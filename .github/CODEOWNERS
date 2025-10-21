@@ -5,7 +5,7 @@
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default file owners
-* @bitwarden/dept-architecture
+* @bitwarden/team-ai-sme
 
 # Docker-related files
 **/Dockerfile @bitwarden/team-appsec @bitwarden/dept-bre

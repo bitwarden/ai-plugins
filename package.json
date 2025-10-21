@@ -1,15 +1,15 @@
 {
-  "name": "@bitwarden/template",
+  "name": "@bitwarden/ai-plugins",
   "version": "0.0.0",
-  "description": "Bitwarden Template",
+  "description": "Bitwarden AI Plugins",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitwarden/template.git"
+    "url": "git+https://github.com/bitwarden/ai-plugins.git"
   },
   "author": "Bitwarden Inc. <hello@bitwarden.com> (https://bitwarden.com)",
   "license": "SEE LICENSE IN LICENSE.txt",
   "bugs": {
-    "url": "https://github.com/bitwarden/template/issues"
+    "url": "https://github.com/bitwarden/ai-plugins/issues"
   },
   "homepage": "https://bitwarden.com",
   "devDependencies": {

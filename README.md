@@ -1,3 +1,3 @@
-# Template Repository
+# AI Plugins
 
-This repository serves as a template for others and establishes very basic structure and tooling setup for later customization.
+Plugins and other tools for AI-assisted development.
