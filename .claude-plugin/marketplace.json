@@ -1,0 +1,13 @@
+{
+  "name": "bitwarden-marketplace",
+  "owner": {
+    "name": "Bitwarden",
+    "email": "support@bitwarden.com"
+  },
+  "metadata": {
+    "description": "Official Bitwarden Claude Plugin Marketplace",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": []
+}
