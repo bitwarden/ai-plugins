@@ -1,227 +1,165 @@
-# Session Logging Implementation
+# Session Logging Architecture
 
-## What Was Built
+## Overview
 
-A comprehensive session logging system for Claude Code that automatically captures all session activity for retrospective analysis.
+The claude-retrospective plugin leverages Claude Code's native session logging for retrospective analysis. No custom hooks are required.
 
-## Components
+## Architecture
 
-### 1. Core Logging Infrastructure
-- **`logging_utils.py`**: Shared SessionLogger class
-  - NDJSON writer (compact, machine-readable, append-friendly)
-  - Markdown writer (human-readable, formatted)
-  - Transcript parser for extracting conversation data
+Claude Code automatically logs all session activity to:
+```
+~/.claude/projects/{project-dir}/{session-id}.jsonl
+```
 
-### 2. Event Hooks (6 hooks)
-- **`SessionStart`**: Initialize log files when session begins
-- **`UserPromptSubmit`**: Log every user message
-- **`PostToolUse`**: Log all tool invocations (Read, Write, Edit, Bash, WebFetch, Task, etc.)
-- **`Stop`**: Log Claude's responses by parsing transcript
-- **`SubagentStop`**: Log subagent completion events
-- **`SessionEnd`**: Finalize logs when session ends
+The retrospective skill reads these native logs to perform comprehensive session analysis.
 
-### 3. Documentation & Testing
-- **`README.md`**: Complete usage documentation
-- **`VERIFICATION.md`**: Step-by-step verification guide
-- **`test_hooks.sh`**: Automated test suite (all tests pass ✅)
-- **`SUMMARY.md`**: This file
+## Native Log Capabilities
 
-## Log Formats
+Claude's session logs capture:
+- **User prompts**: Every message sent by the user
+- **Assistant responses**: All text, thinking blocks, and tool invocations
+- **Tool execution**: Tool inputs, outputs, and error states
+- **Session metadata**: Timestamps, git context, working directory
+- **Conversation flow**: Parent-child relationships between messages
 
-### NDJSON (Machine-Readable)
+## Log Format
+
+JSONL format (newline-delimited JSON) with one message per line:
+
 ```json
-{"e":"start","sid":"session-123","t":"2025-10-23T10:00:00","cwd":"/path"}
-{"t":"2025-10-23T10:00:05","e":"up","d":{"prompt":"user message"}}
-{"t":"2025-10-23T10:00:10","e":"tu","d":{"tool_name":"Read","tool_input":{...}}}
+{
+  "type": "user" | "assistant" | "file-history-snapshot",
+  "sessionId": "uuid",
+  "timestamp": "ISO-8601",
+  "cwd": "/working/directory",
+  "gitBranch": "branch-name",
+  "message": {
+    "role": "user" | "assistant",
+    "content": "string" | [{"type": "text|thinking|tool_use|tool_result", ...}]
+  },
+  "parentUuid": "uuid"
+}
 ```
 
-**Optimizations**:
-- Newline-delimited (append-only, no file rewrites)
-- Compact field names (`e`, `t`, `d`)
-- Event codes (`up`, `cr`, `tu`, `ss`, `end`)
-- No whitespace (except newlines)
+## Data Sources for Retrospective
 
-### Markdown (Human-Readable)
-```markdown
-# Claude Code Session Log
+The retrospective skill combines multiple data sources:
 
-**Session ID**: `session-123`
-**Started**: 2025-10-23 10:00:00
+- ✅ **Git history**: Commits, diffs, file changes during session
+- ✅ **Claude logs**: Native session logs from `~/.claude/projects/`
+- ✅ **Project files**: Test coverage, code quality, compilation status
+- ✅ **User feedback**: Direct input about goals and satisfaction
+- ✅ **Sub-agent interactions**: When sub-agents were used, their feedback
 
----
+## Processing Examples
 
-## [10:00:05] UserPrompt
+### Bash
+```bash
+# Find project directory
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
 
-**User**:
+# Count user prompts
+grep -c '"type":"user"' ~/.claude/projects/${PROJECT_DIR}/<session-id>.jsonl
+
+# Extract tool usage
+grep '"type":"assistant"' session.jsonl | jq -r '.message.content[]? | select(.type=="tool_use") | .name' | sort | uniq -c
+
+# Find errors
+grep '"is_error":true' session.jsonl
 ```
-user message here
-```
 
----
+### Python
+```python
+import json
+
+def read_session_log(session_path):
+    events = []
+    with open(session_path, 'r') as f:
+        for line in f:
+            events.append(json.loads(line.strip()))
+    return events
+
+def count_tool_uses(events):
+    tool_uses = {}
+    for event in events:
+        if event.get('type') == 'assistant':
+            content = event.get('message', {}).get('content', [])
+            if isinstance(content, list):
+                for item in content:
+                    if item.get('type') == 'tool_use':
+                        tool_name = item.get('name', 'unknown')
+                        tool_uses[tool_name] = tool_uses.get(tool_name, 0) + 1
+    return tool_uses
 ```
 
 ## Integration with Retrospective Skill
 
-The retrospective skill (`${CLAUDE_PLUGIN_ROOT}/skills/retrospective/`) is designed to use these logs:
+The retrospective skill workflow:
 
 1. **User triggers**: "Run a retrospective on this session"
-2. **Skill reads logs**: Parses NDJSON for analysis, references Markdown for context
-3. **Generates report**: Comprehensive retrospective with metrics and insights
-
-### Data Sources for Retrospective
-- ✅ **Git history**: session-analytics.md provides guidance
-- ✅ **Claude logs**: ✅ NOW AVAILABLE via hooks (`.ndjson` files)
-- ✅ **Project files**: File analysis already supported
-- ✅ **User feedback**: Skill prompts for direct input
-- ✅ **Sub-agent feedback**: Skill can invoke agents for feedback
-
-## How It Works
-
-### During a Claude Code Session:
-
-1. **Session starts** → SessionStart hook → Creates empty `.ndjson` and `.md` files
-2. **User sends message** → UserPromptSubmit hook → Appends user prompt to logs
-3. **Claude uses tool** → PostToolUse hook → Appends tool use to logs
-   - Special handling for Task tool (subagent invocations)
-4. **Claude responds** → Stop hook → Parses transcript, appends response to logs
-5. **Subagent finishes** → SubagentStop hook → Appends completion event
-6. **Session ends** → SessionEnd hook → Appends end event, finalizes logs
-
-### Log Files Created:
-```
-${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/
-├── 2025-10-23_10-00-00_session-abc123.ndjson  (compact, for parsing)
-└── 2025-10-23_10-00-00_session-abc123.md       (readable, for review)
-```
-
-## Testing Results
-
-**Automated tests**: ✅ All 10 tests pass
-
-```
-✓ Test 1: Check hook executability
-✓ Test 2: Check logging utilities
-✓ Test 3: Test SessionStart hook
-✓ Test 4: Test UserPromptSubmit hook
-✓ Test 5: Test PostToolUse hook
-✓ Test 6: Test SubagentStop hook
-✓ Test 7: Test SessionEnd hook
-✓ Test 8: Verify log format
-✓ Test 9: Validate NDJSON format
-✓ Test 10: Cleanup test logs
-```
-
-## Key Features
-
-### Reliability
-- **Fail-safe**: All hooks exit 0 even on errors (never blocks session)
-- **Best-effort logging**: Errors logged to stderr but don't interrupt workflow
-- **Robust error handling**: Graceful degradation if transcript unavailable
-
-### Performance
-- **Append-only**: NDJSON format requires no file rewrites (~1-2ms per event)
-- **Compact encoding**: Short field names and event codes minimize size
-- **Minimal overhead**: <5ms total per event
-
-### Completeness
-- **Full conversation capture**: Every user prompt, Claude response, tool use
-- **Subagent tracking**: Special handling for Task tool invocations
-- **Timestamp precision**: ISO 8601 timestamps for all events
-- **Context preservation**: Session ID, working directory, full event data
-
-## Usage
-
-### Automatic (No Action Required)
-Hooks activate automatically when you use Claude Code. Just use Claude normally and logs will accumulate in `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/`.
-
-### Manual Analysis
-```bash
-# View latest session log
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-cat "$LOGS_DIR"/$(ls -t "$LOGS_DIR"/*.md | head -1)
-
-# Parse for metrics
-LATEST=$(ls -t "$LOGS_DIR"/*.ndjson | head -1)
-echo "Tool uses: $(grep -c '"e":"tu"' "$LATEST")"
-echo "User prompts: $(grep -c '"e":"up"' "$LATEST")"
-```
-
-### Via Retrospective Skill
-```
-User: "Run a retrospective on this session"
-Claude: [Invokes retrospective skill]
-        [Reads .ndjson logs]
-        [Analyzes patterns and metrics]
-        [Generates comprehensive report]
-```
-
-## Files Created
-
-```
-${CLAUDE_PLUGIN_ROOT}/hooks/
-├── logging_utils.py          (7.2 KB - shared logging library)
-├── SessionStart              (968 B - initialize logs)
-├── UserPromptSubmit          (945 B - log user messages)
-├── PostToolUse               (1.2 KB - log tool uses)
-├── Stop                      (1.9 KB - log Claude responses)
-├── SubagentStop              (882 B - log subagent completion)
-├── SessionEnd                (846 B - finalize logs)
-├── README.md                 (5.4 KB - usage documentation)
-├── VERIFICATION.md           (4.9 KB - verification guide)
-├── test_hooks.sh             (3.2 KB - automated tests)
-└── SUMMARY.md                (this file)
-```
-
-All hooks are executable and ready to use.
+2. **Scope definition**: Identify session timeframe or commit range
+3. **Data collection**: Read native logs, git history, project files
+4. **Analysis**: Calculate metrics, identify patterns, extract insights
+5. **Report generation**: Create comprehensive retrospective report
+6. **Validation**: Gather user feedback on findings
 
 ## Benefits
 
-### For Users
-- **Session awareness**: Review what happened during complex sessions
-- **Learning**: Understand workflow patterns and improve over time
-- **Accountability**: Complete audit trail of all session activity
-- **Debugging**: Trace issues back to specific interactions
+### Reliability
+- **Always available**: Native logs are core Claude Code functionality
+- **High fidelity**: Complete capture of all session activity
+- **No overhead**: Zero performance impact (no custom hooks)
+- **Consistent format**: Stable log structure across versions
 
-### For Retrospective Analysis
-- **Quantitative metrics**: Tool usage counts, timing data, event frequencies
+### Completeness
+- **Full conversation**: Every user prompt and assistant response
+- **Tool tracking**: All tool invocations with inputs and outputs
+- **Error capture**: Failed operations and error messages
+- **Context preservation**: Git state, working directory, timestamps
+- **Thinking blocks**: When enabled, captures reasoning process
+
+### Analysis Power
+- **Quantitative metrics**: Tool usage counts, timing, success rates
 - **Qualitative insights**: Full conversation context for pattern analysis
-- **Subagent tracking**: Understand subagent invocations and coordination
 - **Workflow optimization**: Identify bottlenecks and inefficiencies
+- **Learning opportunities**: Understand successful approaches and anti-patterns
 
-### For Development
-- **Machine-readable**: NDJSON format easy to parse programmatically
-- **Human-readable**: Markdown format for manual review
-- **Extensible**: Easy to add new event types or data fields
-- **Reusable**: Hooks work for any Claude Code project
+## Usage
 
-## Next Steps
+### Automatic Operation
+Claude Code logs sessions automatically. No setup or configuration required.
 
-1. **Start using Claude Code normally** - hooks log automatically
-2. **Let sessions accumulate** - logs build up in `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/`
-3. **Run retrospectives** - use the retrospective skill to analyze sessions
-4. **Iterate and improve** - apply learnings to optimize workflow
+### Retrospective Analysis
+```
+User: "Run a retrospective on the last 2 hours"
+Claude: [Invokes retrospective skill]
+        [Reads native session logs]
+        [Analyzes git history]
+        [Calculates metrics]
+        [Generates comprehensive report with insights]
+```
 
-## Marketplace Readiness
+### Manual Analysis
+```bash
+# View session log
+PROJ_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+cat ~/.claude/projects/${PROJ_DIR}/<session-id>.jsonl | jq
 
-This implementation is ready for Claude Plugin Marketplace:
+# Extract user prompts
+grep '"type":"user"' session.jsonl | jq -r '.message.content'
 
-✅ **Follows best practices**: Official hook structure and conventions
-✅ **Complete documentation**: README, verification guide, test suite
-✅ **Robust error handling**: Fail-safe, never blocks sessions
-✅ **Performance optimized**: Minimal overhead, efficient storage
-✅ **Integration ready**: Works with retrospective skill
-✅ **Self-contained**: No external dependencies (Python stdlib only)
-✅ **Tested**: Automated test suite with 100% pass rate
+# Count assistant responses
+grep -c '"type":"assistant"' session.jsonl
+```
 
-## Support
+## Documentation
 
-- **Documentation**: See `README.md` for detailed usage
-- **Verification**: See `VERIFICATION.md` for troubleshooting
-- **Testing**: Run `test_hooks.sh` to verify installation
-- **Issues**: Check hook executable permissions and `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/` directory
+- **[README.md](README.md)**: Usage guide and log format reference
+- **[VERIFICATION.md](VERIFICATION.md)**: Verification steps
+- **[retrospecting SKILL.md](../skills/retrospecting/SKILL.md)**: Detailed retrospective workflow
 
 ---
 
-**Status**: ✅ Complete and Ready to Use
+**Status**: ✅ Ready to Use
 
-The logging system is fully implemented, tested, and documented. Hooks will activate automatically in the next Claude Code session and begin logging all activity for retrospective analysis.
+The retrospective plugin uses Claude Code's native logging infrastructure for comprehensive session analysis.

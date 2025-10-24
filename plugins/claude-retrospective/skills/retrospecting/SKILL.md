@@ -51,8 +51,8 @@ Before gathering data, determine the appropriate analysis depth:
    # Count recent commits
    git log --oneline --since="1 hour ago" | wc -l
 
-   # Check log file sizes
-   ls -lh ${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/ | tail -5
+   # List session log files with metadata
+   ${CLAUDE_PROJECT_DIR}/.claude/skills/extracting-session-data/scripts/list-sessions.sh --sort date | head -5
    ```
 
 2. **Suggest depth to user** based on metrics:
@@ -76,21 +76,21 @@ Execute data collection based on confirmed depth mode:
 
 **Quick Mode**:
 - Git: `git diff <start>..<end> --stat` only (no full diffs)
-- Logs: Last log file only, use grep to find errors: `grep -i "error\|failed" <log>`
+- Logs: Extract statistics and errors only via `extracting-session-data` skill
 - Files: Check compilation status only
 - User: 2-3 targeted questions
 - Skip: Sub-agent feedback, detailed file analysis
 
 **Standard Mode**:
 - Git: Full commit history + stats, selective diffs for key files
-- Logs: Structured extraction (see log processing below)
+- Logs: Extract metadata, statistics, tool-usage, and errors via `extracting-session-data` skill
 - Files: Quality metrics for changed files
 - User: 5-7 questions covering main areas
 - Include: Sub-agent feedback if applicable
 
 **Comprehensive Mode**:
 - Git: Everything (full logs, diffs, file analysis)
-- Logs: Full processing (see below, with size management)
+- Logs: Extract all data types via `extracting-session-data` skill, may read full logs if <500 lines
 - Files: Deep analysis including tests, architecture compliance
 - User: Extensive feedback (8-10 questions)
 - Include: All sub-agent feedback, pattern extraction
@@ -112,42 +112,61 @@ Depth: [concise|detailed|code-review] based on retrospective mode
 The skill will return structured git metrics needed for retrospective analysis.
 
 #### Log Processing (Size-Aware)
-Read relevant logs from `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/` directory using progressive approach:
+Use the `extracting-session-data` skill to access Claude Code native session logs efficiently.
 
-1. **Check log size first**:
+1. **List Available Sessions**:
    ```bash
-   wc -l ${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/<SESSION_ID>.md
+   # List all sessions with metadata (size, lines, date, branch)
+   ${CLAUDE_PROJECT_DIR}/.claude/skills/extracting-session-data/scripts/list-sessions.sh
    ```
 
-2. **Small logs (<500 lines)**: Read entire file directly
-
-3. **Medium logs (500-2000 lines)**: Use structured extraction:
+2. **Check Session Size**:
    ```bash
-   # Extract tool usage stats
-   grep -o '"tool":"[^"]*"' <NDJSON> | sort | uniq -c
-
-   # Find errors
-   grep -i "error\|failed\|warning" <MARKDOWN> | head -20
-
-   # Get section headers (conversation flow)
-   grep "^##" <MARKDOWN>
+   # Get statistics for specific session
+   ${CLAUDE_PROJECT_DIR}/.claude/skills/extracting-session-data/scripts/extract-data.sh \
+       --type statistics --session SESSION_ID
    ```
-   Then read first 100 and last 100 lines for context.
 
-4. **Large logs (>2000 lines)**: Extract summary data only:
+3. **Extract Data Based on Session Size and Mode**:
+
+   **Quick Mode** (or any session >2000 lines):
    ```bash
-   # Tool success rate
-   grep '"tool":' <NDJSON> | wc -l
-
-   # Error count
-   grep -ci "error" <MARKDOWN>
-
-   # Major sections
-   grep "^##\|^###" <MARKDOWN> | head -30
+   # Extract only statistics and errors
+   extract-data.sh --type statistics --session SESSION_ID
+   extract-data.sh --type errors --session SESSION_ID --limit 10
    ```
-   Store summary statistics, do not keep full log in context.
 
-5. **Synthesize extracted data** into compact summary (max 200 lines) before continuing to analysis.
+   **Standard Mode** (sessions 500-2000 lines):
+   ```bash
+   # Extract metadata, statistics, tool usage, and errors
+   extract-data.sh --type metadata --session SESSION_ID
+   extract-data.sh --type statistics --session SESSION_ID
+   extract-data.sh --type tool-usage --session SESSION_ID
+   extract-data.sh --type errors --session SESSION_ID
+   ```
+
+   **Comprehensive Mode** (sessions <500 lines):
+   ```bash
+   # Extract all available data
+   extract-data.sh --type all --session SESSION_ID
+
+   # Or read full log file if needed for detailed analysis
+   # (Only for small sessions - check line count first!)
+   ```
+
+4. **Multi-Session Analysis**:
+   ```bash
+   # Filter sessions by criteria
+   filter-sessions.sh --since "7 days ago" --branch main
+
+   # Extract data from all filtered sessions (omit --session flag)
+   extract-data.sh --type statistics  # Runs on all sessions
+   ```
+
+5. **Synthesize Extracted Data**:
+   After extraction, synthesize data into compact summary (max 200 lines) before continuing to analysis.
+
+**Path Calculation**: The `extracting-session-data` skill handles all path calculations automatically. Session logs are stored in `~/.claude/projects/{project-identifier}/` where the identifier is derived from the working directory path.
 
 #### Project Analysis
 Examine changed files, tests, documentation (depth-appropriate)
@@ -204,17 +223,14 @@ If the retrospective identifies areas for improvement in Claude or Agent interac
 5. If the user declines:
    - Document the suggestions in the retrospective report for future consideration
 
-### Step 8: Cleanup Log Files
+### Step 8: Session Archive Information
 After the retrospective report is created and validated:
-1. Identify the log files from `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/` that correspond to the session being analyzed
-2. Ask the user if they want to delete these log files:
-   - "Would you like me to delete the session log files used for this retrospective?"
-   - Explain which files will be deleted (both `.md` and `.ndjson` files)
-3. If the user confirms:
-   - Delete the specified log files using the Bash tool
-   - Confirm deletion to the user
-4. If the user declines:
-   - Keep the log files and inform the user they remain available in `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/`
+1. Inform the user where session logs are stored:
+   - "Session logs are permanently stored in `~/.claude/projects/{project-dir}/{session-id}.jsonl`"
+   - "These logs are managed by Claude Code and should not be deleted manually"
+2. Explain that retrospective reports are saved separately in:
+   - `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/reports/`
+3. Note that Claude Code manages session log retention automatically
 
 ## Output Standards
 
@@ -329,11 +345,11 @@ A good retrospective should:
 
 ## Report Storage
 
-**Directory**: `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/reports/`
+**Directory**: `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/reports/`
 
 **Filename format**: `YYYY-MM-DD-session-description-SESSION_ID.md`
 - Use ISO date format (YYYY-MM-DD) for chronological sorting
 - Keep description brief (3-5 words, hyphen-separated)
 - Include session ID from log files for traceability
 
-**Example path**: `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/reports/2025-10-23-authentication-refactor-3be2bbaf.md`
+**Example path**: `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/reports/2025-10-23-authentication-refactor-3be2bbaf.md`

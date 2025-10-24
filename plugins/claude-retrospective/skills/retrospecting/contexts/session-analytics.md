@@ -31,7 +31,9 @@ git diff <start-commit>...<end-commit> --name-only
 
 ### 2. Claude Logs Analysis
 **What to Examine**:
-- `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/` directory for conversation transcripts
+- `~/.claude/projects/{project-dir}/{session-id}.jsonl` - Claude Code native session logs (JSONL format)
+  - Project directory is calculated by transforming absolute working directory: `$(echo "${PWD}" | sed 's/\//\-/g')`
+  - Example: `/Users/user/project` becomes `~/.claude/projects/-Users-user-project/`
 - Tool usage patterns (which tools were called, frequency, success rates)
 - Error messages and retry patterns
 - Decision-making rationale in responses

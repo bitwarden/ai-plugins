@@ -267,7 +267,7 @@ A good git session analysis should:
 - b7fb072 Add reviewing-changes skill
 
 ### Top Files Changed
-1. `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/SKILL.md` (+85 -30)
+1. `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/SKILL.md` (+85 -30)
 2. `.claude/skills/reviewing-changes/SKILL.md` (+120 -0) [NEW]
 3. `.claude/hooks/prompt-submit.sh` (+25 -10)
 ```
@@ -289,8 +289,8 @@ A good git session analysis should:
 ### Changes by Area
 
 **Skills** (6 files):
-- `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/SKILL.md`: New skill definition
-- `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/contexts/session-analytics.md`: Analysis framework
+- `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/SKILL.md`: New skill definition
+- `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/contexts/session-analytics.md`: Analysis framework
 - `.claude/skills/reviewing-changes/SKILL.md`: New code review skill
 
 **Infrastructure** (3 files):

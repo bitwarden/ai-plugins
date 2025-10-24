@@ -1,231 +1,257 @@
-# Verification Guide: Claude Code Logging Hooks
+# Verification Guide: Claude Retrospective Plugin
 
 ## Quick Verification
 
-### 1. Run Automated Tests
+The claude-retrospective plugin uses Claude Code's native session logs. This verification confirms that:
+1. Claude's native logs are accessible
+2. The retrospective skill can read them
+3. Log format is as expected
+
+### 1. Verify Claude's Native Logs Exist
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/hooks/test_hooks.sh
+# Find project directory (sanitized path)
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+
+# List session logs
+ls -lh ~/.claude/projects/${PROJECT_DIR}/*.jsonl | tail -5
 ```
 
-Expected output: All tests pass ✅
+You should see `.jsonl` files with recent timestamps.
 
-### 2. Verify Hooks are Active in Real Session
-
-The hooks are **already logging this current session**! Check for logs:
+### 2. Inspect Current Session Log
 
 ```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-ls -lah "$LOGS_DIR"/
+# Find current session ID (from environment or recent file)
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
+
+echo "Latest session log: $LATEST_LOG"
+wc -l "$LATEST_LOG"
 ```
 
-You should see `.ndjson` and `.md` files with today's timestamp.
+The log should contain multiple lines (one JSON object per line).
 
-### 3. Inspect Current Session Logs
+### 3. Verify Log Contents
 
-**View machine-readable log (NDJSON)**:
 ```bash
-# Find latest log
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-LATEST_LOG=$(ls -t "$LOGS_DIR"/*.ndjson | head -1)
-cat "$LATEST_LOG"
+# Get project directory
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
+
+# Check for required fields
+echo "Checking log structure..."
+head -1 "$LATEST_LOG" | jq 'keys'
+
+# Count message types
+echo -e "\nMessage types:"
+echo "  User messages: $(grep -c '"type":"user"' "$LATEST_LOG")"
+echo "  Assistant messages: $(grep -c '"type":"assistant"' "$LATEST_LOG")"
+
+# Check for tool uses
+echo -e "\nTool usage:"
+grep '"type":"assistant"' "$LATEST_LOG" | jq -r '.message.content[]? | select(.type=="tool_use") | .name' | sort | uniq -c
 ```
 
-**View human-readable log (Markdown)**:
+Expected output:
+- Log should contain valid JSON on each line
+- Should show counts for user and assistant messages
+- Tool usage should show tools used in this session
+
+### 4. Verify Log Format
+
 ```bash
-# Find latest log
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-LATEST_LOG=$(ls -t "$LOGS_DIR"/*.md | head -1)
-cat "$LATEST_LOG"
+# Examine a complete message
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
+
+# Show first user message
+grep '"type":"user"' "$LATEST_LOG" | head -1 | jq '.'
 ```
 
-### 4. Verify Specific Events Are Being Logged
-
-**Check for user prompts**:
-```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-grep '"e":"up"' "$LOGS_DIR"/*.ndjson | tail -3
-```
-
-**Check for tool uses**:
-```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-grep '"e":"tu"' "$LOGS_DIR"/*.ndjson | tail -5
-```
-
-**Check for subagent invocations** (Task tool):
-```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-grep '"tool_name":"Task"' "$LOGS_DIR"/*.ndjson
-```
-
-**Check for Claude responses**:
-```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-grep '"e":"cr"' "$LOGS_DIR"/*.ndjson | tail -3
+Should show structure:
+```json
+{
+  "type": "user",
+  "sessionId": "uuid",
+  "timestamp": "ISO-8601",
+  "cwd": "/working/directory",
+  "gitBranch": "branch-name",
+  "message": {
+    "role": "user",
+    "content": "user prompt text"
+  }
+}
 ```
 
 ## What Should Be Logged
 
-This current session should have logged:
+Claude's native logs capture:
 
-1. ✅ **SessionStart**: When this session began
-2. ✅ **UserPrompt**: All your messages (including "Review @.claude/agents/retrospective-agent.md", "Let's try creating hooks", etc.)
-3. ✅ **ToolUse**: All tool calls (Read, Write, Edit, Bash, WebFetch, etc.)
-4. ✅ **ClaudeResponse**: All of Claude's responses
-5. ✅ **SubagentStop**: If any subagents were invoked (Task tool)
+1. ✅ **User prompts**: Every message you send
+2. ✅ **Assistant responses**: All text, thinking blocks, tool invocations
+3. ✅ **Tool execution**: Tool inputs, outputs, and error states
+4. ✅ **Session metadata**: Timestamps, git context, working directory
+5. ✅ **Conversation flow**: Parent-child message relationships
 
 ## Manual Verification Steps
 
 ### Check Event Counts
 
 ```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-LATEST_LOG=$(ls -t "$LOGS_DIR"/*.ndjson | head -1)
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
 
-echo "Session events in current log:"
-echo "- Start events: $(grep -c '"e":"start"' "$LATEST_LOG")"
-echo "- User prompts: $(grep -c '"e":"up"' "$LATEST_LOG")"
-echo "- Tool uses: $(grep -c '"e":"tu"' "$LATEST_LOG")"
-echo "- Claude responses: $(grep -c '"e":"cr"' "$LATEST_LOG")"
-echo "- Subagent stops: $(grep -c '"e":"ss"' "$LATEST_LOG")"
-echo "- Total events: $(wc -l < "$LATEST_LOG")"
+echo "Session statistics:"
+echo "- User prompts: $(grep -c '"type":"user"' "$LATEST_LOG")"
+echo "- Assistant responses: $(grep -c '"type":"assistant"' "$LATEST_LOG")"
+echo "- Total lines: $(wc -l < "$LATEST_LOG")"
+echo "- File size: $(du -h "$LATEST_LOG" | cut -f1)"
 ```
 
-### Verify Markdown Format
+### Verify Tool Tracking
 
 ```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-LATEST_MD=$(ls -t "$LOGS_DIR"/*.md | head -1)
-head -50 "$LATEST_MD"
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
+
+# Show tool usage statistics
+echo "Tools used in this session:"
+grep '"type":"assistant"' "$LATEST_LOG" | \
+  jq -r '.message.content[]? | select(.type=="tool_use") | .name' | \
+  sort | uniq -c | sort -rn
 ```
 
-Should show:
-- Session header with ID and timestamp
-- Chronological events with `[HH:MM:SS]` timestamps
-- Formatted sections for each event type
-
-### Test Subagent Logging
-
-To verify subagent logging works, invoke a subagent and check logs:
+### Verify Error Tracking
 
 ```bash
-# After invoking a subagent via Task tool in Claude...
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-grep -A 10 '"tool_name":"Task"' "$LOGS_DIR"/*.ndjson | tail -20
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
+
+# Check for errors
+echo "Errors in session:"
+grep '"is_error":true' "$LATEST_LOG" | wc -l
 ```
 
-Should show Task tool invocations with subagent type and prompt.
+### Verify Thinking Blocks (if enabled)
+
+```bash
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+LATEST_LOG=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1)
+
+# Check for thinking blocks
+echo "Thinking blocks in session:"
+grep '"type":"assistant"' "$LATEST_LOG" | \
+  jq -r '.message.content[]? | select(.type=="thinking")' | \
+  wc -l
+```
 
 ## Troubleshooting
 
-### No Logs Created
+### No Logs Found
 
-**Check 1**: Hooks are executable
+**Issue**: `ls ~/.claude/projects/${PROJECT_DIR}/*.jsonl` returns no files
+
+**Possible causes**:
+1. Project directory path sanitization is incorrect
+2. This is the first session in this project
+3. Claude Code version doesn't support native logging
+
+**Solution**:
 ```bash
-HOOKS_DIR="${CLAUDE_PLUGIN_ROOT}/hooks"
-ls -l "$HOOKS_DIR"/SessionStart "$HOOKS_DIR"/UserPromptSubmit "$HOOKS_DIR"/PostToolUse
+# List all project directories
+ls ~/.claude/projects/
+
+# Manually find your project
+find ~/.claude/projects/ -name "*.jsonl" | head -5
 ```
 
-All should show `-rwxr-xr-x` (executable).
+### Logs Are Empty
 
-**Fix**:
+**Issue**: Log files exist but have zero lines
+
+**Possible cause**: Session just started, no activity yet
+
+**Solution**: Wait for session activity (send a prompt, use a tool) and check again
+
+### JSON Parse Errors
+
+**Issue**: `jq` reports JSON parsing errors
+
+**Possible cause**: Log file is being written while reading
+
+**Solution**: Copy log file first, then parse
 ```bash
-chmod +x ${CLAUDE_PLUGIN_ROOT}/hooks/*
+cp "$LATEST_LOG" /tmp/session.jsonl
+cat /tmp/session.jsonl | jq
 ```
 
-**Check 2**: Logs directory exists
+### Cannot Find Current Session
+
+**Issue**: Don't know which log file corresponds to current session
+
+**Solution**: Use most recent file by modification time
 ```bash
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-ls -ld "$LOGS_DIR"/
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl | head -1
 ```
 
-**Fix**:
+## Performance Considerations
+
+Claude's native logs are maintained by Claude Code with minimal overhead:
+- Automatic log management
+- No custom hook execution
+- Efficient JSONL format
+- Logs are written asynchronously
+
+To check log sizes:
 ```bash
-mkdir -p ${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g')
+du -sh ~/.claude/projects/${PROJECT_DIR}/
 ```
-
-### Logs Are Empty or Missing Events
-
-**Check**: Run test script to verify hooks work in isolation
-```bash
-${CLAUDE_PLUGIN_ROOT}/hooks/test_hooks.sh
-```
-
-If tests pass but real sessions don't log, hooks may not be registered with Claude Code.
-
-### Hooks Not Triggered
-
-Claude Code automatically discovers and runs hooks in `${CLAUDE_PLUGIN_ROOT}/hooks/` with matching event names. Verify:
-
-1. Hook files have exact names: `SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`, `SubagentStop`, `SessionEnd`
-2. Hook files are executable (`chmod +x`)
-3. Hook files have proper shebang (`#!/usr/bin/env python3`)
-
-### JSON Validation Errors
-
-```bash
-# Validate all NDJSON logs
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-for log in "$LOGS_DIR"/*.ndjson; do
-    echo "Validating $log"
-    cat "$log" | while read line; do
-        echo "$line" | python3 -m json.tool > /dev/null || echo "Invalid: $line"
-    done
-done
-```
-
-## Performance Impact
-
-The hooks are designed to be lightweight:
-- **NDJSON append**: ~1-2ms per event (no file rewrites)
-- **Markdown append**: ~1-2ms per event
-- **Total overhead**: <5ms per event (negligible)
-
-To verify performance is acceptable:
-```bash
-# Check log file sizes
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-du -h "$LOGS_DIR"/*.ndjson "$LOGS_DIR"/*.md
-```
-
-If logs grow too large (>10MB), consider implementing log rotation.
 
 ## Success Criteria
 
-✅ **Hooks are working correctly if**:
+✅ **Plugin is working correctly if**:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs/` directory contains `.ndjson` and `.md` files
-2. Files are named with today's date/time
-3. NDJSON files contain at least: start event, user prompts, tool uses
-4. Markdown files are human-readable with formatted sections
-5. Test script passes all tests
-6. Current session's interactions appear in logs
+1. `~/.claude/projects/{project-dir}/` contains `.jsonl` files
+2. Latest log file has recent modification time
+3. Log contains user and assistant messages
+4. JSON structure matches expected format
+5. Tool usage is tracked in assistant messages
+6. Retrospective skill can read and parse logs
+
+## Testing Retrospective Skill
+
+Once logs are verified, test the retrospective skill:
+
+```
+User: "Show me the current session ID"
+Claude: [Provides session ID from environment]
+
+User: "Run a retrospective on this session"
+Claude: [Invokes retrospective skill]
+        [Reads native session logs]
+        [Analyzes git history]
+        [Generates comprehensive report]
+```
+
+## Quick Verification One-Liner
+
+```bash
+PROJECT_DIR=$(echo "${PWD}" | sed 's/\//-/g') && \
+LATEST=$(ls -t ~/.claude/projects/${PROJECT_DIR}/*.jsonl 2>/dev/null | head -1) && \
+echo "Latest session: $(basename $LATEST)" && \
+echo "Size: $(du -h "$LATEST" | cut -f1)" && \
+echo "User prompts: $(grep -c '"type":"user"' "$LATEST")" && \
+echo "Assistant responses: $(grep -c '"type":"assistant"' "$LATEST")" && \
+echo "✅ Claude native logs verified!"
+```
 
 ## Next Steps
 
-Once verified, you can:
+Once verified:
 
-1. **Use the retrospective skill**: Ask Claude to "run a retrospective on this session"
-2. **Analyze logs manually**: Review `.md` files for session insights
-3. **Process logs programmatically**: Parse `.ndjson` for quantitative analysis
-4. **Customize logging**: Modify `logging_utils.py` to adjust what's logged
-
-## Quick Verification Command
-
-Run this one-liner to verify everything is working:
-
-```bash
-HOOKS_DIR="${CLAUDE_PLUGIN_ROOT}/hooks"
-LOGS_DIR="${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/logs"
-echo "Checking hooks..." && \
-ls -l "$HOOKS_DIR"/{SessionStart,UserPromptSubmit,PostToolUse,Stop,SubagentStop,SessionEnd} && \
-echo "Checking logs..." && \
-ls -lh "$LOGS_DIR"/*.{ndjson,md} 2>/dev/null | tail -5 && \
-echo "Event counts:" && \
-LATEST=$(ls -t "$LOGS_DIR"/*.ndjson | head -1) && \
-echo "  UserPrompts: $(grep -c '"e":"up"' "$LATEST" 2>/dev/null || echo 0)" && \
-echo "  ToolUses: $(grep -c '"e":"tu"' "$LATEST" 2>/dev/null || echo 0)" && \
-echo "  ClaudeResponses: $(grep -c '"e":"cr"' "$LATEST" 2>/dev/null || echo 0)" && \
-echo "✅ Hooks verified!"
-```
+1. **Use the retrospective skill**: "Run a retrospective on the last 2 hours"
+2. **Analyze logs manually**: Parse JSONL for custom metrics
+3. **Build on this**: Create additional analysis tools using log data

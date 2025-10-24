@@ -2,7 +2,8 @@
 
 **Purpose**: Standardized templates for comprehensive session retrospectives
 **Owner**: Retrospective Skill
-**Storage**: All reports generated in `${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/reports/` directory
+**Storage**: All reports generated in `${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/reports/` directory
+**Session Logs**: Claude Code native logs stored in `~/.claude/projects/{project-dir}/{session-id}.jsonl`
 
 ---
 
@@ -254,7 +255,7 @@
 ### Storage and Organization
 
 ```
-${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/
+${CLAUDE_PROJECT_DIR}/.claude/skills/retrospecting/
 ├── SKILL.md
 ├── contexts/
 │   └── session-analytics.md
@@ -263,9 +264,15 @@ ${CLAUDE_PLUGIN_ROOT}/skills/retrospecting/
 ├── reports/
 │   ├── YYYY-MM-DD-brief-description-SESSION_ID.md
 │   └── YYYY-MM-DD-another-session-SESSION_ID.md
-└── patterns/
-    ├── successful-patterns.md
-    └── anti-patterns-to-avoid.md
+├── patterns/
+│   ├── successful-patterns.md
+│   └── anti-patterns-to-avoid.md
+└── scripts/
+    └── analyze-session-logs.sh
+
+Session logs (managed by Claude Code):
+~/.claude/projects/{project-dir}/{session-id}.jsonl
+(where {project-dir} = working directory path with slashes replaced by dashes)
 ```
 
 **Naming Convention**: `YYYY-MM-DD-brief-description-SESSION_ID.md`
