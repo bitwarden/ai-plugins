@@ -1,0 +1,21 @@
+{
+  "name": "claude-retrospective",
+  "version": "1.0.0",
+  "description": "Comprehensive analysis of Claude Code sessions to identify successful patterns, problematic areas, and opportunities for improvement.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-marketplace/tree/main/plugins/claude-retrospective",
+  "repository": "https://github.com/bitwarden/ai-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "analysis",
+    "retrospective",
+    "session-review",
+    "performance-insights",
+    "improvement-opportunities"
+  ],
+  "hooks": "./hooks/hooks.json",
+  "skills": "./skills/"
+}
