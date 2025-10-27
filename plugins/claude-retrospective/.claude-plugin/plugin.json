@@ -16,6 +16,5 @@
     "performance-insights",
     "improvement-opportunities"
   ],
-  "hooks": "./hooks/hooks.json",
   "skills": "./skills/"
 }
