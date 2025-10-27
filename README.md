@@ -1,6 +1,6 @@
 # Bitwarden AI Plugin Marketplace
 
-Plugins and other tools for AI-assisted development.
+A curated collection of plugins and tools designed for AI-assisted development. This marketplace enables discovery and distribution of quality-controlled, well-maintained plugins for use with Claude Code and other AI development tools.
 
 ## Usage
 
@@ -54,6 +54,55 @@ plugins/your-plugin-name/
 ├── hooks/                   (event handlers - optional)
 └── .mcp.json               (MCP servers - optional)
 ```
+
+## Plugin Requirements
+
+All plugins contributed to this marketplace **must** include:
+
+- **Comprehensive README documentation** - Clear description of capabilities, usage, and examples
+- **Proper error handling and validation** - Plugins should fail gracefully with helpful error messages
+- **Security best practices** - No credential exposure, input validation on all untrusted data
+- **Test coverage** - Unit tests for core functionality and integration tests for external dependencies
+- **Semantic versioning** - Follow [semver](https://semver.org/) format for version numbers
+- **Claude Code compatibility** - Ensure plugins work reliably with Claude Code and similar AI development tools
+
+## Code Quality Standards
+
+To maintain consistency and quality across all plugins:
+
+- Use `.editorconfig` settings for consistent formatting
+- Validate spelling against `.cspell.json` and add domain-specific terms as needed
+- Ensure all pre-commit hooks pass before submitting pull requests
+- Provide clear, helpful error messages for users
+- Follow existing patterns in the repository
+
+## Security Considerations
+
+This is a Bitwarden-maintained repository with high security standards. All plugins must adhere to:
+
+- **Never commit credentials or API keys** - Use environment variables or secure configuration methods
+- **Review all external dependencies for vulnerabilities** - Regularly audit and update dependencies
+- **Follow principle of least privilege** - Request only necessary permissions and access
+- **Validate all inputs as untrusted** - Never assume external input is safe
+- **Fail safely and degrade gracefully** - Plugins should handle errors without compromising security
+
+## Best Practices
+
+When developing plugins, follow these best practices:
+
+1. **Documentation First** - Write comprehensive documentation before implementation
+2. **Security by Default** - Assume all inputs are untrusted and validate accordingly
+3. **Fail Safely** - Plugins should degrade gracefully on errors rather than crash
+4. **Version Compatibility** - Clearly document version requirements and compatibility
+5. **Performance** - Consider performance implications for large-scale operations
+6. **User Experience** - Provide clear error messages and helpful feedback
+
+## Review Process
+
+- All contributions require review from repository maintainers (see `.github/CODEOWNERS`)
+- Automated checks validate code quality, security, and compliance
+- Human reviewers provide feedback and approve merged changes
+- Follow [Bitwarden Contributing Guidelines](https://contributing.bitwarden.com) for all submissions
 
 ## Documentation
 
