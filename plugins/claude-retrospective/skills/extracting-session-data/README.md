@@ -68,14 +68,39 @@ Other skills (like retrospecting) interpret this data to generate insights.
 
 See all available sessions for your project:
 
+**Output formats**: `table` (default), `json`, `csv`
+**Sort options**: `date` (default), `size`, `lines`
+
 ```bash
-# Shows table with session IDs, sizes, line counts, dates, and branches
+# List all sessions (table format)
 scripts/list-sessions.sh
+
+# List with JSON output
+scripts/list-sessions.sh --format json
+
+# List sorted by size
+scripts/list-sessions.sh --sort size
+
+# List for specific project
+scripts/list-sessions.sh /path/to/project --sort date
 ```
 
 ### 2. Filter Sessions
 
 Find sessions matching specific criteria:
+
+**Available filter options**:
+- `--since DATE` - Sessions modified since date (e.g., "2 days ago", "2025-10-20")
+- `--until DATE` - Sessions modified until date
+- `--branch NAME` - Sessions on specific git branch
+- `--min-size SIZE` - Minimum file size (e.g., "1M", "500K")
+- `--max-size SIZE` - Maximum file size
+- `--min-lines N` - Minimum line count
+- `--max-lines N` - Maximum line count
+- `--has-errors` - Only sessions with failed tool calls
+- `--keyword WORD` - Sessions containing keyword
+
+**Output formats**: `list` (default), `paths`, `json`
 
 ```bash
 # Recent sessions
@@ -87,13 +112,32 @@ scripts/filter-sessions.sh --has-errors
 # Sessions on specific branch
 scripts/filter-sessions.sh --branch main
 
-# Large sessions
-scripts/filter-sessions.sh --min-lines 500
+# Large sessions with errors
+scripts/filter-sessions.sh --min-lines 500 --has-errors
+
+# Sessions on main branch in last week
+scripts/filter-sessions.sh --branch main --since "7 days ago"
+
+# Sessions containing specific keyword
+scripts/filter-sessions.sh --keyword "authentication"
+
+# Get paths only (for piping to other commands)
+scripts/filter-sessions.sh --since "1 day ago" --format paths
 ```
 
 ### 3. Extract Data
 
 Pull specific information from sessions:
+
+**Available extraction types**:
+- `metadata` - Session info (ID, timestamps, branch, working dir)
+- `user-prompts` - All user messages
+- `tool-usage` - Tool call statistics (which tools, how many times)
+- `errors` - Failed tool calls with timestamps
+- `thinking` - Thinking blocks (if extended thinking enabled)
+- `text-responses` - Assistant text responses only
+- `statistics` - Session metrics (message counts, tool calls, errors)
+- `all` - Combined extraction of key data
 
 ```bash
 # Session metadata
@@ -108,8 +152,14 @@ scripts/extract-data.sh --type errors --session SESSION_ID
 # Tool usage statistics
 scripts/extract-data.sh --type tool-usage --session SESSION_ID
 
-# User prompts
-scripts/extract-data.sh --type user-prompts --session SESSION_ID
+# User prompts (with optional limit)
+scripts/extract-data.sh --type user-prompts --session SESSION_ID --limit 10
+
+# Extract from all sessions (omit --session flag)
+scripts/extract-data.sh --type statistics
+
+# Extract from different project
+scripts/extract-data.sh --type metadata --project /path/to/project
 ```
 
 ## File Organization
@@ -215,6 +265,37 @@ If your sessions contained sensitive data:
 - You control access to `~/.claude/projects/` directory
 - Be cautious when sharing extracted data
 - Consider project-specific access controls
+
+## Error Handling
+
+All scripts exit with non-zero status on errors and output messages to stderr. You can check exit status in bash:
+
+```bash
+# Check if logs exist before processing
+if ! scripts/locate-logs.sh /path/to/project &>/dev/null; then
+    echo "Project has no session logs"
+fi
+```
+
+**Common errors**:
+
+```bash
+# Logs directory doesn't exist
+scripts/locate-logs.sh /nonexistent/project
+# Error: Logs directory not found: ~/.claude/projects/-nonexistent-project
+
+# Session file not found
+scripts/extract-data.sh --type metadata --session invalid-id
+# Error: Session file not found: ~/.claude/projects/-path/invalid-id.jsonl
+
+# Missing required argument
+scripts/extract-data.sh --session abc123
+# Error: --type is required
+
+# jq not installed
+scripts/extract-data.sh --type metadata --session abc123
+# Error: jq is required but not installed. Install with: brew install jq
+```
 
 ## Troubleshooting
 

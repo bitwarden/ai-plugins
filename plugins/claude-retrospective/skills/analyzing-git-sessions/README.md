@@ -378,5 +378,5 @@ Found an issue or want a feature?
 
 ---
 
-**Maintained By**: Project team
+**Maintained By**: @team-ai-sme
 **Related Skills**: `retrospecting`, `reviewing-changes`
