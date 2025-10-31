@@ -15,6 +15,12 @@
       "source": "./plugins/claude-retrospective",
       "version": "1.0.0",
       "description": "Comprehensive analysis of Claude Code sessions to identify successful patterns, problematic areas, and opportunities for improvement."
+    },
+    {
+      "name": "claude-config-validator",
+      "source": "./plugins/claude-config-validator",
+      "version": "1.0.0",
+      "description": "Validates Claude Code configuration files for security, structure, and quality. Reviews CLAUDE.md, skills, agents, prompts, commands, and settings."
     }
   ]
 }
