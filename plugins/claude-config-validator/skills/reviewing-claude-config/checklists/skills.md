@@ -225,14 +225,6 @@ Classify findings using `reference/priority-framework.md`:
 
 ---
 
-## Output Format
-
-Follow the format guidance from `SKILL.md` Step 5 (inline comments with file:line references).
-
-See `examples/review-outputs.md` for complete skill review examples.
-
----
-
 ## Final Checklist Summary
 
 Before completing review, verify:
