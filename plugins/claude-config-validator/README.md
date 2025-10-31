@@ -339,19 +339,6 @@ Contributions welcome! Please follow:
 - Repository standards in root `README.md`
 - Code quality requirements in `.editorconfig`
 
-## Version History
-
-### 1.0.0 (2025-10-30)
-- Initial release
-- Comprehensive validation for 6 configuration types
-- Evidence-based standards from official Anthropic documentation
-- Multi-pass review strategy with security-first approach
-- Marketplace-ready quality standards
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file
-
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-marketplace/issues)
