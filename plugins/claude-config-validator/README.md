@@ -267,7 +267,7 @@ Rationale:
 
 Security principle: Grant minimum necessary tools only.
 
-Reference: `reference/agent-tool-access.md` - Tool Access Security Matrix
+Reference: `reference/agent-configuration-security.md` - Tool Access Security Matrix
 ```
 
 ### Example 2: Skill Progressive Disclosure Violation

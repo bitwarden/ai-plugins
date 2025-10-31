@@ -75,26 +75,18 @@ The checklist provides:
 When to load references:
 1. Need to classify issue priority? → priority-framework.md
 2. Security patterns unclear? → security-patterns.md
-3. Agent tool access/security? → agent-tool-access.md
-4. Agent model selection/naming? → agent-configuration.md
-5. Agent system prompts? → agent-system-prompts.md
-6. When to invoke agents? → agent-when-to-invoke.md
-7. Agent orchestration/chaining? → agent-invocation-techniques.md
-8. Agent security/performance? → agent-invocation-operations.md
-9. Quality criteria questions? → prompt-engineering-quality.md
+3. Agent configuration/tool access/system prompts? → agent-configuration-security.md
+4. Agent invocation (when/how/operations)? → agent-invocation-guide.md
+5. Quality criteria questions? → quality-prompt-engineering.md
 </thinking>
 
 Load reference files only when needed for specific questions:
 
 - **Issue prioritization** → `reference/priority-framework.md` (CRITICAL vs IMPORTANT vs SUGGESTED vs OPTIONAL)
 - **Security patterns** → `reference/security-patterns.md` (detection commands, fix examples)
-- **Agent tool access** → `reference/agent-tool-access.md` (tool security matrix, secure patterns)
-- **Agent configuration** → `reference/agent-configuration.md` (model selection, naming, validation)
-- **Agent system prompts** → `reference/agent-system-prompts.md` (prompt patterns, anti-patterns)
-- **When to invoke agents** → `reference/agent-when-to-invoke.md` (decision criteria, best practices)
-- **Agent orchestration** → `reference/agent-invocation-techniques.md` (chaining, prompt engineering)
-- **Agent operations** → `reference/agent-invocation-operations.md` (security, performance, validation)
-- **Quality criteria** → `reference/prompt-engineering-quality.md` (prompt engineering best practices)
+- **Agent configuration & security** → `reference/agent-configuration-security.md` (model selection, naming, tool access, system prompts, secure patterns)
+- **Agent invocation** → `reference/agent-invocation-guide.md` (when to invoke, chaining patterns, prompt engineering, operations)
+- **Quality criteria** → `reference/quality-prompt-engineering.md` (prompt engineering best practices)
 
 ### Step 5: Document Findings
 
