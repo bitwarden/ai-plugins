@@ -211,11 +211,12 @@ If you want to customize for your organization:
 
 ## Examples
 
-See `examples/README.md` for available review examples with specific files for each type:
-- `example-skill-review.md` - Skill review with multiple issues
-- `example-claude-md-review.md` - CLAUDE.md review with duplication
-- `example-settings-review.md` - Settings review with security concerns
-- `example-prompts-review.md` - Prompts review with quality improvements
+Available review examples for each configuration type:
+- `examples/example-agent-review.md` - Agent review with security and quality issues
+- `examples/example-skill-review.md` - Skill review with multiple issues
+- `examples/example-claude-md-review.md` - CLAUDE.md review with duplication
+- `examples/example-settings-review.md` - Settings review with security concerns
+- `examples/example-prompts-review.md` - Prompts review with quality improvements
 
 ## Research Foundation
 

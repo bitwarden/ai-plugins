@@ -152,7 +152,7 @@ Reference: Anthropic Skills Documentation
 - **Inline comment**: Specific issue, recommendation, or question (use `file:line` format)
 - **Summary comment**: Overall assessment, recommendation (APPROVE or REQUEST CHANGES)
 
-See `examples/README.md` for available review examples. Load the specific example relevant to your file type:
+Load the specific example relevant to your file type (on-demand only, not upfront):
 - Agents → `examples/example-agent-review.md`
 - Skills → `examples/example-skill-review.md`
 - CLAUDE.md → `examples/example-claude-md-review.md`
