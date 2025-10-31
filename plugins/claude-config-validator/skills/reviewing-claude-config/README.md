@@ -211,12 +211,54 @@ If you want to customize for your organization:
 
 ## Examples
 
-Available review examples for each configuration type:
+This skill includes 5 comprehensive review examples demonstrating proper feedback format:
+
 - `examples/example-agent-review.md` - Agent review with security and quality issues
 - `examples/example-skill-review.md` - Skill review with multiple issues
 - `examples/example-claude-md-review.md` - CLAUDE.md review with duplication
 - `examples/example-settings-review.md` - Settings review with security concerns
 - `examples/example-prompts-review.md` - Prompts review with quality improvements
+
+### Review Output Format
+
+Each review follows this structure:
+
+**Inline Comments:**
+```
+**file:line** - PRIORITY: Issue description
+
+[Specific fix with code example]
+
+[Rationale explaining why this matters]
+```
+
+**Summary Comment:**
+```
+**Overall Assessment:** APPROVE / REQUEST CHANGES
+
+[Findings grouped by priority: CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL]
+```
+
+### Priority Levels
+
+- **CRITICAL** - Prevents functionality, security vulnerabilities (must fix)
+- **IMPORTANT** - Significant quality/maintainability impact (should fix)
+- **SUGGESTED** - Nice-to-have improvements (could fix)
+- **OPTIONAL** - Personal preferences, alternatives (consider)
+
+### Best Practices
+
+**Feedback Quality:**
+- Provide specific fixes with code examples, not just problem identification
+- Explain rationale (the "why"), not just the "what"
+- Include references to documentation when applicable
+- Use precise file:line references
+
+**Tone:**
+- Constructive and specific, never dismissive
+- Focus on code/config, not people
+- Acknowledge complexity and trade-offs
+- Balance criticism with recognition of what works well
 
 ## Research Foundation
 
