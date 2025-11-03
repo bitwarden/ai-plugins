@@ -9,5 +9,12 @@
     "version": "1.0.0",
     "pluginRoot": "./plugins"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "claude-retrospective",
+      "source": "./plugins/claude-retrospective",
+      "version": "1.0.0",
+      "description": "Comprehensive analysis of Claude Code sessions to identify successful patterns, problematic areas, and opportunities for improvement."
+    }
+  ]
 }
