@@ -10,6 +10,12 @@ A curated collection of plugins and tools designed for AI-assisted development. 
 /plugin marketplace add bitwarden/ai-marketplace
 ```
 
+or
+
+```bash
+/plugin marketplace add https://github.com/bitwarden/ai-plugins
+```
+
 ### Installing plugins from this marketplace
 
 Once the marketplace is added, you can install plugins using:
