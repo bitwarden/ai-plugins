@@ -58,10 +58,10 @@ You can add this marketplace using either the short form or full URL:
 
 ```bash
 # Short form (GitHub owner/repo)
-/plugin marketplace add bitwarden/ai-marketplace
+/plugin marketplace add bitwarden/ai-plugins
 
 # Full GitHub URL
-/plugin marketplace add https://github.com/bitwarden/ai-marketplace
+/plugin marketplace add https://github.com/bitwarden/ai-plugins
 ```
 
 **Note:** After adding the marketplace, you will need to restart Claude Code for the changes to take effect.
