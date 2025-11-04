@@ -4,17 +4,69 @@ A curated collection of plugins and tools designed for AI-assisted development. 
 
 ## Usage
 
+### Prerequisites
+
+This marketplace is hosted in a private GitHub repository and requires GitHub authentication to access.
+
+#### Setting up GitHub Authentication for Claude Code
+
+Choose one of the following authentication methods:
+
+**Option 1: GitHub CLI (Recommended)**
+
+1. Install GitHub CLI if not already installed:
+   ```bash
+   # macOS
+   brew install gh
+
+   # Windows
+   winget install --id GitHub.cli
+
+   # Linux
+   # See https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+   ```
+
+2. Authenticate with GitHub:
+   ```bash
+   gh auth login
+   ```
+   Follow the prompts to authenticate via browser or token.
+
+**Option 2: Personal Access Token**
+
+1. Generate a GitHub Personal Access Token (classic):
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Give it a descriptive name (e.g., "Claude Code Marketplace Access")
+   - Select the `repo` scope (this grants access to private repositories)
+   - Generate and copy the token
+
+2. Configure Claude Code with your GitHub token:
+   ```bash
+   export GITHUB_TOKEN=your_token_here
+   ```
+
+   Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
+   ```bash
+   echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
+   source ~/.zshrc
+   ```
+
 ### Adding this marketplace to Claude Code
 
+You can add this marketplace using either the short form or full URL:
+
 ```bash
+# Short form (GitHub owner/repo)
 /plugin marketplace add bitwarden/ai-marketplace
+
+# Full GitHub URL
+/plugin marketplace add https://github.com/bitwarden/ai-marketplace
 ```
 
-or
+**Note:** After adding the marketplace, you will need to restart Claude Code for the changes to take effect.
 
-```bash
-/plugin marketplace add https://github.com/bitwarden/ai-plugins
-```
+**Tip:** You can also use `/plugin` interactively to manage marketplaces and plugins through a guided interface.
 
 ### Installing plugins from this marketplace
 
@@ -22,6 +74,10 @@ Once the marketplace is added, you can install plugins using:
 ```bash
 /plugin install plugin-name@bitwarden-marketplace
 ```
+
+Plugins are installed by default to `~/.claude/plugins/` on your local system.
+
+**Note:** After installing a plugin, you will need to restart Claude Code for the plugin to become active.
 
 ## Contributing Plugins
 
