@@ -323,10 +323,6 @@ Current version: **1.0.0**
 
 See CHANGELOG.md for version history.
 
-## License
-
-MIT License - See LICENSE file for details.
-
 ## Support
 
 For issues, questions, or feedback:
@@ -342,9 +338,3 @@ Built with research-backed best practices from:
 - Claude Code Best Practices
 - Security best practices for credential detection
 - Prompt engineering quality standards
-
----
-
-**Version**: 1.0.0
-**Last Updated**: 2025-10-30
-**Maintainer**: Internal Team

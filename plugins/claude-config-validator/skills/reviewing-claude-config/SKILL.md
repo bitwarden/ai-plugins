@@ -75,18 +75,14 @@ The checklist provides:
 When to load references:
 1. Need to classify issue priority? → priority-framework.md
 2. Security patterns unclear? → security-patterns.md
-3. Agent configuration/tool access/system prompts? → agent-configuration-security.md
-4. Agent invocation (when/how/operations)? → agent-invocation-guide.md
-5. Quality criteria questions? → quality-prompt-engineering.md
+3. Claude Code requirements (YAML, tools, models, limits)? → claude-code-requirements.md
 </thinking>
 
 Load reference files only when needed for specific questions:
 
 - **Issue prioritization** → `reference/priority-framework.md` (CRITICAL vs IMPORTANT vs SUGGESTED vs OPTIONAL)
 - **Security patterns** → `reference/security-patterns.md` (detection commands, fix examples)
-- **Agent configuration & security** → `reference/agent-configuration-security.md` (model selection, naming, tool access, system prompts, secure patterns)
-- **Agent invocation** → `reference/agent-invocation-guide.md` (when to invoke, chaining patterns, prompt engineering, operations)
-- **Quality criteria** → `reference/quality-prompt-engineering.md` (prompt engineering best practices)
+- **Claude Code requirements** → `reference/claude-code-requirements.md` (YAML frontmatter, model selection, tool names, progressive disclosure, settings conventions)
 
 ### Step 5: Document Findings
 
