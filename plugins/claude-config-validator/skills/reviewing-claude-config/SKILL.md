@@ -1,6 +1,6 @@
 ---
 name: reviewing-claude-config
-description: Reviews Claude configuration files in .claude directories for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md files, skills (SKILL.md), agents, prompts, commands, or settings. Validates YAML frontmatter, progressive disclosure patterns, token efficiency, and security best practices. Detects critical issues like committed settings.local.json, hardcoded secrets, malformed YAML, broken file references, oversized skill files, and insecure agent tool access.
+description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md files (project-level or .claude/), skills (SKILL.md), agents, prompts, commands, or settings. Validates YAML frontmatter, progressive disclosure patterns, token efficiency, and security best practices. Detects critical issues like committed settings.local.json, hardcoded secrets, malformed YAML, broken file references, oversized skill files, and insecure agent tool access.
 version: 1.0.0
 allowed-tools: Read, Grep, Glob
 ---
