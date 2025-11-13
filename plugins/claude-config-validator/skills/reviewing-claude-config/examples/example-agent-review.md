@@ -59,7 +59,7 @@ Rationale:
 
 Security principle: Grant minimum necessary tools only.
 
-Reference: `reference/agent-tool-access.md` - Tool Access Security Matrix
+Reference: `reference/claude-code-requirements.md` - Tool Access Patterns (lines 89-133)
 
 ---
 
@@ -352,7 +352,7 @@ Clarify in system prompt whether agent:
 - Reads and writes new formatted files (Read, Write)
 - Modifies files in place (Read, Edit)
 
-Reference: `reference/agent-tool-access.md` - Tool Access Patterns
+Reference: `reference/claude-code-requirements.md` - Tool Access Patterns (lines 89-133)
 
 ---
 
