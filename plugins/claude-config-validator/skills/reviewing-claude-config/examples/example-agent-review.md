@@ -104,8 +104,6 @@ Use JSDoc format:
 
 Structured thinking reduces errors by 40% (Anthropic Chain of Thought research).
 
-Reference: `reference/agent-system-prompts.md` - System Prompt Engineering Patterns
-
 ---
 
 **`.claude/agents/documentation-writer.md:1-6`** - SUGGESTED: Add model selection
