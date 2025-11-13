@@ -26,7 +26,7 @@ Determine the primary file type(s) being reviewed:
 **Detection Rules**:
 - **Agents**: Changes to `.claude/agents/*.md` or `plugins/*/agents/*.md`
 - **Skills**: Changes to `skill.md` files or skill support files (checklists, references, examples)
-- **CLAUDE.md**: Changes to `.claude/CLAUDE.md` or project-level `CLAUDE.md`
+- **CLAUDE.md**: Changes to `CLAUDE.md` files (any location: project root, `.claude/`, or subdirectories)
 - **Prompts/Commands**: Changes to `.claude/prompts/*.md` or `.claude/commands/*.md`
 - **Settings**: Changes to `.claude/settings.json` or `.claude/settings.local.json`
 

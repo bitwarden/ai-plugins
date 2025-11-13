@@ -1,6 +1,13 @@
 # CLAUDE.md Review Checklist
 
-Review checklist for changes to CLAUDE.md files (project-level or in `.claude/` directories).
+Review checklist for changes to CLAUDE.md files at any level (project root, `.claude/` directory, or subdirectories).
+
+**Valid CLAUDE.md Locations:**
+- Project root: `/CLAUDE.md` - Global project instructions
+- Claude directory: `/.claude/CLAUDE.md` - Claude Code-specific instructions
+- Subdirectories: `/path/to/subdirectory/CLAUDE.md` - Scoped instructions for specific modules/components
+
+All locations are valid and serve different scoping purposes. This checklist applies equally to all locations.
 
 ---
 
