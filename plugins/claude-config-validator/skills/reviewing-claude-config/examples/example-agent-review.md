@@ -123,7 +123,7 @@ model: sonnet  # Or haiku for simple documentation
 
 Documentation generation is moderately complex (Sonnet) but could use Haiku for speed if following strict templates.
 
-Reference: `reference/agent-configuration.md` - Model Selection Guidelines
+Reference: `reference/claude-code-requirements.md` - Model Selection (lines 73-86)
 
 ---
 
@@ -330,7 +330,7 @@ Rationale:
 - Opus should be reserved for complex architectural decisions
 - This agent will be invoked frequently (cost multiplier)
 
-Reference: `reference/agent-configuration.md` - Model Selection Guidelines
+Reference: `reference/claude-code-requirements.md` - Model Selection (lines 73-86)
 
 ---
 
@@ -453,8 +453,6 @@ Invoke the security-scanner agent to analyze modified files for vulnerabilities:
 
 Specific invocations with context improve agent output quality by ~40%.
 
-Reference: `reference/agent-invocation-techniques.md` - Prompt Engineering for Agent Invocation
-
 ---
 
 ## Example 5: Circular Agent Dependency (Anti-Pattern)
@@ -497,8 +495,6 @@ After fixing, report completion. Do NOT invoke analyzer.
 ```
 
 Rationale: Circular dependencies cause unpredictable behavior and infinite loops. Use explicit workflow coordination instead.
-
-Reference: `reference/agent-invocation-techniques.md` - Anti-Pattern: Circular Agent Invocation
 
 ---
 
