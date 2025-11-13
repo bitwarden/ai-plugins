@@ -1,4 +1,4 @@
-# ## Example 4: Prompts Review - Quality Improvements
+# Example Prompts Review
 
 **Context:** Reviewing a new slash command prompt.
 

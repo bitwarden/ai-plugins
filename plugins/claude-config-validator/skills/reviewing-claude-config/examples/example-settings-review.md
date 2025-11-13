@@ -1,4 +1,4 @@
-# ## Example 3: Settings Review - Security Issues
+# Example Settings Review
 
 **Context:** Reviewing settings.json with multiple security concerns.
 

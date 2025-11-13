@@ -1,4 +1,4 @@
-# ## Example 1: Skill Review - Multiple Issues
+# Example Skill Review
 
 **Context:** Reviewing a new skill with structural and quality issues.
 
