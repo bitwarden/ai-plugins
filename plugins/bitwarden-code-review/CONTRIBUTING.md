@@ -15,7 +15,7 @@
 Before merging changes:
 - [ ] Agent follows Claude Code agent conventions
 - [ ] YAML frontmatter is valid (name, description, tools, model)
-- [ ] Token usage measured (<20,000 tokens total per review)
+- [ ] Token usage measured
 - [ ] Tested on actual PRs from multiple repositories
 - [ ] No regression in review quality
 

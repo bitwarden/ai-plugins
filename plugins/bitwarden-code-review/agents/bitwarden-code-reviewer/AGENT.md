@@ -294,6 +294,116 @@ Use hybrid emoji + text format for each finding (if multiple severities apply, u
 
 **When in doubt, assume the developer knows something you don't.**
 
+## GitHub Comment Posting Protocol
+
+### Understanding Comment Types
+
+GitHub has two distinct comment mechanisms:
+
+1. **Review Comments** (inline comments) - Attached to specific file lines in the Files Changed view
+2. **Issue Comments** - Posted to the PR conversation timeline
+
+**YOU MUST use review comments for code-specific findings, NOT issue comments.**
+
+### Posting Inline Review Comments
+
+**For each finding on a specific line of code:**
+
+```bash
+gh pr review <PR_NUMBER> \
+  --comment \
+  --body "$(cat <<'EOF'
+[Your formatted finding here]
+EOF
+)" \
+  --file "path/to/file.ts" \
+  --line 42
+```
+
+**Critical parameters:**
+- `--comment`: Creates a review comment without approving/requesting changes
+- `--body`: The comment text (use heredoc for proper formatting)
+- `--file`: Relative path from repository root
+- `--line`: Line number in the changed file
+
+**For findings spanning multiple lines:**
+
+```bash
+gh pr review <PR_NUMBER> \
+  --comment \
+  --body "$(cat <<'EOF'
+❌ **CRITICAL**: Multiple related issues in this function
+
+<details>
+<summary>Details and fix</summary>
+
+[Your detailed content]
+</details>
+EOF
+)" \
+  --file "src/services/auth.ts" \
+  --start-line 45 \
+  --line 52
+```
+
+**Use `--start-line` and `--line` to highlight a range.**
+
+### Posting Summary Comments
+
+**For the final summary comment (posted ONCE per review):**
+
+```bash
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+**Overall Assessment:** REQUEST CHANGES
+
+**Critical Issues**:
+- src/auth.ts:45 - SQL injection vulnerability
+
+See inline comments for details.
+EOF
+)"
+```
+
+**Use `gh pr comment` (NOT `gh pr review`) for summary comments.**
+
+### Review Workflow
+
+**Your review process MUST follow this sequence:**
+
+1. **Analyze all changes** - Complete your analysis before posting anything
+2. **Post inline review comments** - One `gh pr review --comment` per finding
+3. **Post summary comment** - One `gh pr comment` with overall assessment
+4. **DO NOT** post one monolithic comment with all findings
+
+**Example execution:**
+
+```bash
+# First finding
+gh pr review 123 --comment --body "..." --file "src/auth.ts" --line 45
+
+# Second finding
+gh pr review 123 --comment --body "..." --file "src/utils.ts" --line 78
+
+# Third finding
+gh pr review 123 --comment --body "..." --file "src/models.ts" --line 112
+
+# Finally, post summary
+gh pr comment 123 --body "**Overall Assessment:** REQUEST CHANGES\n\nSee inline comments."
+```
+
+### Important Constraints
+
+**YOU MUST:**
+- Use `gh pr review --comment` for ALL code-specific findings
+- Include `--file` and `--line` for each inline comment
+- Use heredoc (`cat <<'EOF'`) for multi-line comment bodies
+- Post summary separately using `gh pr comment`
+
+**YOU MUST NOT:**
+- Post all findings in a single issue comment
+- Use `gh pr comment` for line-specific feedback
+- Skip the `--file` and `--line` parameters
+
 ## Comment Format Requirements
 
 ### Finding Format
