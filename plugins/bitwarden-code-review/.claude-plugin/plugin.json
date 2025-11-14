@@ -1,0 +1,23 @@
+{
+  "name": "bitwarden-code-review",
+  "version": "0.1.0",
+  "description": "Comprehensive code review system with organization-wide standards and repository-specific patterns. Includes skills for Android, iOS, web clients, and server codebases.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-marketplace/tree/main/plugins/bitwarden-code-review",
+  "repository": "https://github.com/bitwarden/ai-marketplace",
+  "license": "Bitwarden",
+  "keywords": [
+    "code-review",
+    "pull-request",
+    "quality-assurance",
+    "android",
+    "ios",
+    "web",
+    "server",
+    "security"
+  ],
+  "agents": "./agents/bitwarden-code-reviewer/AGENT.md"
+}

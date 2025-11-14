@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
-  "words": ["Bitwarden", "CODEOWNERS", "semver", "frontmatter"],
+  "words": ["anthropics", "Bitwarden", "CODEOWNERS", "semver", "frontmatter"],
   "flagWords": [],
   "ignorePaths": [
     ".vscode",

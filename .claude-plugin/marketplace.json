@@ -21,6 +21,12 @@
       "source": "./plugins/claude-config-validator",
       "version": "1.0.0",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Reviews CLAUDE.md, skills, agents, prompts, commands, and settings."
+    },
+    {
+      "name": "bitwarden-code-review",
+      "source": "./plugins/bitwarden-code-review",
+      "version": "1.0.0",
+      "description": "Comprehensive code review system with organization-wide standards and repository-specific patterns."
     }
   ]
 }
