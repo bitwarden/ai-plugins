@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-code-review",
   "version": "0.1.0",
-  "description": "Comprehensive code review system with organization-wide standards and repository-specific patterns. Includes skills for Android, iOS, web clients, and server codebases.",
+  "description": "Comprehensive code review system with organization-wide standards and repository-specific patterns.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
