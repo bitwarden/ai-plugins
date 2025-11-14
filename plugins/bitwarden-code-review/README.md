@@ -281,4 +281,4 @@ Bitwarden
 
 For issues or questions:
 - Internal: #ai-discussions Slack channel
-- GitHub Issues: [bitwarden/ai-marketplace](https://github.com/bitwarden/ai-marketplace/issues)
+- GitHub Issues: [bitwarden/ai-marketplace](https://github.com/bitwarden/ai-plugins/issues)
