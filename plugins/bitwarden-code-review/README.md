@@ -155,7 +155,7 @@ jobs:
 
           # Add Bitwarden marketplace
           plugin_marketplaces: |
-            https://github.com/bitwarden/ai-marketplace.git
+            https://github.com/bitwarden/ai-plugins.git
 
           # Install code review plugin
           plugins: |

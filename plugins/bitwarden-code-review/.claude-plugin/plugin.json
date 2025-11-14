@@ -6,8 +6,8 @@
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-marketplace/tree/main/plugins/bitwarden-code-review",
-  "repository": "https://github.com/bitwarden/ai-marketplace",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-code-review",
+  "repository": "https://github.com/bitwarden/ai-plugins",
   "license": "Bitwarden",
   "keywords": [
     "code-review",
