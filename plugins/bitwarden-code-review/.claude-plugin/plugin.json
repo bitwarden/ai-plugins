@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-code-review",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Comprehensive code review system with organization-wide standards and repository-specific patterns.",
   "author": {
     "name": "Bitwarden",
@@ -8,7 +8,6 @@
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-code-review",
   "repository": "https://github.com/bitwarden/ai-plugins",
-  "license": "Bitwarden",
   "keywords": [
     "code-review",
     "pull-request",

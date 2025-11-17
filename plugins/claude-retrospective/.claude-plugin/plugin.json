@@ -6,9 +6,8 @@
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-marketplace/tree/main/plugins/claude-retrospective",
-  "repository": "https://github.com/bitwarden/ai-marketplace",
-  "license": "MIT",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/claude-retrospective",
+  "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": [
     "analysis",
     "retrospective",
