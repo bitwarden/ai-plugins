@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial release of `bitwarden-code-review` plugin
-- Base organizational guidelines (69 lines) defining:
+- Base organizational guidelines defining:
   - Process rules (structured thinking, check existing comments, avoid duplicates, respect resolved threads)
   - Finding terminology ("Finding" not "Issue", no # symbol for GitHub autolinking)
   - Emoji classification system (❌ ⚠️ ♻️ 🎨 💭)
@@ -24,14 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Professional tone guidelines
 - Plugin manifest with metadata and skill registration
 - Comprehensive README documentation
-- Token-optimized architecture using progressive disclosure
-
-### Architecture Notes
-
-- **Base guidelines**: 69 lines, ~100 tokens (organizational standards)
-- **Skill structure**: Self-contained with inline priority framework and review psychology (no duplication with base)
-- **Token usage**: Simple reviews ~1,045 tokens, complex reviews ~1,770 tokens
-- **Progressive disclosure**: Only relevant checklists and reference materials loaded per review
 
 ---
 
