@@ -2,6 +2,7 @@
 argument-hint: [PR#] | [PR URL]
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
 model: claude-sonnet-4-5
+allowed-tools: Task
 ---
 
 You must invoke the bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
@@ -11,7 +12,9 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 1. **Pull Request Information**:
    - If arguments are provided ($ARGUMENTS), treat them as the PR number or URL
    - If no arguments provided, ask the user if there is a related PR number or URL
-   - Fetch the PR data using `gh pr view` and related commands
+   - If user indicates no PR or requests local changes review, review the current git branch changes using `git diff` and `git status`
+   - For PRs: Fetch the PR data using `gh pr view` and related commands
+   - For local changes: Analyze uncommitted and committed changes on the current branch
 
 2. **Local Review Mode**: You are performing a code review, and writing output to LOCAL FILES instead of posting to GitHub
 

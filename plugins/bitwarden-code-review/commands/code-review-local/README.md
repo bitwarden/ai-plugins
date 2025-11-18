@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` agent to perform comprehensive code reviews of GitHub pull requests, writing the review findings to **local files** instead of posting them to GitHub. This enables offline review workflows, preview capabilities before posting, and integration with custom review processes.
+The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` agent to perform comprehensive code reviews of **GitHub pull requests or local git changes**, writing the review findings to **local files** instead of posting them to GitHub. This enables offline review workflows, preview capabilities before posting, pre-commit validation, and integration with custom review processes.
 
 ## Usage
 
@@ -14,9 +14,11 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 
 - **`[PR#]`** (optional): Pull request number (e.g., `123`)
 - **`[PR URL]`** (optional): Full GitHub PR URL (e.g., `https://github.com/bitwarden/clients/pull/123`)
-- **No arguments**: The command will ask you to provide a PR number or URL interactively
+- **No arguments**: The command will ask interactively whether to review a PR or local changes
 
 ### Examples
+
+#### Review GitHub Pull Requests
 
 ```bash
 # Review by PR number
@@ -24,9 +26,18 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 
 # Review by full URL
 /code-review-local https://github.com/bitwarden/mobile/pull/4567
+```
 
-# Interactive mode (will prompt for PR info)
+#### Review Local Changes
+
+```bash
+# Interactive mode - choose to review local changes when prompted
 /code-review-local
+# When asked for PR number, indicate you want to review local changes instead
+
+# The agent will analyze:
+# - Uncommitted changes (git diff)
+# - Committed changes on current branch vs base branch
 ```
 
 ## Output Files
@@ -73,7 +84,7 @@ Contains all inline review comments with file and line references that would be 
 ---
 ```
 
-**Note**: If no inline comments are needed (clean PR), this file will be empty or contain only the approval message.
+**Note**: If no inline comments are needed (clean PR), this file will be empty.
 
 ## Review Severity Categories
 
@@ -87,15 +98,22 @@ The agent uses Bitwarden's standard emoji classification system:
 
 ## What the Command Does
 
+### For Pull Request Reviews:
 1. **Fetches PR data** from GitHub using `gh pr view` and related commands
-2. **Analyzes changes** following Bitwarden engineering standards
-3. **Checks for repository-specific guidelines** (e.g., `.claude/prompts/review-code.md`)
-4. **Applies standard review protocol**:
-   - Reads existing comments to avoid duplicates
-   - Assesses PR metadata and context
-   - Evaluates code against security, correctness, and maintainability standards
-5. **Generates structured review findings** with proper formatting
-6. **Writes output to local files** (never posts to GitHub)
+2. **Reads existing comments** to avoid duplicates
+3. **Assesses PR metadata and context**
+
+### For Local Changes Reviews:
+1. **Analyzes git changes** using `git status`, `git diff`, and `git log`
+2. **Evaluates uncommitted and committed changes** on current branch
+3. **Compares against base branch** to understand full change scope
+
+### Common Review Steps:
+1. **Checks for repository-specific guidelines** (e.g., `.claude/prompts/review-code.md`)
+2. **Applies standard review protocol** following Bitwarden engineering standards
+3. **Evaluates code** against security, correctness, and maintainability standards
+4. **Generates structured review findings** with proper formatting
+5. **Writes output to local files** (never posts to GitHub)
 
 ## Use Cases
 
@@ -131,6 +149,18 @@ Integrate with custom tooling or approval processes:
 python process_review.py review-summary.md review-inline-comments.md
 ```
 
+### Pre-Commit Validation
+Review your local changes before committing or creating a PR:
+
+```bash
+# Review uncommitted changes before commit
+/code-review-local
+# Choose "local changes" when prompted
+# Review findings in the generated files
+# Fix any issues identified
+# Commit when clean
+```
+
 ### Training and Learning
 Use the output to understand code review best practices:
 
@@ -157,7 +187,6 @@ Use the output to understand code review best practices:
 
 - [Bitwarden Code Review Plugin README](../../README.md)
 - [Bitwarden Code Reviewer Agent](../../agents/bitwarden-code-reviewer/AGENT.md)
-- [Base Review Guidelines](../../.claude/prompts/base-review-guidelines.md)
 
 ## Troubleshooting
 
