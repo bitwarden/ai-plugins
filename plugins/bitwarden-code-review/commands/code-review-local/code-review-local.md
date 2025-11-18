@@ -2,7 +2,7 @@
 argument-hint: [PR#] | [PR URL]
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
 model: claude-sonnet-4-5
-allowed-tools: Task
+allowed-tools: Task, Read
 ---
 
 You must invoke the bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
