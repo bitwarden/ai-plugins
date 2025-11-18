@@ -109,7 +109,7 @@ cat review-summary.md
 cat review-inline-comments.md
 # Manually post if satisfied
 gh pr comment 123 --body-file review-summary.md
-gh pr review 123 --comment --body-file review-inline-comments.md
+gh pr review 123 --comment --body "$(cat review-inline-comments.md)"
 ```
 
 ### Offline Review Workflow
@@ -142,7 +142,7 @@ Use the output to understand code review best practices:
 
 ## Technical Details
 
-- **Model**: Uses `sonnet` model for balanced performance and quality
+- **Model**: Uses `claude-sonnet-4-5` model for balanced performance and quality
 - **Agent**: Invokes `bitwarden-code-reviewer` specialized agent
 - **GitHub Access**: Read-only via `gh` CLI (requires authentication)
 - **No Posting**: Deliberately does not post to GitHub-output is file-only

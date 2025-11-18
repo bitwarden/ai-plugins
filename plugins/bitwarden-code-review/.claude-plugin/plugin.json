@@ -18,5 +18,8 @@
     "server",
     "security"
   ],
-  "agents": "./agents/bitwarden-code-reviewer/AGENT.md"
+  "agents": "./agents/bitwarden-code-reviewer/AGENT.md",
+  "commands": [
+    "./commands/code-review-local/code-review-local.md"
+  ]
 }
