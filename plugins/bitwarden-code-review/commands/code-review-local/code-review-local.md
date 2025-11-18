@@ -1,8 +1,6 @@
 ---
 argument-hint: [PR#] | [PR URL]
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
-model: claude-sonnet-4-5
-allowed-tools: Task, Read
 ---
 
 You must invoke the bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
@@ -34,9 +32,11 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
    - Proper `<details>` sections for each finding
    - Final summary with overall assessment
 
+**Note**: The output formats below mirror the standard GitHub review formats documented in your AGENT.md file, adapted for local file output instead of direct GitHub posting.
+
 **File 1: `review-summary.md`**
 
-Contains the overall summary comment. Format:
+Contains the overall summary comment (same format as would be posted with `gh pr comment` in standard GitHub reviews, but written to local file). Format:
 
 ```markdown
 **Overall Assessment:** APPROVE / REQUEST CHANGES
@@ -57,7 +57,7 @@ Or for clean PRs:
 
 **File 2: `review-inline-comments.md`**
 
-Contains all inline review comments with file and line references. Format:
+Contains all inline review comments with file and line references (same format as would be posted with `gh pr review --comment` in standard GitHub reviews, but written to local file). Format:
 
 ```markdown
 ## [file-path]:[line-number]
