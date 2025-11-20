@@ -11,6 +11,8 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 - **Autonomous Review Agent**: Single agent handles all code review tasks without manual invocation
 - **Organizational Standards**: Consistent review process, finding classification, and comment formatting across all repositories
 - **Repository-Specific Customization**: Teams can add technology-specific requirements without modifying the plugin
+- **Thread Detection**: Prevents duplicate comments by detecting existing threads before posting
+- **Change Type Classification**: Automatically detects PR type (bugfix, feature, refactor, etc.) and tailors review focus
 - **Security-First Approach**: Prioritizes security vulnerabilities, data exposure, and authentication issues
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
 - **Pattern Recognition**: Avoids false positives by recognizing framework conventions and intentional patterns
@@ -47,8 +49,26 @@ bitwarden-code-review/
 ├── agents/
 │   └── bitwarden-code-reviewer/
 │       └── AGENT.md             # Main review agent
+├── commands/
+│   └── code-review-local/       # Local review command
 └── README.md                    # This file
 ```
+
+### Thread Detection
+
+The agent includes automatic duplicate comment prevention through direct GitHub API integration:
+
+- **Implementation**: Agent autonomously constructs `gh pr` and `gh api` GraphQL queries based on execution context
+- **Context Detection**: Automatically detects PR information from:
+  - GitHub Actions environment variables (`GITHUB_EVENT_PATH`, `GITHUB_REPOSITORY`)
+  - Slash command arguments or manual invocation
+  - Gracefully skips detection for local reviews without PR context
+- **Purpose**: Detects existing comment threads (including resolved ones) before creating new ones
+- **Matching Logic**:
+  - Exact match: Same file + same line number
+  - Nearby match: Same file + line within ±5 lines
+  - Content match: Existing comment body is similar (>70%)
+- **Benefits**: Prevents duplicate comments, maintains conversation continuity, works universally across repository installations and invocation methods
 
 ## Repository-Specific Customization
 

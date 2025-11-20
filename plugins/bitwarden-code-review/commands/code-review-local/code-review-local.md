@@ -8,11 +8,14 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 **CRITICAL INSTRUCTIONS FOR THE AGENT:**
 
 1. **Pull Request Information**:
-   - If arguments are provided ($ARGUMENTS), treat them as the PR number or URL
+   - If arguments are provided ($ARGUMENTS), extract the numeric PR number:
+     - Direct number: "123" → PR number is 123
+     - PR URL: "https://github.com/org/repo/pull/456" → PR number is 456
+     - Text reference: "PR #789" → PR number is 789
    - If no arguments provided, ask the user if there is a related PR number or URL
    - If user indicates no PR or requests local changes review, review the current git branch changes using `git diff` and `git status`
-   - For PRs: Fetch the PR data using `gh pr view` and related commands
-   - For local changes: Analyze uncommitted and committed changes on the current branch
+   - For PRs: Use the extracted PR number when executing thread detection and fetching PR data with `gh pr view` commands
+   - For local changes: Skip thread detection, analyze uncommitted and committed changes on the current branch
 
 2. **Local Review Mode**: You are performing a code review, and writing output to LOCAL FILES instead of posting to GitHub
 
