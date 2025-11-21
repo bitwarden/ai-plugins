@@ -237,9 +237,7 @@ test -f .claude/prompts/review-code.md && echo "EXISTS" || echo "NOT_FOUND"
    - **Performance** - O(n²) algorithms, memory leaks, unnecessary network calls
    - **Maintainability** - Only after above are satisfied
 
-3. **Stop after 3+ related critical issues** - If you find 3 or more critical (❌) issues in the SAME CATEGORY (e.g., multiple SQL injections, repeated null safety violations), request fixes before continuing. If critical issues span different security/correctness domains, complete the review to identify all vulnerability classes.
-
-4. **Verify completeness** - Before posting, confirm you've examined all changed code for the above issues
+3. **Verify completeness** - Before posting, confirm you've examined all changed code for the above issues
 
 **You MUST NOT:**
 - Post findings incrementally or return for "second look" reviews
