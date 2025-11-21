@@ -12,7 +12,6 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 - **Organizational Standards**: Consistent review process, finding classification, and comment formatting across all repositories
 - **Repository-Specific Customization**: Teams can add technology-specific requirements without modifying the plugin
 - **Thread Detection**: Prevents duplicate comments by detecting existing threads before posting
-- **Change Type Classification**: Automatically detects PR type (bugfix, feature, refactor, etc.) and tailors review focus
 - **Security-First Approach**: Prioritizes security vulnerabilities, data exposure, and authentication issues
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
 - **Pattern Recognition**: Avoids false positives by recognizing framework conventions and intentional patterns
@@ -26,7 +25,7 @@ The plugin provides a single agent (`bitwarden-code-reviewer`) that:
 
 1. **Reads PR Context**: Gathers PR metadata, existing comments, and resolved threads
 2. **Loads Repository Guidelines**: Checks for `.claude/prompts/review-code.md` and integrates custom requirements
-3. **Analyzes Changes**: Identifies change type (bugfix, feature, refactor, etc.) and tailors review approach
+3. **Analyzes Changes**: Understands change scope and impact, then adapts review depth based on observed complexity and risk
 4. **Classifies Findings**: Uses 5-tier severity system (CRITICAL, IMPORTANT, DEBT, SUGGESTED, QUESTION)
 5. **Formats Output**: Posts inline comments and summary using mandatory templates
 

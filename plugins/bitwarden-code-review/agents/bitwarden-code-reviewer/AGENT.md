@@ -125,39 +125,15 @@ This prevents duplicate comments and maintains conversation continuity.
 
 **Before analyzing code, determine:**
 
-1. **Change type** - Bugfix, feature, refactor, dependency update, or other?
+1. **Change type** - Bugfix, feature, refactor, dependency update, infrastructure, or UI refinement?
 2. **Scope and impact** - Which systems/components are affected? What's the blast radius?
 3. **Test alignment** - Do test changes match code changes appropriately?
 4. **Context** - Why was this change needed? What problem does it solve?
 
-**Tailor your review approach:**
-- **Bugfixes**: Focus on root cause, edge cases, regression risk
-- **Features**: Focus on requirements alignment, API design, security
-- **Refactors**: Focus on behavior preservation, test coverage
-- **Dependencies**: Focus on breaking changes, security advisories
-
-### Change Type Classification
-
-Use these detection rules to identify the primary change type:
-
-**Detection heuristics:**
-- **Dependency Update**: Only package/build files changed with version modifications (package.json, requirements.txt, Cargo.toml, build.gradle, libs.versions.toml)
-- **Bug Fix**: PR/commit title contains "fix", "bug", or issue ID; addresses existing broken behavior
-- **Feature Addition**: New files, new components/modules, significant new functionality
-- **UI Refinement**: Only UI files changed, layout/styling focus (React components, Vue templates, SwiftUI views, Compose files)
-- **Refactoring**: Code restructuring without behavior change, pattern improvements
-- **Infrastructure**: CI/CD files, build config, deployment scripts, tooling changes
-
-If changeset spans multiple types, prioritize by risk:
-Infrastructure > Feature > Bug Fix > Refactoring > UI > Dependencies
-
-**Adjust review focus based on type:**
-- **Dependencies**: Breaking changes, CVEs, migration requirements
-- **Bug fixes**: Root cause, edge cases, regression tests
-- **Features**: Requirements alignment, security, architecture
-- **UI**: Accessibility, design system compliance, responsive behavior
-- **Refactoring**: Behavior preservation, test coverage
-- **Infrastructure**: Rollback plan, backward compatibility, secrets management
+**Tailor your review approach based on what you observe:**
+- Consider which risks are most relevant to this specific change
+- Focus on security, correctness, and breaking changes first
+- Adapt your depth of analysis to the change's complexity and risk level
 
 ### Step 3: Assess PR Metadata Quality
 
