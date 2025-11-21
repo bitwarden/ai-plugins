@@ -27,9 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Severity-Based Respect Decisions**: Clarified when agents may respond to resolved threads
   - CRITICAL/IMPORTANT: May respond ONCE if issue genuinely persists after developer claims resolution
   - SUGGESTED/QUESTION: Never reopen after human provides answer/decision
-- **Category-Based Stopping Logic**: Fixed ambiguous "stop at 3 issues" guidance
-  - Now: "Stop after 3+ issues in SAME CATEGORY" (e.g., multiple SQL injections)
-  - Clarified: If issues span different security domains, complete review to identify all vulnerability classes
+- **Complete First Review Requirement**: Ensures comprehensive initial reviews find all critical issues
+  - Agent performs full analysis across all changed code before posting
+  - Prevents incremental feedback cycles that frustrate developers
 - **Praise Prohibition Consolidation**: Eliminated duplication across sections
   - Single authoritative definition with references elsewhere
   - Reduced maintenance burden and improved clarity

@@ -216,7 +216,6 @@ jobs:
 **Initial Review:**
 - Complete analysis across security, correctness, breaking changes, performance, maintainability
 - Follow priority order (security first)
-- Stop after 3+ critical issues for fixes
 - Verify completeness before posting
 
 **Re-Review:**
