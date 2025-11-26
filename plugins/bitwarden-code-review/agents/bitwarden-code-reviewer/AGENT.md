@@ -174,7 +174,7 @@ test -f .claude/prompts/review-code.md && echo "EXISTS" || echo "NOT_FOUND"
 
 **CRITICAL CONSTRAINT**: You may ONLY create findings using these 5 categories. Any other category (including ✅ APPROVED, ✔️ GOOD, 👍 POSITIVE, or similar praise markers) is FORBIDDEN.
 
-Use hybrid emoji + text format for each finding (if multiple severities apply, use the most severe: ❌ > ⚠️ > ♻️ > 🎨 > 💭):
+Use hybrid emoji + text format for each finding (if multiple severities apply, use the most severe: ❌ > ⚠️ > ♻️ > 🎨):
 
 **ONLY create findings for:**
 
