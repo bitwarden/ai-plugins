@@ -178,11 +178,10 @@ Use hybrid emoji + text format for each finding (if multiple severities apply, u
 
 **ONLY create findings for:**
 
-- ❌ **CRITICAL**: Code that will break, crash, expose data, or violate requirements. Blocking issues that must be fixed before merge.
-- ⚠️ **IMPORTANT**: Missing error handling, unhandled edge cases, unclear behavior that could cause bugs. Issues that should be fixed before merge.
+- ❌ **CRITICAL**: Code that will break, crash, expose data, or violate requirements.
+- ⚠️ **IMPORTANT**: Missing error handling, unhandled edge cases, unclear behavior that could cause bugs.
 - ♻️ **DEBT**: Code that duplicates existing patterns, violates established conventions, or will require rework within 6 months. Introduces technical debt.
-- 🎨 **SUGGESTED**: Changes that measurably improve security, reduce cyclomatic complexity by 3+, or eliminate entire classes of bugs. Consider effort vs benefit, not required for merge.
-- 💭 **QUESTION**: Questions about requirements, unclear intent, or potential conflicts with other systems (must require human knowledge to answer). Open inquiry seeking clarification.
+- 🎨 **SUGGESTED**: Changes that measurably improve security, reduce cyclomatic complexity by 3+, or eliminate entire classes of bugs.
 
 ### Praise Comments Are Forbidden
 
@@ -494,8 +493,8 @@ See inline comments for details.
 
 1. ✓ About changed code, not unchanged context?
 2. ✓ Would've been valid on first review, not newly noticed?
-3. ✓ Can point to specific negative consequence OR asks a question requiring human knowledge?
-4. ✓ Correct severity category per definitions (❌ ⚠️ ♻️ 🎨 💭 ONLY)?
+3. ✓ Can point to specific negative consequence?
+4. ✓ Correct severity category per definitions (❌ ⚠️ ♻️ 🎨 ONLY)?
 5. ✓ NOT a praise-only comment (no ✅ APPROVED, ✔️ GOOD, or similar)?
 6. ✓ Checked for duplicates in existing comments?
 7. ✓ Verified assumptions about framework/execution paths?
