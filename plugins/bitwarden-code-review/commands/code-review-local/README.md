@@ -94,7 +94,7 @@ The agent uses Bitwarden's standard emoji classification system:
 - **⚠️ Important**: Bugs, incorrect logic, maintainability concerns
 - **♻️ Refactoring**: Code quality improvements, technical debt
 - **🎨 Style/Convention**: Formatting, naming, minor conventions
-- **💭 Question/Discussion**: Clarifications, suggestions for discussion
+- **❓ Question/Discussion**: Clarifications, suggestions for discussion
 
 ## What the Command Does
 
