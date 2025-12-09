@@ -43,6 +43,8 @@ The plugin provides a single agent (`bitwarden-code-reviewer`) that:
 
 ```
 bitwarden-code-review/
+├── .claude/
+│   └── settings.json            # Security boundaries
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin metadata
 ├── agents/
@@ -59,15 +61,72 @@ The agent includes automatic duplicate comment prevention through direct GitHub 
 
 - **Implementation**: Agent autonomously constructs `gh pr` and `gh api` GraphQL queries based on execution context
 - **Context Detection**: Automatically detects PR information from:
-  - GitHub Actions environment variables (`GITHUB_EVENT_PATH`, `GITHUB_REPOSITORY`)
-  - Slash command arguments or manual invocation
-  - Gracefully skips detection for local reviews without PR context
+    - GitHub Actions environment variables (`GITHUB_EVENT_PATH`, `GITHUB_REPOSITORY`)
+    - Slash command arguments or manual invocation
+    - Gracefully skips detection for local reviews without PR context
 - **Purpose**: Detects existing comment threads (including resolved ones) before creating new ones
 - **Matching Logic**:
-  - Exact match: Same file + same line number
-  - Nearby match: Same file + line within ±5 lines
-  - Content match: Existing comment body is similar (>70%)
+    - Exact match: Same file + same line number
+    - Nearby match: Same file + line within ±5 lines
+    - Content match: Existing comment body is similar (>70%)
 - **Benefits**: Prevents duplicate comments, maintains conversation continuity, works universally across repository installations and invocation methods
+
+## Security
+
+### Permission Boundaries
+
+The plugin includes a `.claude/settings.json` file that defines security boundaries by explicitly denying dangerous GitHub operations:
+
+**Denied Operations:**
+
+_Pull Request Modifications:_
+
+- ❌ `gh pr merge/close/edit/lock/unlock/reopen/ready/checkout` - Cannot modify or checkout PRs
+
+_Issue Modifications:_
+
+- ❌ `gh issue create/close/reopen/edit/delete/lock/unlock/transfer/pin/unpin` - Cannot modify issues
+- ✅ `gh issue view/list` - CAN read issues for context (not blocked)
+
+_Repository Operations:_
+
+- ❌ `gh repo edit/archive/delete/rename/sync/create/fork` - Cannot modify repository
+
+_Release Operations:_
+
+- ❌ `gh release` - Cannot create, modify, or delete releases
+
+_Organization Operations:_
+
+- ❌ `gh org` - Cannot modify org membership or settings
+
+_Secrets and Workflows:_
+
+- ❌ `gh secret` - Cannot access or modify repository secrets
+- ❌ `gh workflow` - Cannot trigger or modify workflows
+
+_CI/CD Operations:_
+
+- ❌ `gh run rerun/cancel/delete/watch` - Cannot modify CI runs
+
+_API Operations:_
+
+- ❌ `gh api` DELETE/PATCH/PUT operations - Cannot modify or delete via API
+
+**Allowed Operations:**
+
+- ✅ Read PR metadata (`gh pr view`, `gh pr status`, `gh pr list`)
+- ✅ Read code changes (`gh pr diff`, `git diff`)
+- ✅ Read commit history (`git log`, `git show`)
+- ✅ Read issues for context (`gh issue view`, `gh issue list`)
+- ✅ View CI status (`gh pr checks`, `gh run view`, `gh run list`)
+- ✅ Post review comments (`gh pr review`)
+- ✅ Post summary comments (`gh pr comment`)
+- ✅ Execute read-only GraphQL queries (`gh api graphql`)
+
+### Recommended Project Configuration
+
+When using this plugin in your repositories, **copy the security settings** to your project's `.claude/settings.json`. This ensures the code review agent cannot perform destructive operations in your project, following the **principle of least privilege**.
 
 ## Repository-Specific Customization
 
@@ -76,6 +135,7 @@ Repositories can provide **additional** review guidelines that supplement (but n
 **Location**: `.claude/prompts/review-code.md` in the repository being reviewed
 
 **Purpose**:
+
 - Add technology stack-specific focus areas
 - Define additional team coding conventions
 - Specify extra repository-specific security checks
@@ -83,6 +143,7 @@ Repositories can provide **additional** review guidelines that supplement (but n
 - Provide team context and preferences
 
 **How It Works**:
+
 1. Agent automatically checks for `.claude/prompts/review-code.md`
 2. If found, reads and integrates guidelines with base standards
 3. **Base guidelines always take precedence** - conflicts are resolved by ignoring conflicting repo directives
@@ -91,12 +152,14 @@ Repositories can provide **additional** review guidelines that supplement (but n
 **Important: Base Guidelines Cannot Be Overridden**
 
 Repository guidelines are strictly **additive**. They can:
+
 - ✅ Add new patterns to check
 - ✅ Add technology-specific requirements
 - ✅ Request additional focus areas
 - ✅ Provide team context
 
 Repository guidelines CANNOT:
+
 - ❌ Weaken security requirements
 - ❌ Change severity classifications
 - ❌ Modify comment format requirements
@@ -109,26 +172,31 @@ Repository guidelines CANNOT:
 # Repository-Specific Review Guidelines
 
 ## Technology Focus
+
 - Heavily scrutinize React hook dependency arrays
 - Validate all GraphQL queries use proper fragments
 - Ensure all Suspense boundaries have error boundaries
 
 ## Additional Security Checks
+
 - All authentication flows must include CSRF protection
 - Flag any direct DOM manipulation for XSS review
 - Verify all API calls use our axios wrapper (includes auth)
 
 ## Additional Code Conventions
+
 - Flag TODO comments as technical debt
 - Prefer named exports over default exports
 - Component files must co-locate tests (ComponentName.test.tsx)
 
 ## Focus Areas
+
 - Prioritize performance review in this performance-critical codebase
 - Extra scrutiny on authentication and session management code
 ```
 
 **Benefits**:
+
 - No plugin modification needed for repo-specific needs
 - Guidelines versioned with repository code
 - Easy team collaboration on review standards
@@ -140,6 +208,7 @@ Repository guidelines CANNOT:
 ### Automatic Invocation
 
 The agent is automatically invoked by Claude when:
+
 - User mentions "review", "PR", or "pull request"
 - User requests code review feedback
 - User analyzes code changes
@@ -157,31 +226,31 @@ Use the bitwarden-code-reviewer agent to review this PR
 name: Code Review with Claude
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+    pull_request:
+        types: [opened, synchronize]
 
 jobs:
-  code-review:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    code-review:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Run Code Review
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Run Code Review
+              uses: anthropics/claude-code-action@v1
+              with:
+                  anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Add Bitwarden marketplace
-          plugin_marketplaces: |
-            https://github.com/bitwarden/ai-plugins.git
+                  # Add Bitwarden marketplace
+                  plugin_marketplaces: |
+                      https://github.com/bitwarden/ai-plugins.git
 
-          # Install code review plugin
-          plugins: |
-            bitwarden-code-review@bitwarden-marketplace
+                  # Install code review plugin
+                  plugins: |
+                      bitwarden-code-review@bitwarden-marketplace
 
-          prompt: |
-            Review this pull request using the bitwarden-code-reviewer agent.
+                  prompt: |
+                      Review this pull request using the bitwarden-code-reviewer agent.
 ```
 
 ## Review Process
@@ -189,36 +258,38 @@ jobs:
 ### Pre-Review Protocol
 
 1. **Read Existing Context**
-   - PR title and description
-   - All existing comments and threads
-   - Resolved threads and human responses
-   - Identify initial review vs re-review
+    - PR title and description
+    - All existing comments and threads
+    - Resolved threads and human responses
+    - Identify initial review vs re-review
 
 2. **Understand the Change**
-   - Change type (bugfix, feature, refactor, dependency update)
-   - Scope and impact analysis
-   - Test alignment verification
+    - Change type (bugfix, feature, refactor, dependency update)
+    - Scope and impact analysis
+    - Test alignment verification
 
 3. **Assess PR Metadata**
-   - Title clarity and specificity
-   - Objective explanation
-   - Screenshots/recordings for UI changes
-   - JIRA reference in tracking section
-   - Test plan documentation
+    - Title clarity and specificity
+    - Objective explanation
+    - Screenshots/recordings for UI changes
+    - JIRA reference in tracking section
+    - Test plan documentation
 
 4. **Load Repository Guidelines**
-   - Check for `.claude/prompts/review-code.md`
-   - Integrate with base standards
-   - Apply conflict resolution (base guidelines win)
+    - Check for `.claude/prompts/review-code.md`
+    - Integrate with base standards
+    - Apply conflict resolution (base guidelines win)
 
 ### Review Execution
 
 **Initial Review:**
+
 - Complete analysis across security, correctness, breaking changes, performance, maintainability
 - Follow priority order (security first)
 - Verify completeness before posting
 
 **Re-Review:**
+
 - Review ONLY changed files/lines since last review
 - Don't re-raise resolved issues
 - Verify previous critical findings were fixed
@@ -227,6 +298,7 @@ jobs:
 ### Output Format
 
 **Inline Comments** (mandatory format):
+
 ```
 ❌ **CRITICAL**: SQL injection vulnerability in user query
 
@@ -253,6 +325,7 @@ Reference: OWASP SQL Injection Prevention
 **Summary Comments**:
 
 For PRs with issues:
+
 ```
 **Overall Assessment:** REQUEST CHANGES
 
@@ -263,6 +336,7 @@ See inline comments for details.
 ```
 
 For clean PRs:
+
 ```
 **Overall Assessment:** APPROVE
 
@@ -298,5 +372,6 @@ Bitwarden
 ## Support
 
 For issues or questions:
+
 - Internal: #ai-discussions Slack channel
 - GitHub Issues: [bitwarden/ai-plugins](https://github.com/bitwarden/ai-plugins/issues)
