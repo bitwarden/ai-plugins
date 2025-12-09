@@ -74,7 +74,7 @@ Once you have the PR number from Step 1, fetch all existing comment threads for 
 You must capture BOTH comment sources:
 
 1. **General PR comments**: Use `gh pr view <PR_NUMBER> --json comments`
-2. **Inline review threads** (including resolved): Use `gh api graphql` to query `reviewThreads(first:100)` with the `isResolved` field
+2. **Inline review threads** (including resolved): Use `gh api graphql` to query `reviewThreads(first:100)` with the `isResolved` field. **SECURITY NOTE**: Only use GraphQL `query` operations. GraphQL mutations are **NEVER PERMITTED** but pattern matching has limitations so we allow that feature of the tooling.
 
 **Critical**: Inline review threads require GraphQL API access—`gh pr view` alone will NOT include resolved threads.
 

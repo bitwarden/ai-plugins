@@ -37,7 +37,10 @@
       "Bash(gh api:*DELETE*)",
       "Bash(gh api:*PATCH*)",
       "Bash(gh api:*PUT*)",
-      "Bash(gh api:*POST*/merge*)"
+      "Bash(gh api:*POST*/merge*)",
+      "Bash(gh api graphql:*mutation*)",
+      "Bash(gh api graphql:*Mutation*)",
+      "Bash(gh api:*graphql* -f query=*mutation*)"
     ]
   }
 }
