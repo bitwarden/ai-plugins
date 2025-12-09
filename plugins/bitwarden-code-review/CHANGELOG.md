@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - CI/CD operations (rerun, cancel, delete, watch - **allows read-only `gh run view/list`**)
     - API write operations (DELETE, PATCH, PUT methods)
 - Agent now follows principle of least privilege with read + comment permissions only
+- GraphQL access restricted to query operations.
+    - Primary enforcement done through GitHub token permissions in the reusable review code workflow in the gh-actions repo.
+    - Secondary defense is mutations blocked via pattern matching in the agent.md
 
 ## [1.2.0] - 2025-11-20
 
