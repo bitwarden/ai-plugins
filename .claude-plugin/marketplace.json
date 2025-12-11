@@ -27,6 +27,12 @@
       "source": "./plugins/bitwarden-code-review",
       "version": "1.2.0",
       "description": "Comprehensive code review system with organization-wide standards and repository-specific patterns."
+    },
+    {
+      "name": "bitwarden-software-engineer",
+      "source": "./plugins/bitwarden-software-engineer",
+      "version": "1.0.0",
+      "description": "Comprehensive full-stack software engineering assistant proficient in modern software development"
     }
   ]
 }
