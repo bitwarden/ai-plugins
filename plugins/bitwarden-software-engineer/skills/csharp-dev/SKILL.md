@@ -26,11 +26,8 @@ When invoked:
 - DON'T add interfaces/abstractions unless used for external dependencies or testing.
 - Don't wrap existing abstractions.
 - Don't default to `public`. Least-exposure rule: `private` > `internal` > `protected` > `public`
-- Keep names consistent and meaningful
 - Comments explain **why**, not what, and they MUST be absolutely necessary. We strive for uncle Bob clean code
-- Don't add unused methods/params.
 - When fixing one method, check siblings for the same issue.
-- Reuse existing methods as much as possible
 
 ## Goals for our .NET applications
 
