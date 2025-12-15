@@ -5,6 +5,14 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2025-12-15
+
+### Security
+
+- Restrict agent tool declaration from `Bash(gh pr review:*)` to `Bash(gh pr review:--comment*)` to explicitly prevent PR approval and rejection operations
+- Closes permission gap where `--approve` and `--request-changes` flags were technically allowed by wildcard pattern but not intended
+- Agent retains ability to post inline review comments (`gh pr review --comment`) and summary comments (`gh pr comment`)
+
 ## [1.3.0] - 2025-12-09
 
 ### Security
