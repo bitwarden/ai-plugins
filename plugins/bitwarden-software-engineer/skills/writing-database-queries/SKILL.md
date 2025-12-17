@@ -24,6 +24,7 @@ Zero-downtime deployments require three-phase migrations:
 **Phase 3 — Finalization** (`util/Migrator/DbScripts_finalization`): Runs at next release. Removes backwards-compatibility scaffolding.
 
 Other locations:
+
 - `src/Sql/dbo` — Master schema source of truth
 - `src/Sql/dbo_finalization` — Future schema state
 - `util/Migrator/DbScripts_manual` — Exceptional cases (index rebuilds)
@@ -80,6 +81,6 @@ Use separate test databases (`vault_test`) from development (`vault_dev`).
 
 ## Database-Specific Guidance
 
-For T-SQL patterns (MSSQL, stored procedures, Dapper), see [guides/tsql.md](guides/tsql.md).
+For T-SQL patterns (MSSQL, stored procedures, Dapper), read [guides/tsql.md](guides/tsql.md).
 
-For Entity Framework patterns (PostgreSQL, MySQL, SQLite, EF migrations), see [guides/entity-framework.md](guides/entity-framework.md).
+For Entity Framework patterns (PostgreSQL, MySQL, SQLite, EF migrations), read [guides/entity-framework.md](guides/entity-framework.md).

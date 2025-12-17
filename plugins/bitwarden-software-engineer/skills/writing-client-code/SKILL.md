@@ -7,6 +7,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 ## Repository Structure
 
 The `clients` mono-repo contains:
+
 - `apps/web`, `apps/browser`, `apps/desktop`, `apps/cli` — client applications
 - `libs/common` — shared code for ALL clients including CLI (no Angular dependencies)
 - `libs/angular` — Angular-specific code for visual clients only
@@ -17,6 +18,7 @@ Install dependencies from repo root only. Build with Nx: `npx nx serve web`.
 ## Angular Requirements
 
 **New components** must use:
+
 - OnPush change detection
 - New control flow syntax (`@if`, `@for`, `@switch`)
 - Standalone components
@@ -38,6 +40,7 @@ Install dependencies from repo root only. Build with Nx: `npx nx serve web`.
 ## File Naming
 
 Dashes for words, dots for types:
+
 - `folder.service.ts` → `FolderService`
 - `folder-list.component.ts` → `FolderListComponent`
 - `folder.view.ts` → `FolderView`
@@ -48,25 +51,29 @@ Dashes for words, dots for types:
 **No enums.** Use frozen const objects with `Object.freeze()` and `as const`. Always explicitly type variables using the derived type.
 
 **Imports:**
+
 - Within same package (`@bitwarden/common`): relative imports
 - Across packages: absolute imports (`@bitwarden/common/platform/...`)
 
 ## State Management
 
-| Context | Use |
-|---------|-----|
-| Component local state | Signals |
-| Angular-only services | Signals |
-| Cross-client services (libs/common) | RxJS |
+| Context                             | Use     |
+| ----------------------------------- | ------- |
+| Component local state               | Signals |
+| Angular-only services               | Signals |
+| Cross-client services (libs/common) | RxJS    |
 
-**No manual subscriptions.** Use `| async` pipe or `takeUntilDestroyed()`.
+**Avoid manual subscriptions.** Prefer `| async` pipe. When subscriptions are necessary, pipe through `takeUntilDestroyed()` — enforced by `prefer-takeUntil` lint rule.
 
 ## Styling
 
 All Tailwind classes require **`tw-` prefix**:
+
 ```html
-<div class="tw-bg-background-alt2 tw-p-4">  <!-- ✅ -->
-<div class="bg-background-alt2 p-4">        <!-- ❌ -->
+<div class="tw-bg-background-alt2 tw-p-4">
+    <!-- ✅ -->
+    <div class="bg-background-alt2 p-4"><!-- ❌ --></div>
+</div>
 ```
 
 Use Component Library (`libs/components/`) for common UI patterns.

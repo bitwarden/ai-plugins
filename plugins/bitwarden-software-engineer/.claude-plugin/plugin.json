@@ -15,6 +15,5 @@
     "sql",
     "fullstack"
   ],
-  "agents": ["./agents/bitwarden-software-engineer.md"],
-  "commands": []
+  "agents": ["./agents/bitwarden-software-engineer.md"]
 }

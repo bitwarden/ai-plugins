@@ -7,6 +7,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 ## Repository Structure
 
 The `server` repo contains:
+
 - `src/Api` — REST API endpoints
 - `src/Identity` — Authentication/identity service
 - `src/Core` — Business logic, commands, queries, services
@@ -16,7 +17,7 @@ Run with `dotnet run` from service directories. Migrations: `pwsh dev/migrate.ps
 
 ## Command Query Separation (CQS)
 
-New features should use the CQS pattern — discrete action classes instead of large entity-focused services (ADR-0008).
+New features should use the CQS pattern — discrete action classes instead of large entity-focused services [ADR-0008](https://contributing.bitwarden.com/architecture/adr/server-CQRS-pattern).
 
 **Commands** = write operations (e.g., `CreateCipherCommand`). Change state, may return result.
 
@@ -45,6 +46,7 @@ Name classes after the action: `RotateOrganizationApiKeyCommand`. Each command/q
 ## Dependency Injection
 
 Use `TryAdd*` overloads, not `AddSingleton`/`AddTransient`:
+
 ```csharp
 // ✅ Correct
 services.TryAddSingleton<IMyService, DefaultMyService>();
@@ -58,6 +60,7 @@ Consider creating dependency groups for related services.
 ## GUID Generation
 
 Always use `CoreHelpers.GenerateComb()` for entity IDs — prevents SQL Server index fragmentation:
+
 ```csharp
 // ✅ Correct
 var id = CoreHelpers.GenerateComb();
@@ -74,9 +77,9 @@ var id = Guid.NewGuid();
 
 ## Caching
 
-**Only implement caching if explicitly requested.** Caching adds complexity and isn't always the right solution.
+**Don't implement caching unless requested.** If a user describes a performance problem where caching might help, suggest it — but don't implement without confirmation. Caching adds complexity and isn't always the right solution.
 
-When caching is needed, use `IFusionCache` instead of `IDistributedCache` (ADR-0028). Register with `AddExtendedCache` and inject via keyed services.
+When caching is needed, use `IFusionCache` instead of `IDistributedCache` [ADR-0028](https://contributing.bitwarden.com/architecture/adr/adopt-fusion-cache). Register with `AddExtendedCache` and inject via keyed services.
 
 FusionCache provides automatic key prefixing, L1/L2 caching, stampede protection, and backplane sync across nodes.
 

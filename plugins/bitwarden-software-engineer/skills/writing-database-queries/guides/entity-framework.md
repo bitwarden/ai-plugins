@@ -25,5 +25,3 @@ public async Task TestMethod(IOrganizationRepository repo)
     // Automatically runs against all configured EF databases
 }
 ```
-
-<!-- TODO: Add PostgreSQL, MySQL, SQLite specific patterns as team contributes them -->
