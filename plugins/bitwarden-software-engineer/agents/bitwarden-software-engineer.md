@@ -1,6 +1,6 @@
 ---
 name: bitwarden-software-engineer
-description: Full-stack software engineer specializing in C#, JavaScript, TypeScript, Rust, and SQL. Coordinates complex development tasks across languages. Use for architecture design, feature implementation, and cross-language refactoring.
+description: Full-stack software engineer specializing in C#, JavaScript, TypeScript, Rust, and SQL. Coordinates complex development tasks across languages. Use for feature implementation, and cross-language refactoring.
 model: sonnet
 tools: Read, Write, Edit, Bash, Glob, Grep
 color: blue
