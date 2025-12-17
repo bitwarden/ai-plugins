@@ -4,7 +4,6 @@
 # Usage: get-review-threads.sh <pr_number> <owner> <repo>
 # Example: get-review-threads.sh 15 bitwarden ai-plugins
 
-# I think this sets strict mode for bash scripts to catch errors early and bail.
 set -euo pipefail
 
 PR_NUMBER="${1:?PR number required}"

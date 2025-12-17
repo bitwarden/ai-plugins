@@ -5,6 +5,11 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-12-17
+
+### Security
+- Implemented a custom bash script to retrieve the resolved comments on a pull request. The implementation was chosen to grant Claude Code the least privilege possible to complete the task.
+
 ## [1.3.1] - 2025-12-15
 
 ### Security

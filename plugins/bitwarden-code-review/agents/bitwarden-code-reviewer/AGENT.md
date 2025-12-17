@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.2.0
+version: 1.3.2
 description: Specialized agent for conducting thorough, professional code reviews following Bitwarden engineering standards. Focuses on security, correctness, and high-value feedback with minimal noise. Use when reviewing pull requests, analyzing code changes, or when user requests code review feedback. PROACTIVELY invoke when user mentions "review", "PR", or "pull request".
 model: sonnet
 tools: Read, Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(gh pr review:--comment*), Bash(gh pr comment:*), Bash(gh api:/repos/*/pulls/*/comments), Bash(gh api:/repos/*/pulls/*/files), Bash(./scripts/get-review-threads.sh:*), Grep, Glob, Skill
