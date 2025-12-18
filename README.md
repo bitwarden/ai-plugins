@@ -154,13 +154,13 @@ This is a Bitwarden-maintained repository with high security standards. All plug
 
 ## Versioning and Changelog Requirements
 
-**CRITICAL**: All plugin changes MUST include a version bump and changelog entry.
+All plugin changes must include a version bump and changelog entry.
 
 ### When to Bump Versions
 
 Follow [Semantic Versioning](https://semver.org/) for all version changes:
 
-- **MAJOR (X.0.0)**: Breaking changes or incompatible API modifications
+- **MAJOR (X.0.0)**: Breaking changes or incompatible modifications
 - **MINOR (0.X.0)**: New features or backward-compatible additions
 - **PATCH (0.0.X)**: Bug fixes, documentation updates, or security patches
 
@@ -178,12 +178,6 @@ A helper script automates version updates across all required files:
 ./scripts/bump-plugin-version.sh bitwarden-code-review 1.3.4
 ```
 
-This script automatically updates:
-
-- `.claude-plugin/marketplace.json` (marketplace registration)
-- `plugins/<plugin-name>/.claude-plugin/plugin.json` (plugin manifest)
-- `plugins/<plugin-name>/agents/*/AGENT.md` (agent frontmatter, if agents exist)
-
 ### Changelog Requirements
 
 After running the version bump script, update the changelog:
@@ -197,32 +191,6 @@ After running the version bump script, update the changelog:
    - **Removed**: Removed features
    - **Fixed**: Bug fixes
    - **Security**: Security improvements
-
-**Example changelog entry:**
-
-```markdown
-## [1.3.4] - 2025-12-18
-
-### Fixed
-
-- Corrected error handling in edge case scenarios
-
-### Security
-
-- Improved input validation for external data sources
-```
-
-### Pull Request Checklist
-
-When submitting a plugin change:
-
-- [ ] Version bumped using `bump-plugin-version.sh`
-- [ ] Changelog entry added with clear description
-- [ ] All three version locations updated (marketplace.json, plugin.json, AGENT.md)
-- [ ] Tests pass
-- [ ] Documentation updated if needed
-
-**Never commit plugin changes without updating the version and changelog.**
 
 ## Best Practices
 
