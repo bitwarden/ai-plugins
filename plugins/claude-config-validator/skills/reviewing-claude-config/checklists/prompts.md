@@ -28,6 +28,7 @@ Brief description of what this does and when to use it.
 **Examples:**
 
 ✅ **GOOD - Clear purpose:**
+
 ```markdown
 # review-pr
 
@@ -37,6 +38,7 @@ Usage: /review-pr <pr-number>
 ```
 
 ❌ **BAD - Vague purpose:**
+
 ```markdown
 # review-pr
 
@@ -66,6 +68,7 @@ Completeness check:
 **Self-Contained vs Skill Reference:**
 
 ✅ **GOOD - Simple task, self-contained:**
+
 ```markdown
 # format-commit
 
@@ -77,6 +80,7 @@ Types: feat, fix, docs, style, refactor, test, chore
 ```
 
 ✅ **GOOD - Complex task, reference skill:**
+
 ```markdown
 # review-changes
 
@@ -86,6 +90,7 @@ Use the `reviewing-changes` skill to perform comprehensive review based on chang
 ```
 
 ❌ **BAD - Complex task without guidance:**
+
 ```markdown
 # review-changes
 
@@ -112,6 +117,7 @@ Quality considerations:
 **Logical Structure:**
 
 ✅ **GOOD - Step-by-step:**
+
 ```markdown
 1. Read the PR description and changed files
 2. Identify the change type (feature, bug fix, refactor)
@@ -122,7 +128,8 @@ Quality considerations:
 **Examples for Complex Tasks:**
 
 ✅ **GOOD - Shows expected format:**
-```markdown
+
+````markdown
 Expected output format:
 
 \```
@@ -131,7 +138,7 @@ Expected output format:
 Change MutableStateFlow to StateFlow:
 ...
 \```
-```
+````
 
 ---
 
@@ -148,6 +155,7 @@ Session context considerations:
 **Context Requirements:**
 
 ✅ **GOOD - Explicit about requirements:**
+
 ```markdown
 # review-file
 
@@ -159,6 +167,7 @@ This command will read the file and analyze it against project standards.
 ```
 
 ❌ **BAD - Assumes context without stating:**
+
 ```markdown
 # review-file
 
@@ -168,6 +177,7 @@ Reviews the file.
 **Graceful Handling:**
 
 ✅ **GOOD - Handles missing info:**
+
 ```markdown
 If no PR number provided, analyze current git diff.
 If no files changed, report clean working directory.
@@ -188,6 +198,7 @@ Skill reference check:
 **Proper Skill References:**
 
 ✅ **GOOD - Clear skill invocation:**
+
 ```markdown
 # review-changes
 
@@ -198,6 +209,7 @@ a convenient shorthand for PR and commit reviews.
 ```
 
 **Verify:**
+
 - [ ] Referenced skill exists in `.claude/skills/`
 - [ ] Skill name matches exactly (case-sensitive)
 - [ ] Command adds value beyond just calling skill
@@ -208,6 +220,7 @@ a convenient shorthand for PR and commit reviews.
 ## Priority Classification
 
 Classify findings using `reference/priority-framework.md`:
+
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
 - **SUGGESTED** - Improvements that aren't essential

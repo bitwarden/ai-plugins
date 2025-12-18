@@ -20,6 +20,7 @@ Replace with reference:
 ## Reference Documentation
 
 Critical resources:
+
 - `docs/ARCHITECTURE.md` - Architecture patterns and principles
 - `docs/STYLE_AND_BEST_PRACTICES.md` - Code style guidelines
 
@@ -27,6 +28,7 @@ Critical resources:
 ```
 
 Rationale: CLAUDE.md should provide high-level directives and references, not duplicate detailed specs. This:
+
 - Reduces token usage (200 lines → 10 lines)
 - Prevents documentation drift (single source of truth)
 - Improves maintainability
@@ -43,11 +45,13 @@ Consider adding clear guidance on when to ask vs proceed autonomously:
 ## Decision-Making
 
 Defer to user for high-impact decisions:
+
 - Architecture/module changes
 - Public API modifications
 - Security mechanism changes
 
 Proceed autonomously for:
+
 - Implementation details within established patterns
 - Test additions
 - Bug fixes following existing patterns
@@ -62,9 +66,9 @@ This helps Claude make appropriate judgment calls without over-asking or under-a
 **Overall Assessment:** REQUEST CHANGES
 
 **Must Fix (IMPORTANT):**
+
 - Remove duplicated architecture content, replace with references
 
 This reduces token usage by ~80% while improving maintainability. The rest of the file is well-structured.
 
 ---
-

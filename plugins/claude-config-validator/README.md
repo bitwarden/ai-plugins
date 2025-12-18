@@ -12,18 +12,19 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 Validates **6 configuration file types** with specialized checklists:
 
-| Configuration Type | What Gets Validated |
-|-------------------|---------------------|
-| **Agents** (`.claude/agents/*.md`) | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity |
-| **Skills** (skill directories) | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
-| **CLAUDE.md** (project instructions) | Clarity, specificity, security patterns, proper emphasis, structured organization |
-| **Prompts/Commands** (`.claude/prompts/*.md`, `.claude/commands/*.md`) | Purpose clarity, session context handling, skill references, parameter validation |
-| **Settings** (`.claude/settings.json`) | Security (no committed credentials), permission scoping, valid JSON structure |
-| **Plugin Configurations** (`plugins/*/`) | Manifest validation, directory structure, marketplace standards |
+| Configuration Type                                                     | What Gets Validated                                                                                        |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Agents** (`.claude/agents/*.md`)                                     | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity        |
+| **Skills** (skill directories)                                         | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
+| **CLAUDE.md** (project instructions)                                   | Clarity, specificity, security patterns, proper emphasis, structured organization                          |
+| **Prompts/Commands** (`.claude/prompts/*.md`, `.claude/commands/*.md`) | Purpose clarity, session context handling, skill references, parameter validation                          |
+| **Settings** (`.claude/settings.json`)                                 | Security (no committed credentials), permission scoping, valid JSON structure                              |
+| **Plugin Configurations** (`plugins/*/`)                               | Manifest validation, directory structure, marketplace standards                                            |
 
 ### Security-First Validation
 
 Every review **always** includes critical security checks:
+
 - ✅ No committed `settings.local.json` files
 - ✅ No hardcoded credentials (API keys, passwords, tokens)
 - ✅ Appropriate permission scoping
@@ -33,6 +34,7 @@ Every review **always** includes critical security checks:
 ### Evidence-Based Quality Standards
 
 All validation criteria sourced from **official Anthropic documentation** and enterprise best practices (Microsoft Azure AI patterns):
+
 - Agent tool access security matrices
 - Progressive disclosure guidelines (500-line file limits)
 - Model selection decision trees (haiku/sonnet/opus)
@@ -42,6 +44,7 @@ All validation criteria sourced from **official Anthropic documentation** and en
 ### Multi-Pass Review Strategy
 
 Uses structured, systematic validation approach:
+
 1. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
 2. **Structure Validation** - YAML frontmatter, file organization, required fields
 3. **Functionality Review** - Logic, completeness, integration points
@@ -51,6 +54,7 @@ Uses structured, systematic validation approach:
 ### Inline, Actionable Feedback
 
 Provides specific, file:line referenced feedback with:
+
 - **Priority classification** (CRITICAL / IMPORTANT / SUGGESTED / OPTIONAL)
 - **Specific fixes** with code examples
 - **Rationale** explaining why issues matter
@@ -79,6 +83,7 @@ Provides specific, file:line referenced feedback with:
 ```
 
 The skill will automatically:
+
 1. Detect which configuration files were recently modified
 2. Select appropriate validation checklists
 3. Execute security-first review
@@ -91,6 +96,7 @@ The skill will automatically:
 **Scenario**: You've created a new agent configuration and want to ensure it meets security and quality standards before committing.
 
 **Usage**:
+
 ```markdown
 Review my new agent configuration in .claude/agents/code-analyzer.md
 ```
@@ -104,6 +110,7 @@ Review my new agent configuration in .claude/agents/code-analyzer.md
 **Scenario**: You're preparing a plugin for marketplace submission and need to meet elevated quality standards.
 
 **Usage**:
+
 ```markdown
 Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 ```
@@ -117,6 +124,7 @@ Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 **Scenario**: You've created a complex skill with multiple reference files and want to ensure proper progressive disclosure.
 
 **Usage**:
+
 ```markdown
 Review my skill at .claude/skills/my-skill/ for progressive disclosure and token efficiency
 ```
@@ -130,6 +138,7 @@ Review my skill at .claude/skills/my-skill/ for progressive disclosure and token
 **Scenario**: You want to audit all Claude configurations in your project for security issues.
 
 **Usage**:
+
 ```markdown
 Security audit all Claude configuration files in this project
 ```
@@ -143,6 +152,7 @@ Security audit all Claude configuration files in this project
 **Description**: Reviews Claude configuration files in .claude directories for security, structure, and prompt engineering quality.
 
 **Validates**:
+
 - CLAUDE.md files
 - Skills (SKILL.md)
 - Agents
@@ -151,6 +161,7 @@ Security audit all Claude configuration files in this project
 - Settings
 
 **Capabilities**:
+
 - YAML frontmatter validation
 - Progressive disclosure pattern analysis
 - Token efficiency assessment
@@ -158,6 +169,7 @@ Security audit all Claude configuration files in this project
 - Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access)
 
 **Validation Strategy**:
+
 - Multi-pass review (structure → security → functionality → quality)
 - Evidence-based recommendations (all criteria from official docs)
 - Priority-classified feedback (CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL)
@@ -168,24 +180,28 @@ Security audit all Claude configuration files in this project
 ### Agent Validation (6-Pass Strategy)
 
 **Pass 1: Structure and YAML Frontmatter**
+
 - Valid YAML syntax (no tabs, proper structure)
 - Required fields: `name`, `description`
 - Optional fields validated: `tools`, `model`
 - System prompt presence and non-empty
 
 **Pass 2: Security and Tool Access**
+
 - Principle of least privilege verification
 - Tool access appropriateness (Read/Grep/Glob for analysis, Write/Edit for modification, Bash justification required)
 - Over-privileged agent detection
 - Dangerous tool combination identification
 
 **Pass 3: Description and Activation Triggers**
+
 - Specificity (clear purpose statement)
 - Activation triggers ("Use when...", "PROACTIVELY invoke...")
 - Single responsibility principle
 - Appropriate scope
 
 **Pass 4: System Prompt Quality**
+
 - Role clarity
 - Capability definition
 - Structured thinking guidance (`<thinking>` blocks)
@@ -194,11 +210,13 @@ Security audit all Claude configuration files in this project
 - Token efficiency
 
 **Pass 5: Model Selection**
+
 - Appropriate model for task complexity (haiku/sonnet/opus/inherit)
 - Cost/performance optimization
 - Justification for selection
 
 **Pass 6: Marketplace Standards** (if applicable)
+
 - Elevated documentation requirements
 - Production readiness
 - Error handling
@@ -207,22 +225,26 @@ Security audit all Claude configuration files in this project
 ### Skill Validation (4-Pass Strategy)
 
 **Pass 1: Structure and YAML**
+
 - Valid YAML frontmatter with required fields
 - SKILL.md presence
 - Proper file organization
 
 **Pass 2: Progressive Disclosure**
+
 - File size limits (500-line guideline for references)
 - On-demand vs auto-loaded content
 - Token efficiency optimization
 
 **Pass 3: Quality and Clarity**
+
 - Clear instructions
 - Structured thinking blocks
 - Example inclusion
 - Proper emphasis
 
 **Pass 4: Integration and Completeness**
+
 - No broken file references
 - Checklist completeness
 - Reference accuracy
@@ -230,12 +252,14 @@ Security audit all Claude configuration files in this project
 ### Security Validation (Always Executed)
 
 **Critical Checks** (all configuration types):
+
 - settings.local.json NOT committed to git
 - No hardcoded credentials (passwords, API keys, tokens)
 - Permissions appropriately scoped
 - No secrets in plaintext
 
 **Detection Methods**:
+
 - Git status checks
 - Pattern matching for common secret formats
 - Permission validation against least privilege principle
@@ -247,6 +271,7 @@ Security audit all Claude configuration files in this project
 **Input**: Agent configuration with missing `tools` field
 
 **Output**:
+
 ```
 **.claude/agents/documentation-writer.md:1-6** - CRITICAL: Missing tools field - inherits all tools including Bash
 
@@ -275,6 +300,7 @@ Reference: `reference/agent-configuration-security.md` - Tool Access Security Ma
 **Input**: Skill with 690-line reference file
 
 **Output**:
+
 ```
 **.claude/skills/my-skill/reference/patterns.md:1** - IMPORTANT: File exceeds 500-line progressive disclosure guideline
 
@@ -296,6 +322,7 @@ Reference: Progressive Disclosure Best Practices
 **Input**: CLAUDE.md with vague instructions
 
 **Output**:
+
 ```
 **.claude/CLAUDE.md:42** - IMPORTANT: Instruction lacks specificity
 
@@ -335,6 +362,7 @@ plugins/claude-config-validator/
 ## Contributing
 
 Contributions welcome! Please follow:
+
 - [Bitwarden Contributing Guidelines](https://contributing.bitwarden.com)
 - Repository standards in root `README.md`
 - Code quality requirements in `.editorconfig`

@@ -37,6 +37,7 @@ CRITICAL security considerations:
 Check if `settings.local.json` appears in changed files list. If present in git diff or PR, this is CRITICAL.
 
 **Fix:**
+
 ```bash
 # Remove from git but keep locally
 git rm --cached .claude/settings.local.json
@@ -46,6 +47,7 @@ echo ".claude/settings.local.json" >> .gitignore
 ```
 
 **Rationale:** Local settings may contain:
+
 - User-specific file paths
 - API keys or tokens
 - Personal preferences
@@ -68,6 +70,7 @@ Secret detection:
 **Scan for Common Secret Patterns:**
 
 ❌ **CRITICAL ISSUES:**
+
 ```json
 {
   "apiKey": "sk-1234567890abcdef",
@@ -78,6 +81,7 @@ Secret detection:
 ```
 
 ✅ **SAFE ALTERNATIVES:**
+
 ```json
 {
   "apiKeyVar": "$OPENAI_API_KEY",
@@ -87,6 +91,7 @@ Secret detection:
 ```
 
 **Common Secret Patterns:**
+
 - `apiKey`, `api_key`, `API_KEY`
 - `password`, `passwd`, `pwd`
 - `token`, `auth_token`, `access_token`
@@ -108,17 +113,15 @@ Permission scoping:
 **Appropriate Permission Scoping:**
 
 ❌ **TOO BROAD:**
+
 ```json
 {
-  "autoApprovedTools": [
-    "Read://*",
-    "Write://*",
-    "Bash:*"
-  ]
+  "autoApprovedTools": ["Read://*", "Write://*", "Bash:*"]
 }
 ```
 
 ✅ **APPROPRIATELY SCOPED:**
+
 ```json
 {
   "autoApprovedTools": [
@@ -133,16 +136,19 @@ Permission scoping:
 **Permission Guidelines:**
 
 **Read Permissions:**
+
 - Scope to project directory and relevant config
 - Avoid `Read://*` (entire filesystem)
 - Consider what actually needs to be read
 
 **Write Permissions:**
+
 - Even more restrictive than Read
 - Limit to source directories, not config or root
 - Avoid write access outside project
 
 **Bash Permissions:**
+
 - Specific commands, not `Bash:*`
 - Safe operations: `git status`, `npm install`, `./gradlew test`
 - NEVER auto-approve: `rm -rf`, `dd`, `chmod 777`, `curl | sh`
@@ -162,6 +168,7 @@ Command safety:
 **Safe vs Dangerous Commands:**
 
 ✅ **SAFE to auto-approve:**
+
 ```json
 {
   "autoApprovedTools": [
@@ -176,20 +183,22 @@ Command safety:
 ```
 
 ❌ **DANGEROUS - require approval:**
+
 ```json
 {
   "autoApprovedTools": [
-    "Bash:rm -rf:*",        // Data destruction
-    "Bash:git push --force:*",  // Destructive git operation
-    "Bash:chmod 777:*",     // Security risk
-    "Bash:curl * | sh:*",   // Arbitrary code execution
-    "Bash:dd:*",            // Low-level disk operations
-    "Bash:mkfs:*"           // Filesystem formatting
+    "Bash:rm -rf:*", // Data destruction
+    "Bash:git push --force:*", // Destructive git operation
+    "Bash:chmod 777:*", // Security risk
+    "Bash:curl * | sh:*", // Arbitrary code execution
+    "Bash:dd:*", // Low-level disk operations
+    "Bash:mkfs:*" // Filesystem formatting
   ]
 }
 ```
 
 **Safety Criteria:**
+
 - **Read-only operations:** Generally safe (ls, git status, git diff)
 - **Idempotent operations:** Safe to run multiple times (npm install, git pull)
 - **Destructive operations:** Require approval (rm, force push, formatting)
@@ -210,24 +219,25 @@ Syntax validation:
 **Common JSON Issues:**
 
 ❌ **Syntax errors:**
+
 ```json
 {
   "autoApprovedTools": [
-    "Read://path/**",  // Trailing comma error
+    "Read://path/**" // Trailing comma error
   ]
 }
 ```
 
 ✅ **Valid JSON:**
+
 ```json
 {
-  "autoApprovedTools": [
-    "Read://path/**"
-  ]
+  "autoApprovedTools": ["Read://path/**"]
 }
 ```
 
 **Field Validation:**
+
 - Check field names against Claude Code documentation
 - Verify value types (string, boolean, array, object)
 - Ensure required fields are present
@@ -238,6 +248,7 @@ Syntax validation:
 ## Priority Classification
 
 Classify findings using `reference/priority-framework.md`:
+
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
 - **SUGGESTED** - Improvements that aren't essential

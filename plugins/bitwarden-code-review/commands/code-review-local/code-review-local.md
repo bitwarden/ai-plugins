@@ -44,6 +44,7 @@ Contains the overall summary comment (same format as would be posted with `gh pr
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
 **Critical Issues** (if any):
+
 - [file:line] - [brief description]
 
 See inline comments for details.
@@ -70,6 +71,7 @@ Contains all inline review comments with file and line references (same format a
 <summary>Details and fix</summary>
 
 [Full details, code examples, rationale]
+
 </details>
 
 ---

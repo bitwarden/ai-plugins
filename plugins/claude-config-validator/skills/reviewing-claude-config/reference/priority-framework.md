@@ -11,6 +11,7 @@ Classification system for prioritizing issues found in Claude configuration file
 **Definition:** Issues that prevent functionality, expose security vulnerabilities, or cause immediate harm.
 
 **Examples:**
+
 - settings.local.json committed to git
 - Hardcoded API keys, tokens, or passwords
 - Missing YAML frontmatter (skill won't be recognized)
@@ -21,6 +22,7 @@ Classification system for prioritizing issues found in Claude configuration file
 **Action Required:** Must fix immediately before approval.
 
 **Review Comment Format:**
+
 ```
 **CRITICAL**: [Issue description]
 
@@ -36,6 +38,7 @@ This must be fixed before approval because [security/functionality reason].
 **Definition:** Issues that significantly impact quality, maintainability, or user experience but don't prevent basic functionality.
 
 **Examples:**
+
 - Duplicated documentation content
 - Poor progressive disclosure (file > 500 lines)
 - Missing structured thinking blocks
@@ -47,6 +50,7 @@ This must be fixed before approval because [security/functionality reason].
 **Action Required:** Should fix in this PR/commit. If time-constrained, create follow-up issue.
 
 **Review Comment Format:**
+
 ```
 **IMPORTANT**: [Issue description]
 
@@ -62,6 +66,7 @@ This must be fixed before approval because [security/functionality reason].
 **Definition:** Improvements that enhance quality but aren't essential for approval.
 
 **Examples:**
+
 - Additional examples for clarity
 - Better file organization
 - More specific guidance
@@ -72,6 +77,7 @@ This must be fixed before approval because [security/functionality reason].
 **Action Required:** Optional improvements. Consider for future work.
 
 **Review Comment Format:**
+
 ```
 **SUGGESTED**: [Improvement suggestion]
 
@@ -87,6 +93,7 @@ This would improve [aspect] but isn't required for approval.
 **Definition:** Personal preferences, alternative approaches, or minor stylistic choices.
 
 **Examples:**
+
 - Alternative phrasing
 - Different organizational structure
 - Stylistic preferences
@@ -95,6 +102,7 @@ This would improve [aspect] but isn't required for approval.
 **Action Required:** Author decides. No expectation to change.
 
 **Review Comment Format:**
+
 ```
 **OPTIONAL**: [Observation or suggestion]
 
@@ -121,7 +129,7 @@ Use this structured thinking approach to classify issues:
 3. Would this improve quality but not essential?
    → YES: SUGGESTED
    → NO: OPTIONAL
-</thinking>
+   </thinking>
 
 ---
 
@@ -130,6 +138,7 @@ Use this structured thinking approach to classify issues:
 ### Security Context
 
 In security-sensitive configurations (settings.json, permissions):
+
 - Elevate permission issues to CRITICAL
 - Elevate secret exposure to CRITICAL
 - Broad permissions: IMPORTANT → CRITICAL
@@ -137,6 +146,7 @@ In security-sensitive configurations (settings.json, permissions):
 ### Marketplace-Bound Skills
 
 For skills intended for marketplace:
+
 - Elevate missing examples to IMPORTANT
 - Elevate unclear activation triggers to IMPORTANT
 - Elevate poor progressive disclosure to CRITICAL
@@ -144,6 +154,7 @@ For skills intended for marketplace:
 ### Internal Tools
 
 For internal-only configurations:
+
 - May accept some SUGGESTED issues
 - Still require CRITICAL fixes
 - IMPORTANT issues can be follow-up work
@@ -154,46 +165,46 @@ For internal-only configurations:
 
 ### Security Issues
 
-| Issue | Priority |
-|-------|----------|
-| Committed settings.local.json | CRITICAL |
-| Hardcoded API keys/tokens | CRITICAL |
-| Dangerous auto-approved commands | CRITICAL |
-| Overly broad permissions (Read://*, Write://*) | CRITICAL |
-| Permissions exposing ~/.ssh, /etc | CRITICAL |
-| Permissions broader than needed | IMPORTANT |
+| Issue                                          | Priority  |
+| ---------------------------------------------- | --------- |
+| Committed settings.local.json                  | CRITICAL  |
+| Hardcoded API keys/tokens                      | CRITICAL  |
+| Dangerous auto-approved commands               | CRITICAL  |
+| Overly broad permissions (Read://_, Write://_) | CRITICAL  |
+| Permissions exposing ~/.ssh, /etc              | CRITICAL  |
+| Permissions broader than needed                | IMPORTANT |
 
 ### Structure Issues
 
-| Issue | Priority |
-|-------|----------|
-| Missing YAML frontmatter | CRITICAL |
-| Broken file references | CRITICAL |
+| Issue                                           | Priority  |
+| ----------------------------------------------- | --------- |
+| Missing YAML frontmatter                        | CRITICAL  |
+| Broken file references                          | CRITICAL  |
 | File > 500 lines without progressive disclosure | IMPORTANT |
-| Poor file organization | SUGGESTED |
-| Missing structured thinking blocks | IMPORTANT |
+| Poor file organization                          | SUGGESTED |
+| Missing structured thinking blocks              | IMPORTANT |
 
 ### Quality Issues
 
-| Issue | Priority |
-|-------|----------|
-| Vague or unclear instructions | IMPORTANT |
+| Issue                                 | Priority  |
+| ------------------------------------- | --------- |
+| Vague or unclear instructions         | IMPORTANT |
 | Missing examples for complex concepts | IMPORTANT |
 | No activation triggers in description | IMPORTANT |
-| Duplicated documentation | IMPORTANT |
-| Inefficient token usage | SUGGESTED |
-| Additional examples would help | SUGGESTED |
-| Alternative phrasing | OPTIONAL |
+| Duplicated documentation              | IMPORTANT |
+| Inefficient token usage               | SUGGESTED |
+| Additional examples would help        | SUGGESTED |
+| Alternative phrasing                  | OPTIONAL  |
 
 ### Syntax Issues
 
-| Issue | Priority |
-|-------|----------|
-| Invalid JSON syntax | CRITICAL |
-| Malformed YAML frontmatter | CRITICAL |
-| Incorrect field names | IMPORTANT |
-| Missing required fields | IMPORTANT |
-| Deprecated fields | SUGGESTED |
+| Issue                      | Priority  |
+| -------------------------- | --------- |
+| Invalid JSON syntax        | CRITICAL  |
+| Malformed YAML frontmatter | CRITICAL  |
+| Incorrect field names      | IMPORTANT |
+| Missing required fields    | IMPORTANT |
+| Deprecated fields          | SUGGESTED |
 
 ---
 
@@ -214,24 +225,28 @@ When multiple issues exist in a single review:
 ## Communication Guidelines by Priority
 
 ### CRITICAL
+
 - **Tone:** Direct and firm
 - **Language:** "Must fix", "Required", "Blocks approval"
 - **Explanation:** Always explain the risk/impact
 - **Solution:** Always provide specific fix
 
 ### IMPORTANT
+
 - **Tone:** Strong recommendation
 - **Language:** "Should fix", "Recommended", "Significantly improves"
 - **Explanation:** Explain why it matters
 - **Solution:** Provide specific recommendation
 
 ### SUGGESTED
+
 - **Tone:** Helpful suggestion
 - **Language:** "Consider", "Would improve", "Could enhance"
 - **Explanation:** Brief rationale
 - **Solution:** Optional, may suggest alternatives
 
 ### OPTIONAL
+
 - **Tone:** Neutral observation
 - **Language:** "Alternative approach", "Personal preference"
 - **Explanation:** Acknowledge it's not critical

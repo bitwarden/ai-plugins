@@ -15,6 +15,7 @@ Choose one of the following authentication methods:
 **Option 1: GitHub CLI (Recommended)**
 
 1. Install GitHub CLI if not already installed:
+
    ```bash
    # macOS
    brew install gh
@@ -42,11 +43,13 @@ Choose one of the following authentication methods:
    - Generate and copy the token
 
 2. Configure Claude Code with your GitHub token:
+
    ```bash
    export GITHUB_TOKEN=your_token_here
    ```
 
    Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
+
    ```bash
    echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
    source ~/.zshrc
@@ -71,6 +74,7 @@ You can add this marketplace using either the short form or full URL:
 ### Installing plugins from this marketplace
 
 Once the marketplace is added, you can install plugins using:
+
 ```bash
 /plugin install plugin-name@bitwarden-marketplace
 ```

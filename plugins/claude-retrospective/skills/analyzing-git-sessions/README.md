@@ -5,6 +5,7 @@ Analyzes git commits and changes within a timeframe or commit range, providing s
 ## What It Does
 
 This skill analyzes git repository activity and produces structured summaries including:
+
 - Commit history with messages and authors
 - File change statistics (additions, deletions, modifications)
 - Identification of key files by change magnitude
@@ -14,6 +15,7 @@ This skill analyzes git repository activity and produces structured summaries in
 ## When to Use
 
 Use this skill when you need to:
+
 - **Review your work**: "What did I accomplish in the last 2 hours?"
 - **Prepare code reviews**: Generate PR descriptions and identify review focus areas
 - **Write standups**: "What did I work on yesterday?"
@@ -26,22 +28,26 @@ Use this skill when you need to:
 ### Natural Language Invocations
 
 **Time-based analysis**:
+
 - "Analyze my git changes from the last 2 hours"
 - "Show me what I committed today"
 - "Summarize my work since 10am"
 - "What changed in the last hour?"
 
 **Commit range analysis**:
+
 - "Show me changes between abc123 and def456"
 - "Analyze commits from HEAD~5 to HEAD"
 - "Compare feature-branch to main"
 
 **With specific focus**:
+
 - "Show me authentication module changes from today"
 - "What test files did I modify this week?"
 - "Analyze changes in the app directory since yesterday"
 
 **Output format requests**:
+
 - "Generate a code review summary for my last 3 commits"
 - "Give me a concise summary of today's work"
 - "Show detailed diffs for my morning commits"
@@ -53,6 +59,7 @@ Use this skill when you need to:
 ```
 
 The skill will prompt you for:
+
 1. Time range or commit range
 2. Optional path filters
 3. Desired output depth (concise/detailed/code review)
@@ -64,6 +71,7 @@ The skill will prompt you for:
 Best for: Quick overview, standup reports, work logs
 
 Includes:
+
 - Commit count and authors
 - Files changed summary (added/modified/deleted)
 - Net line changes
@@ -71,6 +79,7 @@ Includes:
 - Commit messages
 
 **Example**:
+
 ```
 Git Session Summary
 Range: 2 hours ago to now
@@ -89,6 +98,7 @@ Top Files:
 Best for: Session documentation, deeper review
 
 Includes everything from Concise, plus:
+
 - Full file list with statistics
 - Author breakdown
 - Diffs for top 3-5 files
@@ -99,6 +109,7 @@ Includes everything from Concise, plus:
 Best for: PR preparation, team reviews
 
 Includes:
+
 - Suggested PR title (from commits)
 - Changes grouped by module/directory
 - Scope summary
@@ -111,6 +122,7 @@ Includes:
 ### Output Depth
 
 Control level of detail:
+
 - **Concise**: Stats and commit list only (~500-1000 tokens)
 - **Detailed**: Stats + top file diffs (~2000-5000 tokens)
 - **Code Review**: Comprehensive with module grouping (~3000-8000 tokens)
@@ -120,6 +132,7 @@ The skill automatically suggests appropriate depth based on session size.
 ### Path Filters
 
 Narrow analysis to specific paths:
+
 - "Analyze changes in app/src/main/kotlin/auth/"
 - "Show only test file changes"
 - "Focus on gradle files"
@@ -127,6 +140,7 @@ Narrow analysis to specific paths:
 ### Author Filters
 
 For multi-contributor analysis:
+
 - "Show only my commits from today"
 - "What did the team change this week?"
 
@@ -143,6 +157,7 @@ For multi-contributor analysis:
 **Request**: "Generate code review summary for feature-auth-biometrics branch"
 
 **Result**: PR-ready description with:
+
 - What changed and why
 - Files organized by module
 - Test coverage notes
@@ -153,6 +168,7 @@ For multi-contributor analysis:
 **Request**: "Detailed analysis of my work in the last 3 hours"
 
 **Result**: Comprehensive summary for retrospective or work log:
+
 - What was accomplished
 - Which files were touched
 - Magnitude of changes
@@ -169,6 +185,7 @@ For multi-contributor analysis:
 **Request**: "Compare feature-branch to main"
 
 **Result**: What's in the feature branch that's not in main
+
 - Commits to be merged
 - Files that will change
 - Potential conflicts
@@ -178,6 +195,7 @@ For multi-contributor analysis:
 **Request**: (Called by retrospecting skill during analysis)
 
 **Result**: Git metrics for retrospective:
+
 - Session scope (commit count, file count)
 - Change velocity
 - Areas of focus (which modules touched)
@@ -187,11 +205,13 @@ For multi-contributor analysis:
 ### Be Specific About Timeframe
 
 **Good**:
+
 - "Last 2 hours"
 - "Since 2025-10-23 14:00"
 - "Today from 9am to 5pm"
 
 **Less specific** (still works, but may need clarification):
+
 - "Recent changes" → skill will ask "how recent?"
 - "My work" → skill will ask "from when?"
 
@@ -206,6 +226,7 @@ The skill will recommend depth based on session size, but you can override.
 ### Use Filters for Large Sessions
 
 If you worked on multiple areas:
+
 - "Show only authentication changes from today"
 - "Analyze ViewModel changes in the last week"
 
@@ -218,6 +239,7 @@ This keeps output focused and context-efficient.
 **Input**: "What did I work on this morning?"
 
 **Output**:
+
 ```markdown
 Git Session Summary (9:00am - 12:00pm)
 
@@ -226,6 +248,7 @@ Files: 9 modified, 1 added
 Changes: +220 -65 lines
 
 Commits:
+
 - Add biometric authentication support
 - Refactor LoginViewModel state handling
 - Update authentication tests
@@ -234,6 +257,7 @@ Commits:
 - Update documentation
 
 Key Files:
+
 1. BiometricAuthManager.kt (+85 -15)
 2. LoginViewModel.kt (+60 -25)
 3. AuthenticationTests.kt (+45 -20)
@@ -244,34 +268,40 @@ Key Files:
 **Input**: "Generate PR summary for my feature branch"
 
 **Output**:
+
 ```markdown
 Pull Request Summary
 
 Title: Add Biometric Authentication Support
 
 Overview:
+
 - 12 commits over 3 days
 - 15 files changed across 3 modules
 - Adds biometric authentication flow with fallback
 
 Commits:
+
 1. Implement BiometricAuthManager for authentication
 2. Add biometric prompt UI components
 3. Integrate with CredentialManager API
-...
+   ...
 
 Changes by Module:
 
 app (8 files):
+
 - BiometricAuthManager.kt: Core biometric logic
 - LoginScreen.kt: UI integration
 - AuthViewModel.kt: State management
 
 core (4 files):
+
 - CredentialProvider.kt: Credential management
 - SecurityUtils.kt: Security helpers
 
 tests (3 files):
+
 - BiometricAuthTests.kt: Unit tests
 - LoginFlowTests.kt: Integration tests
 
@@ -288,19 +318,23 @@ Test Coverage:
 This skill integrates with several workflows and can be invoked standalone or as part of other processes:
 
 ### Retrospecting Skill
+
 - Invoked during Step 2 (Gather Data - Git Analysis)
 - Provides commit history and change stats for retrospective analysis
 
 ### Code Review Preparation
+
 - Generate PR descriptions
 - Identify review focus areas
 - Highlight test coverage changes
 
 ### Daily Standup Reports
+
 - "What did I work on yesterday?"
 - Quick summary of activity
 
 ### Work Log Generation
+
 - Weekly/monthly activity summaries
 - Contribution tracking
 
@@ -323,12 +357,14 @@ For large sessions (>30 files), the skill automatically uses concise mode to pre
 ## Limitations
 
 **Cannot**:
+
 - Analyze uncommitted changes (use `git status` or `git diff` directly)
 - Access remote branches not fetched locally
 - Interpret semantic meaning of changes (shows what changed, not why)
 - Generate commits or modify git history
 
 **Works best with**:
+
 - Clean commit history with meaningful messages
 - Commits pushed regularly (not one giant commit)
 - Reasonable session sizes (<100 files changed)
@@ -363,6 +399,7 @@ For large sessions (>30 files), the skill automatically uses concise mode to pre
 ## Version History
 
 **v1.0** (2025-10-23):
+
 - Initial release
 - Support for time ranges and commit ranges
 - Three output formats (concise, detailed, code review)
@@ -372,6 +409,7 @@ For large sessions (>30 files), the skill automatically uses concise mode to pre
 ## Feedback
 
 Found an issue or want a feature?
+
 - Update `.claude/skills/analyzing-git-sessions/SKILL.md`
 - Modify this README for documentation improvements
 - Suggest new output formats or filters
