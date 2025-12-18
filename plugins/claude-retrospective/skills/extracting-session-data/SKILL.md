@@ -61,6 +61,7 @@ scripts/list-sessions.sh /path/to/project
 Parse JSONL logs and extract specific data types.
 
 **Available extraction types**:
+
 - `metadata` - Session info (ID, timestamps, branch, working dir)
 - `user-prompts` - All user messages
 - `tool-usage` - Tool call statistics
@@ -93,6 +94,7 @@ scripts/extract-data.sh --type metadata --project /path/to/project
 Find sessions matching criteria.
 
 **Filter options**:
+
 - `--since DATE` - Sessions modified since date ("2 days ago", "2025-10-20")
 - `--until DATE` - Sessions modified until date
 - `--branch NAME` - Sessions on specific git branch
@@ -167,6 +169,7 @@ When another skill (like retrospecting) needs session data:
 4. **Return Raw Data**: Return extracted data to caller for analysis
 
 **Example**:
+
 ```bash
 # Get latest session ID
 LATEST=$(scripts/list-sessions.sh --format json --sort date | jq -r '.[0].sessionId')
@@ -220,6 +223,7 @@ scripts/extract-data.sh --type statistics --session SESSION_ID
 ### Return Raw Data to Caller
 
 This skill should:
+
 - Execute bash scripts to extract data
 - Return raw text output to calling skill
 - Let calling skill manage context for analysis
@@ -254,6 +258,7 @@ No analysis, no interpretation - just data extraction.
 All scripts exit with non-zero status on errors and output to stderr.
 
 Check exit status before processing:
+
 ```bash
 if ! scripts/locate-logs.sh /path/to/project &>/dev/null; then
     # Handle: logs directory doesn't exist
@@ -267,6 +272,7 @@ fi
 ```
 
 Common error messages:
+
 - `Error: Logs directory not found: ~/.claude/projects/-path`
 - `Error: Session file not found: ~/.claude/projects/-path/session-id.jsonl`
 - `Error: --type is required`
@@ -275,11 +281,13 @@ Common error messages:
 ## Path Calculation
 
 Claude Code stores sessions using this pattern:
+
 ```
 ~/.claude/projects/{project-identifier}/{session-id}.jsonl
 ```
 
 Where `{project-identifier}` is calculated by replacing all `/` with `-` in the absolute working directory path:
+
 ```bash
 # Example: /Users/user/project → -Users-user-project
 PROJECT_ID=$(echo "${PWD}" | sed 's/\//\-/g')
@@ -291,6 +299,7 @@ All scripts use `locate-logs.sh` internally for consistent path calculation.
 ## Anti-Patterns to Avoid
 
 **Don't**:
+
 - Load full session logs into context without checking size
 - Parse JSONL manually - use `extract-data.sh`
 - Hardcode log paths - use `locate-logs.sh`
@@ -298,6 +307,7 @@ All scripts use `locate-logs.sh` internally for consistent path calculation.
 - Process large logs synchronously without user awareness
 
 **Do**:
+
 - Check session size with `--type statistics` before processing
 - Use appropriate extraction type for specific needs
 - Filter sessions before extraction for efficiency
@@ -317,10 +327,12 @@ Effective use of this skill means:
 ## Dependencies
 
 **Required**:
+
 - `bash` (v4.0+)
 - `jq` (JSON parser)
 
 Scripts check for `jq` and provide installation instructions if missing:
+
 ```
 Error: jq is required but not installed. Install with: brew install jq
 ```

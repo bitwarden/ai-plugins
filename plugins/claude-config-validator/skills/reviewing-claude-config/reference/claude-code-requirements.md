@@ -9,6 +9,7 @@ Claude Code-specific conventions, formats, and requirements that differ from gen
 ### Skills (SKILL.md files)
 
 **Required Fields:**
+
 ```yaml
 ---
 name: skill-name-in-kebab-case
@@ -17,17 +18,20 @@ description: Clear description with activation triggers
 ```
 
 **Optional Fields:**
+
 ```yaml
-version: 1.0.0  # Semver format (MAJOR.MINOR.PATCH)
+version: 1.0.0 # Semver format (MAJOR.MINOR.PATCH)
 ```
 
 **Field Requirements:**
+
 - `name`: **MUST** be kebab-case (use-dashes-not_underscores)
 - `description`: **MUST** include activation triggers (when to use the skill)
 - `version`: **SHOULD** follow semantic versioning if marketplace-bound
 - **NO TABS**: Use spaces only (YAML requirement)
 
 **Valid Example:**
+
 ```yaml
 ---
 name: reviewing-changes
@@ -37,18 +41,20 @@ description: Comprehensive code reviews for Android. Detects change type and app
 ```
 
 **Invalid Examples:**
+
 ```yaml
 ---
-name: reviewing_changes  # ❌ Underscore instead of dash
-description: Reviews code  # ❌ Too vague, no activation triggers
+name: reviewing_changes # ❌ Underscore instead of dash
+description: Reviews code # ❌ Too vague, no activation triggers
 ---
 ```
 
 ---
 
-### Agents (.claude/agents/*.md or plugins/*/agents/*.md)
+### Agents (.claude/agents/_.md or plugins/_/agents/\*.md)
 
 **Required Fields:**
+
 ```yaml
 ---
 name: agent-name-in-kebab-case
@@ -57,12 +63,14 @@ description: Clear description of agent purpose
 ```
 
 **Optional Fields:**
+
 ```yaml
-model: sonnet  # haiku, sonnet, opus, or inherit
-tools: Read, Write, Grep, Glob, Bash  # Specific tools only
+model: sonnet # haiku, sonnet, opus, or inherit
+tools: Read, Write, Grep, Glob, Bash # Specific tools only
 ```
 
 **Field Requirements:**
+
 - `name`: kebab-case, unique within project
 - `description`: Clear purpose and activation context
 - `model`: One of: `haiku`, `sonnet`, `opus`, `inherit` (lowercase)
@@ -75,12 +83,12 @@ tools: Read, Write, Grep, Glob, Bash  # Specific tools only
 
 ### Valid Model Values
 
-| Model | Value | Use Case |
-|-------|-------|----------|
-| Haiku | `haiku` | Fast, simple tasks (formatting, scripts, quick operations) |
-| Sonnet | `sonnet` | Balanced default (code review, testing, documentation) |
-| Opus | `opus` | Complex reasoning (architecture, novel problems) |
-| Inherit | `inherit` | Use parent session's model |
+| Model   | Value     | Use Case                                                   |
+| ------- | --------- | ---------------------------------------------------------- |
+| Haiku   | `haiku`   | Fast, simple tasks (formatting, scripts, quick operations) |
+| Sonnet  | `sonnet`  | Balanced default (code review, testing, documentation)     |
+| Opus    | `opus`    | Complex reasoning (architecture, novel problems)           |
+| Inherit | `inherit` | Use parent session's model                                 |
 
 **Default**: If `model` field omitted, defaults to `sonnet`
 
@@ -91,34 +99,41 @@ tools: Read, Write, Grep, Glob, Bash  # Specific tools only
 ### Tool Names (Case-Sensitive)
 
 **Read-Only Tools** (LOW RISK):
+
 - `Read` - Read file contents
 - `Grep` - Search file contents
 - `Glob` - Find files by pattern
 
 **Write Tools** (MEDIUM RISK):
+
 - `Write` - Create new files
 - `Edit` - Modify existing files
 
 **Execution Tools** (HIGH RISK):
+
 - `Bash` - Execute shell commands
 
 **Network Tools** (MEDIUM-HIGH RISK):
+
 - `WebFetch` - Fetch URL content
 - `WebSearch` - Search web
 
 ### Tool Access Security
 
 **Read-only agents** (safest pattern):
+
 ```yaml
 tools: Read, Grep, Glob
 ```
 
 **Write-capable agents** (moderate risk):
+
 ```yaml
 tools: Read, Grep, Glob, Write, Edit
 ```
 
 **Full-access agents** (highest risk - justify in review):
+
 ```yaml
 # Omit tools field to inherit all tools
 # OR explicitly list all needed tools
@@ -138,11 +153,13 @@ tools: Read, Grep, Glob, Write, Edit
 ### 500-Line Guideline
 
 **Main skill file** (SKILL.md):
+
 - **Target**: ≤500 lines
 - **Maximum**: 500 lines is guideline, not hard limit
 - **Rationale**: Context window efficiency, cognitive load management
 
 **If exceeding 500 lines**:
+
 - Split into supporting files
 - Use on-demand loading pattern
 - Organize into subdirectories
@@ -161,16 +178,19 @@ skill-name/
 ### On-Demand Loading
 
 **Main file should:**
+
 - Provide routing logic (which file to load when)
 - Reference supporting files explicitly
 - Use structured thinking to guide decisions
 
 **Supporting files should:**
+
 - Be self-contained (understandable in isolation)
 - State clear purpose at top
 - Avoid circular dependencies
 
 **Example routing:**
+
 ```markdown
 ### Step 2: Load Appropriate Checklist
 
@@ -190,6 +210,7 @@ Based on detected type, read the relevant checklist:
 **CRITICAL**: `settings.local.json` must **NEVER** be committed to git
 
 **Detection**:
+
 ```bash
 git status | grep "settings.local.json"
 git diff --cached | grep "settings.local.json"
@@ -204,6 +225,7 @@ git diff --cached | grep "settings.local.json"
 ### Auto-Approved Tool Patterns
 
 **Format** (in settings.json):
+
 ```json
 {
   "autoApproved": [
@@ -215,6 +237,7 @@ git diff --cached | grep "settings.local.json"
 ```
 
 **Guidelines**:
+
 - Use specific command patterns, not wildcards: `Bash(git status:*)` not `Bash(*)`
 - Use absolute paths for Read permissions: `Read(/full/path/**)` not `Read(**)`
 - Glob patterns for restricted access: `Read(/project/src/**/*.ts)` to limit file types
@@ -225,34 +248,35 @@ git diff --cached | grep "settings.local.json"
 
 ### YAML Errors
 
-| Issue | Detection | Fix |
-|-------|-----------|-----|
-| Tabs instead of spaces | Malformed YAML error | Replace tabs with spaces |
-| Missing colon | Parser error | Add `:` after field name |
-| Wrong field name | Skill not recognized | Check exact spelling: `name` not `Name` |
-| Invalid model value | Ignored or error | Use: `haiku`, `sonnet`, `opus`, `inherit` |
+| Issue                  | Detection            | Fix                                       |
+| ---------------------- | -------------------- | ----------------------------------------- |
+| Tabs instead of spaces | Malformed YAML error | Replace tabs with spaces                  |
+| Missing colon          | Parser error         | Add `:` after field name                  |
+| Wrong field name       | Skill not recognized | Check exact spelling: `name` not `Name`   |
+| Invalid model value    | Ignored or error     | Use: `haiku`, `sonnet`, `opus`, `inherit` |
 
 ### Tool Access Errors
 
-| Issue | Detection | Fix |
-|-------|-----------|-----|
-| Wrong tool name | Tool not available | Use exact case: `Grep` not `grep` |
+| Issue             | Detection          | Fix                               |
+| ----------------- | ------------------ | --------------------------------- |
+| Wrong tool name   | Tool not available | Use exact case: `Grep` not `grep` |
 | Typo in tool name | Tool not available | Check spelling: `Bash` not `bash` |
-| Over-privileged | Security review | Remove unnecessary tools |
+| Over-privileged   | Security review    | Remove unnecessary tools          |
 
 ### Progressive Disclosure Violations
 
-| Issue | Detection | Fix |
-|-------|-----------|-----|
-| Main file >500 lines | Line count | Split into supporting files |
-| All context loaded upfront | Review structure | Use on-demand loading |
-| Circular dependencies | File references | Reorganize file structure |
+| Issue                      | Detection        | Fix                         |
+| -------------------------- | ---------------- | --------------------------- |
+| Main file >500 lines       | Line count       | Split into supporting files |
+| All context loaded upfront | Review structure | Use on-demand loading       |
+| Circular dependencies      | File references  | Reorganize file structure   |
 
 ---
 
 ## Validation Checklist
 
 **YAML Frontmatter**:
+
 - [ ] `name` field present and kebab-case
 - [ ] `description` field present with activation triggers
 - [ ] `version` follows semver (if present)
@@ -262,18 +286,21 @@ git diff --cached | grep "settings.local.json"
 - [ ] Valid YAML syntax
 
 **Progressive Disclosure**:
+
 - [ ] Main SKILL.md file ≤500 lines
 - [ ] Supporting files organized in subdirectories
 - [ ] On-demand loading pattern used
 - [ ] File references are correct and exist
 
 **Security**:
+
 - [ ] No settings.local.json committed
 - [ ] No hardcoded credentials or API keys
 - [ ] Tool access follows least privilege principle
 - [ ] Bash access justified if granted
 
 **File Organization**:
+
 - [ ] Skills: `SKILL.md` with YAML frontmatter
 - [ ] Agents: `.claude/agents/*.md` or `plugins/*/agents/*.md`
 - [ ] Prompts: `.claude/prompts/*.md` or `.claude/commands/*.md`

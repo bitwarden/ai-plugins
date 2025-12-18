@@ -49,16 +49,19 @@ The command generates two markdown files in your current working directory:
 Contains the overall summary comment that would be posted with `gh pr comment`.
 
 **Format for PRs with issues:**
+
 ```markdown
 **Overall Assessment:** REQUEST CHANGES
 
 **Critical Issues**:
+
 - [file:line] - [brief description]
 
 See inline comments for details.
 ```
 
 **Format for clean PRs:**
+
 ```markdown
 **Overall Assessment:** APPROVE
 
@@ -70,6 +73,7 @@ See inline comments for details.
 Contains all inline review comments with file and line references that would be posted with `gh pr review --comment`.
 
 **Format:**
+
 ```markdown
 ## [file-path]:[line-number]
 
@@ -79,6 +83,7 @@ Contains all inline review comments with file and line references that would be 
 <summary>Details and fix</summary>
 
 [Full details, code examples, rationale]
+
 </details>
 
 ---
@@ -99,25 +104,28 @@ The agent uses Bitwarden's standard emoji classification system:
 ## What the Command Does
 
 ### For Pull Request Reviews:
+
 1. **Fetches PR data** from GitHub using `gh pr view` and related commands
 2. **Reads existing comments** to avoid duplicates
 3. **Assesses PR metadata and context**
 
 ### For Local Changes Reviews:
+
 1. **Analyzes git changes** using `git status`, `git diff`, and `git log`
 2. **Evaluates uncommitted and committed changes** on current branch
 3. **Compares against base branch** to understand full change scope
 
 ### Common Review Steps:
-1. **Checks for repository-specific guidelines** (e.g., `.claude/prompts/review-code.md`)
-2. **Applies standard review protocol** following Bitwarden engineering standards
-3. **Evaluates code** against security, correctness, and maintainability standards
-4. **Generates structured review findings** with proper formatting
-5. **Writes output to local files** (never posts to GitHub)
+
+1. **Applies standard review protocol** following Bitwarden engineering standards
+2. **Evaluates code** against security, correctness, and maintainability standards
+3. **Generates structured review findings** with proper formatting
+4. **Writes output to local files** (never posts to GitHub)
 
 ## Use Cases
 
 ### Preview Before Posting
+
 Review the generated files before manually posting to GitHub:
 
 ```bash
@@ -131,6 +139,7 @@ gh pr review 123 --comment --body "$(cat review-inline-comments.md)"
 ```
 
 ### Offline Review Workflow
+
 Perform code reviews without immediate GitHub access:
 
 ```bash
@@ -140,6 +149,7 @@ Perform code reviews without immediate GitHub access:
 ```
 
 ### Custom Review Integration
+
 Integrate with custom tooling or approval processes:
 
 ```bash
@@ -150,6 +160,7 @@ python process_review.py review-summary.md review-inline-comments.md
 ```
 
 ### Pre-Commit Validation
+
 Review your local changes before committing or creating a PR:
 
 ```bash
@@ -162,6 +173,7 @@ Review your local changes before committing or creating a PR:
 ```
 
 ### Training and Learning
+
 Use the output to understand code review best practices:
 
 ```bash
@@ -191,16 +203,18 @@ Use the output to understand code review best practices:
 ## Troubleshooting
 
 ### "PR not found" error
+
 - Verify the PR number or URL is correct
 - Ensure you have access to the repository
 - Check that `gh` CLI is authenticated: `gh auth status`
 
 ### Empty review files
+
 - Verify the PR has actual changes to review
 - Check that the PR is not already merged/closed
-- Ensure repository-specific guidelines are accessible
 
 ### "Permission denied" errors
+
 - Verify repository access permissions
 - Re-authenticate with `gh auth login`
 - Check that the repository allows code review access

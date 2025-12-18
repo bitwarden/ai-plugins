@@ -15,5 +15,5 @@ insert_final_newline = true
 guidelines = 120
 
 # JSON files
-[*.json]
+[*.{json,yml,md}]
 indent_size = 2

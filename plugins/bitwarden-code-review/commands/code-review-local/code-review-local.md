@@ -30,7 +30,6 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 6. **Include All Standard Review Elements**:
    - Pre-review protocol (read existing comments, understand changes, assess PR metadata)
-   - Repository-specific guidelines (check for .claude/prompts/review-code.md)
    - All finding categories (❌ ⚠️ ♻️ 🎨 💭)
    - Proper `<details>` sections for each finding
    - Final summary with overall assessment
@@ -45,6 +44,7 @@ Contains the overall summary comment (same format as would be posted with `gh pr
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
 **Critical Issues** (if any):
+
 - [file:line] - [brief description]
 
 See inline comments for details.
@@ -71,6 +71,7 @@ Contains all inline review comments with file and line references (same format a
 <summary>Details and fix</summary>
 
 [Full details, code examples, rationale]
+
 </details>
 
 ---
