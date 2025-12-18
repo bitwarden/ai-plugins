@@ -109,11 +109,10 @@ The agent uses Bitwarden's standard emoji classification system:
 3. **Compares against base branch** to understand full change scope
 
 ### Common Review Steps:
-1. **Checks for repository-specific guidelines** (e.g., `.claude/prompts/review-code.md`)
-2. **Applies standard review protocol** following Bitwarden engineering standards
-3. **Evaluates code** against security, correctness, and maintainability standards
-4. **Generates structured review findings** with proper formatting
-5. **Writes output to local files** (never posts to GitHub)
+1. **Applies standard review protocol** following Bitwarden engineering standards
+2. **Evaluates code** against security, correctness, and maintainability standards
+3. **Generates structured review findings** with proper formatting
+4. **Writes output to local files** (never posts to GitHub)
 
 ## Use Cases
 
@@ -198,7 +197,6 @@ Use the output to understand code review best practices:
 ### Empty review files
 - Verify the PR has actual changes to review
 - Check that the PR is not already merged/closed
-- Ensure repository-specific guidelines are accessible
 
 ### "Permission denied" errors
 - Verify repository access permissions
