@@ -3,6 +3,7 @@
 Review checklist for changes to CLAUDE.md files at any level (project root, `.claude/` directory, or subdirectories).
 
 **Valid CLAUDE.md Locations:**
+
 - Project root: `/CLAUDE.md` - Global project instructions
 - Claude directory: `/.claude/CLAUDE.md` - Claude Code-specific instructions
 - Subdirectories: `/path/to/subdirectory/CLAUDE.md` - Scoped instructions for specific modules/components
@@ -24,19 +25,21 @@ Security considerations for CLAUDE.md:
 </thinking>
 
 **Critical Security Checks:**
+
 - [ ] No hardcoded API keys, tokens, or passwords
 - [ ] No sensitive environment variables exposed
-- [ ] No overly broad file permissions (e.g., Read:/*)
+- [ ] No overly broad file permissions (e.g., Read:/\*)
 - [ ] No dangerous auto-approved commands (rm -rf, etc.)
 - [ ] No paths exposing sensitive user data
 
 **Common Security Issues:**
+
 ```markdown
 ❌ BAD: apiKey: "sk-1234567890abcdef"
 ✅ GOOD: Reference: Use environment variable $API_KEY
 
-❌ BAD: Auto-approve: Bash(rm -rf:*)
-✅ GOOD: Auto-approve: Bash(npm install:*)
+❌ BAD: Auto-approve: Bash(rm -rf:_)
+✅ GOOD: Auto-approve: Bash(npm install:_)
 
 ❌ BAD: Read://Users/username/.ssh/**
 ✅ GOOD: Read://Users/username/projects/myproject/**
@@ -55,6 +58,7 @@ CLAUDE.md structure considerations:
 </thinking>
 
 **Organizational Requirements:**
+
 - [ ] Clear section headers organize content
 - [ ] Core directives stated upfront
 - [ ] References to detailed docs (not duplication)
@@ -62,25 +66,31 @@ CLAUDE.md structure considerations:
 - [ ] Purpose of file is immediately clear
 
 **Example Structure:**
+
 ```markdown
 # Project Guidelines
 
 Core directives for [project purpose].
 
 ## Core Directives
+
 [High-level must-follow rules]
 
 ## Code Quality Standards
+
 [Brief standards, reference detailed docs]
 
 ## Workflow Practices
+
 [How to approach tasks]
 
 ## Reference Documentation
+
 [Links to detailed architecture/style docs]
 ```
 
 **Red Flags:**
+
 - No clear organization or section headers
 - Mixing high-level directives with low-level details
 - Duplicating content from other documentation files
@@ -101,15 +111,19 @@ Duplication check:
 **Anti-Pattern: Duplicating Architecture Docs**
 
 ❌ **BAD - Copying detailed patterns into CLAUDE.md:**
+
 ```markdown
 ## MVVM Pattern
+
 ViewModels must expose StateFlow...
 [500 lines of detailed MVVM guidance]
 ```
 
 ✅ **GOOD - Reference detailed docs:**
+
 ```markdown
 ## Core Directives
+
 1. Adhere to Architecture: All code MUST follow `docs/ARCHITECTURE.md`
 2. Follow Code Style: ALWAYS follow `docs/STYLE_AND_BEST_PRACTICES.md`
 ```
@@ -117,12 +131,14 @@ ViewModels must expose StateFlow...
 **Principle:** CLAUDE.md provides high-level directives and references. Detailed specs live in their own documentation files.
 
 **Appropriate Content:**
+
 - Core must-follow directives
 - Workflow practices (before/during/after implementation)
 - Decision-making guidance (when to ask vs proceed)
 - References to detailed documentation
 
 **Inappropriate Content:**
+
 - Detailed API documentation (belongs in code docs)
 - Complete architecture patterns (belongs in ARCHITECTURE.md)
 - Full style guide (belongs in STYLE_AND_BEST_PRACTICES.md)
@@ -154,10 +170,12 @@ Clarity considerations:
 **Actionable Decision Guidance:**
 
 ✅ **GOOD - Clear when to ask vs proceed:**
+
 ```markdown
 ## Decision-Making
 
 Defer to user for high-impact decisions:
+
 - Architecture/module changes
 - Public API modifications
 - Security mechanism changes
@@ -165,6 +183,7 @@ Defer to user for high-impact decisions:
 - Third-party library additions
 
 Proceed autonomously for:
+
 - Implementation details within established patterns
 - Test additions
 - Documentation updates
@@ -186,8 +205,10 @@ Token efficiency for CLAUDE.md:
 **Efficiency Techniques:**
 
 **Use References:**
+
 ```markdown
 Reference Documentation:
+
 - `docs/ARCHITECTURE.md` - Architecture patterns
 - `docs/STYLE_AND_BEST_PRACTICES.md` - Code style
 
@@ -195,8 +216,10 @@ Do not duplicate information from these files.
 ```
 
 **Use Lists and Headers:**
+
 ```markdown
 Anti-Patterns:
+
 - Creating new patterns when established ones exist
 - Exception-based error handling in business logic
 - Direct dependency access (use DI)
@@ -211,6 +234,7 @@ Anti-Patterns:
 ## Priority Classification
 
 Classify findings using `reference/priority-framework.md`:
+
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
 - **SUGGESTED** - Improvements that aren't essential

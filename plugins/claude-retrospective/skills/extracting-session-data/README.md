@@ -1,5 +1,3 @@
-
-
 # Extracting Session Data Skill
 
 Locates, lists, filters, and extracts structured data from Claude Code session logs. Designed for efficient access to single or multiple sessions.
@@ -7,11 +5,13 @@ Locates, lists, filters, and extracts structured data from Claude Code session l
 ## What It Does
 
 This skill provides programmatic access to Claude Code's native session logs stored in:
+
 ```
 ~/.claude/projects/{project-dir}/{session-id}.jsonl
 ```
 
 It can:
+
 - **Locate** session log directories and files
 - **List** available sessions with metadata (size, date, branch)
 - **Extract** specific data (errors, tool usage, messages, statistics)
@@ -22,6 +22,7 @@ It can:
 You typically won't invoke this skill directly. Other skills (like `retrospecting`) use it behind the scenes to access session data efficiently.
 
 However, you might invoke it directly when you want to:
+
 - See what sessions are available
 - Find sessions from a specific timeframe or branch
 - Extract specific data (like all errors from recent sessions)
@@ -90,6 +91,7 @@ scripts/list-sessions.sh /path/to/project --sort date
 Find sessions matching specific criteria:
 
 **Available filter options**:
+
 - `--since DATE` - Sessions modified since date (e.g., "2 days ago", "2025-10-20")
 - `--until DATE` - Sessions modified until date
 - `--branch NAME` - Sessions on specific git branch
@@ -130,6 +132,7 @@ scripts/filter-sessions.sh --since "1 day ago" --format paths
 Pull specific information from sessions:
 
 **Available extraction types**:
+
 - `metadata` - Session info (ID, timestamps, branch, working dir)
 - `user-prompts` - All user messages
 - `tool-usage` - Tool call statistics (which tools, how many times)
@@ -176,6 +179,7 @@ plugins/claude-retrospective/skills/extracting-session-data/
 ```
 
 Session logs themselves are stored by Claude Code in:
+
 ```
 ~/.claude/projects/{project-dir}/{session-id}.jsonl
 ```
@@ -189,6 +193,7 @@ Claude Code calculates the log directory from your working directory:
 3. Store logs in `~/.claude/projects/{transformed-path}/`
 
 **Example**:
+
 ```
 Working Directory: /Users/you/projects/myapp
 Project Identifier: -Users-you-projects-myapp
@@ -202,16 +207,19 @@ All scripts in this skill handle this transformation automatically.
 ### For Users
 
 **"What sessions are available?"**
+
 ```
 List all sessions: scripts/list-sessions.sh
 ```
 
 **"Show me recent sessions with errors"**
+
 ```
 scripts/filter-sessions.sh --since "7 days ago" --has-errors
 ```
 
 **"How much data is in my last session?"**
+
 ```
 scripts/extract-data.sh --type statistics --session SESSION_ID
 ```
@@ -219,12 +227,14 @@ scripts/extract-data.sh --type statistics --session SESSION_ID
 ### For Skills Integration
 
 **Retrospective Skill** uses this skill to:
+
 - List available sessions for user selection
 - Check session sizes before processing
 - Extract errors, tool usage, and statistics
 - Filter sessions by timeframe or branch
 
 **Future Skills** could use it to:
+
 - Compare sessions across time
 - Generate usage reports
 - Debug specific session issues
@@ -261,6 +271,7 @@ This skill requires Claude Code's native session logs. These are automatically c
 ### Sensitive Information
 
 If your sessions contained sensitive data:
+
 - Session logs are stored locally only
 - You control access to `~/.claude/projects/` directory
 - Be cautious when sharing extracted data
@@ -304,6 +315,7 @@ scripts/extract-data.sh --type metadata --session abc123
 **Cause**: No sessions exist for the current project yet, or you're in a different directory.
 
 **Solution**:
+
 - Check you're in the correct project directory
 - Verify Claude Code has been used in this project
 - Manually check: `ls ~/.claude/projects/`
@@ -313,6 +325,7 @@ scripts/extract-data.sh --type metadata --session abc123
 **Cause**: Session ID doesn't exist or is incorrect.
 
 **Solution**:
+
 - List available sessions: `scripts/list-sessions.sh`
 - Copy exact session ID from the list
 - Ensure you're in the correct project directory
@@ -322,6 +335,7 @@ scripts/extract-data.sh --type metadata --session abc123
 **Cause**: The `jq` JSON parser is not installed.
 
 **Solution**:
+
 ```bash
 # macOS
 brew install jq
@@ -338,6 +352,7 @@ sudo dnf install jq
 **Cause**: Filter criteria are too restrictive.
 
 **Solution**:
+
 - Broaden criteria (e.g., longer timeframe)
 - List all sessions first: `scripts/list-sessions.sh`
 - Check filter syntax in help: `scripts/filter-sessions.sh --help`
@@ -353,6 +368,7 @@ scripts/filter-sessions.sh --since "3 days ago"
 ```
 
 **Output**:
+
 ```
 Found 5 matching session(s):
 
@@ -402,6 +418,7 @@ This skill is designed as a **utility skill** for other skills to use:
 ### Retrospecting Skill
 
 Uses extracting-session-data to:
+
 1. List available sessions for user selection
 2. Check session complexity (size, line count)
 3. Extract errors, tool calls, and statistics
@@ -410,6 +427,7 @@ Uses extracting-session-data to:
 ### Future Session Analysis Skills
 
 Could use extracting-session-data to:
+
 - Compare productivity across sessions
 - Track tool usage trends over time
 - Identify recurring error patterns
@@ -420,6 +438,7 @@ Could use extracting-session-data to:
 ### Efficient Filtering
 
 **Be specific** with filters to reduce processing:
+
 ```bash
 # Good: Narrow scope
 scripts/filter-sessions.sh --branch main --since "2 days ago" --has-errors
@@ -431,6 +450,7 @@ scripts/filter-sessions.sh
 ### Check Size First
 
 **Before extracting** from multiple sessions, check sizes:
+
 ```bash
 scripts/list-sessions.sh --sort size
 ```
@@ -440,6 +460,7 @@ This helps you understand how much data you're working with.
 ### Use Appropriate Extraction Types
 
 **Don't extract everything** if you only need specific data:
+
 ```bash
 # Good: Targeted extraction
 scripts/extract-data.sh --type statistics
@@ -451,6 +472,7 @@ scripts/extract-data.sh --type all
 ## Future Enhancements
 
 Planned improvements:
+
 - Parallel processing for multi-session extraction
 - Compressed session log support
 - Export to standardized formats (CSV, JSON)
@@ -460,6 +482,7 @@ Planned improvements:
 ## Feedback
 
 Found an issue or have a suggestion?
+
 - Modify scripts in `scripts/` directory
 - Update SKILL.md for Claude's instructions
 - Update this README.md for user documentation

@@ -7,6 +7,7 @@ Comprehensive skill for reviewing Claude Code configuration files with security-
 This skill provides systematic review guidance for Claude Code configuration files in `.claude` directories. It detects file types, applies appropriate review checklists, and enforces security best practices with executable detection scripts.
 
 **Use this skill when:**
+
 - Reviewing changes to `CLAUDE.md` files
 - Reviewing skill files (`skill.md` and supporting files)
 - Reviewing prompts or commands (`.claude/prompts/*.md`, `.claude/commands/*.md`)
@@ -16,6 +17,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 ## Features
 
 ### Security-First Approach
+
 - Detects committed `settings.local.json` files
 - Scans for hardcoded secrets and credentials
 - Validates permission scoping
@@ -23,12 +25,14 @@ This skill provides systematic review guidance for Claude Code configuration fil
 - Includes executable `security-scan.sh` script
 
 ### Intelligent Routing
+
 - Detects configuration file type automatically
 - Routes to appropriate specialized checklist
 - Progressive disclosure for token efficiency
 - Structured thinking throughout review process
 
 ### Quality Enforcement
+
 - YAML frontmatter validation
 - Progressive disclosure enforcement (500 line limit)
 - Prompt engineering quality checks
@@ -36,6 +40,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 - Token efficiency optimization
 
 ### Comprehensive Coverage
+
 - **4 specialized checklists**: Skills, CLAUDE.md, Prompts, Settings
 - **3 reference guides**: Priority framework, security patterns, quality criteria
 - **4 review examples**: Demonstrating proper feedback format
@@ -79,6 +84,7 @@ Review the changes to .claude/CLAUDE.md
 ```
 
 The skill will:
+
 1. Detect the file type (CLAUDE.md in this case)
 2. Execute security scan
 3. Load the appropriate checklist
@@ -98,6 +104,7 @@ cd .claude/skills/reviewing-claude-config/scripts
 ```
 
 The script checks for:
+
 - Committed settings.local.json
 - Hardcoded secrets (API keys, tokens, passwords)
 - Overly broad permissions
@@ -106,16 +113,19 @@ The script checks for:
 ### Examples
 
 **Review a new skill:**
+
 ```
 Review .claude/skills/my-new-skill/skill.md
 ```
 
 **Review settings changes:**
+
 ```
 Review the changes to .claude/settings.json
 ```
 
 **Review CLAUDE.md updates:**
+
 ```
 Review .claude/CLAUDE.md for quality and security
 ```
@@ -173,6 +183,7 @@ The skill follows a systematic 5-step review process:
 ### Security Checks (Always First)
 
 Regardless of file type, these checks are performed:
+
 - ✅ settings.local.json NOT in git
 - ✅ No hardcoded credentials
 - ✅ Permissions appropriately scoped
@@ -224,6 +235,7 @@ This skill includes 5 comprehensive review examples demonstrating proper feedbac
 Each review follows this structure:
 
 **Inline Comments:**
+
 ```
 **file:line** - PRIORITY: Issue description
 
@@ -233,6 +245,7 @@ Each review follows this structure:
 ```
 
 **Summary Comment:**
+
 ```
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
@@ -249,12 +262,14 @@ Each review follows this structure:
 ### Best Practices
 
 **Feedback Quality:**
+
 - Provide specific fixes with code examples, not just problem identification
 - Explain rationale (the "why"), not just the "what"
 - Include references to documentation when applicable
 - Use precise file:line references
 
 **Tone:**
+
 - Constructive and specific, never dismissive
 - Focus on code/config, not people
 - Acknowledge complexity and trade-offs
@@ -278,6 +293,7 @@ See `docs/IMPLEMENTATION_PLAN.md` for detailed research sources.
 **Issue**: Claude doesn't invoke the skill automatically
 
 **Solutions:**
+
 1. Verify YAML frontmatter exists in `skill.md`
 2. Check skill name is `reviewing-claude-config`
 3. Ensure file is in `.claude/skills/reviewing-claude-config/`
@@ -288,6 +304,7 @@ See `docs/IMPLEMENTATION_PLAN.md` for detailed research sources.
 **Issue**: `./security-scan.sh` returns errors
 
 **Solutions:**
+
 1. Make executable: `chmod +x security-scan.sh`
 2. Verify you're in a git repository (for git commands)
 3. Check script has access to `.claude` directory
@@ -298,6 +315,7 @@ See `docs/IMPLEMENTATION_PLAN.md` for detailed research sources.
 **Issue**: Security scan detects patterns in documentation
 
 **Solutions:**
+
 1. Security scan excludes `examples/` and `security-patterns.md`
 2. Use "example" or "your-key-here" as placeholders in docs
 3. Review manually to confirm false positives
@@ -307,6 +325,7 @@ See `docs/IMPLEMENTATION_PLAN.md` for detailed research sources.
 This skill is designed for internal team use but follows open-source best practices.
 
 **To contribute improvements:**
+
 1. Test changes in your project first
 2. Ensure changes remain 100% generic (no project-specific references)
 3. Update CHANGELOG.md with changes
@@ -315,6 +334,7 @@ This skill is designed for internal team use but follows open-source best practi
 ## Versioning
 
 This skill follows [Semantic Versioning](https://semver.org/):
+
 - **MAJOR**: Breaking changes to skill interface or file structure
 - **MINOR**: New features, new checklists, backward-compatible changes
 - **PATCH**: Bug fixes, documentation updates, minor improvements
@@ -326,6 +346,7 @@ See CHANGELOG.md for version history.
 ## Support
 
 For issues, questions, or feedback:
+
 1. Check troubleshooting section above
 2. Review examples in `examples/review-outputs.md`
 3. Consult reference files for detailed guidance
@@ -334,6 +355,7 @@ For issues, questions, or feedback:
 ## Acknowledgments
 
 Built with research-backed best practices from:
+
 - Anthropic Official Documentation (Chain of Thought, Progressive Disclosure)
 - Claude Code Best Practices
 - Security best practices for credential detection

@@ -22,6 +22,7 @@ This file contains behavioral instructions for Claude when working in this repos
 ### Plugin Requirements Enforcement
 
 Ensure all plugins include:
+
 - Comprehensive README documentation
 - Proper error handling and validation
 - Security best practices (no credentials, input validation)

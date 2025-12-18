@@ -22,6 +22,7 @@ If ANY check fails, flag as **CRITICAL** immediately.
 ### Check 1: Detect Committed settings.local.json
 
 **Manual Detection:**
+
 ```bash
 # Check if file is tracked by git
 git ls-files | grep "settings.local.json"
@@ -30,10 +31,12 @@ git ls-files | grep "settings.local.json"
 ```
 
 **Expected Output:**
+
 - **Empty:** File not tracked (GOOD)
 - **File path:** File is tracked (CRITICAL)
 
 **Automated Detection:**
+
 ```bash
 #!/bin/bash
 # detect-committed-local-settings.sh
@@ -52,6 +55,7 @@ fi
 ### Check 2: Scan for Hardcoded Secrets
 
 **Pattern Detection:**
+
 ```bash
 # Search for common secret patterns
 grep -rE "(apiKey|api_key|API_KEY|password|passwd|token|secret)\s*[:=]\s*['\"]" .claude/
@@ -62,14 +66,15 @@ grep -rE "(sk-[a-zA-Z0-9]{32,}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36})" .claude
 
 **Common Secret Patterns:**
 
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| OpenAI API Key | `sk-[a-zA-Z0-9]{32,}` | `sk-abc123def456...` |
-| GitHub Token | `ghp_[a-zA-Z0-9]{36}` | `ghp_xxxxxxxxxxxx...` |
-| Generic API Key | `(api[-_]?key)\s*[:=]\s*['"][^'"]+` | `apiKey: "abc123"` |
-| Password | `(password\|passwd)\s*[:=]\s*['"][^'"]+` | `password: "secret"` |
+| Pattern         | Regex                                    | Example               |
+| --------------- | ---------------------------------------- | --------------------- |
+| OpenAI API Key  | `sk-[a-zA-Z0-9]{32,}`                    | `sk-abc123def456...`  |
+| GitHub Token    | `ghp_[a-zA-Z0-9]{36}`                    | `ghp_xxxxxxxxxxxx...` |
+| Generic API Key | `(api[-_]?key)\s*[:=]\s*['"][^'"]+`      | `apiKey: "abc123"`    |
+| Password        | `(password\|passwd)\s*[:=]\s*['"][^'"]+` | `password: "secret"`  |
 
 **Automated Detection:**
+
 ```bash
 #!/bin/bash
 # detect-hardcoded-secrets.sh
@@ -116,6 +121,7 @@ grep -r "Bash:\*" .claude/settings.json
 ```
 
 **Red Flags:**
+
 - `Read://*` - Read access to entire filesystem
 - `Write://*` - Write access to entire filesystem
 - `Bash:*` - Auto-approve ALL bash commands
@@ -123,6 +129,7 @@ grep -r "Bash:\*" .claude/settings.json
 - `Read:///etc/**` - Access to system config
 
 **Automated Detection:**
+
 ```bash
 #!/bin/bash
 # detect-broad-permissions.sh
@@ -171,17 +178,18 @@ grep -E "(rm -rf|chmod 777|mkfs|dd|curl.*\| sh)" .claude/settings.json
 
 **Dangerous Commands List:**
 
-| Command | Risk | Why Dangerous |
-|---------|------|---------------|
-| `rm -rf` | Data loss | Recursive deletion without confirmation |
-| `git push --force` | Data loss | Overwrites remote history |
-| `chmod 777` | Security | Grants all permissions to everyone |
-| `curl ... \| sh` | RCE | Executes arbitrary remote code |
-| `dd` | Data loss | Low-level disk operations |
-| `mkfs` | Data loss | Formats filesystems |
-| `:(){ :\|:& };:` | DoS | Fork bomb |
+| Command            | Risk      | Why Dangerous                           |
+| ------------------ | --------- | --------------------------------------- |
+| `rm -rf`           | Data loss | Recursive deletion without confirmation |
+| `git push --force` | Data loss | Overwrites remote history               |
+| `chmod 777`        | Security  | Grants all permissions to everyone      |
+| `curl ... \| sh`   | RCE       | Executes arbitrary remote code          |
+| `dd`               | Data loss | Low-level disk operations               |
+| `mkfs`             | Data loss | Formats filesystems                     |
+| `:(){ :\|:& };:`   | DoS       | Fork bomb                               |
 
 **Automated Detection:**
+
 ```bash
 #!/bin/bash
 # detect-dangerous-commands.sh
@@ -380,6 +388,7 @@ git commit -m "Remove settings.local.json from git tracking"
 ### Fix 2: Remove Hardcoded Secrets
 
 **Before:**
+
 ```json
 {
   "apiKey": "sk-1234567890abcdef"
@@ -387,6 +396,7 @@ git commit -m "Remove settings.local.json from git tracking"
 ```
 
 **After:**
+
 ```json
 {
   "apiKeyVar": "$OPENAI_API_KEY",
@@ -395,25 +405,27 @@ git commit -m "Remove settings.local.json from git tracking"
 ```
 
 **Or remove entirely and document:**
+
 ```markdown
 # Configuration
 
 Set required environment variables:
+
 - `OPENAI_API_KEY` - Your OpenAI API key
 ```
 
 ### Fix 3: Scope Down Permissions
 
 **Before:**
+
 ```json
 {
-  "autoApprovedTools": [
-    "Read://*"
-  ]
+  "autoApprovedTools": ["Read://*"]
 }
 ```
 
 **After:**
+
 ```json
 {
   "autoApprovedTools": [
@@ -426,15 +438,15 @@ Set required environment variables:
 ### Fix 4: Remove Dangerous Commands
 
 **Before:**
+
 ```json
 {
-  "autoApprovedTools": [
-    "Bash:*"
-  ]
+  "autoApprovedTools": ["Bash:*"]
 }
 ```
 
 **After:**
+
 ```json
 {
   "autoApprovedTools": [
@@ -452,18 +464,21 @@ Set required environment variables:
 ## Safe Command Whitelist
 
 **Read-Only Commands (Generally Safe):**
+
 - `git status`, `git log`, `git diff`, `git show`
 - `ls`, `cat`, `head`, `tail`, `less`
 - `grep`, `find`, `wc`, `sort`
 - `npm list`, `./gradlew tasks`
 
 **Idempotent Commands (Safe):**
+
 - `npm install`, `npm ci`
 - `./gradlew build`, `./gradlew test`
 - `git pull` (on feature branches)
 - `mkdir -p` (with scoped paths)
 
 **Commands Requiring Approval:**
+
 - Any `rm` command
 - `git push --force`
 - `chmod`, `chown`

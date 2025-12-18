@@ -59,14 +59,14 @@ The agent includes automatic duplicate comment prevention through direct GitHub 
 
 - **Implementation**: Agent autonomously constructs `gh pr` and `gh api` GraphQL queries based on execution context
 - **Context Detection**: Automatically detects PR information from:
-    - GitHub Actions environment variables (`GITHUB_EVENT_PATH`, `GITHUB_REPOSITORY`)
-    - Slash command arguments or manual invocation
-    - Gracefully skips detection for local reviews without PR context
+  - GitHub Actions environment variables (`GITHUB_EVENT_PATH`, `GITHUB_REPOSITORY`)
+  - Slash command arguments or manual invocation
+  - Gracefully skips detection for local reviews without PR context
 - **Purpose**: Detects existing comment threads (including resolved ones) before creating new ones
 - **Matching Logic**:
-    - Exact match: Same file + same line number
-    - Nearby match: Same file + line within ±5 lines
-    - Content match: Existing comment body is similar (>70%)
+  - Exact match: Same file + same line number
+  - Nearby match: Same file + line within ±5 lines
+  - Content match: Existing comment body is similar (>70%)
 - **Benefits**: Prevents duplicate comments, maintains conversation continuity, works universally across repository installations and invocation methods
 
 ## Security
@@ -149,31 +149,31 @@ Use the bitwarden-code-reviewer agent to review this PR
 name: Code Review with Claude
 
 on:
-    pull_request:
-        types: [opened, synchronize]
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
-    code-review:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  code-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Run Code Review
-              uses: anthropics/claude-code-action@v1
-              with:
-                  anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-                  # Add Bitwarden marketplace
-                  plugin_marketplaces: |
-                      https://github.com/bitwarden/ai-plugins.git
+          # Add Bitwarden marketplace
+          plugin_marketplaces: |
+            https://github.com/bitwarden/ai-plugins.git
 
-                  # Install code review plugin
-                  plugins: |
-                      bitwarden-code-review@bitwarden-marketplace
+          # Install code review plugin
+          plugins: |
+            bitwarden-code-review@bitwarden-marketplace
 
-                  prompt: |
-                      Review this pull request using the bitwarden-code-reviewer agent.
+          prompt: |
+            Review this pull request using the bitwarden-code-reviewer agent.
 ```
 
 ## Review Process
@@ -181,22 +181,22 @@ jobs:
 ### Pre-Review Protocol
 
 1. **Read Existing Context**
-    - PR title and description
-    - All existing comments and threads
-    - Resolved threads and human responses
-    - Identify initial review vs re-review
+   - PR title and description
+   - All existing comments and threads
+   - Resolved threads and human responses
+   - Identify initial review vs re-review
 
 2. **Understand the Change**
-    - Change type (bugfix, feature, refactor, dependency update)
-    - Scope and impact analysis
-    - Test alignment verification
+   - Change type (bugfix, feature, refactor, dependency update)
+   - Scope and impact analysis
+   - Test alignment verification
 
 3. **Assess PR Metadata**
-    - Title clarity and specificity
-    - Objective explanation
-    - Screenshots/recordings for UI changes
-    - JIRA reference in tracking section
-    - Test plan documentation
+   - Title clarity and specificity
+   - Objective explanation
+   - Screenshots/recordings for UI changes
+   - JIRA reference in tracking section
+   - Test plan documentation
 
 ### Review Execution
 

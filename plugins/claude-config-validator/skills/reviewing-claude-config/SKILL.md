@@ -24,6 +24,7 @@ Analyze the changed files:
 Determine the primary file type(s) being reviewed:
 
 **Detection Rules**:
+
 - **Agents**: Changes to `.claude/agents/*.md` or `plugins/*/agents/*.md`
 - **Skills**: Changes to `skill.md` files or skill support files (checklists, references, examples)
 - **CLAUDE.md**: Changes to `CLAUDE.md` files (any location: project root, `.claude/`, or subdirectories)
@@ -45,6 +46,7 @@ Security first, regardless of file type:
 **CRITICAL CHECKS** (perform for ALL Claude config reviews):
 
 Run these mental checks immediately:
+
 - [ ] settings.local.json NOT in git (check changed files list)
 - [ ] No hardcoded credentials in any modified files
 - [ ] Permissions scoped appropriately (if settings.json modified)
@@ -65,6 +67,7 @@ Based on detected file type, read and follow the relevant checklist:
 - **Settings** → `checklists/settings.md` (security, permissions scoping)
 
 The checklist provides:
+
 - Multi-pass review strategy
 - What to check and what to skip
 - Structured thinking guidance
@@ -102,6 +105,7 @@ Checklists reference this section rather than duplicating content.
 **CRITICAL**: Use inline comments on specific lines, NOT one large summary comment.
 
 **Inline Comment Rules**:
+
 - Create separate comment for EACH specific issue on the exact line
 - Do NOT create one large summary comment with all issues
 - Do NOT update existing comments - always create new comments
@@ -109,6 +113,7 @@ Checklists reference this section rather than duplicating content.
 - Explain rationale (why this matters)
 
 **Comment Format**:
+
 ```
 **[file:line]** - [PRIORITY]: [Issue description]
 
@@ -120,7 +125,8 @@ Reference: [documentation link if applicable]
 ```
 
 **Example inline comment**:
-```
+
+````
 **.claude/skills/my-skill/skill.md:1** - CRITICAL: Missing YAML frontmatter
 
 Skills require YAML frontmatter to be discoverable by Claude Code:
@@ -135,13 +141,15 @@ description: Clear description with activation triggers
 Without frontmatter, the skill won't be recognized by Claude Code.
 
 Reference: Anthropic Skills Documentation
-```
+````
 
 **When to use inline vs summary**:
+
 - **Inline comment**: Specific issue, recommendation, or question (use `file:line` format)
 - **Summary comment**: Overall assessment, recommendation (APPROVE or REQUEST CHANGES)
 
 Load the specific example relevant to your file type (on-demand only, not upfront):
+
 - Agents → `examples/example-agent-review.md`
 - Skills → `examples/example-skill-review.md`
 - CLAUDE.md → `examples/example-claude-md-review.md`

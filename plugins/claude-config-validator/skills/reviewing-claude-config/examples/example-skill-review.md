@@ -27,6 +27,7 @@ Reference: Anthropic Skills Documentation - YAML Requirements
 Main skill file is 650 lines, exceeding Anthropic's 500-line progressive disclosure recommendation.
 
 Suggested structure:
+
 ```
 my-new-skill/
 ├── skill.md (≤500 lines - routing logic only)
@@ -72,7 +73,7 @@ Reference: Anthropic Prompt Engineering - Structured Thinking
 
 This section describes the expected comment format but doesn't show an example. Consider adding:
 
-```markdown
+````markdown
 **Example inline comment:**
 
 \```
@@ -82,7 +83,7 @@ This section describes the expected comment format but doesn't show an example. 
 
 [Rationale]
 \```
-```
+````
 
 Examples improve clarity significantly, especially for complex output formats.
 
@@ -105,16 +106,18 @@ More direct phrasing slightly improves token efficiency, but current version is 
 This skill has strong potential but requires fixes before approval:
 
 **Must Fix (CRITICAL):**
+
 - Add YAML frontmatter (blocks recognition)
 
 **Should Fix (IMPORTANT):**
+
 - Reduce main file to ≤500 lines via progressive disclosure
 - Add structured thinking blocks for key decisions
 
 **Nice to Have (SUGGESTED):**
+
 - Add concrete examples for output formats
 
 Once the critical frontmatter is added and the file is restructured with progressive disclosure, this will be ready for approval. The core logic and approach are solid.
 
 ---
-
