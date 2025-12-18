@@ -16,6 +16,5 @@
     "claude-config",
     "code-review",
     "best-practices"
-  ],
-  "skills": "./skills/"
+  ]
 }
