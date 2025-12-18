@@ -18,7 +18,3 @@ Before merging changes:
 - [ ] Token usage measured
 - [ ] Tested on actual PRs from multiple repositories
 - [ ] No regression in review quality
-
-## Repository Guidelines
-
-Teams update their own `.claude/prompts/review-code.md` files independently. No plugin changes needed.

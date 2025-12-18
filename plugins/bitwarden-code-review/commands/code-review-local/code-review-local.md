@@ -30,7 +30,6 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 6. **Include All Standard Review Elements**:
    - Pre-review protocol (read existing comments, understand changes, assess PR metadata)
-   - Repository-specific guidelines (check for .claude/prompts/review-code.md)
    - All finding categories (❌ ⚠️ ♻️ 🎨 💭)
    - Proper `<details>` sections for each finding
    - Final summary with overall assessment
