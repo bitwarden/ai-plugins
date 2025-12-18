@@ -19,9 +19,44 @@ This file contains behavioral instructions for Claude when working in this repos
 - Ensure plugin has its own `.claude-plugin/plugin.json` manifest
 - Add domain-specific terms to `.cspell.json`
 
+### When Modifying Existing Plugins
+
+**CRITICAL**: All plugin changes MUST include a version bump and changelog entry.
+
+When making ANY changes to a plugin (code, documentation, configuration, scripts, agents):
+
+1. **Determine the semantic version bump**:
+    - MAJOR (X.0.0): Breaking changes, incompatible API changes
+    - MINOR (0.X.0): New features, backward-compatible additions
+    - PATCH (0.0.X): Bug fixes, documentation updates, security patches
+
+2. **Use the version bump script**:
+
+    ```bash
+    ./scripts/bump-plugin-version.sh <plugin-name> <new-version>
+    ```
+
+    This automatically updates all three required files:
+    - `.claude-plugin/marketplace.json`
+    - `plugins/<plugin-name>/.claude-plugin/plugin.json`
+    - `plugins/<plugin-name>/agents/*/AGENT.md` (if agents exist)
+
+3. **Add changelog entry**:
+    - Update `plugins/<plugin-name>/CHANGELOG.md`
+    - Use Keep a Changelog format
+    - Document what changed and why
+    - Place entry under appropriate category (Added, Changed, Fixed, Security, etc.)
+
+4. **Include version bump in PR**:
+    - Version bump and changelog changes must be part of the same PR as the code changes
+    - This ensures version history is accurate and traceable
+
+**Never commit plugin changes without updating the version and changelog.**
+
 ### Plugin Requirements Enforcement
 
 Ensure all plugins include:
+
 - Comprehensive README documentation
 - Proper error handling and validation
 - Security best practices (no credentials, input validation)

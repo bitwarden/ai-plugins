@@ -15,42 +15,45 @@ Choose one of the following authentication methods:
 **Option 1: GitHub CLI (Recommended)**
 
 1. Install GitHub CLI if not already installed:
-   ```bash
-   # macOS
-   brew install gh
 
-   # Windows
-   winget install --id GitHub.cli
+    ```bash
+    # macOS
+    brew install gh
 
-   # Linux
-   # See https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-   ```
+    # Windows
+    winget install --id GitHub.cli
+
+    # Linux
+    # See https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+    ```
 
 2. Authenticate with GitHub:
-   ```bash
-   gh auth login
-   ```
-   Follow the prompts to authenticate via browser or token.
+    ```bash
+    gh auth login
+    ```
+    Follow the prompts to authenticate via browser or token.
 
 **Option 2: Personal Access Token**
 
 1. Generate a GitHub Personal Access Token (classic):
-   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-   - Click "Generate new token (classic)"
-   - Give it a descriptive name (e.g., "Claude Code Marketplace Access")
-   - Select the `repo` scope (this grants access to private repositories)
-   - Generate and copy the token
+    - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+    - Click "Generate new token (classic)"
+    - Give it a descriptive name (e.g., "Claude Code Marketplace Access")
+    - Select the `repo` scope (this grants access to private repositories)
+    - Generate and copy the token
 
 2. Configure Claude Code with your GitHub token:
-   ```bash
-   export GITHUB_TOKEN=your_token_here
-   ```
 
-   Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
-   ```bash
-   echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
-   source ~/.zshrc
-   ```
+    ```bash
+    export GITHUB_TOKEN=your_token_here
+    ```
+
+    Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
+
+    ```bash
+    echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
+    source ~/.zshrc
+    ```
 
 ### Adding this marketplace to Claude Code
 
@@ -71,6 +74,7 @@ You can add this marketplace using either the short form or full URL:
 ### Installing plugins from this marketplace
 
 Once the marketplace is added, you can install plugins using:
+
 ```bash
 /plugin install plugin-name@bitwarden-marketplace
 ```
@@ -89,16 +93,16 @@ To add a plugin to this marketplace:
 
 ```json
 {
-  "name": "your-plugin-name",
-  "source": "./plugins/your-plugin-name",
-  "description": "Brief description of your plugin",
-  "version": "1.0.0",
-  "author": {
-    "name": "Your Name",
-    "email": "your.email@bitwarden.com"
-  },
-  "keywords": ["keyword1", "keyword2"],
-  "category": "utility"
+    "name": "your-plugin-name",
+    "source": "./plugins/your-plugin-name",
+    "description": "Brief description of your plugin",
+    "version": "1.0.0",
+    "author": {
+        "name": "Your Name",
+        "email": "your.email@bitwarden.com"
+    },
+    "keywords": ["keyword1", "keyword2"],
+    "category": "utility"
 }
 ```
 
@@ -148,6 +152,78 @@ This is a Bitwarden-maintained repository with high security standards. All plug
 - **Validate all inputs as untrusted** - Never assume external input is safe
 - **Fail safely and degrade gracefully** - Plugins should handle errors without compromising security
 
+## Versioning and Changelog Requirements
+
+**CRITICAL**: All plugin changes MUST include a version bump and changelog entry.
+
+### When to Bump Versions
+
+Follow [Semantic Versioning](https://semver.org/) for all version changes:
+
+- **MAJOR (X.0.0)**: Breaking changes or incompatible API modifications
+- **MINOR (0.X.0)**: New features or backward-compatible additions
+- **PATCH (0.0.X)**: Bug fixes, documentation updates, or security patches
+
+### Using the Version Bump Script
+
+A helper script automates version updates across all required files:
+
+```bash
+./scripts/bump-plugin-version.sh <plugin-name> <new-version>
+```
+
+**Example:**
+
+```bash
+./scripts/bump-plugin-version.sh bitwarden-code-review 1.3.4
+```
+
+This script automatically updates:
+
+- `.claude-plugin/marketplace.json` (marketplace registration)
+- `plugins/<plugin-name>/.claude-plugin/plugin.json` (plugin manifest)
+- `plugins/<plugin-name>/agents/*/AGENT.md` (agent frontmatter, if agents exist)
+
+### Changelog Requirements
+
+After running the version bump script, update the changelog:
+
+1. Edit `plugins/<plugin-name>/CHANGELOG.md`
+2. Follow [Keep a Changelog](https://keepachangelog.com/) format
+3. Add an entry under the appropriate category:
+    - **Added**: New features
+    - **Changed**: Changes in existing functionality
+    - **Deprecated**: Soon-to-be removed features
+    - **Removed**: Removed features
+    - **Fixed**: Bug fixes
+    - **Security**: Security improvements
+
+**Example changelog entry:**
+
+```markdown
+## [1.3.4] - 2025-12-18
+
+### Fixed
+
+- Corrected error handling in edge case scenarios
+
+### Security
+
+- Improved input validation for external data sources
+```
+
+### Pull Request Checklist
+
+When submitting a plugin change:
+
+- [ ] Version bumped using `bump-plugin-version.sh`
+- [ ] Changelog entry added with clear description
+- [ ] All three version locations updated (marketplace.json, plugin.json, AGENT.md)
+- [ ] Tests pass
+- [ ] Documentation updated if needed
+
+**Never commit plugin changes without updating the version and changelog.**
+
 ## Best Practices
 
 When developing plugins, follow these best practices:
@@ -158,6 +234,7 @@ When developing plugins, follow these best practices:
 4. **Version Compatibility** - Clearly document version requirements and compatibility
 5. **Performance** - Consider performance implications for large-scale operations
 6. **User Experience** - Provide clear error messages and helpful feedback
+7. **Version Every Change** - Always bump version and update changelog for any plugin modification
 
 ## Review Process
 
