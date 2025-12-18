@@ -16,44 +16,44 @@ Choose one of the following authentication methods:
 
 1. Install GitHub CLI if not already installed:
 
-    ```bash
-    # macOS
-    brew install gh
+   ```bash
+   # macOS
+   brew install gh
 
-    # Windows
-    winget install --id GitHub.cli
+   # Windows
+   winget install --id GitHub.cli
 
-    # Linux
-    # See https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-    ```
+   # Linux
+   # See https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+   ```
 
 2. Authenticate with GitHub:
-    ```bash
-    gh auth login
-    ```
-    Follow the prompts to authenticate via browser or token.
+   ```bash
+   gh auth login
+   ```
+   Follow the prompts to authenticate via browser or token.
 
 **Option 2: Personal Access Token**
 
 1. Generate a GitHub Personal Access Token (classic):
-    - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-    - Click "Generate new token (classic)"
-    - Give it a descriptive name (e.g., "Claude Code Marketplace Access")
-    - Select the `repo` scope (this grants access to private repositories)
-    - Generate and copy the token
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Give it a descriptive name (e.g., "Claude Code Marketplace Access")
+   - Select the `repo` scope (this grants access to private repositories)
+   - Generate and copy the token
 
 2. Configure Claude Code with your GitHub token:
 
-    ```bash
-    export GITHUB_TOKEN=your_token_here
-    ```
+   ```bash
+   export GITHUB_TOKEN=your_token_here
+   ```
 
-    Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
+   Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
 
-    ```bash
-    echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
-    source ~/.zshrc
-    ```
+   ```bash
+   echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
+   source ~/.zshrc
+   ```
 
 ### Adding this marketplace to Claude Code
 
@@ -93,16 +93,16 @@ To add a plugin to this marketplace:
 
 ```json
 {
-    "name": "your-plugin-name",
-    "source": "./plugins/your-plugin-name",
-    "description": "Brief description of your plugin",
-    "version": "1.0.0",
-    "author": {
-        "name": "Your Name",
-        "email": "your.email@bitwarden.com"
-    },
-    "keywords": ["keyword1", "keyword2"],
-    "category": "utility"
+  "name": "your-plugin-name",
+  "source": "./plugins/your-plugin-name",
+  "description": "Brief description of your plugin",
+  "version": "1.0.0",
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@bitwarden.com"
+  },
+  "keywords": ["keyword1", "keyword2"],
+  "category": "utility"
 }
 ```
 
@@ -191,12 +191,12 @@ After running the version bump script, update the changelog:
 1. Edit `plugins/<plugin-name>/CHANGELOG.md`
 2. Follow [Keep a Changelog](https://keepachangelog.com/) format
 3. Add an entry under the appropriate category:
-    - **Added**: New features
-    - **Changed**: Changes in existing functionality
-    - **Deprecated**: Soon-to-be removed features
-    - **Removed**: Removed features
-    - **Fixed**: Bug fixes
-    - **Security**: Security improvements
+   - **Added**: New features
+   - **Changed**: Changes in existing functionality
+   - **Deprecated**: Soon-to-be removed features
+   - **Removed**: Removed features
+   - **Fixed**: Bug fixes
+   - **Security**: Security improvements
 
 **Example changelog entry:**
 
