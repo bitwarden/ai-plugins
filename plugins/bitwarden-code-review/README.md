@@ -1,6 +1,6 @@
 # Bitwarden Code Review Plugin
 
-Comprehensive AI-powered code review agent following Bitwarden engineering standards with support for repository-specific customization.
+Comprehensive AI-powered code review agent following Bitwarden engineering standards.
 
 ## Overview
 
@@ -10,7 +10,6 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 
 - **Autonomous Review Agent**: Single agent handles all code review tasks without manual invocation
 - **Organizational Standards**: Consistent review process, finding classification, and comment formatting across all repositories
-- **Repository-Specific Customization**: Teams can add technology-specific requirements without modifying the plugin
 - **Thread Detection**: Prevents duplicate comments by detecting existing threads before posting
 - **Security-First Approach**: Prioritizes security vulnerabilities, data exposure, and authentication issues
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
@@ -24,10 +23,9 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 The plugin provides a single agent (`bitwarden-code-reviewer`) that:
 
 1. **Reads PR Context**: Gathers PR metadata, existing comments, and resolved threads
-2. **Loads Repository Guidelines**: Checks for `.claude/prompts/review-code.md` and integrates custom requirements
-3. **Analyzes Changes**: Understands change scope and impact, then adapts review depth based on observed complexity and risk
-4. **Classifies Findings**: Uses 5-tier severity system (CRITICAL, IMPORTANT, DEBT, SUGGESTED, QUESTION)
-5. **Formats Output**: Posts inline comments and summary using mandatory templates
+2. **Analyzes Changes**: Understands change scope and impact, then adapts review depth based on observed complexity and risk
+3. **Classifies Findings**: Uses 5-tier severity system (CRITICAL, IMPORTANT, DEBT, SUGGESTED, QUESTION)
+4. **Formats Output**: Posts inline comments and summary using mandatory templates
 
 ### Finding Classification
 
@@ -128,81 +126,6 @@ _API Operations:_
 
 When using this plugin in your repositories, **copy the security settings** to your project's `.claude/settings.json`. This ensures the code review agent cannot perform destructive operations in your project, following the **principle of least privilege**.
 
-## Repository-Specific Customization
-
-Repositories can provide **additional** review guidelines that supplement (but never override) the base organizational standards.
-
-**Location**: `.claude/prompts/review-code.md` in the repository being reviewed
-
-**Purpose**:
-
-- Add technology stack-specific focus areas
-- Define additional team coding conventions
-- Specify extra repository-specific security checks
-- Request focus on particular patterns
-- Provide team context and preferences
-
-**How It Works**:
-
-1. Agent automatically checks for `.claude/prompts/review-code.md`
-2. If found, reads and integrates guidelines with base standards
-3. **Base guidelines always take precedence** - conflicts are resolved by ignoring conflicting repo directives
-4. If not found, uses base guidelines only
-
-**Important: Base Guidelines Cannot Be Overridden**
-
-Repository guidelines are strictly **additive**. They can:
-
-- ✅ Add new patterns to check
-- ✅ Add technology-specific requirements
-- ✅ Request additional focus areas
-- ✅ Provide team context
-
-Repository guidelines CANNOT:
-
-- ❌ Weaken security requirements
-- ❌ Change severity classifications
-- ❌ Modify comment format requirements
-- ❌ Override professional standards
-- ❌ Skip mandatory checks
-
-**Example Repository Guidelines**:
-
-```markdown
-# Repository-Specific Review Guidelines
-
-## Technology Focus
-
-- Heavily scrutinize React hook dependency arrays
-- Validate all GraphQL queries use proper fragments
-- Ensure all Suspense boundaries have error boundaries
-
-## Additional Security Checks
-
-- All authentication flows must include CSRF protection
-- Flag any direct DOM manipulation for XSS review
-- Verify all API calls use our axios wrapper (includes auth)
-
-## Additional Code Conventions
-
-- Flag TODO comments as technical debt
-- Prefer named exports over default exports
-- Component files must co-locate tests (ComponentName.test.tsx)
-
-## Focus Areas
-
-- Prioritize performance review in this performance-critical codebase
-- Extra scrutiny on authentication and session management code
-```
-
-**Benefits**:
-
-- No plugin modification needed for repo-specific needs
-- Guidelines versioned with repository code
-- Easy team collaboration on review standards
-- Organizational standards remain enforced
-- Teams can add requirements without weakening base standards
-
 ## Usage
 
 ### Automatic Invocation
@@ -274,11 +197,6 @@ jobs:
     - Screenshots/recordings for UI changes
     - JIRA reference in tracking section
     - Test plan documentation
-
-4. **Load Repository Guidelines**
-    - Check for `.claude/prompts/review-code.md`
-    - Integrate with base standards
-    - Apply conflict resolution (base guidelines win)
 
 ### Review Execution
 
