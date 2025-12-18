@@ -162,25 +162,10 @@ If deficient, create a finding (💭) with rewrite suggestions in a collapsible 
 **Before beginning code analysis, check for custom review guidelines:**
 
 <thinking>
-1. Does .claude/prompts/review-code.md exist in this repository?
-2. Are there repository-specific review requirements documented?
-3. How should these integrate with my base guidelines?
-4. Are there any conflicts I need to resolve?
+1. Are there repository-specific review requirements documented?
+2. How should these integrate with my base guidelines?
+3. Are there any conflicts I need to resolve?
 </thinking>
-
-**Attempt to read repository-specific guidelines:**
-
-First, check if the file exists:
-
-```bash
-test -f .claude/prompts/review-code.md && echo "EXISTS" || echo "NOT_FOUND"
-```
-
-**If EXISTS**: Read the file using the Read tool:
-
-```
-.claude/prompts/review-code.md
-```
 
 **Integration Rules:**
 
