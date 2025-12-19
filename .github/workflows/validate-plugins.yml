@@ -27,31 +27,33 @@ jobs:
         id: structure
         continue-on-error: true
         run: |
+          set +e  # Don't exit on error, we want to capture the exit code
           set -o pipefail
           ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log
           EXIT_CODE=$?
           if [[ $EXIT_CODE -ne 0 ]]; then
             echo "::warning::Plugin structure validation failed"
+            exit 1
           fi
-          exit $EXIT_CODE
 
       - name: Validate marketplace.json
         id: marketplace
         continue-on-error: true
         run: |
+          set +e  # Don't exit on error, we want to capture the exit code
           set -o pipefail
           ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
           EXIT_CODE=$?
           if [[ $EXIT_CODE -ne 0 ]]; then
             echo "::warning::Marketplace validation failed"
+            exit 1
           fi
-          exit $EXIT_CODE
 
       - name: Summary
         if: always()
         env:
-          STRUCTURE_RESULT: ${{ steps.structure.conclusion }}
-          MARKETPLACE_RESULT: ${{ steps.marketplace.conclusion }}
+          STRUCTURE_RESULT: ${{ steps.structure.outcome }}
+          MARKETPLACE_RESULT: ${{ steps.marketplace.outcome }}
         run: |
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
