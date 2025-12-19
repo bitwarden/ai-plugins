@@ -44,7 +44,7 @@ print_error() {
 }
 
 print_warning() {
-    echo -e "  ${YELLOW}⚠️  $1${RESET}"
+    echo -e "  ${YELLOW}⚠️ $1${RESET}"
     ((TOTAL_WARNINGS++))
 }
 
@@ -325,7 +325,7 @@ main() {
     done
 
     if [[ ${#plugins[@]} -eq 0 ]]; then
-        echo -e "${YELLOW}⚠️  No plugins found in $PLUGINS_DIR${RESET}"
+        echo -e "${YELLOW}⚠️ No plugins found in $PLUGINS_DIR${RESET}"
         exit 0
     fi
 

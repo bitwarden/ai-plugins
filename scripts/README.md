@@ -127,7 +127,7 @@ The script provides colored output:
 
 📦 Validating claude-config-validator...
   ❌ Missing required file: CHANGELOG.md
-  ⚠️  CHANGELOG.md does not exist
+  ⚠️ CHANGELOG.md does not exist
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 Validation Summary
