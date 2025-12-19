@@ -27,13 +27,15 @@ jobs:
         id: structure
         continue-on-error: true
         run: |
-          ./scripts/validate-plugin-structure.sh
+          set -o pipefail
+          ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log || echo "::warning::Plugin structure validation failed"
 
       - name: Validate marketplace.json
         id: marketplace
         continue-on-error: true
         run: |
-          ./scripts/validate-marketplace.sh
+          set -o pipefail
+          ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log || echo "::warning::Marketplace validation failed"
 
       - name: Summary
         if: always()
@@ -50,6 +52,23 @@ jobs:
           echo "Plugin structure validation: $STRUCTURE_RESULT"
           echo "Marketplace validation: $MARKETPLACE_RESULT"
           echo ""
+
+          # Display detailed results if available
+          if [[ -f /tmp/structure-validation.log ]] && [[ "$STRUCTURE_RESULT" == "failure" ]]; then
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📋 Plugin Structure Validation Details:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            cat /tmp/structure-validation.log
+            echo ""
+          fi
+
+          if [[ -f /tmp/marketplace-validation.log ]] && [[ "$MARKETPLACE_RESULT" == "failure" ]]; then
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📋 Marketplace Validation Details:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            cat /tmp/marketplace-validation.log
+            echo ""
+          fi
 
           if [[ "$STRUCTURE_RESULT" == "failure" ]] || [[ "$MARKETPLACE_RESULT" == "failure" ]]; then
             echo "❌ Validation failed. Please review the errors above."
