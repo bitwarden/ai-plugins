@@ -1,0 +1,51 @@
+name: Validate Plugins
+
+on:
+  pull_request:
+    paths:
+      - "plugins/**"
+      - ".claude-plugin/marketplace.json"
+      - "scripts/validate-*.sh"
+      - ".github/workflows/validate-plugins.yml"
+
+permissions: {}
+
+jobs:
+  validate:
+    name: Validate plugin structure and requirements
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Validate plugin structure
+        run: |
+          ./scripts/validate-plugin-structure.sh
+
+      - name: Validate marketplace.json
+        run: |
+          ./scripts/validate-marketplace.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 Validation Complete"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "All validation checks completed."
+          echo "Please review any errors or warnings above."
+          echo ""
+          echo "For more information on plugin requirements:"
+          echo "  📖 README.md"
+          echo "  🔗 https://docs.claude.com/en/docs/claude-code/plugins-reference"
