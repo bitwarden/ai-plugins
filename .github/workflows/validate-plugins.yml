@@ -24,11 +24,13 @@ jobs:
           persist-credentials: false
 
       - name: Validate plugin structure
+        id: structure
         continue-on-error: true
         run: |
           ./scripts/validate-plugin-structure.sh
 
       - name: Validate marketplace.json
+        id: marketplace
         continue-on-error: true
         run: |
           ./scripts/validate-marketplace.sh
@@ -38,12 +40,28 @@ jobs:
         run: |
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📊 Validation Complete"
+          echo "📊 Validation Summary"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-          echo "All validation checks completed."
-          echo "Please review any errors or warnings above."
+
+          STRUCTURE_RESULT="${{ steps.structure.outcome }}"
+          MARKETPLACE_RESULT="${{ steps.marketplace.outcome }}"
+
+          echo "Plugin structure validation: $STRUCTURE_RESULT"
+          echo "Marketplace validation: $MARKETPLACE_RESULT"
           echo ""
-          echo "For more information on plugin requirements:"
-          echo "  📖 README.md"
-          echo "  🔗 https://docs.claude.com/en/docs/claude-code/plugins-reference"
+
+          if [[ "$STRUCTURE_RESULT" == "failure" ]] || [[ "$MARKETPLACE_RESULT" == "failure" ]]; then
+            echo "❌ Validation failed. Please review the errors above."
+            echo ""
+            echo "For more information on plugin requirements:"
+            echo "  📖 scripts/README.md"
+            echo "  🔗 https://docs.claude.com/en/docs/claude-code/plugins-reference"
+            exit 1
+          else
+            echo "✅ All validation checks passed!"
+            echo ""
+            echo "For more information on plugin requirements:"
+            echo "  📖 scripts/README.md"
+            echo "  🔗 https://docs.claude.com/en/docs/claude-code/plugins-reference"
+          fi
