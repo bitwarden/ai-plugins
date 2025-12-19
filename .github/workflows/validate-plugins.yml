@@ -39,15 +39,15 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          STRUCTURE_RESULT: ${{ steps.structure.outcome }}
+          MARKETPLACE_RESULT: ${{ steps.marketplace.outcome }}
         run: |
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "📊 Validation Summary"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-
-          STRUCTURE_RESULT="${{ steps.structure.outcome }}"
-          MARKETPLACE_RESULT="${{ steps.marketplace.outcome }}"
 
           echo "Plugin structure validation: $STRUCTURE_RESULT"
           echo "Marketplace validation: $MARKETPLACE_RESULT"
