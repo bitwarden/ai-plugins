@@ -5,7 +5,7 @@
 # This script checks that all plugins in the marketplace follow the required
 # structure and contain necessary files.
 
-set -euo pipefail
+set -uo pipefail
 
 # Colors for output
 RED='\033[91m'

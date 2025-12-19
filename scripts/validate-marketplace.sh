@@ -5,7 +5,7 @@
 # This script checks that the marketplace.json file is valid and that all
 # listed plugins actually exist in the plugins directory.
 
-set -euo pipefail
+set -uo pipefail
 
 # Colors for output
 RED='\033[91m'
