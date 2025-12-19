@@ -345,8 +345,8 @@ main() {
         # Run validations
         validate_plugin_structure "$plugin_path" || plugin_has_errors=1
         validate_plugin_json "$plugin_path" || plugin_has_errors=1
-        validate_readme_content "$plugin_path"
-        validate_changelog_format "$plugin_path"
+        validate_readme_content "$plugin_path" || true
+        validate_changelog_format "$plugin_path" || true
 
         # Validate agents if they exist
         if [[ -d "$plugin_path/agents" ]]; then
@@ -374,6 +374,7 @@ main() {
     done
 
     # Print summary
+    echo ""
     print_header "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     print_header "📊 Validation Summary"
     print_header "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -387,7 +388,15 @@ main() {
         echo -e "${GREEN}✅ All plugins passed structure validation${RESET}"
         exit 0
     else
-        echo -e "${RED}❌ Plugin validation failed${RESET}"
+        echo -e "${RED}❌ Plugin validation failed with $TOTAL_ERRORS error(s)${RESET}"
+        echo ""
+        echo -e "${YELLOW}To fix these issues:${RESET}"
+        echo "1. Review the error messages above for each plugin"
+        echo "2. Add missing required files (plugin.json, README.md, CHANGELOG.md)"
+        echo "3. Ensure all agent/skill directories contain their respective .md files"
+        echo "4. Run validation locally: ./scripts/validate-plugin-structure.sh"
+        echo ""
+        echo -e "${YELLOW}For more information, see: scripts/README.md${RESET}"
         exit 1
     fi
 }

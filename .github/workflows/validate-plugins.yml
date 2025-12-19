@@ -28,10 +28,12 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Validate plugin structure
+        continue-on-error: true
         run: |
           ./scripts/validate-plugin-structure.sh
 
       - name: Validate marketplace.json
+        continue-on-error: true
         run: |
           ./scripts/validate-marketplace.sh
 

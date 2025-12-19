@@ -294,6 +294,7 @@ main() {
     echo ""
 
     # Print summary
+    echo ""
     print_header "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     print_header "📊 Validation Summary"
     print_header "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -306,7 +307,17 @@ main() {
         echo -e "${GREEN}✅ marketplace.json is valid${RESET}"
         exit 0
     else
-        echo -e "${RED}❌ marketplace.json validation failed${RESET}"
+        echo -e "${RED}❌ marketplace.json validation failed with $TOTAL_ERRORS error(s)${RESET}"
+        echo ""
+        echo -e "${YELLOW}To fix these issues:${RESET}"
+        echo "1. Review the error messages above"
+        echo "2. Ensure all required fields are present (name, owner, plugins)"
+        echo "3. Verify all plugin entries have: name, source, description, version"
+        echo "4. Check that versions match between marketplace.json and plugin.json files"
+        echo "5. Ensure all listed plugins exist in the plugins/ directory"
+        echo "6. Run validation locally: ./scripts/validate-marketplace.sh"
+        echo ""
+        echo -e "${YELLOW}For more information, see: scripts/README.md${RESET}"
         exit 1
     fi
 }
