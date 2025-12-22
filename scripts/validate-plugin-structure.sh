@@ -51,7 +51,8 @@ print_warning() {
 # Function to validate plugin structure
 validate_plugin_structure() {
     local plugin_path="$1"
-    local plugin_name=$(basename "$plugin_path")
+    local plugin_name
+    plugin_name=$(basename "$plugin_path")
     local has_errors=0
 
     # Check required files
@@ -82,7 +83,8 @@ validate_plugin_structure() {
     if [[ -d "$plugin_path/agents" ]]; then
         for agent_dir in "$plugin_path/agents"/*; do
             if [[ -d "$agent_dir" ]]; then
-                local agent_name=$(basename "$agent_dir")
+                local agent_name
+                agent_name=$(basename "$agent_dir")
                 if [[ ! -f "$agent_dir/AGENT.md" ]]; then
                     print_error "Agent directory $agent_name missing AGENT.md"
                     has_errors=1
@@ -95,7 +97,8 @@ validate_plugin_structure() {
     if [[ -d "$plugin_path/skills" ]]; then
         for skill_dir in "$plugin_path/skills"/*; do
             if [[ -d "$skill_dir" ]]; then
-                local skill_name=$(basename "$skill_dir")
+                local skill_name
+                skill_name=$(basename "$skill_dir")
                 if [[ ! -f "$skill_dir/SKILL.md" ]]; then
                     print_error "Skill directory $skill_name missing SKILL.md"
                     has_errors=1
@@ -108,8 +111,10 @@ validate_plugin_structure() {
     if [[ -d "$plugin_path/commands" ]]; then
         for command_dir in "$plugin_path/commands"/*; do
             if [[ -d "$command_dir" ]]; then
-                local command_name=$(basename "$command_dir")
-                local md_count=$(find "$command_dir" -maxdepth 1 -name "*.md" | wc -l)
+                local command_name
+                command_name=$(basename "$command_dir")
+                local md_count
+                md_count=$(find "$command_dir" -maxdepth 1 -name "*.md" | wc -l)
                 if [[ $md_count -eq 0 ]]; then
                     print_error "Command directory $command_name has no .md files"
                     has_errors=1
@@ -138,10 +143,14 @@ validate_plugin_json() {
     fi
 
     # Check required fields
-    local name=$(jq -r '.name // empty' "$plugin_json")
-    local version=$(jq -r '.version // empty' "$plugin_json")
-    local description=$(jq -r '.description // empty' "$plugin_json")
-    local author=$(jq -r '.author // empty' "$plugin_json")
+    local name
+    name=$(jq -r '.name // empty' "$plugin_json")
+    local version
+    version=$(jq -r '.version // empty' "$plugin_json")
+    local description
+    description=$(jq -r '.description // empty' "$plugin_json")
+    local author
+    author=$(jq -r '.author // empty' "$plugin_json")
 
     if [[ -z "$name" ]]; then
         print_error "Missing required field in plugin.json: name"
@@ -179,7 +188,8 @@ validate_readme_content() {
         return 0
     fi
 
-    local content=$(tr '[:upper:]' '[:lower:]' < "$readme")
+    local content
+    content=$(tr '[:upper:]' '[:lower:]' < "$readme")
 
     # Check for key sections (warnings only)
     if ! echo "$content" | grep -qE "(description|overview|about)"; then
@@ -205,7 +215,8 @@ validate_changelog_format() {
         return 0
     fi
 
-    local content=$(cat "$changelog")
+    local content
+    content=$(cat "$changelog")
 
     # Check for Keep a Changelog format (warnings only)
     if ! echo "$content" | grep -qE "##\s+\["; then
@@ -226,7 +237,8 @@ validate_changelog_format() {
 validate_agent_frontmatter() {
     local agent_file="$1"
     local plugin_name="$2"
-    local agent_name=$(basename "$(dirname "$agent_file")")
+    local agent_name
+    agent_name=$(basename "$(dirname "$agent_file")")
     local has_errors=0
 
     # Check for YAML frontmatter
@@ -236,7 +248,8 @@ validate_agent_frontmatter() {
     fi
 
     # Extract frontmatter (between first two --- markers)
-    local frontmatter=$(sed -n '/^---$/,/^---$/p' "$agent_file" | sed '1d;$d')
+    local frontmatter
+    frontmatter=$(sed -n '/^---$/,/^---$/p' "$agent_file" | sed '1d;$d')
 
     if [[ -z "$frontmatter" ]]; then
         print_error "Agent $plugin_name/$agent_name: Empty frontmatter"
@@ -257,10 +270,12 @@ validate_agent_frontmatter() {
     # Validate tools field is present and looks like an array
     if echo "$frontmatter" | grep -q "^tools:"; then
         # Check if the next line starts with a dash (array item)
-        local tools_line=$(echo "$frontmatter" | grep -n "^tools:" | cut -d: -f1)
+        local tools_line
+        tools_line=$(echo "$frontmatter" | grep -n "^tools:" | cut -d: -f1)
         if [[ -n "$tools_line" ]]; then
             local next_line=$((tools_line + 1))
-            local next_content=$(echo "$frontmatter" | sed -n "${next_line}p")
+            local next_content
+            next_content=$(echo "$frontmatter" | sed -n "${next_line}p")
             if [[ -n "$next_content" ]] && [[ ! "$next_content" =~ ^[[:space:]]*- ]]; then
                 print_error "Agent $plugin_name/$agent_name: 'tools' field must be an array"
                 has_errors=1
@@ -275,7 +290,8 @@ validate_agent_frontmatter() {
 validate_skill_frontmatter() {
     local skill_file="$1"
     local plugin_name="$2"
-    local skill_name=$(basename "$(dirname "$skill_file")")
+    local skill_name
+    skill_name=$(basename "$(dirname "$skill_file")")
     local has_errors=0
 
     # Check for YAML frontmatter
@@ -285,7 +301,8 @@ validate_skill_frontmatter() {
     fi
 
     # Extract frontmatter
-    local frontmatter=$(sed -n '/^---$/,/^---$/p' "$skill_file" | sed '1d;$d')
+    local frontmatter
+    frontmatter=$(sed -n '/^---$/,/^---$/p' "$skill_file" | sed '1d;$d')
 
     if [[ -z "$frontmatter" ]]; then
         print_error "Skill $plugin_name/$skill_name: Empty frontmatter"
@@ -330,12 +347,12 @@ main() {
     fi
 
     # Sort plugins
-    IFS=$'\n' plugins=($(sort <<<"${plugins[*]}"))
-    unset IFS
+    mapfile -t plugins < <(printf '%s\n' "${plugins[@]}" | sort)
 
     # Validate each plugin
     for plugin_path in "${plugins[@]}"; do
-        local plugin_name=$(basename "$plugin_path")
+        local plugin_name
+        plugin_name=$(basename "$plugin_path")
         print_section "📦 Validating $plugin_name..."
 
         ((TOTAL_PLUGINS++))

@@ -67,14 +67,16 @@ validate_marketplace_structure() {
         has_errors=1
     else
         # Check plugins is an array
-        local plugin_type=$(jq -r '.plugins | type' "$MARKETPLACE_JSON" 2>/dev/null)
+        local plugin_type
+        plugin_type=$(jq -r '.plugins | type' "$MARKETPLACE_JSON" 2>/dev/null)
         if [[ "$plugin_type" != "array" ]]; then
             print_error "'plugins' must be an array"
             has_errors=1
         fi
 
         # Check plugins array is not empty
-        local plugin_count=$(jq '.plugins | length' "$MARKETPLACE_JSON")
+        local plugin_count
+        plugin_count=$(jq '.plugins | length' "$MARKETPLACE_JSON")
         if [[ $plugin_count -eq 0 ]]; then
             print_error "'plugins' array is empty"
             has_errors=1
@@ -87,7 +89,8 @@ validate_marketplace_structure() {
 # Function to validate a single plugin entry
 validate_plugin_entry() {
     local index="$1"
-    local plugin_name=$(jq -r ".plugins[$index].name // empty" "$MARKETPLACE_JSON")
+    local plugin_name
+    plugin_name=$(jq -r ".plugins[$index].name // empty" "$MARKETPLACE_JSON")
     local has_errors=0
 
     # Check required fields
@@ -97,7 +100,8 @@ validate_plugin_entry() {
         plugin_name="plugin at index $index"
     fi
 
-    local source=$(jq -r ".plugins[$index].source // empty" "$MARKETPLACE_JSON")
+    local source
+    source=$(jq -r ".plugins[$index].source // empty" "$MARKETPLACE_JSON")
     if [[ -z "$source" ]]; then
         print_error "Plugin '$plugin_name' missing required field: source"
         has_errors=1
@@ -109,13 +113,15 @@ validate_plugin_entry() {
         fi
     fi
 
-    local description=$(jq -r ".plugins[$index].description // empty" "$MARKETPLACE_JSON")
+    local description
+    description=$(jq -r ".plugins[$index].description // empty" "$MARKETPLACE_JSON")
     if [[ -z "$description" ]]; then
         print_error "Plugin '$plugin_name' missing required field: description"
         has_errors=1
     fi
 
-    local version=$(jq -r ".plugins[$index].version // empty" "$MARKETPLACE_JSON")
+    local version
+    version=$(jq -r ".plugins[$index].version // empty" "$MARKETPLACE_JSON")
     if [[ -z "$version" ]]; then
         print_error "Plugin '$plugin_name' missing required field: version"
         has_errors=1
@@ -133,8 +139,10 @@ validate_plugin_entry() {
 # Function to check if plugin exists
 check_plugin_exists() {
     local index="$1"
-    local plugin_name=$(jq -r ".plugins[$index].name // empty" "$MARKETPLACE_JSON")
-    local source=$(jq -r ".plugins[$index].source // empty" "$MARKETPLACE_JSON")
+    local plugin_name
+    plugin_name=$(jq -r ".plugins[$index].name // empty" "$MARKETPLACE_JSON")
+    local source
+    source=$(jq -r ".plugins[$index].source // empty" "$MARKETPLACE_JSON")
     local has_errors=0
 
     if [[ -z "$source" ]]; then
@@ -169,12 +177,16 @@ check_plugin_exists() {
 # Function to check marketplace and plugin consistency
 check_consistency() {
     local has_errors=0
-    local plugin_count=$(jq '.plugins | length' "$MARKETPLACE_JSON")
+    local plugin_count
+    plugin_count=$(jq '.plugins | length' "$MARKETPLACE_JSON")
 
     for ((i=0; i<plugin_count; i++)); do
-        local plugin_name=$(jq -r ".plugins[$i].name // empty" "$MARKETPLACE_JSON")
-        local source=$(jq -r ".plugins[$i].source // empty" "$MARKETPLACE_JSON")
-        local marketplace_version=$(jq -r ".plugins[$i].version // empty" "$MARKETPLACE_JSON")
+        local plugin_name
+        plugin_name=$(jq -r ".plugins[$i].name // empty" "$MARKETPLACE_JSON")
+        local source
+        source=$(jq -r ".plugins[$i].source // empty" "$MARKETPLACE_JSON")
+        local marketplace_version
+        marketplace_version=$(jq -r ".plugins[$i].version // empty" "$MARKETPLACE_JSON")
 
         if [[ -z "$source" ]] || [[ -z "$plugin_name" ]]; then
             continue
@@ -196,7 +208,8 @@ check_consistency() {
         fi
 
         # Compare versions
-        local plugin_version=$(jq -r '.version // empty' "$plugin_json")
+        local plugin_version
+        plugin_version=$(jq -r '.version // empty' "$plugin_json")
         if [[ -n "$marketplace_version" ]] && [[ -n "$plugin_version" ]]; then
             if [[ "$marketplace_version" != "$plugin_version" ]]; then
                 print_error "Version mismatch for '$plugin_name': marketplace.json has '$marketplace_version', plugin.json has '$plugin_version'"
@@ -205,7 +218,8 @@ check_consistency() {
         fi
 
         # Compare names
-        local plugin_json_name=$(jq -r '.name // empty' "$plugin_json")
+        local plugin_json_name
+        plugin_json_name=$(jq -r '.name // empty' "$plugin_json")
         if [[ -n "$plugin_json_name" ]] && [[ "$plugin_json_name" != "$plugin_name" ]]; then
             print_error "Name mismatch for '$plugin_name': marketplace.json has '$plugin_name', plugin.json has '$plugin_json_name'"
             has_errors=1
@@ -219,10 +233,12 @@ check_consistency() {
 
         for dir in "$plugins_dir"/*; do
             if [[ -d "$dir" ]] && [[ ! $(basename "$dir") =~ ^\. ]]; then
-                local dir_name=$(basename "$dir")
+                local dir_name
+                dir_name=$(basename "$dir")
 
                 # Check if this plugin is in the marketplace
-                local found=$(jq -r --arg name "$dir_name" '.plugins[] | select(.name == $name) | .name' "$MARKETPLACE_JSON")
+                local found
+                found=$(jq -r --arg name "$dir_name" '.plugins[] | select(.name == $name) | .name' "$MARKETPLACE_JSON")
 
                 if [[ -z "$found" ]]; then
                     missing_plugins+=("$dir_name")
@@ -231,7 +247,8 @@ check_consistency() {
         done
 
         if [[ "${#missing_plugins[@]}" -gt 0 ]]; then
-            local missing_list=$(IFS=', '; echo "${missing_plugins[*]}")
+            local missing_list
+            missing_list=$(IFS=', '; echo "${missing_plugins[*]}")
             print_error "Plugins exist in 'plugins/' directory but are not listed in marketplace.json: $missing_list"
             has_errors=1
         fi
@@ -265,11 +282,13 @@ main() {
 
     # Validate individual plugin entries
     print_section "📦 Checking plugin entries..."
-    local plugin_count=$(jq '.plugins | length' "$MARKETPLACE_JSON" 2>/dev/null || echo "0")
+    local plugin_count
+    plugin_count=$(jq '.plugins | length' "$MARKETPLACE_JSON" 2>/dev/null || echo "0")
 
     if [[ $plugin_count -gt 0 ]]; then
         for ((i=0; i<plugin_count; i++)); do
-            local plugin_name=$(jq -r ".plugins[$i].name // \"plugin at index $i\"" "$MARKETPLACE_JSON")
+            local plugin_name
+            plugin_name=$(jq -r ".plugins[$i].name // \"plugin at index $i\"" "$MARKETPLACE_JSON")
 
             local entry_errors=0
             local exists_errors=0
