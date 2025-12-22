@@ -4,6 +4,11 @@
 #
 # This script checks that all plugins in the marketplace follow the required
 # structure and contain necessary files.
+#
+# Usage:
+#   ./validate-plugin-structure.sh                    # Validate all plugins
+#   ./validate-plugin-structure.sh plugin1 plugin2    # Validate specific plugins
+#   ./validate-plugin-structure.sh plugins/plugin1    # Validate by path
 
 set -uo pipefail
 
@@ -335,19 +340,52 @@ main() {
 
     # Get list of plugin directories
     local plugins=()
-    for dir in "$PLUGINS_DIR"/*; do
-        if [[ -d "$dir" ]] && [[ ! $(basename "$dir") =~ ^\. ]]; then
-            plugins+=("$dir")
+
+    # If arguments provided, validate only those plugins
+    if [[ $# -gt 0 ]]; then
+        for arg in "$@"; do
+            # Remove leading ./ if present
+            arg="${arg#./}"
+
+            # If argument is a full path to plugin directory
+            if [[ -d "$arg" ]]; then
+                plugins+=("$arg")
+            # If argument is just the plugin name
+            elif [[ -d "$PLUGINS_DIR/$arg" ]]; then
+                plugins+=("$PLUGINS_DIR/$arg")
+            # If argument is a path within plugins/
+            elif [[ "$arg" =~ ^plugins/ ]]; then
+                local plugin_name
+                plugin_name=$(echo "$arg" | cut -d/ -f2)
+                if [[ -d "$PLUGINS_DIR/$plugin_name" ]]; then
+                    plugins+=("$PLUGINS_DIR/$plugin_name")
+                fi
+            fi
+        done
+
+        # Remove duplicates
+        mapfile -t plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
+
+        if [[ "${#plugins[@]}" -eq 0 ]]; then
+            echo -e "${YELLOW}⚠️ No valid plugin directories found in arguments${RESET}"
+            exit 0
         fi
-    done
+    else
+        # No arguments - validate all plugins
+        for dir in "$PLUGINS_DIR"/*; do
+            if [[ -d "$dir" ]] && [[ ! $(basename "$dir") =~ ^\. ]]; then
+                plugins+=("$dir")
+            fi
+        done
 
-    if [[ "${#plugins[@]}" -eq 0 ]]; then
-        echo -e "${YELLOW}⚠️ No plugins found in $PLUGINS_DIR${RESET}"
-        exit 0
+        if [[ "${#plugins[@]}" -eq 0 ]]; then
+            echo -e "${YELLOW}⚠️ No plugins found in $PLUGINS_DIR${RESET}"
+            exit 0
+        fi
+
+        # Sort plugins
+        mapfile -t plugins < <(printf '%s\n' "${plugins[@]}" | sort)
     fi
-
-    # Sort plugins
-    mapfile -t plugins < <(printf '%s\n' "${plugins[@]}" | sort)
 
     # Validate each plugin
     for plugin_path in "${plugins[@]}"; do
@@ -419,4 +457,4 @@ main() {
 }
 
 # Run main function
-main
+main "$@"

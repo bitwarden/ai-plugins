@@ -24,26 +24,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate plugin structure
-        id: structure
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log
-
-      - name: Validate marketplace.json
-        id: marketplace
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
-
       - name: Get changed plugin files
         id: changed-files
         run: |
           # Get list of changed files in plugins directory
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^plugins/' || echo "")
+
+          # Extract unique plugin directories from changed files
+          CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | xargs)
 
           # Filter for AGENT.md and hooks.json files
           AGENT_FILES=$(echo "$CHANGED_FILES" | grep 'AGENT\.md$' || echo "")
@@ -52,6 +41,8 @@ jobs:
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "changed_plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
 
           echo "agent_files<<EOF" >> $GITHUB_OUTPUT
           echo "$AGENT_FILES" >> $GITHUB_OUTPUT
@@ -66,6 +57,32 @@ jobs:
             echo "has_components=true" >> $GITHUB_OUTPUT
           else
             echo "has_components=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate plugin structure
+        id: structure
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          if [[ -n "${{ steps.changed-files.outputs.changed_plugins }}" ]]; then
+            echo "Validating only changed plugins: ${{ steps.changed-files.outputs.changed_plugins }}"
+            ./scripts/validate-plugin-structure.sh ${{ steps.changed-files.outputs.changed_plugins }} 2>&1 | tee /tmp/structure-validation.log
+          else
+            echo "No plugin files changed, validating all plugins"
+            ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log
+          fi
+
+      - name: Validate marketplace.json
+        id: marketplace
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          if [[ -n "${{ steps.changed-files.outputs.changed_plugins }}" ]]; then
+            echo "Validating marketplace entries for changed plugins: ${{ steps.changed-files.outputs.changed_plugins }}"
+            ./scripts/validate-marketplace.sh ${{ steps.changed-files.outputs.changed_plugins }} 2>&1 | tee /tmp/marketplace-validation.log
+          else
+            echo "No plugin files changed, validating entire marketplace.json"
+            ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
           fi
 
       - name: Log in to Azure

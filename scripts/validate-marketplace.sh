@@ -4,6 +4,11 @@
 #
 # This script checks that the marketplace.json file is valid and that all
 # listed plugins actually exist in the plugins directory.
+#
+# Usage:
+#   ./validate-marketplace.sh                         # Validate all plugins
+#   ./validate-marketplace.sh plugin1 plugin2         # Validate specific plugins
+#   ./validate-marketplace.sh plugins/plugin1         # Validate by path
 
 set -uo pipefail
 
@@ -273,7 +278,32 @@ main() {
         exit 1
     fi
 
-    # Validate marketplace structure
+    # Build list of plugins to validate
+    local target_plugins=()
+    if [[ $# -gt 0 ]]; then
+        # Arguments provided - extract plugin names
+        for arg in "$@"; do
+            # Remove leading ./ if present
+            arg="${arg#./}"
+
+            # Extract plugin name from various path formats
+            if [[ "$arg" =~ ^plugins/([^/]+) ]]; then
+                target_plugins+=("${BASH_REMATCH[1]}")
+            elif [[ -d "$REPO_ROOT/plugins/$arg" ]]; then
+                target_plugins+=("$arg")
+            fi
+        done
+
+        # Remove duplicates
+        mapfile -t target_plugins < <(printf '%s\n' "${target_plugins[@]}" | sort -u)
+
+        if [[ "${#target_plugins[@]}" -eq 0 ]]; then
+            echo -e "${YELLOW}⚠️ No valid plugins found in arguments${RESET}"
+            exit 0
+        fi
+    fi
+
+    # Validate marketplace structure (always check this)
     print_section "📋 Checking marketplace structure..."
     if validate_marketplace_structure; then
         print_success "Structure is valid"
@@ -289,6 +319,20 @@ main() {
         for ((i=0; i<plugin_count; i++)); do
             local plugin_name
             plugin_name=$(jq -r ".plugins[$i].name // \"plugin at index $i\"" "$MARKETPLACE_JSON")
+
+            # Skip plugins not in target list if specific plugins requested
+            if [[ "${#target_plugins[@]}" -gt 0 ]]; then
+                local found=0
+                for target in "${target_plugins[@]}"; do
+                    if [[ "$plugin_name" == "$target" ]]; then
+                        found=1
+                        break
+                    fi
+                done
+                if [[ $found -eq 0 ]]; then
+                    continue
+                fi
+            fi
 
             local entry_errors=0
             local exists_errors=0
@@ -307,8 +351,68 @@ main() {
 
     # Check consistency with actual plugins
     print_section "🔄 Checking consistency with plugin files..."
-    if check_consistency; then
-        print_success "All plugins are consistent"
+
+    # If specific plugins requested, only check those for consistency
+    if [[ "${#target_plugins[@]}" -gt 0 ]]; then
+        local has_errors=0
+        for target_plugin in "${target_plugins[@]}"; do
+            # Find the plugin index in marketplace.json
+            local found_index=-1
+            for ((i=0; i<plugin_count; i++)); do
+                local plugin_name
+                plugin_name=$(jq -r ".plugins[$i].name // empty" "$MARKETPLACE_JSON")
+                if [[ "$plugin_name" == "$target_plugin" ]]; then
+                    found_index=$i
+                    break
+                fi
+            done
+
+            if [[ $found_index -ge 0 ]]; then
+                local source
+                source=$(jq -r ".plugins[$found_index].source // empty" "$MARKETPLACE_JSON")
+                local marketplace_version
+                marketplace_version=$(jq -r ".plugins[$found_index].version // empty" "$MARKETPLACE_JSON")
+
+                if [[ -n "$source" ]]; then
+                    source="${source#./}"
+                    local plugin_json="$REPO_ROOT/$source/.claude-plugin/plugin.json"
+
+                    if [[ -f "$plugin_json" ]]; then
+                        if ! jq empty "$plugin_json" 2>/dev/null; then
+                            print_error "Invalid JSON in $plugin_json"
+                            has_errors=1
+                        else
+                            # Compare versions
+                            local plugin_version
+                            plugin_version=$(jq -r '.version // empty' "$plugin_json")
+                            if [[ -n "$marketplace_version" ]] && [[ -n "$plugin_version" ]]; then
+                                if [[ "$marketplace_version" != "$plugin_version" ]]; then
+                                    print_error "Version mismatch for '$target_plugin': marketplace.json has '$marketplace_version', plugin.json has '$plugin_version'"
+                                    has_errors=1
+                                fi
+                            fi
+
+                            # Compare names
+                            local plugin_json_name
+                            plugin_json_name=$(jq -r '.name // empty' "$plugin_json")
+                            if [[ -n "$plugin_json_name" ]] && [[ "$plugin_json_name" != "$target_plugin" ]]; then
+                                print_error "Name mismatch for '$target_plugin': marketplace.json has '$target_plugin', plugin.json has '$plugin_json_name'"
+                                has_errors=1
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+        done
+
+        if [[ $has_errors -eq 0 ]]; then
+            print_success "All checked plugins are consistent"
+        fi
+    else
+        # No specific plugins - check all consistency
+        if check_consistency; then
+            print_success "All plugins are consistent"
+        fi
     fi
     echo ""
 
@@ -342,4 +446,4 @@ main() {
 }
 
 # Run main function
-main
+main "$@"
