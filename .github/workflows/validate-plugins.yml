@@ -70,7 +70,8 @@ jobs:
           set -o pipefail
           if [[ -n "$CHANGED_PLUGINS" ]]; then
             echo "Validating only changed plugins: $CHANGED_PLUGINS"
-            ./scripts/validate-plugin-structure.sh $CHANGED_PLUGINS 2>&1 | tee /tmp/structure-validation.log
+            read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+            ./scripts/validate-plugin-structure.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/structure-validation.log
           else
             echo "No plugin files changed, validating all plugins"
             ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log
@@ -85,7 +86,8 @@ jobs:
           set -o pipefail
           if [[ -n "$CHANGED_PLUGINS" ]]; then
             echo "Validating marketplace entries for changed plugins: $CHANGED_PLUGINS"
-            ./scripts/validate-marketplace.sh $CHANGED_PLUGINS 2>&1 | tee /tmp/marketplace-validation.log
+            read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+            ./scripts/validate-marketplace.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/marketplace-validation.log
           else
             echo "No plugin files changed, validating entire marketplace.json"
             ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
