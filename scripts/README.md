@@ -8,6 +8,7 @@ Utility scripts for maintaining the Bitwarden AI Plugins Marketplace.
 - [validate-plugin-structure.sh](#validate-plugin-structuresh) - Validate plugin structure
 - [validate-marketplace.sh](#validate-marketplacesh) - Validate marketplace.json
 - [GitHub Actions Integration](#github-actions-integration)
+- [Local Development Workflow](#local-development-workflow)
 
 ## bump-plugin-version.sh
 
@@ -210,30 +211,6 @@ Total errors found: 0
 
 ✅ marketplace.json is valid
 ```
-
-### Running Validations Locally
-
-Before submitting a pull request, run the validation scripts locally to catch issues early:
-
-```bash
-# Validate marketplace.json
-bash scripts/validate-marketplace.sh
-
-# Validate plugin structure
-bash scripts/validate-plugin-structure.sh
-
-# Run both validations
-bash scripts/validate-marketplace.sh && bash scripts/validate-plugin-structure.sh
-```
-
-### Requirements
-
-The validation scripts require:
-
-- Bash 4.0+
-- `jq` - JSON processor (`brew install jq` on macOS, `apt-get install jq` on Ubuntu)
-- `sed` - Stream editor (usually pre-installed)
-- `grep` - Pattern matching (usually pre-installed)
 
 ---
 

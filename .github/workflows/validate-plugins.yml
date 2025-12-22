@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      pull-requests: write
 
     steps:
       - name: Check out repo
@@ -37,11 +38,113 @@ jobs:
           set -o pipefail
           ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
 
+      - name: Get changed plugin files
+        id: changed-files
+        run: |
+          # Get list of changed files in plugins directory
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^plugins/' || echo "")
+
+          # Filter for AGENT.md and hooks.json files
+          AGENT_FILES=$(echo "$CHANGED_FILES" | grep 'AGENT\.md$' || echo "")
+          HOOK_FILES=$(echo "$CHANGED_FILES" | grep 'hooks\.json$' || echo "")
+
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "agent_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$AGENT_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "hook_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$HOOK_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          # Check if there are any plugin component files to validate
+          if [[ -n "$AGENT_FILES" ]] || [[ -n "$HOOK_FILES" ]]; then
+            echo "has_components=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_components=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to Azure
+        if: steps.changed-files.outputs.has_components == 'true'
+        uses: bitwarden/gh-actions/azure-login@main
+        with:
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Get Azure Key Vault secrets
+        id: get-kv-secrets
+        if: steps.changed-files.outputs.has_components == 'true'
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
+        with:
+          keyvault: gh-org-bitwarden
+          secrets: "ANTHROPIC-CODE-REVIEW-API-KEY"
+
+      - name: Log out from Azure
+        if: steps.changed-files.outputs.has_components == 'true'
+        uses: bitwarden/gh-actions/azure-logout@main
+
+      - name: Validate plugin components and security
+        id: components
+        if: steps.changed-files.outputs.has_components == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@0d1933529914177075d5bc3558ae3d047f188146 # v1.0.26
+        env:
+          USE_AGENT_SDK: "true"
+          USE_SIMPLE_PROMPT: "true"
+        with:
+          anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
+          track_progress: false
+          use_sticky_comment: false
+          plugin_marketplaces: "git+https://github.com/bitwarden/ai-plugins.git"
+          plugins: "plugin-dev, claude-config-validator@bitwarden-marketplace"
+          prompt: |
+            Review the following plugin configuration files for compliance with Claude Code plugin standards and security best practices.
+
+            Changed files:
+            ${{ steps.changed-files.outputs.changed_files }}
+
+            Agent files changed:
+            ${{ steps.changed-files.outputs.agent_files }}
+
+            Hook files changed:
+            ${{ steps.changed-files.outputs.hook_files }}
+
+            Perform TWO types of validation:
+
+            ## 1. Component Validation (using plugin-dev)
+            For each AGENT.md and hooks.json file:
+            - Validate agent identifiers (3-50 chars, lowercase, hyphens only)
+            - Validate description length (10-5,000 chars)
+            - Validate system prompt length (20-10,000 chars)
+            - Check YAML frontmatter structure
+            - Validate hook JSON schema
+            - Check hook event names
+            - Verify script paths use ${CLAUDE_PLUGIN_ROOT}
+
+            ## 2. Security Validation (using claude-config-validator)
+            For all changed plugin files:
+            - Scan for committed secrets (API keys, tokens, passwords)
+            - Check for hardcoded credentials in code
+            - Validate permission scoping in settings files
+            - Detect dangerous command auto-approvals
+            - Identify overly broad file access permissions
+
+            Use /skill reviewing-claude-config from claude-config-validator to perform comprehensive security review.
+
+            Report all violations as errors with specific file locations and remediation guidance.
+
       - name: Summary
         if: always()
         env:
           STRUCTURE_RESULT: ${{ steps.structure.outcome }}
           MARKETPLACE_RESULT: ${{ steps.marketplace.outcome }}
+          COMPONENTS_RESULT: ${{ steps.components.outcome }}
+          HAS_COMPONENTS: ${{ steps.changed-files.outputs.has_components }}
         run: |
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -51,6 +154,11 @@ jobs:
 
           echo "Plugin structure validation: $STRUCTURE_RESULT"
           echo "Marketplace validation: $MARKETPLACE_RESULT"
+          if [[ "$HAS_COMPONENTS" == "true" ]]; then
+            echo "Component & security validation (AI-driven): $COMPONENTS_RESULT"
+          else
+            echo "Component & security validation (AI-driven): skipped (no plugin files changed)"
+          fi
           echo ""
 
           # Display detailed results if available
@@ -70,11 +178,33 @@ jobs:
             echo ""
           fi
 
+          if [[ "$COMPONENTS_RESULT" == "failure" ]]; then
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📋 Component & Security Validation Details:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "See PR comments for detailed validation feedback from:"
+            echo "  - plugin-dev (component validation)"
+            echo "  - claude-config-validator (security validation)"
+            echo ""
+          fi
+
+          # Check if any validation failed
+          FAILED=false
           if [[ "$STRUCTURE_RESULT" == "failure" ]] || [[ "$MARKETPLACE_RESULT" == "failure" ]]; then
+            FAILED=true
+          fi
+
+          # Only fail on components if it actually ran and failed
+          if [[ "$HAS_COMPONENTS" == "true" ]] && [[ "$COMPONENTS_RESULT" == "failure" ]]; then
+            FAILED=true
+          fi
+
+          if [[ "$FAILED" == "true" ]]; then
             echo "❌ Validation failed. Please review the errors above."
             echo ""
             echo "For more information on plugin requirements:"
             echo "  📖 scripts/README.md"
+            echo "  📖 https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/README.md"
             echo "  🔗 https://docs.claude.com/en/docs/claude-code/plugins-reference"
             exit 1
           else
@@ -82,5 +212,6 @@ jobs:
             echo ""
             echo "For more information on plugin requirements:"
             echo "  📖 scripts/README.md"
+            echo "  📖 https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/README.md"
             echo "  🔗 https://docs.claude.com/en/docs/claude-code/plugins-reference"
           fi
