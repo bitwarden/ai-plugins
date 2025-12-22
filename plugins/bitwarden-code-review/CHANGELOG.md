@@ -106,7 +106,3 @@ Plugin version tracks base guidelines changes:
 - **Major version**: Breaking changes to base guidelines or emoji system
 - **Minor version**: New organizational patterns added to base guidelines, or new tool additions.
 - **Patch version**: Bug fixes, clarifications, documentation improvements
-
-Individual skills have independent versioning in their SKILL.md frontmatter:
-
-- Example: Plugin v1.2.0, android skill v1.5.0, iOS skill v2.1.0
