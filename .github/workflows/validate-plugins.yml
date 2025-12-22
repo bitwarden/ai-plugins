@@ -32,10 +32,10 @@ jobs:
         run: |
           # Get list of changed files in plugins directory
           git fetch origin "$BASE_REF"
-          CHANGED_FILES=$(git diff --name-only origin/"$BASE_REF"...HEAD | grep '^plugins/' || echo "")
+          CHANGED_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep '^plugins/' || echo "")
 
           # Extract unique plugin directories from changed files
-          CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | xargs)
+          CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | tr '\n' ' ' | sed 's/ $//')
 
           # Filter for AGENT.md and hooks.json files
           AGENT_FILES=$(echo "$CHANGED_FILES" | grep 'AGENT\.md$' || echo "")

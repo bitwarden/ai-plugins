@@ -119,8 +119,8 @@ validate_plugin_structure() {
                 local command_name
                 command_name=$(basename "$command_dir")
                 local md_count
-                md_count=$(find "$command_dir" -maxdepth 1 -name "*.md" | wc -l)
-                if [[ $md_count -eq 0 ]]; then
+                md_count=$(find "$command_dir" -maxdepth 1 -name "*.md" -print0 | grep -zc .)
+                if [[ "$md_count" -eq 0 ]]; then
                     print_error "Command directory $command_name has no .md files"
                     has_errors=1
                 fi
@@ -349,19 +349,23 @@ main() {
             # Remove leading ./ if present
             arg="${arg#./}"
 
-            # If argument is a full path to plugin directory
-            if [[ -d "$arg" ]]; then
-                plugins+=("$arg")
-            # If argument is just the plugin name
-            elif [[ -d "$PLUGINS_DIR/$arg" ]]; then
-                plugins+=("$PLUGINS_DIR/$arg")
+            # Sanitize path to prevent traversal attacks
+            # Remove any .. sequences and leading/trailing slashes
+            arg="${arg//..\/}"
+            arg="${arg//\/..}"
+            arg="${arg#/}"
+            arg="${arg%/}"
+
             # If argument is a path within plugins/
-            elif [[ "$arg" =~ ^plugins/ ]]; then
-                local plugin_name
-                plugin_name=$(echo "$arg" | cut -d/ -f2)
-                if [[ -d "$PLUGINS_DIR/$plugin_name" ]]; then
+            if [[ "$arg" =~ ^plugins/([^/]+)$ ]]; then
+                local plugin_name="${BASH_REMATCH[1]}"
+                # Validate plugin name contains only safe characters
+                if [[ "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$PLUGINS_DIR/$plugin_name" ]]; then
                     plugins+=("$PLUGINS_DIR/$plugin_name")
                 fi
+            # If argument is just the plugin name
+            elif [[ "$arg" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$PLUGINS_DIR/$arg" ]]; then
+                plugins+=("$PLUGINS_DIR/$arg")
             fi
         done
 

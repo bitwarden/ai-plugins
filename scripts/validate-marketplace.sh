@@ -286,10 +286,21 @@ main() {
             # Remove leading ./ if present
             arg="${arg#./}"
 
+            # Sanitize path to prevent traversal attacks
+            # Remove any .. sequences and leading/trailing slashes
+            arg="${arg//..\/}"
+            arg="${arg//\/..}"
+            arg="${arg#/}"
+            arg="${arg%/}"
+
             # Extract plugin name from various path formats
-            if [[ "$arg" =~ ^plugins/([^/]+) ]]; then
-                target_plugins+=("${BASH_REMATCH[1]}")
-            elif [[ -d "$REPO_ROOT/plugins/$arg" ]]; then
+            if [[ "$arg" =~ ^plugins/([^/]+)$ ]]; then
+                local plugin_name="${BASH_REMATCH[1]}"
+                # Validate plugin name contains only safe characters
+                if [[ "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$REPO_ROOT/plugins/$plugin_name" ]]; then
+                    target_plugins+=("$plugin_name")
+                fi
+            elif [[ "$arg" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$REPO_ROOT/plugins/$arg" ]]; then
                 target_plugins+=("$arg")
             fi
         done
