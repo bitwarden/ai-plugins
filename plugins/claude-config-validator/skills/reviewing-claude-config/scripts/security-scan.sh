@@ -144,7 +144,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" "/etc" "id_rsa" "credentials")
     for path in "${SENSITIVE_PATHS[@]}"; do
         if grep -q "$path" "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-            echo "  ⚠️ WARNING: Permissions reference sensitive path: $path"
+            echo "  ⚠️  WARNING: Permissions reference sensitive path: $path"
             echo "     File: ${CLAUDE_DIR}/settings.json"
             echo "     Review manually to ensure appropriate scoping"
             echo ""
