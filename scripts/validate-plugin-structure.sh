@@ -253,8 +253,9 @@ validate_agent_frontmatter() {
     fi
 
     # Extract frontmatter (between first two --- markers)
+    # Use awk for more robust YAML frontmatter extraction
     local frontmatter
-    frontmatter=$(sed -n '/^---$/,/^---$/p' "$agent_file" | sed '1d;$d')
+    frontmatter=$(awk '/^---$/{if(++n==2){exit}}n==1' "$agent_file")
 
     if [[ -z "$frontmatter" ]]; then
         print_error "Agent $plugin_name/$agent_name: Empty frontmatter"
@@ -305,9 +306,10 @@ validate_skill_frontmatter() {
         return 1
     fi
 
-    # Extract frontmatter
+    # Extract frontmatter (between first two --- markers)
+    # Use awk for more robust YAML frontmatter extraction
     local frontmatter
-    frontmatter=$(sed -n '/^---$/,/^---$/p' "$skill_file" | sed '1d;$d')
+    frontmatter=$(awk '/^---$/{if(++n==2){exit}}n==1' "$skill_file")
 
     if [[ -z "$frontmatter" ]]; then
         print_error "Skill $plugin_name/$skill_name: Empty frontmatter"
@@ -364,7 +366,7 @@ main() {
         done
 
         # Remove duplicates
-        mapfile -t plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
+        readarray -t plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
 
         if [[ "${#plugins[@]}" -eq 0 ]]; then
             echo -e "${YELLOW}⚠️ No valid plugin directories found in arguments${RESET}"
@@ -373,7 +375,7 @@ main() {
     else
         # No arguments - validate all plugins
         for dir in "$PLUGINS_DIR"/*; do
-            if [[ -d "$dir" ]] && [[ ! $(basename "$dir") =~ ^\. ]]; then
+            if [[ -d "$dir" ]] && [[ ! "$(basename "$dir")" =~ ^\. ]]; then
                 plugins+=("$dir")
             fi
         done
@@ -384,7 +386,7 @@ main() {
         fi
 
         # Sort plugins
-        mapfile -t plugins < <(printf '%s\n' "${plugins[@]}" | sort)
+        readarray -t plugins < <(printf '%s\n' "${plugins[@]}" | sort)
     fi
 
     # Validate each plugin

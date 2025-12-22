@@ -237,7 +237,7 @@ check_consistency() {
         local missing_plugins=()
 
         for dir in "$plugins_dir"/*; do
-            if [[ -d "$dir" ]] && [[ ! $(basename "$dir") =~ ^\. ]]; then
+            if [[ -d "$dir" ]] && [[ ! "$(basename "$dir")" =~ ^\. ]]; then
                 local dir_name
                 dir_name=$(basename "$dir")
 
@@ -295,7 +295,7 @@ main() {
         done
 
         # Remove duplicates
-        mapfile -t target_plugins < <(printf '%s\n' "${target_plugins[@]}" | sort -u)
+        readarray -t target_plugins < <(printf '%s\n' "${target_plugins[@]}" | sort -u)
 
         if [[ "${#target_plugins[@]}" -eq 0 ]]; then
             echo -e "${YELLOW}⚠️ No valid plugins found in arguments${RESET}"
