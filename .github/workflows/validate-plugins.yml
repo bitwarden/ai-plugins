@@ -41,25 +41,24 @@ jobs:
           AGENT_FILES=$(echo "$CHANGED_FILES" | grep 'AGENT\.md$' || echo "")
           HOOK_FILES=$(echo "$CHANGED_FILES" | grep 'hooks\.json$' || echo "")
 
-          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-          echo "changed_plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
-
-          echo "agent_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$AGENT_FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-          echo "hook_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$HOOK_FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "changed_files<<EOF"
+            echo "$CHANGED_FILES"
+            echo "EOF"
+            echo "changed_plugins=$CHANGED_PLUGINS"
+            echo "agent_files<<EOF"
+            echo "$AGENT_FILES"
+            echo "EOF"
+            echo "hook_files<<EOF"
+            echo "$HOOK_FILES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
           # Check if there are any plugin component files to validate
           if [[ -n "$AGENT_FILES" ]] || [[ -n "$HOOK_FILES" ]]; then
-            echo "has_components=true" >> $GITHUB_OUTPUT
+            echo "has_components=true" >> "$GITHUB_OUTPUT"
           else
-            echo "has_components=false" >> $GITHUB_OUTPUT
+            echo "has_components=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Validate plugin structure
