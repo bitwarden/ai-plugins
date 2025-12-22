@@ -64,35 +64,27 @@ jobs:
 
       - name: Validate plugin structure
         id: structure
+        if: steps.changed-files.outputs.changed_plugins != ''
         continue-on-error: true
         env:
           CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
         run: |
           set -o pipefail
-          if [[ -n "$CHANGED_PLUGINS" ]]; then
-            echo "Validating only changed plugins: $CHANGED_PLUGINS"
-            read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
-            ./scripts/validate-plugin-structure.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/structure-validation.log
-          else
-            echo "No plugin files changed, validating all plugins"
-            ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log
-          fi
+          echo "Validating changed plugins: $CHANGED_PLUGINS"
+          read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+          ./scripts/validate-plugin-structure.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/structure-validation.log
 
       - name: Validate marketplace.json
         id: marketplace
+        if: steps.changed-files.outputs.changed_plugins != ''
         continue-on-error: true
         env:
           CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
         run: |
           set -o pipefail
-          if [[ -n "$CHANGED_PLUGINS" ]]; then
-            echo "Validating marketplace entries for changed plugins: $CHANGED_PLUGINS"
-            read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
-            ./scripts/validate-marketplace.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/marketplace-validation.log
-          else
-            echo "No plugin files changed, validating entire marketplace.json"
-            ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
-          fi
+          echo "Validating marketplace entries for changed plugins: $CHANGED_PLUGINS"
+          read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+          ./scripts/validate-marketplace.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/marketplace-validation.log
 
       - name: Log in to Azure
         if: steps.changed-files.outputs.has_components == 'true'
@@ -171,6 +163,7 @@ jobs:
           MARKETPLACE_RESULT: ${{ steps.marketplace.outcome }}
           COMPONENTS_RESULT: ${{ steps.components.outcome }}
           HAS_COMPONENTS: ${{ steps.changed-files.outputs.has_components }}
+          CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
         run: |
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -178,12 +171,17 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
 
-          echo "Plugin structure validation: $STRUCTURE_RESULT"
-          echo "Marketplace validation: $MARKETPLACE_RESULT"
+          if [[ -n "$CHANGED_PLUGINS" ]]; then
+            echo "Plugin structure validation: $STRUCTURE_RESULT"
+            echo "Marketplace validation: $MARKETPLACE_RESULT"
+          else
+            echo "Plugin structure validation: skipped (no plugin files changed)"
+            echo "Marketplace validation: skipped (no plugin files changed)"
+          fi
           if [[ "$HAS_COMPONENTS" == "true" ]]; then
             echo "Component & security validation (AI-driven): $COMPONENTS_RESULT"
           else
-            echo "Component & security validation (AI-driven): skipped (no plugin files changed)"
+            echo "Component & security validation (AI-driven): skipped (no component files changed)"
           fi
           echo ""
 
@@ -216,8 +214,12 @@ jobs:
 
           # Check if any validation failed
           FAILED=false
-          if [[ "$STRUCTURE_RESULT" == "failure" ]] || [[ "$MARKETPLACE_RESULT" == "failure" ]]; then
-            FAILED=true
+
+          # Only fail on structure/marketplace if they ran and failed
+          if [[ -n "$CHANGED_PLUGINS" ]]; then
+            if [[ "$STRUCTURE_RESULT" == "failure" ]] || [[ "$MARKETPLACE_RESULT" == "failure" ]]; then
+              FAILED=true
+            fi
           fi
 
           # Only fail on components if it actually ran and failed
