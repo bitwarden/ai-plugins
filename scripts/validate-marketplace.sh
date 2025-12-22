@@ -222,7 +222,7 @@ check_consistency() {
                 local dir_name=$(basename "$dir")
 
                 # Check if this plugin is in the marketplace
-                local found=$(jq -r ".plugins[] | select(.name == \"$dir_name\") | .name" "$MARKETPLACE_JSON")
+                local found=$(jq -r --arg name "$dir_name" '.plugins[] | select(.name == $name) | .name' "$MARKETPLACE_JSON")
 
                 if [[ -z "$found" ]]; then
                     missing_plugins+=("$dir_name")
@@ -230,7 +230,7 @@ check_consistency() {
             fi
         done
 
-        if [[ ${#missing_plugins[@]} -gt 0 ]]; then
+        if [[ "${#missing_plugins[@]}" -gt 0 ]]; then
             local missing_list=$(IFS=', '; echo "${missing_plugins[*]}")
             print_error "Plugins exist in 'plugins/' directory but are not listed in marketplace.json: $missing_list"
             has_errors=1

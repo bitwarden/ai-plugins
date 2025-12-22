@@ -179,7 +179,7 @@ validate_readme_content() {
         return 0
     fi
 
-    local content=$(cat "$readme" | tr '[:upper:]' '[:lower:]')
+    local content=$(tr '[:upper:]' '[:lower:]' < "$readme")
 
     # Check for key sections (warnings only)
     if ! echo "$content" | grep -qE "(description|overview|about)"; then
@@ -324,7 +324,7 @@ main() {
         fi
     done
 
-    if [[ ${#plugins[@]} -eq 0 ]]; then
+    if [[ "${#plugins[@]}" -eq 0 ]]; then
         echo -e "${YELLOW}⚠️ No plugins found in $PLUGINS_DIR${RESET}"
         exit 0
     fi
