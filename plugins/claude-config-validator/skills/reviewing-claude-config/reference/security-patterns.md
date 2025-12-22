@@ -303,7 +303,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     fi
 
     if grep -qE '(\.ssh|\.aws|\.gnupg)' "${CLAUDE_DIR}/settings.json"; then
-        echo "  ⚠️  WARNING: Permissions reference sensitive directories"
+        echo "  ⚠️ WARNING: Permissions reference sensitive directories"
         PERM_ISSUES=1
     fi
 

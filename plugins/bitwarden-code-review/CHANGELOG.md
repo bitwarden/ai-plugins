@@ -5,6 +5,23 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-12-21
+
+### Added
+
+- Two new skills: `classifying-review-findings` and `posting-bitwarden-review-comments`
+- Comprehensive test plan in `tests/TESTING.md`
+
+### Changed
+
+- Refactored AGENT.md to use skill-based architecture for classification and formatting
+- Updated permission patterns in settings.json to use `:*` suffix format
+- Simplified README.md by moving detailed procedures to skill documentation
+
+### Fixed
+
+- Permission deny patterns now correctly use `:*` format for Claude Code compatibility
+
 ## [1.3.3] - 2025-12-18
 
 - Remove all repo specific guidance from our code review agent.
@@ -106,7 +123,3 @@ Plugin version tracks base guidelines changes:
 - **Major version**: Breaking changes to base guidelines or emoji system
 - **Minor version**: New organizational patterns added to base guidelines, or new tool additions.
 - **Patch version**: Bug fixes, clarifications, documentation improvements
-
-Individual skills have independent versioning in their SKILL.md frontmatter:
-
-- Example: Plugin v1.2.0, android skill v1.5.0, iOS skill v2.1.0
