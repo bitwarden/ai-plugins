@@ -26,10 +26,12 @@ jobs:
 
       - name: Get changed plugin files
         id: changed-files
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           # Get list of changed files in plugins directory
-          git fetch origin ${{ github.base_ref }}
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^plugins/' || echo "")
+          git fetch origin "$BASE_REF"
+          CHANGED_FILES=$(git diff --name-only origin/"$BASE_REF"...HEAD | grep '^plugins/' || echo "")
 
           # Extract unique plugin directories from changed files
           CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | xargs)
@@ -62,11 +64,13 @@ jobs:
       - name: Validate plugin structure
         id: structure
         continue-on-error: true
+        env:
+          CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
         run: |
           set -o pipefail
-          if [[ -n "${{ steps.changed-files.outputs.changed_plugins }}" ]]; then
-            echo "Validating only changed plugins: ${{ steps.changed-files.outputs.changed_plugins }}"
-            ./scripts/validate-plugin-structure.sh ${{ steps.changed-files.outputs.changed_plugins }} 2>&1 | tee /tmp/structure-validation.log
+          if [[ -n "$CHANGED_PLUGINS" ]]; then
+            echo "Validating only changed plugins: $CHANGED_PLUGINS"
+            ./scripts/validate-plugin-structure.sh $CHANGED_PLUGINS 2>&1 | tee /tmp/structure-validation.log
           else
             echo "No plugin files changed, validating all plugins"
             ./scripts/validate-plugin-structure.sh 2>&1 | tee /tmp/structure-validation.log
@@ -75,11 +79,13 @@ jobs:
       - name: Validate marketplace.json
         id: marketplace
         continue-on-error: true
+        env:
+          CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
         run: |
           set -o pipefail
-          if [[ -n "${{ steps.changed-files.outputs.changed_plugins }}" ]]; then
-            echo "Validating marketplace entries for changed plugins: ${{ steps.changed-files.outputs.changed_plugins }}"
-            ./scripts/validate-marketplace.sh ${{ steps.changed-files.outputs.changed_plugins }} 2>&1 | tee /tmp/marketplace-validation.log
+          if [[ -n "$CHANGED_PLUGINS" ]]; then
+            echo "Validating marketplace entries for changed plugins: $CHANGED_PLUGINS"
+            ./scripts/validate-marketplace.sh $CHANGED_PLUGINS 2>&1 | tee /tmp/marketplace-validation.log
           else
             echo "No plugin files changed, validating entire marketplace.json"
             ./scripts/validate-marketplace.sh 2>&1 | tee /tmp/marketplace-validation.log
