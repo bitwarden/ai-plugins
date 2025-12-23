@@ -93,6 +93,39 @@ claude -p "What skills are available?"
 
 ---
 
+### Skill 3: `posting-review-summary`
+
+#### Discovery Test
+
+```bash
+claude -p "What skills are available for posting review summaries?"
+```
+
+✅ Should list `posting-review-summary`
+
+#### Invocation Tests
+
+| Test                     | Command                                                                                                                                                                | Expected                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **Context detection**    | `claude -p "Using posting-review-summary, explain how you determine where to post the summary"`                                                                        | Mentions sticky comment tool vs local file                    |
+| **Format with findings** | `claude -p "Using posting-review-summary, format a summary with: 1 CRITICAL sql injection in auth.ts:45, 1 SUGGESTED additional covering unit test in api.test.ts:20"` | Uses collapsed `<details>` section, CRITICAL before SUGGESTED |
+| **Clean PR format**      | `claude -p "Using posting-review-summary, format a summary for a PR with no issues"`                                                                                   | Brief approval, no `<details>` section                        |
+| **Deficient title**      | `claude -p "Using posting-review-summary, format a summary for a PR titled 'fix bug' with no description"`                                                             | Includes ❓ about title in Details section                    |
+| **Adequate title**       | `claude -p "Using posting-review-summary, format a summary for a PR titled 'Fix null check in UserService.getProfile' with brief description"`                         | NO metadata comments                                          |
+| **Missing screenshots**  | `claude -p "Using posting-review-summary, format a summary for a PR that changes UI components but has no screenshots"`                                                | Includes ❓ requesting screenshots                            |
+| **Metadata limit**       | `claude -p "Using posting-review-summary, the PR has: vague title, no description, no test plan, no Jira link, no screenshots. Format the summary."`                   | Max 3 lines of metadata feedback total                        |
+
+#### Anti-Pattern Tests
+
+| Test                   | Command            | Should NOT happen                                         |
+| ---------------------- | ------------------ | --------------------------------------------------------- |
+| **No gh pr comment**   | Any summary format | Never suggests using `gh pr comment`                      |
+| **No praise sections** | Summary format     | Never includes "Strengths" or "Highlights" headers        |
+| **No inline metadata** | Any metadata issue | Never suggests posting metadata issues as inline comments |
+| **No perfect-seeking** | Adequate PR        | Never comments on "could be better" metadata              |
+
+---
+
 ### Integration Test
 
 Run a full review scenario that should invoke multiple skills:

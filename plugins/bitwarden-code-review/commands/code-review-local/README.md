@@ -46,16 +46,24 @@ The command generates two markdown files in your current working directory:
 
 ### 1. `review-summary.md`
 
-Contains the overall summary comment that would be posted with `gh pr comment`.
+Contains the overall summary comment (via `Skill(posting-review-summary)`).
 
 **Format for PRs with issues:**
 
 ```markdown
 **Overall Assessment:** REQUEST CHANGES
 
-**Critical Issues**:
+[1-2 neutral sentences describing what was reviewed]
 
-- [file:line] - [brief description]
+<details>
+<summary>Code Review Details</summary>
+
+- ❌ **CRITICAL**: [One-line description]
+  - `filename.ts:42`
+- ⚠️ **IMPORTANT**: [One-line description]
+  - `filename.ts:87`
+
+</details>
 
 See inline comments for details.
 ```
@@ -97,9 +105,9 @@ The agent uses Bitwarden's standard emoji classification system:
 
 - **❌ Critical**: Security vulnerabilities, data loss risks, breaking changes
 - **⚠️ Important**: Bugs, incorrect logic, maintainability concerns
-- **♻️ Refactoring**: Code quality improvements, technical debt
-- **🎨 Style/Convention**: Formatting, naming, minor conventions
-- **❓ Question/Discussion**: Clarifications, suggestions for discussion
+- **♻️ Debt**: Code quality improvements, technical debt
+- **🎨 Suggested**: Measurable improvements with concrete metrics
+- **❓ Question**: Clarifications, suggestions for discussion
 
 ## What the Command Does
 

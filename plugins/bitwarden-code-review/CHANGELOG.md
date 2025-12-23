@@ -5,6 +5,27 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-12-23
+
+### Added
+
+- Skill `posting-review-summary` for context-aware summary output (sticky comment vs local file)
+- Skill `avoiding-false-positives` to reduce hallucinations
+- Skill `detecting-existing-threads` for duplicate comment prevention
+- Skill `reviewing-incremental-changes` for re-review scoping
+- Collapsed `<details>` section in summaries listing findings by severity
+
+### Changed
+
+- Extracted PR metadata assessment from AGENT.md into `posting-review-summary` skill
+- `posting-bitwarden-review-comments` delegates summary formatting to dedicated skill
+- Summary comments include 1-2 neutral sentences describing what was reviewed
+- Reduced AGENT.md complexity (~180 lines → ~120 lines)
+
+### Fixed
+
+- Tool permission patterns for `get-review-threads.sh`
+
 ## [1.4.0] - 2025-12-21
 
 ### Added
