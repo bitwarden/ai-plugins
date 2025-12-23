@@ -52,8 +52,6 @@ Uses same format as `Skill(posting-review-summary)`:
   - `filename.ts:42`
 
 </details>
-
-See inline comments for details.
 ```
 
 **File 2: `review-inline-comments.md`**
