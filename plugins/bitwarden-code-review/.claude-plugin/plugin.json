@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-code-review",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Comprehensive code review system with organization-wide standards.",
   "author": {
     "name": "Bitwarden",
@@ -22,6 +22,10 @@
   "commands": ["./commands/code-review-local/code-review-local.md"],
   "skills": [
     "./skills/classifying-review-findings/SKILL.md",
-    "./skills/posting-bitwarden-review-comments/SKILL.md"
+    "./skills/posting-bitwarden-review-comments/SKILL.md",
+    "./skills/detecting-existing-threads/SKILL.md",
+    "./skills/avoiding-false-positives/SKILL.md",
+    "./skills/reviewing-incremental-changes/SKILL.md",
+    "./skills/posting-review-summary/SKILL.md"
   ]
 }

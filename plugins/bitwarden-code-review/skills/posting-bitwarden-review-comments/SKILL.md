@@ -1,6 +1,6 @@
 ---
 name: posting-bitwarden-review-comments
-description: Formats and posts GitHub PR review comments following Bitwarden engineering standards. Use when posting code review findings, inline comments, or summary assessments on pull requests. Also use when Claude Code creates a sticky comment for PR reviews.
+description: Formats and posts GitHub PR inline review comments following Bitwarden engineering standards. Use when posting code-specific findings. For summary comments, invoke posting-review-summary skill.
 ---
 
 # Posting Bitwarden Review Comments
@@ -12,6 +12,7 @@ description: Formats and posts GitHub PR review comments following Bitwarden eng
 3. **MUST** Use the Bitwarden finding format
 4. **FORBIDDEN**: Do NOT add "Strengths", "Highlights", or positive observations sections.
 5. **FORBIDDEN** Do NOT post praise-only inline comments
+6. **FORBIDDEN**: Do NOT post PR metadata issues (title, description, test plan) as inline comments. These go in the summary only.
 
 ## Finding Format
 
@@ -61,29 +62,6 @@ Reference: [docs link if applicable]
 </details>
 ```
 
-## Summary Comments
+## Summary Output
 
-**Every summary comment MUST:**
-
-1. Be concise - list only finding summaries with file:line references
-2. Not repeat details from inline comments
-3. Limit praise to one or two sentences
-
-### Template for PRs with actionable issues
-
-```
-**Overall Assessment:** APPROVE / REQUEST CHANGES
-
-**Critical Issues** (if any):
-- [One-line summary with file:line reference]
-
-See inline comments for details.
-```
-
-### Template for PRs without actionable issues
-
-```
-**Overall Assessment:** APPROVE
-
-[One neutral sentence describing what was reviewed]
-```
+Invoke `Skill(posting-review-summary)` for all summary formatting and posting.

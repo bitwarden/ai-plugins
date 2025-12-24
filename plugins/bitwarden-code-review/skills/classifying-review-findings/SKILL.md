@@ -33,3 +33,20 @@ Verify ALL three:
 - Vague suggestions ("could be simpler")
 - Style preferences without enforced standard
 - Naming nitpicks unless actively misleading
+- PR metadata issues (title, description, test plan) - handled by summary skill, not classified here
+
+## Suggested Improvements (🎨) Criteria
+
+**Only suggest improvements that provide measurable value:**
+
+1. **Security gain** - Eliminates entire vulnerability class (SQL injection, XSS, etc.)
+2. **Complexity reduction** - Reduces cyclomatic complexity by 3+, eliminates nesting level
+3. **Bug prevention** - Makes entire category of bugs impossible (type safety, null safety)
+4. **Performance gain** - Reduces O(n²) to O(n), eliminates N+1 queries (provide evidence)
+
+**Provide concrete metrics:**
+
+- ❌ "This could be simpler"
+- ✅ "This has cyclomatic complexity of 12; extracting validation logic would reduce to 6"
+
+**If you can't measure the improvement, don't suggest it.**

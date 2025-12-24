@@ -29,10 +29,14 @@ The plugin provides a single agent (`bitwarden-code-reviewer`) that:
 
 ### Skills
 
-The agent leverages two specialized skills:
+The agent leverages specialized skills:
 
-- **`classifying-review-findings`**: Determines severity levels (CRITICAL, IMPORTANT, DEBT, SUGGESTED, QUESTION) and validates finding criteria
-- **`posting-bitwarden-review-comments`**: Formats PR comments following Bitwarden standards and handles GitHub comment posting
+- **`classifying-review-findings`**: Determines severity levels and validates finding criteria
+- **`posting-bitwarden-review-comments`**: Formats inline PR comments following Bitwarden standards
+- **`posting-review-summary`**: Posts or updates summary comments (handles sticky comment vs local file)
+- **`detecting-existing-threads`**: Prevents duplicate comments by detecting existing threads
+- **`reviewing-incremental-changes`**: Scopes re-reviews to only new changes
+- **`avoiding-false-positives`**: Validates findings against framework patterns and conventions
 
 ### Finding Classification
 
@@ -58,10 +62,18 @@ bitwarden-code-review/
 ├── commands/
 │   └── code-review-local/                    # Local review command
 ├── skills/
+│   ├── avoiding-false-positives/
+│   │   └── SKILL.md                          # False positive prevention
 │   ├── classifying-review-findings/
 │   │   └── SKILL.md                          # Severity classification
-│   └── posting-bitwarden-review-comments/
-│       └── SKILL.md                          # Comment formatting
+│   ├── detecting-existing-threads/
+│   │   └── SKILL.md                          # Duplicate prevention
+│   ├── posting-bitwarden-review-comments/
+│   │   └── SKILL.md                          # Inline comment formatting
+│   ├── posting-review-summary/
+│   │   └── SKILL.md                          # Summary comment handling
+│   └── reviewing-incremental-changes/
+│       └── SKILL.md                          # Re-review scoping
 ├── tests/
 │   └── TESTING.md                            # Test plan and validation
 └── README.md                                 # This file
