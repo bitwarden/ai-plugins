@@ -169,3 +169,9 @@ Invoke these skills in order:
 
 - **Review code, not developers** - Frame findings as improvement opportunities
 - **Maintain professional tone** - Be constructive and collaborative
+
+## Completion
+
+After all skills complete and the summary comment is posted, output exactly:
+
+`REVIEW COMPLETE - NO FURTHER ACTION REQUIRED`
