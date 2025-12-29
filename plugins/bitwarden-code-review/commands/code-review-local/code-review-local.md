@@ -17,11 +17,11 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
    - For PRs: Use the extracted PR number when executing thread detection and fetching PR data with `gh pr view` commands
    - For local changes: Skip thread detection, analyze uncommitted and committed changes on the current branch
 
-2. **Local Review Mode**: You are performing a code review, and writing output to LOCAL FILES instead of posting to GitHub
+2. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
 
-3. **Output Destination**: Write review findings to TWO separate files:
-   - `review-summary.md` - The overall summary comment (what would be posted with `gh pr comment`)
-   - `review-inline-comments.md` - All inline review comments (what would be posted with `gh pr review --comment`)
+3. **Output Destination**: Write to local files:
+   - `review-summary.md` - Summary (via `Skill(posting-review-summary)` in local mode)
+   - `review-inline-comments.md` - Inline comments (same format as GitHub)
 
 4. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
    - If no inline comments would be left, leave `review-inline-comments.md` blank.
@@ -30,8 +30,7 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 6. **Include All Standard Review Elements**:
    - Pre-review protocol (read existing comments, understand changes, assess PR metadata)
-   - Repository-specific guidelines (check for .claude/prompts/review-code.md)
-   - All finding categories (❌ ⚠️ ♻️ 🎨 💭)
+   - All finding categories (❌ ⚠️ ♻️ 🎨 ❓)
    - Proper `<details>` sections for each finding
    - Final summary with overall assessment
 
@@ -39,23 +38,20 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 **File 1: `review-summary.md`**
 
-Contains the overall summary comment (same format as would be posted with `gh pr comment` in standard GitHub reviews, but written to local file). Format:
+Uses same format as `Skill(posting-review-summary)`:
 
 ```markdown
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
-**Critical Issues** (if any):
-- [file:line] - [brief description]
+[1-2 neutral sentence describing what was reviewed]
 
-See inline comments for details.
-```
+<details>
+<summary>Code Review Details</summary>
 
-Or for clean PRs:
+- [emoji] **[SEVERITY]**: [One-line description]
+  - `filename.ts:42`
 
-```markdown
-**Overall Assessment:** APPROVE
-
-[One neutral sentence describing what was reviewed]
+</details>
 ```
 
 **File 2: `review-inline-comments.md`**
@@ -71,6 +67,7 @@ Contains all inline review comments with file and line references (same format a
 <summary>Details and fix</summary>
 
 [Full details, code examples, rationale]
+
 </details>
 
 ---

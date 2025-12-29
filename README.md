@@ -15,6 +15,7 @@ Choose one of the following authentication methods:
 **Option 1: GitHub CLI (Recommended)**
 
 1. Install GitHub CLI if not already installed:
+
    ```bash
    # macOS
    brew install gh
@@ -42,11 +43,13 @@ Choose one of the following authentication methods:
    - Generate and copy the token
 
 2. Configure Claude Code with your GitHub token:
+
    ```bash
    export GITHUB_TOKEN=your_token_here
    ```
 
    Or add it to your shell configuration file (~/.zshrc, ~/.bashrc, etc.) to persist across sessions:
+
    ```bash
    echo 'export GITHUB_TOKEN=your_token_here' >> ~/.zshrc
    source ~/.zshrc
@@ -71,6 +74,7 @@ You can add this marketplace using either the short form or full URL:
 ### Installing plugins from this marketplace
 
 Once the marketplace is added, you can install plugins using:
+
 ```bash
 /plugin install plugin-name@bitwarden-marketplace
 ```
@@ -148,6 +152,46 @@ This is a Bitwarden-maintained repository with high security standards. All plug
 - **Validate all inputs as untrusted** - Never assume external input is safe
 - **Fail safely and degrade gracefully** - Plugins should handle errors without compromising security
 
+## Versioning and Changelog Requirements
+
+All plugin changes must include a version bump and changelog entry.
+
+### When to Bump Versions
+
+Follow [Semantic Versioning](https://semver.org/) for all version changes:
+
+- **MAJOR (X.0.0)**: Breaking changes or incompatible modifications
+- **MINOR (0.X.0)**: New features or backward-compatible additions
+- **PATCH (0.0.X)**: Bug fixes, documentation updates, or security patches
+
+### Using the Version Bump Script
+
+A helper script automates version updates across all required files:
+
+```bash
+./scripts/bump-plugin-version.sh <plugin-name> <new-version>
+```
+
+**Example:**
+
+```bash
+./scripts/bump-plugin-version.sh bitwarden-code-review 1.3.4
+```
+
+### Changelog Requirements
+
+After running the version bump script, update the changelog:
+
+1. Edit `plugins/<plugin-name>/CHANGELOG.md`
+2. Follow [Keep a Changelog](https://keepachangelog.com/) format
+3. Add an entry under the appropriate category:
+   - **Added**: New features
+   - **Changed**: Changes in existing functionality
+   - **Deprecated**: Soon-to-be removed features
+   - **Removed**: Removed features
+   - **Fixed**: Bug fixes
+   - **Security**: Security improvements
+
 ## Best Practices
 
 When developing plugins, follow these best practices:
@@ -158,6 +202,7 @@ When developing plugins, follow these best practices:
 4. **Version Compatibility** - Clearly document version requirements and compatibility
 5. **Performance** - Consider performance implications for large-scale operations
 6. **User Experience** - Provide clear error messages and helpful feedback
+7. **Version Every Change** - Always bump version and update changelog for any plugin modification
 
 ## Review Process
 

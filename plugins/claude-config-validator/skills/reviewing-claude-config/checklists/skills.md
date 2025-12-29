@@ -18,6 +18,7 @@ Critical structural elements:
 </thinking>
 
 **Focus Areas:**
+
 - [ ] YAML frontmatter present and valid
 - [ ] Skill file size ≤ 500 lines (progressive disclosure requirement)
 - [ ] No hardcoded secrets or credentials
@@ -25,6 +26,7 @@ Critical structural elements:
 - [ ] Supporting files are properly organized
 
 **Critical Issues to Flag Immediately:**
+
 - Missing YAML frontmatter (skill won't be recognized)
 - File > 500 lines without progressive disclosure
 - Hardcoded API keys, tokens, or passwords
@@ -44,6 +46,7 @@ YAML frontmatter requirements:
 </thinking>
 
 **Required Fields:**
+
 ```yaml
 ---
 name: skill-name-in-kebab-case
@@ -52,11 +55,13 @@ description: Clear description with activation triggers
 ```
 
 **Optional Fields:**
+
 ```yaml
-version: 1.0.0  # Semver format if marketplace-bound
+version: 1.0.0 # Semver format if marketplace-bound
 ```
 
 **Check For:**
+
 - [ ] `name` field exists and is kebab-case
 - [ ] `description` field exists and is clear
 - [ ] Description includes activation triggers (when to use)
@@ -64,6 +69,7 @@ version: 1.0.0  # Semver format if marketplace-bound
 - [ ] If versioned, follows semver (MAJOR.MINOR.PATCH)
 
 **Common Issues:**
+
 - Missing name or description
 - Name not in kebab-case (use-dashes-not-underscores)
 - Description too vague ("does stuff" → specify what and when)
@@ -82,18 +88,21 @@ Progressive disclosure requirements:
 </thinking>
 
 **Main skill.md Requirements:**
+
 - [ ] File size ≤ 500 lines
 - [ ] Clear routing logic (when to load which files)
 - [ ] Structured thinking blocks guide decision-making
 - [ ] References supporting files explicitly
 
 **Supporting Files Requirements:**
+
 - [ ] Each file is self-contained (understandable in isolation)
 - [ ] Clear purpose stated at top of file
 - [ ] No circular dependencies between files
 - [ ] Loaded on-demand, not all at once
 
 **File Organization Patterns:**
+
 ```
 skill-name/
 ├── skill.md              # Main orchestration (≤500 lines)
@@ -104,6 +113,7 @@ skill-name/
 ```
 
 **Red Flags:**
+
 - Main skill.md > 500 lines (should be split into supporting files)
 - Supporting files reference each other in circles
 - All context loaded upfront instead of on-demand
@@ -123,30 +133,35 @@ Quality criteria for skill instructions:
 </thinking>
 
 **Clarity:**
+
 - [ ] Instructions are specific, not vague
 - [ ] Technical terms are defined or demonstrated
 - [ ] Expected behavior is clearly stated
 - [ ] Step-by-step procedures where appropriate
 
 **Examples:**
+
 - [ ] Code examples for patterns to follow
 - [ ] Sample outputs showing expected format
 - [ ] Anti-patterns demonstrated (what NOT to do)
 - [ ] File structure examples where relevant
 
 **Emphasis:**
+
 - [ ] **Bold** for critical requirements
 - [ ] `Code blocks` for technical terms and examples
 - [ ] Headers organize content logically
 - [ ] Lists break down complex information
 
 **Structured Thinking:**
+
 - [ ] `<thinking>` blocks guide systematic analysis
 - [ ] Key questions posed before each major step
 - [ ] Decision criteria made explicit
 - [ ] Reasoning process modeled for complex decisions
 
 **Constructive Tone:**
+
 - [ ] Focus on "do this" not just "don't do that"
 - [ ] Explain rationale (why things matter)
 - [ ] Provide actionable fixes, not just problem identification
@@ -165,18 +180,21 @@ Token efficiency considerations:
 </thinking>
 
 **Efficient Organization:**
+
 - [ ] Progressive disclosure implemented (load only what's needed)
 - [ ] No duplicate information across files
 - [ ] Reference other docs instead of copying content
 - [ ] Clear routing to minimize unnecessary context loading
 
 **Concise Language:**
+
 - [ ] Direct statements preferred over verbose explanations
 - [ ] Technical precision without fluff
 - [ ] Examples are minimal but sufficient
 - [ ] Headers and structure reduce need for transitional text
 
 **Avoid:**
+
 - Repeating same information in multiple places
 - Loading all context upfront "just in case"
 - Verbose explanations when examples suffice
@@ -187,6 +205,7 @@ Token efficiency considerations:
 ## Priority Classification
 
 Classify findings using `reference/priority-framework.md`:
+
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
 - **SUGGESTED** - Improvements that aren't essential
@@ -197,27 +216,32 @@ Classify findings using `reference/priority-framework.md`:
 ## Common Skill Anti-Patterns
 
 **Monolithic Skills:**
+
 - Single file > 500 lines
 - All context loaded upfront
 - No progressive disclosure strategy
 - Fix: Split into main orchestration + supporting files
 
 **Vague Activation:**
+
 - Description: "Helps with code stuff"
 - Better: "Reviews Kotlin code for MVVM violations. Use when checking ViewModels, state management, or UI layer architecture."
 
 **Missing Structured Thinking:**
+
 - Instructions without guidance on reasoning process
 - No decision criteria for complex choices
 - Fix: Add `<thinking>` blocks with key questions
 
 **Broken Progressive Disclosure:**
+
 - Supporting files reference each other circularly
 - Files not self-contained
 - Unclear when to load what
 - Fix: Clear routing logic, self-contained files
 
 **Token Waste:**
+
 - Duplicate information across files
 - Loading all context upfront
 - Verbose explanations without adding value

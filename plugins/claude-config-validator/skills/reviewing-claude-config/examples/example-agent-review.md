@@ -17,7 +17,6 @@ Examples of agent configuration reviews showing common issues and best practices
 name: documentation-writer
 description: Helps write documentation.
 ---
-
 Write good documentation for code.
 ```
 
@@ -28,6 +27,7 @@ Write good documentation for code.
 Current description is too vague and doesn't specify when to use this agent.
 
 Recommended:
+
 ```yaml
 description: Generates API documentation and code comments for TypeScript projects. Use when documenting functions, classes, or REST endpoints in .ts files.
 ```
@@ -43,6 +43,7 @@ Reference: Anthropic Subagent Documentation - Description Best Practices
 Agent has no `tools` field, meaning it inherits ALL tools including destructive operations.
 
 Recommended:
+
 ```yaml
 ---
 name: documentation-writer
@@ -52,6 +53,7 @@ tools: Read, Grep, Glob, Write
 ```
 
 Rationale:
+
 - Read/Grep/Glob: Analyze code to document
 - Write: Create documentation files
 - NO Edit: Doesn't modify source code
@@ -68,10 +70,12 @@ Reference: `reference/claude-code-requirements.md` - Tool Access Patterns (lines
 Current prompt is too brief and unstructured.
 
 Recommended:
+
 ```markdown
 # Documentation Writer Agent
 
 ## Role
+
 You are a documentation specialist focused on creating clear, comprehensive API documentation for TypeScript projects.
 
 ## Process
@@ -85,20 +89,23 @@ Before documenting:
 </thinking>
 
 ## Output Format
+
 Use JSDoc format:
 \`\`\`typescript
-/**
- * [Brief description]
- *
- * @param {Type} paramName - Parameter description
- * @returns {Type} Return value description
- * @throws {ErrorType} When error occurs
- * @example
- * // Usage example
- */
-\`\`\`
+/\*\*
+
+- [Brief description]
+-
+- @param {Type} paramName - Parameter description
+- @returns {Type} Return value description
+- @throws {ErrorType} When error occurs
+- @example
+- // Usage example
+  \*/
+  \`\`\`
 
 ## Examples
+
 [Include 2-3 examples of good documentation]
 ```
 
@@ -115,7 +122,7 @@ Consider specifying model for cost/performance optimization:
 name: documentation-writer
 description: ...
 tools: Read, Grep, Glob, Write
-model: sonnet  # Or haiku for simple documentation
+model: sonnet # Or haiku for simple documentation
 ---
 ```
 
@@ -132,13 +139,16 @@ Reference: `reference/claude-code-requirements.md` - Model Selection (lines 73-8
 This agent requires fixes before approval:
 
 **Must Fix (CRITICAL):**
+
 - Add tools field with minimum required access (prevent security risk)
 
 **Should Fix (IMPORTANT):**
+
 - Improve description with specific activation triggers
 - Add structured system prompt with examples
 
 **Nice to Have (SUGGESTED):**
+
 - Specify model selection
 
 Once security issues are addressed and description improved, this will be ready for use.
@@ -265,6 +275,7 @@ No changes required. This is a reference-quality agent configuration.
 **`plugins/security-tools/agents/security-scanner.md:15-25`** - OPTIONAL: Consider additional capabilities
 
 Current capabilities are comprehensive for web applications. For even broader coverage, consider adding:
+
 - Container/Docker security misconfigurations
 - API security (rate limiting, API key exposure)
 - Dependency vulnerability scanning
@@ -281,6 +292,7 @@ This is a design choice - current scope is excellent.
 **Overall Assessment:** APPROVE
 
 This is an exemplary agent configuration that demonstrates:
+
 - Security best practices (minimal tool access)
 - Clear activation triggers for automatic delegation
 - Comprehensive system prompt with structured thinking
@@ -307,7 +319,6 @@ description: Formats code according to project style guides.
 tools: Read, Write, Edit
 model: opus
 ---
-
 Format code files using project style guide.
 ```
 
@@ -318,11 +329,13 @@ Format code files using project style guide.
 Current configuration uses `opus` for code formatting, which is expensive overkill.
 
 Recommended:
+
 ```yaml
-model: haiku  # Fast and cost-effective for mechanical tasks
+model: haiku # Fast and cost-effective for mechanical tasks
 ```
 
 Rationale:
+
 - Code formatting is mechanical, doesn't require complex reasoning
 - Haiku is 10x+ faster and significantly cheaper
 - Opus should be reserved for complex architectural decisions
@@ -337,16 +350,19 @@ Reference: `reference/claude-code-requirements.md` - Model Selection (lines 73-8
 Code formatter likely creates formatted versions, doesn't need Edit for in-place modification.
 
 Recommended:
+
 ```yaml
-tools: Read, Write  # Remove Edit
+tools: Read, Write # Remove Edit
 ```
 
 Or if in-place formatting is required:
+
 ```yaml
-tools: Read, Edit  # Remove Write
+tools: Read, Edit # Remove Write
 ```
 
 Clarify in system prompt whether agent:
+
 - Reads and writes new formatted files (Read, Write)
 - Modifies files in place (Read, Edit)
 
@@ -357,29 +373,35 @@ Reference: `reference/claude-code-requirements.md` - Tool Access Patterns (lines
 **`.claude/agents/code-formatter.md:7`** - IMPORTANT: System prompt lacks specification
 
 Current prompt doesn't specify:
+
 - Which style guide to use
 - What file types to format
 - Output format expectations
 
 Recommended:
+
 ```markdown
 # Code Formatter Agent
 
 ## Role
+
 Format code files according to project style guides automatically.
 
 ## Supported Languages
+
 - Python: Black formatter (PEP 8)
 - TypeScript: Prettier (project .prettierrc)
 - Go: gofmt
 
 ## Process
+
 1. Read file and detect language
 2. Apply appropriate formatter rules
 3. Write formatted output
 4. Report files formatted and any errors
 
 ## Output
+
 - List of files successfully formatted
 - Any files skipped (unsupported language, errors)
 - Summary of changes made
@@ -394,6 +416,7 @@ Clear specification prevents ambiguous behavior.
 **Overall Assessment:** REQUEST CHANGES
 
 **Must Fix (IMPORTANT):**
+
 - Change model from opus to haiku (cost/performance)
 - Clarify tool access (Write OR Edit, not both)
 - Add comprehensive system prompt
@@ -423,6 +446,7 @@ Use the code-reviewer agent.
 Current invocation is too vague and provides no context or expectations.
 
 Recommended:
+
 ```markdown
 ## Step 3: Invoke Security Analysis
 
@@ -432,18 +456,21 @@ Invoke the security-scanner agent to analyze modified files for vulnerabilities:
 {list of modified files from step 1}
 
 **Focus areas:**
+
 - Authentication and authorization logic
 - Database query construction
 - User input handling and validation
 - Output encoding and XSS prevention
 
 **Expected output:**
+
 - Inline comments with file:line references
 - CRITICAL priority for vulnerabilities
 - Specific fix recommendations with secure code examples
 - OWASP category for each finding
 
 **Context:**
+
 - Application uses JWT authentication
 - Database is PostgreSQL with SQLAlchemy ORM
 - Framework is Flask with Jinja2 templates
@@ -460,11 +487,13 @@ Specific invocations with context improve agent output quality by ~40%.
 ### Configuration
 
 **Agent A:** `.claude/agents/code-analyzer.md`
+
 ```markdown
 If issues found, invoke code-fixer agent.
 ```
 
 **Agent B:** `.claude/agents/code-fixer.md`
+
 ```markdown
 After fixing, invoke code-analyzer agent to verify.
 ```
@@ -474,18 +503,24 @@ After fixing, invoke code-analyzer agent to verify.
 **`.claude/agents/code-analyzer.md:45` + `.claude/agents/code-fixer.md:38`** - CRITICAL: Circular agent dependency
 
 These agents invoke each other, creating a potential infinite loop:
+
 - code-analyzer → code-fixer → code-analyzer → ...
 
 Fix:
+
 ```markdown
 # code-analyzer.md
+
 Report issues found. Do NOT invoke other agents.
 
 # code-fixer.md
+
 After fixing, report completion. Do NOT invoke analyzer.
 
 # Create separate coordinator if needed:
+
 # code-improvement-workflow.md
+
 1. Invoke code-analyzer
 2. Review results
 3. If fixes needed, invoke code-fixer
@@ -499,6 +534,7 @@ Rationale: Circular dependencies cause unpredictable behavior and infinite loops
 ## Key Takeaways
 
 ### Excellent Agent Patterns
+
 1. **Minimal tool access** - Grant only necessary tools
 2. **Specific descriptions** - Include activation triggers
 3. **Structured system prompts** - Use thinking blocks and examples
@@ -506,6 +542,7 @@ Rationale: Circular dependencies cause unpredictable behavior and infinite loops
 5. **Clear constraints** - Define what agent doesn't do
 
 ### Common Mistakes
+
 1. **Over-privileged** - Inheriting all tools unnecessarily
 2. **Vague descriptions** - No activation triggers
 3. **Wrong model** - Opus for simple tasks, Haiku for complex
@@ -513,6 +550,7 @@ Rationale: Circular dependencies cause unpredictable behavior and infinite loops
 5. **Scope creep** - Trying to do too many things
 
 ### Security Priorities
+
 1. **Always specify tools** unless all tools genuinely needed
 2. **Justify Bash access** explicitly in system prompt
 3. **Read-only for analysis** agents

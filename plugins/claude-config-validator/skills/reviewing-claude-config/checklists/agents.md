@@ -18,6 +18,7 @@ Critical structural elements for agents:
 </thinking>
 
 **Focus Areas:**
+
 - [ ] YAML frontmatter present and syntactically valid
 - [ ] Required fields: `name` and `description`
 - [ ] Optional fields validated if present: `tools`, `model`
@@ -25,6 +26,7 @@ Critical structural elements for agents:
 - [ ] File structure follows markdown format
 
 **Required YAML Frontmatter:**
+
 ```yaml
 ---
 name: agent-name-in-lowercase-with-hyphens
@@ -33,16 +35,18 @@ description: Specific description with activation triggers
 ```
 
 **Optional YAML Fields:**
+
 ```yaml
 ---
 name: agent-name
 description: Clear description
-tools: Read, Grep, Glob  # Comma-separated tool names (omit to inherit all)
-model: sonnet              # Options: sonnet, opus, haiku, inherit
+tools: Read, Grep, Glob # Comma-separated tool names (omit to inherit all)
+model: sonnet # Options: sonnet, opus, haiku, inherit
 ---
 ```
 
 **Critical Issues to Flag Immediately:**
+
 - Missing YAML frontmatter (agent won't be recognized)
 - Missing `name` field
 - Missing `description` field
@@ -72,6 +76,7 @@ Agents should have ONLY the tools necessary for their specific function.
 **Tool Access Patterns:**
 
 ✅ **GOOD - Read-only analysis agent:**
+
 ```yaml
 ---
 name: code-analyzer
@@ -81,6 +86,7 @@ tools: Read, Grep, Glob
 ```
 
 ✅ **GOOD - Scoped editing agent:**
+
 ```yaml
 ---
 name: test-generator
@@ -90,6 +96,7 @@ tools: Read, Grep, Write
 ```
 
 ❌ **BAD - Overly broad access:**
+
 ```yaml
 ---
 name: helper-agent
@@ -99,15 +106,17 @@ description: Helps with various tasks
 ```
 
 ❌ **BAD - Unnecessary destructive access:**
+
 ```yaml
 ---
 name: documentation-writer
 description: Writes documentation
-tools: Read, Write, Edit, Bash  # Why does documentation need Bash?
+tools: Read, Write, Edit, Bash # Why does documentation need Bash?
 ---
 ```
 
 **Security Checks:**
+
 - [ ] Tool access scoped to minimum required
 - [ ] Read-only agents don't have Write/Edit/Bash
 - [ ] Bash access is justified for agent purpose
@@ -115,12 +124,14 @@ tools: Read, Write, Edit, Bash  # Why does documentation need Bash?
 - [ ] No dangerous tool combinations without justification
 
 **Common Secure Patterns:**
+
 - **Analyst/Reviewer**: Read, Grep, Glob (read-only)
 - **Code Generator**: Read, Grep, Write (creates new files)
 - **Refactoring Agent**: Read, Grep, Edit (modifies existing)
 - **Automation Agent**: Read, Write, Bash (needs command execution)
 
 **Red Flags:**
+
 - Inheriting all tools without clear justification
 - Bash access without explanation
 - Write/Edit access for analysis-only agents
@@ -145,37 +156,44 @@ Description quality considerations:
 Descriptions must be specific about BOTH functionality AND activation triggers.
 
 ✅ **GOOD - Specific with activation triggers:**
+
 ```yaml
 description: Reviews Kotlin code for MVVM violations, state management issues, and Compose best practices. Use when analyzing Android ViewModels, state flows, or Compose UI code.
 ```
 
 ✅ **GOOD - Clear automatic delegation:**
+
 ```yaml
 description: Debugs runtime errors by analyzing stack traces and logs. PROACTIVELY invoke when error messages or exceptions are present.
 ```
 
 ✅ **GOOD - Narrow scope with examples:**
+
 ```yaml
 description: Generates unit tests for Python functions using pytest. Use when working with .py files that lack test coverage.
 ```
 
 ❌ **BAD - Too vague:**
+
 ```yaml
 description: Helps with code stuff.
 ```
 
 ❌ **BAD - No activation triggers:**
+
 ```yaml
 description: Analyzes code quality and suggests improvements.
 # When should this be used? What languages? What types of improvements?
 ```
 
 ❌ **BAD - Too broad (violates single responsibility):**
+
 ```yaml
 description: Handles all aspects of development including coding, testing, deployment, documentation, and architecture design.
 ```
 
 **Check For:**
+
 - [ ] Description states what the agent does
 - [ ] Description includes activation triggers (when to use)
 - [ ] Description is specific, not vague
@@ -183,6 +201,7 @@ description: Handles all aspects of development including coding, testing, deplo
 - [ ] Appropriate level of detail (not too terse, not too verbose)
 
 **Activation Language Patterns:**
+
 - "Use when..." - Explicit trigger conditions
 - "PROACTIVELY invoke..." - Encourages automatic delegation
 - "Use for..." - Specific use cases
@@ -205,6 +224,7 @@ System prompt effectiveness:
 **System Prompt Requirements:**
 
 **Clarity and Specificity:**
+
 - [ ] Role clearly defined
 - [ ] Capabilities explicitly stated
 - [ ] Constraints and boundaries documented
@@ -214,18 +234,22 @@ System prompt effectiveness:
 **Prompt Engineering Best Practices:**
 
 ✅ **GOOD - Structured with examples:**
+
 ```markdown
 # Code Reviewer Agent
 
 ## Role
+
 You are a specialized code reviewer focusing on security vulnerabilities, performance issues, and adherence to SOLID principles.
 
 ## Capabilities
+
 - Identify SQL injection, XSS, and CSRF vulnerabilities
 - Detect performance anti-patterns (N+1 queries, memory leaks)
 - Verify SOLID principle adherence
 
 ## Process
+
 1. Read the file and understand context
 2. Analyze against security checklist
 3. Check performance patterns
@@ -233,15 +257,18 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 5. Provide inline comments with file:line references
 
 ## Output Format
+
 **file.py:42** - CRITICAL: SQL injection vulnerability
 [Specific fix with code example]
 [Rationale explaining security impact]
 
 ## Examples
+
 [Include 2-3 examples of good review comments]
 ```
 
 ✅ **GOOD - Includes structured thinking:**
+
 ```markdown
 Before analyzing each file, use structured thinking:
 
@@ -256,22 +283,26 @@ Then provide your analysis...
 ```
 
 ❌ **BAD - Too vague:**
+
 ```markdown
 Review code and find problems.
 ```
 
 ❌ **BAD - No structure or examples:**
+
 ```markdown
 You're a code reviewer. Look at code and tell the user what's wrong with it. Check for bugs and bad practices.
 ```
 
 **Structured Thinking Guidance:**
+
 - [ ] `<thinking>` blocks guide reasoning process
 - [ ] Key questions posed for each major step
 - [ ] Decision criteria made explicit
 - [ ] Systematic analysis approach modeled
 
 **Token Efficiency:**
+
 - [ ] Concise without losing clarity
 - [ ] Examples are minimal but sufficient
 - [ ] No unnecessary verbosity
@@ -304,12 +335,14 @@ model: inherit # Inherits from parent conversation
 **When to Use Each Model:**
 
 **Haiku** - Simple, straightforward tasks:
+
 - Formatting code
 - Running predefined scripts
 - Simple file operations
 - Quick analysis with clear criteria
 
 **Sonnet** - Most agent tasks (default):
+
 - Code review
 - Bug analysis
 - Test generation
@@ -317,17 +350,20 @@ model: inherit # Inherits from parent conversation
 - Moderate complexity reasoning
 
 **Opus** - Complex reasoning only:
+
 - Architectural decisions
 - Complex refactoring across multiple files
 - Novel problem-solving
 - High-stakes analysis requiring maximum accuracy
 
 **Inherit** - Context-dependent:
+
 - When agent needs same context as main conversation
 - When model selection should match user's choice
 - For consistency across conversation
 
 **Best Practice Checks:**
+
 - [ ] Model specified or intentionally omitted
 - [ ] Model complexity matches task complexity
 - [ ] Not using opus unnecessarily (cost/latency)
@@ -336,6 +372,7 @@ model: inherit # Inherits from parent conversation
 - [ ] Agent scope appropriately focused
 
 **Anti-Patterns:**
+
 - Using opus for simple formatting tasks
 - Using haiku for complex analysis
 - Agent trying to handle too many different task types
@@ -359,12 +396,14 @@ Marketplace quality considerations:
 **For Marketplace-Bound Agents:**
 
 **Elevated Standards:**
+
 - Missing examples: SUGGESTED → IMPORTANT
 - Vague descriptions: IMPORTANT → CRITICAL
 - Poor system prompt: SUGGESTED → IMPORTANT
 - Undocumented tool access: IMPORTANT → CRITICAL
 
 **Documentation Requirements:**
+
 - [ ] Clear purpose and use cases
 - [ ] Examples in system prompt
 - [ ] Tool access justified
@@ -372,12 +411,14 @@ Marketplace quality considerations:
 - [ ] Expected outputs demonstrated
 
 **Production Readiness:**
+
 - [ ] Error handling considered
 - [ ] Edge cases addressed
 - [ ] Clear success/failure criteria
 - [ ] Graceful degradation patterns
 
 **Internal vs Marketplace:**
+
 - Internal agents: Can accept more SUGGESTED issues
 - Marketplace agents: Must fix all IMPORTANT issues
 - Both: Must fix all CRITICAL security/functionality issues
@@ -387,6 +428,7 @@ Marketplace quality considerations:
 ## Priority Classification
 
 Classify findings using `reference/priority-framework.md`:
+
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
 - **SUGGESTED** - Improvements that aren't essential
@@ -397,30 +439,36 @@ Classify findings using `reference/priority-framework.md`:
 ## Common Agent Anti-Patterns
 
 **Over-Privileged Agent:**
+
 - Inherits all tools without justification
 - Bash access for read-only task
 - Fix: Specify minimum required tools
 
 **Vague Purpose:**
+
 - Description: "Helps with code"
 - Better: "Reviews Python code for PEP 8 violations. Use when analyzing .py files."
 
 **Missing Structured Thinking:**
+
 - System prompt lacks reasoning guidance
 - No decision criteria for complex choices
 - Fix: Add `<thinking>` blocks with key questions
 
 **Wrong Model Selection:**
+
 - Using opus for simple formatting
 - Using haiku for complex analysis
 - Fix: Match model to task complexity
 
 **Scope Creep:**
+
 - Agent trying to handle multiple unrelated tasks
 - Jack-of-all-trades, master of none
 - Fix: Split into focused, single-purpose agents
 
 **Security Oversights:**
+
 - Bash access without scoping
 - Write access for analysis-only agents
 - No consideration of tool access implications
