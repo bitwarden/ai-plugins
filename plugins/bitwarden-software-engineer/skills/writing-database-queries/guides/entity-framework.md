@@ -1,6 +1,6 @@
 # Entity Framework Guide
 
-EF is used for PostgreSQL, MySQL, MariaDB, and SQLite. MSSQL uses Dapper in production.
+Entity Framework (EF) is used for PostgreSQL, MySQL, MariaDB, and SQLite. The Dapper ORM is used for MSSQL.
 
 ## Generating Migrations
 
