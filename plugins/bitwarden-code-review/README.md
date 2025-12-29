@@ -126,6 +126,91 @@ The agent follows a structured review process:
 
 For detailed process documentation, see [agents/bitwarden-code-reviewer/AGENT.md](./agents/bitwarden-code-reviewer/AGENT.md).
 
+## Code Review Institutional Knowledge
+
+### Overview
+
+The plugin includes a knowledge capture system that builds institutional memory from code reviews to prevent repeated mistakes and improve review quality.
+
+**Skills**:
+- `capturing-review-knowledge` - Document learnings from completed reviews
+- `recalling-review-knowledge` - Retrieve past learnings before starting reviews
+
+**Commands**:
+- `/retrospective-review [PR#]` - Capture knowledge after completing code review
+- `/advise-review` - Retrieve knowledge before starting code review
+
+### Key Concepts
+
+**Failed Detections**: Issues that were missed initially, caught late in review, or nearly overlooked. The most valuable type of knowledge.
+
+**Repository Gotchas**: Architectural patterns, common mistakes, and technology-specific issues unique to a repository.
+
+**Methodology Improvements**: Review strategies and techniques that proved effective or ineffective.
+
+**Actionability Gate**: Only high-value learnings are captured to maintain signal-to-noise ratio.
+
+### Usage Workflow
+
+**Before a Code Review:**
+
+```bash
+/advise-review
+```
+
+Displays:
+- Failed detections to watch for (issues caught late in past reviews)
+- Repository-specific gotchas (architectural patterns and common mistakes)
+- Effective review methodologies
+- Knowledge freshness metadata
+
+**For detailed usage**, see [recalling-review-knowledge skill documentation](skills/recalling-review-knowledge/README.md)
+
+**After a Code Review:**
+
+```bash
+# After local review
+/retrospective-review
+
+# Or analyze specific PR
+/retrospective-review 12345
+```
+
+The skill autonomously:
+- Analyzes review comments for severity markers (❌ CRITICAL, ⚠️ IMPORTANT)
+- Filters false positives (comments resolved without code changes)
+- Extracts failed detections, repository patterns, and methodology insights
+- Updates or creates SKILL file for the repository
+- Presents extraction summary
+
+**For detailed implementation**, see [capturing-review-knowledge skill documentation](skills/capturing-review-knowledge/README.md)
+
+### Knowledge Storage
+
+Per-repository knowledge is stored as SKILL files with YAML frontmatter:
+
+```
+skills/
+├── {owner}-{repo}-review-knowledge/     # Per-repository knowledge
+│   ├── SKILL.md                         # Unified knowledge file
+│   └── references/
+│       └── troubleshooting.md           # Error → Solution mappings
+```
+
+**Examples**:
+- [skills/bitwarden-ai-plugins-review-knowledge/SKILL.md](skills/bitwarden-ai-plugins-review-knowledge/SKILL.md)
+- [skills/bitwarden-server-review-knowledge/SKILL.md](skills/bitwarden-server-review-knowledge/SKILL.md)
+
+### Best Practices
+
+1. **Query before every review**: Run `/advise-review` to load context
+2. **Capture immediately**: Run `/retrospective-review` right after review while fresh
+3. **Review before committing**: Always check `git diff` before committing knowledge
+4. **Share with team**: Push knowledge updates so everyone benefits
+5. **Maintain quality**: Only capture actionable, high-value learnings
+
+---
+
 ## Installation
 
 Available through Bitwarden's internal Claude Code marketplace:

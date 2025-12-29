@@ -1,0 +1,42 @@
+---
+name: {{OWNER}}-{{REPO}}-review-knowledge
+description: "Code review knowledge for {{OWNER}}/{{REPO}} ({{TECH_STACK}}). Usage scenarios: (1) When reviewing PRs in {{OWNER}}/{{REPO}}, (2) When encountering {{COMMON_ERROR_1}}, (3) When checking {{PATTERN_1}}. Verified on {{LANGUAGES}}."
+---
+
+# {{OWNER}}/{{REPO}} - Code Review Knowledge
+
+## Repository Overview
+
+| Item | Details |
+|------|---------|
+| **Repository** | [{{OWNER}}/{{REPO}}](https://github.com/{{OWNER}}/{{REPO}}) |
+| **Technology Stack** | {{TECH_STACK}} |
+| **Primary Languages** | {{LANGUAGES}} |
+| **Review Count** | {{REVIEW_COUNT}} |
+| **Date Range** | {{FIRST_DATE}} to {{LAST_DATE}} |
+| **Common Issue Categories** | {{CATEGORIES}} |
+| **Last Updated** | {{DATE}} |
+
+## Verified Detection Strategies
+
+_Copy-paste ready commands for catching common issues._
+
+{{DETECTION_STRATEGIES}}
+
+## Failed Attempts (Critical Learnings)
+
+| Issue | Why Missed | Detection Strategy | Review Date | PR Link | Severity |
+|-------|------------|-------------------|-------------|---------|----------|
+{{FAILED_DETECTIONS_ROWS}}
+
+## Repository Gotchas
+
+_Architectural patterns and conventions specific to this repository._
+
+{{REPOSITORY_GOTCHAS}}
+
+## Methodology Improvements
+
+_What worked and what didn't in review approaches._
+
+{{METHODOLOGY_IMPROVEMENTS}}
