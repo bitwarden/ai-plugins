@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Added a brief ending instruction in an attempt to avoid a follow-up update of the summary comment by the Github action.
+- Added a brief ending instruction to avoid a follow-up update of the summary comment by the GitHub action.
 
 ## [1.5.0] - 2025-12-23
 
