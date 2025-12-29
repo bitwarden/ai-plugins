@@ -14,5 +14,6 @@
     "session-review",
     "performance-insights",
     "improvement-opportunities"
-  ]
+  ],
+  "skills": "./skills/"
 }
