@@ -13,8 +13,6 @@ The `clients` mono-repo contains:
 - `libs/angular` — Angular-specific code for visual clients only
 - `libs/components` — Angular Component Library
 
-Install dependencies from repo root only. Build with Nx: `npx nx serve web`.
-
 ## Angular Requirements
 
 **New components** must use:
@@ -71,8 +69,8 @@ All Tailwind classes require **`tw-` prefix**:
 
 ```html
 <div class="tw-bg-background-alt2 tw-p-4">
-    <!-- ✅ -->
-    <div class="bg-background-alt2 p-4"><!-- ❌ --></div>
+  <!-- ✅ -->
+  <div class="bg-background-alt2 p-4"><!-- ❌ --></div>
 </div>
 ```
 
