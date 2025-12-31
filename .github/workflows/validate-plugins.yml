@@ -133,7 +133,7 @@ jobs:
 
             Perform TWO types of validation:
 
-            ## 1. Component Validation (using plugin-dev)
+            ## 1. Component Validation (using the plugin-dev agent)
             For each AGENT.md and hooks.json file:
             - Validate agent identifiers (3-50 chars, lowercase, hyphens only)
             - Validate description length (10-5,000 chars)
@@ -143,7 +143,7 @@ jobs:
             - Check hook event names
             - Verify script paths use ${CLAUDE_PLUGIN_ROOT}
 
-            ## 2. Security Validation (using claude-config-validator)
+            ## 2. Security Validation (using the claude-config-validator agent)
             For all changed plugin files:
             - Scan for committed secrets (API keys, tokens, passwords)
             - Check for hardcoded credentials in code
@@ -151,7 +151,7 @@ jobs:
             - Detect dangerous command auto-approvals
             - Identify overly broad file access permissions
 
-            Use /skill reviewing-claude-config from claude-config-validator to perform comprehensive security review.
+            Use skill reviewing-claude-config from the claude-config-validator agent to perform comprehensive security review.
 
             Report all violations as errors with specific file locations and remediation guidance.
 
