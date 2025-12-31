@@ -28,6 +28,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MARKETPLACE_JSON="$REPO_ROOT/.claude-plugin/marketplace.json"
 
+# Source shared path sanitization library
+source "$SCRIPT_DIR/lib/path-sanitization.sh"
+
 # Function to print colored output
 print_header() {
     echo -e "${BOLD}$1${RESET}"
@@ -283,30 +286,20 @@ main() {
     if [[ $# -gt 0 ]]; then
         # Arguments provided - extract plugin names
         for arg in "$@"; do
-            # Remove leading ./ if present
-            arg="${arg#./}"
-
-            # Sanitize path to prevent traversal attacks
-            # Remove any .. sequences and leading/trailing slashes
-            arg="${arg//..\/}"
-            arg="${arg//\/..}"
-            arg="${arg#/}"
-            arg="${arg%/}"
-
-            # Extract plugin name from various path formats
-            if [[ "$arg" =~ ^plugins/([^/]+)$ ]]; then
-                local plugin_name="${BASH_REMATCH[1]}"
-                # Validate plugin name contains only safe characters
-                if [[ "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$REPO_ROOT/plugins/$plugin_name" ]]; then
-                    target_plugins+=("$plugin_name")
-                fi
-            elif [[ "$arg" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$REPO_ROOT/plugins/$arg" ]]; then
-                target_plugins+=("$arg")
+            # Use shared sanitization function to safely parse plugin path
+            local sanitized_path
+            if sanitized_path=$(sanitize_plugin_path "$arg" "$REPO_ROOT/plugins" 2>/dev/null); then
+                # Extract just the plugin name from the full path
+                local plugin_name
+                plugin_name=$(basename "$sanitized_path")
+                target_plugins+=("$plugin_name")
             fi
         done
 
-        # Remove duplicates
-        readarray -t target_plugins < <(printf '%s\n' "${target_plugins[@]}" | sort -u)
+        # Remove duplicates (only if we have plugins)
+        if [[ "${#target_plugins[@]}" -gt 0 ]]; then
+            array_from_lines target_plugins < <(printf '%s\n' "${target_plugins[@]}" | sort -u)
+        fi
 
         if [[ "${#target_plugins[@]}" -eq 0 ]]; then
             echo -e "${YELLOW}⚠️ No valid plugins found in arguments${RESET}"

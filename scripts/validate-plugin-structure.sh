@@ -30,6 +30,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PLUGINS_DIR="$REPO_ROOT/plugins"
 
+# Source shared path sanitization library
+source "$SCRIPT_DIR/lib/path-sanitization.sh"
+
 # Function to print colored output
 print_header() {
     echo -e "${BOLD}$1${RESET}"
@@ -118,9 +121,7 @@ validate_plugin_structure() {
             if [[ -d "$command_dir" ]]; then
                 local command_name
                 command_name=$(basename "$command_dir")
-                local md_count
-                md_count=$(find "$command_dir" -maxdepth 1 -name "*.md" -print0 | grep -zc .)
-                if [[ "$md_count" -eq 0 ]]; then
+                if ! find "$command_dir" -maxdepth 1 -name "*.md" -print -quit | grep -q .; then
                     print_error "Command directory $command_name has no .md files"
                     has_errors=1
                 fi
@@ -214,6 +215,7 @@ validate_readme_content() {
 validate_changelog_format() {
     local plugin_path="$1"
     local changelog="$plugin_path/CHANGELOG.md"
+    local has_errors=0
 
     if [[ ! -f "$changelog" ]]; then
         print_warning "CHANGELOG.md does not exist"
@@ -236,6 +238,28 @@ validate_changelog_format() {
             print_warning "CHANGELOG should use standard categories (Added, Changed, Fixed, etc.)"
         fi
     fi
+
+    # Check version consistency with plugin.json
+    local plugin_json="$plugin_path/.claude-plugin/plugin.json"
+    if [[ -f "$plugin_json" ]]; then
+        local plugin_version
+        plugin_version=$(jq -r '.version // empty' "$plugin_json" 2>/dev/null)
+
+        if [[ -n "$plugin_version" ]]; then
+            # Extract first version from CHANGELOG (format: ## [X.Y.Z])
+            local changelog_version
+            changelog_version=$(grep -E '^##\s+\[[0-9]+\.[0-9]+\.[0-9]+\]' "$changelog" | head -1 | sed -E 's/^##[[:space:]]+\[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/')
+
+            if [[ -n "$changelog_version" ]] && [[ "$changelog_version" != "$plugin_version" ]]; then
+                print_error "CHANGELOG version ($changelog_version) doesn't match plugin.json version ($plugin_version)"
+                has_errors=1
+            elif [[ -z "$changelog_version" ]] && echo "$content" | grep -qE "##\s+\["; then
+                print_warning "CHANGELOG has version entries but first version could not be parsed"
+            fi
+        fi
+    fi
+
+    return $has_errors
 }
 
 # Function to validate AGENT.md frontmatter
@@ -346,31 +370,17 @@ main() {
     # If arguments provided, validate only those plugins
     if [[ $# -gt 0 ]]; then
         for arg in "$@"; do
-            # Remove leading ./ if present
-            arg="${arg#./}"
-
-            # Sanitize path to prevent traversal attacks
-            # Remove any .. sequences and leading/trailing slashes
-            arg="${arg//..\/}"
-            arg="${arg//\/..}"
-            arg="${arg#/}"
-            arg="${arg%/}"
-
-            # If argument is a path within plugins/
-            if [[ "$arg" =~ ^plugins/([^/]+)$ ]]; then
-                local plugin_name="${BASH_REMATCH[1]}"
-                # Validate plugin name contains only safe characters
-                if [[ "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$PLUGINS_DIR/$plugin_name" ]]; then
-                    plugins+=("$PLUGINS_DIR/$plugin_name")
-                fi
-            # If argument is just the plugin name
-            elif [[ "$arg" =~ ^[a-zA-Z0-9_-]+$ ]] && [[ -d "$PLUGINS_DIR/$arg" ]]; then
-                plugins+=("$PLUGINS_DIR/$arg")
+            # Use shared sanitization function to safely parse plugin path
+            local sanitized_path
+            if sanitized_path=$(sanitize_plugin_path "$arg" "$PLUGINS_DIR" 2>/dev/null); then
+                plugins+=("$sanitized_path")
             fi
         done
 
-        # Remove duplicates
-        readarray -t plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
+        # Remove duplicates (only if we have plugins)
+        if [[ "${#plugins[@]}" -gt 0 ]]; then
+            array_from_lines plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
+        fi
 
         if [[ "${#plugins[@]}" -eq 0 ]]; then
             echo -e "${YELLOW}⚠️ No valid plugin directories found in arguments${RESET}"
@@ -390,7 +400,7 @@ main() {
         fi
 
         # Sort plugins
-        readarray -t plugins < <(printf '%s\n' "${plugins[@]}" | sort)
+        array_from_lines plugins < <(printf '%s\n' "${plugins[@]}" | sort)
     fi
 
     # Validate each plugin
@@ -407,7 +417,7 @@ main() {
         validate_plugin_structure "$plugin_path" || plugin_has_errors=1
         validate_plugin_json "$plugin_path" || plugin_has_errors=1
         validate_readme_content "$plugin_path" || true
-        validate_changelog_format "$plugin_path" || true
+        validate_changelog_format "$plugin_path" || plugin_has_errors=1
 
         # Validate agents if they exist
         if [[ -d "$plugin_path/agents" ]]; then
