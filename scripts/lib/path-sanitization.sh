@@ -15,12 +15,18 @@ array_from_lines() {
     local line
     local -a temp_array=()
 
+    # Validate array_name contains only safe identifier characters
+    # This prevents code injection via eval
+    if [[ ! "$array_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+        echo "Invalid array name: $array_name" >&2
+        return 1
+    fi
+
     while IFS= read -r line; do
         temp_array+=("$line")
     done
 
     # Use eval to assign to the named array variable
-    # This is safe because array_name is controlled by the script
     # Handle empty arrays properly with set -u
     if [[ "${#temp_array[@]}" -eq 0 ]]; then
         eval "${array_name}=()"
