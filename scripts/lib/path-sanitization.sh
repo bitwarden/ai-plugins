@@ -48,6 +48,11 @@ sanitize_plugin_path() {
     local arg="$1"
     local plugins_dir="$2"
 
+    # Reject paths containing null bytes, newlines, or carriage returns
+    if [[ "$arg" =~ $'\0' ]] || [[ "$arg" =~ $'\n' ]] || [[ "$arg" =~ $'\r' ]]; then
+        return 1
+    fi
+
     # Remove leading ./
     arg="${arg#./}"
 
@@ -96,7 +101,8 @@ sanitize_plugin_path() {
     local canonical_plugins_dir
     canonical_plugins_dir="$(cd "$plugins_dir" && pwd 2>/dev/null)" || return 1
 
-    if [[ ! "$canonical_path" =~ ^"$canonical_plugins_dir"/ ]]; then
+    if [[ "$canonical_path" != "$canonical_plugins_dir" ]] && \
+       [[ ! "$canonical_path" =~ ^"$canonical_plugins_dir"/ ]]; then
         # Path escapes the plugins directory - reject it
         return 1
     fi
