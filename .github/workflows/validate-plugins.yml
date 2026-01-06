@@ -129,7 +129,9 @@ jobs:
           plugin_marketplaces: |
             https://github.com/anthropics/claude-code.git
             https://github.com/bitwarden/ai-plugins.git
-          plugins: "plugin-dev@anthropics, claude-config-validator@bitwarden-marketplace"
+          plugins: |
+            plugin-dev@anthropics
+            claude-config-validator@bitwarden-marketplace
           prompt: |
             Review the following plugin configuration files for compliance with Claude Code plugin standards and security best practices.
 
