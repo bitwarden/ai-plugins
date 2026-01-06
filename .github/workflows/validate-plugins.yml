@@ -39,8 +39,10 @@ jobs:
           CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | tr '\n' ' ' | sed 's/ $//')
 
           # Filter for AGENT.md, SKILL.md, and hooks.json files
-          # Agent files are in plugins/*/agents/*/AGENT.md
-          AGENT_FILES=$(echo "$CHANGED_FILES" | grep '/agents/.*/AGENT\.md$' || echo "")
+          # Agent files can be in two patterns:
+          #   1. plugins/*/agents/*/AGENT.md (subdirectory with AGENT.md)
+          #   2. plugins/*/agents/*.md (direct .md files in agents directory)
+          AGENT_FILES=$(echo "$CHANGED_FILES" | grep -E '/agents/.*\.md$' || echo "")
           # Skill files are in plugins/*/skills/*/SKILL.md
           SKILL_FILES=$(echo "$CHANGED_FILES" | grep '/skills/.*/SKILL\.md$' || echo "")
           HOOK_FILES=$(echo "$CHANGED_FILES" | grep 'hooks\.json$' || echo "")
@@ -124,8 +126,8 @@ jobs:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
           track_progress: true
           use_sticky_comment: true
-          plugin_marketplaces: "https://github.com/bitwarden/ai-plugins.git"
-          plugins: "plugin-dev, claude-config-validator@bitwarden-marketplace"
+          plugin_marketplaces: "https://github.com/anthropics/claude-code.git, https://github.com/bitwarden/ai-plugins.git"
+          plugins: "plugin-dev@anthropics, claude-config-validator@bitwarden-marketplace"
           prompt: |
             Review the following plugin configuration files for compliance with Claude Code plugin standards and security best practices.
 
