@@ -126,7 +126,9 @@ jobs:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
           track_progress: true
           use_sticky_comment: true
-          plugin_marketplaces: "https://github.com/anthropics/claude-code.git, https://github.com/bitwarden/ai-plugins.git"
+          plugin_marketplaces: |
+            https://github.com/anthropics/claude-code.git
+            https://github.com/bitwarden/ai-plugins.git
           plugins: "plugin-dev@anthropics, claude-config-validator@bitwarden-marketplace"
           prompt: |
             Review the following plugin configuration files for compliance with Claude Code plugin standards and security best practices.
