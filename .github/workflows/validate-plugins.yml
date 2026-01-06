@@ -38,8 +38,11 @@ jobs:
           # Extract unique plugin directories from changed files
           CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | tr '\n' ' ' | sed 's/ $//')
 
-          # Filter for AGENT.md and hooks.json files
-          AGENT_FILES=$(echo "$CHANGED_FILES" | grep 'AGENT\.md$' || echo "")
+          # Filter for AGENT.md, SKILL.md, and hooks.json files
+          # Agent files are in plugins/*/agents/*/AGENT.md
+          AGENT_FILES=$(echo "$CHANGED_FILES" | grep '/agents/.*/AGENT\.md$' || echo "")
+          # Skill files are in plugins/*/skills/*/SKILL.md
+          SKILL_FILES=$(echo "$CHANGED_FILES" | grep '/skills/.*/SKILL\.md$' || echo "")
           HOOK_FILES=$(echo "$CHANGED_FILES" | grep 'hooks\.json$' || echo "")
 
           {
@@ -50,13 +53,16 @@ jobs:
             echo "agent_files<<EOF"
             echo "$AGENT_FILES"
             echo "EOF"
+            echo "skill_files<<EOF"
+            echo "$SKILL_FILES"
+            echo "EOF"
             echo "hook_files<<EOF"
             echo "$HOOK_FILES"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
           # Check if there are any plugin component files to validate
-          if [[ -n "$AGENT_FILES" ]] || [[ -n "$HOOK_FILES" ]]; then
+          if [[ -n "$AGENT_FILES" ]] || [[ -n "$SKILL_FILES" ]] || [[ -n "$HOOK_FILES" ]]; then
             echo "has_components=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_components=false" >> "$GITHUB_OUTPUT"
@@ -129,16 +135,19 @@ jobs:
             Agent files changed:
             ${{ steps.changed-files.outputs.agent_files }}
 
+            Skill files changed:
+            ${{ steps.changed-files.outputs.skill_files }}
+
             Hook files changed:
             ${{ steps.changed-files.outputs.hook_files }}
 
             Perform TWO types of validation:
 
             ## 1. Component Validation (using the plugin-dev agent)
-            For each AGENT.md and hooks.json file:
-            - Validate agent identifiers (3-50 chars, lowercase, hyphens only)
+            For each AGENT.md, SKILL.md, and hooks.json file:
+            - Validate agent/skill identifiers (3-50 chars, lowercase, hyphens only)
             - Validate description length (10-5,000 chars)
-            - Validate system prompt length (20-10,000 chars)
+            - Validate system prompt length (20-10,000 chars) for agents
             - Check YAML frontmatter structure
             - Validate hook JSON schema
             - Check hook event names
