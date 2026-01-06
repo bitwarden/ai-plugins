@@ -144,11 +144,18 @@ jobs:
             Perform TWO types of validation:
 
             ## 1. Component Validation (using the plugin-dev agent)
-            For each AGENT.md, SKILL.md, and hooks.json file:
-            - Validate agent/skill identifiers (3-50 chars, lowercase, hyphens only)
+            For AGENT.md files:
+            - Validate agent identifiers (3-50 chars, lowercase, hyphens only)
             - Validate description length (10-5,000 chars)
-            - Validate system prompt length (20-10,000 chars) for agents
+            - Validate system prompt length (20-10,000 chars)
             - Check YAML frontmatter structure
+
+            For SKILL.md files:
+            - Validate skill name (max 64 chars)
+            - Validate description length (max 1024 chars)
+            - Check YAML frontmatter structure
+
+            For hooks.json files:
             - Validate hook JSON schema
             - Check hook event names
             - Verify script paths use ${CLAUDE_PLUGIN_ROOT}
