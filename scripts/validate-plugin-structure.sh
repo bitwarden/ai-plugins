@@ -369,11 +369,17 @@ main() {
 
     # If arguments provided, validate only those plugins
     if [[ $# -gt 0 ]]; then
+        echo "DEBUG: Received $# argument(s): $*"
         for arg in "$@"; do
+            echo "DEBUG: Processing argument: '$arg'"
             # Use shared sanitization function to safely parse plugin path
             local sanitized_path
-            if sanitized_path=$(sanitize_plugin_path "$arg" "$PLUGINS_DIR" 2>/dev/null); then
+            if sanitized_path=$(sanitize_plugin_path "$arg" "$PLUGINS_DIR" 2>&1); then
+                echo "DEBUG: ✓ Sanitized to: '$sanitized_path'"
                 plugins+=("$sanitized_path")
+            else
+                echo "DEBUG: ✗ Failed to sanitize argument '$arg'"
+                echo "DEBUG:   Output from sanitize_plugin_path: $sanitized_path"
             fi
         done
 
