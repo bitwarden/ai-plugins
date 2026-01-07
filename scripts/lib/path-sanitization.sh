@@ -50,6 +50,7 @@ sanitize_plugin_path() {
 
     # Reject paths containing null bytes, newlines, or carriage returns
     if [[ "$arg" =~ $'\0' ]] || [[ "$arg" =~ $'\n' ]] || [[ "$arg" =~ $'\r' ]]; then
+        echo "ERROR: Path contains invalid characters (null/newline/carriage return)" >&2
         return 1
     fi
 
@@ -77,11 +78,13 @@ sanitize_plugin_path() {
         plugin_name="$arg"
     else
         # Invalid format or potentially dangerous pattern
+        echo "ERROR: Path format invalid. Expected 'plugins/name' or 'name', got: '$arg'" >&2
         return 1
     fi
 
     # Validate plugin name contains only safe characters
     if [[ ! "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        echo "ERROR: Plugin name contains invalid characters: '$plugin_name'" >&2
         return 1
     fi
 
@@ -90,20 +93,28 @@ sanitize_plugin_path() {
 
     # Verify the path exists and is a directory
     if [[ ! -d "$plugin_path" ]]; then
+        echo "ERROR: Plugin directory does not exist: $plugin_path" >&2
         return 1
     fi
 
     # Use realpath to resolve any symlinks and get canonical path
     local canonical_path
-    canonical_path="$(cd "$plugin_path" && pwd 2>/dev/null)" || return 1
+    if ! canonical_path="$(cd "$plugin_path" && pwd 2>/dev/null)"; then
+        echo "ERROR: Failed to resolve canonical path for: $plugin_path" >&2
+        return 1
+    fi
 
     # Verify the resolved path is still under plugins_dir
     local canonical_plugins_dir
-    canonical_plugins_dir="$(cd "$plugins_dir" && pwd 2>/dev/null)" || return 1
+    if ! canonical_plugins_dir="$(cd "$plugins_dir" && pwd 2>/dev/null)"; then
+        echo "ERROR: Failed to resolve plugins directory: $plugins_dir" >&2
+        return 1
+    fi
 
     if [[ "$canonical_path" != "$canonical_plugins_dir" ]] && \
        [[ ! "$canonical_path" =~ ^"$canonical_plugins_dir"/ ]]; then
         # Path escapes the plugins directory - reject it
+        echo "ERROR: Path escapes plugins directory (security check failed)" >&2
         return 1
     fi
 
