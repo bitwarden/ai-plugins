@@ -79,8 +79,16 @@ jobs:
         run: |
           set -o pipefail
           echo "Validating changed plugins: $CHANGED_PLUGINS"
-          read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
-          ./scripts/validate-plugin-structure.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/structure-validation.log
+          echo "DEBUG: Length of CHANGED_PLUGINS: ${#CHANGED_PLUGINS}"
+          echo "DEBUG: CHANGED_PLUGINS (hex): $(echo -n "$CHANGED_PLUGINS" | od -A n -t x1)"
+          if [[ -n "$CHANGED_PLUGINS" ]]; then
+            IFS=' ' read -r -a PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+            echo "DEBUG: Array length: ${#PLUGINS_ARRAY[@]}"
+            echo "DEBUG: Array contents: ${PLUGINS_ARRAY[@]}"
+            ./scripts/validate-plugin-structure.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/structure-validation.log
+          else
+            echo "DEBUG: CHANGED_PLUGINS is empty, skipping validation"
+          fi
 
       - name: Validate marketplace.json
         id: marketplace
@@ -91,8 +99,16 @@ jobs:
         run: |
           set -o pipefail
           echo "Validating marketplace entries for changed plugins: $CHANGED_PLUGINS"
-          read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
-          ./scripts/validate-marketplace.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/marketplace-validation.log
+          echo "DEBUG: Length of CHANGED_PLUGINS: ${#CHANGED_PLUGINS}"
+          echo "DEBUG: CHANGED_PLUGINS (hex): $(echo -n "$CHANGED_PLUGINS" | od -A n -t x1)"
+          if [[ -n "$CHANGED_PLUGINS" ]]; then
+            IFS=' ' read -r -a PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+            echo "DEBUG: Array length: ${#PLUGINS_ARRAY[@]}"
+            echo "DEBUG: Array contents: ${PLUGINS_ARRAY[@]}"
+            ./scripts/validate-marketplace.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/marketplace-validation.log
+          else
+            echo "DEBUG: CHANGED_PLUGINS is empty, skipping validation"
+          fi
 
       - name: Log in to Azure
         if: steps.changed-files.outputs.has_components == 'true'
