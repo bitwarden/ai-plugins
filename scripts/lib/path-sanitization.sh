@@ -48,9 +48,15 @@ sanitize_plugin_path() {
     local arg="$1"
     local plugins_dir="$2"
 
-    # Reject paths containing null bytes, newlines, or carriage returns
-    if [[ "$arg" =~ $'\0' ]] || [[ "$arg" =~ $'\n' ]] || [[ "$arg" =~ $'\r' ]]; then
-        echo "ERROR: Path contains invalid characters (null/newline/carriage return)" >&2
+    # Reject paths containing newlines or carriage returns
+    # Note: Null bytes can't exist in bash strings (they terminate strings),
+    # so we only need to check for newline and carriage return
+    if [[ "$arg" == *$'\n'* ]]; then
+        echo "ERROR: Path contains newline" >&2
+        return 1
+    fi
+    if [[ "$arg" == *$'\r'* ]]; then
+        echo "ERROR: Path contains carriage return" >&2
         return 1
     fi
 

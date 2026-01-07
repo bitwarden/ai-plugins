@@ -284,21 +284,15 @@ main() {
     # Build list of plugins to validate
     local target_plugins=()
     if [[ $# -gt 0 ]]; then
-        echo "DEBUG: Received $# argument(s): $*"
         # Arguments provided - extract plugin names
         for arg in "$@"; do
-            echo "DEBUG: Processing argument: '$arg'"
             # Use shared sanitization function to safely parse plugin path
             local sanitized_path
-            if sanitized_path=$(sanitize_plugin_path "$arg" "$REPO_ROOT/plugins" 2>&1); then
+            if sanitized_path=$(sanitize_plugin_path "$arg" "$REPO_ROOT/plugins" 2>/dev/null); then
                 # Extract just the plugin name from the full path
                 local plugin_name
                 plugin_name=$(basename "$sanitized_path")
-                echo "DEBUG: ✓ Sanitized to: '$sanitized_path' → plugin name: '$plugin_name'"
                 target_plugins+=("$plugin_name")
-            else
-                echo "DEBUG: ✗ Failed to sanitize argument '$arg'"
-                echo "DEBUG:   Output from sanitize_plugin_path: $sanitized_path"
             fi
         done
 
