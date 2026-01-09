@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.5.2] - 2025-01-09
 
+### Changed
+
 - Refactored the fetching of resolved comments back into the SKILL.md because the script will not execute in the Claude Code Action because of security concerns.
 
 ## [1.5.1] - 2025-12-24
