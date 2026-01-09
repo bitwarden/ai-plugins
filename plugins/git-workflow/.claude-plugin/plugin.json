@@ -1,0 +1,21 @@
+{
+  "name": "git-workflow",
+  "version": "1.0.0",
+  "description": "Streamlined git workflow: commit, push, and create/update PR with auto-generated messages following Bitwarden PR template",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/git-workflow",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "git",
+    "workflow",
+    "commit",
+    "push",
+    "pull-request",
+    "automation",
+    "pr-template"
+  ],
+  "commands": ["./commands/commit-push-pr.md"]
+}
