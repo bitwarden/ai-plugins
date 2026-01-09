@@ -81,7 +81,7 @@ bitwarden-code-review/
 
 ### Thread Detection
 
-The agent prevents duplicate comments by detecting existing threads (including resolved ones) before posting. Matches by exact location, nearby lines (±5), and content similarity (>70%). See [agents/bitwarden-code-reviewer/AGENT.md](./agents/bitwarden-code-reviewer/AGENT.md) for implementation details.
+The agent prevents duplicate comments by detecting existing threads (including resolved ones) before posting. Matches by exact location, nearby lines (±5), and content similarity (>70%). See [skills/detecting-existing-threads/SKILL.md](./skills/detecting-existing-threads/SKILL.md) for implementation details.
 
 ## Security
 
