@@ -1,9 +1,9 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.5.1
+version: 1.5.2
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "review", "PR", or "pull request".
 model: sonnet
-tools: Read, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql*reviewThreads*-f owner=*-f repo=*-F pr=*:*), Bash(./scripts/get-review-threads.sh:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
+tools: Read, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), "Bash(gh api graphql -f query=:*)", Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
 ---
 
 # Bitwarden Code Review Agent

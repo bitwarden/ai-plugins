@@ -5,6 +5,10 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2025-01-09
+
+- Refactored the fetching of resolved comments back into the SKILL.md because the script will not execute in the Claude Code Action because of security concerns.
+
 ## [1.5.1] - 2025-12-24
 
 ### Changed

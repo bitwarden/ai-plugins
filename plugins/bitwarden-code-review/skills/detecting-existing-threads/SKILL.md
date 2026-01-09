@@ -12,8 +12,7 @@ Prevent duplicate comments by detecting existing review threads before posting n
 ## Required Tools
 
 - `Bash(gh pr view:*)` - Get general PR comments
-- `Bash(gh api graphql*reviewThreads*-f owner=*-f repo=*-F pr=*:*)` - Get resolved threads
-- `Bash(./scripts/get-review-threads.sh:*)` - Script wrapper
+- `Bash(gh api graphql -f query=:*)` - Get resolved and open review threads (direct GraphQL)
 
 ## Step 1: Determine PR Number
 
@@ -40,8 +39,34 @@ Capture BOTH comment sources:
 # General PR comments
 gh pr view <PR_NUMBER> --json comments
 
-# Inline resolved review threads (REQUIRED - gh pr view misses these)
-./scripts/get-review-threads.sh <PR_NUMBER> <OWNER> <REPO>
+# Inline review threads (resolved + open)
+gh api graphql -f query='
+query($owner: String!, $repo: String!, $pr: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100) {
+        nodes {
+          id
+          isResolved
+          isOutdated
+          path
+          line
+          startLine
+          diffSide
+          comments(first: 10) {
+            nodes {
+              id
+              body
+              author { login }
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  }
+}
+' -f owner="<OWNER>" -f repo="<REPO>" -F pr="<PR_NUMBER>"
 ```
 
 ## Step 3: Parse Into Structure
