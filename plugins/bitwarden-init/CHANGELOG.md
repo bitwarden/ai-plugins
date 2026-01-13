@@ -17,5 +17,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Anti-Patterns
   - Data Models
   - Configuration, Security, and Authentication
-- Automatic codebase analysis and context gathering
-- Comprehensive README documentation

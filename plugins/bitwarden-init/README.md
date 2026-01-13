@@ -56,11 +56,6 @@ After running `/bitwarden-init:init`, you can:
 - Update sections as the codebase evolves
 - Add additional context that Claude should know about your project
 
-## Requirements
-
-- Claude Code (latest version recommended)
-- Repository with code to analyze
-
 ## Contributing
 
 See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines on contributing to this plugin.

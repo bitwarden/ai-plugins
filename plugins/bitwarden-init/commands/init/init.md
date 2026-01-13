@@ -34,6 +34,7 @@ Initialize Claude Code configuration for this repository with Bitwarden's standa
 - Dependency injection and configuration patterns
 - Error handling and validation strategies
 - Testing approaches and utilities
+- Where to find authoritative documentation on the web
 
 ## Anti-Patterns
 - Common mistakes to avoid in this codebase
@@ -50,7 +51,7 @@ Initialize Claude Code configuration for this repository with Bitwarden's standa
 
 ## Configuration, Security, and Authentication
 - Environment variable management
-- Secrets handling (1Password, vaults, key management)
+- Secrets handling 
 - Authentication and authorization flows
 - API security patterns and middleware
 - Compliance requirements and security controls
