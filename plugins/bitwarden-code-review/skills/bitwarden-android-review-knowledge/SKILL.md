@@ -1,8 +1,6 @@
 ---
 name: bitwarden-android-review-knowledge
-description: "Code review knowledge for bitwarden/android (Kotlin, Android). Usage scenarios: (1) When reviewing PRs in bitwarden/android, (2) When encountering organization event tracking, (3) When checking credential manager security patterns. Verified on Kotlin, Gradle, Compose."
-author: Patrick Honkonen (SaintPatrck) & Claude Retrospective Analysis
-date: 2025-12-18
+description: Institutional knowledge for bitwarden/android code reviews. Use BEFORE reviewing android PRs to understand repository-specific patterns, architectural constraints, and avoid false positives.
 ---
 
 # bitwarden/android - Code Review Knowledge
@@ -14,10 +12,7 @@ date: 2025-12-18
 | **Repository** | [bitwarden/android](https://github.com/bitwarden/android) |
 | **Technology Stack** | Android, Kotlin, Jetpack Compose, MVVM+UDF, Hilt DI |
 | **Primary Languages** | Kotlin, Gradle |
-| **Review Count** | 10 |
-| **Date Range** | 2025-12-04 to 2025-12-16 |
-| **Common Issue Categories** | Security patterns, Architecture compliance, Event tracking, Documentation accuracy |
-| **Last Updated** | 2025-12-18 |
+| **Common Issue Categories** | Security patterns, Architecture compliance, Event tracking, Documentation accuracy, Test patterns |
 
 ## Verified Detection Strategies
 
@@ -73,10 +68,49 @@ grep -B5 "sendEvent.*Navigate" \
   echo "⚠️  Navigation without prior event tracking detected"
 ```
 
+### Complete View State Assertion Validation
+```bash
+# Detect individual property assertions (anti-pattern in bitwarden/android)
+rg "assertEquals\([^,]+\.[^,]+," app/src/test --type kotlin
+```
+
+### Markdown Documentation Line Number References
+```bash
+# Find hardcoded line number references that create maintenance burden
+rg '\w+\.md:\d+(-\d+)?' --glob '*.md'
+```
+
+### Markdown Code Formatting Check
+```bash
+# Find file paths and code terms missing backtick formatting
+rg '(?<!`)@\w+(?!`)' --glob '*.md'  # Annotations without backticks
+rg '(?<!`)[\w/]+\.md(?!`)' --glob '*.md'  # Paths without backticks
+```
+
+### JSON Test Data Syntax Validation
+```bash
+# Find multiline JSON in test files (manual validation needed)
+rg '"""[\s\S]*?"[^,\s]*\s*"' --type kotlin --glob '*Test.kt'
+```
+
+### State Persistence for Conditional Navigation
+```bash
+# Find StateFlow<Boolean> fields controlling navigation without persistence checks
+rg 'StateFlow<Boolean>' app/src/main/kotlin --type kotlin -A10 | \
+  rg -v 'storeMigration|hasMigrationBeenAttempted' && \
+  echo "⚠️  StateFlow navigation without persistence tracking detected"
+```
+
 ## Failed Attempts (Critical Learnings)
 
 | Issue | Why Missed | Detection Strategy | Review Date | PR Link | Severity |
 |-------|------------|-------------------|-------------|---------|----------|
+| Hardcoded line number references in documentation | Focused on content correctness rather than maintainability of line references | Search for pattern `\w+\.md:\d+(-\d+)?` in documentation files; flag as maintenance risk | 2025-10-27 | [#6072](https://github.com/bitwarden/android/pull/6072) | ⚠️ IMPORTANT |
+| Missing code formatting for technical terms in markdown | Initial focus on content structure rather than markdown formatting conventions | Verify file paths and code terms use backticks; search for unformatted patterns like `docs/\w+` or `@\w+` | 2025-10-27 | [#6072](https://github.com/bitwarden/android/pull/6072) | ⚠️ IMPORTANT |
+| CODEOWNERS coverage for functionally-coupled workflow files | Focused on primary directory ownership without considering related workflows in different directories | When reviewing CODEOWNERS changes, grep workflow files for references to feature directory; check for ownership transitivity | 2025-10-27 | [#6072](https://github.com/bitwarden/android/pull/6072) | ⚠️ IMPORTANT |
+| Weak test assertion pattern (property-by-property instead of complete state) | Claude's default test generation uses individual property assertions rather than complete state equality | Search for `assertEquals(expected.property, actual.property)` pattern; require complete state assertions: `assertEquals(expectedState, actualState)` | 2025-12-16 | [#6275](https://github.com/bitwarden/android/pull/6275) | ⚠️ IMPORTANT |
+| JSON syntax error in test data (missing comma) | JSON syntax errors in triple-quoted raw strings don't get IDE validation | Always validate JSON test data syntax; paste into JSON validator; check CI test results for parsing failures | 2025-12-17 | [#6281](https://github.com/bitwarden/android/pull/6281) | ❌ CRITICAL |
+| Documentation placeholder vs implementation mismatch flagged incorrectly | Did not recognize that documentation examples commonly use placeholder values for pedagogical clarity | Check if values are marked as placeholders (9999, example, REPLACE_ME); distinguish configuration files from documentation examples | 2025-12-19 | [#6282](https://github.com/bitwarden/android/pull/6282) | 🎨 SUGGESTED |
 | Network serialization tests missing for OrganizationEventType 1618/1619 | Generic serializer handles all enums; tests seemed redundant | Search for new enum values in OrganizationEventType.kt, verify corresponding test exists in EventServiceTest.kt | 2025-12-16 | [#6273](https://github.com/bitwarden/android/pull/6273) | ⚠️ IMPORTANT |
 | String resource file location inconsistency not documented in feature flags skill | Assumed single canonical location for string resources | Check both strings.xml and strings_non_localized.xml when documenting patterns; note historical inconsistencies | 2025-12-05 | [#6238](https://github.com/bitwarden/android/pull/6238) | ⚠️ IMPORTANT |
 | Naming convention automation limitations in feature flags | Assumed mechanical kebab-case to snake_case transformation | Document that string resource keys use semantic variations and abbreviations; always confirm generated names with user | 2025-12-05 | [#6238](https://github.com/bitwarden/android/pull/6238) | ⚠️ IMPORTANT |
@@ -86,6 +120,141 @@ grep -B5 "sendEvent.*Navigate" \
 ## Repository Gotchas
 
 _Architectural patterns and conventions specific to this repository._
+
+### Complete View State Assertions Required
+
+**Pattern**: bitwarden/android requires complete view state assertions in tests rather than individual property verification. This testing philosophy makes tests "stronger" by catching state coupling issues.
+
+**Common Mistake**: Claude (and Claude-assisted developers) generate tests with individual property verification:
+```kotlin
+assertEquals(expectedState.property1, actualState.property1)
+assertEquals(expectedState.property2, actualState.property2)
+```
+
+**Required Pattern**:
+```kotlin
+assertEquals(expectedState, actualState)
+// or when specific fields change
+assertEquals(expectedState.copy(changedField = newValue), actualState)
+```
+
+**Detection Strategy**:
+```bash
+rg "assertEquals\([^,]+\.[^,]+," app/src/test --type kotlin
+```
+
+**Impact**: Weaker tests that miss state coupling issues; false confidence; inconsistent testing patterns; human reviewer time wasted catching this repeatedly
+
+**References**: PR [#6275](https://github.com/bitwarden/android/pull/6275)
+
+### State Persistence Required for Conditional Navigation Flows
+
+**Pattern**: When implementing conditional navigation flows based on feature flags, policies, or user state, must track whether user has already seen/dismissed the flow to prevent infinite loops.
+
+**Common Mistake**: Implementing `StateFlow<Boolean>` that emits `true` whenever conditions are met, without tracking user interaction history. This causes navigation to trigger repeatedly on every sync/state check.
+
+**Example Problem**:
+```kotlin
+val shouldMigratePersonalVaultFlow: StateFlow<Boolean>
+
+private fun verifyConditions(cipherList: List<Cipher>) {
+    val shouldMigrate = policyManager.getActivePolicies(PolicyTypeJson.PERSONAL_OWNERSHIP).any() &&
+        featureFlagManager.getFeatureFlag(FlagKey.MigrateMyVaultToMyItems) &&
+        connectionManager.isNetworkConnected &&
+        cipherList.any { it.organizationId == null }
+    // ⚠️ No check for whether user already dismissed this!
+    mutableShouldMigratePersonalVaultFlow.update { shouldMigrate }
+}
+```
+
+**Required Fix Pattern**:
+```kotlin
+// Add persistence methods in SettingsDiskSource or AuthDiskSource
+fun storeMigrationAttempted(userId: String, organizationId: String)
+fun hasMigrationBeenAttempted(userId: String, organizationId: String): Boolean
+
+// Update validation logic
+private fun verifyConditions(cipherList: List<Cipher>) {
+    val shouldMigrate =
+        !hasMigrationBeenAttempted(currentUserId, organizationId) && // NEW CHECK
+        policyManager.getActivePolicies(PolicyTypeJson.PERSONAL_OWNERSHIP).any() &&
+        featureFlagManager.getFeatureFlag(FlagKey.MigrateMyVaultToMyItems) &&
+        connectionManager.isNetworkConnected &&
+        cipherList.any { it.organizationId == null }
+    mutableShouldMigratePersonalVaultFlow.update { shouldMigrate }
+}
+```
+
+**Detection Strategy**:
+```bash
+# Find StateFlow<Boolean> fields controlling navigation without persistence checks
+rg 'StateFlow<Boolean>' app/src/main/kotlin --type kotlin -A10 | \
+  rg -v 'storeMigration|hasMigrationBeenAttempted'
+```
+
+**Impact**: Critical UX issue - infinite navigation loops make app unusable; applies to all feature-flag-driven conditional navigation flows
+
+**References**: PR [#6279](https://github.com/bitwarden/android/pull/6279)
+
+### Kotlin Delegation Pattern for Interface Composition
+
+**Pattern**: Bitwarden Android uses Kotlin's `by` delegation keyword for interface composition when implementing cross-cutting concerns.
+
+**Example**:
+```kotlin
+class SettingsDiskSourceImpl(
+    private val sharedPreferences: SharedPreferences,
+    private val json: Json,
+    flightRecorderDiskSource: FlightRecorderDiskSource,
+) : BaseDiskSource(sharedPreferences = sharedPreferences),
+    SettingsDiskSource,
+    FlightRecorderDiskSource by flightRecorderDiskSource {
+    // Implementation only for SettingsDiskSource methods
+    // FlightRecorderDiskSource methods delegated automatically
+}
+```
+
+**Common Mistake**: Manually implementing interface methods instead of using delegation.
+
+**Detection Strategy**: When adding cross-cutting concerns (logging, analytics), check if delegation is appropriate; look for constructor parameters that implement interfaces; search for pattern `Interface by parameter`.
+
+**Impact**: Reduces boilerplate, improves testability, follows Single Responsibility Principle. Constructor complexity is acceptable trade-off.
+
+**References**: PR [#6281](https://github.com/bitwarden/android/pull/6281)
+
+### Module Architecture - Shared Logic in `:data` Module
+
+**Pattern**: Common data source implementations belong in `:data` module, app-specific modules delegate.
+
+**Architecture**:
+```
+:data/
+  └── FlightRecorderDiskSource (concrete implementation)
+:app/
+  └── SettingsDiskSource (delegates to FlightRecorderDiskSource)
+:authenticator/
+  └── SettingsDiskSource (delegates to FlightRecorderDiskSource)
+```
+
+**Common Mistake**: Duplicating implementations in `:app` and `:authenticator`.
+
+**Detection Strategy**: When reviewing data source changes, check if logic is duplicated across modules; if implementation identical, suggest moving to `:data` module; verify DI setup in all modules.
+
+**Impact**: Code reusability across Bitwarden apps; single source of truth; easier testing.
+
+**References**: PR [#6281](https://github.com/bitwarden/android/pull/6281)
+
+### Talkback Behavior with Custom VisualTransformation
+
+**Pattern**: Custom `VisualTransformation` in Compose prevents Talkback from reading text values normally. Solution requires explicit `semantics { contentDescription = actualText }` when content should be readable.
+
+**Common Mistake**: Using custom visual transformations without considering accessibility implications.
+
+**Detection Strategy**: Search for `VisualTransformation` implementations; verify accessibility semantics are set when content should be spoken; consider system setting overrides.
+
+**Impact**: Accessibility issues for users relying on Talkback; potential security implications when overriding system "Speak Passwords" setting.
+
+**References**: PR [#6222](https://github.com/bitwarden/android/pull/6222)
 
 ### Organization Event Tracking Two-Layer Pattern
 
@@ -219,6 +388,66 @@ git grep -I '[[:space:]]$' -- '*.md'
 ## Methodology Improvements
 
 _What worked and what didn't in review approaches._
+
+### Documentation Review Process Effectiveness
+
+**What Worked**: Iterative review with multiple team members caught progressively finer details; fresh eyes identified formatting issues; quick turnaround time (<2 hours for most issues); thread resolution discipline.
+
+**What Didn't Work**: Initial submission didn't catch documentation quality issues in self-review; no apparent documentation linting or automated checks.
+
+**Lesson**: For documentation-heavy PRs, conduct dedicated formatting/maintainability review pass separate from content review. Consider establishing documentation quality checklist or linting automation.
+
+**Applicability**: Documentation PRs, CLAUDE.md changes, SKILL.md additions, markdown-heavy changes
+
+**Example**: PR [#6072](https://github.com/bitwarden/android/pull/6072)
+
+### Documentation Placeholder Pattern Recognition
+
+**What Worked**: Using placeholder values (like `9999`) in documentation examples makes intent clear; keeping documentation examples generic improves pedagogical value.
+
+**What Didn't Work**: Claude flagged documentation placeholders as critical mismatches without considering pedagogical intent; severity assessment too high for documentation style choices.
+
+**Lesson**: When reviewing documentation changes, assess documentation purpose (reference vs example); recognize placeholder patterns (`9999`, `example.com`, `YOUR_VALUE_HERE`); calibrate severity appropriately; suggest clarification over demanding values match.
+
+**Applicability**: CI/CD configuration examples, README getting-started guides, API documentation with sample requests/responses
+
+**Example**: PR [#6282](https://github.com/bitwarden/android/pull/6282)
+
+### Claude Bot Review Limitations with Repository-Specific Conventions
+
+**What Worked**: Claude bot validated basic patterns (dependency injection, MVVM architecture, test presence); fast initial review (3m 16s); correctly identified core functionality was sound.
+
+**What Didn't Work**: Bot failed to detect repository-specific testing conventions; approved code that violated established patterns; no check for complete vs partial state assertions; generated false confidence.
+
+**Lesson**: Claude bot reviews require calibration to repository-specific conventions beyond language/framework defaults. Generic "best practices" may conflict with project-specific philosophies. Repository gotchas must be explicitly encoded in bot instructions.
+
+**Applicability**: All automated Claude reviews for bitwarden/android; any repository with testing conventions that differ from framework defaults; projects where architectural philosophy trumps generic best practices
+
+**Example**: PR [#6275](https://github.com/bitwarden/android/pull/6275)
+
+### Early Architectural Review for Navigation Changes
+
+**What Worked**: Claude identified state persistence issue by analyzing navigation flow and state management patterns before PR merged; traced how `StateFlow` would behave across multiple sync cycles; provided specific code examples showing required persistence pattern.
+
+**What Didn't Work**: N/A - pattern was successful
+
+**Lesson**: For refactoring PRs involving navigation or state management, validate architectural decisions first. Proactively trace state flows across multiple user interaction cycles to identify infinite loop patterns.
+
+**Applicability**: Feature-flag-driven UX changes, policy-based navigation redirects, one-time setup/onboarding flows, migration prompts triggered by state conditions
+
+**Example**: PR [#6279](https://github.com/bitwarden/android/pull/6279)
+
+### Test-First Validation with CI Integration
+
+**What Worked**: CI automatically runs tests on all PRs; failed "Test" check immediately flagged JSON syntax error; Claude bot review identified same issue before human review; combination of automated review + CI testing provides rapid feedback.
+
+**What Didn't Work**: N/A - pattern was successful
+
+**Lesson**: Multi-layered validation (bot review + CI) provides redundancy. JSON syntax errors in test data are easily caught by CI if tests attempt to parse the data. Always check CI test results before human review.
+
+**Applicability**: Test data includes JSON, YAML, or other structured formats; any PR with test changes
+
+**Example**: PR [#6281](https://github.com/bitwarden/android/pull/6281)
 
 ### Layered PR Strategy for Event Type Introduction
 

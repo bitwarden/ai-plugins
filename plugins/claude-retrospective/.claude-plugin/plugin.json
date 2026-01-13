@@ -1,7 +1,7 @@
 {
   "name": "claude-retrospective",
-  "version": "1.2.0",
-  "description": "Comprehensive analysis of Claude Code sessions to identify successful patterns, problematic areas, and opportunities for improvement. Examines git history, conversation logs, code changes, and gathers user feedback to generate actionable retrospective reports.",
+  "version": "1.0.0",
+  "description": "Comprehensive analysis of Claude Code sessions to identify successful patterns, problematic areas, and opportunities for improvement.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"

@@ -12,10 +12,7 @@ description: "Code review knowledge for {{OWNER}}/{{REPO}} ({{TECH_STACK}}). Usa
 | **Repository** | [{{OWNER}}/{{REPO}}](https://github.com/{{OWNER}}/{{REPO}}) |
 | **Technology Stack** | {{TECH_STACK}} |
 | **Primary Languages** | {{LANGUAGES}} |
-| **Review Count** | {{REVIEW_COUNT}} |
-| **Date Range** | {{FIRST_DATE}} to {{LAST_DATE}} |
 | **Common Issue Categories** | {{CATEGORIES}} |
-| **Last Updated** | {{DATE}} |
 
 ## Verified Detection Strategies
 

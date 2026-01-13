@@ -5,6 +5,26 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-01-13
+
+### Added
+
+- **Institutional Knowledge System**: Capture and recall learnings from code reviews
+  - `pr-knowledge-extractor` agent for automated knowledge extraction from PRs
+  - `capturing-review-knowledge` skill for documenting failed detections, repository gotchas, and methodology insights
+  - `recalling-review-knowledge` skill for loading institutional knowledge before reviews
+- **Repository-Specific Knowledge Skills**: Pre-loaded learnings for Bitwarden repositories
+  - `bitwarden-server-review-knowledge` (.NET/C#, ASP.NET Core)
+  - `bitwarden-clients-review-knowledge` (TypeScript, Angular, RxJS)
+  - `bitwarden-android-review-knowledge` (Kotlin, Jetpack Compose)
+  - `bitwarden-ios-review-knowledge` (Swift, SPM)
+  - `bitwarden-ai-plugins-review-knowledge` (TypeScript, YAML, Bash)
+  - `bitwarden-sdk-internal-review-knowledge` (Rust, WASM)
+  - `bitwarden-gh-actions-review-knowledge` (GitHub Actions, YAML, Bash)
+- **New Commands**:
+  - `/retrospective-review [PR#]` - Analyze completed reviews and capture actionable learnings
+  - `/advise-review` - Load institutional knowledge before starting a review
+
 ## [1.5.2] - 2025-01-09
 
 ### Changed

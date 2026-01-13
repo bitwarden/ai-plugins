@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-code-review",
   "version": "1.6.0",
-  "description": "Comprehensive code review system with organization-wide standards and institutional knowledge capture. Usage scenarios: (1) When reviewing bitwarden repositories (TypeScript, C#, Kotlin, Swift), (2) When checking Claude config files (CLAUDE.md, AGENT.md, SKILL.md), (3) When encountering authentication bypass patterns, (4) When validating state management, (5) When detecting SQL injection. Captures failed detections, repository gotchas, and review methodologies.",
+  "description": "Comprehensive code review system with organization-wide standards and institutional knowledge capture.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
@@ -16,11 +16,16 @@
     "ios",
     "web",
     "server",
+    "github-actions",
+    "workflows",
     "security",
     "institutional-knowledge",
     "failed-detections"
   ],
-  "agents": "./agents/bitwarden-code-reviewer/AGENT.md",
+  "agents": [
+    "./agents/bitwarden-code-reviewer/AGENT.md",
+    "./agents/pr-knowledge-extractor/AGENT.md"
+  ],
   "skills": "./skills/",
   "commands": [
     "./commands/code-review-local/code-review-local.md",

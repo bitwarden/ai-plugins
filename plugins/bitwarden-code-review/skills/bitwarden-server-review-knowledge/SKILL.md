@@ -1,6 +1,6 @@
 ---
 name: bitwarden-server-review-knowledge
-description: "Code review knowledge for bitwarden/server (.NET/C#, ASP.NET Core). Usage scenarios: (1) When reviewing PRs in bitwarden/server, (2) When encountering authentication/authorization patterns, (3) When checking security validation logic. Verified on C#, SQL, PowerShell."
+description: Institutional knowledge for bitwarden/server code reviews. Use BEFORE reviewing server PRs to understand repository-specific patterns, architectural constraints, and avoid false positives.
 ---
 
 # bitwarden/server - Code Review Knowledge
@@ -12,10 +12,7 @@ description: "Code review knowledge for bitwarden/server (.NET/C#, ASP.NET Core)
 | **Repository** | [bitwarden/server](https://github.com/bitwarden/server) |
 | **Technology Stack** | api, aspnet, aspnetcore, bitwarden, csharp, docker, dotnet, dotnet-core, signalr, sql, sql-server |
 | **Primary Languages** | C#, CSS, Dockerfile, HTML, Handlebars, JavaScript, PLpgSQL, PowerShell, Rust, SCSS, Shell, TSQL |
-| **Review Count** | 4 |
-| **Date Range** | 2025-12-17 to 2025-12-18 |
-| **Common Issue Categories** | Missing validation returns, architectural pattern mismatches, review noise/repetition |
-| **Last Updated** | 2025-12-18 |
+| **Common Issue Categories** | Missing validation returns, architectural pattern mismatches, review noise/repetition, EDD violations, defensive programming gaps |
 
 ## Verified Detection Strategies
 
@@ -66,12 +63,49 @@ rg "JSON_EXTRACT|LIKE '%\".*\":%'" util/Migrator/DbScripts/*.sql
 rg "migrationBuilder\.(Create|Alter|Drop)" util/*Migrations/ -A 3
 ```
 
+### Database: Check for EDD violations (column renames)
+```bash
+# Flag any RenameColumn operations (violates Evolutionary Database Design)
+rg "RenameColumn\(" util/*Migrations/ --type cs -A 2
+
+# Verify corresponding SQL Server migration exists for EF changes
+# When EF migration exists, check for matching SQL Server script
+ls util/Migrator/DbScripts/ | grep -E "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+```
+
+### Database: Check permission query completeness
+```bash
+# Verify permission queries check BOTH user and group permission views
+rg "CollectionUserPermissionsView" --type sql -A 5 | grep -c "CollectionGroupPermissionsView"
+
+# Find queries that might miss group-based permissions
+rg "CollectionUserPermissionsView" --type sql | grep -v "CollectionGroupPermissionsView"
+```
+
+### Entity Framework: Check for execution strategy issues
+```bash
+# Find manual transaction usage that may conflict with EnableRetryOnFailure
+rg "BeginTransactionAsync" --type cs -B 5 | grep -v "CreateExecutionStrategy"
+
+# Check if DbContext is created outside ExecuteAsync (anti-pattern)
+rg "CreateExecutionStrategy" --type cs -A 10 | grep -B 5 "GetDatabaseContext"
+```
+
+### API: Check for defensive nullable parameter handling
+```bash
+# When parameters change to nullable, verify constructor normalization
+rg "string\? " --type cs src/ | grep "constructor\|public.*\("
+```
+
 ## Failed Attempts (Critical Learnings)
 
 | Issue | Why Missed | Detection Strategy | Review Date | PR Link | Severity |
 |-------|------------|-------------------|-------------|---------|----------|
 | Missing return statement after ValidateClientVersionAsync call | Focused on feature flag path logic, didn't verify non-feature-flag path completeness | Always verify ALL code paths have proper validation return handling; search for validation calls: `rg "await Validate.*Async\(" --type cs -A 2` and confirm each is checked/returned | 2025-12-17 | [#6588](https://github.com/bitwarden/server/pull/6588) | ❌ CRITICAL |
 | Test constructor signature mismatch after controller constructor changed | Initial review focused on endpoint removal and feature flag cleanup; didn't cross-reference test file constructor parameters against controller signature changes | When controllers have constructor signature changes, ALWAYS verify test file constructors in parallel: `rg "new.*Controller\(" test/ -A 5` and compare against actual controller constructor parameters | 2025-12-18 | [#6744](https://github.com/bitwarden/server/pull/6744) | ❌ CRITICAL |
+| Missing CollectionGroupPermissionsView check in exclusion logic | Reviewed CollectionUserPermissionsView usage but didn't verify group-based permission path was also checked in NOT EXISTS clause | When reviewing permission queries with UNION ALL or exclusion logic, verify BOTH `CollectionUserPermissionsView` AND `CollectionGroupPermissionsView` are checked: `rg "CollectionUserPermissionsView" --type sql -A 5 \| grep "CollectionGroupPermissionsView"` | 2025-11-21 | [#6606](https://github.com/bitwarden/server/pull/6606) | ❌ CRITICAL |
+| False positive claiming missing @CollectionId parameter in Dapper code | Failed to read entire method implementation, jumped to conclusion after seeing variable generation without verifying parameter addition 5 lines later | Before flagging "missing parameter" issues, search for ALL usages of variable in method; for Dapper implementations, explicitly verify `DynamicParameters.Add()` calls match stored procedure signature; only mark CRITICAL after quoting exact lines showing issue | 2025-12-03 | [#6677](https://github.com/bitwarden/server/pull/6677) | ⚠️ FALSE_POSITIVE |
+| Constructor should normalize empty strings to null during nullable conversion | Focused on callsite updates, didn't consider defensive programming at constructor boundary; assumed all callers would pass correct values | When reviewing nullable type conversions (non-null → nullable), ask: "What if someone passes the old value?" Check constructor/setter for normalization: `rg "string\? " --type cs \| grep constructor`; apply defensive principle: normalize at boundary | 2025-12-19 | [#6753](https://github.com/bitwarden/server/pull/6753) | ⚠️ VALID_ISSUE |
 
 ## Repository Gotchas
 
@@ -183,7 +217,135 @@ _Architectural patterns and conventions specific to this repository._
 - Breaks reproducible database setup from migrations
 - Test databases may not have the data to delete, causing migrations to silently succeed without testing the actual logic
 
-**References**: PR [#6746](https://github.com/bitwarden/server/pull/6746) - Reviewer @withinfocus correctly identified: "This feels to me like a task for DbOps to execute where needed vs. a checked-in change that's migrated." The PR was closed without merging, with developer agreeing it should be a DbOps script instead.
+**References**: PR [#6746](https://github.com/bitwarden/server/pull/6746) - A team reviewer correctly identified: "This feels to me like a task for DbOps to execute where needed vs. a checked-in change that's migrated." The PR was closed without merging, with developer agreeing it should be a DbOps script instead.
+
+### Evolutionary Database Design (EDD) - Column Renames Require Multi-Release Process
+
+**Pattern**: bitwarden/server enforces [Evolutionary Database Design (EDD)](https://contributing.bitwarden.com/contributing/database-migrations/edd/) for all database schema changes. Direct column renames via `RenameColumn` in EF migrations violate EDD principles and break compatibility during rolling deployments.
+
+**Common Mistake**: Using `migrationBuilder.RenameColumn()` to rename database columns, which causes application crashes for running instances during deployment.
+
+**Required Approach**:
+1. **Release 1**: Add new column (e.g., `OrganizationUserId`), sync data from old column (e.g., `UserGuid`)
+2. **Release 2**: Update application code to read/write new column
+3. **Release 3**: Drop old column
+
+**Detection Strategy**:
+- Search for `RenameColumn` in migration files: `rg "RenameColumn\(" util/*Migrations/ --type cs -A 2`
+- Flag ANY column rename and require multi-release EDD process
+- Verify corresponding SQL Server migration in `util/Migrator/DbScripts/` exists and is consistent
+
+**Impact**: CRITICAL - Direct renames cause deployment failures and application crashes during rolling deployments. Breaks database compatibility between running application versions.
+
+**References**: PR [#6606](https://github.com/bitwarden/server/pull/6606) - A team reviewer flagged: "Renaming a database column does not follow EDD. In order to achieve this, a new column must be added, the data must be synced between the old and new columns, then the old column is dropped. This is a multi-release process."
+
+### SQL Server Migration Consistency - Must Match EF Migrations
+
+**Pattern**: bitwarden/server uses both EF migrations (MySQL, Postgres, SQLite) AND SQL Server migration scripts in `util/Migrator/DbScripts/`. ALL database engines must receive equivalent schema changes.
+
+**Common Mistake**: Adding migrations to EF files but forgetting corresponding SQL Server migration script, causing deployment inconsistencies and schema drift between database engines.
+
+**Detection Strategy**:
+- When reviewing EF migrations in `util/*Migrations/`, ALWAYS check for corresponding SQL Server migration
+- SQL Server migrations follow pattern: `util/Migrator/DbScripts/[YYYY-MM-DD]_[NN]_[Description].sql`
+- Verify schema changes (column adds, renames, type changes) exist in BOTH locations
+- Search for table name mentioned in EF migration within SQL Server script
+
+**Impact**: CRITICAL - Causes deployment failures and schema drift between SQL Server and other database engines.
+
+**References**: PR [#6606](https://github.com/bitwarden/server/pull/6606) - A team reviewer flagged: "This is no migration action that corresponds with the EF migrations. We can't do a rename anyway but you'll need a corresponding SQL migration in this file to match the EF migrations."
+
+### Group-Based vs User-Based Permissions - Dual Permission Path Architecture
+
+**Pattern**: bitwarden/server implements dual permission paths - direct user-to-collection permissions AND group-based permissions (users inherit permissions through group membership). Both paths must be checked in permission queries.
+
+**Common Mistake**: Queries checking user permissions only verify `CollectionUserPermissionsView` and miss `CollectionGroupPermissionsView`, causing users with group-only permissions to be incorrectly excluded or denied access.
+
+**Detection Strategy**:
+- When reviewing queries checking collection/vault permissions, verify BOTH permission views are checked:
+  - `CollectionUserPermissionsView` - direct user-collection assignments
+  - `CollectionGroupPermissionsView` - group-based permissions (users → groups → collections)
+- Search pattern: `rg "CollectionUserPermissionsView" --type sql | grep -v "CollectionGroupPermissionsView"`
+- Especially critical in exclusion logic (NOT EXISTS, LEFT JOIN WHERE NULL)
+
+**Impact**: HIGH - Users lose access to collections they should have via group membership, or incorrectly appear as having no access in reports and queries.
+
+**References**: PR [#6606](https://github.com/bitwarden/server/pull/6606) - Initial implementation missed group permission check in NOT EXISTS clause, requiring multiple review rounds to fix. Users with group-only permissions would have incorrectly appeared as "Users without collection access."
+
+### Entity Framework EnableRetryOnFailure Has Global Impact
+
+**Pattern**: Global EF configuration changes (especially `EnableRetryOnFailure()`) affect ALL repositories using manual transactions. When enabled globally, EF does not allow manual transaction creation with `BeginTransactionAsync()` unless wrapped in an execution strategy.
+
+**Common Mistake**: Adding `EnableRetryOnFailure()` to global EF database configuration without auditing all existing `BeginTransactionAsync()` usage throughout the codebase.
+
+**Why It's Problematic**: Throws `InvalidOperationException: The configured execution strategy does not support user initiated transactions` at runtime for all existing manual transaction code.
+
+**Detection Strategy**:
+1. When reviewing EF configuration changes in `EntityFrameworkServiceCollectionExtensions.cs`, search for all manual transactions: `rg "BeginTransactionAsync" --type cs`
+2. Check if execution strategies are used: `rg "CreateExecutionStrategy" --type cs`
+3. Flag global `EnableRetryOnFailure()` additions as requiring codebase-wide transaction audit
+
+**Correct Patterns**:
+
+**Option A (Preferred)**: Localized retry - use execution strategy only where needed
+```csharp
+var strategy = dbContext.Database.CreateExecutionStrategy();
+return await strategy.ExecuteAsync(async () =>
+{
+    using var transaction = await dbContext.Database.BeginTransactionAsync();
+    // ... transaction work
+});
+```
+
+**Option B**: Global retry - ALL existing transactions must be updated to use execution strategies
+
+**Impact**: CRITICAL - Runtime failures in existing repositories. Breaks production code if not caught before deployment.
+
+**References**: PR [#6677](https://github.com/bitwarden/server/pull/6677) - Author noted: "this required changes to system-wide EF configuration" and "has broken every other instance where we're manually creating an EF transaction."
+
+### DbContext Lifecycle Management with Execution Strategies
+
+**Pattern**: DbContext must be created INSIDE `ExecuteAsync` block to ensure fresh context on retry attempts. Reusing DbContext across retry attempts can cause corrupted state after deadlocks or transient failures.
+
+**Common Mistake**: Creating DbContext outside `strategy.ExecuteAsync()` and reusing the same instance across retry attempts.
+
+**Detection Strategy**:
+- When reviewing execution strategy usage, check where scope and DbContext are created
+- Pattern to flag: DbContext created BEFORE `strategy.ExecuteAsync()`
+- Search: `rg "CreateExecutionStrategy" --type cs -A 10 | grep -B 5 "GetDatabaseContext"`
+
+**Anti-Pattern**:
+```csharp
+using var scope = ServiceScopeFactory.CreateScope();
+var dbContext = GetDatabaseContext(scope);  // Outside ExecuteAsync - WRONG
+var strategy = dbContext.Database.CreateExecutionStrategy();
+
+return await strategy.ExecuteAsync(async () =>
+{
+    // Reuses same dbContext on retry - could be corrupted after deadlock
+    using var transaction = await dbContext.Database.BeginTransactionAsync();
+});
+```
+
+**Correct Pattern**:
+```csharp
+using var tempScope = ServiceScopeFactory.CreateScope();
+var strategy = GetDatabaseContext(tempScope).Database.CreateExecutionStrategy();
+
+return await strategy.ExecuteAsync(async () =>
+{
+    // Fresh scope and context for each execution (including retries)
+    using var scope = ServiceScopeFactory.CreateScope();
+    var dbContext = GetDatabaseContext(scope);
+
+    using var transaction = await dbContext.Database.BeginTransactionAsync();
+    // ... transaction work
+});
+```
+
+**Impact**: HIGH - Silent data corruption or unexpected behavior on retry attempts.
+
+**References**: PR [#6677](https://github.com/bitwarden/server/pull/6677) - Claude correctly identified this anti-pattern in the EF implementation where DbContext was created outside ExecuteAsync block.
 
 ## Methodology Improvements
 
@@ -191,7 +353,7 @@ _What worked and what didn't in review approaches._
 
 ### Multi-Round Review Process
 
-**What Worked**: The PR went through multiple review rounds with different reviewers (Claude bot initial review, @quexten for KM perspective, @JaredSnider-Bitwarden for architecture), catching different classes of issues at each stage.
+**What Worked**: The PR went through multiple review rounds with different reviewers (Claude bot initial review, a domain expert for KM perspective, an architect reviewer for architecture), catching different classes of issues at each stage.
 
 **What Didn't Work**: Some critical issues (missing return statement) weren't caught until mid-review despite being in the initial code.
 
@@ -278,3 +440,77 @@ gh api "repos/{owner}/{repo}/pulls/{num}/comments" --jq 'length'
 **Examples**:
 - PR [#6750](https://github.com/bitwarden/server/pull/6750) - Claude claimed completion at 2025-12-18T13:33:09Z but posted zero review artifacts
 - PR [#6746](https://github.com/bitwarden/server/pull/6746) - Claude claimed "Several critical issues" and "incorrect IntegrationType mapping" at 2025-12-17T15:39:52Z but posted zero inline comments, only a summary comment claiming the detailed review was posted
+- PR [#6739](https://github.com/bitwarden/server/pull/6739) - Claude bot reported "The review has been completed. Please check the inline comments" but GitHub API verification showed zero comments/reviews posted
+
+### User Pushback Improves Review Quality
+
+**What Worked**: When a team member (in PR #6677) challenged a specific false positive finding ("I disagree with '1. Missing @CollectionId Parameter' - double check that you've read this correctly"), Claude re-read the code, acknowledged the error, and issued a prompt correction. Trust was maintained by retracting the false positive while preserving other valid findings.
+
+**What Didn't Work**: Initial review made a CRITICAL claim without sufficient verification. Code reference was not carefully checked before marking as blocking.
+
+**Lesson**: Encourage users to challenge review findings. When users push back:
+1. Re-read the specific code section they're questioning
+2. Quote exact lines in the response to verify claims
+3. Acknowledge errors promptly and explicitly
+4. Update findings to remove incorrect items
+
+False positives are inevitable, but how we handle them determines trust. Quick acknowledgment and correction maintains credibility.
+
+**Applicability**: All code reviews, especially when marking issues as CRITICAL or blocking.
+
+**Example**: PR [#6677](https://github.com/bitwarden/server/pull/6677) - False positive was retracted within hours after user challenge, maintaining review credibility.
+
+### Architecture-First Review for Database Schema Changes
+
+**What Worked**: A team reviewer (in PR #6606) immediately flagged EDD violation on first review, pointing to specific documentation and multi-release process requirements.
+
+**What Didn't Work**: Automated Claude review mentioned EDD in summary but didn't block on it or provide clear remediation steps in early rounds. Formatting and logic issues took precedence over architectural violations.
+
+**Lesson**:
+- Database schema changes (migrations, column renames, table structure changes) require architecture-first review
+- EDD violations should be flagged as BLOCKING in first review round with concrete remediation steps
+- Link to documentation: https://contributing.bitwarden.com/contributing/database-migrations/edd/
+
+**Applicability**: ALL PRs touching migration files (`util/*Migrations/`) or stored procedures.
+
+**Example**: PR [#6606](https://github.com/bitwarden/server/pull/6606) - `RenameColumn` usage was architectural blocker requiring PR redesign.
+
+### Multi-Layer Review Catches Boundary Conditions
+
+**What Worked**: Sequential reviews with different perspectives increased coverage. In PR #6753:
+- Bot review caught technical correctness issues (redundant operators, breaking changes)
+- Human review caught defensive programming opportunities at API boundaries
+- Neither perspective alone would have caught all issues
+
+**What Didn't Work**: Single-pass automated review missed constructor boundary normalization opportunity.
+
+**Lesson**: When reviewing nullable type conversions (non-null → nullable), explicitly check for defensive normalization at boundaries. Don't assume all callers will be updated correctly or that future code won't pass the old value.
+
+**Applicability**: PRs involving:
+- Non-null to nullable type conversions
+- API contract changes
+- Constructor or public method signature modifications
+- Defensive programming opportunities
+
+**Specific Checklist for Nullable Conversions**:
+- [ ] All callsites updated to pass new expected value
+- [ ] Constructor/setter normalizes old values to new semantic meaning
+- [ ] Tests cover both old and new value handling
+- [ ] API documentation updated to clarify null vs empty semantics
+
+**Example**: PR [#6753](https://github.com/bitwarden/server/pull/6753) - A team reviewer suggested: "Can this model normalize an empty string to `null` in its constructor, just in case someone does pass in an empty string?" This defensive improvement was implemented.
+
+### Persistent Critical Issues Require Human Escalation
+
+**What Worked**: Human reviewer escalated PR #6606 after automated Claude reviews persisted critical issues across multiple rounds. Human review provided concrete EDD guidance and requested changes, resolving stalled automated review cycles.
+
+**What Didn't Work**: Claude bot re-flagged the same issue multiple times even after it was fixed, causing noise and frustration. Author repeatedly responded "already fixed" or "change has been made" but bot didn't verify before re-commenting.
+
+**Lesson**:
+- If a CRITICAL issue persists beyond 2 review rounds, human reviewer should escalate
+- Automated reviewers should verify fix before re-flagging in subsequent rounds
+- Author responses like "already fixed" should trigger verification before re-commenting
+
+**Applicability**: All automated code review workflows with multi-round reviews.
+
+**Example**: PR [#6606](https://github.com/bitwarden/server/pull/6606) - Missing `CollectionGroupPermissionsView` check was flagged repeatedly until human reviewer intervened.

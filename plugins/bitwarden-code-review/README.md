@@ -57,23 +57,32 @@ bitwarden-code-review/
 ├── .claude-plugin/
 │   └── plugin.json                           # Plugin metadata
 ├── agents/
-│   └── bitwarden-code-reviewer/
-│       └── AGENT.md                          # Main review agent
+│   ├── bitwarden-code-reviewer/
+│   │   └── AGENT.md                          # Main review agent
+│   └── pr-knowledge-extractor/
+│       └── AGENT.md                          # Knowledge extraction agent
 ├── commands/
-│   └── code-review-local/                    # Local review command
+│   ├── code-review-local/                    # Local review command
+│   ├── retrospective-review/                 # Post-review knowledge capture
+│   └── advise-review/                        # Pre-review knowledge recall
 ├── skills/
-│   ├── avoiding-false-positives/
-│   │   └── SKILL.md                          # False positive prevention
-│   ├── classifying-review-findings/
-│   │   └── SKILL.md                          # Severity classification
-│   ├── detecting-existing-threads/
-│   │   └── SKILL.md                          # Duplicate prevention
-│   ├── posting-bitwarden-review-comments/
-│   │   └── SKILL.md                          # Inline comment formatting
-│   ├── posting-review-summary/
-│   │   └── SKILL.md                          # Summary comment handling
-│   └── reviewing-incremental-changes/
-│       └── SKILL.md                          # Re-review scoping
+│   ├── avoiding-false-positives/             # False positive prevention
+│   ├── classifying-review-findings/          # Severity classification
+│   ├── detecting-existing-threads/           # Duplicate prevention
+│   ├── posting-bitwarden-review-comments/    # Inline comment formatting
+│   ├── posting-review-summary/               # Summary comment handling
+│   ├── reviewing-incremental-changes/        # Re-review scoping
+│   ├── capturing-review-knowledge/           # Knowledge capture workflow
+│   ├── recalling-review-knowledge/           # Knowledge recall workflow
+│   ├── bitwarden-server-review-knowledge/
+│   ├── bitwarden-clients-review-knowledge/
+│   ├── bitwarden-android-review-knowledge/
+│   ├── bitwarden-ios-review-knowledge/
+│   ├── bitwarden-ai-plugins-review-knowledge/
+│   ├── bitwarden-sdk-internal-review-knowledge/
+│   └── bitwarden-gh-actions-review-knowledge/
+├── scripts/
+│   └── get-review-threads.sh                 # GraphQL thread detection
 ├── tests/
 │   └── TESTING.md                            # Test plan and validation
 └── README.md                                 # This file
