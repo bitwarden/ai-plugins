@@ -17,72 +17,277 @@ Enhance the existing CLAUDE.md file with Bitwarden's standardized template forma
    - Review data models, database schemas, and API contracts
    - Look for configuration management, environment variables, and secrets handling
    - Find testing patterns, utilities, and coverage expectations
+   - Analyze build, deployment, and CI/CD pipelines
+   - Identify common issues and debugging approaches
    - Identify external documentation sources and authoritative references
 
-3. **Enhance CLAUDE.md**: Restructure the file to use **exactly** the following six sections. 
+3. **Enhance CLAUDE.md**: Restructure the file to use **exactly** the following sections.
 
 **CRITICAL REQUIREMENTS:**
 - The final CLAUDE.md MUST use these exact headings verbatim - no other top-level headings are allowed
-- ALL content from the original CLAUDE.md MUST be incorporated into one of these six sections - do not remove any information
+- ALL content from the original CLAUDE.md MUST be incorporated into one of these sections - do not remove any information
 - Reorganize and merge existing content into the appropriate sections below
 - Add new information from your supplementary research to fill gaps
+
+---
 
 **Required Sections (use these exact headings):**
 
 ## Overview
-- Brief description of the business domain and project purpose
-- Key concepts and terminology specific to this codebase
-- Primary user types and their main workflows
-- Integration points with external systems
+
+### What This Project Does
+- Primary function/purpose (1-2 sentences)
+- Key interfaces or entry points
+- Target users/consumers
+
+### Key Concepts
+- Domain-specific terminology
+- Important abstractions to understand
+
+---
 
 ## Architecture & Patterns
-- High-level folder structure and organization
-- Module boundaries and layer dependencies
-- Communication patterns between components
-- Design patterns and architectural decisions
-- External service integrations
 
-## Stack Best Practices
-- Language-specific idioms and conventions used in this codebase
-- Framework patterns and recommended approaches
-- Dependency injection and configuration patterns
-- Error handling and validation strategies
-- Testing approaches and utilities
-- Where to find authoritative documentation on the web
+### System Architecture
+- Include an ASCII diagram showing high-level request/data flow
+- Example format:
+```
+    Client Request
+         ↓
+    Entry Point (index.ts)
+         ↓
+    ┌─────────────┬─────────────┐
+    │  Handler A  │  Handler B  │
+    └─────────────┴─────────────┘
+```
 
-## Anti-Patterns
-- Common mistakes to avoid in this codebase
-- Security concerns (e.g., logging sensitive data, hardcoded secrets)
-- Performance pitfalls
-- Maintenance anti-patterns (e.g., non-parameterized SQL queries)
+### Code Organization
+- Include a directory tree showing key folders and their purposes
+- Example format:
+```
+src/
+├── handlers/       # Request handlers
+├── schemas/        # Validation schemas
+├── services/       # Business logic
+└── index.ts        # Entry point
+```
+
+### Key Principles
+- Numbered list of architectural principles with brief explanations
+
+### Core Patterns
+- For each significant pattern, document:
+  - **Purpose**: Why this pattern exists
+  - **Implementation**: Code example showing canonical implementation
+  - **Usage**: Code example showing how to use the pattern
+
+---
+
+## Development Guide
+
+### Adding New [Primary Entity]
+- Step-by-step checklist for the most common development task
+- Include code templates for each step:
+  1. Define the schema (with template)
+  2. Implement the handler (with template)
+  3. Register/wire up the component (with template)
+  4. Write tests (with template)
+  5. Update documentation
+
+### Common Patterns
+- Code examples with comments for:
+  - Request/input handling
+  - Error handling
+  - Response formatting
+  - Any other recurring patterns
+
+---
 
 ## Data Models
-- Core domain entities and their relationships
+
+### Core Types
+```typescript
+// Key interfaces and types used throughout the project
+```
+
+### Validation Schemas
+```typescript
+// Zod schemas or similar validation definitions
+```
+
+- Document core domain entities and their relationships
 - Key value objects and DTOs
 - Data validation rules and constraints
-- Database migration patterns
+- Database migration patterns (if applicable)
 - API request/response formats
 
-## Configuration, Security, and Authentication
-- Environment variable management
-- Secrets handling 
-- Authentication and authorization flows
+---
+
+## Security & Configuration
+
+### Security Rules
+**MANDATORY - These rules have no exceptions:**
+- Numbered list of security rules with explanations and rationale
+
+### Security Functions
+| Function | Purpose | Usage |
+|----------|---------|-------|
+| `functionName()` | What it does | When to use it |
+
+### Environment Configuration
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `VAR_NAME` | Yes/No | What it configures | `example-value` |
+
+### Authentication & Authorization
+- How authentication works
+- Required credentials/tokens
+- Token lifecycle management
 - API security patterns and middleware
-- Compliance requirements and security controls
+
+---
+
+## Testing
+
+### Test Structure
+```
+tests/
+├── unit/              # Unit tests
+├── integration/       # Integration tests
+└── fixtures/          # Test data
+```
+
+### Writing Tests
+- Unit test template with Arrange/Act/Assert structure
+- Integration test template with setup/teardown
+
+### Running Tests
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+npm test -- [file]    # Run specific file
+```
+
+### Test Environment
+- Required mocks
+- Environment variable setup for tests
+- Test data location
+
+---
+
+## Code Style & Standards
+
+### Formatting
+- Tool used (Prettier, ESLint, etc.)
+- Key configuration settings
+
+### Naming Conventions
+- `camelCase` for: variables, functions
+- `PascalCase` for: types, interfaces, classes
+- `SCREAMING_SNAKE_CASE` for: constants
+- Other project-specific conventions
+
+### Imports
+- Ordering rules
+- Extension requirements (e.g., `.js` for ES modules)
+
+### Comments
+- When to use JSDoc
+- When to use inline comments
+
+### Pre-commit Hooks
+- What runs automatically
+- Manual checks to run before committing
+
+---
+
+## Anti-Patterns
+
+### DO
+- ✅ Pattern/practice to follow
+- ✅ Always validate inputs before processing
+- ✅ Follow the established patterns in this document
+- ✅ Write tests for new functionality
+- ✅ Handle errors gracefully
+- ✅ Use TypeScript strict mode (if applicable)
+
+### DON'T
+- ❌ Skip input validation
+- ❌ Use `any` types (TypeScript)
+- ❌ Hardcode credentials or secrets
+- ❌ Ignore error responses
+- ❌ Commit sensitive data
+- ❌ Bypass security functions
+- ❌ Project-specific anti-patterns
+
+---
+
+## Deployment
+
+### Building
+```bash
+# Build commands
+```
+
+### Versioning
+- Versioning strategy (e.g., semantic versioning)
+- How versions are managed
+
+### Publishing/Deploying
+```bash
+# Deployment steps
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### [Issue Category]
+**Problem**: Description of the issue
+**Solution**: How to fix it
+
+### Debug Tips
+- How to enable verbose logging
+- Common debugging workflows
+- Useful diagnostic commands
+
+---
+
+## References
+
+### Official Documentation
+- Links to primary framework/library docs
+
+### Internal Documentation
+- Links to contributing guides, ADRs, etc.
+
+### Tools & Libraries
+- Links to key dependency documentation
+
+---
 
 **Enhancement Guidelines:**
 - **No information loss**: Every piece of content from the original CLAUDE.md must appear in the final output, incorporated into the appropriate section
-- **Strict heading structure**: Only the six headings above are permitted as top-level sections - merge any other headings as subsections or bullet points within the appropriate section
+- **Strict heading structure**: Only the headings above are permitted as top-level sections (## level) - merge any other headings as subsections (### level) or bullet points within the appropriate section
 - **Fill gaps**: Add information for any sections that are missing or incomplete based on your supplementary research
 - **Be specific**: Include concrete examples, file paths, and code references from this codebase
+- **Include code templates**: Provide canonical code examples that can be copied and adapted
+- **Use visual structure**: Include ASCII diagrams, tables, and directory trees where they aid comprehension
 - **Prioritize security**: Pay special attention to authentication, authorization, and data protection patterns
 - **Stay current**: Reference actual patterns found in the code, not assumptions
-- **Keep it concise**: Bullet points and clear structure over verbose paragraphs
 
 **Content Quality Standards:**
 - Every section should have substantive, codebase-specific content
 - Avoid generic advice that could apply to any project
-- Include file paths and specific examples where helpful (e.g., "See `src/auth/guards/` for authentication guards")
+- Include file paths and specific examples (e.g., "See `src/auth/guards/` for authentication guards")
+- Use tables for structured data (env vars, security functions)
+- Use emoji indicators (✅/❌) for DO/DON'T lists
 - Note any deviations from standard practices and why they exist
 
-**Final Step**: After enhancing CLAUDE.md, provide a brief summary of what was added or changed compared to the original file.
+**Handling Optional Sections:**
+- If a section is not applicable to this project (e.g., "Deployment" for a library), include the heading with a brief note: "Not applicable - this is a library consumed as a dependency."
+- Never omit a required heading entirely
+
+**Final Step**: After enhancing CLAUDE.md, provide a detailed summary of what was added or changed compared to the original file.
