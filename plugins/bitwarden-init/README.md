@@ -1,114 +1,63 @@
 # Bitwarden Init Plugin
 
-Initialize Claude Code configuration with Bitwarden's standardized template format.
+Generates CLAUDE.md files using Bitwarden's standardized documentation template.
 
-## Overview
+## What It Does
 
-This plugin provides a `/bitwarden-init:init` command that generates a comprehensive CLAUDE.md file by combining Anthropic's built-in `/init` analysis with Bitwarden's extended template structure. The two-phase approach ensures thorough codebase analysis followed by Bitwarden-specific enhancements.
+This plugin creates comprehensive CLAUDE.md files that document your codebase. It works in two phases:
+
+1. **Phase 1**: Runs Anthropic's built-in `/init` to analyze your codebase and generate initial documentation
+2. **Phase 2**: Extends the output with Bitwarden's template structure, adding standardized sections
 
 ## Installation
-
-### From Bitwarden Marketplace
 
 ```bash
 /plugin install bitwarden-init@bitwarden-marketplace
 ```
 
-After installation, restart Claude Code to activate the plugin.
+Restart Claude Code after installation.
 
-## Usage
+## Commands
 
-Navigate to your repository in Claude Code and run:
+### `/bitwarden-init:init`
 
-```
-/bitwarden-init:init
-```
+Generates a new CLAUDE.md file. Runs both phases automatically:
+1. Anthropic's `/init` analyzes the codebase
+2. `/enhance` restructures and extends the output
 
-This triggers a two-phase initialization process:
+### `/bitwarden-init:enhance`
 
-1. **Phase 1 - Anthropic's /init**: Analyzes your codebase to generate an initial CLAUDE.md with build commands, architecture overview, and detected patterns
-
-2. **Phase 2 - Bitwarden Enhancement**: Reads the generated CLAUDE.md, performs supplementary research, and extends it with Bitwarden's standardized sections
-
-### What Happens
-
-```mermaid
-flowchart TD
-    A["/bitwarden-init:init"] --> B["Phase 1: Anthropic's /init"]
-    B --> |"Build/dev commands<br/>Code architecture<br/>Initial patterns"| C["CLAUDE.md created"]
-    C --> D["Phase 2: Bitwarden Enhance"]
-    D --> |"Supplementary research<br/>Extended template sections<br/>Security & auth focus"| E["Enhanced CLAUDE.md"]
-```
-
-### Enhance Only
-
-If you already have a CLAUDE.md file and want to extend it with Bitwarden's template sections:
-
-```
-/bitwarden-init:enhance
-```
-
-This reads your existing file, performs supplementary research, and restructures the content to match Bitwarden's standardized format.
+Enhances an existing CLAUDE.md file. Reads your current file, performs additional codebase research, and reorganizes content to match Bitwarden's template sections.
 
 ## Template Structure
 
-The generated CLAUDE.md file includes these sections:
+The generated CLAUDE.md includes these sections:
 
-| Section | Contents |
-|---------|----------|
-| **Overview** | Business domain, key concepts, user types, integration points |
-| **Architecture & Patterns** | Structure, module boundaries, design patterns, external services |
-| **Stack Best Practices** | Language idioms, framework patterns, error handling, testing |
-| **Anti-Patterns** | Common mistakes, security concerns, performance pitfalls |
-| **Data Models** | Domain entities, DTOs, validation rules, database patterns |
-| **Configuration, Security, and Authentication** | Environment management, secrets, auth flows, compliance |
+- **Overview** - Project purpose, key concepts
+- **Architecture & Patterns** - System diagrams, code organization, implementation patterns
+- **Development Guide** - Step-by-step instructions with code templates
+- **Data Models** - Types, validation schemas, domain entities
+- **Security & Configuration** - Security rules, authentication, environment variables
+- **Testing** - Test structure, writing tests, running tests
+- **Code Style & Standards** - Formatting, naming conventions, pre-commit hooks
+- **Anti-Patterns** - DO/DON'T lists
+- **Deployment** - Build and deployment instructions
+- **Troubleshooting** - Common issues and solutions
+- **References** - Documentation links
 
 ## Requirements
 
-- `claude` CLI must be installed and available in PATH
-- Sufficient permissions to run Claude Code non-interactively
-
-## Benefits
-
-- **Comprehensive**: Combines Anthropic's analysis with Bitwarden's structure
-- **Standardization**: Consistent documentation format across all Bitwarden repositories
-- **Onboarding**: New team members can quickly understand codebase patterns
-- **AI Context**: Provides Claude with comprehensive project context for better assistance
-- **Security Focus**: Emphasizes authentication, authorization, and data protection patterns
-
-## Customization
-
-After initialization, you can:
-- Refine the generated content to add project-specific details
-- Update sections as the codebase evolves
-- Re-run `/bitwarden-init:enhance` to refresh content after major changes
-
-## Plugin Structure
-
-```
-bitwarden-init/
-├── .claude-plugin/
-│   └── plugin.json
-├── commands/
-│   ├── init/
-│   │   ├── init.md              # Main command (runs the chain)
-│   │   └── scripts/
-│   │       └── run-init-chain.sh
-│   └── enhance/
-│       └── enhance.md           # Enhancement-only command
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-└── README.md
-```
+- `claude` CLI in PATH
+- Write permissions for CLAUDE.md
 
 ## Contributing
 
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines on contributing to this plugin.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-See [LICENSE.txt](../../LICENSE.txt) for licensing information.
+See [LICENSE.txt](../../LICENSE.txt).
