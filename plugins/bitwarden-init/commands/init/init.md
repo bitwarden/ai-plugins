@@ -27,7 +27,12 @@ claude -p "/bitwarden-init:enhance" --allowedTools "Read" "Edit" "WebFetch" "Gre
 
 **Completion**
 
-After both phases complete:
-1. Inform the user that CLAUDE.md has been created and enhanced
-2. Suggest they review and customize the generated file
-3. Remind them to commit CLAUDE.md to their repository
+After both phases complete successfully, read the generated CLAUDE.md and provide a summary report to the user:
+
+1. **What `/init` captured**: Summarize the project-specific information discovered during Phase 1.
+
+2. **What `/enhance` added**: Summarize the additional findings and documentation added during Phase 2.
+
+3. **Suggested improvements**: Based on gaps or uncertainties encountered, suggest specific ways the user could improve their CLAUDE.md with their project knowledge.
+
+Remind the user to review the generated file and commit it to their repository.
