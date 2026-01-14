@@ -30,7 +30,7 @@ description: |
   User wants to extract actionable learnings from review comments.
   </commentary>
   </example>
-model: sonnet
+model: opus
 color: cyan
 tools: Read, Bash(gh pr:*), Bash(gh api:*), Bash(git log:*), Bash(git show:*), Grep, Glob, Skill
 ---
