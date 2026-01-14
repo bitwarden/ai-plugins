@@ -32,6 +32,9 @@ Enhance the existing CLAUDE.md file with Bitwarden's standardized template forma
 ---
 
 **Required Sections (use these exact headings):**
+# [Project Name] - Claude Code Configuration
+
+Brief description of the project and its primary purpose.
 
 ## Overview
 
@@ -49,107 +52,173 @@ Enhance the existing CLAUDE.md file with Bitwarden's standardized template forma
 ## Architecture & Patterns
 
 ### System Architecture
-- Include an ASCII diagram showing high-level request/data flow
-- Example format:
+
 ```
+[ASCII diagram showing high-level request flow]
+
+Example:
     Client Request
          ↓
     Entry Point (index.ts)
          ↓
     ┌─────────────┬─────────────┐
     │  Handler A  │  Handler B  │
+    │      ↓     │      ↓     │
+    │  Service A  │  Service B  │
     └─────────────┴─────────────┘
 ```
 
 ### Code Organization
-- Include a directory tree showing key folders and their purposes
-- Example format:
+
 ```
 src/
 ├── handlers/       # Request handlers
 ├── schemas/        # Validation schemas
 ├── services/       # Business logic
+├── utils/          # Shared utilities
 └── index.ts        # Entry point
 ```
 
 ### Key Principles
-- Numbered list of architectural principles with brief explanations
+1. **Principle One**: Brief explanation
+2. **Principle Two**: Brief explanation
+3. **Principle Three**: Brief explanation
 
 ### Core Patterns
-- For each significant pattern, document:
-  - **Purpose**: Why this pattern exists
-  - **Implementation**: Code example showing canonical implementation
-  - **Usage**: Code example showing how to use the pattern
+
+#### [Pattern Name] (e.g., Validation Wrapper)
+
+**Purpose**: Why this pattern exists
+
+**Implementation**:
+```typescript
+// Code example showing the canonical implementation
+```
+
+**Usage**:
+```typescript
+// Code example showing how to use the pattern
+```
 
 ---
 
 ## Development Guide
 
 ### Adding New [Primary Entity]
-- Step-by-step checklist for the most common development task
-- Include code templates for each step:
-  1. Define the schema (with template)
-  2. Implement the handler (with template)
-  3. Register/wire up the component (with template)
-  4. Write tests (with template)
-  5. Update documentation
+
+Step-by-step checklist for the most common development task.
+
+**1. Define the Schema** (`src/schemas/[domain].ts`)
+```typescript
+// Template code
+```
+
+**2. Define the [Entity]** (`src/[entities]/[domain].ts`)
+```typescript
+// Template code
+```
+
+**3. Implement the Handler** (`src/handlers/[domain].ts`)
+```typescript
+// Template code
+```
+
+**4. Register the Handler** (`src/index.ts`)
+```typescript
+// Where and how to register
+```
+
+**5. Write Tests** (`tests/[domain].spec.ts`)
+```typescript
+// Test template
+```
+
+**6. Update Documentation**
+- Files that may need updates
 
 ### Common Patterns
-- Code examples with comments for:
-  - Request/input handling
-  - Error handling
-  - Response formatting
-  - Any other recurring patterns
+
+#### [Pattern Category 1] (e.g., Request Handling)
+
+```typescript
+// Code example with comments explaining key parts
+```
+
+#### [Pattern Category 2] (e.g., Error Handling)
+
+```typescript
+// Code example with comments explaining key parts
+```
+
+#### Response Formatting
+
+```typescript
+// Standard response structure
+return {
+  // ...
+};
+```
 
 ---
 
 ## Data Models
 
 ### Core Types
+
 ```typescript
 // Key interfaces and types used throughout the project
+interface ExampleModel {
+  id: string;
+  name: string;
+  // ...
+}
 ```
 
 ### Validation Schemas
+
 ```typescript
 // Zod schemas or similar validation definitions
+const exampleSchema = z.object({
+  // ...
+});
 ```
-
-- Document core domain entities and their relationships
-- Key value objects and DTOs
-- Data validation rules and constraints
-- Database migration patterns (if applicable)
-- API request/response formats
 
 ---
 
 ## Security & Configuration
 
 ### Security Rules
+
 **MANDATORY - These rules have no exceptions:**
-- Numbered list of security rules with explanations and rationale
+
+1. **Rule One**: Explanation and rationale
+2. **Rule Two**: Explanation and rationale
+3. **Rule Three**: Explanation and rationale
 
 ### Security Functions
+
 | Function | Purpose | Usage |
 |----------|---------|-------|
 | `functionName()` | What it does | When to use it |
 
 ### Environment Configuration
+
 | Variable | Required | Description | Example |
 |----------|----------|-------------|---------|
 | `VAR_NAME` | Yes/No | What it configures | `example-value` |
 
 ### Authentication & Authorization
+
 - How authentication works
 - Required credentials/tokens
 - Token lifecycle management
-- API security patterns and middleware
 
 ---
 
 ## Testing
 
 ### Test Structure
+
 ```
 tests/
 ├── unit/              # Unit tests
@@ -158,10 +227,28 @@ tests/
 ```
 
 ### Writing Tests
-- Unit test template with Arrange/Act/Assert structure
-- Integration test template with setup/teardown
+
+**Unit Test Template**:
+```typescript
+describe('[Feature]', () => {
+  it('should [expected behavior]', () => {
+    // Arrange
+    // Act
+    // Assert
+  });
+});
+```
+
+**Integration Test Template**:
+```typescript
+describe('[Feature] Integration', () => {
+  // Setup/teardown
+  // Test cases
+});
+```
 
 ### Running Tests
+
 ```bash
 npm test              # Run all tests
 npm run test:watch    # Watch mode
@@ -169,8 +256,9 @@ npm test -- [file]    # Run specific file
 ```
 
 ### Test Environment
+
 - Required mocks
-- Environment variable setup for tests
+- Environment variable setup
 - Test data location
 
 ---
@@ -178,14 +266,13 @@ npm test -- [file]    # Run specific file
 ## Code Style & Standards
 
 ### Formatting
-- Tool used (Prettier, ESLint, etc.)
-- Key configuration settings
+- Tool used (Prettier, etc.)
+- Key configuration
 
 ### Naming Conventions
 - `camelCase` for: variables, functions
 - `PascalCase` for: types, interfaces, classes
 - `SCREAMING_SNAKE_CASE` for: constants
-- Other project-specific conventions
 
 ### Imports
 - Ordering rules
@@ -197,45 +284,52 @@ npm test -- [file]    # Run specific file
 
 ### Pre-commit Hooks
 - What runs automatically
-- Manual checks to run before committing
+- Manual checks to run
 
 ---
 
 ## Anti-Patterns
 
 ### DO
-- ✅ Pattern/practice to follow
+
+- ✅ Use [pattern] for [situation]
 - ✅ Always validate inputs before processing
 - ✅ Follow the established patterns in this document
 - ✅ Write tests for new functionality
 - ✅ Handle errors gracefully
-- ✅ Use TypeScript strict mode (if applicable)
+- ✅ Use TypeScript strict mode
 
 ### DON'T
+
 - ❌ Skip input validation
-- ❌ Use `any` types (TypeScript)
+- ❌ Use `any` types
 - ❌ Hardcode credentials or secrets
 - ❌ Ignore error responses
 - ❌ Commit sensitive data
 - ❌ Bypass security functions
-- ❌ Project-specific anti-patterns
+- ❌ [Project-specific anti-pattern]
 
 ---
 
 ## Deployment
 
 ### Building
+
 ```bash
-# Build commands
+npm run build
 ```
 
 ### Versioning
-- Versioning strategy (e.g., semantic versioning)
-- How versions are managed
 
-### Publishing/Deploying
+Follow semantic versioning: `MAJOR.MINOR.PATCH`
+- `MAJOR`: Breaking changes
+- `MINOR`: New features (backwards compatible)
+- `PATCH`: Bug fixes
+
+### Publishing
+
 ```bash
-# Deployment steps
+# Steps to publish
 ```
 
 ---
@@ -244,27 +338,37 @@ npm test -- [file]    # Run specific file
 
 ### Common Issues
 
-#### [Issue Category]
+#### [Issue Category 1]
+
 **Problem**: Description of the issue
+
+**Solution**: How to fix it
+
+#### [Issue Category 2]
+
+**Problem**: Description of the issue
+
 **Solution**: How to fix it
 
 ### Debug Tips
+
 - How to enable verbose logging
 - Common debugging workflows
-- Useful diagnostic commands
 
 ---
 
 ## References
 
 ### Official Documentation
-- Links to primary framework/library docs
+- [Link to primary docs]()
+- [Link to API reference]()
 
 ### Internal Documentation
-- Links to contributing guides, ADRs, etc.
+- [Link to contributing guide]()
+- [Link to code style guide]()
 
 ### Tools & Libraries
-- Links to key dependency documentation
+- [Link to key dependency docs]()
 
 ---
 
