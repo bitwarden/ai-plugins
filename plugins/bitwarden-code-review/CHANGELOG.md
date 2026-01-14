@@ -5,6 +5,13 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2025-01-12
+
+### Changed
+
+- Added code-review command to properly invoke the bitwarden-code-reviewer agent via Task tool
+- Updated command to use `plugin-name:agent-name` pattern for correct agent invocation
+
 ## [1.5.2] - 2025-01-09
 
 ### Changed
