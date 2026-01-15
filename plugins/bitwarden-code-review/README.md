@@ -60,7 +60,7 @@ bitwarden-code-review/
 │   └── bitwarden-code-reviewer/
 │       └── AGENT.md                          # Main review agent
 ├── commands/
-│   └── code-review/                          # Code review command
+│   ├── code-review/                          # Code review command
 │   └── code-review-local/                    # Local review command
 ├── skills/
 │   ├── avoiding-false-positives/
