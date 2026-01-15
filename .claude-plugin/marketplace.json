@@ -27,6 +27,12 @@
       "source": "./plugins/bitwarden-code-review",
       "version": "1.6.0",
       "description": "Comprehensive code review system with organization-wide standards."
+    },
+    {
+      "name": "bitwarden-init",
+      "source": "./plugins/bitwarden-init",
+      "version": "1.0.0",
+      "description": "Initialize Claude Code configuration with Bitwarden's standardized template format"
     }
   ]
 }
