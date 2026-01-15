@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added code-review command to properly invoke the bitwarden-code-reviewer agent via Task tool
 - Updated agent frontmatter listing all skills available
-- Updated agent model to opus; aligns with our changes to the Github reusable action
+- Updated agent model to opus; aligns with our changes to the GitHub reusable action
 
 ## [1.5.2] - 2026-01-09
 
