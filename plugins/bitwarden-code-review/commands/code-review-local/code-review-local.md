@@ -7,7 +7,12 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 **CRITICAL INSTRUCTIONS FOR THE AGENT:**
 
-1. **Pull Request Information**:
+1. **Load Institutional Knowledge First**:
+   - Before analyzing any code, invoke `Skill(recalling-review-knowledge)` to load repository-specific knowledge
+   - Internalize failed detections, repository gotchas, verified detection strategies, and common false positive patterns
+   - If no knowledge exists, proceed with general best practices
+
+2. **Pull Request Information**:
    - If arguments are provided ($ARGUMENTS), extract the numeric PR number:
      - Direct number: "123" → PR number is 123
      - PR URL: "https://github.com/org/repo/pull/456" → PR number is 456
@@ -17,18 +22,18 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
    - For PRs: Use the extracted PR number when executing thread detection and fetching PR data with `gh pr view` commands
    - For local changes: Skip thread detection, analyze uncommitted and committed changes on the current branch
 
-2. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
+3. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
 
-3. **Output Destination**: Write to local files:
+4. **Output Destination**: Write to local files:
    - `review-summary.md` - Summary (via `Skill(posting-review-summary)` in local mode)
    - `review-inline-comments.md` - Inline comments (same format as GitHub)
 
-4. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
+5. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
    - If no inline comments would be left, leave `review-inline-comments.md` blank.
 
-5. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
+6. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
 
-6. **Include All Standard Review Elements**:
+7. **Include All Standard Review Elements**:
    - Pre-review protocol (read existing comments, understand changes, assess PR metadata)
    - All finding categories (❌ ⚠️ ♻️ 🎨 ❓)
    - Proper `<details>` sections for each finding
