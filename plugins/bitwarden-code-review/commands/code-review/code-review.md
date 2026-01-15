@@ -4,7 +4,7 @@ allowed-tools: Read, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*
 description: Review a GitHub pull request and post findings directly to GitHub
 ---
 
-Perform a code review for the following pull request following Bitwarden engineering standards.
+You must invoke the bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
 
 **Steps:**
 
