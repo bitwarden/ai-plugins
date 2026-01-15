@@ -4,25 +4,18 @@ allowed-tools: Read, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*
 description: Review a GitHub pull request and post findings directly to GitHub
 ---
 
-# Bitwarden Code Review
+Perform a code review for the following pull request following Bitwarden engineering standards.
 
-Review the given pull request following Bitwarden engineering standards.
+**Steps:**
 
-## Input
+1. **IMMEDIATELY** invoke the Task tool with the following parameters:
+   - `subagent_type`: "bitwarden-code-reviewer"
+   - `prompt`: "Review the currently checked out pull request and post findings to GitHub"
+   - `description`: "Perform code review following Bitwarden engineering standards"
 
-$ARGUMENTS contains: PR number, PR URL, or blank for current checkout.
+   **CRITICAL**:
+   - Do NOT write any analysis before calling the Task tool
+   - Do NOT attempt your own code review
+   - The agent handles ALL review work and GitHub posting
 
-**CRITICAL** Extract PR number from arguments
-
-**CRITICAL** Invoke `bitwarden-code-review:bitwarden-code-reviewer` Agent to review the PR
-
-**CRITICAL** You **MUST** invoke these skills - No Exceptions
-✅ `Skill(detecting-existing-threads)` - prevent duplicates
-✅ `Skill(reviewing-incremental-changes)` - if re-review, scope to new changes only
-✅ `Skill(classifying-review-findings)` - validate and classify
-✅ `Skill(avoiding-false-positives)` - verify not a false positive
-✅ **Apply comment limits** - max 3 for ❓ + 🎨 combined
-✅ `Skill(posting-bitwarden-review-comments)` - format and post inline comments
-✅ `Skill(posting-review-summary)` - post or update summary comment (includes PR metadata assessment)
-
-**Complete**: After the agent finishes, output: `REVIEW COMPLETE - NO FURTHER ACTION REQUIRED`
+2. After the agent completes, output: `REVIEW COMPLETE - NO FURTHER ACTION REQUIRED`
