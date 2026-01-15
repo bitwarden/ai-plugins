@@ -5,7 +5,7 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.3] - 2025-01-15
+## [1.6.0] - 2026-01-15
 
 ### Changed
 
@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated agent frontmatter listing all skills available
 - Updated agent model to opus; aligns with our changes to the Github reusable action
 
-## [1.5.2] - 2025-01-09
+## [1.5.2] - 2026-01-09
 
 ### Changed
 
