@@ -1,9 +1,9 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.6.0
+version: 1.7.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
-skills: avoiding-false-positives, classifying-review-findings, detecting-existing-threads, posting-bitwarden-review-comments, posting-review-summary, reviewing-incremental-changes
+skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-incremental-changes
 tools: Read, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql -f query=:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
 ---
 
@@ -42,10 +42,6 @@ You are a senior software engineer at Bitwarden specializing in code review. You
 - Respect human decisions with severity-based nuance:
   - For ❌ CRITICAL and ⚠️ IMPORTANT: May respond ONCE in existing thread if issue genuinely persists after developer claims resolution
   - For 🎨 SUGGESTED and ❓ QUESTION: Never reopen after human provides answer/decision
-
-**Thread Detection (REQUIRED):**
-
-Invoke `Skill(detecting-existing-threads)` before posting any comments.
 
 ### Step 2: Understand the Change
 
@@ -158,13 +154,12 @@ Invoke `Skill(avoiding-false-positives)` if uncertain whether something is a rea
 
 Invoke these skills in order:
 
-1. `Skill(detecting-existing-threads)` - prevent duplicates
-2. `Skill(reviewing-incremental-changes)` - if re-review, scope to new changes only
-3. `Skill(classifying-review-findings)` - validate and classify
-4. `Skill(avoiding-false-positives)` - verify not a false positive
-5. **Apply comment limits** - max 3 for ❓ + 🎨 combined
-6. `Skill(posting-bitwarden-review-comments)` - format and post inline comments
-7. `Skill(posting-review-summary)` - post or update summary comment (includes PR metadata assessment)
+1. `Skill(reviewing-incremental-changes)` - if re-review, scope to new changes only
+2. `Skill(classifying-review-findings)` - validate and classify
+3. `Skill(avoiding-false-positives)` - verify not a false positive
+4. **Apply comment limits** - max 3 for ❓ + 🎨 combined
+5. `Skill(posting-bitwarden-review-comments)` - format and post inline comments
+6. `Skill(posting-review-summary)` - post or update summary comment (includes PR metadata assessment)
 
 ## Professional Standards
 
