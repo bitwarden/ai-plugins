@@ -15,20 +15,67 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
    - If no arguments provided, ask the user if there is a related PR number or URL
    - If user indicates no PR or requests local changes review, review the current git branch changes using `git diff` and `git status`
    - For PRs: Use the extracted PR number when executing thread detection and fetching PR data with `gh pr view` commands
-   - For local changes: Skip thread detection, analyze uncommitted and committed changes on the current branch
+   - For local changes: Skip thread detection (step 2), analyze uncommitted and committed changes on the current branch
 
-2. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
+2. **Detect Existing Threads** (PR reviews only - skip for local changes):
 
-3. **Output Destination**: Write to local files:
+   Fetch existing review threads to prevent duplicate comments. Capture BOTH comment sources:
+
+   ```bash
+   # General PR comments
+   gh pr view <PR_NUMBER> --json comments
+
+   # Inline review threads (resolved + open)
+   gh api graphql -f query='
+   query($owner: String!, $repo: String!, $pr: Int!) {
+     repository(owner: $owner, name: $repo) {
+       pullRequest(number: $pr) {
+         reviewThreads(first: 100) {
+           nodes {
+             id
+             isResolved
+             isOutdated
+             path
+             line
+             startLine
+             diffSide
+             comments(first: 10) {
+               nodes {
+                 id
+                 body
+                 author { login }
+                 createdAt
+               }
+             }
+           }
+         }
+       }
+     }
+   }
+   ' -f owner="<OWNER>" -f repo="<REPO>" -F pr="<PR_NUMBER>"
+   ```
+
+   **Thread Matching Logic** - Before creating any new comment, check for matches:
+
+   | Match Type   | Criteria                   | Action              |
+   | ------------ | -------------------------- | ------------------- |
+   | **Exact**    | Same file + same line      | Use existing thread |
+   | **Nearby**   | Same file + line within ±5 | Use existing thread |
+   | **Content**  | Body similarity >70%       | Use existing thread |
+   | **No match** | None of above              | Create new comment  |
+
+3. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
+
+4. **Output Destination**: Write to local files:
    - `review-summary.md` - Summary (via `Skill(posting-review-summary)` in local mode)
    - `review-inline-comments.md` - Inline comments (same format as GitHub)
 
-4. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
+5. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
    - If no inline comments would be left, leave `review-inline-comments.md` blank.
 
-5. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
+6. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
 
-6. **Include All Standard Review Elements**:
+7. **Include All Standard Review Elements**:
    - Pre-review protocol (read existing comments, understand changes, assess PR metadata)
    - All finding categories (❌ ⚠️ ♻️ 🎨 ❓)
    - Proper `<details>` sections for each finding

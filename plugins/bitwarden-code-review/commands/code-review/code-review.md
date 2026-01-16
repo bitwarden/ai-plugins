@@ -12,7 +12,7 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
    Use the Read tool to attempt reading `/tmp/pr-threads.json`:
    - If the file exists, capture its JSON content for the next step
-   - If the file does not exist (Read returns an error), proceed without thread context (agent will fetch via API)
+   - If the file does not exist (Read returns an error), proceed without thread context
 
 2. **Invoke the Task tool** with the following parameters:
    - `subagent_type`: "bitwarden-code-reviewer"
