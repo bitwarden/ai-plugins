@@ -8,14 +8,41 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 **Steps:**
 
-1. **IMMEDIATELY** invoke the Task tool with the following parameters:
+1. **Check for pre-fetched thread context** (created by workflow):
+
+   Use the Read tool to attempt reading `/tmp/pr-threads.json`:
+   - If the file exists, capture its JSON content for the next step
+   - If the file does not exist (Read returns an error), proceed without thread context (agent will fetch via API)
+
+2. **Invoke the Task tool** with the following parameters:
    - `subagent_type`: "bitwarden-code-reviewer"
-   - `prompt`: "Review the currently checked out pull request and post findings to GitHub"
    - `description`: "Perform code review following Bitwarden engineering standards"
+   - `prompt`: Use ONE of the following based on Step 1:
+
+   **If `/tmp/pr-threads.json` existed**, include the thread data:
+
+   ```
+   Review the currently checked out pull request and post findings to GitHub.
+
+   ## Existing PR Threads (Pre-fetched)
+
+   The following threads already exist on this PR. Use this data to avoid duplicate comments.
+   Do NOT re-fetch threads via API - this data is authoritative.
+
+   <threads>
+   [INSERT JSON CONTENT FROM /tmp/pr-threads.json HERE]
+   </threads>
+   ```
+
+   **If file did NOT exist**, use the simple prompt:
+
+   ```
+   Review the currently checked out pull request and post findings to GitHub.
+   ```
 
    **CRITICAL**:
    - Do NOT write any analysis before calling the Task tool
    - Do NOT attempt your own code review
    - The agent handles ALL review work and GitHub posting
 
-2. After the agent completes, output: `REVIEW COMPLETE - NO FURTHER ACTION REQUIRED`
+3. After the agent completes, output: `REVIEW COMPLETE - NO FURTHER ACTION REQUIRED`

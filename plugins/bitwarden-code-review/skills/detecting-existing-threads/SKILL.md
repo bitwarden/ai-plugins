@@ -11,10 +11,27 @@ Prevent duplicate comments by detecting existing review threads before posting n
 
 ## Required Tools
 
-- `Bash(gh pr view:*)` - Get general PR comments
-- `Bash(gh api graphql -f query=:*)` - Get resolved and open review threads (direct GraphQL)
+- `Read` - Read pre-fetched thread data from `/tmp/pr-threads.json`
+- `Bash(gh pr view:*)` - Get general PR comments (fallback)
+- `Bash(gh api graphql -f query=:*)` - Get resolved and open review threads (fallback)
 
-## Step 1: Determine PR Number
+## Step 0: Check for Pre-fetched Thread Data
+
+**FIRST**, check if thread data was already provided in your prompt context:
+
+- Look for a `<threads>` section in your input/prompt
+- If present, use that data directly - **DO NOT make API calls**
+- Skip to "Thread Matching Logic" section
+
+**SECOND**, if no `<threads>` section in prompt, use the Read tool to check for the file:
+
+- Attempt to read `/tmp/pr-threads.json` using the Read tool
+- If file exists: Use its contents, skip to "Thread Matching Logic"
+- If Read returns an error (file not found): Continue to Step 1 (fetch via API)
+
+**Why this matters**: In GitHub Actions, the workflow pre-fetches threads to avoid redundant API calls. This step ensures we use that data when available.
+
+## Step 1: Determine PR Number (Fallback)
 
 Use this priority order:
 
@@ -31,7 +48,9 @@ Use this priority order:
 3. **Local review mode**:
    - No PR number available → skip thread detection entirely
 
-## Step 2: Fetch Thread Data
+## Step 2: Fetch Thread Data (Fallback)
+
+**Only execute this step if Step 0 found no pre-fetched data.**
 
 Capture BOTH comment sources:
 
