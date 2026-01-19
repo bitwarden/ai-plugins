@@ -1,6 +1,6 @@
 ---
 name: posting-bitwarden-review-comments
-description: Formats and posts GitHub PR inline review comments following Bitwarden engineering standards. Use when posting code-specific findings. For summary comments, invoke posting-review-summary skill.
+description: Use this skill when posting inline comments to GitHub pull requests. Apply when formatting comments following Bitwarden engineering standards with severity emojis, clear explanations, and actionable suggestions. Use after findings are classified and ready to post. DO NOT USE when posting summary comments.
 ---
 
 # Posting Bitwarden Review Comments

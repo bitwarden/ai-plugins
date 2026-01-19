@@ -1,6 +1,6 @@
 ---
 name: reviewing-incremental-changes
-description: Handles re-reviews after new commits. Use when a PR already has review comments or when responding to developer changes.
+description: Use this skill when re-reviewing a PR that already has comments or when responding to developer changes after initial review. Apply when PR threads exist or when reviewing force-pushed commits. Handles incremental reviews, detects addressed feedback, avoids duplicate comments, and focuses only on newly introduced issues.
 ---
 
 # Reviewing Incremental Changes

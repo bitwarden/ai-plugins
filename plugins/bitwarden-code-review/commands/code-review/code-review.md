@@ -4,7 +4,7 @@ allowed-tools: Read, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*
 description: Review a GitHub pull request and post findings directly to GitHub
 ---
 
-You must invoke the bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
+You must invoke the bitwarden-code-review:bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
 
 **Steps:**
 
@@ -15,7 +15,7 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
    - If the file does not exist (Read returns an error), proceed without thread context
 
 2. **Invoke the Task tool** with the following parameters:
-   - `subagent_type`: "bitwarden-code-reviewer"
+   - `subagent_type`: "bitwarden-code-review:bitwarden-code-reviewer"
    - `description`: "Perform code review following Bitwarden engineering standards"
    - `prompt`: Use ONE of the following based on Step 1:
 
