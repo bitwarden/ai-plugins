@@ -1,6 +1,6 @@
 ---
 name: avoiding-false-positives
-description: Prevents false positive findings by recognizing framework patterns, codebase conventions, and common non-issues. Use when uncertain whether something is a real issue.
+description: Use this skill when validating ANY potential code review finding. Apply BEFORE classifying to verify the finding is real; can you trace incorrect behavior, is it handled elsewhere, and are you certain about framework semantics? If any answer is no, DO NOT create the finding.
 ---
 
 # Avoiding False Positives

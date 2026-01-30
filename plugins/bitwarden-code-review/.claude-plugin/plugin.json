@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-code-review",
-  "version": "1.6.0",
-  "description": "Comprehensive code review system with organization-wide standards and institutional knowledge capture.",
+  "version": "1.7.1",
+  "description": "Comprehensive code review system with organization-wide standards.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
@@ -26,10 +26,18 @@
     "./agents/bitwarden-code-reviewer/AGENT.md",
     "./agents/pr-knowledge-extractor/AGENT.md"
   ],
-  "skills": "./skills/",
   "commands": [
+    "./commands/advise-review/advise-review.md",
+    "./commands/code-review/code-review.md",
     "./commands/code-review-local/code-review-local.md",
-    "./commands/retrospective-review/retrospective-review.md",
-    "./commands/advise-review/advise-review.md"
+    "./commands/retrospective-review/retrospective-review.md"
+  ],
+  "skills": [
+    "./skills/classifying-review-findings/SKILL.md",
+    "./skills/posting-bitwarden-review-comments/SKILL.md",
+    "./skills/detecting-existing-threads/SKILL.md",
+    "./skills/avoiding-false-positives/SKILL.md",
+    "./skills/reviewing-incremental-changes/SKILL.md",
+    "./skills/posting-review-summary/SKILL.md"
   ]
 }

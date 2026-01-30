@@ -62,9 +62,10 @@ bitwarden-code-review/
 │   └── pr-knowledge-extractor/
 │       └── AGENT.md                          # Knowledge extraction agent
 ├── commands/
+│   ├── advise-review/                        # Pre-review knowledge recall
+│   ├── code-review/                          # Code review command
 │   ├── code-review-local/                    # Local review command
-│   ├── retrospective-review/                 # Post-review knowledge capture
-│   └── advise-review/                        # Pre-review knowledge recall
+│   └── retrospective-review/                 # Post-review knowledge capture
 ├── skills/
 │   ├── avoiding-false-positives/             # False positive prevention
 │   ├── classifying-review-findings/          # Severity classification
