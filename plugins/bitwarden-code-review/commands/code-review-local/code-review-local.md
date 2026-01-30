@@ -69,18 +69,18 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
    | **Content**  | Body similarity >70%       | Use existing thread |
    | **No match** | None of above              | Create new comment  |
 
-3. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
+4. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
 
-4. **Output Destination**: Write to local files:
+5. **Output Destination**: Write to local files:
    - `review-summary.md` - Summary (via `Skill(posting-review-summary)` in local mode)
    - `review-inline-comments.md` - Inline comments (same format as GitHub)
 
-5. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
+6. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
    - If no inline comments would be left, leave `review-inline-comments.md` blank.
 
-6. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
+7. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
 
-7. **Include All Standard Review Elements**:
+8. **Include All Standard Review Elements**:
    - Pre-review protocol (read existing comments, understand changes, assess PR metadata)
    - All finding categories (❌ ⚠️ ♻️ 🎨 ❓)
    - Proper `<details>` sections for each finding
