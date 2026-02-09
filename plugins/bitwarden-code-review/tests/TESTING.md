@@ -126,6 +126,30 @@ claude -p "What skills are available for posting review summaries?"
 
 ---
 
+### Skill 4: `detecting-existing-threads`
+
+#### Discovery Test
+
+```bash
+claude -p "What skills are available for detecting existing threads?"
+```
+
+✅ Should list `detecting-existing-threads`
+
+#### Invocation Tests
+
+| Test                         | Command                                                                                                                                               | Expected                                     |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| **PR number from context**   | `claude -p "Using detecting-existing-threads skill, detect existing threads for PR #123"`                                                             | Determines PR number is 123, fetches threads |
+| **PR URL parsing**           | `claude -p "Using detecting-existing-threads skill, detect threads for https://github.com/bitwarden/server/pull/6778"`                                | Extracts PR 456, owner/repo correctly        |
+| **Severity detection**       | `claude -p "Using detecting-existing-threads skill, what severities exist in https://github.com/bitwarden/server/pull/6778?"`                         | Detects ❌→CRITICAL, ⚠️→IMPORTANT, etc.      |
+| **Thread matching - exact**  | `claude -p "Using detecting-existing-threads skill, check if Program.cs:89 already has a thread in PR https://github.com/bitwarden/server/pull/6778"` | Finds exact match by file + line             |
+| **Thread matching - nearby** | `claude -p "Using detecting-existing-threads skill, check if Program.cs:93 has a thread in https://github.com/bitwarden/server/pull/6778"`            | Finds nearby match (within ±5 lines)         |
+| **Issue persists**           | `claude -p "Using detecting-existing-threads skill, existing thread has same issue. What should be done by Claude?"`                                  | Respond in existing thread                   |
+| **Issue resolved**           | `claude -p "Using detecting-existing-threads skill, existing thread shows issue fixed. What should be done by Claude?"`                               | Note resolution, don't re-raise              |
+
+---
+
 ### Integration Test
 
 Run a full review scenario that should invoke multiple skills:

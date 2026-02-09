@@ -1,6 +1,6 @@
 ---
 name: posting-review-summary
-description: Posts or updates the PR summary comment. Detects context (GitHub sticky comment, GitHub new comment, or local file) and routes output accordingly. Use after all findings are classified and inline comments are posted.
+description: Use this skill when posting the final summary comment after all inline comments are posted. Apply as the LAST step of code review after all findings are classified and inline comments are complete. Detects context (GitHub sticky comment, new comment, or local file) and routes output accordingly.
 ---
 
 # Posting Review Summary

@@ -1,6 +1,6 @@
 ---
 name: classifying-review-findings
-description: Classifies code review findings into severity categories (CRITICAL, IMPORTANT, DEBT, SUGGESTED, QUESTION) following Bitwarden standards. Use when determining severity levels, categorizing PR comments, deciding what emoji to use, or verifying if something should be flagged at all.
+description: Use this skill when categorizing code review findings into severity levels. Apply when determining which emoji and label to use for PR comments, deciding if an issue should be flagged at all, or classifying findings as CRITICAL, IMPORTANT, DEBT, SUGGESTED, or QUESTION.
 ---
 
 # Classifying Review Findings

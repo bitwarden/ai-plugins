@@ -5,6 +5,40 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-01-19
+
+### Changed
+
+- Improved the skill frontmatter using the Anthropic `skill-development` skill.
+- Updated tool invocation of the code review agent to include the name of the plugin.
+
+## [1.7.0] - 2026-01-16
+
+### Removed
+
+- Deleted `detecting-existing-threads` skill entirely - thread detection instructions are now embedded directly in commands
+
+### Changed
+
+- Simplified architecture for thread detection all instructions now come from command files, not skills
+- Moved thread detection instructions directly into `code-review-local.md` as step 2 (after PR metadata extraction)
+- Removed all `detecting-existing-threads` skill invocation references from `AGENT.md` and `plugin.json`
+- Command file (`code-review.md`) now reads `/tmp/pr-threads.json` and injects thread data directly into the agent's prompt for guaranteed context delivery
+
+## [1.6.0] - 2026-01-15
+
+### Changed
+
+- Added code-review command to properly invoke the bitwarden-code-reviewer agent via Task tool
+- Updated agent frontmatter listing all skills available
+- Updated agent model to opus; aligns with our changes to the GitHub reusable action
+
+## [1.5.2] - 2026-01-09
+
+### Changed
+
+- Refactored the fetching of resolved comments back into the SKILL.md because the script will not execute in the Claude Code Action because of security concerns.
+
 ## [1.5.1] - 2025-12-24
 
 ### Changed
