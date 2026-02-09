@@ -33,6 +33,12 @@
       "source": "./plugins/bitwarden-init",
       "version": "1.0.0",
       "description": "Initialize Claude Code configuration with Bitwarden's standardized template format"
+    },
+    {
+      "name": "atlassian-reader",
+      "source": "./plugins/atlassian-reader",
+      "version": "1.0.0",
+      "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud."
     }
   ]
 }
