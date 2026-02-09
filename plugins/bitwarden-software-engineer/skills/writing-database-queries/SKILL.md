@@ -1,86 +1,65 @@
 ---
 name: writing-database-queries
-description: Bitwarden database queries, stored procedures, and migrations. Use when working with .sql files, stored procedures, EF migrations, or database schema changes.
-tools: Read, Write, Edit, Bash, Glob, Grep
+description: Bitwarden database architecture, migrations, and dual-ORM strategy. Use when working with .sql files, stored procedures, EF migrations, or database schema changes.
 ---
 
-## Repository Architecture
+## Dual-ORM Architecture
 
-MSSQL uses Dapper with stored procedures. All other databases (PostgreSQL, MySQL, SQLite) use Entity Framework Core. Every database change requires both implementations.
+Bitwarden maintains two parallel data access implementations:
 
-- Dapper: `Repository Method → Stored Procedure → View (for reads)`
-- EF: `Repository Method → DbContext → Generated SQL`
+- **MSSQL:** Dapper with stored procedures
+- **PostgreSQL, MySQL, SQLite:** Entity Framework Core
 
-Repository interfaces abstract both. When a stored procedure performs specific operations, the EF implementation must replicate identical behavior.
+Every database change requires both implementations. Repository interfaces abstract both — when a stored procedure performs specific operations, the EF implementation must replicate identical behavior.
 
-## Migration Workflow (Evolutionary Database Design)
+### Why two ORMs?
+
+MSSQL was the original database. Dapper + stored procedures gave fine-grained control over query performance for the self-hosted product. When cloud-hosted Bitwarden added PostgreSQL/MySQL/SQLite support, EF Core was the pragmatic choice for multi-database targeting — rewriting all stored procedures for each dialect wasn't feasible. The dual approach persists because migrating MSSQL off Dapper would be a massive effort with risk and no clear benefit.
+
+## Evolutionary Database Design (EDD)
 
 Zero-downtime deployments require three-phase migrations:
 
-**Phase 1 — Initial** (`util/Migrator/DbScripts`): Runs before code deployment. Must be fast, backwards-compatible. Adds support for new features without breaking current release.
+**Phase 1 — Initial** (`util/Migrator/DbScripts`): Runs before code deployment. Must be fast and backwards-compatible. Adds support for new features without breaking the currently running release.
 
-**Phase 2 — Transition** (`util/Migrator/DbScripts_transition`): Runs after deployment as background task. Handles slow data migrations. Must be batched. NO schema changes.
+**Phase 2 — Transition** (`util/Migrator/DbScripts_transition`): Runs after deployment as a background task. Handles slow data migrations that must be batched. NO schema changes — only data movement.
 
-**Phase 3 — Finalization** (`util/Migrator/DbScripts_finalization`): Runs at next release. Removes backwards-compatibility scaffolding.
+**Phase 3 — Finalization** (`util/Migrator/DbScripts_finalization`): Runs at the next release. Removes backwards-compatibility scaffolding from Phase 1.
 
-Other locations:
+### Why three phases?
+
+Bitwarden Cloud deploys without downtime. If a migration adds a NOT NULL column, the currently running code (which doesn't know about that column) would break on INSERT. Phase 1 adds the column as nullable with a default. Phase 2 backfills existing rows. Phase 3 (next release, when all code knows about the column) adds the NOT NULL constraint. This pattern applies to any schema change that could break the previous release.
+
+### When you only need Phase 1
+
+Simple additive changes (new nullable column, new table, new stored procedure) that don't break existing code can skip Phases 2 and 3. Only use multi-phase when the change would break the currently deployed release if applied immediately.
+
+## Key locations
 
 - `src/Sql/dbo` — Master schema source of truth
 - `src/Sql/dbo_finalization` — Future schema state
 - `util/Migrator/DbScripts_manual` — Exceptional cases (index rebuilds)
 
-## Migration Naming
+## ORM-Specific Implementation
 
-MSSQL: `YYYY-MM-DD_##_MigrationName.sql` (e.g., `2024-01-15_00_AddUserColumn.sql`)
+When implementing Dapper repository methods, stored procedures, or MSSQL migration scripts, activate the `implementing-dapper-queries` skill.
 
-Finalization: `YYYY-0M-FinalizationMigration.sql`
+When implementing EF Core repositories, generating EF migrations, or working with PostgreSQL/MySQL/SQLite, activate the `implementing-ef-core` skill.
 
-EF migration class names must exactly match the MSSQL migration name portion.
+## Critical Rules
 
-Generate EF migrations: `pwsh ef_migrate.ps1 <MigrationName>`
+These are the most frequently violated conventions. Claude cannot fetch the linked docs at runtime, so these are inlined here:
 
-Apply migrations: `pwsh migrate.ps1 -all` (all databases) or `pwsh migrate.ps1` (MSSQL only)
+- **Migration file naming:** `YYYY-MM-DD_##_Description.sql` (e.g., `2025-06-15_00_AddVaultColumn.sql`)
+- **All schema objects use `dbo` schema** — never create objects in other schemas
+- **Constraint naming:** `PK_TableName` (primary key), `FK_Child_Parent` (foreign key), `IX_Table_Column` (index), `DF_Table_Column` (default)
+- **Idempotent scripts:** Use `IF NOT EXISTS` / `IF COL_LENGTH(...)` guards before schema changes in migration scripts
+- **Every database change requires both Dapper and EF Core implementations** — never ship one without the other
+- **Integration tests use `[DatabaseData]` attribute** — this runs the test against all configured database providers
 
-## All Migrations Must Be Idempotent
+## Further Reading
 
-```sql
--- Tables
-IF OBJECT_ID('[dbo].[TableName]') IS NULL
-BEGIN
-    CREATE TABLE [dbo].[TableName] (...)
-END
-GO
-
--- Columns
-IF COL_LENGTH('[dbo].[TableName]', 'ColumnName') IS NULL
-BEGIN
-    ALTER TABLE [dbo].[TableName]
-        ADD [ColumnName] INT NOT NULL CONSTRAINT DF_Table_Column DEFAULT 0
-END
-GO
-
--- Procedures: always use CREATE OR ALTER
-CREATE OR ALTER PROCEDURE [dbo].[Entity_Action]
-```
-
-## Testing
-
-Use `[DatabaseData]` attribute to run tests against all configured databases:
-
-```csharp
-[Theory, DatabaseData]
-public async Task TestMethod(IOrganizationRepository repo)
-{
-    // Runs for MSSQL/Dapper, Postgres/EF, MySQL/EF, SQLite/EF
-}
-```
-
-For migration testing, use `MigrationName` parameter matching both SQL file suffix and EF class name.
-
-Use separate test databases (`vault_test`) from development (`vault_dev`).
-
-## Database-Specific Guidance
-
-For T-SQL patterns (MSSQL, stored procedures, Dapper), read [guides/tsql.md](guides/tsql.md).
-
-For Entity Framework patterns (PostgreSQL, MySQL, SQLite, EF migrations), read [guides/entity-framework.md](guides/entity-framework.md).
+- [SQL code style](https://contributing.bitwarden.com/contributing/code-style/sql/)
+- [Database migrations (MSSQL)](https://contributing.bitwarden.com/contributing/database-migrations/mssql)
+- [Database migrations (EF)](https://contributing.bitwarden.com/contributing/database-migrations/ef)
+- [Evolutionary Database Design](https://contributing.bitwarden.com/contributing/database-migrations/edd)

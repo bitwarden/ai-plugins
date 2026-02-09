@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-software-engineer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden.",
   "author": {
     "name": "Bitwarden",
@@ -11,9 +11,10 @@
   "keywords": [
     "typescript",
     "csharp",
-    "rust",
     "sql",
     "fullstack"
   ],
-  "agents": ["./agents/bitwarden-software-engineer.md"]
+  "agents": [
+    "./agents/bitwarden-software-engineer.md"
+  ]
 }

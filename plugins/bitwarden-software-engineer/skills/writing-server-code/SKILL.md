@@ -1,10 +1,9 @@
 ---
 name: writing-server-code
 description: Bitwarden server code conventions for C# and .NET. Use when working in the server repo, creating commands, queries, services, or API endpoints.
-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-## Repository Structure
+## Repository Orientation
 
 The `server` repo contains:
 
@@ -13,78 +12,79 @@ The `server` repo contains:
 - `src/Core` — Business logic, commands, queries, services
 - `src/Infrastructure` — Data access, repositories
 
-Run with `dotnet run` from service directories. Migrations: `pwsh dev/migrate.ps1`.
+## Architectural Rationale
 
-## Command Query Separation (CQS)
+### Command Query Separation (CQS)
 
-New features should use the CQS pattern — discrete action classes instead of large entity-focused services [ADR-0008](https://contributing.bitwarden.com/architecture/adr/server-CQRS-pattern).
+New features should use the CQS pattern — discrete action classes instead of large entity-focused services. See [ADR-0008](https://contributing.bitwarden.com/architecture/adr/server-CQRS-pattern).
 
-**Commands** = write operations (e.g., `CreateCipherCommand`). Change state, may return result.
+**Why CQS matters at Bitwarden:** The codebase historically grew around entity-focused services (e.g., `CipherService`) that accumulated hundreds of methods. CQS breaks these into single-responsibility classes (`CreateCipherCommand`, `GetOrganizationApiKeyQuery`), making code easier to test, reason about, and modify without unintended side effects.
 
-**Queries** = read operations (e.g., `GetOrganizationApiKeyQuery`). Return data, never change state.
+**Commands** = write operations. Change state, may return result. Named after the action: `RotateOrganizationApiKeyCommand`.
 
-Name classes after the action: `RotateOrganizationApiKeyCommand`. Each command/query has single responsibility.
+**Queries** = read operations. Return data, never change state.
 
-**Existing code:** The codebase includes service-based patterns developed over time. When modifying existing services, follow the patterns already in the file. Don't refactor to CQS unless explicitly asked.
+**When NOT to use CQS:** When modifying existing service-based code, follow the patterns already in the file. Don't refactor to CQS unless explicitly asked. If asked to refactor, apply the pattern only to the scope requested.
 
-**If asked to refactor to CQS:** Then apply the pattern to the scope requested — but don't expand beyond what was asked.
+### FusionCache over IDistributedCache
 
-## Naming Conventions
+When caching is needed, use `IFusionCache` instead of `IDistributedCache`. See [ADR-0028](https://contributing.bitwarden.com/architecture/adr/adopt-fusion-cache).
 
-- Private fields: `_camelCase` with underscore prefix
-- Properties: `PascalCase`, spelled out (e.g., `OrganizationConfiguration` not `OrgConfig`)
-- Blank line between property groups and methods
+**Why FusionCache:** It provides L1/L2 caching, stampede protection, and backplane sync across nodes — solving problems that `IDistributedCache` leaves to the developer. Register with `AddExtendedCache` and inject via keyed services.
 
-## Code Style
+**Don't implement caching unless requested.** If a user describes a performance problem where caching might help, suggest it — but don't implement without confirmation. Caching adds complexity and isn't always the right solution. Don't migrate existing `IDistributedCache` usage unless explicitly asked.
 
-- Spaces (not tabs), 4-space indentation
-- Always use curly braces for control blocks (even single-line)
-- Long conditionals: trailing operators when split across lines
-- Constructors with multiple arguments: one argument per line
-- `var` for `using` and `foreach` contextual variables
+### GUID Generation
 
-## Dependency Injection
+Always use `CoreHelpers.GenerateComb()` for entity IDs — never `Guid.NewGuid()`. Sequential COMBs prevent SQL Server index fragmentation that random GUIDs cause on clustered indexes, which is critical for Bitwarden's database performance at scale.
 
-Use `TryAdd*` overloads, not `AddSingleton`/`AddTransient`:
+## Critical Rules
 
-```csharp
-// ✅ Correct
-services.TryAddSingleton<IMyService, DefaultMyService>();
+These are the most frequently violated conventions. Claude cannot fetch the linked docs at runtime, so these are inlined here:
 
-// ❌ Wrong
-services.AddSingleton<IMyService, DefaultMyService>();
-```
+- **Use `TryAdd*` for DI registration** (`TryAddScoped`, `TryAddTransient`) — prevents duplicate registrations when multiple modules register the same service
+- **File-scoped namespaces** — `namespace Bit.Core.Vault;` not `namespace Bit.Core.Vault { ... }`
+- **Nullable reference types are enabled** (ADR-0024) — use `!` (null-forgiving) when you know a value isn't null; use `required` modifier for properties that must be set during construction
+- **`Async` suffix on all async methods** — `CreateAsync`, not `Create`, when the method returns `Task`
+- **Controller actions return `ActionResult<T>`** — not `IActionResult` or bare `T`
+- **Testing with xUnit** — use `[Theory, BitAutoData]` (not `[AutoData]`), `SutProvider<T>` for automatic SUT wiring, and `Substitute.For<T>()` from NSubstitute for mocking
 
-Consider creating dependency groups for related services.
+## Examples
 
-## GUID Generation
-
-Always use `CoreHelpers.GenerateComb()` for entity IDs — prevents SQL Server index fragmentation:
+### GUID generation
 
 ```csharp
-// ✅ Correct
+// CORRECT — sequential COMB prevents index fragmentation
 var id = CoreHelpers.GenerateComb();
 
-// ❌ Wrong
+// WRONG — random GUIDs fragment clustered indexes
 var id = Guid.NewGuid();
 ```
 
-## Controller Actions
+### DI registration
 
-- Avoid function overloads — use distinct names (`Get` vs `GetAll`)
-- Name after the action (`CreateThing`, `UpdateThing`), not HTTP method (`PostThing`, `PutThing`)
-- One route per action — don't expose same function under multiple routes
+```csharp
+// CORRECT — idempotent, won't duplicate
+services.TryAddScoped<ICipherService, CipherService>();
 
-## Caching
+// WRONG — silently duplicates registration, last-wins causes subtle bugs
+services.AddScoped<ICipherService, CipherService>();
+```
 
-**Don't implement caching unless requested.** If a user describes a performance problem where caching might help, suggest it — but don't implement without confirmation. Caching adds complexity and isn't always the right solution.
+### Namespace style
 
-When caching is needed, use `IFusionCache` instead of `IDistributedCache` [ADR-0028](https://contributing.bitwarden.com/architecture/adr/adopt-fusion-cache). Register with `AddExtendedCache` and inject via keyed services.
+```csharp
+// CORRECT — file-scoped
+namespace Bit.Core.Vault.Commands;
 
-FusionCache provides automatic key prefixing, L1/L2 caching, stampede protection, and backplane sync across nodes.
+// WRONG — block-scoped
+namespace Bit.Core.Vault.Commands
+{
+    // ...
+}
+```
 
-**Existing code:** Don't migrate existing `IDistributedCache` usage to FusionCache unless explicitly asked.
+## Further Reading
 
-## Testing
-
-Use xUnit. Run integration tests with `dotnet test` from `test/Infrastructure.IntegrationTest`.
+- [C# code style](https://contributing.bitwarden.com/contributing/code-style/csharp/)
+- [Server architecture](https://contributing.bitwarden.com/architecture/server/)
