@@ -1,0 +1,21 @@
+{
+  "name": "atlassian-reader",
+  "version": "1.0.0",
+  "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/atlassian-reader",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "atlassian",
+    "jira",
+    "confluence",
+    "sprint",
+    "agile",
+    "read-only",
+    "issue-tracking"
+  ],
+  "skills": "./skills/"
+}
