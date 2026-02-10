@@ -54,7 +54,7 @@ Use when the user references a ticket ID like `PROJ-123`, asks about a story, or
 curl -s --connect-timeout 10 --max-time 30 \
   -H "Authorization: Basic $(printf '%s:%s' "$ATLASSIAN_EMAIL" "$ATLASSIAN_JIRA_READ_ONLY_TOKEN" | base64)" \
   -H "Accept: application/json" \
-  "https://api.atlassian.com/ex/jira/${ATLASSIAN_CLOUD_ID}/rest/api/3/issue/{{TICKET_ID}}?fields=summary,description,status,issuetype,priority,assignee,reporter,comment,subtasks,issuelinks,parent,labels,components,sprint&expand=renderedFields" | jq .
+  "https://api.atlassian.com/ex/jira/${ATLASSIAN_CLOUD_ID}/rest/api/3/issue/{{TICKET_ID}}?fields=summary,description,status,issuetype,priority,assignee,reporter,comment,subtasks,issuelinks,parent,labels,components,sprint,customfield_10192&expand=renderedFields" | jq .
 ```
 
 Replace `{{TICKET_ID}}` with the actual issue key (e.g. `PROJ-123`).
@@ -62,7 +62,9 @@ Replace `{{TICKET_ID}}` with the actual issue key (e.g. `PROJ-123`).
 **Presentation instructions**:
 
 - **Summary**: Show the issue title, type, status, priority, and assignee prominently
-- **Description**: Read `renderedFields.description` (HTML) and present as clean markdown. Extract acceptance criteria if present (look for headings, checklists, or "Acceptance Criteria" sections)
+- **Description**: Read `renderedFields.description` (HTML) and present as clean markdown
+- **Acceptance Criteria**: Check `renderedFields.customfield_10192` for acceptance criteria content (this is the dedicated A/C field in Bitwarden's Jira instance). If that field is empty or absent, fall back to looking for A/C headings, checklists, or "Acceptance Criteria" sections within the description
+- **Children (Epics/Features)**: If the issue type is Epic or Feature, `fields.subtasks` may be empty — next-gen Jira projects use `parent` relationships instead of subtask links. When reading an epic, **always** perform a follow-up JQL search using `parent = {{TICKET_ID}}` (Section 5) to discover child issues
 - **Subtasks**: If `fields.subtasks` is non-empty, list each with key, summary, and status
 - **Links**: If `fields.issuelinks` is non-empty, list linked issues grouped by link type (e.g. "blocks", "is blocked by", "relates to")
 - **Parent**: If `fields.parent` exists, mention the parent epic/story
@@ -92,12 +94,14 @@ Replace `{{TICKET_ID}}` with the issue key.
 
 Use when the user asks about sprint contents, epic children, text search across issues, or any bulk issue query.
 
+> **API Note**: Atlassian removed the legacy `/rest/api/3/search` endpoint (see [CHANGE-2046](https://developer.atlassian.com/changelog/#CHANGE-2046)). Always use `/rest/api/3/search/jql` instead.
+
 ```bash
 curl -s --connect-timeout 10 --max-time 30 -G \
   -H "Authorization: Basic $(printf '%s:%s' "$ATLASSIAN_EMAIL" "$ATLASSIAN_JIRA_READ_ONLY_TOKEN" | base64)" \
   -H "Accept: application/json" \
   --data-urlencode "jql={{JQL}}" \
-  "https://api.atlassian.com/ex/jira/${ATLASSIAN_CLOUD_ID}/rest/api/3/search?maxResults=20&fields=summary,status,issuetype,priority,assignee,parent" | jq .
+  "https://api.atlassian.com/ex/jira/${ATLASSIAN_CLOUD_ID}/rest/api/3/search/jql?maxResults=20&fields=summary,status,issuetype,priority,assignee,parent" | jq .
 ```
 
 Replace `{{JQL}}` with the user's query. URL-encode special characters.
@@ -118,7 +122,7 @@ Replace `{{JQL}}` with the user's query. URL-encode special characters.
 
 - Present results as a table with columns: Key, Type, Summary, Status, Priority, Assignee
 - Include the parent epic key if present
-- Show the total result count (`total` field) and note if results were truncated
+- The new `/search/jql` endpoint uses cursor-based pagination: check `isLast` (boolean) to determine if more pages exist, rather than the legacy `total` field. If `isLast` is `false`, note that results were truncated
 
 ## 6. Read Confluence Page
 
@@ -251,11 +255,12 @@ Replace `{{SPRINT_ID}}` with the sprint ID from the previous call.
 
 ## 11. Error Handling
 
-| HTTP Status      | Meaning                                               | Fix                                                                                                                                                                                                                                            |
-| ---------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 401 Unauthorized | Invalid or expired API token                          | Ask user to verify the relevant token (`ATLASSIAN_JIRA_READ_ONLY_TOKEN` or `ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN`). Tokens can be regenerated at [Atlassian API tokens](https://id.atlassian.com/manage-profile/security/api-tokens).          |
-| 403 Forbidden    | Token is valid but lacks permission for this resource | Check that the scoped token has the correct **read** scope for the product. The Jira token needs `read:jira-work` scope; the Confluence token needs `read:confluence-content.all` scope. Also verify the user has access to the project/space. |
-| 404 Not Found    | Issue, page, or resource does not exist               | Verify the ticket ID, page ID, or URL. Check for typos. The resource may have been deleted or moved.                                                                                                                                           |
+| HTTP Status              | Meaning                                               | Fix                                                                                                                                                                                                                                                             |
+| ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 401 Unauthorized         | Invalid or expired API token                          | Ask user to verify the relevant token (`ATLASSIAN_JIRA_READ_ONLY_TOKEN` or `ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN`). Tokens can be regenerated at [Atlassian API tokens](https://id.atlassian.com/manage-profile/security/api-tokens).                           |
+| 403 Forbidden            | Token is valid but lacks permission for this resource | Check that the scoped token has the correct **read** scope for the product. The Jira token needs `read:jira-work` scope; the Confluence token needs `read:confluence-content.all` scope. Also verify the user has access to the project/space.                  |
+| 404 Not Found            | Issue, page, or resource does not exist               | Verify the ticket ID, page ID, or URL. Check for typos. The resource may have been deleted or moved.                                                                                                                                                            |
+| 200 with `errorMessages` | API endpoint has been removed or deprecated           | Atlassian periodically retires old API versions. If the response contains `"The requested API has been removed"`, check the [Atlassian changelog](https://developer.atlassian.com/changelog/) for migration guidance and update the endpoint URL in this skill. |
 
 **Never expose tokens**: Do not echo, log, or include token values in output when debugging authentication failures. Refer to tokens by variable name only.
 
