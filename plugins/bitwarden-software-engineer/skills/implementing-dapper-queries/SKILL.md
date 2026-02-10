@@ -7,13 +7,9 @@ description: Implementing Dapper repository methods and stored procedures for MS
 
 All Dapper implementations live in `src/Infrastructure/Dapper/Repositories/`. Each repository class implements an interface from `src/Core/` and uses stored procedures for all database operations. The repository method is intentionally thin — it maps C# parameters to SQL parameters and maps result sets back to domain objects.
 
-### Why stored procedures, not inline SQL
+### Stored procedures over inline SQL
 
-At Bitwarden's scale, stored procedures provide:
-
-1. **Execution plan stability** — SQL Server caches and reuses plans, avoiding recompilation on every call
-2. **Independent optimization** — DBAs can tune queries without application redeployment
-3. **Security boundary** — Application connects with EXECUTE-only permissions on procedures, not direct table access
+The default pattern is stored procedures for all Dapper database operations. Some exceptions exist where inline SQL is used — these are provided automatically by the repository base class and parent patterns, not written ad-hoc in individual repository methods.
 
 ## Workflow
 

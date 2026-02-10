@@ -49,6 +49,4 @@ After making changes, always verify your work before declaring done. Use the app
 
 ### Database changes
 
-- **Verify migration naming** follows `YYYY-MM-DD_##_Description.sql` format
-- **Verify idempotency** — migration scripts must use `IF NOT EXISTS` guards
-- **Verify EF parity** — if you wrote a stored procedure, confirm the EF implementation matches its behavior
+- Verify your changes against the conventions in the active database skill (`implementing-dapper-queries`, `implementing-ef-core`, or `writing-database-queries`)

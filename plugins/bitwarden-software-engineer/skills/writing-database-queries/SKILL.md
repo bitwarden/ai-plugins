@@ -12,27 +12,17 @@ Bitwarden maintains two parallel data access implementations:
 
 Every database change requires both implementations. Repository interfaces abstract both — when a stored procedure performs specific operations, the EF implementation must replicate identical behavior.
 
-### Why two ORMs?
-
-MSSQL was the original database. Dapper + stored procedures gave fine-grained control over query performance for the self-hosted product. When cloud-hosted Bitwarden added PostgreSQL/MySQL/SQLite support, EF Core was the pragmatic choice for multi-database targeting — rewriting all stored procedures for each dialect wasn't feasible. The dual approach persists because migrating MSSQL off Dapper would be a massive effort with risk and no clear benefit.
-
 ## Evolutionary Database Design (EDD)
 
-Zero-downtime deployments require three-phase migrations:
+Bitwarden Cloud uses zero-downtime deployments with a multi-phase migration strategy:
 
-**Phase 1 — Initial** (`util/Migrator/DbScripts`): Runs before code deployment. Must be fast and backwards-compatible. Adds support for new features without breaking the currently running release.
+- **Phase 1 — Initial** (`util/Migrator/DbScripts`): Runs before code deployment. Must be backwards-compatible.
+- **Phase 2 — Transition** (`util/Migrator/DbScripts_transition`): Runs after deployment. Handles batched data migrations only — no schema changes.
+- **Phase 3 — Finalization** (`util/Migrator/DbScripts_finalization`): Runs at the next release. Removes backwards-compatibility scaffolding.
 
-**Phase 2 — Transition** (`util/Migrator/DbScripts_transition`): Runs after deployment as a background task. Handles slow data migrations that must be batched. NO schema changes — only data movement.
+Simple additive changes (new nullable column, new table, new stored procedure) only need Phase 1.
 
-**Phase 3 — Finalization** (`util/Migrator/DbScripts_finalization`): Runs at the next release. Removes backwards-compatibility scaffolding from Phase 1.
-
-### Why three phases?
-
-Bitwarden Cloud deploys without downtime. If a migration adds a NOT NULL column, the currently running code (which doesn't know about that column) would break on INSERT. Phase 1 adds the column as nullable with a default. Phase 2 backfills existing rows. Phase 3 (next release, when all code knows about the column) adds the NOT NULL constraint. This pattern applies to any schema change that could break the previous release.
-
-### When you only need Phase 1
-
-Simple additive changes (new nullable column, new table, new stored procedure) that don't break existing code can skip Phases 2 and 3. Only use multi-phase when the change would break the currently deployed release if applied immediately.
+**Always defer to the developer on migration phasing.** The multi-phase approach is complex and context-dependent. When a database change is needed, write the migration script for Phase 1 and ask the developer whether additional phases are required.
 
 ## Key locations
 

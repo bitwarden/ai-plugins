@@ -26,13 +26,11 @@ New features should use the CQS pattern — discrete action classes instead of l
 
 **When NOT to use CQS:** When modifying existing service-based code, follow the patterns already in the file. Don't refactor to CQS unless explicitly asked. If asked to refactor, apply the pattern only to the scope requested.
 
-### FusionCache over IDistributedCache
+### Caching
 
-When caching is needed, use `IFusionCache` instead of `IDistributedCache`. See [ADR-0028](https://contributing.bitwarden.com/architecture/adr/adopt-fusion-cache).
+When caching is needed, follow the conventions in [CACHING.md](https://github.com/bitwarden/server/blob/main/src/Core/Utilities/CACHING.md). Use `IFusionCache` instead of `IDistributedCache`.
 
-**Why FusionCache:** It provides L1/L2 caching, stampede protection, and backplane sync across nodes — solving problems that `IDistributedCache` leaves to the developer. Register with `AddExtendedCache` and inject via keyed services.
-
-**Don't implement caching unless requested.** If a user describes a performance problem where caching might help, suggest it — but don't implement without confirmation. Caching adds complexity and isn't always the right solution. Don't migrate existing `IDistributedCache` usage unless explicitly asked.
+**Don't implement caching unless requested.** If a user describes a performance problem where caching might help, suggest it — but don't implement without confirmation.
 
 ### GUID Generation
 
