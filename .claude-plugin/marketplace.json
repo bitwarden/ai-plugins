@@ -39,6 +39,11 @@
       "source": "./plugins/bitwarden-software-engineer",
       "version": "0.2.0",
       "description": "Full-stack software engineering assistant with skills for Bitwarden client, server, and database development patterns."
+    },
+      "name": "atlassian-reader",
+      "source": "./plugins/atlassian-reader",
+      "version": "1.0.0",
+      "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud."
     }
   ]
 }
