@@ -2,11 +2,6 @@ name: Validate Plugins
 
 on:
   pull_request:
-    paths:
-      - "plugins/**"
-      - ".claude-plugin/marketplace.json"
-      - "scripts/validate-*.sh"
-      - ".github/workflows/validate-plugins.yml"
 
 permissions: {}
 
@@ -26,8 +21,29 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      - name: Check for relevant changes
+        id: relevance
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch origin "$BASE_REF"
+          CHANGED=$(git diff --name-only "origin/$BASE_REF...HEAD")
+
+          # Check if any changed files match paths relevant to plugin validation
+          RELEVANT=$(echo "$CHANGED" | grep -E '^(plugins/|\.claude-plugin/marketplace\.json$|scripts/validate-|\.github/workflows/validate-plugins\.yml$)' || echo "")
+
+          if [[ -n "$RELEVANT" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Relevant plugin files changed:"
+            echo "$RELEVANT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "No relevant plugin files changed — skipping validation."
+          fi
+
       - name: Get changed plugin files
         id: changed-files
+        if: steps.relevance.outputs.should_run == 'true'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
@@ -181,6 +197,7 @@ jobs:
       - name: Summary
         if: always()
         env:
+          SHOULD_RUN: ${{ steps.relevance.outputs.should_run }}
           STRUCTURE_RESULT: ${{ steps.structure.outcome }}
           MARKETPLACE_RESULT: ${{ steps.marketplace.outcome }}
           COMPONENTS_RESULT: ${{ steps.components.outcome }}
@@ -192,6 +209,11 @@ jobs:
           echo "📊 Validation Summary"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
+
+          if [[ "$SHOULD_RUN" != "true" ]]; then
+            echo "✅ No plugin-related files changed — validation not required."
+            exit 0
+          fi
 
           if [[ -n "$CHANGED_PLUGINS" ]]; then
             echo "Plugin structure validation: $STRUCTURE_RESULT"
