@@ -1,6 +1,6 @@
 ---
 name: threat-modeling
-description: Conduct threat modeling exercises producing security definitions, data flow diagrams, and threat catalogs. Use when performing initial security assessments, defining security goals for new features, or generating threat model artifacts.
+description: This skill should be used when the user asks to "create a threat model", "define security goals", "generate a data flow diagram", "write security definitions", "perform an initial security assessment", or needs to produce threat model artifacts for new features or architecture changes.
 ---
 
 ## Bitwarden's Engagement Model
@@ -162,7 +162,7 @@ Teams should initiate a full engagement with the AppSec team (#team-eng-appsec) 
 - **Data sharing modifications** (organization memberships, Send, sharing features)
 - **New IPC channels** between components
 - **Cross-domain or cross-origin** functionality
-- **Uncertain about security implications** — perform an Initial Security Assessment first and post findings to #team-eng-appsec with a note that you're unsure if a full engagement is needed
+- **Uncertain about security implications** — perform an Initial Security Assessment first and post findings to #team-eng-appsec with a note indicating uncertainty about whether a full engagement is needed
 
 Quick questions (e.g., concerns about a third-party library or coding practice) don't need a full engagement — post those directly to #team-eng-appsec.
 

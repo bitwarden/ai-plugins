@@ -1,6 +1,6 @@
 ---
 name: detecting-secrets
-description: Find hardcoded secrets, credentials, and sensitive data in code beyond automated scanners. Use when auditing code for credential leaks, reviewing secret handling patterns, or responding to secret scanning alerts.
+description: This skill should be used when the user asks to "find hardcoded secrets", "audit for credential leaks", "check for API keys in code", "review secret scanning alerts", "rotate a leaked secret", or needs to detect hardcoded credentials, review secret handling patterns, or remediate exposed secrets.
 ---
 
 ## Secret Patterns
@@ -162,7 +162,7 @@ For local development, use user-secrets or `.env` files that are `.gitignore`d â
 
 - **Assume any committed secret is compromised.** Always rotate, even if the repo is private. No exceptions.
 - **Never suppress secret scanning alerts without rotation.** Dismissing an alert doesn't make the exposure go away.
-- **Validation, not just detection.** When you find a potential secret, verify it's real before raising an alarm. Check if it's a test value, placeholder, or encrypted content.
+- **Validation, not just detection.** When a potential secret is found, verify it's real before raising an alarm. Check if it's a test value, placeholder, or encrypted content.
 - **Check the full commit history.** A secret removed in the latest commit may still exist in git history. Use `git log -p -S "secret-pattern"` to search history.
 - **Bitwarden uses Azure Key Vault** for secrets management. If a new secret needs to be stored, work with BRE to provision vault access for the repository.
 

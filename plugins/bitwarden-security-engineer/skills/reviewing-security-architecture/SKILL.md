@@ -1,6 +1,6 @@
 ---
 name: reviewing-security-architecture
-description: Evaluate system designs and architecture for security properties — authentication, authorization, data protection, trust boundaries, and cryptographic patterns. Use for architecture review, design assessment, or when evaluating security implications of design decisions.
+description: This skill should be used when the user asks to "review the security architecture", "check authentication patterns", "evaluate trust boundaries", "review encryption implementation", "assess authorization design", or needs to evaluate system designs for authentication, authorization, data protection, or cryptographic correctness.
 ---
 
 ## Authentication Architecture

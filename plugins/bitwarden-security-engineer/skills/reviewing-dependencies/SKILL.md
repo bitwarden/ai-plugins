@@ -1,6 +1,6 @@
 ---
 name: reviewing-dependencies
-description: Supply chain security analysis — vulnerable dependencies, transitive risk, and dependency governance. Use when evaluating third-party packages, reviewing Dependabot alerts, or assessing supply chain risk.
+description: This skill should be used when the user asks to "review Dependabot alerts", "check for vulnerable dependencies", "audit third-party packages", "assess supply chain risk", "run Grype scan", or needs to evaluate dependency health, transitive risk, or supply chain security.
 ---
 
 ## Dependency Vulnerability Workflow
@@ -39,7 +39,7 @@ For each alert, determine:
 
 ## Transitive Dependency Risk
 
-Direct dependencies are visible in `package.json` or `.csproj` files, but transitive dependencies (dependencies of dependencies) make up the majority of your dependency tree and are often invisible.
+Direct dependencies are visible in `package.json` or `.csproj` files, but transitive dependencies (dependencies of dependencies) make up the majority of the dependency tree and are often invisible.
 
 **Why transitive dependencies matter:**
 
@@ -97,7 +97,7 @@ grype <image> --only-fixed --fail-on high
 **Interpreting Grype output:**
 
 - Each finding includes: CVE ID, severity, package name, installed version, fixed version
-- `Fixed` column tells you if an update is available
+- `Fixed` column indicates whether an update is available
 - Use `--only-fixed` to focus on actionable items (vulnerabilities with available fixes)
 
 ## Platform-Specific Guidance
@@ -155,7 +155,7 @@ npm ci  # Installs exactly from lockfile, fails if lockfile is out of date
 A Software Bill of Materials (SBOM) is an inventory of all components in a software artifact. Understanding SBOMs helps reason about supply chain risk:
 
 - **What it contains:** Package names, versions, licenses, relationships (direct vs. transitive)
-- **Why it matters:** Enables rapid response when a new CVE is published — you can immediately identify which projects are affected
+- **Why it matters:** Enables rapid response when a new CVE is published — immediately identify which projects are affected
 - **Standard formats:** SPDX, CycloneDX
 - **GitHub integration:** GitHub generates dependency graphs automatically; Dependabot uses this for alerting
 
@@ -165,7 +165,7 @@ A Software Bill of Materials (SBOM) is an inventory of all components in a softw
 - **Prefer updating over pinning.** Pinning a vulnerable version and adding a workaround accumulates tech debt. Update when a fix is available.
 - **Evaluate the full transitive tree.** A direct dependency may be safe, but its transitive dependencies may not be.
 - **Review new dependencies before adoption.** Check health criteria above before adding any new package. More dependencies = more attack surface.
-- **Lock your dependencies.** Always commit lockfiles (`package-lock.json`, `packages.lock.json`). Use `npm ci` in CI/CD, not `npm install`.
+- **Lock dependencies.** Always commit lockfiles (`package-lock.json`, `packages.lock.json`). Use `npm ci` in CI/CD, not `npm install`.
 
 ## Further Reading
 

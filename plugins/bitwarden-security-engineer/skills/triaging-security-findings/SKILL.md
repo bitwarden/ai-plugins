@@ -1,6 +1,6 @@
 ---
 name: triaging-security-findings
-description: Triage and remediate findings from Checkmarx, SonarCloud, and Grype. Use when working with GitHub Advanced Security alerts, scanner annotations on PRs, or implementing fixes for detected vulnerabilities.
+description: This skill should be used when the user asks to "triage security findings", "fix a Checkmarx finding", "review SonarCloud results", "dismiss a false positive", "check code scanning alerts", or needs to work with GitHub Advanced Security alerts, scanner annotations on PRs, or Grype vulnerability results.
 ---
 
 ## Scanner Landscape
@@ -67,19 +67,19 @@ gh api /repos/{owner}/{repo}/secret-scanning/alerts --jq '.[] | {number, state, 
 
 These are the states available in Checkmarx for managing findings. Getting the state right matters — it affects whether the finding reappears in future scans.
 
-| State                        | When to Use                                                                        | Effect                                                    |
-| ---------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| **Not Exploitable**          | You are CERTAIN there is no potential risk at ANY point in the product's lifecycle | Finding stops appearing in subsequent scans               |
-| **Proposed Not Exploitable** | You suspect false positive but want team verification                              | Flags for review; requires manager approval for promotion |
-| **Confirmed**                | Vulnerability poses a real risk to be addressed during development                 | Tracked as known issue                                    |
-| **Urgent**                   | Acute risk requiring immediate attention                                           | Escalated priority                                        |
+| State                        | When to Use                                                                | Effect                                                    |
+| ---------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **Not Exploitable**          | CERTAIN there is no potential risk at ANY point in the product's lifecycle | Finding stops appearing in subsequent scans               |
+| **Proposed Not Exploitable** | Suspected false positive, needs team verification                          | Flags for review; requires manager approval for promotion |
+| **Confirmed**                | Vulnerability poses a real risk to be addressed during development         | Tracked as known issue                                    |
+| **Urgent**                   | Acute risk requiring immediate attention                                   | Escalated priority                                        |
 
 ### Critical Rules for State Changes
 
 - **Never mark as Not Exploitable** just because the app isn't in production yet, or because it's currently on a local server. Consider the full product lifecycle — if deploying to cloud or going to production would make it exploitable, it IS exploitable.
 - **Validation is not sufficient.** Checkmarx does not consider adding validation steps as a foolproof solution because they leave threatening input values in place. Sanitizers (which replace threatening values) are preferred. Do not mark a finding as Not Exploitable solely on the basis of a validation step.
-- **When uncertain, use Proposed Not Exploitable** and discuss with your team or #team-eng-appsec.
-- **Document your rationale** — every state change should include a clear explanation of why.
+- **When uncertain, use Proposed Not Exploitable** and discuss with the team or #team-eng-appsec.
+- **Document the rationale** — every state change should include a clear explanation of why.
 
 ## SonarCloud Finding Management
 
@@ -97,7 +97,7 @@ Before dismissing any finding, follow this decision tree:
 1. **Trace the data flow.** Can untrusted input actually reach the flagged sink? Follow the data from entry point through all transformations to the flagged location.
 2. **Check for existing sanitization.** Is there encoding, escaping, or sanitization in the data path? Remember: validation alone is insufficient for Checkmarx findings.
 3. **Consider the full lifecycle.** Even if the code isn't deployed to a risky environment today, will it be? Private repos may go public. Local deployments may move to cloud.
-4. **Document your rationale.** Every dismissal must include a clear, reviewable explanation of why the finding is not exploitable.
+4. **Document the rationale.** Every dismissal must include a clear, reviewable explanation of why the finding is not exploitable.
 
 If any step is uncertain, mark as **Proposed Not Exploitable** rather than **Not Exploitable**.
 

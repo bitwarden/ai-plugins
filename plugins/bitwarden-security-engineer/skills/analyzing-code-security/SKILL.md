@@ -1,6 +1,6 @@
 ---
 name: analyzing-code-security
-description: Deep security analysis of code against OWASP Top 10, OWASP API Top 10, OWASP Mobile Top 10 2024, CWE Top 25, and SANS Top 25. Use when performing manual security code review or analyzing code for vulnerability patterns beyond what scanners catch.
+description: This skill should be used when the user asks to "analyze code for security issues", "check for OWASP vulnerabilities", "review code against CWE Top 25", "find injection vulnerabilities", "do a security code review", or needs manual security analysis against OWASP Top 10, API Top 10, Mobile Top 10, or CWE/SANS frameworks.
 ---
 
 ## Frameworks Reference
@@ -196,7 +196,7 @@ Bitwarden encourages adopting an adversarial mindset during security code review
 **How to think adversarially:**
 
 1. **Create a hypothesis** — e.g., "I can bypass SSO", "I can access another user's vault", "I can escalate from member to admin"
-2. **Work backwards** — What conditions would need to be true for the attack to succeed? Can you fabricate those conditions?
+2. **Work backwards** — What conditions would need to be true for the attack to succeed? Can those conditions be fabricated?
 3. **Question assumptions** — Is that authorization check always reached? What happens if the middleware fails? What if the token is malformed but not invalid?
 4. **Consider failure modes** — What happens when things fail? Do they fail open (insecure) or fail closed (secure)?
 
