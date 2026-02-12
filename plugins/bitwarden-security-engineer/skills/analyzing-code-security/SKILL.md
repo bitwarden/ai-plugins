@@ -3,195 +3,37 @@ name: analyzing-code-security
 description: This skill should be used when the user asks to "analyze code for security issues", "check for OWASP vulnerabilities", "review code against CWE Top 25", "find injection vulnerabilities", "do a security code review", or needs manual security analysis against OWASP Top 10, API Top 10, Mobile Top 10, or CWE/SANS frameworks.
 ---
 
-## Frameworks Reference
+## Security Review Workflow
 
-### OWASP Web Top 10
+Follow these steps when conducting a manual security code review:
 
-| #   | Category                  | What to Look For                                                                   |
-| --- | ------------------------- | ---------------------------------------------------------------------------------- |
-| A01 | Broken Access Control     | Missing authorization checks, IDOR, path traversal, CORS misconfiguration          |
-| A02 | Cryptographic Failures    | Weak algorithms, hardcoded keys, missing encryption, cleartext transmission        |
-| A03 | Injection                 | SQL, NoSQL, OS command, LDAP, XPath injection via unsanitized input                |
-| A04 | Insecure Design           | Missing threat model, business logic flaws, insufficient rate limiting             |
-| A05 | Security Misconfiguration | Default credentials, unnecessary features enabled, verbose errors, missing headers |
-| A06 | Vulnerable Components     | Outdated libraries, unpatched dependencies, known CVEs                             |
-| A07 | Auth Failures             | Weak passwords, missing brute-force protection, insecure session management        |
-| A08 | Data Integrity Failures   | Insecure deserialization, unsigned updates, untrusted CI/CD pipelines              |
-| A09 | Logging Failures          | Missing audit logs, sensitive data in logs, no alerting                            |
-| A10 | SSRF                      | User-controlled URLs in server-side requests, metadata endpoint access             |
+1. **Identify the attack surface.** Determine entry points: API endpoints, message handlers, file parsers, user-facing forms. Read route definitions and controller registrations to build a map.
+2. **Trace data flows from sources to sinks.** Follow untrusted input (HTTP parameters, headers, request bodies, file uploads, external API responses) through all transformations to dangerous operations (database queries, command execution, HTML rendering, file system access).
+3. **Check trust boundary crossings.** At every point where data crosses a trust boundary (client→server, service→service, user input→database), verify that validation, authentication, and authorization are enforced.
+4. **Apply framework checklists.** Consult `references/framework-checklists.md` for OWASP Web/API/Mobile Top 10 and CWE Top 25. Check each applicable category against the code under review.
+5. **Adopt an adversarial mindset.** Form a hypothesis (e.g., "I can bypass SSO", "I can access another user's vault") and work backwards to determine what conditions would make it exploitable.
+6. **Map findings to CWE IDs.** Every finding must include the specific CWE identifier, the code location, and the data flow that makes it exploitable.
+7. **Classify by practical exploitability.** Distinguish between practically exploitable vulnerabilities and theoretical risks. Prioritize accordingly but document both.
 
-### OWASP API Top 10
+## Key Vulnerability Categories
 
-| #     | Category                                        | What to Look For                                                         |
-| ----- | ----------------------------------------------- | ------------------------------------------------------------------------ |
-| API1  | Broken Object Level Authorization               | Missing per-object auth checks, IDOR via API parameters                  |
-| API2  | Broken Authentication                           | Weak token generation, missing token validation, insecure password flows |
-| API3  | Broken Object Property Level Auth               | Mass assignment, excessive data in responses                             |
-| API4  | Unrestricted Resource Consumption               | Missing rate limits, unbounded queries, large payload acceptance         |
-| API5  | Broken Function Level Authorization             | Missing role checks on admin endpoints, privilege escalation             |
-| API6  | Unrestricted Access to Sensitive Business Flows | No bot protection on critical flows (registration, purchase)             |
-| API7  | SSRF                                            | Server-side requests with user-controlled URLs                           |
-| API8  | Security Misconfiguration                       | Missing security headers, CORS wildcard, verbose errors                  |
-| API9  | Improper Inventory Management                   | Undocumented endpoints, old API versions still active                    |
-| API10 | Unsafe Consumption of APIs                      | Trusting third-party API responses without validation                    |
+The most frequently encountered categories across Bitwarden's stack:
 
-### OWASP Mobile Top 10 (2024)
+- **Injection** (CWE-89, CWE-78, CWE-77) — Unsanitized input reaching SQL queries, OS commands, or LDAP queries. Always use parameterized queries and avoid string concatenation.
+- **Broken Access Control** (CWE-862, CWE-287, CWE-306) — Missing authorization checks, IDOR, privilege escalation. Verify per-object ownership checks and role enforcement at every layer.
+- **XSS** (CWE-79) — User input rendered in HTML without encoding. In Angular, avoid `innerHTML` and `bypassSecurityTrust*` with untrusted content.
+- **SSRF** (CWE-918) — User-controlled URLs in server-side requests. Validate against host allowlists.
+- **Insecure Deserialization** (CWE-502) — Type-handling enabled on untrusted input. Avoid `TypeNameHandling.All` in JSON.NET.
+- **Path Traversal** (CWE-22) — User-supplied paths reaching file system operations. Canonicalize and validate against a base directory.
+- **Cryptographic Failures** — Weak algorithms, hardcoded keys, predictable IVs. See the `reviewing-security-architecture` skill for approved algorithms.
 
-| #   | Category                         | What to Look For                                             |
-| --- | -------------------------------- | ------------------------------------------------------------ |
-| M1  | Improper Credential Usage        | Hardcoded credentials, insecure credential storage on device |
-| M2  | Inadequate Supply Chain Security | Unverified third-party SDKs, tampered libraries              |
-| M3  | Insecure Auth/Authorization      | Client-side auth bypasses, missing server-side validation    |
-| M4  | Insufficient I/O Validation      | Missing input validation, injection via intents/deep links   |
-| M5  | Insecure Communication           | Cleartext traffic, certificate pinning bypass, weak TLS      |
-| M6  | Inadequate Privacy Controls      | Excessive data collection, missing consent, PII leakage      |
-| M7  | Insufficient Binary Protections  | No obfuscation, debuggable builds in production              |
-| M8  | Security Misconfiguration        | Excessive permissions, insecure default settings             |
-| M9  | Insecure Data Storage            | Sensitive data in plaintext files, shared preferences, logs  |
-| M10 | Insufficient Cryptography        | Weak algorithms, improper key management, predictable IVs    |
+For complete framework checklists (all OWASP and CWE categories), consult **`references/framework-checklists.md`**.
 
-### CWE Top 25
-
-The most critical software weaknesses. Map findings to these when applicable:
-
-- **CWE-787** Out-of-bounds Write
-- **CWE-79** Cross-site Scripting (XSS)
-- **CWE-89** SQL Injection
-- **CWE-416** Use After Free
-- **CWE-78** OS Command Injection
-- **CWE-20** Improper Input Validation
-- **CWE-125** Out-of-bounds Read
-- **CWE-22** Path Traversal
-- **CWE-352** Cross-Site Request Forgery (CSRF)
-- **CWE-434** Unrestricted File Upload
-- **CWE-862** Missing Authorization
-- **CWE-476** NULL Pointer Dereference
-- **CWE-287** Improper Authentication
-- **CWE-190** Integer Overflow
-- **CWE-502** Deserialization of Untrusted Data
-- **CWE-77** Command Injection
-- **CWE-119** Buffer Overflow
-- **CWE-798** Hardcoded Credentials
-- **CWE-918** Server-Side Request Forgery (SSRF)
-- **CWE-306** Missing Authentication for Critical Function
-
-## Language-Specific Vulnerability Patterns
-
-### C# / .NET
-
-```csharp
-// WRONG — SQL injection via string concatenation
-var query = $"SELECT * FROM Users WHERE Id = '{userId}'";
-var result = connection.Execute(query);
-
-// CORRECT — parameterized query
-var query = "SELECT * FROM Users WHERE Id = @UserId";
-var result = connection.Execute(query, new { UserId = userId });
-```
-
-```csharp
-// WRONG — insecure deserialization with type handling
-JsonConvert.DeserializeObject<object>(input, new JsonSerializerSettings {
-    TypeNameHandling = TypeNameHandling.All
-});
-
-// CORRECT — no type name handling on untrusted input
-JsonConvert.DeserializeObject<ExpectedType>(input);
-```
-
-```csharp
-// WRONG — path traversal via user input
-var filePath = Path.Combine(baseDir, userInput);
-var content = File.ReadAllText(filePath);
-
-// CORRECT — canonicalize and validate
-var filePath = Path.GetFullPath(Path.Combine(baseDir, userInput));
-if (!filePath.StartsWith(Path.GetFullPath(baseDir)))
-    throw new UnauthorizedAccessException();
-var content = File.ReadAllText(filePath);
-```
-
-```csharp
-// WRONG — SSRF via user-controlled URL
-var response = await httpClient.GetAsync(userProvidedUrl);
-
-// CORRECT — validate against allowlist
-var uri = new Uri(userProvidedUrl);
-if (!AllowedHosts.Contains(uri.Host))
-    throw new ArgumentException("Host not allowed");
-var response = await httpClient.GetAsync(uri);
-```
-
-```csharp
-// WRONG — XXE via default XML settings
-var doc = new XmlDocument();
-doc.LoadXml(userInput);
-
-// CORRECT — disable DTD and external entities
-var doc = new XmlDocument();
-doc.XmlResolver = null;
-doc.LoadXml(userInput);
-```
-
-### TypeScript / Angular
-
-```typescript
-// WRONG — XSS via innerHTML
-element.innerHTML = userInput;
-
-// CORRECT — use framework text binding
-// In Angular templates: {{ userInput }} (auto-escaped)
-// Or use DomSanitizer with explicit trust only for known-safe content
-```
-
-```typescript
-// WRONG — bypassing Angular security without justification
-this.sanitizer.bypassSecurityTrustHtml(userInput);
-
-// CORRECT — only bypass for content you fully control
-const trustedContent = this.generateSafeHtml(); // no user input
-this.sanitizer.bypassSecurityTrustHtml(trustedContent);
-```
-
-```typescript
-// WRONG — open redirect
-window.location.href = params.get("redirect");
-
-// CORRECT — validate redirect target
-const redirect = params.get("redirect");
-const url = new URL(redirect, window.location.origin);
-if (url.origin !== window.location.origin) {
-  throw new Error("Invalid redirect");
-}
-window.location.href = url.toString();
-```
-
-```typescript
-// WRONG — insecure postMessage (no origin check)
-window.addEventListener("message", (event) => {
-  processData(event.data);
-});
-
-// CORRECT — validate origin
-window.addEventListener("message", (event) => {
-  if (event.origin !== "https://expected-origin.com") return;
-  processData(event.data);
-});
-```
-
-### SQL
-
-```sql
--- WRONG — dynamic SQL with concatenation
-EXECUTE('SELECT * FROM Users WHERE Name = ''' + @Name + '''');
-
--- CORRECT — parameterized dynamic SQL
-EXECUTE sp_executesql N'SELECT * FROM Users WHERE Name = @Name', N'@Name NVARCHAR(100)', @Name = @Name;
-```
+For CORRECT/WRONG code examples in C#, TypeScript, and SQL, consult **`references/vulnerability-patterns.md`**.
 
 ## Adversarial Review Mindset
 
-Bitwarden encourages adopting an adversarial mindset during security code review — this is different from regular code review which seeks to strengthen code.
+Adopt an adversarial mindset during security code review — this differs from regular code review which seeks to strengthen code.
 
 **How to think adversarially:**
 
@@ -208,7 +50,16 @@ Bitwarden encourages adopting an adversarial mindset during security code review
 - **Practical over theoretical.** Distinguish between vulnerabilities that are practically exploitable in this system vs. theoretical risks. Prioritize accordingly but document both.
 - **Check the whole chain.** A vulnerability isn't just the sink — trace from the source (user input) through all transformations to the sink (dangerous operation). If the chain is broken by sanitization, it's not exploitable.
 
-## Further Reading
+## Additional Resources
+
+### Reference Files
+
+For detailed checklists and code examples, consult:
+
+- **`references/framework-checklists.md`** — OWASP Web Top 10, API Top 10, Mobile Top 10 (2024), CWE Top 25 lookup tables
+- **`references/vulnerability-patterns.md`** — CORRECT/WRONG code examples for C#/.NET, TypeScript/Angular, and SQL
+
+### Further Reading
 
 - [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
 - [OWASP API Security Top 10](https://owasp.org/API-Security/editions/2023/en/0x11-t10/)

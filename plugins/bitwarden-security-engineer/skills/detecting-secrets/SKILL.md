@@ -27,7 +27,7 @@ Look for these categories of hardcoded secrets in code:
 
 ## Context-Aware Detection
 
-Not every pattern match is a real secret. Distinguish real secrets from:
+Distinguish real secrets from false positives. Not every pattern match indicates an actual secret — consider context:
 
 ### Test Fixtures and Mock Data
 
@@ -95,7 +95,7 @@ gh api /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}
 gh api "/repos/{owner}/{repo}/secret-scanning/alerts?state=open" --jq '.[] | select(.push_protection_bypassed == true)'
 ```
 
-**Push protection** prevents commits containing detected secrets from being pushed. When someone bypasses push protection, the alert is flagged — these should be reviewed with extra scrutiny.
+**Push protection** prevents commits containing detected secrets from being pushed. When someone bypasses push protection, the alert is flagged — review these with extra scrutiny.
 
 ## Remediation Workflow
 
