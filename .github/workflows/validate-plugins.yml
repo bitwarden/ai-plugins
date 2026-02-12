@@ -134,10 +134,7 @@ jobs:
         id: components
         if: steps.changed-files.outputs.has_components == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@1b8ee3b94104046d71fde52ec3557651ad8c0d71 # v1.0.29
-        env:
-          USE_AGENT_SDK: "true"
-          USE_SIMPLE_PROMPT: "true"
+        uses: anthropics/claude-code-action@f669191d7d1e67f08a54b0c11cf5683a9a391951 # v1.0.49
         with:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
           track_progress: true
@@ -149,10 +146,14 @@ jobs:
             plugin-dev@claude-code-plugins
             claude-config-validator@bitwarden-marketplace
           prompt: |
-            Review the following plugin configuration files for compliance with Claude Code plugin standards and security best practices.
+            You have access to two plugins: plugin-dev and claude-config-validator.
+            Use their specialized agents to validate the changed plugin files below.
 
             Changed files:
             ${{ steps.changed-files.outputs.changed_files }}
+
+            Changed plugins:
+            ${{ steps.changed-files.outputs.changed_plugins }}
 
             Agent files changed:
             ${{ steps.changed-files.outputs.agent_files }}
@@ -163,36 +164,54 @@ jobs:
             Hook files changed:
             ${{ steps.changed-files.outputs.hook_files }}
 
-            Perform TWO types of validation:
+            Perform the following validations in order:
 
-            ## 1. Component Validation (using the plugin-dev agent)
-            For AGENT.md files:
-            - Validate agent identifiers (3-50 chars, lowercase, hyphens only)
-            - Validate description length (10-5,000 chars)
-            - Validate system prompt length (20-10,000 chars)
-            - Check YAML frontmatter structure
+            ## 1. Plugin Validation (plugin-validator agent from plugin-dev)
 
-            For SKILL.md files:
-            - Validate skill name (max 64 chars)
-            - Validate description length (max 1024 chars)
-            - Check YAML frontmatter structure
+            For each changed plugin listed above, validate the plugin structure.
+            This triggers the plugin-validator agent which performs comprehensive checks:
+            - plugin.json manifest correctness (name, version, required fields)
+            - Directory structure and auto-discovery compliance
+            - Command frontmatter (description, argument-hint, allowed-tools)
+            - Agent frontmatter (name 3-50 chars lowercase hyphens, description with <example> blocks, valid model/color, system prompt >20 chars)
+            - Hooks JSON schema, event names, and ${CLAUDE_PLUGIN_ROOT} usage in script paths
+            - MCP server configurations (valid types, HTTPS/WSS enforcement)
+            - File organization (README.md presence, no unnecessary files)
+            - No hardcoded credentials in any plugin files
 
-            For hooks.json files:
-            - Validate hook JSON schema
-            - Check hook event names
-            - Verify script paths use ${CLAUDE_PLUGIN_ROOT}
+            Run this for every changed plugin directory even if only some component types changed.
 
-            ## 2. Security Validation (using the claude-config-validator agent)
-            For all changed plugin files:
+            ## 2. Skill Review (skill-reviewer agent from plugin-dev)
+
+            If any SKILL.md files were changed (listed above), review each modified skill.
+            This triggers the skill-reviewer agent which evaluates:
+            - SKILL.md YAML frontmatter (required: name, description)
+            - Description quality: specific trigger phrases, third-person form, appropriate length
+            - Content quality: word count (target 1,000-3,000 words), imperative/infinitive writing style
+            - Progressive disclosure: core SKILL.md is lean, details in references/, examples in examples/, scripts in scripts/
+            - All referenced files actually exist
+            - Anti-patterns: vague triggers, bloated SKILL.md, missing examples
+
+            Skip this step if no SKILL.md files were changed.
+
+            ## 3. Security Validation (claude-config-validator plugin)
+
+            For all changed plugin files, use the reviewing-claude-config skill from
+            the claude-config-validator plugin to perform security review:
             - Scan for committed secrets (API keys, tokens, passwords)
             - Check for hardcoded credentials in code
             - Validate permission scoping in settings files
             - Detect dangerous command auto-approvals
             - Identify overly broad file access permissions
 
-            Use skill reviewing-claude-config from the claude-config-validator agent to perform comprehensive security review.
+            ## Output Requirements
 
-            Report all violations as errors with specific file locations and remediation guidance.
+            Combine all findings into a single structured report:
+            - Categorize issues by severity: critical, major, minor
+            - Include the exact file path and line for each issue
+            - Provide specific remediation guidance for each violation
+            - Distinguish errors (must fix) from warnings (should fix)
+            - If all checks pass, confirm with a summary of what was validated
 
       - name: Summary
         if: always()
