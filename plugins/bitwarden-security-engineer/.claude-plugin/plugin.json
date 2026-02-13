@@ -1,0 +1,13 @@
+{
+  "name": "bitwarden-security-engineer",
+  "version": "0.1.0",
+  "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis at Bitwarden.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-security-engineer",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["security", "appsec", "vulnerability", "threat-modeling"],
+  "agents": ["./agents/bitwarden-security-engineer.md"]
+}

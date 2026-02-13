@@ -45,6 +45,12 @@
       "source": "./plugins/atlassian-reader",
       "version": "1.1.0",
       "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud."
+    },
+    {
+      "name": "bitwarden-security-engineer",
+      "source": "./plugins/bitwarden-security-engineer",
+      "version": "0.1.0",
+      "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis."
     }
   ]
 }
