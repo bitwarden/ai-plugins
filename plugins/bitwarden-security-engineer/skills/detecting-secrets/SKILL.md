@@ -165,9 +165,3 @@ For local development, use user-secrets or `.env` files that are `.gitignore`d â
 - **Validation, not just detection.** When a potential secret is found, verify it's real before raising an alarm. Check if it's a test value, placeholder, or encrypted content.
 - **Check the full commit history.** A secret removed in the latest commit may still exist in git history. Use `git log -p -S "secret-pattern"` to search history.
 - **Bitwarden uses Azure Key Vault** for secrets management. If a new secret needs to be stored, work with BRE to provision vault access for the repository.
-
-## Further Reading
-
-- [GitHub Secret Scanning Documentation](https://docs.github.com/en/code-security/secret-scanning)
-- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
-- [git-filter-repo Documentation](https://github.com/newren/git-filter-repo)

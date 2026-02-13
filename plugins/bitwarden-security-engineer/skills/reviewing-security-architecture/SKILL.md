@@ -206,10 +206,3 @@ Architecture security review directly feeds into the threat modeling process:
 - **Anti-patterns found** become candidates for Bitwarden's engagement model Phase 1 initial security assessment
 
 When conducting architecture review, consider whether the findings warrant engaging the AppSec team (#team-eng-appsec) for a full threat modeling session.
-
-## Further Reading
-
-- [OWASP Application Security Verification Standard (ASVS)](https://owasp.org/www-project-application-security-verification-standard/)
-- [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
-- [Bitwarden Security Whitepaper](https://bitwarden.com/help/bitwarden-security-white-paper/)
-- [NIST Cryptographic Standards](https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines)

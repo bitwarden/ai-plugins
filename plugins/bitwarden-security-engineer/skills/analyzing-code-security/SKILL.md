@@ -58,11 +58,3 @@ For detailed checklists and code examples, consult:
 
 - **`references/framework-checklists.md`** — OWASP Web Top 10, API Top 10, Mobile Top 10 (2024), CWE Top 25 lookup tables
 - **`references/vulnerability-patterns.md`** — CORRECT/WRONG code examples for C#/.NET, TypeScript/Angular, and SQL
-
-### Further Reading
-
-- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
-- [OWASP API Security Top 10](https://owasp.org/API-Security/editions/2023/en/0x11-t10/)
-- [OWASP Mobile Top 10 2024](https://owasp.org/www-project-mobile-top-10/)
-- [CWE Top 25 Most Dangerous Software Weaknesses](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html)
-- [OWASP Code Review Guide](https://owasp.org/www-project-code-review-guide/)
