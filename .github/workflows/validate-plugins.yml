@@ -137,8 +137,6 @@ jobs:
         uses: anthropics/claude-code-action@f669191d7d1e67f08a54b0c11cf5683a9a391951 # v1.0.49
         with:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
-          track_progress: true
-          use_sticky_comment: true
           plugin_marketplaces: |
             https://github.com/anthropics/claude-code.git
             https://github.com/bitwarden/ai-plugins.git
