@@ -37,33 +37,77 @@ Bitwarden follows a 4-phase engagement model for security work. This skill prima
 
 ## Security Definitions
 
-Security definitions are Bitwarden's formal construct for communicating the security goals of a system. Each definition has two components:
+Security definitions are Bitwarden's formal construct for communicating the security posture of a system. Each definition has two components: a **threat model** (attacker capabilities) and **security goals** (what the system guarantees).
+
+### Core Vocabulary
+
+Use Bitwarden's standard terminology when writing security definitions:
+
+- **Vault Data** — A user's private information stored in Bitwarden (passwords, usernames, secure notes, credit cards, identities, attachments)
+- **Protected Data** — Data stored in unreadable format (typically encrypted) with expectations about secure key storage
+- **Data at Rest / in Use / in Transit** — The three data states. "At rest" is stored data on disk. "In use" is data in volatile memory during processing. "In transit" is data moving between locations, processes, or devices.
+- **Secure Channel** — A communication channel providing confidentiality (unreadable to unauthorized parties) and integrity (tamper-proof)
+- **Trusted Channel** — A secure channel that also provides authenticity (verified identities of communicating parties)
+- **Data Exporting** — Controlled process where data leaves Bitwarden unprotected, nullifying security guarantees. Requires informed and explicit consent.
+- **Data Sharing** — Controlled data exchange within the Bitwarden secure environment (security guarantees maintained)
+- **Data Leaking** — Unintentional departure of data from Bitwarden unprotected
+- **Bitwarden Secure Environment** — Any process or application adhering to Bitwarden's security standards
 
 ### Threat Model Component
 
-Describes the capabilities of potential attackers. Examples:
+Describe the capabilities of potential attackers — what they can do, not how they do it:
 
-- "The attacker can intercept network traffic between the client and server"
-- "The attacker has read access to the database but not write access"
+- "The attacker has read access to the database but cannot modify stored data"
 - "The attacker controls a browser extension running alongside our extension"
+- "The attacker can intercept network traffic between client and server"
+- "The attacker has full userspace access on a device with a locked vault"
 - "The attacker can send arbitrary API requests with a valid auth token"
 
-**Key principle:** Don't assume external mitigations are in place. Even if it's difficult for an attacker to obtain an auth token, still explore what happens if they do.
+**Key principle:** Don't assume external mitigations are in place. Even if obtaining an auth token is difficult, still explore what happens if an attacker has one.
 
 ### Security Goals Component
 
-Outlines what the system promises to protect against, given the assumed threat model. Examples:
+Define what the system promises to protect against, given the threat model. Align goals with Bitwarden's security principles (P01-P06) where applicable:
 
-- "Given the threat model above, vault data remains confidential even if the server is fully compromised"
-- "Given the threat model above, an attacker with a valid session token cannot access another user's vault"
-- "Given the threat model above, organizational policies cannot be bypassed by modifying client-side state"
+- "Given the threat model above, the server cannot retrieve decrypted vault data or user encryption keys" (P01: Zero Knowledge)
+- "Given the threat model above, vault data cannot be accessed in plaintext once the vault is locked" (P02: Locked Vault is Secure)
+- "Given the threat model above, clients maximize OS/kernel-level protections for vault data in memory" (P03: Semi-Compromised)
+- "Given the threat model above, vault data is accessible only to authorized parties under the user's explicit control" (P05: Controlled Access)
+- "Given the threat model above, data added after key rotation remains protected even if pre-rotation data was compromised" (P06: Minimized Breach Impact)
 
 ### Writing Security Definitions
 
 - It's OK to be wrong — the purpose is to start the conversation and see if these can be broken
 - Start with what the system SHOULD guarantee, then validate through threat analysis
-- Reference existing definitions at [Definitions | Bitwarden Contributing Documentation](https://contributing.bitwarden.com/architecture/deep-dives/security-definitions/)
+- Reference the official vocabulary and existing definitions at [Security Definitions](https://contributing.bitwarden.com/architecture/security/definitions)
 - Separate macro-level definitions (e.g., end-to-end encryption) from micro-level definitions specific to the feature
+
+## Bitwarden Security Principles
+
+These six principles form the foundation for all threat modeling at Bitwarden. Reference them when writing security goals and evaluating threats.
+
+| Principle | Name                                         | Core Guarantee                                                                                                                                                                                                                                       |
+| --------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P01**   | Servers are Zero Knowledge                   | Bitwarden infrastructure cannot access unencrypted user data. The server must not enable weakening of user-chosen protections, masquerade server data as user-encrypted content, or access encrypted data outside the client context.                |
+| **P02**   | A Locked Vault is Secure                     | Highly sensitive vault data cannot be accessed in plaintext once the vault is locked, even if the device is compromised after locking. Platform limitations (e.g., JS memory) are mitigated through buffer clearing and available security features. |
+| **P03**   | Limited Security on Semi-Compromised Devices | For unlocked vaults on devices with userspace malware (but intact OS/kernel), clients maximize kernel/OS-level protections and balance security with usability through controls like biometrics.                                                     |
+| **P04**   | No Security on Fully Compromised Systems     | Bitwarden cannot guarantee vault protection when hardware or OS-level integrity is fully compromised. This applies to unlocked vaults only — locked vaults are covered by P02.                                                                       |
+| **P05**   | Controlled Access to Vault Data              | Vault data, whether at rest or in use, is accessible only to authorized parties under the user's explicit control. Isolation mechanisms are critical in high-risk environments like web browsers.                                                    |
+| **P06**   | Minimized Impact of Security Breaches        | Limit breach scope and duration through session invalidation, key rotation (countering "harvest now, decrypt later"), and post-compromise security (new data remains protected after a breach).                                                      |
+
+**Controlled exceptions exist.** For example, P01 has documented exceptions for Key Connector (self-hosted SSO without passwords) and the Icons Service (plaintext domain names for favicons). When threat modeling, check the [principles documentation](https://contributing.bitwarden.com/architecture/security/principles/) for current exceptions.
+
+## Security Requirements
+
+Security requirements define concrete MUST/SHOULD/MAY obligations organized by category. Reference these when validating that a design satisfies Bitwarden's security standards:
+
+- **VD (Vault Data)** — Protection at rest (encrypted with UserKey), allowances in use (decrypted during unlock), protection in transit (trusted channels), and export controls (informed consent required)
+- **EK (Encryption Keys)** — UserKey requires 256-bit security strength, must be protected at rest and in transit, must never be exported
+- **AT (Authentication Tokens)** — Protected storage at rest, mandatory transit protection
+- **SC (Secure Channels)** — Confidentiality, integrity, replay prevention, forward secrecy for long-lived channels
+- **TC (Trusted Channels)** — Secure channel properties plus receiver identity verification
+
+Full requirements: [Security Requirements](https://contributing.bitwarden.com/architecture/security/requirements)
 
 ## STRIDE Framework
 
@@ -176,7 +220,9 @@ Quick questions (e.g., concerns about a third-party library or coding practice) 
 
 ## Further Reading
 
-- [Definitions | Bitwarden Contributing Documentation](https://contributing.bitwarden.com/architecture/deep-dives/security-definitions/)
+- [Security Definitions](https://contributing.bitwarden.com/architecture/security/definitions) — Official vocabulary and terminology
+- [Security Principles](https://contributing.bitwarden.com/architecture/security/principles/) — P01-P06 foundation principles
+- [Security Requirements](https://contributing.bitwarden.com/architecture/security/requirements) — VD/EK/AT/SC/TC requirement categories
 - [Threat Modeling Manifesto](https://www.threatmodelingmanifesto.org/)
 - [Threat Modeling Guide for Software Teams](https://martinfowler.com/articles/agile-threat-modelling.html)
 - [OWASP Threat Modeling Process](https://owasp.org/www-community/Threat_Modeling_Process)
