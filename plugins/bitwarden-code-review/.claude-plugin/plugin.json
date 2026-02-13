@@ -16,16 +16,26 @@
     "ios",
     "web",
     "server",
-    "security"
+    "github-actions",
+    "workflows",
+    "security",
+    "institutional-knowledge",
+    "failed-detections"
   ],
-  "agents": "./agents/bitwarden-code-reviewer/AGENT.md",
+  "agents": [
+    "./agents/bitwarden-code-reviewer/AGENT.md",
+    "./agents/pr-knowledge-extractor/AGENT.md"
+  ],
   "commands": [
+    "./commands/advise-review/advise-review.md",
     "./commands/code-review/code-review.md",
-    "./commands/code-review-local/code-review-local.md"
+    "./commands/code-review-local/code-review-local.md",
+    "./commands/retrospective-review/retrospective-review.md"
   ],
   "skills": [
     "./skills/classifying-review-findings/SKILL.md",
     "./skills/posting-bitwarden-review-comments/SKILL.md",
+    "./skills/detecting-existing-threads/SKILL.md",
     "./skills/avoiding-false-positives/SKILL.md",
     "./skills/reviewing-incremental-changes/SKILL.md",
     "./skills/posting-review-summary/SKILL.md"
