@@ -129,72 +129,12 @@ At each boundary crossing:
 - Assume the network is compromised — encrypt all internal communication
 - Validate data from internal services just as rigorously as external input
 
-## Cryptographic Patterns
+## Reference Material
 
-### Algorithm Selection
+For detailed lookup tables and code examples, consult:
 
-| Use Case              | Recommended                                                     | Deprecated / Avoid                      |
-| --------------------- | --------------------------------------------------------------- | --------------------------------------- |
-| Symmetric encryption  | AES-256-GCM, ChaCha20-Poly1305                                  | DES, 3DES, AES-ECB, Blowfish            |
-| Hashing               | SHA-256, SHA-384, SHA-512, BLAKE2                               | MD5, SHA-1                              |
-| Password hashing      | Argon2id, bcrypt, PBKDF2 (high iterations)                      | MD5, SHA-\*, plain bcrypt with low cost |
-| Asymmetric encryption | RSA-OAEP (2048+ bits), ECIES                                    | RSA-PKCS1v1.5, RSA < 2048 bits          |
-| Digital signatures    | Ed25519, ECDSA P-256, RSA-PSS                                   | RSA-PKCS1v1.5, DSA                      |
-| Key exchange          | ECDH P-256, X25519                                              | DH with small primes                    |
-| Random generation     | `RandomNumberGenerator` (.NET), `crypto.getRandomValues()` (JS) | `Math.random()`, `System.Random`        |
-
-### Common Crypto Anti-Patterns
-
-```csharp
-// WRONG — ECB mode (reveals patterns in plaintext)
-var aes = Aes.Create();
-aes.Mode = CipherMode.ECB;
-
-// CORRECT — GCM mode (authenticated encryption)
-var aesGcm = new AesGcm(key);
-```
-
-```csharp
-// WRONG — predictable IV
-var iv = new byte[16]; // All zeros
-
-// CORRECT — random IV for each encryption operation
-var iv = RandomNumberGenerator.GetBytes(16);
-```
-
-```typescript
-// WRONG — Math.random() for security-sensitive values
-const token = Math.random().toString(36);
-
-// CORRECT — cryptographic random
-const token = crypto.getRandomValues(new Uint8Array(32));
-```
-
-## Architectural Anti-Patterns
-
-### Implicit Trust Between Services
-
-Services communicating over an internal network without authentication. An attacker who gains access to the internal network can impersonate any service.
-
-**Fix:** Service-to-service authentication (mTLS, service tokens, managed identities).
-
-### Single Point of Failure in Security Path
-
-All authentication going through a single service with no fallback or circuit breaking. If that service goes down, either everything is blocked (denial of service) or auth is bypassed (security failure).
-
-**Fix:** Redundancy for critical security services, fail-closed behavior.
-
-### Insecure Defaults Requiring Opt-In Security
-
-Features that are insecure by default and require developers to remember to enable security.
-
-**Fix:** Secure by default. Security should be the default behavior that must be explicitly opted out of with justification.
-
-### Monolithic Auth with No Defense in Depth
-
-A single authorization check at the API gateway with no enforcement in downstream services.
-
-**Fix:** Authorization at every layer. The gateway check is a first line of defense, not the only one.
+- **`references/crypto-algorithms.md`** — Algorithm selection table (recommended vs. deprecated) and common crypto anti-pattern code examples
+- **`references/architectural-anti-patterns.md`** — Common security architecture anti-patterns (implicit trust, single points of failure, insecure defaults, monolithic auth) with fixes
 
 ## Connection to Threat Modeling
 
