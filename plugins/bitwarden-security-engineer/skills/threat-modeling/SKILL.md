@@ -37,7 +37,7 @@ Bitwarden follows a 4-phase engagement model for security work. This skill prima
 
 ## Security Definitions
 
-Security definitions are Bitwarden's formal construct for communicating the security posture of a system. Each definition has two components: a **threat model** (attacker capabilities) and **security goals** (what the system guarantees).
+Security definitions are Bitwarden's formal construct for communicating the security posture of a system. Each definition has three components: a **threat model** (attacker capabilities), **security goals** (what the system guarantees), and an **accepted goal status** (honest assessment of whether the goal is currently met).
 
 ### Core Vocabulary
 
@@ -55,25 +55,37 @@ Use Bitwarden's standard terminology when writing security definitions:
 
 ### Threat Model Component
 
-Describe the capabilities of potential attackers — what they can do, not how they do it:
+Describe attacker capabilities AND limitations — what they can and cannot do. Always state both sides to scope the definition precisely:
 
-- "The attacker has read access to the database but cannot modify stored data"
-- "The attacker controls a browser extension running alongside our extension"
-- "The attacker can intercept network traffic between client and server"
-- "The attacker has full userspace access on a device with a locked vault"
-- "The attacker can send arbitrary API requests with a valid auth token"
+- "Attacker can run a user space process after the user's client has logged out" + "Attacker does not have access to secure storage mechanisms"
+- "Attacker has database access and can read and write to the Send table" + "Attacker does not have access to the ASP.NET Core Data Protection encryption keys"
+- "Attacker can execute arbitrary JavaScript on the web vault domain"
+- "Attacker can make requests to the `/xyz` endpoint" + "Attacker does not have access to self-hosted server infrastructure"
+
+Include concrete examples where helpful (e.g., "An example for this is a stolen device" or "e.g., through stored XSS in vault data or compromised third-party script").
 
 **Key principle:** Don't assume external mitigations are in place. Even if obtaining an auth token is difficult, still explore what happens if an attacker has one.
 
 ### Security Goals Component
 
-Define what the system promises to protect against, given the threat model. Align goals with Bitwarden's security principles (P01-P06) where applicable:
+State concise, testable guarantees about what cannot happen given the threat model. Reference specific assets (tokens, keys, vault data) and align with Bitwarden's security principles (P01-P06) where applicable:
 
-- "Given the threat model above, the server cannot retrieve decrypted vault data or user encryption keys" (P01: Zero Knowledge)
-- "Given the threat model above, vault data cannot be accessed in plaintext once the vault is locked" (P02: Locked Vault is Secure)
-- "Given the threat model above, clients maximize OS/kernel-level protections for vault data in memory" (P03: Semi-Compromised)
-- "Given the threat model above, vault data is accessible only to authorized parties under the user's explicit control" (P05: Controlled Access)
-- "Given the threat model above, data added after key rotation remains protected even if pre-rotation data was compromised" (P06: Minimized Breach Impact)
+- "Valid tokens cannot be accessed by attacker after the user's client has logged out"
+- "Attacker cannot retrieve any decrypted MasterKeys that do not belong to them"
+- "Token cannot be exfiltrated"
+- "The Credential is not released, and the Attacker and Attacking Application do not get access to the Credential"
+- "Attacker can perform reads on encrypted email addresses lists only"
+
+### Accepted Goal Status Component
+
+Provide an honest assessment of the current state. Use status indicators:
+
+- **Goal is met** — Explain how (e.g., "User state clearing includes removal of the stored token from disk")
+- **Goal is partially met** — Break down what works and what doesn't, using separate indicators for each aspect
+- **Goal is not met** — Explain the gap and why it is accepted (e.g., "access to the self-hosted infrastructure means that the token could likely be exfiltrated through other means")
+- **Best Effort** — For goals dependent on platform capabilities (e.g., "This goal is not upheld for clients that do not have access to secure storage such as web and browser")
+
+When a goal is known to be broken, link to the relevant tracking issue or documentation. Note any scoping caveats (e.g., "These definitions do not apply in the case of a Vault Timeout set to `Never`").
 
 ### Writing Security Definitions
 
@@ -81,6 +93,9 @@ Define what the system promises to protect against, given the threat model. Alig
 - Start with what the system SHOULD guarantee, then validate through threat analysis
 - Reference the official vocabulary and existing definitions at [Security Definitions](https://contributing.bitwarden.com/architecture/security/definitions)
 - Separate macro-level definitions (e.g., end-to-end encryption) from micro-level definitions specific to the feature
+- Number definitions sequentially (SD1, SD2, SD3) within a feature area
+- Each SD is a self-contained unit — one threat model, one security goal, one accepted status
+- Include a glossary of feature-specific terms before the definitions when the feature introduces domain-specific vocabulary
 
 ## Bitwarden Security Principles
 
@@ -156,25 +171,54 @@ Note: Bitwarden is moving toward a Structurizr-based approach for persistent arc
 ### Security Definition Document
 
 ```markdown
-## Security Definition: [Feature/System Name]
+# [Feature Name] Security Definitions
+
+[Link to macro-level security definitions and any parent feature documentation.]
+
+[Optional scoping caveat, e.g., "These security definitions do not apply
+in the case of a Vault Timeout set to `Never`."]
+
+## Glossary
+
+- **[Term]**: [Feature-specific definition]
+- **[Term]**: [Feature-specific definition]
+
+## SD1: [Concise threat scenario title]
 
 ### Threat Model
 
-- Attacker capability 1: [description]
-- Attacker capability 2: [description]
-- Attacker capability 3: [description]
+- Attacker can [capability]
+  - An example for this is [concrete scenario]
+- Attacker does not have [limitation that scopes this definition]
 
-### Security Goals
+### Security Goal
 
-Given the threat model above:
+- [Concise, testable guarantee about what cannot happen]
 
-1. [What the system guarantees]
-2. [What the system guarantees]
-3. [What the system guarantees]
+### Accepted Goal Status
 
-### Assumptions
+- ✅ Goal is met:
+  - [Explanation of how the goal is satisfied in the current implementation]
 
-- [External dependency or assumption]
+---
+
+## SD2: [Concise threat scenario title]
+
+### Threat Model
+
+- Attacker can [capability]
+- Attacker does not have [limitation]
+
+### Security Goal
+
+- [What the system guarantees]
+- [Additional guarantee if applicable]
+
+### Accepted Goal Status
+
+- Goal is **partially** met:
+  - ✅ [Aspect that is satisfied]
+  - ❌ [Aspect that is not satisfied, with explanation of why this is accepted]
 ```
 
 ### Threat Catalog
