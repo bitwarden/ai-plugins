@@ -13,11 +13,25 @@ This file contains behavioral instructions for Claude when working in this repos
 
 ### When Contributing New Plugins
 
-- Always follow the plugin structure documented in README.md
+Use the `/plugin-dev:create-plugin` command for guided end-to-end plugin creation. It walks through discovery, planning, structure creation, implementation, validation, testing, and documentation.
+
+When building individual components, use the plugin-dev skills for best-practice guidance:
+
+- **Plugin structure**: Use the `plugin-dev:plugin-structure` skill for directory layout, manifest configuration, and auto-discovery setup
+- **Agents**: Use the `plugin-dev:agent-development` skill for AGENT.md frontmatter, triggering descriptions, system prompts, and tool selection
+- **Skills**: Use the `plugin-dev:skill-development` skill for SKILL.md structure, progressive disclosure, and description quality
+- **Commands**: Use the `plugin-dev:command-development` skill for slash command frontmatter, arguments, and user interaction patterns
+- **Hooks**: Use the `plugin-dev:hook-development` skill for event-driven automation, prompt-based hooks, and `${CLAUDE_PLUGIN_ROOT}` usage
+- **MCP servers**: Use the `plugin-dev:mcp-integration` skill for Model Context Protocol server configuration and security
+- **Settings**: Use the `plugin-dev:plugin-settings` skill for `.local.md` configuration patterns
+
+After creating a plugin, always:
+
 - Create plugin directory under `plugins/`
 - Add entry to `.claude-plugin/marketplace.json`
 - Ensure plugin has its own `.claude-plugin/plugin.json` manifest
 - Add domain-specific terms to `.cspell.json`
+- Run validation (see below)
 
 ### When Modifying Existing Plugins
 
@@ -52,6 +66,60 @@ When making ANY changes to a plugin (code, documentation, configuration, scripts
    - This ensures version history is accurate and traceable
 
 **Never commit plugin changes without updating the version and changelog.**
+
+### Validating Plugin Changes
+
+After making any plugin changes, run the same validations that CI enforces. This catches issues before pushing.
+
+#### 1. Run the validation scripts
+
+These are fast, local, and require no special environment:
+
+```bash
+# Validate plugin structure (required files, plugin.json fields, frontmatter, changelog format)
+./scripts/validate-plugin-structure.sh <plugin-name>
+
+# Validate marketplace.json (entries, version/name consistency across files)
+./scripts/validate-marketplace.sh <plugin-name>
+```
+
+Both scripts accept either a plugin name or a `plugins/<name>` path. Omit arguments to validate all plugins.
+
+#### 2. Run the plugin-dev validator agent
+
+Use the **plugin-validator** agent from `plugin-dev` for deeper structural and component checks:
+
+- plugin.json manifest correctness and semantic versioning
+- Agent AGENT.md frontmatter (name, description with `<example>` blocks, valid model/color)
+- Skill SKILL.md frontmatter and required fields
+- Hook JSON schema, event names, and `${CLAUDE_PLUGIN_ROOT}` usage
+- MCP server configurations (valid types, HTTPS/WSS enforcement)
+- No hardcoded credentials in any plugin files
+
+Simply mention "validate my plugin" or "check plugin structure" and the plugin-validator agent will be triggered.
+
+#### 3. Review skills with the skill-reviewer agent
+
+When SKILL.md files are added or changed, use the **skill-reviewer** agent from `plugin-dev`:
+
+- Description quality and trigger phrase specificity
+- Content length (target 1,000-3,000 words) and writing style
+- Progressive disclosure (core SKILL.md is lean, details in `references/`, examples in `examples/`)
+- All referenced files actually exist
+
+Simply mention "review my skill" or "check skill quality" to trigger it.
+
+#### 4. Run security validation
+
+Use the **reviewing-claude-config** skill from `claude-config-validator` to scan for:
+
+- Committed secrets (API keys, tokens, passwords)
+- Hardcoded credentials in code
+- Permission scoping issues in settings files
+- Dangerous command auto-approvals
+- Overly broad file access permissions
+
+This skill also validates CLAUDE.md files, agent configs, and command/prompt files for structure and quality.
 
 ### Plugin Requirements Enforcement
 
@@ -100,4 +168,6 @@ This is a Bitwarden-maintained repository with high security standards. Enforce:
 ## Resources
 
 - Repository README: ./README.md
+- Validation scripts: ./scripts/README.md
+- Plugin development guide: https://docs.claude.com/en/docs/claude-code/plugins-reference
 - Bitwarden Contributing Guidelines: https://contributing.bitwarden.com
