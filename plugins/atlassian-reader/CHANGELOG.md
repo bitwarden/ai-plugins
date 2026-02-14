@@ -5,6 +5,13 @@ All notable changes to the Atlassian Reader Plugin will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-14
+
+### Added
+
+- Added a hook to protect against any possible malicious skill usage.
+- Added a reference file and Claude.md to provide Claude Code with specific instructions on how to safely verify the hook and skill work correctly together.
+
 ## [1.1.0] - 2026-02-10
 
 ### Fixed

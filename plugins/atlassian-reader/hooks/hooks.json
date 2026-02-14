@@ -1,0 +1,17 @@
+{
+  "description": "Enforces read-only Atlassian API access. Blocks mutating HTTP methods and data payloads in curl commands targeting Atlassian endpoints.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/block-mutating-atlassian.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

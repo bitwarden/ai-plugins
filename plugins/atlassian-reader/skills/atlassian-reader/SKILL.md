@@ -253,7 +253,11 @@ Replace `{{SPRINT_ID}}` with the sprint ID from the previous call.
 - **Search results**: Present as a compact table. Never expand every result — list summaries and let the user pick which to read in full.
 - **Comments**: Show the 3 most recent unless the user asks for more.
 
-## 11. Error Handling
+## 11. Hook Testing
+
+A read-only safety hook (`hooks/block-mutating-atlassian.sh`) blocks all mutating curl operations targeting Atlassian APIs. After modifying the hook or its gates, validate it by reading `references/hook-testing.md` for the full test harness and category list. Generate test payloads dynamically at runtime — do not store them as committed scripts.
+
+## 12. Error Handling
 
 | HTTP Status              | Meaning                                               | Fix                                                                                                                                                                                                                                                             |
 | ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
