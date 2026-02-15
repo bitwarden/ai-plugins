@@ -9,7 +9,7 @@ Read-only access to Jira and Confluence via Atlassian Cloud REST APIs using **sc
 
 ## 1. Environment Variables
 
-This skill requires four environment variables. **Do not run any verification commands** — go straight to the API call. If it fails, consult the error handling section (Section 11) to diagnose the cause and guide the user.
+This skill requires four environment variables. **Do not run any verification commands** — go straight to the API call. If it fails, consult the error handling section (Section 12) to diagnose the cause and guide the user.
 
 | Variable                               | Purpose                                                                                                                                     |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -27,6 +27,11 @@ HOOKEOF
 input=$(cat)
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 
+# Normalize line continuations to a single line. Claude Code may send multiline
+# curl commands (with \ continuations); collapsing them prevents awk/grep from
+# treating continuation lines as separate statements.
+command=$(printf '%s' "$command" | tr '\n' ' ')
+
 # Pass through anything not targeting Atlassian
 if [[ ! "$command" =~ atlassian\.(com|net) ]]; then
   exit 0
@@ -39,26 +44,46 @@ if echo "$command" | grep -qEi '\beval\b|\bsource\b'; then
   deny "Shell indirection (eval/source) detected targeting Atlassian API. Only direct curl invocations are permitted."
 fi
 
-if echo "$command" | grep -qEi 'bash[[:space:]]+-c[[:space:]]'; then
-  deny "Subshell execution (bash -c) detected targeting Atlassian API. Only direct curl invocations are permitted."
+if echo "$command" | grep -qEi '(bash|sh|zsh|dash)[[:space:]]+-c[[:space:]]'; then
+  deny "Subshell execution detected targeting Atlassian API. Only direct curl invocations are permitted."
 fi
 
-if echo "$command" | grep -qEi '\|[[:space:]]*(bash|sh|zsh)([[:space:]]|$)'; then
+if echo "$command" | grep -qEi '\|[[:space:]]*(bash|sh|zsh|dash)([[:space:]]|$)'; then
   deny "Pipe to shell detected targeting Atlassian API. Only direct curl invocations are permitted."
 fi
 
-# --- Gate 2: Require direct curl command ---
-# If it targets Atlassian and isn't curl, deny unconditionally. Fail closed.
-if ! echo "$command" | grep -qE '(^|[;&|])[[:space:]]*curl[[:space:]]'; then
-  deny "Non-curl command detected targeting Atlassian API. Only direct curl invocations are permitted by the read-only hook."
-fi
+# --- Gate 2: Require ONLY curl commands ---
+# Split on statement separators (;, &&, ||) and verify every segment that
+# targets Atlassian is a curl invocation. This prevents chaining a legitimate
+# curl with a malicious non-curl command (e.g. wget, python, httpie).
+# Note: bare pipe (|) is NOT a split point — it would incorrectly split
+# $(printf ... | base64) inside auth headers and harmless | jq at the end.
+# Pipe-to-shell attacks are caught by Gate 1 instead.
+while IFS= read -r segment; do
+  # Skip empty segments
+  [[ -z "$segment" ]] && continue
+  # Skip segments that don't target Atlassian
+  if ! echo "$segment" | grep -qE 'atlassian\.(com|net)'; then
+    continue
+  fi
+  # This segment targets Atlassian — it must start with curl
+  if ! echo "$segment" | grep -qE '^[[:space:]]*curl[[:space:]]'; then
+    deny "Non-curl command detected targeting Atlassian API. Only direct curl invocations are permitted by the read-only hook."
+  fi
+done <<< "$(echo "$command" | awk '{gsub(/;+|&&|\|\|/,"\n"); print}')"
 
-# --- Gate 3: Only allow -X GET (allowlist, not blocklist) ---
+# --- Gate 3: Only allow a single -X GET (allowlist, not blocklist) ---
 # If -X/--request is present at all, the value must be literally GET. Anything else
 # (POST, PO""ST, $METHOD, or unknown values) is denied.
+# Also deny multiple method flags — curl uses the last one, so "-X GET -X POST"
+# would pass a naive check but actually sends POST.
 if echo "$command" | grep -qEi '(-X[[:space:]]*[[:alpha:]]|-X[[:space:]]|--request([[:space:]]|=))'; then
   if ! echo "$command" | grep -qE '(-X[[:space:]]*|--request[[:space:]]*=?[[:space:]]*)GET([[:space:]]|$)'; then
     deny "Non-GET HTTP method detected targeting Atlassian API. The Atlassian reader skill is strictly read-only. Only GET requests are permitted."
+  fi
+  method_count=$(echo "$command" | grep -oEi '(-X[[:space:]]*[[:alpha:]]|-X[[:space:]]|--request([[:space:]]|=))' | wc -l | tr -d ' ')
+  if [ "$method_count" -gt 1 ]; then
+    deny "Multiple HTTP method flags detected targeting Atlassian API. Only a single -X GET is permitted to prevent method shadowing."
   fi
 fi
 
@@ -78,12 +103,14 @@ fi
 
 # --- Gate 6: Block upload, output-to-file, and config-from-file flags ---
 # These are never needed by the read-only skill.
+# Short flags match ANY following character (or end-of-string) because curl
+# accepts concatenated arguments: -Kfile, -ofile, -Fdata, -Tfile.
 BLOCKED_FLAGS=(
-  '-F[[:space:]"'"'"']|--form[[:space:]=]'           # multipart upload
-  '-T[[:space:]"'"'"']|--upload-file[[:space:]=]'     # PUT file upload
-  '-o[[:space:]"'"'"']|--output[[:space:]=]'          # write response to file
+  '-F.|--form[[:space:]=]'                             # multipart upload
+  '-T.|--upload-file[[:space:]=]'                      # PUT file upload
+  '-o.|--output[[:space:]=]'                           # write response to file
   '-O([[:space:]]|$)'                                  # write response to file (remote name)
-  '-K[[:space:]"'"'"']|--config[[:space:]=]'           # load flags from file (bypasses all checks)
+  '-K.|--config[[:space:]=]'                           # load flags from file (bypasses all checks)
 )
 
 BLOCKED_REASONS=(
