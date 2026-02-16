@@ -52,7 +52,8 @@ Test all method flag variants:
 - `-X POST`, `-X PUT`, `-X DELETE`, `-X PATCH` (with space)
 - `-XPOST`, `-XDELETE` (no space — curl accepts this)
 - `--request=PUT`, `--request=PATCH` (equals sign)
-- Case variations: `-X post`, `-x Post`
+- Case variations: `-X post`, `-X Post`
+- Note: lowercase `-x` (which is curl's `--proxy` flag, not `--request`) is also flagged due to case-insensitive matching — this is intentional safe-side behavior
 - Shell-quoted method: `-X"POST"` (double-quoted, no space after -X)
 - Shell-quoted method: `-X'DELETE'` (single-quoted, no space after -X)
 

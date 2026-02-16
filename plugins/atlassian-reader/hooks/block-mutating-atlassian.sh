@@ -30,7 +30,7 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty')
 # Normalize line continuations to a single line. Claude Code may send multiline
 # curl commands (with \ continuations); collapsing them prevents awk/grep from
 # treating continuation lines as separate statements.
-command=$(printf '%s' "$command" | tr '\n' ' ')
+command=$(printf '%s' "$command" | sed 's/\\$//' | tr '\n' ' ')
 
 # Pass through anything not targeting Atlassian (case-insensitive —
 # DNS is case-insensitive, so ATLASSIAN.COM reaches the same servers).
