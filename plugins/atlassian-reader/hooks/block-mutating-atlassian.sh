@@ -32,10 +32,13 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty')
 # treating continuation lines as separate statements.
 command=$(printf '%s' "$command" | tr '\n' ' ')
 
-# Pass through anything not targeting Atlassian
+# Pass through anything not targeting Atlassian (case-insensitive —
+# DNS is case-insensitive, so ATLASSIAN.COM reaches the same servers).
+shopt -s nocasematch
 if [[ ! "$command" =~ atlassian\.(com|net) ]]; then
   exit 0
 fi
+shopt -u nocasematch
 
 # --- Gate 1: Block shell indirection ---
 # These wrap or obscure the real command, defeating all subsequent checks.
@@ -48,25 +51,21 @@ if echo "$command" | grep -qEi '(bash|sh|zsh|dash)[[:space:]]+-c[[:space:]]'; th
   deny "Subshell execution detected targeting Atlassian API. Only direct curl invocations are permitted."
 fi
 
-if echo "$command" | grep -qEi '\|[[:space:]]*(bash|sh|zsh|dash)([[:space:]]|$)'; then
+if echo "$command" | grep -qEi '\|[[:space:]]*((/usr)?/bin/(bash|sh|zsh|dash)|env[[:space:]]+(bash|sh|zsh|dash))(\b|[[:space:]]|$)'; then
   deny "Pipe to shell detected targeting Atlassian API. Only direct curl invocations are permitted."
 fi
 
 # --- Gate 2: Require ONLY curl commands ---
-# Split on statement separators (;, &&, ||) and verify every segment that
-# targets Atlassian is a curl invocation. This prevents chaining a legitimate
-# curl with a malicious non-curl command (e.g. wget, python, httpie).
+# Split on statement separators (;, &&, ||) and verify every segment is a curl
+# invocation. This prevents chaining a legitimate curl with a malicious non-curl
+# command (e.g. rm, python, httpie) in the same tool call.
 # Note: bare pipe (|) is NOT a split point — it would incorrectly split
 # $(printf ... | base64) inside auth headers and harmless | jq at the end.
 # Pipe-to-shell attacks are caught by Gate 1 instead.
 while IFS= read -r segment; do
   # Skip empty segments
   [[ -z "$segment" ]] && continue
-  # Skip segments that don't target Atlassian
-  if ! echo "$segment" | grep -qE 'atlassian\.(com|net)'; then
-    continue
-  fi
-  # This segment targets Atlassian — it must start with curl
+  # Any segment must start with curl once Atlassian targeting is detected.
   if ! echo "$segment" | grep -qE '^[[:space:]]*curl[[:space:]]'; then
     deny "Non-curl command detected targeting Atlassian API. Only direct curl invocations are permitted by the read-only hook."
   fi
@@ -95,7 +94,7 @@ fi
 # --- Gate 5: Block data payload flags without -G ---
 # -G converts data flags to GET query params (safe, used for JQL/CQL).
 # Without -G, data flags imply POST. Match with or without space after flag.
-if echo "$command" | grep -qEi '(^|[[:space:]])(-d[[:space:]"'\''@]|-d$|--data([[:space:]=]|$)|--data-raw([[:space:]=]|$)|--data-binary([[:space:]=]|$)|--data-urlencode([[:space:]=]|$))'; then
+if echo "$command" | grep -qEi '(^|[[:space:]])(-d.|-d$|--data([[:space:]=]|$)|--data-raw([[:space:]=]|$)|--data-binary([[:space:]=]|$)|--data-urlencode([[:space:]=]|$))'; then
   if ! echo "$command" | grep -qE '(^|[[:space:]])-G([[:space:]]|$)'; then
     deny "Data payload flag detected targeting Atlassian API without -G flag, implying a POST request. Use -G with --data-urlencode for GET query parameters, or remove the data flag."
   fi
@@ -127,10 +126,10 @@ for i in "${!BLOCKED_FLAGS[@]}"; do
   fi
 done
 
-# --- Gate 7: Block variable expansion in method position ---
-# Catches: curl -X $METHOD, curl -X ${METHOD}, curl -X $(cmd)
-if echo "$command" | grep -qE '(-X|--request)[[:space:]]*=?[[:space:]]*(\$\{?\w|\$\()'; then
-  deny "Variable expansion in HTTP method position detected targeting Atlassian API. The method must be a literal value (GET) for safety verification."
+# --- Gate 7: Block variable/command expansion in method position ---
+# Catches: curl -X $METHOD, curl -X ${METHOD}, curl -X $(cmd), curl -X `cmd`
+if echo "$command" | grep -qE '(-X|--request)[[:space:]]*=?[[:space:]]*(\$\{?\w|\$\(|`)'; then
+  deny "Variable or command expansion in HTTP method position detected targeting Atlassian API. The method must be a literal value (GET) for safety verification."
 fi
 
 exit 0
