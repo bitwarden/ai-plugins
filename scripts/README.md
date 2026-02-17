@@ -39,7 +39,8 @@ The script automatically updates version numbers in:
 
 1. **`.claude-plugin/marketplace.json`** - Marketplace registration
 2. **`plugins/<plugin-name>/.claude-plugin/plugin.json`** - Plugin manifest
-3. **`plugins/<plugin-name>/agents/*/AGENT.md`** - All agent YAML frontmatter (if agents exist)
+3. **`README.md`** - Plugin catalog table
+4. **`plugins/<plugin-name>/agents/*/AGENT.md`** - All agent YAML frontmatter (if agents exist)
 
 ### Features
 
@@ -171,6 +172,7 @@ bash scripts/validate-marketplace.sh
   - `marketplace.json`
   - `plugin.json` files
 - **Name consistency** - Ensures names match in marketplace and plugin manifests
+- **README catalog** - Verifies each plugin appears in the README.md plugin catalog table with the correct version
 - **Completeness** - Warns if plugins exist but aren't listed in marketplace
 
 ### Output
@@ -324,6 +326,17 @@ description: Skill description
   jq empty your-file.json
   ```
 - Or use an online validator like [JSONLint](https://jsonlint.com/)
+
+**"Plugin is not listed in the README.md plugin catalog table"**
+
+- Add a row to the plugin catalog table in `README.md`
+- Format: `| [plugin-name](plugins/plugin-name/) | X.Y.Z | Description |`
+- Use the version bump script to keep all files in sync: `./scripts/bump-plugin-version.sh`
+
+**"README catalog version mismatch"**
+
+- Run the version bump script to update all files at once: `./scripts/bump-plugin-version.sh plugin-name X.Y.Z`
+- Or manually update the version in the README.md plugin catalog table
 
 **"Plugin exists but not in marketplace"**
 

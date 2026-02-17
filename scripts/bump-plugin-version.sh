@@ -1,7 +1,7 @@
 #!/bin/bash
 # bump-plugin-version.sh
 # Automates version bumping for plugins in the Bitwarden AI Plugins Marketplace
-# Updates version across marketplace.json, plugin.json, and all agent AGENT.md files
+# Updates version across marketplace.json, plugin.json, README.md catalog, and all agent AGENT.md files
 #
 # Usage: ./scripts/bump-plugin-version.sh <plugin-name> <new-version>
 # Example: ./scripts/bump-plugin-version.sh bitwarden-code-review 1.3.4
@@ -50,6 +50,7 @@ Examples:
 This script updates:
   - .claude-plugin/marketplace.json
   - plugins/<plugin-name>/.claude-plugin/plugin.json
+  - README.md (plugin catalog table)
   - plugins/<plugin-name>/agents/*/AGENT.md (all agent files)
 
 After running this script, remember to:
@@ -163,6 +164,27 @@ else
     exit 1
 fi
 
+# Update README.md catalog table
+README_FILE="$REPO_ROOT/README.md"
+if [ -f "$README_FILE" ]; then
+    print_info "Updating README.md catalog table..."
+    if grep -qE "^\|.*\[${PLUGIN_NAME}\]" "$README_FILE"; then
+        # Replace the version number in the table row for this plugin
+        if sed -i.bak "s/\(\[${PLUGIN_NAME}\](plugins\/${PLUGIN_NAME}\/)\s*|\s*\)[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/\1${NEW_VERSION}/" "$README_FILE"; then
+            rm -f "$README_FILE.bak"
+            print_success "Updated README.md"
+        else
+            print_error "Failed to update README.md"
+            rm -f "$README_FILE.bak"
+            exit 1
+        fi
+    else
+        print_warning "Plugin '$PLUGIN_NAME' not found in README.md catalog table - add it manually"
+    fi
+else
+    print_warning "README.md not found at repository root"
+fi
+
 # Update all AGENT.md files
 AGENT_DIR="$PLUGIN_DIR/agents"
 if [ -d "$AGENT_DIR" ]; then
@@ -204,6 +226,7 @@ echo ""
 print_info "Files updated:"
 print_info "  ✓ .claude-plugin/marketplace.json"
 print_info "  ✓ plugins/$PLUGIN_NAME/.claude-plugin/plugin.json"
+print_info "  ✓ README.md catalog table"
 if [ -n "${AGENT_FILES:-}" ]; then
     print_info "  ✓ Agent AGENT.md files"
 fi

@@ -234,6 +234,41 @@ check_consistency() {
         fi
     done
 
+    # Check that each plugin is listed in the README catalog table
+    local readme_file="$REPO_ROOT/README.md"
+    if [[ -f "$readme_file" ]]; then
+        for ((i=0; i<plugin_count; i++)); do
+            local plugin_name
+            plugin_name=$(jq -r ".plugins[$i].name // empty" "$MARKETPLACE_JSON")
+            local marketplace_version
+            marketplace_version=$(jq -r ".plugins[$i].version // empty" "$MARKETPLACE_JSON")
+
+            if [[ -z "$plugin_name" ]]; then
+                continue
+            fi
+
+            # Check if plugin appears in a markdown table row: | [name](plugins/name/) | version |
+            local readme_row
+            readme_row=$(grep -E "^\|.*\[${plugin_name}\]" "$readme_file" 2>/dev/null || true)
+
+            if [[ -z "$readme_row" ]]; then
+                print_error "Plugin '$plugin_name' is not listed in the README.md plugin catalog table"
+                has_errors=1
+            elif [[ -n "$marketplace_version" ]]; then
+                # Check version in the table row
+                if ! echo "$readme_row" | grep -qF "$marketplace_version"; then
+                    local readme_version
+                    readme_version=$(echo "$readme_row" | sed -E 's/.*\|\s*([0-9]+\.[0-9]+\.[0-9]+)\s*\|.*/\1/')
+                    print_error "README catalog version mismatch for '$plugin_name': marketplace.json has '$marketplace_version', README has '$readme_version'"
+                    has_errors=1
+                fi
+            fi
+        done
+    else
+        print_error "README.md not found at repository root"
+        has_errors=1
+    fi
+
     # Check if there are plugins in the directory not in the marketplace
     local plugins_dir="$REPO_ROOT/plugins"
     if [[ -d "$plugins_dir" ]]; then
