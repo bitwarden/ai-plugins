@@ -1,0 +1,18 @@
+{
+  "name": "bitwarden-atlassian-tools",
+  "version": "1.0.0",
+  "description": "Read-only Atlassian access (Jira issues, sprints, boards, Confluence pages) plus sprint workability analysis with parallel investigation and categorized reporting",
+  "author": {
+    "name": "Bitwarden"
+  },
+  "keywords": [
+    "atlassian",
+    "jira",
+    "confluence",
+    "sprint",
+    "workability",
+    "agile",
+    "read-only",
+    "cql"
+  ]
+}
