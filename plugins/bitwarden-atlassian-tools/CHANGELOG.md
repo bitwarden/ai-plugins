@@ -5,6 +5,23 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-07
+
+### Added
+
+- Confluence client layer with Basic Auth using `ATLASSIAN_CONFLUENCE_URL` and `ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN` env vars (falls back to Jira credentials)
+- 6 Confluence tools:
+  - `get_confluence_page` — retrieve page content, metadata, and title by ID
+  - `get_confluence_page_comments` — get footer and inline comments with optional replies
+  - `get_child_pages` — list child pages of a given parent for hierarchy navigation
+  - `search_confluence` — search pages by space key and/or title
+  - `search_confluence_cql` — search content using Confluence Query Language (CQL)
+  - `list_spaces` — list accessible Confluence spaces with type filtering
+- `download_attachment` tool for downloading Jira attachments as Base64 with configurable size limits
+- Optimized Confluence HTML-to-markdown transformation for reduced token consumption
+- Confluence environment variable passthrough in `.mcp.json`
+- Unit tests for Confluence auth, client, content formatting, and input validation
+
 ## [1.0.1] - 2026-03-06
 
 ### Fixed

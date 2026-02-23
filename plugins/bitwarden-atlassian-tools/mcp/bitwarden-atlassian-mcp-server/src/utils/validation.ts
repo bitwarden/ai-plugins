@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { loadJiraConfig } from '../jira/auth.js';
 
 /**
  * Shape of a tool module's default export.
@@ -65,6 +66,80 @@ export const ListProjectsSchema = z.object({
 });
 
 export type ListProjectsInput = z.infer<typeof ListProjectsSchema>;
+
+// ── Confluence Schemas ───────────────────────────────────────────────
+
+export const GetConfluencePageSchema = z.object({
+  pageId: z.string().min(1, 'Page ID is required'),
+  includeBody: z.boolean().optional().default(true),
+  bodyFormat: z.enum(['storage', 'view', 'export_view']).optional().default('storage'),
+});
+
+export type GetConfluencePageInput = z.infer<typeof GetConfluencePageSchema>;
+
+export const GetConfluencePageCommentsSchema = z.object({
+  pageId: z.string().min(1, 'Page ID is required'),
+  bodyFormat: z.enum(['storage', 'view']).optional().default('storage'),
+  limit: z.number().int().min(1).max(100).optional().default(25),
+  includeReplies: z.boolean().optional().default(true),
+});
+
+export type GetConfluencePageCommentsInput = z.infer<typeof GetConfluencePageCommentsSchema>;
+
+export const GetChildPagesSchema = z.object({
+  pageId: z.string().min(1, 'Page ID is required'),
+  limit: z.number().int().min(1).max(250).optional().default(25),
+});
+
+export type GetChildPagesInput = z.infer<typeof GetChildPagesSchema>;
+
+export const SearchConfluenceSchema = z.object({
+  spaceKey: z.string().optional(),
+  title: z.string().optional(),
+  limit: z.number().int().min(1).max(250).optional().default(25),
+  cursor: z.string().optional(),
+});
+
+export type SearchConfluenceInput = z.infer<typeof SearchConfluenceSchema>;
+
+export const SearchConfluenceCqlSchema = z.object({
+  cql: z.string().min(1, 'CQL query is required'),
+  limit: z.number().int().min(1).max(100).optional().default(10),
+  start: z.number().int().min(0).optional().default(0),
+});
+
+export type SearchConfluenceCqlInput = z.infer<typeof SearchConfluenceCqlSchema>;
+
+export const ListSpacesSchema = z.object({
+  limit: z.number().int().min(1).max(250).optional().default(25),
+  type: z.string().optional(),
+});
+
+export type ListSpacesInput = z.infer<typeof ListSpacesSchema>;
+
+export const DownloadAttachmentSchema = z.object({
+  attachmentUrl: z.string()
+    .url('Must be a valid URL')
+    .regex(/\/secure\/attachment\/|\/rest\/api\/.*\/attachment\//,
+           'Must be a JIRA attachment URL')
+    .refine((url) => {
+      try {
+        const configOrigin = new URL(loadJiraConfig().url).origin;
+        const attachmentOrigin = new URL(url).origin;
+        return attachmentOrigin === configOrigin;
+      } catch {
+        return false;
+      }
+    }, 'Attachment URL hostname does not match the configured Atlassian instance'),
+  maxSizeMB: z.number()
+    .int()
+    .min(1)
+    .max(50)
+    .optional()
+    .default(10),
+});
+
+export type DownloadAttachmentInput = z.infer<typeof DownloadAttachmentSchema>;
 
 /**
  * Validate input against a Zod schema

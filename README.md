@@ -7,7 +7,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | Plugin                                                              | Version | Description                                                                                        |
 | ------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------- |
 | [atlassian-reader](plugins/atlassian-reader/)                       | 1.2.0   | Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud |
-| [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 1.0.0   | Read-only Jira access via custom MCP server: issues, JQL search, comments, projects               |
+| [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 1.1.0   | Read-only Atlassian access: Jira issues, JQL search, Confluence pages, CQL search, attachments    |
 | [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.8.0   | Autonomous code review agent following Bitwarden engineering standards with GitHub integration     |
 | [bitwarden-init](plugins/bitwarden-init/)                           | 1.1.0   | Initialize and enhance CLAUDE.md files with Bitwarden's standardized template format               |
 | [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 0.2.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis  |
