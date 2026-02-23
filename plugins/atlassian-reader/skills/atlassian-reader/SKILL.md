@@ -269,3 +269,17 @@ Replace `{{SPRINT_ID}}` with the sprint ID from the previous call.
 **Missing environment variable detection**: If a curl command returns a connection error or malformed URL, check whether `ATLASSIAN_CLOUD_ID`, `ATLASSIAN_EMAIL`, `ATLASSIAN_JIRA_READ_ONLY_TOKEN`, or `ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN` is unset and ask the user to set them (see Section 1).
 
 **Rate limiting**: Atlassian Cloud APIs have rate limits. If you receive a 429 response, wait a moment before retrying. For batch operations, add a small delay between requests.
+
+## 12. Cross-Plugin Enrichment
+
+After reading Jira or Confluence content, sibling plugin skills can provide deeper analysis:
+
+### Security Context (bitwarden-security-engineer plugin)
+
+- **Security-tagged tickets** → when a Jira issue has security labels, components, or mentions vulnerabilities, activate `Skill(bitwarden-security-context)` to provide Bitwarden's security principles and vocabulary for interpreting the issue's security requirements
+
+### Development Context (bitwarden-software-engineer plugin)
+
+- **Technical specs or architecture docs** → when reading Confluence pages with technical specifications, note that `Skill(writing-server-code)`, `Skill(writing-client-code)`, and `Skill(writing-database-queries)` can validate whether specifications align with Bitwarden's actual development conventions
+
+These skills are optional. If unavailable, present the raw Atlassian content without additional analysis.

@@ -10,6 +10,7 @@ Initialize Claude Code configuration for this repository using a two-phase proce
 First, execute the built-in `/init` command to generate an initial CLAUDE.md file:
 
 Use the Bash tool to run:
+
 ```bash
 claude -p "/init" --allowedTools "Read" "Write" "WebFetch" "Grep" "Glob" --model "opus"
 ```
@@ -21,6 +22,7 @@ Wait for this to complete and verify that CLAUDE.md was created in the current d
 Once Phase 1 completes successfully, run the `/enhance` command from this plugin to extend the CLAUDE.md file with Bitwarden's standardized sections:
 
 Use the Bash tool to run:
+
 ```bash
 claude -p "/bitwarden-init:enhance" --allowedTools "Read" "Edit" "WebFetch" "Grep" "Glob" --model "opus"
 ```

@@ -19,9 +19,11 @@ When making ANY changes to the plugin (code, documentation, configuration, scrip
    - PATCH (0.0.X): Bug fixes, documentation updates, security patches
 
 2. **Use the version bump script** from the repository root:
+
    ```bash
    ./scripts/bump-plugin-version.sh bitwarden-init <new-version>
    ```
+
    This automatically updates all required files including `.claude-plugin/plugin.json`
 
 3. **Add an entry to `CHANGELOG.md`** following [Keep a Changelog](https://keepachangelog.com/) format
@@ -35,6 +37,7 @@ claude --plugin-dir /path/to/bitwarden-ai-plugins/plugins/bitwarden-init
 ```
 
 Test both commands:
+
 - `/bitwarden-init:init` - Verify it runs both phases and generates a complete CLAUDE.md
 - `/bitwarden-init:enhance` - Verify it enhances an existing CLAUDE.md with the template structure
 

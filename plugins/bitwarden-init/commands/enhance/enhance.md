@@ -24,6 +24,7 @@ Enhance the existing CLAUDE.md file with Bitwarden's standardized template forma
 3. **Enhance CLAUDE.md**: Restructure the file to use **exactly** the following sections.
 
 **CRITICAL REQUIREMENTS:**
+
 - The final CLAUDE.md MUST use these exact headings verbatim - no other top-level headings are allowed
 - ALL content from the original CLAUDE.md MUST be incorporated into one of these sections - do not remove any information
 - Reorganize and merge existing content into the appropriate sections below
@@ -32,6 +33,7 @@ Enhance the existing CLAUDE.md file with Bitwarden's standardized template forma
 ---
 
 **Required Sections (use these exact headings):**
+
 # [Project Name] - Claude Code Configuration
 
 Brief description of the project and its primary purpose.
@@ -39,11 +41,13 @@ Brief description of the project and its primary purpose.
 ## Overview
 
 ### What This Project Does
+
 - Primary function/purpose (1-2 sentences)
 - Key interfaces or entry points
 - Target users/consumers
 
 ### Key Concepts
+
 - Domain-specific terminology
 - Important abstractions to understand
 
@@ -80,6 +84,7 @@ src/
 ```
 
 ### Key Principles
+
 1. **Principle One**: Brief explanation
 2. **Principle Two**: Brief explanation
 3. **Principle Three**: Brief explanation
@@ -91,11 +96,13 @@ src/
 **Purpose**: Why this pattern exists
 
 **Implementation**:
+
 ```typescript
 // Code example showing the canonical implementation
 ```
 
 **Usage**:
+
 ```typescript
 // Code example showing how to use the pattern
 ```
@@ -109,31 +116,37 @@ src/
 Step-by-step checklist for the most common development task.
 
 **1. Define the Schema** (`src/schemas/[domain].ts`)
+
 ```typescript
 // Template code
 ```
 
 **2. Define the [Entity]** (`src/[entities]/[domain].ts`)
+
 ```typescript
 // Template code
 ```
 
 **3. Implement the Handler** (`src/handlers/[domain].ts`)
+
 ```typescript
 // Template code
 ```
 
 **4. Register the Handler** (`src/index.ts`)
+
 ```typescript
 // Where and how to register
 ```
 
 **5. Write Tests** (`tests/[domain].spec.ts`)
+
 ```typescript
 // Test template
 ```
 
 **6. Update Documentation**
+
 - Files that may need updates
 
 ### Common Patterns
@@ -197,15 +210,15 @@ const exampleSchema = z.object({
 
 ### Security Functions
 
-| Function | Purpose | Usage |
-|----------|---------|-------|
+| Function         | Purpose      | Usage          |
+| ---------------- | ------------ | -------------- |
 | `functionName()` | What it does | When to use it |
 
 ### Environment Configuration
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `VAR_NAME` | Yes/No | What it configures | `example-value` |
+| Variable   | Required | Description        | Example         |
+| ---------- | -------- | ------------------ | --------------- |
+| `VAR_NAME` | Yes/No   | What it configures | `example-value` |
 
 ### Authentication & Authorization
 
@@ -229,9 +242,10 @@ tests/
 ### Writing Tests
 
 **Unit Test Template**:
+
 ```typescript
-describe('[Feature]', () => {
-  it('should [expected behavior]', () => {
+describe("[Feature]", () => {
+  it("should [expected behavior]", () => {
     // Arrange
     // Act
     // Assert
@@ -240,8 +254,9 @@ describe('[Feature]', () => {
 ```
 
 **Integration Test Template**:
+
 ```typescript
-describe('[Feature] Integration', () => {
+describe("[Feature] Integration", () => {
   // Setup/teardown
   // Test cases
 });
@@ -266,23 +281,28 @@ npm test -- [file]    # Run specific file
 ## Code Style & Standards
 
 ### Formatting
+
 - Tool used (Prettier, etc.)
 - Key configuration
 
 ### Naming Conventions
+
 - `camelCase` for: variables, functions
 - `PascalCase` for: types, interfaces, classes
 - `SCREAMING_SNAKE_CASE` for: constants
 
 ### Imports
+
 - Ordering rules
 - Extension requirements (e.g., `.js` for ES modules)
 
 ### Comments
+
 - When to use JSDoc
 - When to use inline comments
 
 ### Pre-commit Hooks
+
 - What runs automatically
 - Manual checks to run
 
@@ -322,6 +342,7 @@ npm run build
 ### Versioning
 
 Follow semantic versioning: `MAJOR.MINOR.PATCH`
+
 - `MAJOR`: Breaking changes
 - `MINOR`: New features (backwards compatible)
 - `PATCH`: Bug fixes
@@ -360,19 +381,23 @@ Follow semantic versioning: `MAJOR.MINOR.PATCH`
 ## References
 
 ### Official Documentation
+
 - [Link to primary docs]()
 - [Link to API reference]()
 
 ### Internal Documentation
+
 - [Link to contributing guide]()
 - [Link to code style guide]()
 
 ### Tools & Libraries
+
 - [Link to key dependency docs]()
 
 ---
 
 **Enhancement Guidelines:**
+
 - **No information loss**: Every piece of content from the original CLAUDE.md must appear in the final output, incorporated into the appropriate section
 - **Strict heading structure**: Only the headings above are permitted as top-level sections (## level) - merge any other headings as subsections (### level) or bullet points within the appropriate section
 - **Fill gaps**: Add information for any sections that are missing or incomplete based on your supplementary research
@@ -383,6 +408,7 @@ Follow semantic versioning: `MAJOR.MINOR.PATCH`
 - **Stay current**: Reference actual patterns found in the code, not assumptions
 
 **Content Quality Standards:**
+
 - Every section should have substantive, codebase-specific content
 - Avoid generic advice that could apply to any project
 - Include file paths and specific examples (e.g., "See `src/auth/guards/` for authentication guards")
@@ -391,7 +417,22 @@ Follow semantic versioning: `MAJOR.MINOR.PATCH`
 - Note any deviations from standard practices and why they exist
 
 **Handling Optional Sections:**
+
 - If a section is not applicable to this project (e.g., "Deployment" for a library), include the heading with a brief note: "Not applicable - this is a library consumed as a dependency."
 - Never omit a required heading entirely
 
 **Final Step**: After enhancing CLAUDE.md, provide a detailed summary of what was added or changed compared to the original file.
+
+## Post-Generation Validation
+
+After enhancing the CLAUDE.md file, run available validation:
+
+### Config Validation (claude-config-validator plugin)
+
+- **Validate the generated CLAUDE.md** → activate `Skill(reviewing-claude-config)` to verify the generated file has no hardcoded secrets in code examples, proper structure, valid file references, and follows progressive disclosure patterns
+
+### Security Scan (bitwarden-security-engineer plugin)
+
+- **Scan code examples for secrets** → activate `Skill(detecting-secrets)` to ensure no credentials appear in the documentation's code snippets
+
+These validation steps are optional. If the plugins are not installed, skip validation.

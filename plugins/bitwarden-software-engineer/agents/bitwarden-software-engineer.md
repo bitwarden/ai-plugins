@@ -50,3 +50,14 @@ After making changes, always verify your work before declaring done. Use the app
 ### Database changes
 
 - Verify your changes against the conventions in the active database skill (`implementing-dapper-queries`, `implementing-ef-core`, or `writing-database-queries`)
+
+## Security-Aware Development
+
+When the `bitwarden-security-engineer` plugin is installed, additional security skills are available. Use them proactively:
+
+- **Before implementing auth/crypto/access-control features** → activate `Skill(reviewing-security-architecture)` to verify your design against approved patterns (token handling, RBAC, encryption at rest/transit, trust boundaries)
+- **When handling user input that reaches SQL, HTML, file system, or URLs** → activate `Skill(analyzing-code-security)` to check for injection, XSS, SSRF, and path traversal against Bitwarden's vulnerability pattern library
+- **When adding or updating dependencies** → activate `Skill(reviewing-dependencies)` to assess supply chain risk before introducing new packages
+- **When working with secrets or configuration** → activate `Skill(detecting-secrets)` to verify no credentials are hardcoded
+
+These skills are optional — if unavailable (plugin not installed), proceed with your standard workflow.

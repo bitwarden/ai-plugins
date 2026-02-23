@@ -391,6 +391,23 @@ If approaching context limit during analysis:
 - Create concise reports that highlight key insights prominently
 - Understand session context before analyzing effectiveness
 
+## Cross-Plugin Enrichment
+
+When sibling Bitwarden plugins are installed, retrospectives gain specialist analysis:
+
+### Security-Aware Retrospectives (bitwarden-security-engineer plugin)
+
+After collecting git diffs from the session:
+
+- **Scan for committed credentials** → activate `Skill(detecting-secrets)` against the session's git diffs to warn if secrets were inadvertently committed
+- **Assess security posture of new code** → if the session introduced auth, crypto, or input-handling code, activate `Skill(analyzing-code-security)` to flag potential vulnerabilities in the retrospective report
+
+### Quality Classification (bitwarden-code-review plugin)
+
+- **Classify session changes by impact** → activate `Skill(classifying-review-findings)` to categorize the session's changes using the CRITICAL/IMPORTANT/DEBT/SUGGESTED framework, giving users a clear picture of what needs attention
+
+These skills are optional. If unavailable, proceed with standard retrospective analysis.
+
 ## Success Criteria
 
 A good retrospective should:

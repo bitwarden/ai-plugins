@@ -84,9 +84,9 @@ export class CryptoService {
 ```html
 <!-- CORRECT -->
 <div class="tw-flex tw-gap-2 tw-mt-4">
-
-<!-- WRONG — missing tw- prefix, will be stripped -->
-<div class="flex gap-2 mt-4">
+  <!-- WRONG — missing tw- prefix, will be stripped -->
+  <div class="flex gap-2 mt-4"></div>
+</div>
 ```
 
 ### Const objects over enums (ADR-0025)
