@@ -156,6 +156,16 @@ Load the specific example relevant to your file type (on-demand only, not upfron
 - Settings → `examples/example-settings-review.md`
 - Prompts → `examples/example-prompts-review.md`
 
+## Cross-Plugin Enrichment
+
+### Enhanced Secret Detection (bitwarden-security-engineer plugin)
+
+When the `bitwarden-security-engineer` plugin is installed, supplement the manual security scan above with:
+
+- **Comprehensive secret patterns** → activate `Skill(detecting-secrets)` for context-aware detection that distinguishes test fixtures from production secrets, and covers patterns beyond the manual checks above (connection strings, private keys, cloud provider tokens)
+
+This skill is optional. If unavailable, rely on the manual security checks above.
+
 ## Core Principles
 
 - **Security first**: Always check for committed settings, secrets, overly broad permissions

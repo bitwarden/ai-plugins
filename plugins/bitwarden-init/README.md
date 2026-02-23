@@ -22,6 +22,7 @@ Restart Claude Code after installation.
 ### `/bitwarden-init:init`
 
 Generates a new CLAUDE.md file. Runs both phases automatically:
+
 1. Anthropic's `/init` analyzes the codebase
 2. `/enhance` restructures and extends the output
 

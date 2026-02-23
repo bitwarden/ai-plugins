@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.7.1
+version: 1.8.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-incremental-changes
@@ -165,6 +165,28 @@ Invoke these skills in order:
 
 - **Review code, not developers** - Frame findings as improvement opportunities
 - **Maintain professional tone** - Be constructive and collaborative
+
+## Cross-Plugin Enrichment
+
+When sibling Bitwarden plugins are installed, specialist skills improve review quality:
+
+### Security-Enhanced Review (bitwarden-security-engineer plugin)
+
+For security-sensitive changes (auth, crypto, access control, user input handling):
+
+- **Potential vulnerabilities** → activate `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
+- **Auth/encryption/trust-boundary changes** → activate `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
+- **Dependency updates** → activate `Skill(reviewing-dependencies)` to assess supply chain risk
+
+### Convention-Aware Review (bitwarden-software-engineer plugin)
+
+For implementation pattern review:
+
+- **C#/.NET server changes** → activate `Skill(writing-server-code)` to verify CQS patterns, `TryAdd*` DI, nullable reference types, `Async` suffix conventions
+- **Angular/TypeScript client changes** → activate `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
+- **Database changes** → activate `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
+
+These skills are optional. If unavailable, apply existing review knowledge.
 
 ## Completion
 

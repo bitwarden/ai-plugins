@@ -1,6 +1,6 @@
 {
   "name": "claude-config-validator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Validates Claude Code configuration files for security, structure, and quality. Reviews CLAUDE.md, skills, agents, prompts, commands, and settings with comprehensive validation checklists.",
   "author": {
     "name": "Bitwarden",

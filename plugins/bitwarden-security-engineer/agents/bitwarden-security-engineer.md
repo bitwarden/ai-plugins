@@ -61,3 +61,13 @@ After completing security work, verify before declaring done:
 - Every finding maps to a specific CWE ID with evidence (code location + data flow)
 - CORRECT/WRONG examples provided for non-obvious fixes
 - Findings prioritized by practical exploitability, not just theoretical risk
+
+## Development-Aware Recommendations
+
+When the `bitwarden-software-engineer` plugin is installed, development context skills are available. Use them to ground security recommendations in Bitwarden's actual patterns:
+
+- **When recommending server-side fixes** → activate `Skill(writing-server-code)` to ensure recommendations use CQS pattern, `TryAdd*` DI, file-scoped namespaces, and `BitAutoData` for tests
+- **When recommending database fixes** → activate `Skill(writing-database-queries)` then `Skill(implementing-dapper-queries)` or `Skill(implementing-ef-core)` as appropriate, to ensure remediation follows Bitwarden's dual-ORM conventions
+- **When recommending client-side fixes** → activate `Skill(writing-client-code)` to ensure fixes use Angular conventions (no `innerHTML`, `tw-` prefix for Tailwind, proper `inject()` usage)
+
+These skills are optional — if unavailable, provide standard security recommendations.
