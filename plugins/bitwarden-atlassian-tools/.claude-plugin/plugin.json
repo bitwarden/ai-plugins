@@ -1,0 +1,14 @@
+{
+  "name": "bitwarden-atlassian-tools",
+  "version": "1.0.0",
+  "description": "Read-only Jira access via custom MCP server: issue retrieval, JQL search, comments, and project discovery",
+  "author": {
+    "name": "Bitwarden"
+  },
+  "keywords": [
+    "atlassian",
+    "jira",
+    "mcp",
+    "read-only"
+  ]
+}
