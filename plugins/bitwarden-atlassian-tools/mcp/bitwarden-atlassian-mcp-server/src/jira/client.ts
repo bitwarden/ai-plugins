@@ -177,6 +177,10 @@ export class JiraClient {
    * Download attachment as binary buffer
    */
   async downloadAttachment(attachmentUrl: string): Promise<Buffer> {
+    if (!attachmentUrl.startsWith(this.config.url)) {
+      throw new Error('Attachment URL does not belong to the configured Jira instance');
+    }
+
     try {
       const response = await axios.get(attachmentUrl, {
         headers: getJiraHeaders(this.config),

@@ -43,10 +43,10 @@ export type GetIssueCommentsInput = z.infer<typeof GetIssueCommentsSchema>;
  */
 export const SearchIssuesSchema = z.object({
   jql: z.string().min(1, 'JQL query cannot be empty'),
-  startAt: z.number().int().min(0).optional().default(0),
   maxResults: z.number().int().min(1).max(100).optional().default(50),
   fields: z.array(z.string()).optional(),
   expand: z.array(z.string()).optional(),
+  nextPageToken: z.string().optional(),
 });
 
 export type SearchIssuesInput = z.infer<typeof SearchIssuesSchema>;

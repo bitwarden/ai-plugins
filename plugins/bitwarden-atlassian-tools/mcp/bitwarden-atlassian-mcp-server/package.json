@@ -1,7 +1,7 @@
 {
   "name": "@bitwarden/atlassian-tools-mcp",
-  "version": "2.0.0",
-  "description": "Custom read-only JIRA & Confluence MCP server for Atlassian access and sprint workability analysis with optimized data transformation",
+  "version": "1.0.0",
+  "description": "Read-only Jira MCP server for issue retrieval, JQL search, comments, and project discovery",
   "type": "module",
   "main": "build/index.js",
   "bin": {
@@ -16,22 +16,21 @@
   "keywords": [
     "mcp",
     "jira",
-    "confluence",
     "model-context-protocol",
     "atlassian",
     "read-only",
-    "cql"
+    "jql"
   ],
   "author": "Bitwarden",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.0",
-    "axios": "^1.6.0",
-    "zod": "^3.22.0"
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "axios": "1.13.6",
+    "zod": "3.24.2"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
+    "@types/node": "20.19.35",
+    "typescript": "5.8.3"
   },
   "engines": {
     "node": ">=18.0.0"

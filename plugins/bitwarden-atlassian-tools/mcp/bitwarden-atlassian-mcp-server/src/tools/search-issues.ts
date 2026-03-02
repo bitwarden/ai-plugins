@@ -57,16 +57,14 @@ async function handler(input: any): Promise<string> {
   const client = new JiraClient();
 
   try {
-    // Zod applies defaults, but TypeScript doesn't know, so we provide fallbacks
-    const startAt = validated.startAt ?? 0;
     const maxResults = validated.maxResults ?? 50;
 
     const result = await client.searchIssues({
       jql: validated.jql,
-      startAt,
       maxResults,
       fields: validated.fields,
       expand: validated.expand,
+      nextPageToken: validated.nextPageToken,
     });
 
     if (result.issues.length === 0) {
@@ -75,8 +73,7 @@ async function handler(input: any): Promise<string> {
 
     let output = `# JIRA Search Results\n\n`;
     output += `**Query:** ${validated.jql}\n`;
-    output += `**Results:** ${result.issues.length}${result.total != null ? ` of ${result.total} total` : ''}\n`;
-    output += `**Page:** ${startAt + 1} - ${startAt + result.issues.length}\n\n`;
+    output += `**Results:** ${result.issues.length}${result.total != null ? ` of ${result.total} total` : ''}\n\n`;
     output += `---\n\n`;
 
     for (const issue of result.issues) {
@@ -86,9 +83,8 @@ async function handler(input: any): Promise<string> {
 
     if (result.nextPageToken) {
       output += `\n**Note:** More issues available. Use nextPageToken="${result.nextPageToken}" to fetch the next page.\n`;
-    } else if (result.total != null && result.total > startAt + result.issues.length) {
-      const remaining = result.total - (startAt + result.issues.length);
-      output += `\n**Note:** ${remaining} more issues available.\n`;
+    } else if (result.total != null && result.total > result.issues.length) {
+      output += `\n**Note:** More issues available. Refine your query or increase maxResults to see more.\n`;
     }
 
     return output;
@@ -110,12 +106,6 @@ const searchIssuesTool: ToolDefinition = {
         type: 'string',
         description: 'JQL query string (e.g., "project = ABC AND status = Open")',
       },
-      startAt: {
-        type: 'number',
-        description: 'Pagination offset (default: 0)',
-        default: 0,
-        minimum: 0,
-      },
       maxResults: {
         type: 'number',
         description: 'Number of results to return (default: 50, max: 100)',
@@ -132,6 +122,10 @@ const searchIssuesTool: ToolDefinition = {
         type: 'array',
         items: { type: 'string' },
         description: 'Additional entities to expand (e.g., ["changelog", "renderedFields"])',
+      },
+      nextPageToken: {
+        type: 'string',
+        description: 'Token for fetching the next page of results (returned in previous response)',
       },
     },
     required: ['jql'],

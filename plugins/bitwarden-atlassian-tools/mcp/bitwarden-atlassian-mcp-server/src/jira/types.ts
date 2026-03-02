@@ -139,7 +139,6 @@ export interface JiraSearchResponse {
 
 export interface JiraSearchParams {
   jql: string;
-  startAt?: number;
   maxResults?: number;
   fields?: string[];
   expand?: string[];
