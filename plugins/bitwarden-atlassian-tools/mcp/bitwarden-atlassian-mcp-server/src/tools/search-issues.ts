@@ -5,6 +5,7 @@
 
 import { JiraClient } from '../jira/client.js';
 import { validateInput, SearchIssuesSchema, SearchIssuesInput, ToolDefinition } from '../utils/validation.js';
+import { extractPlainTextTruncated } from '../utils/adf.js';
 
 /**
  * Format issue for display in results
@@ -25,28 +26,8 @@ function formatIssue(issue: any): string {
 ${fields.created ? `- Created: ${new Date(fields.created).toLocaleDateString()}` : ''}
 ${fields.updated ? `- Updated: ${new Date(fields.updated).toLocaleDateString()}` : ''}
 - Labels: ${labels}
-${fields.description ? `- Description: ${extractPlainText(fields.description)}` : ''}
+${fields.description ? `- Description: ${extractPlainTextTruncated(fields.description)}` : ''}
 `;
-}
-
-/**
- * Extract plain text from JIRA ADF (Atlassian Document Format)
- */
-function extractPlainText(adf: any): string {
-  if (!adf || !adf.content) return '';
-
-  let text = '';
-  for (const node of adf.content) {
-    if (node.type === 'paragraph' && node.content) {
-      for (const contentNode of node.content) {
-        if (contentNode.type === 'text') {
-          text += contentNode.text + ' ';
-        }
-      }
-    }
-  }
-
-  return text.trim().substring(0, 200) + (text.length > 200 ? '...' : '');
 }
 
 /**

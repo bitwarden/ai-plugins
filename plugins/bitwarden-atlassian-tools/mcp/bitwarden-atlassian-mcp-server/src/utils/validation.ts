@@ -20,7 +20,10 @@ export interface ToolDefinition {
  * Schema for get_issue tool parameters
  */
 export const GetIssueSchema = z.object({
-  issueIdOrKey: z.string().min(1, 'Issue ID or key is required'),
+  issueIdOrKey: z.string().regex(
+    /^[A-Z][A-Z0-9_]+-\d+$|^\d+$/,
+    'Must be a valid Jira issue key (e.g., PROJ-123) or numeric ID'
+  ),
   fields: z.array(z.string()).optional(),
   expand: z.array(z.string()).optional(),
 });
@@ -31,7 +34,10 @@ export type GetIssueInput = z.infer<typeof GetIssueSchema>;
  * Schema for get_issue_comments tool parameters
  */
 export const GetIssueCommentsSchema = z.object({
-  issueIdOrKey: z.string().min(1, 'Issue ID or key is required'),
+  issueIdOrKey: z.string().regex(
+    /^[A-Z][A-Z0-9_]+-\d+$|^\d+$/,
+    'Must be a valid Jira issue key (e.g., PROJ-123) or numeric ID'
+  ),
   startAt: z.number().int().min(0).optional().default(0),
   maxResults: z.number().int().min(1).max(100).optional().default(50),
 });

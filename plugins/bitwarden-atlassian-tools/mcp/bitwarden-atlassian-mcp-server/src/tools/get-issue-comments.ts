@@ -5,37 +5,7 @@
 
 import { JiraClient } from '../jira/client.js';
 import { validateInput, GetIssueCommentsSchema, GetIssueCommentsInput, ToolDefinition } from '../utils/validation.js';
-
-/**
- * Extract plain text from JIRA ADF (Atlassian Document Format)
- */
-function extractPlainText(adf: any): string {
-  if (!adf || !adf.content) return '';
-
-  let text = '';
-
-  function traverse(node: any) {
-    if (node.type === 'text') {
-      text += node.text;
-    } else if (node.type === 'hardBreak') {
-      text += '\n';
-    } else if (node.content) {
-      for (const child of node.content) {
-        traverse(child);
-      }
-      // Add newline after paragraphs, headings, etc.
-      if (['paragraph', 'heading', 'codeBlock'].includes(node.type)) {
-        text += '\n';
-      }
-    }
-  }
-
-  for (const node of adf.content) {
-    traverse(node);
-  }
-
-  return text.trim();
-}
+import { extractPlainText } from '../utils/adf.js';
 
 /**
  * Format comments for display
@@ -110,6 +80,7 @@ const getIssueCommentsTool: ToolDefinition = {
       issueIdOrKey: {
         type: 'string',
         description: 'JIRA issue key (e.g., "PM-12345") or numeric ID',
+        pattern: '^[A-Z][A-Z0-9_]+-\\d+$|^\\d+$',
       },
       startAt: {
         type: 'number',

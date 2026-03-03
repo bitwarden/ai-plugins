@@ -11,7 +11,9 @@
     "build": "tsc && chmod +x build/index.js",
     "watch": "tsc --watch",
     "dev": "tsc && node build/index.js",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "mcp",
@@ -30,7 +32,8 @@
   },
   "devDependencies": {
     "@types/node": "20.19.35",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vitest": "3.1.1"
   },
   "engines": {
     "node": ">=18.0.0"
