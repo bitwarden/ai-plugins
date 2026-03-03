@@ -110,6 +110,20 @@ jobs:
           read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
           ./scripts/validate-marketplace.sh "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/marketplace-validation.log
 
+      - name: Validate version bump
+        id: version-bump
+        if: steps.changed-files.outputs.has_components == 'true'
+        continue-on-error: true
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
+        run: |
+          set -o pipefail
+          git fetch origin "$BASE_REF"
+          echo "Checking version bumps for plugins with component changes: $CHANGED_PLUGINS"
+          read -ra PLUGINS_ARRAY <<< "$CHANGED_PLUGINS"
+          ./scripts/validate-version-bump.sh "origin/$BASE_REF" "${PLUGINS_ARRAY[@]}" 2>&1 | tee /tmp/version-bump-validation.log
+
       - name: Log in to Azure
         if: steps.changed-files.outputs.has_components == 'true'
         uses: bitwarden/gh-actions/azure-login@main
@@ -217,6 +231,7 @@ jobs:
           SHOULD_RUN: ${{ steps.relevance.outputs.should_run }}
           STRUCTURE_RESULT: ${{ steps.structure.outcome }}
           MARKETPLACE_RESULT: ${{ steps.marketplace.outcome }}
+          VERSION_BUMP_RESULT: ${{ steps.version-bump.outcome }}
           COMPONENTS_RESULT: ${{ steps.components.outcome }}
           HAS_COMPONENTS: ${{ steps.changed-files.outputs.has_components }}
           CHANGED_PLUGINS: ${{ steps.changed-files.outputs.changed_plugins }}
@@ -240,8 +255,10 @@ jobs:
             echo "Marketplace validation: skipped (no plugin files changed)"
           fi
           if [[ "$HAS_COMPONENTS" == "true" ]]; then
+            echo "Version bump validation: $VERSION_BUMP_RESULT"
             echo "Component & security validation (AI-driven): $COMPONENTS_RESULT"
           else
+            echo "Version bump validation: skipped (no component files changed)"
             echo "Component & security validation (AI-driven): skipped (no component files changed)"
           fi
           echo ""
@@ -260,6 +277,14 @@ jobs:
             echo "📋 Marketplace Validation Details:"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             cat /tmp/marketplace-validation.log
+            echo ""
+          fi
+
+          if [[ -f /tmp/version-bump-validation.log ]] && [[ "$VERSION_BUMP_RESULT" == "failure" ]]; then
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📋 Version Bump Validation Details:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            cat /tmp/version-bump-validation.log
             echo ""
           fi
 
@@ -283,9 +308,11 @@ jobs:
             fi
           fi
 
-          # Only fail on components if it actually ran and failed
-          if [[ "$HAS_COMPONENTS" == "true" ]] && [[ "$COMPONENTS_RESULT" == "failure" ]]; then
-            FAILED=true
+          # Only fail on version bump / components if they actually ran and failed
+          if [[ "$HAS_COMPONENTS" == "true" ]]; then
+            if [[ "$VERSION_BUMP_RESULT" == "failure" ]] || [[ "$COMPONENTS_RESULT" == "failure" ]]; then
+              FAILED=true
+            fi
           fi
 
           if [[ "$FAILED" == "true" ]]; then
