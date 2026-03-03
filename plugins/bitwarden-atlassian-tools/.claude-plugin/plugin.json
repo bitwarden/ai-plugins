@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-atlassian-tools",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Read-only Atlassian access via custom MCP server: Jira issues, JQL search, Confluence pages, CQL search, and attachments",
   "author": {
     "name": "Bitwarden"

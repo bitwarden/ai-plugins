@@ -5,6 +5,15 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-09
+
+### Fixed
+
+- Fix `extractPlainText` silently dropping smart links (Figma, Confluence URLs), lists, mentions, and other rich ADF content from Jira descriptions
+- Add handlers for 15 ADF node types: inlineCard, blockCard, embedCard, mention, emoji, status, date, media, bulletList, orderedList, blockquote, expand, nestedExpand, rule, and table
+- Preserve link URLs from text node marks and inlineCard nodes in `extractPlainTextTruncated`
+- Grow test coverage from 27 to 118 cases
+
 ## [1.1.0] - 2026-03-07
 
 ### Added
