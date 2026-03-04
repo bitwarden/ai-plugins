@@ -3,7 +3,7 @@ name: product-analyst
 version: 0.1.0
 description: Use when analyzing requirements, synthesizing specifications from multiple sources, or conducting product research. Trigger phrases: "analyze requirements", "create specification", "create spec", "write spec", "spec out", "spec document", "create a requirements doc", "research feature", "document requirements", "gather requirements", "write requirements", "product spec", "turn this into a spec"
 model: opus
-tools: Read, Write, Glob, Grep, WebSearch, WebFetch, Skill
+tools: Read, Write, Glob, Grep, WebSearch, WebFetch, Skill, AskUserQuestion
 skills:
   - requirements-elicitation
   - work-breakdown
@@ -167,7 +167,7 @@ When multiple sources are provided:
 - ✅ **Check iterative delivery** — Flag any scope that seems to exceed a small/medium or a quarter
 - ✅ **Include verification** — Provide concrete commands/tests to verify completion
 - ✅ **Save to specs/** — Write the output file to `plugins/bitwarden-product-analyst/specs/`
-- ❌ **Don't assume** — If information is missing, mark it as TBD with owner attribution
+- ❌ **Don't assume** — If information is missing, use `AskUserQuestion` to offer the choice: answer it now or mark it as TBD with owner attribution
 - ❌ **Don't over-engineer** — Match detail to scope; don't add unnecessary complexity
 - ❌ **Don't skip sections** — Address all template sections
 
