@@ -1,0 +1,41 @@
+{
+  "name": "@bitwarden/atlassian-tools-mcp",
+  "version": "1.0.0",
+  "description": "Read-only Jira MCP server for issue retrieval, JQL search, comments, and project discovery",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "bitwarden-atlassian-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "watch": "tsc --watch",
+    "dev": "tsc && node build/index.js",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "mcp",
+    "jira",
+    "model-context-protocol",
+    "atlassian",
+    "read-only",
+    "jql"
+  ],
+  "author": "Bitwarden",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "axios": "1.13.6",
+    "zod": "3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.35",
+    "typescript": "5.8.3",
+    "vitest": "3.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

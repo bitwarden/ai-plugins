@@ -7,6 +7,7 @@ Utility scripts for maintaining the Bitwarden AI Plugins Marketplace.
 - [bump-plugin-version.sh](#bump-plugin-versionsh) - Automate version bumping
 - [validate-plugin-structure.sh](#validate-plugin-structuresh) - Validate plugin structure
 - [validate-marketplace.sh](#validate-marketplacesh) - Validate marketplace.json
+- [validate-version-bump.sh](#validate-version-bumpsh) - Validate version bumps for changed plugins
 - [GitHub Actions Integration](#github-actions-integration)
 - [Local Development Workflow](#local-development-workflow)
 
@@ -216,6 +217,54 @@ Total errors found: 0
 
 ---
 
+## validate-version-bump.sh
+
+Validates that changed plugins include a version bump and changelog update.
+
+### Usage
+
+```bash
+# Compare against a base branch
+./scripts/validate-version-bump.sh origin/main plugin-name
+
+# Check multiple plugins
+./scripts/validate-version-bump.sh origin/main bitwarden-code-review bitwarden-software-engineer
+
+# Accept plugins/ path prefix
+./scripts/validate-version-bump.sh origin/main plugins/bitwarden-code-review
+```
+
+### Checks Performed
+
+- **Version bump** - Compares the version in `plugin.json` between the base ref and HEAD. The new version must be strictly greater than the base version (any of major, minor, or patch).
+- **Changelog update** - Verifies that `CHANGELOG.md` was modified in the diff between the base ref and HEAD.
+
+### Exit Codes
+
+- `0` - All plugins have proper version bumps
+- `1` - One or more plugins are missing a version bump or changelog update
+
+### Example Output
+
+```
+🔍 Validating version bumps for changed plugins...
+
+📦 Checking bitwarden-software-engineer...
+  ❌ bitwarden-software-engineer: Version not bumped (still 0.3.0). Plugin component files were changed — run ./scripts/bump-plugin-version.sh bitwarden-software-engineer <new-version>
+  ❌ bitwarden-software-engineer: CHANGELOG.md not updated. Add an entry describing what changed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Version Bump Validation Summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Plugins checked: 1
+Total errors: 2
+
+❌ Version bump validation failed with 2 error(s)
+```
+
+---
+
 ## Plugin Requirements Reference
 
 ### Required Files
@@ -312,6 +361,13 @@ description: Skill description
   - `marketplace.json`
   - `AGENT.md` files (if agents exist)
 - Use the version bump script: `./scripts/bump-plugin-version.sh plugin-name X.Y.Z`
+
+**"Version not bumped" / "CHANGELOG.md not updated"**
+
+- Plugin component files (agents, skills, hooks) were changed without a version bump
+- Run `./scripts/bump-plugin-version.sh <plugin-name> <new-version>` to bump all version files
+- Add a changelog entry under the appropriate category (Added, Changed, Fixed, etc.)
+- Commit the version bump alongside your code changes
 
 **"Missing YAML frontmatter"**
 

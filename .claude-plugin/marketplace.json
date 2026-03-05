@@ -47,6 +47,12 @@
       "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud."
     },
     {
+      "name": "bitwarden-atlassian-tools",
+      "source": "./plugins/bitwarden-atlassian-tools",
+      "version": "1.0.0",
+      "description": "Read-only Jira access via custom MCP server: issue retrieval, JQL search, comments, and project discovery"
+    },
+    {
       "name": "bitwarden-security-engineer",
       "source": "./plugins/bitwarden-security-engineer",
       "version": "0.2.0",
