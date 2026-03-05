@@ -28,7 +28,7 @@ Simple additive changes (new nullable column, new table, new stored procedure) t
 
 ### Stored procedure compatibility
 
-For example stored procedure changes fall into two categories:
+Stored procedure changes fall into two categories:
 
 - **Non-breaking (DEFAULT parameters):** Adding a parameter with a default value (e.g., `@NewParam BIT = NULL`) is backwards-compatible. Existing callers keep working; no `_V2` is needed.
 - **Breaking (`_V2` versioning):** Required when result-set structure changes, calling patterns change (e.g., single result → multiple result sets), required parameters are added without defaults, or query semantics differ. Implement this by creating `ProcedureName_V2` while retaining the original procedure for backwards compatibility.
@@ -56,7 +56,7 @@ These are the most frequently violated conventions. Claude cannot fetch the link
 - **All schema objects use `dbo` schema** — never create objects in other schemas
 - **Constraint naming:** `PK_TableName` (primary key), `FK_Child_Parent` (foreign key), `IX_Table_Column` (index), `DF_Table_Column` (default)
 - **Idempotent scripts:** Use `IF NOT EXISTS` / `IF COL_LENGTH(...)` guards before schema changes in migration scripts
-- **Every database change requires both Dapper and EF Core implementations** — never ship one without the other
+- **New repository functionality requires both Dapper and EF Core implementations** — unless the feature is explicitly EF-only or the change is a backwards-compatible stored procedure modification
 - **Integration tests use `[DatabaseData]` attribute** — this runs the test against all configured database providers
 
 ## Further Reading
