@@ -4,9 +4,6 @@ version: 0.1.0
 description: Use when analyzing requirements, synthesizing specifications from multiple sources, or conducting product research. Trigger phrases: "analyze requirements", "create specification", "create spec", "write spec", "spec out", "spec document", "create a requirements doc", "research feature", "document requirements", "gather requirements", "write requirements", "product spec", "turn this into a spec"
 model: opus
 tools: Read, Write, Glob, Grep, WebSearch, WebFetch, Skill, AskUserQuestion
-skills:
-  - requirements-elicitation
-  - work-breakdown
 color: blue
 ---
 
@@ -67,7 +64,7 @@ When reading a Confluence product initiative page, map its sections to the requi
 
 ### 2. Analysis Phase
 
-Use the `requirements-elicitation` skill to extract requirements:
+Use `Skill(requirements-elicitation)` to extract requirements:
 - Identify functional requirements (what the system must do)
 - Identify non-functional requirements (performance, security, compatibility)
 - Note constraints and dependencies
@@ -79,7 +76,7 @@ Use the `requirements-elicitation` skill to extract requirements:
 
 ### 3. Organization Phase
 
-Use the `work-breakdown` skill to:
+Use `Skill(work-breakdown)` to:
 - Break down into implementable components
 - Identify cross-repo dependencies (always note if `bitwarden/server` changes are required before client work)
 - Create verification criteria
