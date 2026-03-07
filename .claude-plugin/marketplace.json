@@ -35,6 +35,12 @@
       "description": "Initialize Claude Code configuration with Bitwarden's standardized template format"
     },
     {
+      "name": "bitwarden-product-analyst",
+      "source": "./plugins/bitwarden-product-analyst",
+      "version": "0.1.0",
+      "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources"
+    },
+    {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
       "version": "0.3.0",

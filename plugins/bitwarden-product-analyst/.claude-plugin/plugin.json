@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-product-analyst",
+  "version": "0.1.0",
+  "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-product-analyst",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "product-analysis",
+    "requirements",
+    "specifications",
+    "research"
+  ],
+  "agents": "./agents/product-analyst/AGENT.md",
+  "skills": "./skills/"
+}
