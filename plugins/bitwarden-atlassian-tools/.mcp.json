@@ -2,8 +2,8 @@
   "mcpServers": {
     "bitwarden-atlassian": {
       "type": "stdio",
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server/build/index.js"],
+      "command": "bash",
+      "args": ["-c", "cd ${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server && npm install --silent >/dev/null 2>&1 && npm run build >/dev/null 2>&1 && exec node build/index.js"],
       "env": {
         "ATLASSIAN_JIRA_URL": "${ATLASSIAN_JIRA_URL}",
         "ATLASSIAN_EMAIL": "${ATLASSIAN_EMAIL}",
