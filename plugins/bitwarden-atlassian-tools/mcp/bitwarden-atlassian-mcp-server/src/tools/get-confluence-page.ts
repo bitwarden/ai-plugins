@@ -5,51 +5,7 @@
 
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, GetConfluencePageSchema, GetConfluencePageInput, ToolDefinition } from '../utils/validation.js';
-
-/**
- * Convert Confluence storage format to readable text
- * Confluence uses XHTML-like storage format
- */
-function formatStorageContent(html: string): string {
-  if (!html) return '';
-
-  // Basic HTML to plain text conversion
-  let text = html;
-
-  // Replace common tags with readable equivalents
-  text = text.replace(/<br\s*\/?>/gi, '\n');
-  text = text.replace(/<\/p>/gi, '\n\n');
-  text = text.replace(/<p[^>]*>/gi, '');
-  text = text.replace(/<h([1-6])[^>]*>/gi, (_, level) => '\n' + '#'.repeat(parseInt(level)) + ' ');
-  text = text.replace(/<\/h[1-6]>/gi, '\n');
-  text = text.replace(/<li[^>]*>/gi, '- ');
-  text = text.replace(/<\/li>/gi, '\n');
-  text = text.replace(/<ul[^>]*>|<\/ul>/gi, '\n');
-  text = text.replace(/<ol[^>]*>|<\/ol>/gi, '\n');
-  text = text.replace(/<strong[^>]*>|<\/strong>/gi, '**');
-  text = text.replace(/<b[^>]*>|<\/b>/gi, '**');
-  text = text.replace(/<em[^>]*>|<\/em>/gi, '_');
-  text = text.replace(/<i[^>]*>|<\/i>/gi, '_');
-  text = text.replace(/<code[^>]*>|<\/code>/gi, '`');
-  text = text.replace(/<pre[^>]*>/gi, '\n```\n');
-  text = text.replace(/<\/pre>/gi, '\n```\n');
-
-  // Remove remaining HTML tags
-  text = text.replace(/<[^>]+>/g, '');
-
-  // Decode HTML entities
-  text = text.replace(/&nbsp;/g, ' ');
-  text = text.replace(/&lt;/g, '<');
-  text = text.replace(/&gt;/g, '>');
-  text = text.replace(/&amp;/g, '&');
-  text = text.replace(/&quot;/g, '"');
-  text = text.replace(/&#39;/g, "'");
-
-  // Clean up excessive newlines
-  text = text.replace(/\n{3,}/g, '\n\n');
-
-  return text.trim();
-}
+import { htmlToMarkdown, resolveWebuiUrl } from '../utils/format.js';
 
 /**
  * Format page for display
@@ -75,10 +31,7 @@ function formatPage(page: any): string {
   }
 
   if (page._links?.webui) {
-    const baseUrl = page._links.webui.startsWith('http')
-      ? page._links.webui
-      : `${process.env.ATLASSIAN_CONFLUENCE_URL || process.env.ATLASSIAN_JIRA_URL}${page._links.webui}`;
-    output += `**URL:** ${baseUrl}\n`;
+    output += `**URL:** ${resolveWebuiUrl(page._links.webui)}\n`;
   }
 
   output += `\n---\n\n`;
@@ -86,11 +39,11 @@ function formatPage(page: any): string {
   // Add page content if available
   if (page.body?.storage?.value) {
     output += `## Content\n\n`;
-    const formattedContent = formatStorageContent(page.body.storage.value);
+    const formattedContent = htmlToMarkdown(page.body.storage.value);
     output += formattedContent + '\n';
   } else if (page.body?.view?.value) {
     output += `## Content\n\n`;
-    const formattedContent = formatStorageContent(page.body.view.value);
+    const formattedContent = htmlToMarkdown(page.body.view.value);
     output += formattedContent + '\n';
   } else {
     output += `_No content available_\n`;

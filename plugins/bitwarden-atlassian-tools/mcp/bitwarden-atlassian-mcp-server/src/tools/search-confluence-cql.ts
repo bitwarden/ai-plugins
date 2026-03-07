@@ -5,6 +5,7 @@
 
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, SearchConfluenceCqlSchema, SearchConfluenceCqlInput, ToolDefinition } from '../utils/validation.js';
+import { resolveWebuiUrl } from '../utils/format.js';
 
 /**
  * Format CQL search results for display
@@ -40,10 +41,7 @@ function formatCqlSearchResults(results: any, params: SearchConfluenceCqlInput):
     }
 
     if (item._links?.webui) {
-      const baseUrl = item._links.webui.startsWith('http')
-        ? item._links.webui
-        : `${process.env.ATLASSIAN_CONFLUENCE_URL || process.env.ATLASSIAN_JIRA_URL}${item._links.webui}`;
-      output += `**URL:** ${baseUrl}\n`;
+      output += `**URL:** ${resolveWebuiUrl(item._links.webui)}\n`;
     }
 
     output += `\n---\n\n`;

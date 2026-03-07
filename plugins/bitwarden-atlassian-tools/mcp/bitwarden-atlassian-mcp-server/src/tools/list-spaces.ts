@@ -6,6 +6,7 @@
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, ListSpacesSchema, ToolDefinition } from '../utils/validation.js';
 import { ConfluenceSpace } from '../confluence/types.js';
+import { resolveWebuiUrl } from '../utils/format.js';
 
 /**
  * Format space list for display
@@ -27,10 +28,7 @@ function formatSpaces(spaces: ConfluenceSpace[]): string {
     output += `- Type: ${space.type}\n`;
     output += `- Status: ${space.status}\n`;
     if (space._links?.webui) {
-      const baseUrl = space._links.webui.startsWith('http')
-        ? space._links.webui
-        : `${process.env.ATLASSIAN_CONFLUENCE_URL || process.env.ATLASSIAN_JIRA_URL}${space._links.webui}`;
-      output += `- URL: ${baseUrl}\n`;
+      output += `- URL: ${resolveWebuiUrl(space._links.webui)}\n`;
     }
     output += `\n`;
   }

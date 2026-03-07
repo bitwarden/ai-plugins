@@ -6,39 +6,7 @@
 import { ConfluenceClient } from '../confluence/client.js';
 import { ConfluenceComment } from '../confluence/types.js';
 import { validateInput, GetConfluencePageCommentsSchema, GetConfluencePageCommentsInput, ToolDefinition } from '../utils/validation.js';
-
-/**
- * Convert Confluence storage format to readable text
- */
-function formatCommentContent(html: string): string {
-  if (!html) return '';
-
-  let text = html;
-
-  // Replace common tags with readable equivalents
-  text = text.replace(/<br\s*\/?>/gi, '\n');
-  text = text.replace(/<\/p>/gi, '\n');
-  text = text.replace(/<p[^>]*>/gi, '');
-  text = text.replace(/<strong[^>]*>|<\/strong>/gi, '**');
-  text = text.replace(/<b[^>]*>|<\/b>/gi, '**');
-  text = text.replace(/<em[^>]*>|<\/em>/gi, '_');
-  text = text.replace(/<i[^>]*>|<\/i>/gi, '_');
-  text = text.replace(/<code[^>]*>|<\/code>/gi, '`');
-  text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi, '[$2]($1)');
-
-  // Remove remaining HTML tags
-  text = text.replace(/<[^>]+>/g, '');
-
-  // Decode HTML entities
-  text = text.replace(/&nbsp;/g, ' ');
-  text = text.replace(/&lt;/g, '<');
-  text = text.replace(/&gt;/g, '>');
-  text = text.replace(/&amp;/g, '&');
-  text = text.replace(/&quot;/g, '"');
-  text = text.replace(/&#39;/g, "'");
-
-  return text.trim();
-}
+import { htmlToMarkdown } from '../utils/format.js';
 
 /**
  * Format a single comment
@@ -71,7 +39,7 @@ function formatComment(comment: ConfluenceComment, indent: number = 0): string {
   // Add comment body
   const bodyContent = comment.body?.storage?.value || comment.body?.view?.value || '';
   if (bodyContent) {
-    const formattedContent = formatCommentContent(bodyContent);
+    const formattedContent = htmlToMarkdown(bodyContent);
     // Indent multi-line content
     const indentedContent = formattedContent
       .split('\n')

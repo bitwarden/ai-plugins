@@ -370,6 +370,15 @@ describe('DownloadAttachmentSchema', () => {
     ).toThrow();
   });
 
+  it('should reject a URL with the attachment pattern only in the query string', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({
+        attachmentUrl:
+          'https://mycompany.atlassian.net/rest/api/2/user?key=admin&x=/secure/attachment/',
+      })
+    ).toThrow();
+  });
+
   it('should reject an empty string', () => {
     expect(() =>
       DownloadAttachmentSchema.parse({ attachmentUrl: '' })

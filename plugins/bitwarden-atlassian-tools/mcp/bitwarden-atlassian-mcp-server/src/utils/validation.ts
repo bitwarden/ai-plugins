@@ -120,8 +120,14 @@ export type ListSpacesInput = z.infer<typeof ListSpacesSchema>;
 export const DownloadAttachmentSchema = z.object({
   attachmentUrl: z.string()
     .url('Must be a valid URL')
-    .regex(/\/secure\/attachment\/|\/rest\/api\/.*\/attachment\//,
-           'Must be a JIRA attachment URL')
+    .refine((url) => {
+      try {
+        const { pathname } = new URL(url);
+        return /\/secure\/attachment\/|\/rest\/api\/.*\/attachment\//.test(pathname);
+      } catch {
+        return false;
+      }
+    }, 'Must be a JIRA attachment URL path')
     .refine((url) => {
       try {
         const configOrigin = new URL(loadJiraConfig().url).origin;

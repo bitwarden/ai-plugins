@@ -6,6 +6,7 @@
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, GetChildPagesSchema, ToolDefinition } from '../utils/validation.js';
 import { ConfluencePage } from '../confluence/types.js';
+import { resolveWebuiUrl } from '../utils/format.js';
 
 /**
  * Format child pages for display
@@ -31,10 +32,7 @@ function formatChildPages(pages: ConfluencePage[], parentPageId: string): string
       }
     }
     if (page._links?.webui) {
-      const baseUrl = page._links.webui.startsWith('http')
-        ? page._links.webui
-        : `${process.env.ATLASSIAN_CONFLUENCE_URL || process.env.ATLASSIAN_JIRA_URL}${page._links.webui}`;
-      output += `- URL: ${baseUrl}\n`;
+      output += `- URL: ${resolveWebuiUrl(page._links.webui)}\n`;
     }
     output += `\n`;
   }
