@@ -1,17 +1,19 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 /**
- * Tests for JiraClient.downloadAttachment hostname validation.
+ * Tests for JiraClient.downloadAttachment hostname validation and gateway routing.
  *
  * The constructor calls loadJiraConfig() which requires env vars,
  * so we mock the auth module to avoid that dependency.
  */
 
+const mockInstanceGet = vi.fn();
+
 // Mock axios before importing the client
 vi.mock('axios', () => {
   const mockAxios: any = {
     create: vi.fn(() => ({
-      get: vi.fn(),
+      get: mockInstanceGet,
       interceptors: {
         response: { use: vi.fn() },
       },
@@ -35,7 +37,6 @@ vi.mock('./auth.js', () => ({
   }),
 }));
 
-import axios from 'axios';
 import { JiraClient } from './client.js';
 
 describe('JiraClient.downloadAttachment', () => {
@@ -46,26 +47,40 @@ describe('JiraClient.downloadAttachment', () => {
     vi.clearAllMocks();
   });
 
-  it('should allow *.atlassian.net attachment URL', async () => {
-    const mockGet = vi.mocked(axios.get);
-    mockGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
+  it('should route *.atlassian.net attachment URL through the API gateway', async () => {
+    mockInstanceGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
 
     const result = await client.downloadAttachment(
       'https://company.atlassian.net/rest/api/3/attachment/content/12345'
     );
     expect(result).toBeInstanceOf(Buffer);
-    expect(mockGet).toHaveBeenCalledOnce();
+    expect(mockInstanceGet).toHaveBeenCalledOnce();
+    expect(mockInstanceGet).toHaveBeenCalledWith(
+      'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/attachment/content/12345',
+      expect.objectContaining({ responseType: 'arraybuffer' })
+    );
+  });
+
+  it('should preserve query parameters when rewriting to gateway URL', async () => {
+    mockInstanceGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
+
+    await client.downloadAttachment(
+      'https://company.atlassian.net/rest/api/3/attachment/content/12345?redirect=false'
+    );
+    expect(mockInstanceGet).toHaveBeenCalledWith(
+      'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/attachment/content/12345?redirect=false',
+      expect.anything()
+    );
   });
 
   it('should allow any *.atlassian.net subdomain', async () => {
-    const mockGet = vi.mocked(axios.get);
-    mockGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
+    mockInstanceGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
 
     const result = await client.downloadAttachment(
       'https://other-company.atlassian.net/rest/api/3/attachment/content/12345'
     );
     expect(result).toBeInstanceOf(Buffer);
-    expect(mockGet).toHaveBeenCalledOnce();
+    expect(mockInstanceGet).toHaveBeenCalledOnce();
   });
 
   it('should reject non-atlassian.net domain', async () => {

@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated from direct site URLs to Atlassian API gateway (`api.atlassian.com`) for all API requests
 - Replaced `ATLASSIAN_JIRA_URL` and `ATLASSIAN_CONFLUENCE_URL` env vars with single `ATLASSIAN_CLOUD_ID`
 - Attachment URL validation now accepts any `*.atlassian.net` origin instead of exact origin match
+- Attachment downloads now route through the API gateway for scoped token compatibility
+
 ### Added
 
 - Support for Atlassian scoped API tokens (requires gateway routing)

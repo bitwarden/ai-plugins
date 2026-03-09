@@ -174,7 +174,9 @@ export class JiraClient {
   }
 
   /**
-   * Download attachment as binary buffer
+   * Download attachment as binary buffer.
+   * Rewrites direct *.atlassian.net URLs to route through the API gateway
+   * so that scoped API tokens authenticate correctly.
    */
   async downloadAttachment(attachmentUrl: string): Promise<Buffer> {
     const parsed = new URL(attachmentUrl);
@@ -182,9 +184,11 @@ export class JiraClient {
       throw new Error('Attachment URL must be an *.atlassian.net hostname');
     }
 
+    // Route through the API gateway so scoped tokens work
+    const gatewayUrl = `${this.config.gatewayBaseUrl}${parsed.pathname}${parsed.search}`;
+
     try {
-      const response = await axios.get(attachmentUrl, {
-        headers: getJiraHeaders(this.config),
+      const response = await this.client.get(gatewayUrl, {
         responseType: 'arraybuffer',
         timeout: 60000,
         maxContentLength: 50 * 1024 * 1024,
