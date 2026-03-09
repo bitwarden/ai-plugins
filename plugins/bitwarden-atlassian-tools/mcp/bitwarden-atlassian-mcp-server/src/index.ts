@@ -45,7 +45,7 @@ const tools: ToolDefinition[] = [
 ];
 
 async function main() {
-  const requiredEnvVars = ['ATLASSIAN_JIRA_URL', 'ATLASSIAN_EMAIL', 'ATLASSIAN_JIRA_READ_ONLY_TOKEN'];
+  const requiredEnvVars = ['ATLASSIAN_CLOUD_ID', 'ATLASSIAN_EMAIL', 'ATLASSIAN_JIRA_READ_ONLY_TOKEN'];
   const missingVars = requiredEnvVars.filter(v => !process.env[v]);
 
   if (missingVars.length > 0) {
@@ -54,7 +54,7 @@ async function main() {
   }
 
   const server = new Server(
-    { name: 'bitwarden-atlassian-mcp', version: '1.1.0' },
+    { name: 'bitwarden-atlassian-mcp', version: '2.0.0' },
     { capabilities: { tools: {} } },
   );
 

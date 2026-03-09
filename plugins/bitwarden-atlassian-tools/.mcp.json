@@ -5,10 +5,9 @@
       "command": "bash",
       "args": ["-c", "cd \"${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server\" && npm install --silent >/dev/null && npm run build >/dev/null && exec node build/index.js"],
       "env": {
-        "ATLASSIAN_JIRA_URL": "${ATLASSIAN_JIRA_URL}",
+        "ATLASSIAN_CLOUD_ID": "${ATLASSIAN_CLOUD_ID}",
         "ATLASSIAN_EMAIL": "${ATLASSIAN_EMAIL}",
         "ATLASSIAN_JIRA_READ_ONLY_TOKEN": "${ATLASSIAN_JIRA_READ_ONLY_TOKEN}",
-        "ATLASSIAN_CONFLUENCE_URL": "${ATLASSIAN_CONFLUENCE_URL}",
         "ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN": "${ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN}"
       }
     }

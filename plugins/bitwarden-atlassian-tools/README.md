@@ -9,15 +9,30 @@ Read-only Atlassian access via a custom MCP server providing Jira issue retrieva
 Configure the following environment variables:
 
 ```bash
-# Required — Jira access
-export ATLASSIAN_JIRA_URL="https://your-domain.atlassian.net"
+# Required — Atlassian Cloud ID (find yours at https://your-domain.atlassian.net/_edge/tenant_info)
+export ATLASSIAN_CLOUD_ID="your-cloud-id"
 export ATLASSIAN_EMAIL="your-email@company.com"
 export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-api-token"
 
-# Optional — Confluence access (falls back to Jira credentials if not set)
-export ATLASSIAN_CONFLUENCE_URL="https://your-domain.atlassian.net"
+# Optional — Confluence token (falls back to Jira token if not set)
 export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-api-token"
 ```
+
+API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
+
+### Required Atlassian Permissions
+
+Use **scoped (granular) API tokens** for least-privilege access. Create them at [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and grant the following scopes:
+
+| Scope | Required for |
+|-------|-------------|
+| `read:jira-work` | Issues, comments, projects, attachments, boards, sprints |
+| `read:jira-user` | User display names on issues and comments |
+| `read:confluence-content.all` | Pages, comments, child pages |
+| `read:confluence-space.summary` | Space listing |
+| `search:confluence` | CQL and title/space search |
+
+Classic (non-scoped) API tokens also work but inherit full account permissions, which is broader than necessary.
 
 ## MCP Tools
 

@@ -22,22 +22,22 @@ function resolveEnv(name: string): string | undefined {
  * @throws {Error} If required environment variables are missing
  */
 export function loadJiraConfig(): JiraConfig {
-  const url = resolveEnv('ATLASSIAN_JIRA_URL');
+  const cloudId = resolveEnv('ATLASSIAN_CLOUD_ID');
   const email = resolveEnv('ATLASSIAN_EMAIL');
   const apiToken = resolveEnv('ATLASSIAN_JIRA_READ_ONLY_TOKEN');
 
-  if (!url || !email || !apiToken) {
+  if (!cloudId || !email || !apiToken) {
     throw new Error(
       'Missing required JIRA environment variables. ' +
-      'Please set ATLASSIAN_JIRA_URL, ATLASSIAN_EMAIL, and ATLASSIAN_JIRA_READ_ONLY_TOKEN'
+      'Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_JIRA_READ_ONLY_TOKEN'
     );
   }
 
-  // Normalize URL by removing trailing slash
-  const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+  const gatewayBaseUrl = `https://api.atlassian.com/ex/jira/${cloudId}`;
 
   return {
-    url: normalizedUrl,
+    cloudId,
+    gatewayBaseUrl,
     email,
     apiToken,
   };

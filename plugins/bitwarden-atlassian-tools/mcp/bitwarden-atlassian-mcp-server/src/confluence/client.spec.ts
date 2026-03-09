@@ -22,7 +22,8 @@ vi.mock('axios', () => ({
 
 vi.mock('./auth.js', () => ({
   loadConfluenceConfig: () => ({
-    url: 'https://company.atlassian.net',
+    cloudId: 'test-cloud-id',
+    gatewayBaseUrl: 'https://api.atlassian.com/ex/confluence/test-cloud-id',
     email: 'user@example.com',
     apiToken: 'test-token',
   }),
@@ -105,7 +106,7 @@ describe('ConfluenceClient error handling', () => {
       config: {},
     });
     expect(err.message).toContain('request failed');
-    expect(err.message).toContain('ATLASSIAN_CONFLUENCE_URL');
+    expect(err.message).toContain('ATLASSIAN_CLOUD_ID');
   });
 
   it('should handle no response and no request', async () => {

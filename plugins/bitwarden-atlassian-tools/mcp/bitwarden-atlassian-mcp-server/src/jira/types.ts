@@ -4,7 +4,8 @@
  */
 
 export interface JiraConfig {
-  url: string;
+  cloudId: string;
+  gatewayBaseUrl: string;
   email: string;
   apiToken: string;
 }

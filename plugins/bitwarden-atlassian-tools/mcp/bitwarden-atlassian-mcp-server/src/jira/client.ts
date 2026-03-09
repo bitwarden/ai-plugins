@@ -27,7 +27,7 @@ export class JiraClient {
   constructor() {
     this.config = loadJiraConfig();
     this.client = axios.create({
-      baseURL: this.config.url,
+      baseURL: this.config.gatewayBaseUrl,
       headers: getJiraHeaders(this.config),
       timeout: 30000, // 30 second timeout
     });
@@ -68,7 +68,7 @@ export class JiraClient {
     }
 
     if (error.request) {
-      return new Error(`JIRA API request failed: ${error.message}. Check your JIRA_URL.`);
+      return new Error(`JIRA API request failed: ${error.message}. Check your ATLASSIAN_CLOUD_ID.`);
     }
 
     return new Error(`JIRA client error: ${error.message}`);
@@ -177,10 +177,9 @@ export class JiraClient {
    * Download attachment as binary buffer
    */
   async downloadAttachment(attachmentUrl: string): Promise<Buffer> {
-    const configOrigin = new URL(this.config.url).origin;
-    const attachmentOrigin = new URL(attachmentUrl).origin;
-    if (attachmentOrigin !== configOrigin) {
-      throw new Error('Attachment URL does not belong to the configured Jira instance');
+    const parsed = new URL(attachmentUrl);
+    if (!parsed.hostname.endsWith('.atlassian.net') || parsed.hostname === '.atlassian.net') {
+      throw new Error('Attachment URL must be an *.atlassian.net hostname');
     }
 
     try {

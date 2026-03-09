@@ -44,8 +44,7 @@ import searchConfluenceCqlTool from './search-confluence-cql.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
-  delete process.env.ATLASSIAN_CONFLUENCE_URL;
-  delete process.env.ATLASSIAN_JIRA_URL;
+  // no env cleanup needed
 });
 
 // ── get_confluence_page ─────────────────────────────────────────────
@@ -105,8 +104,7 @@ describe('get_confluence_page formatting', () => {
     expect(result).toContain('**URL:** https://company.atlassian.net/wiki/spaces/EN/pages/1');
   });
 
-  it('should prepend ATLASSIAN_CONFLUENCE_URL for relative webui URL', async () => {
-    process.env.ATLASSIAN_CONFLUENCE_URL = 'https://company.atlassian.net';
+  it('should return relative webui URL as-is', async () => {
     mockGetPage.mockResolvedValueOnce({
       title: 'Page',
       id: '1',
@@ -115,20 +113,7 @@ describe('get_confluence_page formatting', () => {
     });
 
     const result = await getConfluencePageTool.handler({ pageId: '1' });
-    expect(result).toContain('**URL:** https://company.atlassian.net/wiki/spaces/EN/pages/1');
-  });
-
-  it('should fall back to ATLASSIAN_JIRA_URL for relative webui URL', async () => {
-    process.env.ATLASSIAN_JIRA_URL = 'https://jira.example.com';
-    mockGetPage.mockResolvedValueOnce({
-      title: 'Page',
-      id: '1',
-      status: 'current',
-      _links: { webui: '/wiki/spaces/EN/pages/1' },
-    });
-
-    const result = await getConfluencePageTool.handler({ pageId: '1' });
-    expect(result).toContain('**URL:** https://jira.example.com/wiki/spaces/EN/pages/1');
+    expect(result).toContain('**URL:** /wiki/spaces/EN/pages/1');
   });
 
   it('should render body from storage format', async () => {
@@ -472,8 +457,7 @@ describe('get_child_pages formatting', () => {
     expect(result).toContain('- Modified By: Jane');
   });
 
-  it('should construct URL with ATLASSIAN_CONFLUENCE_URL for relative links', async () => {
-    process.env.ATLASSIAN_CONFLUENCE_URL = 'https://company.atlassian.net';
+  it('should return relative webui URL as-is for child pages', async () => {
     mockGetChildPages.mockResolvedValueOnce({
       results: [
         {
@@ -486,7 +470,7 @@ describe('get_child_pages formatting', () => {
     });
 
     const result = await getChildPagesTool.handler({ pageId: '100' });
-    expect(result).toContain('- URL: https://company.atlassian.net/wiki/spaces/EN/pages/200');
+    expect(result).toContain('- URL: /wiki/spaces/EN/pages/200');
   });
 
   it('should show empty results message', async () => {
@@ -532,8 +516,7 @@ describe('list_spaces formatting', () => {
     expect(result).toContain('- Status: current');
   });
 
-  it('should construct URL for relative links', async () => {
-    process.env.ATLASSIAN_CONFLUENCE_URL = 'https://company.atlassian.net';
+  it('should return relative webui URL as-is for spaces', async () => {
     mockListSpaces.mockResolvedValueOnce({
       results: [
         {
@@ -548,7 +531,7 @@ describe('list_spaces formatting', () => {
     });
 
     const result = await listSpacesTool.handler({});
-    expect(result).toContain('- URL: https://company.atlassian.net/wiki/spaces/EN');
+    expect(result).toContain('- URL: /wiki/spaces/EN');
   });
 
   it('should show empty results message', async () => {
@@ -630,8 +613,7 @@ describe('search_confluence formatting', () => {
     expect(result).toContain('**Space:** Engineering (EN)');
   });
 
-  it('should construct URL for pages', async () => {
-    process.env.ATLASSIAN_CONFLUENCE_URL = 'https://company.atlassian.net';
+  it('should return relative webui URL as-is for search results', async () => {
     mockSearchPages.mockResolvedValueOnce({
       results: [
         {
@@ -645,7 +627,7 @@ describe('search_confluence formatting', () => {
     });
 
     const result = await searchConfluenceTool.handler({ spaceKey: 'EN' });
-    expect(result).toContain('**URL:** https://company.atlassian.net/wiki/spaces/EN/pages/1');
+    expect(result).toContain('**URL:** /wiki/spaces/EN/pages/1');
   });
 
   it('should show empty results message', async () => {

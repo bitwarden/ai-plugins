@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 /**
- * Tests for JiraClient.downloadAttachment origin validation.
+ * Tests for JiraClient.downloadAttachment hostname validation.
  *
  * The constructor calls loadJiraConfig() which requires env vars,
  * so we mock the auth module to avoid that dependency.
@@ -23,7 +23,8 @@ vi.mock('axios', () => {
 
 vi.mock('./auth.js', () => ({
   loadJiraConfig: () => ({
-    url: 'https://company.atlassian.net',
+    cloudId: 'test-cloud-id',
+    gatewayBaseUrl: 'https://api.atlassian.com/ex/jira/test-cloud-id',
     email: 'user@example.com',
     apiToken: 'test-token',
   }),
@@ -45,7 +46,7 @@ describe('JiraClient.downloadAttachment', () => {
     vi.clearAllMocks();
   });
 
-  it('should allow same-origin attachment URL', async () => {
+  it('should allow *.atlassian.net attachment URL', async () => {
     const mockGet = vi.mocked(axios.get);
     mockGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
 
@@ -56,10 +57,21 @@ describe('JiraClient.downloadAttachment', () => {
     expect(mockGet).toHaveBeenCalledOnce();
   });
 
-  it('should reject different origin URL', async () => {
+  it('should allow any *.atlassian.net subdomain', async () => {
+    const mockGet = vi.mocked(axios.get);
+    mockGet.mockResolvedValueOnce({ data: Buffer.from('file-content') });
+
+    const result = await client.downloadAttachment(
+      'https://other-company.atlassian.net/rest/api/3/attachment/content/12345'
+    );
+    expect(result).toBeInstanceOf(Buffer);
+    expect(mockGet).toHaveBeenCalledOnce();
+  });
+
+  it('should reject non-atlassian.net domain', async () => {
     await expect(
       client.downloadAttachment('https://evil.com/rest/api/3/attachment/content/12345')
-    ).rejects.toThrow('Attachment URL does not belong to the configured Jira instance');
+    ).rejects.toThrow('Attachment URL must be an *.atlassian.net hostname');
   });
 
   it('should reject sibling domain attack', async () => {
@@ -67,15 +79,15 @@ describe('JiraClient.downloadAttachment', () => {
       client.downloadAttachment(
         'https://company.atlassian.net.evil.com/rest/api/3/attachment/content/12345'
       )
-    ).rejects.toThrow('Attachment URL does not belong to the configured Jira instance');
+    ).rejects.toThrow('Attachment URL must be an *.atlassian.net hostname');
   });
 
-  it('should reject URL with different port', async () => {
+  it('should reject bare atlassian.net without subdomain', async () => {
     await expect(
       client.downloadAttachment(
-        'https://company.atlassian.net:8443/rest/api/3/attachment/content/12345'
+        'https://atlassian.net/rest/api/3/attachment/content/12345'
       )
-    ).rejects.toThrow('Attachment URL does not belong to the configured Jira instance');
+    ).rejects.toThrow('Attachment URL must be an *.atlassian.net hostname');
   });
 
   it('should throw TypeError for invalid URL', async () => {

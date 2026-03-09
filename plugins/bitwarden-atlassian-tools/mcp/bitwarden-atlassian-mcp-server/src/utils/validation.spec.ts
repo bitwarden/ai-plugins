@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   GetIssueSchema,
   GetIssueCommentsSchema,
@@ -14,13 +14,6 @@ import {
   validateInput,
 } from './validation.js';
 
-vi.mock('../jira/auth.js', () => ({
-  loadJiraConfig: () => ({
-    url: 'https://mycompany.atlassian.net',
-    email: 'test@example.com',
-    apiToken: 'test-token',
-  }),
-}));
 
 describe('GetIssueSchema', () => {
   describe('issueIdOrKey validation', () => {
@@ -334,7 +327,7 @@ describe('DownloadAttachmentSchema', () => {
   const validUrl =
     'https://mycompany.atlassian.net/secure/attachment/12345/file.pdf';
 
-  it('should accept a valid attachment URL matching the configured origin', () => {
+  it('should accept a valid *.atlassian.net attachment URL', () => {
     const result = DownloadAttachmentSchema.parse({ attachmentUrl: validUrl });
     expect(result.attachmentUrl).toBe(validUrl);
     expect(result.maxSizeMB).toBe(10);
@@ -347,11 +340,27 @@ describe('DownloadAttachmentSchema', () => {
     expect(result.attachmentUrl).toBe(restUrl);
   });
 
-  it('should reject a URL whose origin does not match (SSRF)', () => {
+  it('should accept any *.atlassian.net subdomain', () => {
+    const otherUrl =
+      'https://other-company.atlassian.net/secure/attachment/12345/file.pdf';
+    const result = DownloadAttachmentSchema.parse({ attachmentUrl: otherUrl });
+    expect(result.attachmentUrl).toBe(otherUrl);
+  });
+
+  it('should reject a non-atlassian.net hostname (SSRF)', () => {
     expect(() =>
       DownloadAttachmentSchema.parse({
         attachmentUrl:
           'https://attacker.com/secure/attachment/123/file.pdf',
+      })
+    ).toThrow();
+  });
+
+  it('should reject a sibling domain attack', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({
+        attachmentUrl:
+          'https://company.atlassian.net.evil.com/secure/attachment/123/file.pdf',
       })
     ).toThrow();
   });

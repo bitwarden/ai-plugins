@@ -30,7 +30,7 @@ export class ConfluenceClient {
   constructor() {
     this.config = loadConfluenceConfig();
     this.client = axios.create({
-      baseURL: this.config.url,
+      baseURL: this.config.gatewayBaseUrl,
       headers: getConfluenceHeaders(this.config),
       timeout: 30000, // 30 second timeout
     });
@@ -69,7 +69,7 @@ export class ConfluenceClient {
     }
 
     if (error.request) {
-      return new Error(`Confluence API request failed: ${error.message}. Check your ATLASSIAN_CONFLUENCE_URL.`);
+      return new Error(`Confluence API request failed: ${error.message}. Check your ATLASSIAN_CLOUD_ID.`);
     }
 
     return new Error(`Confluence client error: ${error.message}`);

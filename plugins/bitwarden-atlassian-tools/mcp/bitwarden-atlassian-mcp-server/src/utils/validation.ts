@@ -4,7 +4,6 @@
  */
 
 import { z } from 'zod';
-import { loadJiraConfig } from '../jira/auth.js';
 
 /**
  * Shape of a tool module's default export.
@@ -130,13 +129,12 @@ export const DownloadAttachmentSchema = z.object({
     }, 'Must be a JIRA attachment URL path')
     .refine((url) => {
       try {
-        const configOrigin = new URL(loadJiraConfig().url).origin;
-        const attachmentOrigin = new URL(url).origin;
-        return attachmentOrigin === configOrigin;
+        const { hostname } = new URL(url);
+        return hostname.endsWith('.atlassian.net') && hostname !== '.atlassian.net';
       } catch {
         return false;
       }
-    }, 'Attachment URL hostname does not match the configured Atlassian instance'),
+    }, 'Attachment URL must be an *.atlassian.net hostname'),
   maxSizeMB: z.number()
     .int()
     .min(1)
