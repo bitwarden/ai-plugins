@@ -20,19 +20,17 @@ function resolveEnv(name: string): string | undefined {
 
 /**
  * Load Confluence configuration from environment variables
- * Falls back to Jira credentials if Confluence-specific ones aren't set
  * @throws {Error} If required environment variables are missing
  */
 export function loadConfluenceConfig(): ConfluenceConfig {
   const cloudId = resolveEnv('ATLASSIAN_CLOUD_ID');
   const email = resolveEnv('ATLASSIAN_EMAIL');
-  const apiToken = resolveEnv('ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN') || resolveEnv('ATLASSIAN_JIRA_READ_ONLY_TOKEN');
+  const apiToken = resolveEnv('ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN');
 
   if (!cloudId || !email || !apiToken) {
     throw new Error(
       'Missing required Confluence environment variables. ' +
-      'Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN ' +
-      '(or ATLASSIAN_JIRA_READ_ONLY_TOKEN)'
+      'Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN'
     );
   }
 
