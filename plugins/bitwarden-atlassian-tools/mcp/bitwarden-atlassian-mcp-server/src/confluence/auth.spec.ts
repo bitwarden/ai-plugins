@@ -35,17 +35,16 @@ describe('loadConfluenceConfig', () => {
     );
   });
 
-  it('should fall back to ATLASSIAN_JIRA_READ_ONLY_TOKEN when Confluence token not set', () => {
+  it('should throw when ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN is missing even if Jira token is set', () => {
     process.env.ATLASSIAN_CLOUD_ID = 'test-cloud-id';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     delete process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN;
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'jira-token';
 
-    const config = loadConfluenceConfig();
-    expect(config.apiToken).toBe('jira-token');
+    expect(() => loadConfluenceConfig()).toThrow(/Missing required Confluence environment variables/);
   });
 
-  it('should prefer Confluence token over Jira token when both set', () => {
+  it('should use ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN', () => {
     process.env.ATLASSIAN_CLOUD_ID = 'test-cloud-id';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN = 'confluence-token';
@@ -71,11 +70,10 @@ describe('loadConfluenceConfig', () => {
     expect(() => loadConfluenceConfig()).toThrow(/Missing required Confluence environment variables/);
   });
 
-  it('should throw when token is missing (both variants)', () => {
+  it('should throw when ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN is missing', () => {
     process.env.ATLASSIAN_CLOUD_ID = 'test-cloud-id';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     delete process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN;
-    delete process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN;
 
     expect(() => loadConfluenceConfig()).toThrow(/Missing required Confluence environment variables/);
   });
