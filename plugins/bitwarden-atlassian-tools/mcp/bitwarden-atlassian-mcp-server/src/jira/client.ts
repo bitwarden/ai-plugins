@@ -196,10 +196,13 @@ export class JiraClient {
 
       return Buffer.from(response.data);
     } catch (error: any) {
-      if (error.code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED') {
+      if (
+        error.code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED' ||
+        error.message?.includes('maxContentLength')
+      ) {
         throw new Error('Attachment exceeds maximum download size (50MB)');
       }
-      throw this.handleError(error);
+      throw error; // already transformed by the response interceptor
     }
   }
 
