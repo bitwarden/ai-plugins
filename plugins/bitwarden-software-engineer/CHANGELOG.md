@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-software-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-03-05
+
+### Changed
+
+- Updated `writing-database-queries` skill: clarified dual-ORM architecture, rewrote EDD section to reflect no-rollback deployment model, documented stored procedure compatibility patterns, and simplified key locations
+
 ## [0.3.0] - 2026-02-23
 
 ### Added
