@@ -13,19 +13,19 @@
     {
       "name": "claude-retrospective",
       "source": "./plugins/claude-retrospective",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Comprehensive analysis of Claude Code sessions to identify successful patterns, problematic areas, and opportunities for improvement."
     },
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Reviews CLAUDE.md, skills, agents, prompts, commands, and settings."
     },
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.8.0",
+      "version": "1.8.1",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -37,7 +37,7 @@
     {
       "name": "bitwarden-product-analyst",
       "source": "./plugins/bitwarden-product-analyst",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources"
     },
     {
@@ -49,7 +49,7 @@
     {
       "name": "atlassian-reader",
       "source": "./plugins/atlassian-reader",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud."
     },
     {
