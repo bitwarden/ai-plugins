@@ -27,7 +27,7 @@ export class JiraClient {
   constructor() {
     this.config = loadJiraConfig();
     this.client = axios.create({
-      baseURL: this.config.url,
+      baseURL: this.config.gatewayBaseUrl,
       headers: getJiraHeaders(this.config),
       timeout: 30000, // 30 second timeout
     });
@@ -68,7 +68,7 @@ export class JiraClient {
     }
 
     if (error.request) {
-      return new Error(`JIRA API request failed: ${error.message}. Check your JIRA_URL.`);
+      return new Error(`JIRA API request failed: ${error.message}. Check your ATLASSIAN_CLOUD_ID.`);
     }
 
     return new Error(`JIRA client error: ${error.message}`);
@@ -174,18 +174,21 @@ export class JiraClient {
   }
 
   /**
-   * Download attachment as binary buffer
+   * Download attachment as binary buffer.
+   * Rewrites direct *.atlassian.net URLs to route through the API gateway
+   * so that scoped API tokens authenticate correctly.
    */
   async downloadAttachment(attachmentUrl: string): Promise<Buffer> {
-    const configOrigin = new URL(this.config.url).origin;
-    const attachmentOrigin = new URL(attachmentUrl).origin;
-    if (attachmentOrigin !== configOrigin) {
-      throw new Error('Attachment URL does not belong to the configured Jira instance');
+    const parsed = new URL(attachmentUrl);
+    if (!parsed.hostname.endsWith('.atlassian.net') || parsed.hostname === '.atlassian.net') {
+      throw new Error('Attachment URL must be an *.atlassian.net hostname');
     }
 
+    // Route through the API gateway so scoped tokens work
+    const gatewayUrl = `${this.config.gatewayBaseUrl}${parsed.pathname}${parsed.search}`;
+
     try {
-      const response = await axios.get(attachmentUrl, {
-        headers: getJiraHeaders(this.config),
+      const response = await this.client.get(gatewayUrl, {
         responseType: 'arraybuffer',
         timeout: 60000,
         maxContentLength: 50 * 1024 * 1024,
@@ -193,10 +196,13 @@ export class JiraClient {
 
       return Buffer.from(response.data);
     } catch (error: any) {
-      if (error.code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED') {
+      if (
+        error.code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED' ||
+        error.message?.includes('maxContentLength')
+      ) {
         throw new Error('Attachment exceeds maximum download size (50MB)');
       }
-      throw this.handleError(error);
+      throw error; // already transformed by the response interceptor
     }
   }
 

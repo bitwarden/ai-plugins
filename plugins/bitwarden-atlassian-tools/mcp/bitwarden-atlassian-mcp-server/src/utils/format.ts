@@ -48,11 +48,9 @@ export function htmlToMarkdown(html: string): string {
 }
 
 /**
- * Resolve a relative Confluence webui link to an absolute URL.
- * Falls back through ATLASSIAN_CONFLUENCE_URL then ATLASSIAN_JIRA_URL env vars.
+ * Resolve a Confluence webui link.
+ * Returns absolute URLs as-is; relative paths are returned unchanged.
  */
 export function resolveWebuiUrl(webui: string): string {
-  if (webui.startsWith('http')) return webui;
-  const base = process.env.ATLASSIAN_CONFLUENCE_URL || process.env.ATLASSIAN_JIRA_URL || '';
-  return `${base}${webui}`;
+  return webui;
 }

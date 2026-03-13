@@ -9,15 +9,49 @@ Read-only Atlassian access via a custom MCP server providing Jira issue retrieva
 Configure the following environment variables:
 
 ```bash
-# Required — Jira access
-export ATLASSIAN_JIRA_URL="https://your-domain.atlassian.net"
+# Required — Atlassian Cloud ID (find yours at https://your-domain.atlassian.net/_edge/tenant_info)
+export ATLASSIAN_CLOUD_ID="your-cloud-id"
 export ATLASSIAN_EMAIL="your-email@company.com"
-export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-api-token"
-
-# Optional — Confluence access (falls back to Jira credentials if not set)
-export ATLASSIAN_CONFLUENCE_URL="https://your-domain.atlassian.net"
-export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-api-token"
+export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-jira-scoped-token"
+export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
 ```
+
+API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
+
+### Required Atlassian Permissions
+
+Use **scoped (granular) API tokens** for least-privilege access. Create them at [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens). Scoped tokens require the API gateway (`api.atlassian.com`) and your Cloud ID.
+
+#### Confluence token scopes
+
+| Scope | Required for |
+|-------|-------------|
+| `read:space:confluence` | Space listing and metadata |
+| `read:space.property:confluence` | Space property access |
+| `read:page:confluence` | Page retrieval by ID |
+| `read:label:confluence` | Label metadata on pages |
+| `read:hierarchical-content:confluence` | Child page navigation |
+| `read:folder:confluence` | Folder content access |
+| `read:embed:confluence` | Embedded content rendering |
+| `read:custom-content:confluence` | Custom content types |
+| `read:content.property:confluence` | Content properties |
+| `read:content:confluence` | Pages, blogposts, attachments, comments, templates |
+| `read:content-details:confluence` | Content details and associated properties |
+| `read:confluence-space.summary` | Space summary information |
+| `read:confluence-props` | Confluence properties |
+| `read:confluence-content.summary` | Content summaries |
+| `read:confluence-content.all` | Full content including body text |
+| `read:comment:confluence` | Page comments (footer and inline) |
+| `read:blogpost:confluence` | Blog post content |
+| `read:attachment:confluence` | Attachment metadata and downloads |
+| `read:account` | User display names on content |
+
+#### Jira token scopes
+
+| Scope | Required for |
+|-------|-------------|
+| `read:jira-work` | Issues, comments, projects, attachments |
+| `read:jira-user` | User display names on issues and comments |
 
 ## MCP Tools
 
@@ -55,7 +89,3 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 
 - Claude Code with MCP support
 - Atlassian API credentials (see Installation)
-
-## License
-
-MIT License - See repository root for details.

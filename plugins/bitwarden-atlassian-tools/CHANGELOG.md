@@ -5,6 +5,24 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-09
+
+### Changed
+
+- Migrated from direct site URLs to Atlassian API gateway (`api.atlassian.com`) for all API requests
+- Replaced `ATLASSIAN_JIRA_URL` and `ATLASSIAN_CONFLUENCE_URL` env vars with single `ATLASSIAN_CLOUD_ID`
+- Attachment URL validation now accepts any `*.atlassian.net` origin instead of exact origin match
+- Attachment downloads now route through the API gateway for scoped token compatibility
+
+### Added
+
+- Support for Atlassian scoped API tokens (requires gateway routing)
+
+### Migration
+
+- Remove `ATLASSIAN_JIRA_URL` and `ATLASSIAN_CONFLUENCE_URL` environment variables
+- Add `ATLASSIAN_CLOUD_ID` (find yours at `https://your-domain.atlassian.net/_edge/tenant_info`)
+
 ## [1.1.1] - 2026-03-09
 
 ### Fixed
