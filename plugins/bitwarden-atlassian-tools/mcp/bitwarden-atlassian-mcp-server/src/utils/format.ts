@@ -46,11 +46,3 @@ export function htmlToMarkdown(html: string): string {
 
   return text.trim();
 }
-
-/**
- * Resolve a Confluence webui link.
- * Returns absolute URLs as-is; relative paths are returned unchanged.
- */
-export function resolveWebuiUrl(webui: string): string {
-  return webui;
-}

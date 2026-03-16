@@ -5,7 +5,7 @@
 
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, GetConfluencePageSchema, GetConfluencePageInput, ToolDefinition } from '../utils/validation.js';
-import { htmlToMarkdown, resolveWebuiUrl } from '../utils/format.js';
+import { htmlToMarkdown } from '../utils/format.js';
 
 /**
  * Format page for display
@@ -31,7 +31,7 @@ function formatPage(page: any): string {
   }
 
   if (page._links?.webui) {
-    output += `**URL:** ${resolveWebuiUrl(page._links.webui)}\n`;
+    output += `**URL:** ${page._links.webui}\n`;
   }
 
   output += `\n---\n\n`;

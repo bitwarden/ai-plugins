@@ -5,7 +5,7 @@
 
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, SearchConfluenceCqlSchema, SearchConfluenceCqlInput, ToolDefinition } from '../utils/validation.js';
-import { resolveWebuiUrl } from '../utils/format.js';
+
 
 /**
  * Format CQL search results for display
@@ -41,7 +41,7 @@ function formatCqlSearchResults(results: any, params: SearchConfluenceCqlInput):
     }
 
     if (item._links?.webui) {
-      output += `**URL:** ${resolveWebuiUrl(item._links.webui)}\n`;
+      output += `**URL:** ${item._links.webui}\n`;
     }
 
     output += `\n---\n\n`;

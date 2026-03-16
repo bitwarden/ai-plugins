@@ -45,7 +45,7 @@ const tools: ToolDefinition[] = [
 ];
 
 async function main() {
-  const requiredEnvVars = ['ATLASSIAN_CLOUD_ID', 'ATLASSIAN_EMAIL', 'ATLASSIAN_JIRA_READ_ONLY_TOKEN'];
+  const requiredEnvVars = ['ATLASSIAN_CLOUD_ID', 'ATLASSIAN_EMAIL', 'ATLASSIAN_JIRA_READ_ONLY_TOKEN', 'ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN'];
   const missingVars = requiredEnvVars.filter(v => !process.env[v]);
 
   if (missingVars.length > 0) {

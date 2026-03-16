@@ -6,7 +6,7 @@
 import { ConfluenceClient } from '../confluence/client.js';
 import { validateInput, GetChildPagesSchema, ToolDefinition } from '../utils/validation.js';
 import { ConfluencePage } from '../confluence/types.js';
-import { resolveWebuiUrl } from '../utils/format.js';
+
 
 /**
  * Format child pages for display
@@ -32,7 +32,7 @@ function formatChildPages(pages: ConfluencePage[], parentPageId: string): string
       }
     }
     if (page._links?.webui) {
-      output += `- URL: ${resolveWebuiUrl(page._links.webui)}\n`;
+      output += `- URL: ${page._links.webui}\n`;
     }
     output += `\n`;
   }
