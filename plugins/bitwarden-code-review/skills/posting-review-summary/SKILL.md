@@ -1,27 +1,25 @@
 ---
 name: posting-review-summary
-description: Use this skill when posting the final summary comment after all inline comments are posted. Apply as the LAST step of code review after all findings are classified and inline comments are complete. Detects context (GitHub sticky comment, new comment, or local file) and routes output accordingly.
+description: Use this skill when posting the final summary comment after all inline comments are posted. Apply as the LAST step of code review after all findings are classified and inline comments are complete. Detects context (agent mode sticky comment, GitHub Actions MCP tool, or local file) and routes output accordingly.
 ---
 
 # Posting Review Summary
 
-## When to Use
-
-Invoke this skill **ONCE** per review, **AFTER** all inline comments are posted.
-The summary **MUST** be scannable and brief because engineers read summaries first.
-
 ## Context Detection
 
-| Context        | How to Detect                                          | Action                       |
-| -------------- | ------------------------------------------------------ | ---------------------------- |
-| GitHub Actions | `mcp__github_comment__update_claude_comment` available | Update sticky comment        |
-| Local review   | Tool not available OR explicit local mode              | Write to `review-summary.md` |
+Check contexts **in this order** — use the first match:
+
+| Context                   | How to Detect                                                                                    | Action                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| **Agent Mode**            | Sticky comment context provided in prompt (comment ID + `<!-- bitwarden-code-review -->` marker) | Write summary to `/tmp/review-summary.md`         |
+| GitHub Actions (tag mode) | `mcp__github_comment__update_claude_comment` available AND no sticky comment context             | Update sticky comment via MCP tool                |
+| Local review              | Neither agent mode context nor MCP tool available                                                | Write to `review-summary.md` in working directory |
 
 **FORBIDDEN:** Do not use `gh pr comment` to create summary comments.
 
 ## PR Metadata Assessment
 
-If PR title, description, or test plan is genuinely deficient, add as ❓ finding in the Code Review Details collapsible section.
+If PR title, description, or test plan is genuinely deficient, add as a finding in the Code Review Details collapsible section.
 
 ### Rules
 
@@ -57,7 +55,7 @@ If PR title, description, or test plan is genuinely deficient, add as ❓ findin
 ```markdown
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
-[1-2 neutral sentence describing what was reviewed]
+[Up to 4 neutral sentence describing what was reviewed]
 
 <details>
 <summary>Code Review Details</summary>
@@ -73,11 +71,11 @@ If PR title, description, or test plan is genuinely deficient, add as ❓ findin
 
 **Ordering:** Group findings by severity in this exact order:
 
-1. ❌ **CRITICAL** (first)
-2. ⚠️ **IMPORTANT**
-3. ♻️ **DEBT**
-4. 🎨 **SUGGESTED**
-5. ❓ **QUESTION**
+1. ❌ : CRITICAL
+2. ⚠️ : IMPORTANT
+3. ♻️ : DEBT
+4. 🎨 : SUGGESTED
+5. ❓ : QUESTION
 
 **Omit empty categories entirely.**
 
@@ -94,9 +92,9 @@ If PR title, description, or test plan is genuinely deficient, add as ❓ findin
 <details>
 <summary>Code Review Details</summary>
 
-- ❌ **CRITICAL**: SQL injection in user query builder
+- ❌ : SQL injection in user query builder
   - `src/auth/queries.ts:87`
-- ⚠️ **IMPORTANT**: Missing null check on optional config
+- ⚠️ : Missing null check on optional config
   - `src/config/loader.ts:23`
 
 </details>
@@ -104,13 +102,24 @@ If PR title, description, or test plan is genuinely deficient, add as ❓ findin
 
 ## Output Execution
 
-**GitHub Actions:**
+### Agent Mode (Sticky Comment)
+
+When sticky comment context is provided in the prompt (comment ID + marker):
+
+1. Write the summary to `/tmp/review-summary.md` using the **Write** tool
+2. Append `\n\n<!-- bitwarden-code-review -->` at the end of the file content
+3. Do **NOT** use `mcp__github_comment__update_claude_comment`
+4. Do **NOT** use `gh pr comment` or `gh api`
+
+The workflow post-step will read this file and update the placeholder comment automatically.
+
+### GitHub Actions (Tag Mode)
 
 ```
 Use mcp__github_comment__update_claude_comment to update the sticky comment with the summary.
 ```
 
-**Local:**
+### Local
 
 ```
 Write summary to review-summary.md in working directory.
