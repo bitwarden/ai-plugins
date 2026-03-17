@@ -63,15 +63,15 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 
 **Security-sensitive changes** (auth, crypto, access control, user input handling):
 
-- **Potential vulnerabilities** → activate `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
-- **Auth/encryption/trust-boundary changes** → activate `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
-- **Dependency updates** → activate `Skill(reviewing-dependencies)` to assess supply chain risk
+- **Potential vulnerabilities** → invoke `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
+- **Auth/encryption/trust-boundary changes** → invoke `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
+- **Dependency updates** → invoke `Skill(reviewing-dependencies)` to assess supply chain risk
 
 **Implementation pattern review:**
 
-- **C#/.NET server changes** → activate `Skill(writing-server-code)` to verify CQS patterns, `TryAdd*` DI, nullable reference types, `Async` suffix conventions
-- **Angular/TypeScript client changes** → activate `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
-- **Database changes** → activate `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
+- **C#/.NET server changes** → invoke `Skill(writing-server-code)` to verify CQS patterns, `TryAdd*` DI, nullable reference types, `Async` suffix conventions
+- **Angular/TypeScript client changes** → invoke `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
+- **Database changes** → invoke `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
 
 These skills are optional. If unavailable, apply existing review knowledge.
 
@@ -82,11 +82,8 @@ These skills are optional. If unavailable, apply existing review knowledge.
 **For each potential finding, use structured thinking:**
 
 <thinking>
-1. Can I trace the execution path showing incorrect behavior?
-2. Is this handled elsewhere (error boundaries, middleware, validators)?
-3. Am I certain about framework behavior, API contracts, and language semantics?
-4. Does this violate established patterns in this codebase?
-5. Is this finding about changed code or just newly noticed?
+1. Does this violate established patterns in this codebase?
+2. Is this finding about changed code or just newly noticed?
 </thinking>
 
 Invoke `Skill(classifying-review-findings)` to determine severity for each finding.
@@ -145,16 +142,7 @@ Rate each finding 0-100:
 
 **Switch mental mode: you are now the defender of the code, not the critic.**
 
-For each finding that scored ≥ 75, invoke `Skill(avoiding-false-positives)` and answer:
-
-1. **Is the behavior actually wrong?** Trace the exact execution path. If you cannot demonstrate incorrect output or state, drop it.
-2. **Is it handled elsewhere?** Check for error boundaries, middleware, validators, caller-side handling, or framework guarantees.
-3. **Are you certain about the semantics?** Verify framework behavior, API contracts, and language rules. If unsure, drop it.
-4. **Is this pre-existing?** If the code existed before this PR and was not modified, drop it.
-5. **Would a senior engineer flag this?** Pedantic nitpick, style preference, or hypothetical edge case → drop it.
-6. **Would a linter catch this?** If yes, drop it — do not duplicate linter work.
-
-**If any answer gives you doubt, drop the finding.** False positives erode trust and waste reviewer time.
+For each finding that scored ≥ 75, invoke `Skill(avoiding-false-positives)` and apply its rejection criteria and verification checks. If any check gives you doubt, drop the finding. False positives erode trust and waste reviewer time.
 
 After validation, you should have a final filtered list of findings to post.
 

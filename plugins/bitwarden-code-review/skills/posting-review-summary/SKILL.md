@@ -82,7 +82,7 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 **Format per finding:**
 
 ```markdown
-- [emoji] **[SEVERITY]**: [One-line description]
+- [emoji]: [One-line description]
   - `filename.ts:42`
 ```
 
