@@ -2,6 +2,10 @@
 
 Claude Code skills for application security at Bitwarden. Generic AI coding assistance doesn't know our scanner toolchain, triage workflows, or threat modeling practices. These skills keep Claude focused on how we secure software here.
 
+## Overview
+
+This plugin provides specialized skills for security engineering tasks — from triaging scanner findings and threat modeling to conducting multi-agent security code reviews. Skills can be invoked individually or orchestrated together for comprehensive coverage across code, dependencies, secrets, and architecture.
+
 ## Skills
 
 | Skill                             | What It Does                                                                                                                                                |
@@ -12,6 +16,7 @@ Claude Code skills for application security at Bitwarden. Generic AI coding assi
 | `reviewing-dependencies`          | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                           |
 | `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                |
 | `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                      |
+| `orchestrating-security-review`   | Multi-agent security code review with independent analysis, verification, and flexible output (chat, file, or GitHub Actions).                              |
 
 ## Usage
 
