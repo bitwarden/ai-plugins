@@ -45,7 +45,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 4. Format the summary report.
 
    First, determine the report header based on review mode:
-   - **PR mode**: `{PR title} (#{number})`
+   - **PR mode**: `PR: (#{number}) - {PR title} — {YYYY-MM-DD}`
    - **Commit mode**: `Code Review: {short SHA}..HEAD — {YYYY-MM-DD}`
    - **Time-based mode**: `Code Review: Changes since {duration} — {YYYY-MM-DD}`
    - **Local changes mode**: `Code Review: Local Changes — {YYYY-MM-DD}`
