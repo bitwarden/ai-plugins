@@ -8,7 +8,11 @@ import { validateInput, GetIssueSchema, GetIssueInput, ToolDefinition } from '..
 import { extractPlainText } from '../utils/adf.js';
 
 /**
- * Format issue details for display
+ * Format issue details for display.
+ * @param issue - The Jira issue object returned by the API.
+ * @param names - Optional mapping of field IDs (e.g. "customfield_10085") to
+ *   human-readable display names (e.g. "Replication Steps"), provided by
+ *   the Jira API when the request includes `expand=names`.
  */
 function formatIssueDetails(issue: any, names?: Record<string, string>): string {
   const fields = issue.fields;
