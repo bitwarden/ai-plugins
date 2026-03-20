@@ -10,7 +10,7 @@ import { extractPlainText } from '../utils/adf.js';
 /**
  * Format issue details for display
  */
-function formatIssueDetails(issue: any): string {
+function formatIssueDetails(issue: any, names?: Record<string, string>): string {
   const fields = issue.fields;
   let output = `# ${issue.key}: ${fields.summary || 'No summary'}\n\n`;
 
@@ -153,6 +153,69 @@ function formatIssueDetails(issue: any): string {
     }
   }
 
+  // Custom fields
+  const knownFields = new Set([
+    'summary', 'issuetype', 'status', 'priority', 'project',
+    'reporter', 'assignee', 'created', 'updated', 'duedate',
+    'resolutiondate', 'description', 'labels', 'components',
+    'fixVersions', 'subtasks', 'parent', 'attachment', 'comment',
+  ]);
+
+  // Field names that produce low-value noise in output
+  const skippedFieldNames = new Set(['Rank', 'Development']);
+
+  const customFields: Array<{ name: string; value: string }> = [];
+
+  for (const key of Object.keys(fields)) {
+    if (!key.startsWith('customfield_') || knownFields.has(key) || fields[key] == null) continue;
+
+    const val = fields[key];
+    const displayName = names?.[key] || key;
+
+    // Skip known low-value fields by display name
+    if (skippedFieldNames.has(displayName)) continue;
+
+    let rendered: string | null = null;
+
+    // ADF rich-text field
+    if (val && typeof val === 'object' && val.type === 'doc' && Array.isArray(val.content)) {
+      const text = extractPlainText(val);
+      if (text) rendered = text;
+    }
+    // Simple string
+    else if (typeof val === 'string' && val.trim()) {
+      rendered = val;
+    }
+    // Number
+    else if (typeof val === 'number') {
+      rendered = String(val);
+    }
+    // Array of strings or objects with name/value
+    else if (Array.isArray(val) && val.length > 0) {
+      rendered = val.map(item =>
+        typeof item === 'string' ? item :
+        item?.name || item?.value || JSON.stringify(item)
+      ).join(', ');
+    }
+    // Object with name or value (e.g., select fields)
+    else if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+      if (val.name) rendered = val.name;
+      else if (val.value) rendered = val.value;
+      else if (val.displayName) rendered = val.displayName;
+    }
+
+    if (rendered) {
+      customFields.push({ name: displayName, value: rendered });
+    }
+  }
+
+  if (customFields.length > 0) {
+    output += `## Additional Fields\n\n`;
+    for (const cf of customFields) {
+      output += `### ${cf.name}\n\n${cf.value}\n\n`;
+    }
+  }
+
   return output;
 }
 
@@ -167,10 +230,10 @@ async function handler(input: any): Promise<string> {
     const issue = await client.getIssue(
       validated.issueIdOrKey,
       validated.fields,
-      validated.expand || ['renderedFields']
+      validated.expand || ['renderedFields', 'names']
     );
 
-    return formatIssueDetails(issue);
+    return formatIssueDetails(issue, issue.names);
   } catch (error) {
     return `Error retrieving issue: ${error instanceof Error ? error.message : String(error)}`;
   }

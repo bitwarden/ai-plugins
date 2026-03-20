@@ -106,6 +106,141 @@ describe('get_issue formatting', () => {
     expect(result).toContain('This is the description');
   });
 
+  it('should render ADF custom fields with display names', async () => {
+    const mockIssue = {
+      key: 'TEST-10',
+      names: {
+        customfield_10085: 'Replication Steps',
+      },
+      fields: {
+        summary: 'Bug with custom fields',
+        priority: { name: 'High' },
+        customfield_10085: {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [{ type: 'text', text: '1. Open app\n2. Click button\n3. See error' }],
+            },
+          ],
+        },
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-10' });
+
+    expect(result).toContain('## Additional Fields');
+    expect(result).toContain('### Replication Steps');
+    expect(result).toContain('1. Open app');
+  });
+
+  it('should render simple string custom fields', async () => {
+    const mockIssue = {
+      key: 'TEST-11',
+      names: {
+        customfield_10086: 'Recommended Solution',
+      },
+      fields: {
+        summary: 'Issue with string custom field',
+        priority: { name: 'Medium' },
+        customfield_10086: 'Upgrade the dependency to v2',
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-11' });
+
+    expect(result).toContain('### Recommended Solution');
+    expect(result).toContain('Upgrade the dependency to v2');
+  });
+
+  it('should render select-type custom fields', async () => {
+    const mockIssue = {
+      key: 'TEST-12',
+      names: {
+        customfield_10087: 'Severity',
+      },
+      fields: {
+        summary: 'Issue with select field',
+        priority: { name: 'Low' },
+        customfield_10087: { name: 'Critical' },
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-12' });
+
+    expect(result).toContain('### Severity');
+    expect(result).toContain('Critical');
+  });
+
+  it('should skip null/empty custom fields', async () => {
+    const mockIssue = {
+      key: 'TEST-13',
+      fields: {
+        summary: 'Issue with empty custom fields',
+        priority: { name: 'Low' },
+        customfield_10085: null,
+        customfield_10086: '',
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-13' });
+
+    expect(result).not.toContain('## Additional Fields');
+  });
+
+  it('should skip low-value fields like Rank and Development', async () => {
+    const mockIssue = {
+      key: 'TEST-15',
+      names: {
+        customfield_10100: 'Rank',
+        customfield_10101: 'Development',
+        customfield_10102: 'Bug category',
+      },
+      fields: {
+        summary: 'Issue with noisy fields',
+        priority: { name: 'Medium' },
+        customfield_10100: '1|hzvg5q:uo9tqj6002tqzzw7hey4b',
+        customfield_10101: { storyPoints: 5 },
+        customfield_10102: { name: 'Broken basic behavior' },
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-15' });
+
+    expect(result).not.toContain('### Rank');
+    expect(result).not.toContain('### Development');
+    expect(result).toContain('### Bug category');
+    expect(result).toContain('Broken basic behavior');
+  });
+
+  it('should fall back to raw field key when names not provided', async () => {
+    const mockIssue = {
+      key: 'TEST-14',
+      fields: {
+        summary: 'Issue without names map',
+        priority: { name: 'Medium' },
+        customfield_99999: 'Some value',
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-14' });
+
+    expect(result).toContain('### customfield_99999');
+    expect(result).toContain('Some value');
+  });
+
   it('should return error message on client failure', async () => {
     mockGetIssue.mockRejectedValueOnce(new Error('Not found'));
 
