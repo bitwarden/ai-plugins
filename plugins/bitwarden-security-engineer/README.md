@@ -18,15 +18,15 @@ Claude Code skills for application security at Bitwarden. Generic AI coding assi
 Install the plugin and invoke the agent:
 
 ```
-Use the bitwarden-security-engineer agent to triage the open Checkmarx findings on this PR.
+Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Checkmarx findings on this PR.
 ```
 
 ```
-Use the bitwarden-security-engineer agent to create a threat model for the new Send feature.
+Use the bitwarden-security-engineer:bitwarden-security-engineer agent to create a threat model for the new Send feature.
 ```
 
 ```
-Use the bitwarden-security-engineer agent to review this code for OWASP Top 10 vulnerabilities.
+Use the bitwarden-security-engineer:bitwarden-security-engineer agent to review this code for OWASP Top 10 vulnerabilities.
 ```
 
 ## References
