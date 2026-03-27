@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-03-20
+
+### Added
+
+- `get_issue` now includes populated custom fields (e.g., "Replication Steps", "Recommended Solution") in an "Additional Fields" section with human-readable field names
+
 ## [2.0.0] - 2026-03-09
 
 ### Changed

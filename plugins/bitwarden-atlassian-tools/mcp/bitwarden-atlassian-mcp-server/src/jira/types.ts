@@ -127,6 +127,7 @@ export interface JiraIssue {
   key: string;
   self: string;
   fields: JiraIssueFields;
+  names?: Record<string, string>;
 }
 
 export interface JiraSearchResponse {

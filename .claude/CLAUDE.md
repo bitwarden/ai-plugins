@@ -44,10 +44,10 @@ When making ANY changes to a plugin (code, documentation, configuration, scripts
    - MINOR (0.X.0): New features, backward-compatible additions
    - PATCH (0.0.X): Bug fixes, documentation updates, security patches
 
-2. **Use the version bump script**:
+2. **Use the version bump script** (pipe `y` to skip the interactive confirmation). `<plugin-name>` is the directory name under `plugins/` (e.g., `bitwarden-code-review`):
 
    ```bash
-   ./scripts/bump-plugin-version.sh <plugin-name> <new-version>
+   echo "y" | ./scripts/bump-plugin-version.sh <plugin-name> <new-version>
    ```
 
    This automatically updates all three required files:
