@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Consolidated Steps 1 and 2 into a single "Gather Context" step that handles both PR and local review modes
 - Moved inline commenting constraints to Step 5 where comments are posted
+- Added a summary comment header
 
 ## [1.8.2] - 2026-03-17
 

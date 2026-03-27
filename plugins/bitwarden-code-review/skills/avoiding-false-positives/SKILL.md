@@ -1,6 +1,6 @@
 ---
 name: avoiding-false-positives
-description: Use this skill to validate findings during Step 5 (Validate Findings). For each finding, run the rejection criteria and verification checks. If a finding fails any check, drop it.
+description: Use this skill to validate findings during Step 4 (Validate Findings). For each finding, run the rejection criteria and verification checks. If a finding fails any check, drop it.
 ---
 
 # Validating Findings
