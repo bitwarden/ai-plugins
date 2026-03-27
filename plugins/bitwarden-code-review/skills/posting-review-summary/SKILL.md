@@ -53,6 +53,8 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 ## Summary Format
 
 ```markdown
+## 🤖 Bitwarden Claude Code Review
+
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
 [Up to 4 neutral sentence describing what was reviewed]
