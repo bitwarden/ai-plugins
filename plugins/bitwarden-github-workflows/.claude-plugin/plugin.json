@@ -1,0 +1,17 @@
+{
+  "name": "bitwarden-github-workflows",
+  "version": "1.0.0",
+  "description": "AI-powered GitHub Actions workflow linting using Bitwarden's custom workflow linter (bwwl).",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-github-workflows",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "github-actions",
+    "workflow-linting",
+    "bwwl",
+    "ci-cd"
+  ]
+}

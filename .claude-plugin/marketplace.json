@@ -63,6 +63,12 @@
       "source": "./plugins/bitwarden-security-engineer",
       "version": "0.2.0",
       "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis."
+    },
+    {
+      "name": "bitwarden-github-workflows",
+      "source": "./plugins/bitwarden-github-workflows",
+      "version": "1.0.0",
+      "description": "AI-powered GitHub Actions workflow linting using Bitwarden's custom workflow linter (bwwl)."
     }
   ]
 }
