@@ -16,7 +16,7 @@ This plugin provides specialized skills for security engineering tasks — from 
 | `reviewing-dependencies`          | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                            |
 | `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                 |
 | `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                       |
-| `performing-security-review`      | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence, and flexible output (chat, file, or GitHub Actions). |
+| `perform-security-review`         | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence, and flexible output (chat, file, or GitHub Actions). |
 
 ## Usage
 

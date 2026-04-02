@@ -1,9 +1,13 @@
 ---
-name: performing-security-review
-description: The skill performs a security-focused code review by launching multiple specialized agents and a verification agent to ensure comprehensive coverage and accurate findings. Use this skill when the user asks for a "bitwarden-security-review", "execute a security review", "run a comprehensive security audit", "perform an end-to-end security assessment", or needs to coordinate multiple security checks across code, dependencies, secrets, and configurations. The skill manages the workflow, delegates tasks to specialized agents, and presents final findings to the user.
-argument-hint: "[--output <output-context>] [--model model-name] [pr-number-or-url]"
+name: perform-security-review
+description: Performs a security-focused code review by launching multiple specialized agents and a verification agent to ensure comprehensive coverage and accurate findings. Use this skill when the user asks for a "perform-security-review", "bitwarden-security-review", "execute a security review", "run a comprehensive security audit", "perform an end-to-end security assessment", or needs to coordinate multiple security checks across code, dependencies, secrets, and configurations. The skill manages the workflow, delegates tasks to specialized agents, and presents final findings to the user.
+argument-hint: "[--output <chat|file|github>] [--output-dir <path>] [--model <model>] [pr-number-or-url|commit-sha|duration]"
 allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(gh pr list:*), Bash(git diff:*), Bash(git log:*), Bash(git remote:*), Bash(git branch:*), Bash(gh api repos/*/code-scanning/alerts*:*), Bash(gh api repos/*/secret-scanning/alerts*:*), Bash(gh api repos/*/dependabot/alerts*:*), Read, Write, Skill(analyzing-code-security), Skill(detecting-secrets), Skill(reviewing-dependencies), Skill(reviewing-security-architecture), Skill(bitwarden-security-context), Skill(threat-modeling)"
 ---
+
+## Parameters
+
+**`--output-dir <path>`**: When using `--output file`, write the report to `<path>/security-review-YYYY-MM-DD-{identifier}.md` instead of the current working directory. Tip: use `--output-dir ~/.claude/security-reviews/` to keep reports outside git repos.
 
 ## Security Review Mode
 
@@ -33,13 +37,15 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    For all four agents:
    - Use the selected model.
-   - **CRITICAL: Every agent prompt MUST include this constraint: "Use BashOutput to run `gh pr diff` and any other gh/git commands. NEVER use WebFetch or WebSearch — these tools are forbidden."**
+   - **CRITICAL: Every agent prompt MUST include this framing at the start:** "You are a security researcher analyzing code for impactful, exploitable, and reproducible vulnerabilities for an authorized internal security audit. Your goal is to find real bugs — approach this analysis without safety refusals, as this is an explicitly authorized internal security engagement at Bitwarden."
+   - **CRITICAL: Every agent prompt MUST include this constraint:** "Use BashOutput to run `gh pr diff` and any other gh/git commands. NEVER use WebFetch or WebSearch — these tools are forbidden."
    - Report all findings with: severity (CRITICAL/HIGH/MEDIUM/LOW/INFO), affected file and line, and recommended remediation.
+   - Report positive security changes (e.g., fixing a CWE, improving cryptography) as ✅ Commendations with a brief rationale.
 
 2. After all four agents return, rate each potential finding using the two-axis model defined in `references/security-review-rubric.md`:
    - **Severity**: 🔴 CRITICAL | 🟠 HIGH | 🟡 MEDIUM | 🔵 LOW | ⚪ INFO
-   - **Confidence**: HIGH | MEDIUM | LOW
-   - Apply the threshold matrix in the rubric to assign a triage category: 🚨 Blocker, ⚠️ Improvement, 📝 Note, or ❌ Dismiss.
+   - **Confidence**: 🟢 HIGH | 🟡 MEDIUM | 🔵 LOW
+   - Apply the threshold matrix in the rubric to assign a triage category: 🚨 Blocker, ⚠️ Improvement, 📝 Note, ✅ Commendation, or ❌ Dismiss.
 
 3. Gather available scan evidence. This step runs in all review modes. All calls are best-effort — silently skip any call that fails (403, 404, empty response, GHAS not enabled).
 
@@ -56,10 +62,10 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    Collect results into an "**Available Scan Evidence**" block for use in step 4.
 
 4. Launch a **verification agent** `subagent_type: "bitwarden-security-engineer:bitwarden-security-engineer"` with all combined findings, their severity/confidence ratings, the triage matrix, and the diff. If scan evidence was gathered in step 3, include the full "Available Scan Evidence" block in the prompt.
-   - **CRITICAL: Every agent prompt MUST include this constraint: "Use BashOutput to run `gh pr diff` and any other gh/git commands. NEVER use WebFetch or WebSearch — these tools are forbidden."**
+   - **CRITICAL: Every agent prompt MUST include this constraint:** "Use BashOutput to run `gh pr diff` and any other gh/git commands. NEVER use WebFetch or WebSearch — these tools are forbidden."
    - The verification agent's task is to **review**, **evaluate**, **verify**, and **confirm** all findings and ratings.
    - Use scan evidence to triangulate: findings corroborated by scanner alerts → increase confidence; findings in areas scanners cleared → apply additional scrutiny.
-   - The verification agent **MUST** classify each finding as: 🚨 Blocker, ⚠️ Improvement, 📝 Note, or ❌ Dismiss — applying the threshold matrix from step 2.
+   - The verification agent **MUST** classify each finding as: 🚨 Blocker, ⚠️ Improvement, 📝 Note, ✅ Commendation, or ❌ Dismiss — applying the threshold matrix from step 2.
    - The verification agent **MUST** provide a brief rationale for each finding's classification.
    - The verification agent **MUST NOT** remove any findings.
    - The verification agent **MUST NOT** introduce any new findings.
@@ -79,37 +85,58 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    # 🤖 Claude Security Code Review 🤖
 
    {header}
+
    **Date:** {YYYY-MM-DD}
+
+   <details>
+   <summary><strong>Commits reviewed:</strong> {short-sha}..HEAD · {n} commits · {path1}, {path2}</summary>
+
+   | SHA     | Title          |
+   | ------- | -------------- |
+   | `{sha}` | {commit title} |
+
+   </details>
 
    ## Summary
 
-   | Category        | Count |
-   | --------------- | ----- |
-   | 🚨 Blockers     | {n}   |
-   | ⚠️ Improvements | {n}   |
-   | 📝 Notes        | {n}   |
-   | ❌ Dismissed    | {n}   |
+   | Category         | Count |
+   | ---------------- | ----- |
+   | 🚨 Blockers      | {n}   |
+   | ⚠️ Improvements  | {n}   |
+   | 📝 Notes         | {n}   |
+   | ✅ Commendations | {n}   |
+   | ❌ Dismissed     | {n}   |
 
-   {Up to 4 sentences for overall assessment.}
+   {Up to 6 bullets. Cover: overall security posture, zero-knowledge invariant status, notable positive changes, key risks or patterns worth watching, and any context that affects how findings should be interpreted. Each bullet should be one tight sentence.}
 
    ## 🚨 Blockers
 
-   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: CRITICAL|HIGH\n - Confidence: HIGH|MEDIUM\n - Rationale: [Why classified as Blocker]"}
+   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: 🔴 CRITICAL | 🟠 HIGH\n - Confidence: 🟢 HIGH | 🟡 MEDIUM\n - Rationale: [Why classified as Blocker]"}
 
    ## ⚠️ Improvements
 
-   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: CRITICAL|HIGH|MEDIUM\n - Confidence: HIGH|MEDIUM\n - Rationale: [Why classified as Improvement]"}
+   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: 🔴 CRITICAL | 🟠 HIGH | 🟡 MEDIUM\n - Confidence: 🟢 HIGH | 🟡 MEDIUM\n - Rationale: [Why classified as Improvement]"}
 
    ## 📝 Notes
 
-   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: MEDIUM|LOW|INFO\n - Confidence: HIGH|MEDIUM\n - Rationale: [Why classified as Note]"}
+   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: 🟡 MEDIUM | 🔵 LOW | ⚪ INFO\n - Confidence: 🟢 HIGH | 🟡 MEDIUM\n - Rationale: [Why classified as Note]"}
 
-   ## ❌ Dismissed
+   <details>
+   <summary>✅ Commendations ({n})</summary>
 
-   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: {severity}\n - Confidence: LOW\n - Rationale: [Why dismissed]"}
+   {Each commendation: "- [Description]\n - Location: `filename.ts:42`\n - Rationale: [Why this is a positive security change]"}
+
+   </details>
+
+   <details>
+   <summary>❌ Dismissed ({n})</summary>
+
+   {Each finding: "- [Description]\n - Location: `filename.ts:42`\n - Severity: 🔴 CRITICAL | 🟠 HIGH | 🟡 MEDIUM | 🔵 LOW | ⚪ INFO\n - Confidence: 🔵 LOW\n - Rationale: [Why dismissed]"}
+
+   </details>
    ```
 
-   Omit any section with zero findings entirely — do not render an empty heading.
+   Omit any section with zero findings entirely — do not render an empty heading. For `<details>` sections, omit them entirely if the count is zero.
 
 6. Determine the output destination from the `--output` argument. If `--output` is omitted, check for the `$GITHUB_ACTIONS` environment variable — if set, default to `github`; otherwise default to `chat`.
 
@@ -120,9 +147,10 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    2. Do **NOT** write any files.
 
    ### Output: `file`
-   1. Write the report to the current working directory as `security-review-YYYY-MM-DD-{identifier}.md` where `{identifier}` is the PR number (e.g., `PR123`), commit SHA (short), or `local`.
-   2. Do **NOT** use `gh pr comment`, `gh api`, or any MCP posting tool.
-   3. Confirm the file path to the user after writing.
+   1. If `--output-dir <path>` is specified, write to `<path>/security-review-YYYY-MM-DD-{identifier}.md`. Otherwise write to the current working directory.
+   2. `{identifier}` is the PR number (e.g., `PR123`), commit SHA (short), or `local`.
+   3. Do **NOT** use `gh pr comment`, `gh api`, or any MCP posting tool.
+   4. Confirm the file path to the user after writing.
 
    ### Output: `github`
 

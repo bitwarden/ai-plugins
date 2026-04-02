@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `performing-security-review` skill: performs a multi-agent security code review with 4 specialized agents (code security, secrets & dependencies, security architecture, threat perspective), two-axis Severity × Confidence scoring, GitHub Advanced Security scan evidence gathering, and flexible output routing (chat, local file, or GitHub Actions workflow)
-- `references/security-review-rubric.md`: OWASP Top 10 2025 checklist, severity × confidence threshold table, and Bitwarden-specific security invariants for agent grounding
+- `perform-security-review` skill: performs a multi-agent security code review with 4 specialized agents (code security, secrets & dependencies, security architecture, threat perspective), two-axis Severity × Confidence scoring, GitHub Advanced Security scan evidence gathering, and flexible output routing (chat, local file, or GitHub Actions workflow); supports `--output-dir <path>` for report placement
+- `references/security-review-rubric.md`: OWASP Top 10 2025 checklist, severity × confidence threshold table, and Bitwarden-specific security invariants for agent grounding; includes security researcher framing in agent prompts and explicit P05 coverage for user-joined organization access paths
 
 ## [0.2.0] - 2026-02-23
 
