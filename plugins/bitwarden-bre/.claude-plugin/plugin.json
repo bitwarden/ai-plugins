@@ -1,0 +1,17 @@
+{
+  "name": "bitwarden-bre",
+  "version": "1.0.0",
+  "description": "BRE tooling for GitHub Actions workflow compliance and security auditing.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-bre",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["bre", "github-actions", "workflow", "security", "linter", "audit"],
+  "commands": [
+    "./commands/bre-workflow-fix/bre-workflow-fix.md",
+    "./commands/bre-action-audit/bre-action-audit.md"
+  ],
+  "skills": ["./skills/bitwarden-workflow-linter-rules/SKILL.md"]
+}
