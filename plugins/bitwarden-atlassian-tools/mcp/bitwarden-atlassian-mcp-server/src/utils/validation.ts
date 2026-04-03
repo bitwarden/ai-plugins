@@ -145,6 +145,15 @@ export const DownloadAttachmentSchema = z.object({
 
 export type DownloadAttachmentInput = z.infer<typeof DownloadAttachmentSchema>;
 
+export const GetIssueRemoteLinksSchema = z.object({
+  issueIdOrKey: z.string().regex(
+    /^[A-Z][A-Z0-9_]+-\d+$|^\d+$/,
+    'Must be a valid Jira issue key (e.g., PROJ-123) or numeric ID'
+  ),
+});
+
+export type GetIssueRemoteLinksInput = z.infer<typeof GetIssueRemoteLinksSchema>;
+
 /**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against

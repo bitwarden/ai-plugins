@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-product-analyst",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources",
   "author": {
     "name": "Bitwarden",

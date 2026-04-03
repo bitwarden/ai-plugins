@@ -37,7 +37,7 @@
     {
       "name": "bitwarden-product-analyst",
       "source": "./plugins/bitwarden-product-analyst",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources"
     },
     {
@@ -47,16 +47,10 @@
       "description": "Full-stack software engineering assistant with skills for Bitwarden client, server, and database development patterns."
     },
     {
-      "name": "atlassian-reader",
-      "source": "./plugins/atlassian-reader",
-      "version": "1.2.1",
-      "description": "Read-only access to Jira issues, epics, sprints, boards, and Confluence pages from Atlassian Cloud."
-    },
-    {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.1.0",
-      "description": "Read-only Atlassian access via custom MCP server: Jira issues, JQL search, Confluence pages, CQL search, and attachments"
+      "version": "2.2.0",
+      "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments"
     },
     {
       "name": "bitwarden-security-engineer",

@@ -1,6 +1,6 @@
 ---
 name: product-analyst
-version: 0.1.4
+version: 0.1.5
 description: Use when analyzing requirements, synthesizing specifications from multiple sources, or conducting product research. Trigger phrases: "analyze requirements", "create specification", "create spec", "write spec", "spec out", "spec document", "create a requirements doc", "research feature", "document requirements", "gather requirements", "write requirements", "product spec", "turn this into a spec"
 model: opus
 tools: Read, Write, Glob, Grep, WebSearch, WebFetch, Skill, AskUserQuestion
@@ -37,7 +37,7 @@ Do not save output inside the plugin directory.
 
 **Identify and fetch all available sources before writing anything.**
 
-If the user provides a Confluence URL or Jira ticket, immediately use `Skill(atlassian-reader)` to fetch the content. Do not ask the user to paste it — fetch it directly.
+If the user provides a Jira ticket, immediately use `Skill(researching-jira-issues)` to fetch the issue with all linked context. If the user provides a standalone Confluence URL, use the `get_confluence_page` MCP tool directly. Do not ask the user to paste content — fetch it directly.
 
 Primary source types (in priority order):
 
@@ -152,7 +152,7 @@ When multiple sources are provided:
 
 ## Critical Rules
 
-- ✅ **Fetch before asking** — If a Confluence URL or Jira ticket is provided, use `Skill(atlassian-reader)` immediately
+- ✅ **Fetch before asking** — If a Jira ticket is provided, use `Skill(researching-jira-issues)` immediately; if a Confluence URL is provided, use the `get_confluence_page` MCP tool directly
 - ✅ **Be thorough** — Cover all requirements comprehensively
 - ✅ **Be specific** — Use concrete, testable criteria
 - ✅ **Be clear** — Avoid ambiguity, define terms
@@ -179,14 +179,15 @@ When the **bitwarden-security-engineer** plugin is installed, invoke:
 
 ### Jira and Confluence Integration
 
-When the **atlassian-reader** plugin is installed, invoke:
+When the **bitwarden-atlassian-tools** plugin is installed:
 
-- `Skill(atlassian-reader)` — For reading Jira issues, epics, stories, sprints, and Confluence pages
+- `Skill(researching-jira-issues)` — For deep-reading Jira issues with all linked issues, sub-tasks, and supporting Confluence documentation
+- MCP tools `get_confluence_page`, `search_confluence`, `search_confluence_cql` — For standalone Confluence operations not tied to a Jira issue
 
 **Usage patterns**:
 
-- User provides Confluence URL → invoke immediately, do not ask user to paste content
-- User provides Jira issue key (e.g., "analyze PROJ-1234") → invoke immediately
+- User provides Jira issue key (e.g., "analyze PROJ-1234") → invoke `Skill(researching-jira-issues)` immediately
+- User provides Confluence URL → use `get_confluence_page` MCP tool directly
 - After fetching a Confluence initiative page, check for linked child pages or referenced Jira epics and fetch those too if relevant
 
 ### Skill Availability
@@ -194,4 +195,4 @@ When the **atlassian-reader** plugin is installed, invoke:
 All cross-plugin skills are optional. If unavailable:
 
 - For security: Document security considerations in standard requirement sections
-- For Confluence/Jira: Ask user to provide content via alternative means (paste text, upload file)
+- For Jira/Confluence: Ask user to provide content via alternative means (paste text, upload file)

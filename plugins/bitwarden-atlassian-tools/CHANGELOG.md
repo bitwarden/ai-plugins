@@ -5,6 +5,21 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-04-03
+
+### Added
+
+- `get_issue_remote_links` MCP tool for fetching external links (Confluence pages, PRs, etc.) attached to a Jira issue, grouped by type
+- `researching-jira-issues` skill that orchestrates deep Jira issue reads using MCP tools — fetches the main issue, traverses linked issues with depth control, follows remote links to Confluence documentation, and synthesizes into a structured summary
+- Cross-plugin enrichment: skill invokes security and engineering skills from sibling plugins when relevant signals are detected
+- Context budget guidance, rate limiting awareness, and graceful degradation in the new skill
+- Next-gen epic children discovery via JQL `parent = EPIC-KEY` search
+- Reference documents for Bitwarden-specific custom field mappings and Jira link type taxonomy
+
+### Removed
+
+- The `atlassian-reader` plugin is no longer needed; its capabilities are fully superseded by this plugin's MCP tools and the new skill
+
 ## [2.1.0] - 2026-03-20
 
 ### Added
