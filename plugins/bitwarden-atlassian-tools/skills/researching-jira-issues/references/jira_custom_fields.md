@@ -11,6 +11,8 @@ Maps each Bitwarden Jira issue type to its known custom fields. Use this to know
 | `customfield_10014` | Epic Link | string | Key of the parent epic (on child issue types) |
 | `customfield_10020` | Sprint | array | Sprint(s) the issue belongs to |
 | `customfield_10028` | Story Points | number | Estimated story points |
+| `customfield_10170` | Github Url | string | URL of the associated GitHub PR (Contributions) |
+| `customfield_10171` | Github ID | string | GitHub ID of the contributor (Contributions) |
 | `customfield_10172` | QA testing notes | rich text | Notes and instructions for QA testing |
 | `customfield_10173` | Goals / Deliverables | rich text | Expected goals and deliverables (Spikes) |
 | `customfield_10175` | Outcome | rich text | Outcome of the work (Spikes) |
@@ -94,6 +96,26 @@ Maps each Bitwarden Jira issue type to its known custom fields. Use this to know
 | Field ID | Name |
 |---|---|
 | `customfield_10020` | Sprint |
+| `customfield_10218` | Initiative Owner |
+| `customfield_10219` | Defect Source |
+| `customfield_10224` | Security Approver |
+
+### Bug
+
+| Field ID | Name |
+|---|---|
+| `customfield_10014` | Epic Link |
+| `customfield_10218` | Initiative Owner |
+| `customfield_10219` | Defect Source |
+| `customfield_10224` | Security Approver |
+
+### Contribution
+
+| Field ID | Name |
+|---|---|
+| `customfield_10170` | Github Url |
+| `customfield_10171` | Github ID |
+| `customfield_10216` | Testing Branch |
 | `customfield_10218` | Initiative Owner |
 | `customfield_10219` | Defect Source |
 | `customfield_10224` | Security Approver |

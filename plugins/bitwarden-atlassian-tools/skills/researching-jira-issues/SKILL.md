@@ -20,7 +20,7 @@ Extract and note:
 - Assignee and reporter
 - Key fields relevant to understanding the work (labels, components, sprint, etc.)
 - Comments that provide important context (clarifications from stakeholders, technical decisions, implementation guidance)
-- **Custom fields**: Consult `references/jira_custom_fields.md` to look up the custom field IDs for this issue's type. Extract and surface all non-null custom fields listed for that type (e.g., Acceptance criteria, QA testing notes, Technical breakdown, Goals/Deliverables, Outcome, etc.). The `names` expansion maps field IDs to human-readable names automatically.
+- **Custom fields**: Consult `references/jira_custom_fields.md` to look up the custom field IDs for this issue's type. Extract and surface all non-null custom fields listed for that type (e.g., Acceptance criteria, QA testing notes, Technical breakdown, Goals/Deliverables, Outcome, etc.). For issue types not listed in the reference, surface all non-null custom fields from the Additional Fields section. The `names` expansion maps field IDs to human-readable names automatically.
 
 ### Step 2: Identify All Linked Issues
 
@@ -55,6 +55,7 @@ Fetch related issues to build context, but stop before the returns diminish. Eac
 
 2. **Depth Control**:
    - Traverse up to 2 levels beyond the main issue (main issue -> linked issue -> one more hop for high-priority links only). Beyond 2 levels, context relevance drops sharply and the risk of ballooning the response grows.
+   - For issues referenced in other Jira projects via inline description URLs (e.g., VULN-*, SEC-*), mention the reference contextually but do not traverse unless it appears as a formal issue link (blocks/depends-on/relates-to). Cross-project inline references are informational, not dependency signals.
    - Track fetched issue keys to avoid circular references (A links to B, B links to A)
    - For each linked issue, use the `get_issue` MCP tool and extract key information
 
@@ -131,17 +132,21 @@ After gathering all issue data, check for enrichment triggers from sibling plugi
 
 ### Security Enrichment
 
-Invoke `Skill(bitwarden-security-context)` when ANY of these signals are present in the `get_issue` output:
+Invoke `Skill(bitwarden-security-context)` when ANY of these signals are present across all fetched content (the main issue, linked issues, and Confluence pages):
 - The **Labels** section contains terms like `security`, `vulnerability`, `compliance`
 - The **Components** section includes security-related components
-- The description or linked docs mention security topics (encryption, auth, access control, etc.)
-- The **Additional Fields** section shows a populated Security Approver (`customfield_10224`)
+- The description or content of the main issue, any fetched linked issue, or any fetched Confluence page mentions security topics (encryption, auth, access control, vulnerability, attack vector, threat model, etc.)
 
 This overlays Bitwarden's security principles (P01-P06) and vocabulary onto the synthesis, adding a "Security Considerations" subsection.
 
 ### Development Enrichment
 
-When linked Confluence pages contain technical specifications or the **Additional Fields** section shows a populated Technical breakdown (`customfield_10313`), invoke the relevant engineering skill based on content signals:
+Invoke the relevant engineering skill based on content signals when ANY of these conditions are met:
+- The **Additional Fields** section shows a populated Technical breakdown (`customfield_10313`)
+- Linked Confluence pages contain technical specifications
+- When Technical Breakdown is absent for the given issue type, the description or content of the main issue or fetched Confluence pages contains technology signals
+
+Match content signals to skills:
 - Server/API/C#/.NET references -> `Skill(writing-server-code)`
 - Client/Angular/TypeScript/UI references -> `Skill(writing-client-code)`
 - Database/migration/SQL/stored procedure references -> `Skill(writing-database-queries)`
@@ -160,7 +165,7 @@ When invoked by another skill, produce a structured markdown document with clear
 
 ### references/jira_custom_fields.md
 
-Maps each Bitwarden Jira issue type (Epic, Spike, Story, Task, QA Bug, Subtask) to its known custom field IDs and human-readable names. Consult this in Step 1 after identifying the issue type to know exactly which custom fields to look for and surface.
+Maps each Bitwarden Jira issue type (Epic, Spike, Story, Task, QA Bug, Subtask, Bug, Contribution) to its known custom field IDs and human-readable names. Consult this in Step 1 after identifying the issue type to know exactly which custom fields to look for and surface.
 
 ### references/jira_link_types.md
 

@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context budget guidance, rate limiting awareness, and graceful degradation in the new skill
 - Next-gen epic children discovery via JQL `parent = EPIC-KEY` search
 - Reference documents for Bitwarden-specific custom field mappings and Jira link type taxonomy
+- Bug and Contribution issue types to custom fields reference
+- Fallback guidance for unlisted issue types in custom fields lookup
+- Cross-project traversal rule for inline description URL references
+
+### Changed
+
+- Enrichment triggers are now content-driven: security and development enrichment scan all fetched content (main issue, linked issues, Confluence pages) instead of relying on narrow field-based signals
+- Removed Security Approver (`customfield_10224`) as a standalone security enrichment trigger (confirmed as org-wide default with no security correlation)
+- Development enrichment now falls back to description/doc content signals when Technical Breakdown field is absent (Epics, Spikes, Bugs)
 
 ### Removed
 
