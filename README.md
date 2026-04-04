@@ -11,7 +11,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.8.1   | Autonomous code review agent following Bitwarden engineering standards with GitHub integration          |
 | [bitwarden-init](plugins/bitwarden-init/)                           | 1.1.0   | Initialize and enhance CLAUDE.md files with Bitwarden's standardized template format                    |
 | [bitwarden-product-analyst](plugins/bitwarden-product-analyst/)     | 0.1.4   | Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources |
-| [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 0.2.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis       |
+| [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 1.0.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis       |
 | [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 0.3.0   | Full-stack engineering assistant for Bitwarden client, server, and database development patterns        |
 | [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                          |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities              |
