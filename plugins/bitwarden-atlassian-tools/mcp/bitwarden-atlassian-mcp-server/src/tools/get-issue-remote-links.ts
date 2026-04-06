@@ -14,7 +14,7 @@ function categorizeLink(link: JiraRemoteLink): 'confluence' | 'github' | 'other'
   const url = link.object.url;
   const appName = link.application?.name?.toLowerCase() || '';
 
-  if (appName.includes('confluence') || url.includes('/wiki/')) {
+  if (appName.includes('confluence') || url.includes('bitwarden.atlassian.net/wiki')) {
     return 'confluence';
   }
   if (appName.includes('github') || url.includes('github.com')) {
