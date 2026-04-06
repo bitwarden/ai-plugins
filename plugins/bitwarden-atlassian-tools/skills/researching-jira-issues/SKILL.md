@@ -48,7 +48,7 @@ Examine the main issue response to identify linked issues through:
 
 Fetch related issues to build context, but stop before the returns diminish. Each additional hop adds API calls and context window usage while providing less directly relevant information.
 
-1. **Priority Order** (consult `references/jira_link_types.md` for details):
+1. **Priority Order**:
    - High Priority: Blocks, Depends on, Parent, Epic Link — these determine whether work can start and where the issue fits in the hierarchy
    - Medium Priority: Sub-tasks, Related issues — these define scope and provide background
    - Low Priority: Clones, Duplicates — only if they provide unique context not found elsewhere
@@ -166,10 +166,6 @@ When invoked by another skill, produce a structured markdown document with clear
 ### references/jira_custom_fields.md
 
 Maps each Bitwarden Jira issue type (Epic, Spike, Story, Task, QA Bug, Subtask, Bug, Contribution) to its known custom field IDs and human-readable names. Consult this in Step 1 after identifying the issue type to know exactly which custom fields to look for and surface.
-
-### references/jira_link_types.md
-
-Comprehensive documentation about Jira link types, their meanings, and priority for reading. Consult this when determining which linked issues to fetch and in what order.
 
 ## Examples
 
