@@ -25,22 +25,14 @@ Available through the Bitwarden AI plugins marketplace:
 | `health-evaluator` | agent | Assesses structural health, tech debt, coupling, and reversibility |
 | `unit-test-evaluator` | agent | Reviews test design for meaningful behavior coverage and anti-patterns |
 
-The agents can also be invoked directly:
-
-```
-# Review documentation for a specific file
-Use the documentation-evaluator agent to review the documentation in src/services/auth.ts
-
-# Assess structural health after a change
-Use the health-evaluator agent to perform a retrospective review of the auth module changes
-
-# Review unit test design
-Use the unit-test-evaluator agent to review the tests in src/services/auth.spec.ts
-```
-
 ### Checking your work
 
 The `check-your-work` skill orchestrates the evaluators. It contains a workflow guide that launches evaluator subagents based on the kind of work Claude performed. Concerns that are not addressed are documented as FIXME comments and surfaced for your review with files and line numbers.
+
+```
+# This skill is self-contained; it does not accept input
+/check-your-work
+```
 
 Add the following rule to your user `CLAUDE.md` if you want Claude to check its work automatically:
 
@@ -54,6 +46,10 @@ Add the following rule to your user `CLAUDE.md` if you want Claude to check its 
 
 General-purpose documentation evaluator. Reviews any software documentation for clarity, accuracy, audience fit, and alignment with the code it describes. Operates in-place — it evaluates what exists now, not what changed.
 
+```
+Use the documentation-evaluator agent to review the documentation in src/services/auth.ts
+```
+
 > [!NOTE]
 > **Want to help?** The documentation evaluator's criteria currently focus on code-level documentation (JSDoc, inline comments, method contracts). Its coverage of architectural docs, READMEs, and other specialized files could use some TLC. Contributions to its `evaluate-documentation` skill are welcome.
 
@@ -61,9 +57,18 @@ General-purpose documentation evaluator. Reviews any software documentation for 
 
 Structural health evaluator. Assesses the environment a change will land in (or has landed in), characterizing tech debt, coupling, and reversibility so that downstream decisions about investment are grounded in observation rather than intuition. Supports both prospective and retrospective review.
 
+```
+Use the health-evaluator agent to perform a retrospective review of the auth module changes
+```
+
 ### Unit Test Evaluator
 
 Unit test design evaluator. Assesses whether tests verify meaningful behaviors, catches common anti-patterns, and identifies opportunities for consolidation. Runs the tests first to confirm they pass before reviewing.
+
+```
+# DO NOT use `@` notation for files
+Use the unit-test-evaluator agent to review the tests in src/services/auth.spec.ts
+```
 
 ## Information Architecture
 
