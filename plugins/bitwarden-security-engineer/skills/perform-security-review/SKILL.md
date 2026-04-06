@@ -2,7 +2,7 @@
 name: perform-security-review
 description: Performs a security-focused code review by launching multiple specialized agents and a verification agent to ensure comprehensive coverage and accurate findings. Use this skill when the user asks for a "perform-security-review", "bitwarden-security-review", "execute a security review", "run a comprehensive security audit", "perform an end-to-end security assessment", or needs to coordinate multiple security checks across code, dependencies, secrets, and configurations. The skill manages the workflow, delegates tasks to specialized agents, and presents final findings to the user.
 argument-hint: "[--output <chat|file|github>] [--output-dir <path>] [--model <model>] [pr-number-or-url|commit-sha|duration]"
-allowed-tools: Bash(gh pr diff *) Bash(gh pr view *) Bash(gh pr list *) Bash(git diff *) Bash(git log *) Bash(git remote get-url *) Bash(git branch --show-current *) Bash(gh api --method GET *) Bash(rm -f /tmp/*) Read Write Skill
+allowed-tools: Bash(gh pr diff *) Bash(gh pr view *) Bash(gh pr list *) Bash(git diff *) Bash(git log *) Bash(git remote get-url *) Bash(git branch --show-current *) Bash(gh api --method GET *) Bash(rm -f /tmp/security-review-*) Read Write Skill
 ---
 
 ## Parameters
