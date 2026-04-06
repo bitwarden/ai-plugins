@@ -20,7 +20,7 @@ Extract and note:
 - Assignee and reporter
 - Key fields relevant to understanding the work (labels, components, sprint, etc.)
 - Comments that provide important context (clarifications from stakeholders, technical decisions, implementation guidance)
-- **Custom fields**: Consult `references/jira_custom_fields.md` to look up the custom field IDs for this issue's type. Extract and surface all non-null custom fields listed for that type (e.g., Acceptance criteria, QA testing notes, Technical breakdown, Goals/Deliverables, Outcome, etc.). For issue types not listed in the reference, surface all non-null custom fields from the Additional Fields section. The `names` expansion maps field IDs to human-readable names automatically.
+- **Custom fields**: Surface all non-null custom fields from the Additional Fields section of the response. The `names` expansion maps field IDs to human-readable display names automatically.
 
 ### Step 2: Identify All Linked Issues
 
@@ -105,7 +105,7 @@ Organize all gathered information into a comprehensive understanding:
 - What are the key requirements or acceptance criteria?
 - What problem is being solved?
 - What documentation supports this work?
-- Show any non-null custom fields for this issue type (per `references/jira_custom_fields.md`) under their field name as a heading, rendering the content as markdown
+- Show any non-null custom fields under their display name as a heading, rendering the content as markdown
 
 #### Dependencies and Relationships
 - What issues must be completed first (blocking dependencies)?
@@ -160,12 +160,6 @@ These skills are from sibling plugins (`bitwarden-security-engineer`, `bitwarden
 ## Composability
 
 When invoked by another skill, produce a structured markdown document with clearly labeled sections matching the Step 6 headings. When invoked directly by a user, present a conversational summary that leads with the most important information (what is it, what's blocking it, what's the scope) and lets the user ask follow-up questions for deeper detail.
-
-## Resources
-
-### references/jira_custom_fields.md
-
-Maps each Bitwarden Jira issue type (Epic, Spike, Story, Task, QA Bug, Subtask, Bug, Contribution) to its known custom field IDs and human-readable names. Consult this in Step 1 after identifying the issue type to know exactly which custom fields to look for and surface.
 
 ## Examples
 
