@@ -14,6 +14,7 @@ The primary workflow is described by the `check-your-work` skill: after completi
 
 General-purpose documentation evaluator. Reviews any software documentation for clarity, accuracy, audience fit, and alignment with the code it describes. Operates in-place — it evaluates what exists now, not what changed.
 
+> [!NOTE]
 > **Want to help?** The documentation evaluator's criteria currently focus on code-level documentation (JSDoc, inline comments, method contracts). Its coverage of architectural docs, READMEs, and other specialized files could use some TLC. Contributions to its `evaluate-documentation` skill are welcome.
 
 ### Health Evaluator
@@ -40,7 +41,8 @@ These skills form a skill library for subagents. Importing into a subagent is th
 
 Evaluate skills never reference subagents.
 
-> **Want to help?** Using subagents is expensive, since they need to rediscover context. The `evaluate-*` skills are independent so that you can experiment with them. If you make a set with better token efficiency, please submit a PR!
+> [!NOTE]
+> **Want to help?** Using subagents is expensive, since they need to rediscover context. The `evaluate-*` skills are independent so that you can experiment with them. If you make a subagent with better token efficiency, please submit a PR!
 
 ### `guide-*` Skills
 
@@ -48,6 +50,7 @@ Guide skills are excluded from the user-invocable list. They are designed for Cl
 
 Guide skills never reference subagents.
 
+> [!NOTE]
 > **Want to help?** The `guide-on-situational-awareness` skill includes tracing methodologies for localized text and message passing in the Bitwarden `clients` repository. If you develop a new tracing methodology for a different area of the codebase, consider contributing it as a resource under this skill.
 
 ## Usage
