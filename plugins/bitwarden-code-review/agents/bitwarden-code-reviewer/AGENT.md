@@ -1,9 +1,9 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.8.3
+version: 1.9.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
-skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary
+skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
 tools: Read, Write, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql -f query=:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
 ---
 
@@ -33,11 +33,18 @@ Then gather the remaining data:
 3. **Test alignment** — Do test changes match code changes appropriately?
 4. **Context** — Why was this change needed? What problem does it solve?
 
+**If dependency manifest files are in the diff** (package.json, .csproj, Cargo.toml, go.mod, etc.), also determine:
+
+- Which manifest and lock files changed
+- Whether the PR author is an automated bot (Renovate, Dependabot)
+- Whether the PR description references AppSec approval (VULN task, explicit mention of the dependency review process)
+
 **Tailor your review approach based on what you observe:**
 
 - Consider which risks are most relevant to this specific change
 - Focus on security, correctness, and breaking changes first
 - Adapt your depth of analysis to the change's complexity and risk level
+- For dependency-only PRs from bots, focus on lock file hygiene and version significance — do not analyze lock file diffs line-by-line
 
 ## Step 2: Analyze Code
 
@@ -49,6 +56,10 @@ Examine all changed code in priority order:
 - **Performance** - O(n²) algorithms, memory leaks, unnecessary network calls
 - **Maintainability** - Only after above are satisfied
 
+### Dependency Change Review
+
+When dependency manifest files appear in the diff, invoke `Skill(reviewing-dependency-changes)` to check process compliance, lock file hygiene, and version bump significance. This skill is always available regardless of sibling plugins.
+
 ### Cross-Plugin Enrichment
 
 When sibling Bitwarden plugins are installed, activate specialist skills during analysis:
@@ -57,7 +68,7 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 
 - **Potential vulnerabilities** → invoke `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
 - **Auth/encryption/trust-boundary changes** → invoke `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
-- **Dependency updates** → invoke `Skill(reviewing-dependencies)` to assess supply chain risk
+- **Dependency updates** → invoke `Skill(reviewing-dependencies)` to assess supply chain risk (complements `reviewing-dependency-changes` with deep security analysis)
 
 **Implementation pattern review:**
 

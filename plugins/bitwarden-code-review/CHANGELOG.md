@@ -5,6 +5,21 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-04-06
+
+### Added
+
+- New `reviewing-dependency-changes` skill for dependency-aware code review: flags new dependencies missing AppSec approval, major version bumps without migration notes, lock file hygiene issues, and incomplete dependency removals
+- Dependency Changes summary table in review output for at-a-glance visibility of package additions, removals, and version changes
+- Dependency context gathering in Step 1: identifies manifest files, bot authors, and approval signals in PR descriptions
+- `Skill(reviewing-dependency-changes)` invocation in Step 2 for all PRs with dependency manifest changes
+
+### Changed
+
+- Updated `avoiding-false-positives` skill with dependency-specific patterns: automated bot updates and lock file regeneration
+- Updated `classifying-review-findings` skill to reject routine Renovate/Dependabot minor/patch updates as non-findings
+- Agent now skips line-by-line lock file analysis for dependency-only bot PRs, focusing on hygiene and version significance
+
 ## [1.8.3] - 2026-03-27
 
 ### Changed
