@@ -73,10 +73,6 @@ Subagents are given a specific set of directions through skill injection, which 
 
 The subagent returns its data to the main agent. Feedback directly relevant to the agent task is typically accepted, after which the agent returns control to its operator.
 
-### Agents
-
-The subagents are intentionally concise. Each configures a persona and establishes high-level objectives. The bulk of their instructions are in skill definitions.
-
 ### The FIXME feedback loop
 
 The main agent tends to act on findings that align with its current task and discard the rest. FIXME instructions in the check-your-work skill capture deferred feedback so it isn't lost.
@@ -86,7 +82,16 @@ The health-evaluator subagent looks for `FIXME` comments as a strong signal for 
 > [!NOTE]
 > **Want to help?** Skills for followup passes are not yet defined. Try using Claude to identify good candidates for tech debt cleanup using these FIXMEs and contribute a new skill!
 
-### Skills
+### Evaluator subagent design
+
+The subagents are intentionally concise. Each configures a persona and establishes high-level objectives. The bulk of their instructions are in skill definitions. Subagents with skill imports are used to control the criteria and capabilities available to the agent.
+
+Forked skills are avoided in evaluators because guide skills are expected to have general utility spanning evaluator boundaries. Injecting these skills directly into the subagent's system prompt ensures efficacy can be measured reliably.
+
+> [!NOTE]
+> **Want to help?** Using subagents is expensive, since they need to rediscover context. If you make a subagent with better token efficiency, please submit a PR!
+
+### Skill design
 
 | Skill | Invocation | Description |
 |-------|------------|-------------|
@@ -95,21 +100,17 @@ The health-evaluator subagent looks for `FIXME` comments as a strong signal for 
 | `evaluate-unit-tests` | subagent import | Criteria and report template for unit test design review |
 | `guide-on-situational-awareness` | automatic | Guide for tracing data flow, message passing, localized text, and recurring patterns |
 
+> [!NOTE]
+> **Want to help?** The `guide-on-situational-awareness` skill includes tracing methodologies for localized text and message passing in the Bitwarden `clients` repository. If you develop a new tracing methodology for a different area of the codebase, consider contributing it as a resource under this skill.
+
 #### `evaluate-*` Skills
 
 These skills form a skill library for subagents. Importing into a subagent is the only supported invocation method — both user invocation and model invocation are disabled. An agent implementing a change must never invoke an `evaluate-*` skill directly, because that agent is prone to rationalize away the skill's advice. The import requirement ensures the subagent has the skill text and provides isolation from the implementing agent's context.
 
 Evaluate skills never reference subagents.
 
-> [!NOTE]
-> **Want to help?** Using subagents is expensive, since they need to rediscover context. The `evaluate-*` skills are independent so that you can experiment with them. If you make a subagent with better token efficiency, please submit a PR!
-
 #### `guide-*` Skills
 
 Guide skills are excluded from the user-invocable list. They are designed for Claude to read automatically and may be used by subagents or the main agent.
 
 Guide skills never reference subagents.
-
-> [!NOTE]
-> **Want to help?** The `guide-on-situational-awareness` skill includes tracing methodologies for localized text and message passing in the Bitwarden `clients` repository. If you develop a new tracing methodology for a different area of the codebase, consider contributing it as a resource under this skill.
-
