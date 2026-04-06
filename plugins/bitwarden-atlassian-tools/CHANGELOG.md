@@ -9,25 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `get_issue_remote_links` MCP tool for fetching external links (Confluence pages, PRs, etc.) attached to a Jira issue, grouped by type
-- `researching-jira-issues` skill that orchestrates deep Jira issue reads using MCP tools — fetches the main issue, traverses linked issues with depth control, follows remote links to Confluence documentation, and synthesizes into a structured summary
-- Cross-plugin enrichment: skill invokes security and engineering skills from sibling plugins when relevant signals are detected
-- Context budget guidance, rate limiting awareness, and graceful degradation in the new skill
-- Next-gen epic children discovery via JQL `parent = EPIC-KEY` search
-- Reference documents for Bitwarden-specific custom field mappings and Jira link type taxonomy
-- Bug and Contribution issue types to custom fields reference
-- Fallback guidance for unlisted issue types in custom fields lookup
-- Cross-project traversal rule for inline description URL references
+- `get_issue_remote_links` MCP tool for fetching remote links attached to a Jira issue
+- `researching-jira-issues` skill for deep Jira issue reads with linked issue traversal, Confluence follow-through, and cross-plugin enrichment
+- Reference documents for custom field mappings and link type taxonomy
 
 ### Changed
 
-- Enrichment triggers are now content-driven: security and development enrichment scan all fetched content (main issue, linked issues, Confluence pages) instead of relying on narrow field-based signals
-- Removed Security Approver (`customfield_10224`) as a standalone security enrichment trigger (confirmed as org-wide default with no security correlation)
-- Development enrichment now falls back to description/doc content signals when Technical Breakdown field is absent (Epics, Spikes, Bugs)
+- Enrichment triggers now scan all fetched content instead of relying on narrow field-based signals
 
 ### Removed
 
-- The `atlassian-reader` plugin is no longer needed; its capabilities are fully superseded by this plugin's MCP tools and the new skill
+- `atlassian-reader` plugin — superseded by this plugin's MCP tools and the new skill
 
 ## [2.1.0] - 2026-03-20
 
