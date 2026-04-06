@@ -16,6 +16,7 @@ The health-evaluator subagent looks for `FIXME` comments as a strong signal for 
 
 > [!NOTE]
 > **Want to help?** 🤝
+>
 > Skills for followup passes are not yet defined. Try using Claude to identify good candidates for tech debt cleanup using these FIXMEs and contribute a new skill!
 
 ### 🧑‍🏫 Evaluator subagent design
@@ -26,6 +27,7 @@ Forked skills are avoided in evaluators because guide skills are expected to hav
 
 > [!NOTE]
 > **Want to help?** 🤝
+>
 > Using subagents is expensive, since they need to rediscover context. If you make a subagent with better token efficiency, please submit a PR!
 
 ### 🧠 Skill design
@@ -39,6 +41,7 @@ Forked skills are avoided in evaluators because guide skills are expected to hav
 
 > [!NOTE]
 > **Want to help?** 🤝
+>
 > The `guide-on-situational-awareness` skill includes tracing methodologies for localized text and message passing in the Bitwarden `clients` repository. If you develop a new tracing methodology for a different area of the codebase, consider contributing it as a resource under this skill.
 
 #### `evaluate-*` Skills

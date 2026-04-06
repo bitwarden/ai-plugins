@@ -61,6 +61,7 @@ Use the documentation-evaluator agent to review the documentation in src/service
 
 > [!NOTE]
 > **Want to help?** 🤝
+>
 > The documentation evaluator's criteria currently focus on code-level documentation (JSDoc, inline comments, method contracts). Its coverage of architectural docs, READMEs, and other specialized files could use some TLC. Contributions to its `evaluate-documentation` skill are welcome.
 
 ### Health Evaluator
