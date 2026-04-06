@@ -30,10 +30,10 @@ Forked skills are avoided in evaluators because guide skills are expected to hav
 
 | Skill | Invocation | Description |
 |-------|------------|-------------|
-| `evaluate-documentation` | subagent import | Criteria and report template for documentation quality review |
-| `evaluate-health` | subagent import | Criteria and report template for structural health review |
-| `evaluate-unit-tests` | subagent import | Criteria and report template for unit test design review |
-| `guide-on-situational-awareness` | automatic | Guide for tracing data flow, message passing, localized text, and recurring patterns |
+| [`evaluate-documentation`](./skills/evaluate-documentation/SKILL.md) | subagent import | Criteria and report template for documentation quality review |
+| [`evaluate-health`](./skills/evaluate-health/SKILL.md) | subagent import | Criteria and report template for structural health review |
+| [`evaluate-unit-tests`](./skills/evaluate-unit-tests/SKILL.md) | subagent import | Criteria and report template for unit test design review |
+| [`guide-on-situational-awareness`](./skills/guide-on-situational-awareness/SKILL.md) | automatic | Guide for tracing data flow, message passing, localized text, and recurring patterns |
 
 > [!NOTE]
 > **Want to help?** The `guide-on-situational-awareness` skill includes tracing methodologies for localized text and message passing in the Bitwarden `clients` repository. If you develop a new tracing methodology for a different area of the codebase, consider contributing it as a resource under this skill.
