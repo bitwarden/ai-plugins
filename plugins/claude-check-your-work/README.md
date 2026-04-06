@@ -24,6 +24,9 @@ Available through the Bitwarden AI plugins marketplace:
 | `documentation-evaluator` | agent | Reviews documentation for clarity, accuracy, and audience fit |
 | `health-evaluator` | agent | Assesses structural health, tech debt, coupling, and reversibility |
 | `unit-test-evaluator` | agent | Reviews test design for meaningful behavior coverage and anti-patterns |
+| `guide-on-situational-awareness` | skill\* | Loaded into context automatically; traces data flow, message passing, localized text, and recurring patterns |
+
+\* Guide skills consume context but are not user-invocable.
 
 ### Checking your work
 
