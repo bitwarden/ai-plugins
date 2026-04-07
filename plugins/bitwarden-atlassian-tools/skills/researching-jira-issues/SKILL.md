@@ -157,10 +157,6 @@ This validates whether the spec aligns with Bitwarden's coding conventions and s
 
 These skills are from sibling plugins (`bitwarden-security-engineer`, `bitwarden-software-engineer`). If unavailable, present the raw Atlassian content without additional analysis.
 
-## Composability
-
-When invoked by another skill, produce a structured markdown document with clearly labeled sections matching the Step 6 headings. When invoked directly by a user, present a conversational summary that leads with the most important information (what is it, what's blocking it, what's the scope) and lets the user ask follow-up questions for deeper detail.
-
 ## Examples
 
 ### examples/deep_read_workflow.md
