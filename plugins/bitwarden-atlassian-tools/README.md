@@ -97,7 +97,6 @@ Features:
 - Custom field awareness for 16 Bitwarden-specific fields across 6 issue types
 - Next-gen epic children discovery via JQL
 - Automatic Confluence page follow-through from remote links
-- Cross-plugin enrichment with security and engineering skills
 - Context budget guidance and graceful degradation
 
 ## Requirements

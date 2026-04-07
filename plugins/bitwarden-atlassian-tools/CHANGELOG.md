@@ -10,12 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `get_issue_remote_links` MCP tool for fetching remote links attached to a Jira issue
-- `researching-jira-issues` skill for deep Jira issue reads with linked issue traversal, Confluence follow-through, and cross-plugin enrichment
+- `researching-jira-issues` skill for deep Jira issue reads with linked issue traversal and Confluence follow-through
 - Reference documents for custom field mappings and link type taxonomy
-
-### Changed
-
-- Enrichment triggers now scan all fetched content instead of relying on narrow field-based signals
 
 ### Removed
 

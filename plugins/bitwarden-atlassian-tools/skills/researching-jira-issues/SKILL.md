@@ -126,37 +126,6 @@ Organize all gathered information into a comprehensive understanding:
 
 When the full synthesis exceeds approximately 4000 words (roughly the point where readers start skimming rather than absorbing), condense lower-priority linked issues (Related, Clones, Duplicates) to single-line summaries with key, status, and summary only. Limit displayed comments to the 3 most recent unless the user asks for more.
 
-## Cross-Plugin Enrichment
-
-After gathering all issue data, check for enrichment triggers from sibling plugins:
-
-### Security Enrichment
-
-Invoke `Skill(bitwarden-security-context)` when ANY of these signals are present across all fetched content (the main issue, linked issues, and Confluence pages):
-- The **Labels** section contains terms like `security`, `vulnerability`, `compliance`
-- The **Components** section includes security-related components
-- The description or content of the main issue, any fetched linked issue, or any fetched Confluence page mentions security topics (encryption, auth, access control, vulnerability, attack vector, threat model, etc.)
-
-This overlays Bitwarden's security principles (P01-P06) and vocabulary onto the synthesis, adding a "Security Considerations" subsection.
-
-### Development Enrichment
-
-Invoke the relevant engineering skill based on content signals when ANY of these conditions are met:
-- The **Additional Fields** section shows a populated Technical breakdown (`customfield_10313`)
-- Linked Confluence pages contain technical specifications
-- When Technical Breakdown is absent for the given issue type, the description or content of the main issue or fetched Confluence pages contains technology signals
-
-Match content signals to skills:
-- Server/API/C#/.NET references -> `Skill(writing-server-code)`
-- Client/Angular/TypeScript/UI references -> `Skill(writing-client-code)`
-- Database/migration/SQL/stored procedure references -> `Skill(writing-database-queries)`
-
-This validates whether the spec aligns with Bitwarden's coding conventions and surfaces any mismatches in a "Development Context" subsection.
-
-### Skill Availability
-
-These skills are from sibling plugins (`bitwarden-security-engineer`, `bitwarden-software-engineer`). If unavailable, present the raw Atlassian content without additional analysis.
-
 ## Examples
 
 ### examples/deep_read_workflow.md
