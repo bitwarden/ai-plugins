@@ -5,10 +5,6 @@ description: Use this skill when a PR diff contains changes to dependency manife
 
 # Reviewing Dependency Changes
 
-This skill covers what a code reviewer should flag when dependency manifest files appear in a PR diff. It focuses on process compliance, hygiene, and signals visible in the diff — not deep vulnerability or license analysis.
-
-**Scope boundary:** This skill answers "did this PR follow the right process and maintain dependency hygiene?" The `bitwarden-security-engineer` plugin's `reviewing-dependencies` skill answers "is this dependency safe?"
-
 ## Manifest File Detection
 
 Flag this skill when any of these files appear in the diff:
@@ -22,9 +18,9 @@ Flag this skill when any of these files appear in the diff:
 
 ## Area 1: New Dependencies
 
-When a PR adds a dependency that was not previously in the codebase, Bitwarden's [Dependency Review and Approval process](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657) requires AppSec review and approval before integration. This applies to **all** new dependencies — production, dev, and test.
+When a PR adds a dependency that was not previously in the codebase, Bitwarden's Dependency Review and Approval process requires AppSec review and approval before integration. This applies to **all** new dependencies — production, dev, and test.
 
-The process requires the submitter to provide the package name/version, ecosystem, justification, scope, affected products, and what it replaces. A security engineer then evaluates security, license compatibility, maintenance health, supply chain risk, and transitive dependencies before rendering an approval decision.
+The submitter must provide the package name/version, ecosystem, justification, scope, affected products, and what it replaces. A security engineer creates a VULN task in Jira and evaluates the dependency across security (known CVEs, exploitability), license compatibility (permissive licenses like MIT/Apache-2.0 are acceptable; copyleft licenses like GPL/AGPL are flagged), maintenance health (active maintainers, recent releases, security policy), supply chain risk (typosquatting, ownership changes, obfuscated install scripts), and transitive dependencies before rendering an approval decision.
 
 ### What to Check
 
@@ -37,11 +33,10 @@ Evidence that the dependency approval process was followed:
 
 - PR description references a **VULN task** (e.g., `VULN-1234`)
 - PR description explicitly mentions **AppSec approval** or the dependency review process
-- PR labels include a dependency approval indicator
 
 ### Severity
 
-- **No approval signal found** → ⚠️ **IMPORTANT**: New dependency `<package>` added. Bitwarden requires AppSec approval before introducing new dependencies. See [Dependency Review and Approval](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657).
+- **No approval signal found** → ⚠️ **IMPORTANT**: New dependency `<package>` added. Bitwarden requires AppSec approval before introducing new dependencies. The submitter should reach out to the AppSec team to initiate the dependency review and approval process.
 - **Unclear whether approval was obtained** → ❓ **QUESTION**: Was AppSec approval obtained for the new `<package>` dependency?
 
 ### What NOT to Flag
