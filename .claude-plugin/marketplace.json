@@ -25,7 +25,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.8.3",
+      "version": "1.9.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -55,7 +55,7 @@
     {
       "name": "bitwarden-security-engineer",
       "source": "./plugins/bitwarden-security-engineer",
-      "version": "0.2.0",
+      "version": "1.0.0",
       "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis."
     }
   ]

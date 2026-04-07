@@ -34,6 +34,7 @@ Verify ALL three:
 - Style preferences without enforced standard
 - Naming nitpicks unless actively misleading
 - PR metadata issues (title, description, test plan) - handled by summary skill, not classified here
+- Renovate/Dependabot minor/patch updates to existing dependencies with passing CI — these are routine Stage 5 monitoring, not reviewable findings
 
 ## Suggested Improvements (🎨) Criteria
 
