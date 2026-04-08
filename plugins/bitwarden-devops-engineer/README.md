@@ -1,11 +1,11 @@
-# bitwarden-bre
+# bitwarden-devops-engineer
 
 BRE tooling for GitHub Actions workflow compliance and security auditing.
 
 ## Installation
 
 ```bash
-claude plugin install bitwarden/ai-plugins#bitwarden-bre
+claude plugin install bitwarden/ai-plugins#bitwarden-devops-engineer
 ```
 
 ## Commands

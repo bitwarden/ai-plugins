@@ -1,12 +1,12 @@
 {
-  "name": "bitwarden-bre",
-  "version": "1.0.0",
+  "name": "bitwarden-devops-engineer",
+  "version": "0.1.0",
   "description": "BRE tooling for GitHub Actions workflow compliance and security auditing.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-bre",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-devops-engineer",
   "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": ["bre", "github-actions", "workflow", "security", "linter", "audit"],
   "commands": [
