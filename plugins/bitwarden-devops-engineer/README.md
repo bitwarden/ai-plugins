@@ -1,50 +1,32 @@
-# bitwarden-devops-engineer
+# Bitwarden DevOps Engineer Plugin
 
-BRE tooling for GitHub Actions workflow compliance and security auditing.
+Claude Code commands and skills for GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation. Generic AI assistance doesn't know Bitwarden's workflow linter rules, approved actions list, or remediation patterns. These tools keep Claude focused on how we manage CI/CD workflows here.
+
+## Components
+
+**Agent:** `bitwarden-devops-engineer`
+
+**Commands:** `workflow-fix`, `action-audit`
+
+**Skills:** `bitwarden-workflow-linter-rules`
 
 ## Installation
 
+Available through Bitwarden's internal Claude Code marketplace:
+
 ```bash
-claude plugin install bitwarden/ai-plugins#bitwarden-devops-engineer
+# Add the Bitwarden marketplace (if not already added)
+/plugin marketplace add https://github.com/bitwarden/ai-plugins
+
+# Install the DevOps engineer plugin
+/plugin install bitwarden-devops-engineer@bitwarden-marketplace
+
+# Restart Claude Code
 ```
 
-## Commands
+## References
 
-### `/bre-workflow-fix [file-or-dir] | --repos <repo1,repo2,...>`
-
-Fix GitHub Actions workflow linter findings in one or more repos.
-
-Runs `bwwl lint` against the target workflow files, applies mechanical fixes automatically (capitalization, permissions, runner pins, action hash pins, output naming), and asks for direction on judgment calls (unapproved actions, complex actionlint findings). Creates a draft PR per repo when done.
-
-**Examples:**
-
-```
-/bre-workflow-fix
-/bre-workflow-fix .github/workflows/build.yml
-/bre-workflow-fix --repos server,clients,android,ios
-```
-
-### `/bre-action-audit [action-name] [--mode incident|audit] [--replace <new-action>]`
-
-Audit and remediate GitHub Actions action usage across the Bitwarden org.
-
-Searches the org via `gh search code`, reports all usages with their pin status, resolves a safe hash with a verification link, and creates draft PRs per repo after confirmation.
-
-**Modes:**
-
-- `incident` (default when action name is provided): Targeted search for a specific action.
-- `audit` (default when no action name): Sweep all workflow files for unpinned action references.
-
-**Examples:**
-
-```
-/bre-action-audit tj-actions/changed-files
-/bre-action-audit tj-actions/changed-files --replace actions/changed-files
-/bre-action-audit --mode audit
-```
-
-## Skills
-
-### `bitwarden-workflow-linter-rules`
-
-Reference knowledge for all 10 Bitwarden workflow linter rules, their triggers, and correct fixes. Used internally by `/bre-workflow-fix` but also available to any agent that needs to reason about workflow compliance.
+- [Bitwarden Workflow Linter](https://github.com/bitwarden/workflow-linter) — `bwwl` source, approved actions list, and rule definitions
+- [actionlint](https://github.com/rhysd/actionlint) — Static checker for GitHub Actions workflow files, used internally by `bwwl`
+- [GitHub Actions Documentation](https://docs.github.com/en/actions) — Workflow syntax, permissions model, and contexts reference
+- [GitHub Code Search](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax) — Syntax reference for `gh search code` used in `action-audit`

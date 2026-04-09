@@ -1,23 +1,24 @@
 ---
 name: bitwarden-workflow-linter-rules
-description: Use this skill when linting and fixing GitHub Actions workflow findings from the Bitwarden workflow linter (bwwl). Covers the full workflow: running the linter, parsing errors only, applying per-rule fixes, verifying, and reporting results.
+description: >-
+  Use this skill when running, interpreting, or fixing findings from the Bitwarden workflow linter
+  (bwwl) — a tool that enforces rules across all .github/workflows/ files. Covers all 10 linter
+  rules split into two categories: mechanical rules applied automatically (name_capitalized,
+  name_exists, permissions_exist, pinned_job_runner, step_pinned, underscore_outputs,
+  job_environment_prefix, check_pr_target) and judgment rules requiring user input (step_approved,
+  run_actionlint). Includes bwwl setup, per-rule triggers and fix procedures, verification, and
+  result reporting. Assumes bwwl is already installed — stops execution if not found.
 ---
 
-# Bitwarden Workflow Linter (bwwl)
+## Prerequisites
 
-The Bitwarden workflow linter (`bwwl`) enforces rules on all `.github/workflows/` files. This skill runs the linter, fixes every detected error, verifies the fixes, and reports results.
-
-## Setup
-
-If `bwwl` is not available in the current environment, install it before proceeding:
+Before proceeding, verify `bwwl` is available:
 
 ```bash
-python3 -m venv /tmp/bwwl-venv
-source /tmp/bwwl-venv/bin/activate
-pip install bitwarden_workflow_linter --quiet
+bwwl --version
 ```
 
-Requires Python 3.13+. Do not attempt to install it outside of a virtualenv. If setup fails, inform the user and wait for confirmation before continuing.
+If the command is not found, stop and inform the user that `bwwl` must be installed before continuing. Do not attempt to install it.
 
 ## Execution Steps
 
@@ -90,7 +91,7 @@ Use the Read tool to examine each affected file, then use the Edit tool to apply
 **`step_approved`**
 - **Trigger:** A step's `uses:` references an action not on the Bitwarden approved actions list.
 - **Options to present to the user:**
-  1. **Add to approved list** — if the action is legitimate and BRE has reviewed it, add it to `bitwarden/workflow-linter`'s approved actions config.
+  1. **Add to approved list** — if the action is legitimate and has been reviewed and approved, add it to `bitwarden/workflow-linter`'s approved actions config.
   2. **Replace** — swap with an approved alternative that provides the same functionality.
   3. **Remove** — delete the step if it is not essential.
 - Do not make this change automatically. Show the unapproved action name, ask which option the user wants, then act.

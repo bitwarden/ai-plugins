@@ -1,17 +1,17 @@
 {
   "name": "bitwarden-devops-engineer",
-  "version": "0.1.0",
-  "description": "BRE tooling for GitHub Actions workflow compliance and security auditing.",
+  "version": "0.2.0",
+  "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-devops-engineer",
   "repository": "https://github.com/bitwarden/ai-plugins",
-  "keywords": ["bre", "github-actions", "workflow", "security", "linter", "audit"],
+  "keywords": ["devops", "github-actions", "workflow", "security", "linter", "audit"],
+  "agents": ["./agents/bitwarden-devops-engineer.md"],
   "commands": [
-    "./commands/bre-workflow-fix/bre-workflow-fix.md",
-    "./commands/bre-action-audit/bre-action-audit.md"
-  ],
-  "skills": ["./skills/bitwarden-workflow-linter-rules/SKILL.md"]
+    "./commands/workflow-fix/workflow-fix.md",
+    "./commands/action-audit/action-audit.md"
+  ]
 }

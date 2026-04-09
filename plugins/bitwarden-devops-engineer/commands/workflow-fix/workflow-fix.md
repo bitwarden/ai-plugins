@@ -1,12 +1,8 @@
 ---
-description: Fix Bitwarden workflow linter findings in one or more GitHub Actions workflow files
+description: Fix GitHub Actions workflow linter findings in one or more workflow files
 argument-hint: [file-or-dir] | --repos <repo1,repo2,...>
 allowed-tools: Read, Edit, Glob, Grep, Skill, Bash(python3 -m venv:*), Bash(pip install:*), Bash(bwwl:*), Bash(git checkout:*), Bash(git switch:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr create:*), Bash(gh api:*)
 ---
-
-Fix GitHub Actions workflow linter findings using the Bitwarden workflow linter (`bwwl`). Applies mechanical fixes automatically and asks for direction on judgment calls.
-
-Use the `bitwarden-workflow-linter-rules` skill throughout this command to determine the correct fix for each finding.
 
 ## Step 1: Determine Scope
 

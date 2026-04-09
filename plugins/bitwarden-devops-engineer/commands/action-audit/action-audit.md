@@ -1,10 +1,8 @@
 ---
-description: Audit and remediate GitHub Actions action usage across the Bitwarden org
+description: Audit and remediate GitHub Actions action usage across the org
 argument-hint: [action-name] [--mode incident|audit] [--replace <new-action>]
 allowed-tools: Read, Edit, Glob, Grep, Bash(gh search code:*), Bash(gh api:*), Bash(gh repo clone:*), Bash(gh pr create:*), Bash(git checkout:*), Bash(git switch:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*)
 ---
-
-Audit usage of a GitHub Actions action across the entire Bitwarden org and produce a remediation plan. Supports two modes:
 
 - **`incident`** (default): Targeted search for a specific action — used when an action is compromised or deprecated.
 - **`audit`**: Sweep all workflow files org-wide for any unpinned action references.
@@ -20,19 +18,19 @@ Audit usage of a GitHub Actions action across the entire Bitwarden org and produ
 **Incident mode** — search for the specific action:
 
 ```bash
-gh search code "uses: <action-name>" --owner bitwarden --extension yml --limit 100
+gh search code "uses: <action-name>" --owner <org> --extension yml --limit 100
 ```
 
 Also search without the `uses:` prefix to catch indirect references:
 
 ```bash
-gh search code "<action-name>" --owner bitwarden --extension yml --limit 100
+gh search code "<action-name>" --owner <org> --extension yml --limit 100
 ```
 
 **Audit mode** — find all workflow files with unpinned action references (not pinned to a full SHA):
 
 ```bash
-gh search code "uses:" --owner bitwarden --extension yml --limit 100
+gh search code "uses:" --owner <org> --extension yml --limit 100
 ```
 
 Then filter results to find `uses:` lines that do NOT match the pattern `@[a-f0-9]{40}` (i.e., not pinned to a hash).
@@ -100,9 +98,9 @@ Show the full list of affected repos and ask the user which ones to remediate. O
 
 For each selected repo:
 
-1. Check if a local clone exists at `~/Documents/Repositories/bitwarden/<repo>`. If not, clone it:
+1. Check if a local clone exists at `~/Documents/Repositories/<org>/<repo>`. If not, clone it:
    ```bash
-   gh repo clone bitwarden/<repo> ~/Documents/Repositories/bitwarden/<repo>
+   gh repo clone <org>/<repo> ~/Documents/Repositories/<org>/<repo>
    ```
 
 2. Create a fix branch:
@@ -135,8 +133,6 @@ Remediates usage of `<action-name>` across this repository.
 **Action taken:** <pin updated to `<sha>` / replaced with `<new-action>`>
 
 **Reason:** <compromised action / deprecated action / unpinned reference>
-
-cc @bitwarden/bre
 EOF
 )" \
   --draft
