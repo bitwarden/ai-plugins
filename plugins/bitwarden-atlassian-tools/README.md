@@ -62,6 +62,7 @@ Use **scoped (granular) API tokens** for least-privilege access. Create them at 
 | `get_issue` | Read a Jira issue by key or ID |
 | `search_issues` | Search issues using JQL |
 | `get_issue_comments` | Get comments for an issue |
+| `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs) |
 | `list_projects` | List accessible Jira projects |
 | `download_attachment` | Download a Jira attachment as Base64 |
 
@@ -84,6 +85,19 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Search with JQL: `mcp__bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
 - Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
 - Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
+
+## Skills
+
+### `researching-jira-issues`
+
+Orchestrates a deep read of a Jira issue by traversing linked issues, remote links, and supporting Confluence documentation, then synthesizing everything into a structured summary. Triggered by mentioning a Jira issue key with intent to understand it deeply (e.g., "Read PROJ-123", "What's blocking PROJ-123?").
+
+Features:
+- Graph traversal with depth control (2 hops) and cycle detection
+- Custom field awareness for 16 Bitwarden-specific fields across 6 issue types
+- Next-gen epic children discovery via JQL
+- Automatic Confluence page follow-through from remote links
+- Context budget guidance and graceful degradation
 
 ## Requirements
 

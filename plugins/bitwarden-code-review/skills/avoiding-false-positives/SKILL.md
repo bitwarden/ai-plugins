@@ -34,6 +34,8 @@ For each finding that passes rejection criteria, verify ALL three:
 3. **Test code** - Different standards apply (hardcoded values, no error handling often OK)
 4. **Generated code** - Migrations, API clients, proto files (only review if hand-edited)
 5. **Copied patterns** - If code matches existing patterns in codebase, consistency > "better" approach
+6. **Automated dependency updates** - Renovate/Dependabot minor/patch updates to existing dependencies with passing CI are routine Stage 5 monitoring
+7. **Lock file regeneration** - A single manifest change can produce thousands of lock file diff lines; this is normal and not a review concern
 
 **When uncertain about a pattern, search the codebase for similar examples before flagging.**
 
@@ -58,5 +60,6 @@ For each finding that passes rejection criteria, verify ALL three:
 - **Race conditions**: Framework synchronizes (React state, DB transactions), or operations idempotent
 - **Performance**: Data bounded (<100 items), runs once at startup, no profiling evidence
 - **Security**: Framework sanitizes (parameterized queries, JSX escaping), or API layer validates
+- **Lock file churn**: Large lock file diffs from a single manifest change are expected behavior, not a review concern
 
 **When uncertain, assume the developer knows something you don't.**

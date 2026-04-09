@@ -16,6 +16,7 @@ import type { ToolDefinition } from './utils/validation.js';
 // Jira tools
 import getIssue from './tools/get-issue.js';
 import getIssueComments from './tools/get-issue-comments.js';
+import getIssueRemoteLinks from './tools/get-issue-remote-links.js';
 import searchIssues from './tools/search-issues.js';
 import listProjects from './tools/list-projects.js';
 
@@ -33,6 +34,7 @@ import downloadAttachment from './tools/download-attachment.js';
 const tools: ToolDefinition[] = [
   getIssue,
   getIssueComments,
+  getIssueRemoteLinks,
   searchIssues,
   listProjects,
   getConfluencePage,

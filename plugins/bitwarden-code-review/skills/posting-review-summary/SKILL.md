@@ -69,6 +69,25 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 </details>
 ```
 
+## Dependency Changes Table
+
+When the PR diff includes dependency manifest file changes, add a **Dependency Changes** subsection inside the `<details>` block, after the findings list and before the optional PR Metadata Assessment.
+
+**Only render this table when there are meaningful version changes** — not for lock file-only churn with no manifest changes.
+
+```markdown
+### Dependency Changes
+
+| Package           | Change                | Ecosystem |
+| ----------------- | --------------------- | --------- |
+| `@foo/bar`        | New (1.2.0)           | npm       |
+| `lodash`          | 3.x → 4.x (**major**) | npm       |
+| `Newtonsoft.Json` | 13.0.1 → 13.0.3       | NuGet     |
+| `old-package`     | Removed               | npm       |
+```
+
+**Bold** the word "major" for major version bumps. Mark new additions as "New (version)" and removals as "Removed".
+
 ## Findings in Details Section
 
 **Ordering:** Group findings by severity in this exact order:

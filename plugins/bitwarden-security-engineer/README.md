@@ -2,16 +2,21 @@
 
 Claude Code skills for application security at Bitwarden. Generic AI coding assistance doesn't know our scanner toolchain, triage workflows, or threat modeling practices. These skills keep Claude focused on how we secure software here.
 
+## Overview
+
+This plugin provides specialized skills for security engineering tasks — from triaging scanner findings and threat modeling to conducting multi-agent security code reviews. Skills can be invoked individually or orchestrated together for comprehensive coverage across code, dependencies, secrets, and architecture.
+
 ## Skills
 
-| Skill                             | What It Does                                                                                                                                                |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `triaging-security-findings`      | Triage Checkmarx, SonarCloud, and Grype findings via GitHub Advanced Security API. Includes finding state rules, false positive protocol, and fix patterns. |
-| `threat-modeling`                 | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                   |
-| `analyzing-code-security`         | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                       |
-| `reviewing-dependencies`          | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                           |
-| `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                |
-| `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                      |
+| Skill                             | What It Does                                                                                                                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `triaging-security-findings`      | Triage Checkmarx, SonarCloud, and Grype findings via GitHub Advanced Security API. Includes finding state rules, false positive protocol, and fix patterns.                  |
+| `threat-modeling`                 | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                    |
+| `analyzing-code-security`         | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                        |
+| `reviewing-dependencies`          | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                            |
+| `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                 |
+| `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                       |
+| `perform-security-review`         | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence, and flexible output (chat, file, or GitHub Actions). |
 
 ## Usage
 

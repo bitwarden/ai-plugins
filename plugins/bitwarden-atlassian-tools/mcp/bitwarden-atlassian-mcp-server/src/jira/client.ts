@@ -16,6 +16,7 @@ import {
   JiraBoardsResponse,
   JiraSprintsResponse,
   JiraSprintIssuesResponse,
+  JiraRemoteLink,
 } from './types.js';
 
 export class JiraClient {
@@ -265,6 +266,16 @@ export class JiraClient {
       { params: queryParams }
     );
 
+    return response.data;
+  }
+
+  /**
+   * Get remote links for an issue (Confluence pages, PRs, external URLs)
+   */
+  async getRemoteLinks(issueIdOrKey: string): Promise<JiraRemoteLink[]> {
+    const response = await this.client.get<JiraRemoteLink[]>(
+      `${this.API_BASE}/issue/${issueIdOrKey}/remotelink`
+    );
     return response.data;
   }
 

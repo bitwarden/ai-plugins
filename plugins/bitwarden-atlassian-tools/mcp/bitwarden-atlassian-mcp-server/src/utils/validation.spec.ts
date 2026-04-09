@@ -11,6 +11,7 @@ import {
   SearchConfluenceCqlSchema,
   ListSpacesSchema,
   DownloadAttachmentSchema,
+  GetIssueRemoteLinksSchema,
   validateInput,
 } from './validation.js';
 
@@ -318,6 +319,38 @@ describe('ListSpacesSchema', () => {
   it('should accept empty object', () => {
     const result = ListSpacesSchema.parse({});
     expect(result).toBeDefined();
+  });
+});
+
+// ── GetIssueRemoteLinksSchema ────────────────────────────────────────
+
+describe('GetIssueRemoteLinksSchema', () => {
+  it('should accept valid issue keys', () => {
+    const result = GetIssueRemoteLinksSchema.parse({ issueIdOrKey: 'PM-123' });
+    expect(result.issueIdOrKey).toBe('PM-123');
+  });
+
+  it('should accept numeric IDs', () => {
+    const result = GetIssueRemoteLinksSchema.parse({ issueIdOrKey: '12345' });
+    expect(result.issueIdOrKey).toBe('12345');
+  });
+
+  it('should reject path traversal', () => {
+    expect(() =>
+      GetIssueRemoteLinksSchema.parse({ issueIdOrKey: '../../admin' })
+    ).toThrow();
+  });
+
+  it('should reject lowercase keys', () => {
+    expect(() =>
+      GetIssueRemoteLinksSchema.parse({ issueIdOrKey: 'proj-123' })
+    ).toThrow();
+  });
+
+  it('should reject empty string', () => {
+    expect(() =>
+      GetIssueRemoteLinksSchema.parse({ issueIdOrKey: '' })
+    ).toThrow();
   });
 });
 
