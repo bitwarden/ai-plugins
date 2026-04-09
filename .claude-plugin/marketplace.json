@@ -61,7 +61,7 @@
     {
       "name": "bitwarden-architect",
       "source": "./plugins/bitwarden-architect",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Generic software architect agent for planning features across any Bitwarden repository. Discovers platform context dynamically via CLAUDE.md and repo-local planning skills."
     },
     {

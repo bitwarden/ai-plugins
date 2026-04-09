@@ -1,7 +1,7 @@
 ---
 name: architect
 description: "Plans, architects, and refines implementation details for features in any Bitwarden codebase before code is written. Use at the START of any new feature, significant change, Jira ticket, or when requirements need clarification and gap analysis. Proactively suggest when the user describes a feature, shares a ticket, or asks to plan work. Produces structured, phased implementation plans ready for the software-engineer agent."
-version: 0.1.0
+version: 0.2.0
 model: opus
 color: green
 tools: Read, Glob, Grep, Write, Edit, Agent, Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
