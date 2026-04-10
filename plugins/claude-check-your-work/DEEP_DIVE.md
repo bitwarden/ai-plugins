@@ -4,20 +4,7 @@ An agent implementing a change is poorly positioned to evaluate its own work —
 
 This plugin addresses both problems. Evaluator subagents, inspired by Anthropic's [harness design case study](https://www.anthropic.com/engineering/harness-design-long-running-apps), isolate evaluation from implementation — trading token efficiency of up-front guidance for improved task focus overall. Progressive skill disclosure, following best practices from Anthropic's [skill-building guide](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf), keeps the main agent's context lean and surfaces evaluation criteria only when needed.
 
-```mermaid
-flowchart TD
-    subgraph &nbsp;
-        direction LR
-        ENTRY(["ENTRYPOINT"]) --> CYW["check-your-work"]
-    end
-    CYW --> SUBS@{ shape: docs, label: "evaluator subagents" }
-    SUBS --> EVAL@{ shape: docs, label: "evaluator skills" }
-    SUBS --> GUIDE@{ shape: docs, label: "guide skills" }
-    GUIDE --> RES@{ shape: docs, label: "resources" }
-    GUIDE --> EX@{ shape: docs, label: "examples" }
-
-    click ENTRY "#" "CLAUDE.md, user invocation"
-```
+![Architecture overview](./architecture-overview.svg)
 
 ## 📚 Information Architecture
 
@@ -44,16 +31,7 @@ The subagents are intentionally concise. Each configures a persona and establish
 
 Forked skills are avoided in evaluators because guide skills are expected to have general utility spanning evaluator boundaries. Injecting these skills directly into the subagent's system prompt ensures efficacy can be measured reliably.
 
-```mermaid
-flowchart LR
-    GUIDANCE["guidance from<br>main agent"] --> HE
-    subgraph &nbsp;
-        direction TB
-        HE["health-evaluator"] --> GSA["guide-on-situational-awareness"]
-        HE --> EH["evaluate-health"]
-    end
-    HE --> FEEDBACK["evaluator feedback"]
-```
+![Health evaluator example](./health-evaluator-example.svg)
 
 > [!NOTE]
 > **Want to help?** 🤝
@@ -86,37 +64,7 @@ The `evaluate-health` skill illustrates this pattern:
   * A **retrospective** review (after implementation) loads [`introduced-changes.md`](./skills/evaluate-health/resources/introduced-changes.md), which classifies signals by whether the implementation introduced or worsened them and flags those that create *hazards*.
 3. **Step 5 — Report:** The skill loads [`report.md`](./skills/evaluate-health/resources/report.md), a structured template for the output.
 
-```mermaid
-flowchart TD
-    SKILL["evaluate-health"]
-    SKILL --> VERIFY["Step 1: Verify"]
-    VERIFY --> SCOPE["Step 2: Broaden Scope"]
-    SCOPE --> INV["Step 3: Inventory"]
-
-    subgraph inv_res [" "]
-        direction LR
-        CC["common-criteria.md"]
-    end
-    INV --> inv_res
-
-    INV --> CLASSIFY["Step 4: Classify"]
-
-    subgraph class_res [" "]
-        direction LR
-        AC["anticipated-changes.md<br><i>consequential</i>"]
-        IC["introduced-changes.md<br><i>hazards</i>"]
-    end
-    CLASSIFY -->|prospective| AC
-    CLASSIFY -->|retrospective| IC
-
-    CLASSIFY --> REPORT["Step 5: Report"]
-
-    subgraph report_res [" "]
-        direction LR
-        RPT["report.md"]
-    end
-    REPORT --> report_res
-```
+![Progressive disclosure in evaluate-health](./progressive-disclosure.svg)
 
 Each phase loads only what it needs. Prospective and retrospective reviews share the same inventory criteria but diverge at classification — consequential versus hazardous — so the agent's attention is shaped by the type of review rather than loaded with criteria for both. This design also makes it straightforward to specialize the health criteria: a new review type can reuse the common inventory step and introduce its own classification resource without changing the rest of the skill. These patterns are applied routinely throughout the plugin.
 

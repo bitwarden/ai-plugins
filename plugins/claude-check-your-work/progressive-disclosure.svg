@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 410" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: Verify -->
+  <rect x="95" y="65" width="150" height="34" rx="4" fill="#f0f4ff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="170" y="86" text-anchor="middle" font-size="13" fill="#1e293b">Verify</text>
+
+  <!-- Arrow: Step 1 → Step 2 -->
+  <line x1="170" y1="99" x2="170" y2="115" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: Broaden Scope -->
+  <rect x="95" y="117" width="150" height="34" rx="4" fill="#f0f4ff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="170" y="138" text-anchor="middle" font-size="13" fill="#1e293b">Broaden Scope</text>
+
+  <!-- Arrow: Step 2 → Step 3 -->
+  <line x1="170" y1="151" x2="170" y2="167" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: Inventory -->
+  <rect x="95" y="169" width="150" height="34" rx="4" fill="#f0f4ff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="170" y="190" text-anchor="middle" font-size="13" fill="#1e293b">Inventory</text>
+
+  <!-- Arrow: Step 3 → common-criteria.md -->
+  <line x1="245" y1="186" x2="368" y2="186" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- common-criteria.md (resource file) -->
+  <rect x="370" y="169" width="185" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="462" y="190" text-anchor="middle" font-size="12" fill="#1e293b">common-criteria.md</text>
+
+  <!-- Arrow: Step 3 → Step 4 -->
+  <line x1="170" y1="203" x2="170" y2="247" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: Classify -->
+  <rect x="95" y="249" width="150" height="34" rx="4" fill="#f0f4ff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="170" y="270" text-anchor="middle" font-size="13" fill="#1e293b">Classify</text>
+
+  <!-- Arrow: Step 4 → anticipated-changes.md (prospective, zig-zag) -->
+  <path d="M 245 258 L 310 258 L 310 236 L 368 236" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="270" y="252" font-size="11" fill="#0f172a" font-style="italic">prospective</text>
+
+  <!-- anticipated-changes.md -->
+  <rect x="370" y="219" width="185" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="462" y="238" text-anchor="middle" font-size="12" fill="#1e293b">anticipated-changes.md</text>
+  <text x="462" y="250" text-anchor="middle" font-size="11" fill="#0f172a" font-style="italic">difficult to undo</text>
+
+  <!-- Arrow: Step 4 → introduced-changes.md (retrospective, zig-zag) -->
+  <path d="M 245 274 L 310 274 L 310 296 L 368 296" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="265" y="289" font-size="11" fill="#0f172a" font-style="italic">retrospective</text>
+
+  <!-- introduced-changes.md -->
+  <rect x="370" y="279" width="185" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="462" y="298" text-anchor="middle" font-size="12" fill="#1e293b">introduced-changes.md</text>
+  <text x="462" y="310" text-anchor="middle" font-size="11" fill="#0f172a" font-style="italic">hazards</text>
+
+  <!-- Arrow: Step 4 → Step 5 -->
+  <line x1="170" y1="283" x2="170" y2="337" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 5: Report -->
+  <rect x="95" y="339" width="150" height="34" rx="4" fill="#f0f4ff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="170" y="360" text-anchor="middle" font-size="13" fill="#1e293b">Report</text>
+
+  <!-- Arrow: Step 5 → report.md -->
+  <line x1="245" y1="356" x2="368" y2="356" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- report.md -->
+  <rect x="370" y="339" width="185" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="462" y="360" text-anchor="middle" font-size="12" fill="#1e293b">report.md</text>
+</svg>

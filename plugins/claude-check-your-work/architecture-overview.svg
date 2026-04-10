@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- ENTRYPOINT (stadium shape) -->
+  <g>
+    <title>CLAUDE.md, user invocation</title>
+    <rect x="35" y="23" width="140" height="34" rx="17" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+    <text x="105" y="44" text-anchor="middle" font-size="13" fill="#1e293b" font-weight="600">ENTRYPOINT</text>
+  </g>
+
+  <!-- Arrow: ENTRYPOINT → check-your-work -->
+  <line x1="175" y1="40" x2="240" y2="40" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- check-your-work -->
+  <rect x="242" y="23" width="155" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="320" y="44" text-anchor="middle" font-size="13" fill="#1e293b">check-your-work</text>
+
+  <!-- Arrow: check-your-work → evaluator subagents -->
+  <line x1="320" y1="57" x2="320" y2="108" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- evaluator subagents (stacked) -->
+  <rect x="237" y="119" width="178" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="234" y="116" width="178" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="231" y="113" width="178" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="320" y="134" text-anchor="middle" font-size="13" fill="#1e293b">evaluator subagents</text>
+
+  <!-- Arrow: guide skills → evaluator subagents (zig-zag) -->
+  <path d="M 170 208 L 170 180 L 290 180 L 290 153" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Arrow: evaluator skills → evaluator subagents (zig-zag) -->
+  <path d="M 460 208 L 460 180 L 350 180 L 350 153" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- guide skills (stacked container with resources and examples inside) -->
+  <rect x="41" y="214" width="290" height="100" rx="8" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="38" y="211" width="290" height="100" rx="8" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="35" y="208" width="290" height="100" rx="8" fill="#f8fafd" stroke="#64748b" stroke-width="1.5"/>
+  <text x="172" y="228" text-anchor="middle" font-size="13" fill="#1e293b">guide skills</text>
+
+  <!-- resources (stacked, inside guide skills) -->
+  <rect x="61" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="58" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="55" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="111" y="262" text-anchor="middle" font-size="13" fill="#1e293b">resources</text>
+
+  <!-- examples (stacked, inside guide skills) -->
+  <rect x="191" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="188" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="185" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="241" y="262" text-anchor="middle" font-size="13" fill="#1e293b">examples</text>
+
+  <!-- evaluator skills (stacked container with resources inside) -->
+  <rect x="386" y="214" width="160" height="100" rx="8" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="383" y="211" width="160" height="100" rx="8" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="380" y="208" width="160" height="100" rx="8" fill="#f8fafd" stroke="#64748b" stroke-width="1.5"/>
+  <text x="460" y="228" text-anchor="middle" font-size="13" fill="#1e293b">evaluator skills</text>
+
+  <!-- resources (stacked, inside evaluator skills) -->
+  <rect x="410" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="407" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="404" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="460" y="262" text-anchor="middle" font-size="13" fill="#1e293b">resources</text>
+</svg>
