@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-devops-engineer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation.",
   "author": {
     "name": "Bitwarden",
@@ -8,8 +8,17 @@
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-devops-engineer",
   "repository": "https://github.com/bitwarden/ai-plugins",
-  "keywords": ["devops", "github-actions", "workflow", "security", "linter", "audit"],
-  "agents": ["./agents/bitwarden-devops-engineer.md"],
+  "keywords": [
+    "devops",
+    "github-actions",
+    "workflow",
+    "security",
+    "linter",
+    "audit"
+  ],
+  "agents": [
+    "./agents/bitwarden-devops-engineer.md"
+  ],
   "commands": [
     "./commands/workflow-fix/workflow-fix.md",
     "./commands/action-audit/action-audit.md"

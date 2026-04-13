@@ -33,3 +33,26 @@ When the user's intent is operational rather than advisory, suggest the appropri
 
 - **Fix linter findings** in one or more workflow files or repos → suggest `/workflow-fix`
 - **Audit or remediate action usage** org-wide → suggest `/action-audit`
+
+## Cross-Plugin Integration
+
+### Security Analysis
+
+When the **bitwarden-security-engineer** plugin is installed:
+
+- `Skill(reviewing-dependencies)` — For supply chain risk assessment beyond linter rules (e.g., deeper analysis of action trust, dependency provenance)
+- `Skill(bitwarden-security-context)` — For grounding advice in Bitwarden's P01–P06 security principles when discussing action trust and workflow security posture
+- `Skill(reviewing-security-architecture)` — For trust boundary evaluation on `pull_request_target` safety and action permissions scope
+
+### Jira Integration
+
+When the **bitwarden-atlassian-tools** plugin is installed:
+
+- User provides a Jira issue key (e.g., "advise on workflow compliance for BRE-1744") → invoke `Skill(researching-jira-issues)` to pull context on the compliance or remediation work
+
+### Skill Availability
+
+All cross-plugin skills are optional. If unavailable:
+
+- For security: Proceed with the `bitwarden-workflow-linter-rules` skill and standard DevOps knowledge
+- For Jira: Ask the user to provide context directly
