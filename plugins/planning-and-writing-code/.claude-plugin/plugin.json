@@ -1,0 +1,23 @@
+{
+  "name": "planning-and-writing-code",
+  "version": "1.0.0",
+  "description": "Bitwarden execution planning workflow: plan, refine, and implement features from Jira tickets with TDD and parallelization support.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/planning-and-writing-code",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "planning",
+    "implementation",
+    "jira",
+    "tdd",
+    "execution-plan"
+  ],
+  "commands": [
+    "./commands/create-plan/create-plan.md",
+    "./commands/review-plan/review-plan.md",
+    "./commands/implement-plan/implement-plan.md"
+  ]
+}
