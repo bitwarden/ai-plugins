@@ -3,6 +3,9 @@
     <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#64748b"/>
     </marker>
+    <marker id="cycle-arrow" viewBox="0 0 8 6" refX="0" refY="3" markerWidth="6" markerHeight="5" orient="auto">
+      <path d="M 0 0 L 8 3 L 0 6 z" fill="#ca8a04"/>
+    </marker>
   </defs>
 
   <!-- ENTRYPOINT (stadium shape) -->
@@ -13,54 +16,68 @@
   </g>
 
   <!-- Arrow: ENTRYPOINT → check-your-work -->
-  <line x1="175" y1="40" x2="240" y2="40" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="175" y1="40" x2="220" y2="40" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- check-your-work -->
-  <rect x="242" y="23" width="155" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
-  <text x="320" y="44" text-anchor="middle" font-size="13" fill="#1e293b">check-your-work</text>
+  <rect x="222" y="23" width="155" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="300" y="44" text-anchor="middle" font-size="13" fill="#1e293b">check-your-work</text>
+
+  <!-- Arrow: check-your-work → main agent -->
+  <line x1="377" y1="40" x2="450" y2="40" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- main agent (square box with cycle arrows) -->
+  <rect x="452" y="23" width="88" height="88" rx="4" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+
+  <!-- cycle arrows (two semi-circular arcs surrounding text, pointing to each other) -->
+  <path d="M 470 50 A 30 30 0 0 1 522 50" fill="none" stroke="#ca8a04" stroke-width="2.5" stroke-linecap="round" marker-end="url(#cycle-arrow)"/>
+  <path d="M 522 84 A 30 30 0 0 1 470 84" fill="none" stroke="#ca8a04" stroke-width="2.5" stroke-linecap="round" marker-end="url(#cycle-arrow)"/>
+
+  <!-- main agent label (centered between arcs) -->
+  <text x="496" y="64" text-anchor="middle" font-size="12" fill="#1e293b">main</text>
+  <text x="496" y="77" text-anchor="middle" font-size="12" fill="#1e293b">agent</text>
 
   <!-- Arrow: check-your-work → evaluator subagents -->
-  <line x1="320" y1="57" x2="320" y2="108" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="300" y1="57" x2="300" y2="108" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- evaluator subagents (stacked) -->
-  <rect x="237" y="119" width="178" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
-  <rect x="234" y="116" width="178" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
-  <rect x="231" y="113" width="178" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
-  <text x="320" y="134" text-anchor="middle" font-size="13" fill="#1e293b">evaluator subagents</text>
+  <rect x="217" y="119" width="178" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="214" y="116" width="178" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="211" y="113" width="178" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="300" y="134" text-anchor="middle" font-size="13" fill="#1e293b">evaluator subagents</text>
 
   <!-- Arrow: guide skills → evaluator subagents (zig-zag) -->
-  <path d="M 170 208 L 170 180 L 290 180 L 290 153" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 150 208 L 150 180 L 270 180 L 270 153" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Arrow: evaluator skills → evaluator subagents (zig-zag) -->
-  <path d="M 460 208 L 460 180 L 350 180 L 350 153" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 440 208 L 440 180 L 330 180 L 330 153" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- guide skills (stacked container with resources and examples inside) -->
-  <rect x="41" y="214" width="290" height="100" rx="8" fill="#dde3ea" stroke="#94a3b8"/>
-  <rect x="38" y="211" width="290" height="100" rx="8" fill="#e8edf3" stroke="#94a3b8"/>
-  <rect x="35" y="208" width="290" height="100" rx="8" fill="#f8fafd" stroke="#64748b" stroke-width="1.5"/>
-  <text x="172" y="228" text-anchor="middle" font-size="13" fill="#1e293b">guide skills</text>
+  <rect x="21" y="214" width="290" height="100" rx="8" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="18" y="211" width="290" height="100" rx="8" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="15" y="208" width="290" height="100" rx="8" fill="#f8fafd" stroke="#64748b" stroke-width="1.5"/>
+  <text x="152" y="228" text-anchor="middle" font-size="13" fill="#1e293b">guide skills</text>
 
   <!-- resources (stacked, inside guide skills) -->
-  <rect x="61" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
-  <rect x="58" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
-  <rect x="55" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
-  <text x="111" y="262" text-anchor="middle" font-size="13" fill="#1e293b">resources</text>
+  <rect x="41" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="38" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="35" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="91" y="262" text-anchor="middle" font-size="13" fill="#1e293b">resources</text>
 
   <!-- examples (stacked, inside guide skills) -->
-  <rect x="191" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
-  <rect x="188" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
-  <rect x="185" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
-  <text x="241" y="262" text-anchor="middle" font-size="13" fill="#1e293b">examples</text>
+  <rect x="171" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="168" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="165" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="221" y="262" text-anchor="middle" font-size="13" fill="#1e293b">examples</text>
 
   <!-- evaluator skills (stacked container with resources inside) -->
-  <rect x="386" y="214" width="160" height="100" rx="8" fill="#dde3ea" stroke="#94a3b8"/>
-  <rect x="383" y="211" width="160" height="100" rx="8" fill="#e8edf3" stroke="#94a3b8"/>
-  <rect x="380" y="208" width="160" height="100" rx="8" fill="#f8fafd" stroke="#64748b" stroke-width="1.5"/>
-  <text x="460" y="228" text-anchor="middle" font-size="13" fill="#1e293b">evaluator skills</text>
+  <rect x="366" y="214" width="160" height="100" rx="8" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="363" y="211" width="160" height="100" rx="8" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="360" y="208" width="160" height="100" rx="8" fill="#f8fafd" stroke="#64748b" stroke-width="1.5"/>
+  <text x="440" y="228" text-anchor="middle" font-size="13" fill="#1e293b">evaluator skills</text>
 
   <!-- resources (stacked, inside evaluator skills) -->
-  <rect x="410" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
-  <rect x="407" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
-  <rect x="404" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
-  <text x="460" y="262" text-anchor="middle" font-size="13" fill="#1e293b">resources</text>
+  <rect x="390" y="247" width="112" height="34" rx="4" fill="#dde3ea" stroke="#94a3b8"/>
+  <rect x="387" y="244" width="112" height="34" rx="4" fill="#e8edf3" stroke="#94a3b8"/>
+  <rect x="384" y="241" width="112" height="34" rx="4" fill="#f7fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="440" y="262" text-anchor="middle" font-size="13" fill="#1e293b">resources</text>
 </svg>
