@@ -1,4 +1,5 @@
 ---
+name: workflow-fix
 description: >
   Apply fixes for workflow linter findings identified by the workflow-audit skill. Applies mechanical
   fixes automatically, pauses for judgment calls, verifies with a re-lint, and creates draft PRs.
@@ -13,7 +14,7 @@ description: >
   User: Fix the workflow linter issues in server and clients
   Action: Trigger workflow-fix for those repos
   </example>
-allowed-tools: Read, Edit, Glob, Grep, Skill, Bash(bwwl:*), Bash(gh api:*), Bash(git checkout:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr create:*)
+allowed-tools: Read, Edit, Glob, Grep, Skill, Bash(bwwl:*), Bash(gh api --method GET *), Bash(git checkout:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr create:*)
 ---
 
 ## Rules

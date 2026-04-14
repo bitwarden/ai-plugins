@@ -1,4 +1,5 @@
 ---
+name: workflow-audit
 description: >
   Run the Bitwarden workflow linter (bwwl) against one or more repos and report findings.
   Strictly read-only — does not modify any files. Categorizes findings as mechanical or judgment

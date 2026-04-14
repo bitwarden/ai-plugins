@@ -1,4 +1,5 @@
 ---
+name: action-audit
 description: >
   Audit GitHub Actions action usage across an org. Searches for a specific action (incident mode)
   or sweeps all workflow files for unpinned action references (audit mode). Produces a read-only
@@ -40,19 +41,19 @@ Determine the mode from the user's request:
 **Incident mode** — search for the specific action:
 
 ```bash
-gh search code "uses: <action-name>" --owner <org> --extension yml --limit 100
+gh search code "uses: <action-name>" --owner <org> --path .github/workflows/ --limit 100
 ```
 
 Also search without the `uses:` prefix to catch indirect references:
 
 ```bash
-gh search code "<action-name>" --owner <org> --extension yml --limit 100
+gh search code "<action-name>" --owner <org> --path .github/workflows/ --limit 100
 ```
 
 **Audit mode** — find all workflow files with unpinned action references (not pinned to a full SHA):
 
 ```bash
-gh search code "uses:" --owner <org> --extension yml --limit 100
+gh search code "uses:" --owner <org> --path .github/workflows/ --limit 100
 ```
 
 Then filter results to find `uses:` lines that do NOT match the pattern `@[a-f0-9]{40}` (i.e., not pinned to a hash).

@@ -1,4 +1,5 @@
 ---
+name: action-remediate
 description: >
   Remediate GitHub Actions action findings identified by the action-audit skill. Applies hash pins
   or action replacements across selected repos and creates draft PRs. Run the action-audit skill
