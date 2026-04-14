@@ -37,7 +37,7 @@ If the command is not found, stop and inform the user that `bwwl` must be instal
 Parse the user's request to determine what to lint:
 
 - **Single file or directory** (e.g., `.github/workflows/build.yml` or `.github/workflows/`): Operate on the current repo only.
-- **Multiple repos** (e.g., "server, clients, android"): Operate on each repo sequentially. For each repo, look for its local clone at `~/Documents/Repositories/<org>/<repo>`. If a clone is not found, inform the user and skip that repo.
+- **Multiple repos** (e.g., "server, clients, android"): Operate on each repo sequentially. Ask the user for the base directory where their repos are cloned. For each repo, look for its local clone at `<base-dir>/<repo>`. If a clone is not found, inform the user and skip that repo.
 - **No specific target**: Lint all files in `.github/workflows/` of the current directory.
 
 ## Step 3: Run the Linter

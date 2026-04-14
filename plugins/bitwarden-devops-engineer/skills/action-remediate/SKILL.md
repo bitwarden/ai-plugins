@@ -39,7 +39,7 @@ If any of this is unclear, ask the user before continuing.
 
 For each selected repo:
 
-1. Check if a local clone exists at `~/Documents/Repositories/<org>/<repo>`. If not, inform the user and skip that repo.
+1. Ask the user for the base directory where their repos are cloned (if not already known). Check if a local clone exists at `<base-dir>/<repo>`. If not, inform the user and skip that repo.
 
 2. Create a fix branch:
    ```bash

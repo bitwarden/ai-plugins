@@ -40,7 +40,7 @@ If the command is not found, stop and inform the user that `bwwl` must be instal
 Parse the user's request to determine what to fix:
 
 - **Single file or directory**: Operate on the current repo only.
-- **Multiple repos** (e.g., "server, clients, android"): Operate on each repo sequentially. For each repo, look for its local clone at `~/Documents/Repositories/<org>/<repo>`. If a clone is not found, inform the user and skip that repo.
+- **Multiple repos** (e.g., "server, clients, android"): Operate on each repo sequentially. Ask the user for the base directory where their repos are cloned. For each repo, look for its local clone at `<base-dir>/<repo>`. If a clone is not found, inform the user and skip that repo.
 - **No specific target**: Fix all findings in `.github/workflows/` of the current directory.
 
 If the user has not run the `workflow-audit` skill first, run the linter now to identify findings before proceeding.
