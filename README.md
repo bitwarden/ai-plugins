@@ -14,6 +14,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 0.3.0   | Full-stack engineering assistant for Bitwarden client, server, and database development patterns        |
 | [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                          |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities              |
+| [planning-and-writing-code](plugins/planning-and-writing-code/)     | 1.0.0   | Execution planning workflow: create, review, and implement feature plans from Jira tickets with TDD and parallelization support |
 
 ## Usage
 
