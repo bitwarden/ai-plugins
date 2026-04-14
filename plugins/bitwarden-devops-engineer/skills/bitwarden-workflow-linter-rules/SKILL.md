@@ -1,58 +1,29 @@
 ---
 name: bitwarden-workflow-linter-rules
 description: >-
-  Use this skill when running, interpreting, or fixing findings from the Bitwarden workflow linter
-  (bwwl) — a tool that enforces rules across all .github/workflows/ files. Covers all 10 linter
-  rules split into two categories: mechanical rules applied automatically (name_capitalized,
-  name_exists, permissions_exist, pinned_job_runner, step_pinned, underscore_outputs,
-  job_environment_prefix, check_pr_target) and judgment rules requiring user input (step_approved,
-  run_actionlint). Includes bwwl setup, per-rule triggers and fix procedures, verification, and
-  result reporting. Assumes bwwl is already installed — stops execution if not found.
+  Reference for all Bitwarden workflow linter (bwwl) rules. Covers all 10 linter rules split into
+  two categories: mechanical rules that can be applied automatically (name_capitalized,
+  permissions_exist, pinned_job_runner, step_pinned, underscore_outputs, job_environment_prefix,
+  check_pr_target) and judgment rules requiring user input (name_exists, step_approved,
+  run_actionlint). Use the workflow-audit skill to run the linter and report findings, and the
+  workflow-fix skill to apply fixes.
+
+  <example>
+  User: What does the step_pinned rule check for?
+  Action: Consult this skill for the rule definition and fix procedure
+  </example>
+
+  <example>
+  User: How do I fix a permissions_exist finding?
+  Action: Consult this skill for the fix procedure
+  </example>
 ---
 
-## Prerequisites
-
-Before proceeding, verify `bwwl` is available:
-
-```bash
-bwwl --version
-```
-
-If the command is not found, stop and inform the user that `bwwl` must be installed before continuing. Do not attempt to install it.
-
-## Execution Steps
-
-### Step 1: Run the Linter
-
-```bash
-bwwl lint -f .github/workflows
-```
-
-Capture both stdout and stderr. Note all file paths, line numbers, rule names, and error descriptions in the output.
-
-### Step 2: Parse Output — Errors Only
-
-From the linter output, produce a structured list of **errors only** — exclude warnings and informational findings. Group by:
-
-1. **File** — which workflow file has issues
-2. **Rule** — which rule is violated
-3. **Location** — line number or context
-
-This filtered list drives all subsequent steps.
-
-### Step 3: Fix Detected Errors
-
-Use the Read tool to examine each affected file, then use the Edit tool to apply fixes. Apply the correct fix for each rule as defined below.
-
-#### Mechanical Rules — apply automatically
+## Mechanical Rules — apply automatically
 
 **`name_capitalized`**
 - **Trigger:** A workflow-level or job-level `name:` value does not start with a capital letter.
 - **Fix:** Capitalize the first character of the name value. Do not change anything else.
-
-**`name_exists`**
-- **Trigger:** A workflow or job is missing a `name:` key entirely.
-- **Fix:** Ask the user what name to use, then add a `name:` key at the correct level with a capitalized value.
 
 **`permissions_exist`**
 - **Trigger:** A workflow or job is missing an explicit `permissions:` key.
@@ -84,9 +55,13 @@ Use the Read tool to examine each affected file, then use the Edit tool to apply
 
 **`check_pr_target`**
 - **Trigger:** A workflow using `pull_request_target` has jobs not restricted to the default branch.
-- **Fix:** Add a condition to the affected jobs: `if: github.ref == 'refs/heads/main'`
+- **Fix:** Add a condition to the affected jobs: `if: github.ref == 'refs/heads/<default-branch>'`. Determine the repo's default branch rather than assuming `main`. If the job already has an `if:` condition, combine with `&&` (e.g., `if: <existing-condition> && github.ref == 'refs/heads/<default-branch>'`).
 
-#### Judgment Rules — pause and ask the user
+## Judgment Rules — pause and ask the user
+
+**`name_exists`**
+- **Trigger:** A workflow or job is missing a `name:` key entirely.
+- **Fix:** Ask the user what name to use, then add a `name:` key at the correct level with a capitalized value.
 
 **`step_approved`**
 - **Trigger:** A step's `uses:` references an action not on the Bitwarden approved actions list.
@@ -101,34 +76,3 @@ Use the Read tool to examine each affected file, then use the Edit tool to apply
 - **Action:** Show the finding verbatim, suggest a fix based on actionlint's message, and ask the user to confirm before applying.
 - Simple actionlint findings (e.g., `shellcheck` style warnings with a clear single-line fix) may be applied automatically.
 
-### Step 4: Verify Fixes
-
-After all fixes are applied, re-run the linter:
-
-```bash
-bwwl lint -f .github/workflows
-```
-
-Confirm all previously reported errors are resolved and no new errors were introduced. If errors remain, analyze why the fix didn't work, adjust, and repeat until clean.
-
-### Step 5: Report Results
-
-```
-## Linting Results
-
-### Files Modified
-- `.github/workflows/build.yml`
-- `.github/workflows/deploy.yml`
-
-### Errors Fixed
-1. **permissions_exist** (2 occurrences)
-   - Added `permissions: {}` to build.yml
-   - Added `permissions: contents: write` to deploy.yml
-
-2. **pinned_job_runner** (3 occurrences)
-   - Replaced `ubuntu-latest` with `ubuntu-24.04` in build.yml (2 jobs)
-   - Replaced `ubuntu-latest` with `ubuntu-24.04` in deploy.yml (1 job)
-
-### Remaining Issues
-None - all workflows pass linting.
-```

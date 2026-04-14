@@ -61,7 +61,7 @@
     {
       "name": "bitwarden-devops-engineer",
       "source": "./plugins/bitwarden-devops-engineer",
-      "version": "0.3.0",
+      "version": "0.1.0",
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     }
   ]
