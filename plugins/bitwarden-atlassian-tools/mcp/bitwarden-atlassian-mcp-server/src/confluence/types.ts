@@ -142,14 +142,14 @@ export interface ConfluenceCommentsResult {
 
 export interface ConfluenceGetCommentsParams {
   pageId: string;
-  bodyFormat?: 'storage' | 'view';
+  bodyFormat?: 'storage';
   limit?: number;
   cursor?: string;
 }
 
 export interface ConfluenceGetCommentRepliesParams {
   commentId: string;
-  bodyFormat?: 'storage' | 'view';
+  bodyFormat?: 'storage';
   limit?: number;
   cursor?: string;
 }

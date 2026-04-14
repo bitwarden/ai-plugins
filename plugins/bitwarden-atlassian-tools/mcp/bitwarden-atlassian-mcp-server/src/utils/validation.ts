@@ -78,7 +78,7 @@ export type GetConfluencePageInput = z.infer<typeof GetConfluencePageSchema>;
 
 export const GetConfluencePageCommentsSchema = z.object({
   pageId: z.string().min(1, 'Page ID is required'),
-  bodyFormat: z.enum(['storage', 'view']).optional().default('storage'),
+  bodyFormat: z.enum(['storage']).optional().default('storage'),
   limit: z.number().int().min(1).max(100).optional().default(25),
   includeReplies: z.boolean().optional().default(true),
 });

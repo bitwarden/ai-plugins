@@ -161,8 +161,8 @@ const getConfluencePageCommentsTool: ToolDefinition = {
       },
       bodyFormat: {
         type: 'string',
-        description: 'Content format for comment body: "storage" (raw) or "view" (rendered)',
-        enum: ['storage', 'view'],
+        description: 'Content format for comment body: "storage" (raw XML)',
+        enum: ['storage'],
         default: 'storage',
       },
       limit: {
