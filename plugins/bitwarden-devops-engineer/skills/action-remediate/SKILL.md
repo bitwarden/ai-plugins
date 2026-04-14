@@ -14,7 +14,7 @@ description: >
   User: Replace tj-actions/changed-files with the safe version across those repos
   Action: Trigger action-remediate to swap the action and create PRs
   </example>
-allowed-tools: Read, Edit, Glob, Grep, Bash(gh api:*), Bash(gh pr create:*), Bash(git checkout:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*)
+allowed-tools: Read, Edit, Glob, Grep, Bash(gh pr create:*), Bash(git checkout:*), Bash(git add .github/:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*)
 ---
 
 ## Rules
