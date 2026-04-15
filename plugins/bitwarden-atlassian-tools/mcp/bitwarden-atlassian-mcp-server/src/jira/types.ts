@@ -4,7 +4,8 @@
  */
 
 export interface JiraConfig {
-  url: string;
+  cloudId: string;
+  gatewayBaseUrl: string;
   email: string;
   apiToken: string;
 }
@@ -126,6 +127,7 @@ export interface JiraIssue {
   key: string;
   self: string;
   fields: JiraIssueFields;
+  names?: Record<string, string>;
 }
 
 export interface JiraSearchResponse {
@@ -215,4 +217,36 @@ export interface JiraSprintIssuesResponse {
   maxResults: number;
   total: number;
   issues: JiraIssue[];
+}
+
+/**
+ * Remote link attached to a Jira issue (Confluence pages, PRs, external URLs).
+ * The /issue/{key}/remotelink endpoint returns JiraRemoteLink[] (plain array).
+ */
+export interface JiraRemoteLink {
+  /** Numeric ID (unlike issue/comment IDs which are strings) */
+  id: number;
+  self: string;
+  globalId?: string;
+  application?: {
+    type?: string;
+    name?: string;
+  };
+  relationship?: string;
+  object: {
+    url: string;
+    title: string;
+    summary?: string;
+    icon?: {
+      url16x16?: string;
+      title?: string;
+    };
+    status?: {
+      resolved?: boolean;
+      icon?: {
+        url16x16?: string;
+        title?: string;
+      };
+    };
+  };
 }

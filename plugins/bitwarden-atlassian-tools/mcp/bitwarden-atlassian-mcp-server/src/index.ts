@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Jira MCP Server
- * Read-only MCP server for Jira integration with Claude Code
+ * Atlassian MCP Server
+ * Read-only MCP server for Jira and Confluence integration with Claude Code
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -13,20 +13,41 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolDefinition } from './utils/validation.js';
 
+// Jira tools
 import getIssue from './tools/get-issue.js';
 import getIssueComments from './tools/get-issue-comments.js';
+import getIssueRemoteLinks from './tools/get-issue-remote-links.js';
 import searchIssues from './tools/search-issues.js';
 import listProjects from './tools/list-projects.js';
+
+// Confluence tools
+import getConfluencePage from './tools/get-confluence-page.js';
+import getConfluencePageComments from './tools/get-confluence-page-comments.js';
+import getChildPages from './tools/get-child-pages.js';
+import searchConfluence from './tools/search-confluence.js';
+import searchConfluenceCql from './tools/search-confluence-cql.js';
+import listSpaces from './tools/list-spaces.js';
+
+// Cross-domain tools
+import downloadAttachment from './tools/download-attachment.js';
 
 const tools: ToolDefinition[] = [
   getIssue,
   getIssueComments,
+  getIssueRemoteLinks,
   searchIssues,
   listProjects,
+  getConfluencePage,
+  getConfluencePageComments,
+  getChildPages,
+  searchConfluence,
+  searchConfluenceCql,
+  listSpaces,
+  downloadAttachment,
 ];
 
 async function main() {
-  const requiredEnvVars = ['ATLASSIAN_JIRA_URL', 'ATLASSIAN_EMAIL', 'ATLASSIAN_JIRA_READ_ONLY_TOKEN'];
+  const requiredEnvVars = ['ATLASSIAN_CLOUD_ID', 'ATLASSIAN_EMAIL', 'ATLASSIAN_JIRA_READ_ONLY_TOKEN', 'ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN'];
   const missingVars = requiredEnvVars.filter(v => !process.env[v]);
 
   if (missingVars.length > 0) {
@@ -35,7 +56,7 @@ async function main() {
   }
 
   const server = new Server(
-    { name: 'bitwarden-atlassian-mcp', version: '1.0.0' },
+    { name: 'bitwarden-atlassian-mcp', version: '2.0.0' },
     { capabilities: { tools: {} } },
   );
 

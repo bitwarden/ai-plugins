@@ -95,7 +95,7 @@ Uses same format as `Skill(posting-review-summary)`:
 <details>
 <summary>Code Review Details</summary>
 
-- [emoji] **[SEVERITY]**: [One-line description]
+- [emoji]: [One-line description]
   - `filename.ts:42`
 
 </details>
@@ -108,7 +108,7 @@ Contains all inline review comments with file and line references (same format a
 ```markdown
 ## [file-path]:[line-number]
 
-[Emoji] **[SEVERITY]**: [One-line description]
+[Emoji]: [One-line description]
 
 <details>
 <summary>Details and fix</summary>

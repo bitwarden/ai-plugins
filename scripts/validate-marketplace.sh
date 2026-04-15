@@ -258,7 +258,7 @@ check_consistency() {
                 # Check version in the table row
                 if ! echo "$readme_row" | grep -qF "$marketplace_version"; then
                     local readme_version
-                    readme_version=$(echo "$readme_row" | sed -E 's/.*\|\s*([0-9]+\.[0-9]+\.[0-9]+)\s*\|.*/\1/')
+                    readme_version=$(echo "$readme_row" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
                     print_error "README catalog version mismatch for '$plugin_name': marketplace.json has '$marketplace_version', README has '$readme_version'"
                     has_errors=1
                 fi
@@ -439,6 +439,23 @@ main() {
                                 has_errors=1
                             fi
                         fi
+                    fi
+                fi
+
+                # Check README catalog version
+                local readme_file="$REPO_ROOT/README.md"
+                if [[ -f "$readme_file" ]] && [[ -n "$marketplace_version" ]]; then
+                    local readme_row
+                    readme_row=$(grep -E "^\|.*\[${target_plugin}\]" "$readme_file" 2>/dev/null || true)
+
+                    if [[ -z "$readme_row" ]]; then
+                        print_error "Plugin '$target_plugin' is not listed in the README.md plugin catalog table"
+                        has_errors=1
+                    elif ! echo "$readme_row" | grep -qF "$marketplace_version"; then
+                        local readme_version
+                        readme_version=$(echo "$readme_row" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+                        print_error "README catalog version mismatch for '$target_plugin': marketplace.json has '$marketplace_version', README has '$readme_version'"
+                        has_errors=1
                     fi
                 fi
             fi

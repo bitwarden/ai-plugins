@@ -4,8 +4,17 @@ import {
   GetIssueCommentsSchema,
   SearchIssuesSchema,
   ListProjectsSchema,
+  GetConfluencePageSchema,
+  GetConfluencePageCommentsSchema,
+  GetChildPagesSchema,
+  SearchConfluenceSchema,
+  SearchConfluenceCqlSchema,
+  ListSpacesSchema,
+  DownloadAttachmentSchema,
+  GetIssueRemoteLinksSchema,
   validateInput,
 } from './validation.js';
+
 
 describe('GetIssueSchema', () => {
   describe('issueIdOrKey validation', () => {
@@ -125,5 +134,339 @@ describe('validateInput', () => {
     } catch (e: any) {
       expect(e.message).toContain('issueIdOrKey');
     }
+  });
+});
+
+// ── Confluence Schemas ──────────────────────────────────────────────
+
+describe('GetConfluencePageSchema', () => {
+  it('should reject empty pageId', () => {
+    expect(() => GetConfluencePageSchema.parse({ pageId: '' })).toThrow();
+  });
+
+  it('should accept numeric string pageId', () => {
+    const result = GetConfluencePageSchema.parse({ pageId: '12345' });
+    expect(result.pageId).toBe('12345');
+  });
+
+  it('should apply defaults for includeBody and bodyFormat', () => {
+    const result = GetConfluencePageSchema.parse({ pageId: '1' });
+    expect(result.includeBody).toBe(true);
+    expect(result.bodyFormat).toBe('storage');
+  });
+
+  it('should accept all bodyFormat variants', () => {
+    for (const fmt of ['storage', 'view', 'export_view']) {
+      const result = GetConfluencePageSchema.parse({ pageId: '1', bodyFormat: fmt });
+      expect(result.bodyFormat).toBe(fmt);
+    }
+  });
+
+  it('should reject invalid bodyFormat', () => {
+    expect(() =>
+      GetConfluencePageSchema.parse({ pageId: '1', bodyFormat: 'invalid' })
+    ).toThrow();
+  });
+});
+
+describe('GetConfluencePageCommentsSchema', () => {
+  it('should reject empty pageId', () => {
+    expect(() => GetConfluencePageCommentsSchema.parse({ pageId: '' })).toThrow();
+  });
+
+  it('should apply defaults', () => {
+    const result = GetConfluencePageCommentsSchema.parse({ pageId: '1' });
+    expect(result.limit).toBe(25);
+    expect(result.includeReplies).toBe(true);
+    expect(result.bodyFormat).toBe('storage');
+  });
+
+  it('should reject limit over 100', () => {
+    expect(() =>
+      GetConfluencePageCommentsSchema.parse({ pageId: '1', limit: 101 })
+    ).toThrow();
+  });
+
+  it('should reject limit less than 1', () => {
+    expect(() =>
+      GetConfluencePageCommentsSchema.parse({ pageId: '1', limit: 0 })
+    ).toThrow();
+  });
+
+  it('should accept storage bodyFormat', () => {
+    expect(
+      GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'storage' }).bodyFormat
+    ).toBe('storage');
+  });
+
+  it('should reject view and export_view bodyFormat', () => {
+    expect(() =>
+      GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'view' })
+    ).toThrow();
+    expect(() =>
+      GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'export_view' })
+    ).toThrow();
+  });
+});
+
+describe('GetChildPagesSchema', () => {
+  it('should reject empty pageId', () => {
+    expect(() => GetChildPagesSchema.parse({ pageId: '' })).toThrow();
+  });
+
+  it('should apply default limit', () => {
+    const result = GetChildPagesSchema.parse({ pageId: '1' });
+    expect(result.limit).toBe(25);
+  });
+
+  it('should reject limit over 250', () => {
+    expect(() =>
+      GetChildPagesSchema.parse({ pageId: '1', limit: 251 })
+    ).toThrow();
+  });
+
+  it('should reject limit less than 1', () => {
+    expect(() =>
+      GetChildPagesSchema.parse({ pageId: '1', limit: 0 })
+    ).toThrow();
+  });
+});
+
+describe('SearchConfluenceSchema', () => {
+  it('should accept empty object', () => {
+    const result = SearchConfluenceSchema.parse({});
+    expect(result.limit).toBe(25);
+  });
+
+  it('should apply default limit', () => {
+    const result = SearchConfluenceSchema.parse({});
+    expect(result.limit).toBe(25);
+  });
+
+  it('should reject limit over 250', () => {
+    expect(() => SearchConfluenceSchema.parse({ limit: 251 })).toThrow();
+  });
+
+  it('should reject limit less than 1', () => {
+    expect(() => SearchConfluenceSchema.parse({ limit: 0 })).toThrow();
+  });
+
+  it('should accept optional strings', () => {
+    const result = SearchConfluenceSchema.parse({ spaceKey: 'EN', title: 'Test' });
+    expect(result.spaceKey).toBe('EN');
+    expect(result.title).toBe('Test');
+  });
+});
+
+describe('SearchConfluenceCqlSchema', () => {
+  it('should reject empty cql', () => {
+    expect(() => SearchConfluenceCqlSchema.parse({ cql: '' })).toThrow();
+  });
+
+  it('should accept valid cql', () => {
+    const result = SearchConfluenceCqlSchema.parse({ cql: 'space = "EN"' });
+    expect(result.cql).toBe('space = "EN"');
+  });
+
+  it('should apply default limit', () => {
+    const result = SearchConfluenceCqlSchema.parse({ cql: 'type = page' });
+    expect(result.limit).toBe(10);
+  });
+
+  it('should apply default start', () => {
+    const result = SearchConfluenceCqlSchema.parse({ cql: 'type = page' });
+    expect(result.start).toBe(0);
+  });
+
+  it('should reject limit over 100', () => {
+    expect(() =>
+      SearchConfluenceCqlSchema.parse({ cql: 'type = page', limit: 101 })
+    ).toThrow();
+  });
+
+  it('should reject limit less than 1', () => {
+    expect(() =>
+      SearchConfluenceCqlSchema.parse({ cql: 'type = page', limit: 0 })
+    ).toThrow();
+  });
+
+  it('should reject negative start', () => {
+    expect(() =>
+      SearchConfluenceCqlSchema.parse({ cql: 'type = page', start: -1 })
+    ).toThrow();
+  });
+});
+
+describe('ListSpacesSchema', () => {
+  it('should apply default limit', () => {
+    const result = ListSpacesSchema.parse({});
+    expect(result.limit).toBe(25);
+  });
+
+  it('should reject limit over 250', () => {
+    expect(() => ListSpacesSchema.parse({ limit: 251 })).toThrow();
+  });
+
+  it('should reject limit less than 1', () => {
+    expect(() => ListSpacesSchema.parse({ limit: 0 })).toThrow();
+  });
+
+  it('should accept optional type', () => {
+    const result = ListSpacesSchema.parse({ type: 'global' });
+    expect(result.type).toBe('global');
+  });
+
+  it('should accept empty object', () => {
+    const result = ListSpacesSchema.parse({});
+    expect(result).toBeDefined();
+  });
+});
+
+// ── GetIssueRemoteLinksSchema ────────────────────────────────────────
+
+describe('GetIssueRemoteLinksSchema', () => {
+  it('should accept valid issue keys', () => {
+    const result = GetIssueRemoteLinksSchema.parse({ issueIdOrKey: 'PM-123' });
+    expect(result.issueIdOrKey).toBe('PM-123');
+  });
+
+  it('should accept numeric IDs', () => {
+    const result = GetIssueRemoteLinksSchema.parse({ issueIdOrKey: '12345' });
+    expect(result.issueIdOrKey).toBe('12345');
+  });
+
+  it('should reject path traversal', () => {
+    expect(() =>
+      GetIssueRemoteLinksSchema.parse({ issueIdOrKey: '../../admin' })
+    ).toThrow();
+  });
+
+  it('should reject lowercase keys', () => {
+    expect(() =>
+      GetIssueRemoteLinksSchema.parse({ issueIdOrKey: 'proj-123' })
+    ).toThrow();
+  });
+
+  it('should reject empty string', () => {
+    expect(() =>
+      GetIssueRemoteLinksSchema.parse({ issueIdOrKey: '' })
+    ).toThrow();
+  });
+});
+
+// ── DownloadAttachmentSchema (SSRF origin validation) ───────────────
+
+describe('DownloadAttachmentSchema', () => {
+  const validUrl =
+    'https://mycompany.atlassian.net/secure/attachment/12345/file.pdf';
+
+  it('should accept a valid *.atlassian.net attachment URL', () => {
+    const result = DownloadAttachmentSchema.parse({ attachmentUrl: validUrl });
+    expect(result.attachmentUrl).toBe(validUrl);
+    expect(result.maxSizeMB).toBe(10);
+  });
+
+  it('should accept a REST API style attachment URL', () => {
+    const restUrl =
+      'https://mycompany.atlassian.net/rest/api/2/attachment/12345';
+    const result = DownloadAttachmentSchema.parse({ attachmentUrl: restUrl });
+    expect(result.attachmentUrl).toBe(restUrl);
+  });
+
+  it('should accept any *.atlassian.net subdomain', () => {
+    const otherUrl =
+      'https://other-company.atlassian.net/secure/attachment/12345/file.pdf';
+    const result = DownloadAttachmentSchema.parse({ attachmentUrl: otherUrl });
+    expect(result.attachmentUrl).toBe(otherUrl);
+  });
+
+  it('should reject a non-atlassian.net hostname (SSRF)', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({
+        attachmentUrl:
+          'https://attacker.com/secure/attachment/123/file.pdf',
+      })
+    ).toThrow();
+  });
+
+  it('should reject a sibling domain attack', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({
+        attachmentUrl:
+          'https://company.atlassian.net.evil.com/secure/attachment/123/file.pdf',
+      })
+    ).toThrow();
+  });
+
+  it('should reject a URL that is not a valid URL', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({ attachmentUrl: 'not-a-url' })
+    ).toThrow();
+  });
+
+  it('should reject a URL missing the attachment path pattern', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({
+        attachmentUrl: 'https://mycompany.atlassian.net/browse/PROJ-1',
+      })
+    ).toThrow();
+  });
+
+  it('should reject a URL with the attachment pattern only in the query string', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({
+        attachmentUrl:
+          'https://mycompany.atlassian.net/rest/api/2/user?key=admin&x=/secure/attachment/',
+      })
+    ).toThrow();
+  });
+
+  it('should reject an empty string', () => {
+    expect(() =>
+      DownloadAttachmentSchema.parse({ attachmentUrl: '' })
+    ).toThrow();
+  });
+
+  describe('maxSizeMB bounds', () => {
+    it('should accept maxSizeMB of 1 (minimum)', () => {
+      const result = DownloadAttachmentSchema.parse({
+        attachmentUrl: validUrl,
+        maxSizeMB: 1,
+      });
+      expect(result.maxSizeMB).toBe(1);
+    });
+
+    it('should accept maxSizeMB of 50 (maximum)', () => {
+      const result = DownloadAttachmentSchema.parse({
+        attachmentUrl: validUrl,
+        maxSizeMB: 50,
+      });
+      expect(result.maxSizeMB).toBe(50);
+    });
+
+    it('should reject maxSizeMB of 0', () => {
+      expect(() =>
+        DownloadAttachmentSchema.parse({
+          attachmentUrl: validUrl,
+          maxSizeMB: 0,
+        })
+      ).toThrow();
+    });
+
+    it('should reject maxSizeMB over 50', () => {
+      expect(() =>
+        DownloadAttachmentSchema.parse({
+          attachmentUrl: validUrl,
+          maxSizeMB: 51,
+        })
+      ).toThrow();
+    });
+
+    it('should default maxSizeMB to 10', () => {
+      const result = DownloadAttachmentSchema.parse({
+        attachmentUrl: validUrl,
+      });
+      expect(result.maxSizeMB).toBe(10);
+    });
   });
 });

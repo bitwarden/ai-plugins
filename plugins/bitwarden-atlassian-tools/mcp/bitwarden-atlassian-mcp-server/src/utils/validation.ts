@@ -66,6 +66,94 @@ export const ListProjectsSchema = z.object({
 
 export type ListProjectsInput = z.infer<typeof ListProjectsSchema>;
 
+// ── Confluence Schemas ───────────────────────────────────────────────
+
+export const GetConfluencePageSchema = z.object({
+  pageId: z.string().min(1, 'Page ID is required'),
+  includeBody: z.boolean().optional().default(true),
+  bodyFormat: z.enum(['storage', 'view', 'export_view']).optional().default('storage'),
+});
+
+export type GetConfluencePageInput = z.infer<typeof GetConfluencePageSchema>;
+
+export const GetConfluencePageCommentsSchema = z.object({
+  pageId: z.string().min(1, 'Page ID is required'),
+  bodyFormat: z.enum(['storage']).optional().default('storage'),
+  limit: z.number().int().min(1).max(100).optional().default(25),
+  includeReplies: z.boolean().optional().default(true),
+});
+
+export type GetConfluencePageCommentsInput = z.infer<typeof GetConfluencePageCommentsSchema>;
+
+export const GetChildPagesSchema = z.object({
+  pageId: z.string().min(1, 'Page ID is required'),
+  limit: z.number().int().min(1).max(250).optional().default(25),
+});
+
+export type GetChildPagesInput = z.infer<typeof GetChildPagesSchema>;
+
+export const SearchConfluenceSchema = z.object({
+  spaceKey: z.string().optional(),
+  title: z.string().optional(),
+  limit: z.number().int().min(1).max(250).optional().default(25),
+  cursor: z.string().optional(),
+});
+
+export type SearchConfluenceInput = z.infer<typeof SearchConfluenceSchema>;
+
+export const SearchConfluenceCqlSchema = z.object({
+  cql: z.string().min(1, 'CQL query is required'),
+  limit: z.number().int().min(1).max(100).optional().default(10),
+  start: z.number().int().min(0).optional().default(0),
+});
+
+export type SearchConfluenceCqlInput = z.infer<typeof SearchConfluenceCqlSchema>;
+
+export const ListSpacesSchema = z.object({
+  limit: z.number().int().min(1).max(250).optional().default(25),
+  type: z.string().optional(),
+});
+
+export type ListSpacesInput = z.infer<typeof ListSpacesSchema>;
+
+export const DownloadAttachmentSchema = z.object({
+  attachmentUrl: z.string()
+    .url('Must be a valid URL')
+    .refine((url) => {
+      try {
+        const { pathname } = new URL(url);
+        return /\/secure\/attachment\/|\/rest\/api\/.*\/attachment\//.test(pathname);
+      } catch {
+        return false;
+      }
+    }, 'Must be a JIRA attachment URL path')
+    .refine((url) => {
+      try {
+        const { hostname } = new URL(url);
+        return hostname.endsWith('.atlassian.net') && hostname !== '.atlassian.net';
+      } catch {
+        return false;
+      }
+    }, 'Attachment URL must be an *.atlassian.net hostname'),
+  maxSizeMB: z.number()
+    .int()
+    .min(1)
+    .max(50)
+    .optional()
+    .default(10),
+});
+
+export type DownloadAttachmentInput = z.infer<typeof DownloadAttachmentSchema>;
+
+export const GetIssueRemoteLinksSchema = z.object({
+  issueIdOrKey: z.string().regex(
+    /^[A-Z][A-Z0-9_]+-\d+$|^\d+$/,
+    'Must be a valid Jira issue key (e.g., PROJ-123) or numeric ID'
+  ),
+});
+
+export type GetIssueRemoteLinksInput = z.infer<typeof GetIssueRemoteLinksSchema>;
+
 /**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against

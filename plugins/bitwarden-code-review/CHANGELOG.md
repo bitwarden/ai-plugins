@@ -5,6 +5,49 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-04-06
+
+### Added
+
+- New `reviewing-dependency-changes` skill for dependency-aware code review: flags new dependencies missing AppSec approval, major version bumps without migration notes, lock file hygiene issues, and incomplete dependency removals
+- Dependency Changes summary table in review output for at-a-glance visibility of package additions, removals, and version changes
+- Dependency context gathering in Step 1: identifies manifest files, bot authors, and approval signals in PR descriptions
+- `Skill(reviewing-dependency-changes)` invocation in Step 2 for all PRs with dependency manifest changes
+
+### Changed
+
+- Updated `avoiding-false-positives` skill with dependency-specific patterns: automated bot updates and lock file regeneration
+- Updated `classifying-review-findings` skill to reject routine Renovate/Dependabot minor/patch updates as non-findings
+- Agent now skips line-by-line lock file analysis for dependency-only bot PRs, focusing on hygiene and version significance
+
+## [1.8.3] - 2026-03-27
+
+### Changed
+
+- Consolidated Steps 1 and 2 into a single "Gather Context" step that handles both PR and local review modes
+- Moved inline commenting constraints to Step 5 where comments are posted
+- Added a summary comment header
+
+## [1.8.2] - 2026-03-17
+
+### Fixed
+
+- Agent mode reviews failed silently because the plugin lacked `Write` tool access and had no awareness of the `<!-- bitwarden-code-review -->` sticky comment workflow — both the command and skill now detect and route summary output correctly
+- Removed the "REVIEW COMPLETE" stop signal that caused the Claude Code Action to terminate before the summary file was written
+
+### Changed
+
+- Restructured AGENT.md from disconnected sections into a linear 7-step process (context → understand → analyze → classify → validate → post comments → post summary) so the agent follows a clear top-to-bottom execution path
+- Added confidence scoring (0-100, ≥75 threshold) as a pre-filter before validation to cut low-confidence findings early, inspired by patterns from Anthropic's and internal code review pipelines
+- Separated finding and validation into distinct steps — the agent now switches from "critic" to "defender" mode before posting, reducing false positives that came from simultaneous find-and-validate
+- Rewrote `avoiding-false-positives` skill from a pre-flight gate into a post-classification validation checklist with concrete rejection criteria
+
+## [1.8.1] - 2026-03-12
+
+### Fixed
+
+- Remove invalid `skills` field from `plugin.json` that listed individual `SKILL.md` file paths instead of directories; skills are auto-discovered from the `skills/` directory
+
 ## [1.8.0] - 2026-02-23
 
 ### Added

@@ -13,35 +13,38 @@ describe('loadJiraConfig', () => {
   });
 
   it('should return config when all env vars are set', () => {
-    process.env.ATLASSIAN_JIRA_URL = 'https://company.atlassian.net';
+    process.env.ATLASSIAN_CLOUD_ID = 'test-cloud-id-123';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'test-token';
 
     const config = loadJiraConfig();
-    expect(config.url).toBe('https://company.atlassian.net');
+    expect(config.cloudId).toBe('test-cloud-id-123');
+    expect(config.gatewayBaseUrl).toBe('https://api.atlassian.com/ex/jira/test-cloud-id-123');
     expect(config.email).toBe('user@example.com');
     expect(config.apiToken).toBe('test-token');
   });
 
-  it('should normalize trailing slash from URL', () => {
-    process.env.ATLASSIAN_JIRA_URL = 'https://company.atlassian.net/';
+  it('should construct gateway URL from cloud ID', () => {
+    process.env.ATLASSIAN_CLOUD_ID = 'ed2a1282-a287-4f97-a32f-b9136165c8ed';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'test-token';
 
     const config = loadJiraConfig();
-    expect(config.url).toBe('https://company.atlassian.net');
+    expect(config.gatewayBaseUrl).toBe(
+      'https://api.atlassian.com/ex/jira/ed2a1282-a287-4f97-a32f-b9136165c8ed'
+    );
   });
 
-  it('should throw when ATLASSIAN_JIRA_URL is missing', () => {
+  it('should throw when ATLASSIAN_CLOUD_ID is missing', () => {
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'test-token';
-    delete process.env.ATLASSIAN_JIRA_URL;
+    delete process.env.ATLASSIAN_CLOUD_ID;
 
     expect(() => loadJiraConfig()).toThrow(/Missing required JIRA environment variables/);
   });
 
   it('should throw when ATLASSIAN_EMAIL is missing', () => {
-    process.env.ATLASSIAN_JIRA_URL = 'https://company.atlassian.net';
+    process.env.ATLASSIAN_CLOUD_ID = 'test-cloud-id';
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'test-token';
     delete process.env.ATLASSIAN_EMAIL;
 
@@ -49,7 +52,7 @@ describe('loadJiraConfig', () => {
   });
 
   it('should throw when ATLASSIAN_JIRA_READ_ONLY_TOKEN is missing', () => {
-    process.env.ATLASSIAN_JIRA_URL = 'https://company.atlassian.net';
+    process.env.ATLASSIAN_CLOUD_ID = 'test-cloud-id';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     delete process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN;
 
@@ -57,7 +60,7 @@ describe('loadJiraConfig', () => {
   });
 
   it('should treat unexpanded ${VAR} template as undefined', () => {
-    process.env.ATLASSIAN_JIRA_URL = '${ATLASSIAN_JIRA_URL}';
+    process.env.ATLASSIAN_CLOUD_ID = '${ATLASSIAN_CLOUD_ID}';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'test-token';
 
@@ -65,7 +68,7 @@ describe('loadJiraConfig', () => {
   });
 
   it('should treat empty string as missing', () => {
-    process.env.ATLASSIAN_JIRA_URL = '';
+    process.env.ATLASSIAN_CLOUD_ID = '';
     process.env.ATLASSIAN_EMAIL = 'user@example.com';
     process.env.ATLASSIAN_JIRA_READ_ONLY_TOKEN = 'test-token';
 
@@ -76,7 +79,8 @@ describe('loadJiraConfig', () => {
 describe('getAuthHeader', () => {
   it('should produce correct Basic auth header', () => {
     const config = {
-      url: 'https://company.atlassian.net',
+      cloudId: 'test-cloud-id',
+      gatewayBaseUrl: 'https://api.atlassian.com/ex/jira/test-cloud-id',
       email: 'user@example.com',
       apiToken: 'my-token',
     };
@@ -88,7 +92,8 @@ describe('getAuthHeader', () => {
 
   it('should start with "Basic "', () => {
     const config = {
-      url: 'https://company.atlassian.net',
+      cloudId: 'test-cloud-id',
+      gatewayBaseUrl: 'https://api.atlassian.com/ex/jira/test-cloud-id',
       email: 'a@b.com',
       apiToken: 'tok',
     };
@@ -100,7 +105,8 @@ describe('getAuthHeader', () => {
 describe('getJiraHeaders', () => {
   it('should return correct header shape', () => {
     const config = {
-      url: 'https://company.atlassian.net',
+      cloudId: 'test-cloud-id',
+      gatewayBaseUrl: 'https://api.atlassian.com/ex/jira/test-cloud-id',
       email: 'user@example.com',
       apiToken: 'test-token',
     };
@@ -113,7 +119,8 @@ describe('getJiraHeaders', () => {
 
   it('should match Authorization header with getAuthHeader', () => {
     const config = {
-      url: 'https://company.atlassian.net',
+      cloudId: 'test-cloud-id',
+      gatewayBaseUrl: 'https://api.atlassian.com/ex/jira/test-cloud-id',
       email: 'user@example.com',
       apiToken: 'test-token',
     };

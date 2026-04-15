@@ -13,19 +13,13 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 - **Thread Detection**: Prevents duplicate comments by detecting existing threads before posting
 - **Security-First Approach**: Prioritizes security vulnerabilities, data exposure, and authentication issues
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
-- **Pattern Recognition**: Avoids false positives by recognizing framework conventions and intentional patterns
-- **Comprehensive First Reviews**: Finds all critical issues in the first pass to avoid incremental feedback
+- **Confidence Scoring**: Pre-filters findings with a 0-100 confidence score (≥75 threshold) before validation to reduce false positives
 
 ## Architecture
 
 ### Code Review Agent
 
-The plugin provides a single agent (`bitwarden-code-reviewer`) that:
-
-1. **Reads PR Context**: Gathers PR metadata, existing comments, and resolved threads
-2. **Analyzes Changes**: Understands change scope and impact, then adapts review depth based on observed complexity and risk
-3. **Classifies Findings**: Invokes `classifying-review-findings` skill to categorize issues using a 5-tier severity system
-4. **Formats Output**: Invokes `posting-bitwarden-review-comments` skill to format and post inline comments and summaries
+The plugin provides a single agent (`bitwarden-code-reviewer`) that follows a linear 7-step review process — from context gathering through validation to posting. See [`AGENT.md`](./agents/bitwarden-code-reviewer/AGENT.md) for the full flow.
 
 ### Skills
 
@@ -34,19 +28,11 @@ The agent leverages specialized skills:
 - **`classifying-review-findings`**: Determines severity levels and validates finding criteria
 - **`posting-bitwarden-review-comments`**: Formats inline PR comments following Bitwarden standards
 - **`posting-review-summary`**: Posts or updates summary comments (handles sticky comment vs local file)
-- **`detecting-existing-threads`**: Prevents duplicate comments by detecting existing threads
-- **`reviewing-incremental-changes`**: Scopes re-reviews to only new changes
 - **`avoiding-false-positives`**: Validates findings against framework patterns and conventions
 
 ### Finding Classification
 
-**Severity Levels** (most to least severe):
-
-- ❌ **CRITICAL**: Code that will break, crash, expose data, or violate requirements (blocking)
-- ⚠️ **IMPORTANT**: Missing error handling, edge cases, unclear behavior (should fix before merge)
-- ♻️ **DEBT**: Code that duplicates patterns or violates conventions (technical debt)
-- 🎨 **SUGGESTED**: Measurable improvements (complexity reduction 3+, eliminates bug classes)
-- ❓ **QUESTION**: Questions about requirements or unclear intent
+See [`classifying-review-findings`](./skills/classifying-review-findings/SKILL.md) for the 5-tier severity system and classification criteria.
 
 ### Directory Structure
 
@@ -67,22 +53,14 @@ bitwarden-code-review/
 │   │   └── SKILL.md                          # False positive prevention
 │   ├── classifying-review-findings/
 │   │   └── SKILL.md                          # Severity classification
-│   ├── detecting-existing-threads/
-│   │   └── SKILL.md                          # Duplicate prevention
 │   ├── posting-bitwarden-review-comments/
 │   │   └── SKILL.md                          # Inline comment formatting
-│   ├── posting-review-summary/
-│   │   └── SKILL.md                          # Summary comment handling
-│   └── reviewing-incremental-changes/
-│       └── SKILL.md                          # Re-review scoping
+│   └── posting-review-summary/
+│       └── SKILL.md                          # Summary comment handling
 ├── tests/
 │   └── TESTING.md                            # Test plan and validation
 └── README.md                                 # This file
 ```
-
-### Thread Detection
-
-The agent prevents duplicate comments by detecting existing threads (including resolved ones) before posting. Matches by exact location, nearby lines (±5), and content similarity (>70%). See [skills/detecting-existing-threads/SKILL.md](./skills/detecting-existing-threads/SKILL.md) for implementation details.
 
 ## Security
 
@@ -114,18 +92,6 @@ Use the bitwarden-code-reviewer agent to review this PR
 ### In GitHub Actions
 
 See the production implementation: [bitwarden/gh-actions `_review-code.yml`](https://github.com/bitwarden/gh-actions/blob/main/.github/workflows/_review-code.yml)
-
-## Review Process
-
-The agent follows a structured review process:
-
-1. **Pre-Review**: Reads PR context, existing comments, and resolved threads
-2. **Skill Loading**: Invokes `classifying-review-findings` and `posting-bitwarden-review-comments` skills
-3. **Analysis**: Reviews security, correctness, breaking changes, performance, and maintainability
-4. **Classification**: Categorizes findings using the 5-tier severity system
-5. **Output**: Formats and posts inline comments and summary
-
-For detailed process documentation, see [agents/bitwarden-code-reviewer/AGENT.md](./agents/bitwarden-code-reviewer/AGENT.md).
 
 ## Installation
 

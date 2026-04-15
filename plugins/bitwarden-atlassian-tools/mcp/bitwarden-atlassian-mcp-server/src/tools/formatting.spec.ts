@@ -10,6 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockGetIssue = vi.fn();
 const mockGetIssueComments = vi.fn();
+const mockGetRemoteLinks = vi.fn();
 const mockSearchIssues = vi.fn();
 const mockListProjects = vi.fn();
 
@@ -18,6 +19,7 @@ vi.mock('../jira/client.js', () => {
     JiraClient: vi.fn().mockImplementation(() => ({
       getIssue: mockGetIssue,
       getIssueComments: mockGetIssueComments,
+      getRemoteLinks: mockGetRemoteLinks,
       searchIssues: mockSearchIssues,
       listProjects: mockListProjects,
     })),
@@ -26,6 +28,7 @@ vi.mock('../jira/client.js', () => {
 
 import getIssueTool from './get-issue.js';
 import getIssueCommentsTool from './get-issue-comments.js';
+import getIssueRemoteLinksTool from './get-issue-remote-links.js';
 import searchIssuesTool from './search-issues.js';
 
 beforeEach(() => {
@@ -104,6 +107,141 @@ describe('get_issue formatting', () => {
 
     expect(result).toContain('## Description');
     expect(result).toContain('This is the description');
+  });
+
+  it('should render ADF custom fields with display names', async () => {
+    const mockIssue = {
+      key: 'TEST-10',
+      names: {
+        customfield_10085: 'Replication Steps',
+      },
+      fields: {
+        summary: 'Bug with custom fields',
+        priority: { name: 'High' },
+        customfield_10085: {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [{ type: 'text', text: '1. Open app\n2. Click button\n3. See error' }],
+            },
+          ],
+        },
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-10' });
+
+    expect(result).toContain('## Additional Fields');
+    expect(result).toContain('### Replication Steps');
+    expect(result).toContain('1. Open app');
+  });
+
+  it('should render simple string custom fields', async () => {
+    const mockIssue = {
+      key: 'TEST-11',
+      names: {
+        customfield_10086: 'Recommended Solution',
+      },
+      fields: {
+        summary: 'Issue with string custom field',
+        priority: { name: 'Medium' },
+        customfield_10086: 'Upgrade the dependency to v2',
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-11' });
+
+    expect(result).toContain('### Recommended Solution');
+    expect(result).toContain('Upgrade the dependency to v2');
+  });
+
+  it('should render select-type custom fields', async () => {
+    const mockIssue = {
+      key: 'TEST-12',
+      names: {
+        customfield_10087: 'Severity',
+      },
+      fields: {
+        summary: 'Issue with select field',
+        priority: { name: 'Low' },
+        customfield_10087: { name: 'Critical' },
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-12' });
+
+    expect(result).toContain('### Severity');
+    expect(result).toContain('Critical');
+  });
+
+  it('should skip null/empty custom fields', async () => {
+    const mockIssue = {
+      key: 'TEST-13',
+      fields: {
+        summary: 'Issue with empty custom fields',
+        priority: { name: 'Low' },
+        customfield_10085: null,
+        customfield_10086: '',
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-13' });
+
+    expect(result).not.toContain('## Additional Fields');
+  });
+
+  it('should skip low-value fields like Rank and Development', async () => {
+    const mockIssue = {
+      key: 'TEST-15',
+      names: {
+        customfield_10100: 'Rank',
+        customfield_10101: 'Development',
+        customfield_10102: 'Bug category',
+      },
+      fields: {
+        summary: 'Issue with noisy fields',
+        priority: { name: 'Medium' },
+        customfield_10100: '1|hzvg5q:uo9tqj6002tqzzw7hey4b',
+        customfield_10101: { storyPoints: 5 },
+        customfield_10102: { name: 'Broken basic behavior' },
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-15' });
+
+    expect(result).not.toContain('### Rank');
+    expect(result).not.toContain('### Development');
+    expect(result).toContain('### Bug category');
+    expect(result).toContain('Broken basic behavior');
+  });
+
+  it('should fall back to raw field key when names not provided', async () => {
+    const mockIssue = {
+      key: 'TEST-14',
+      fields: {
+        summary: 'Issue without names map',
+        priority: { name: 'Medium' },
+        customfield_99999: 'Some value',
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: 'TEST-14' });
+
+    expect(result).toContain('### customfield_99999');
+    expect(result).toContain('Some value');
   });
 
   it('should return error message on client failure', async () => {
@@ -273,5 +411,162 @@ describe('search_issues formatting', () => {
 
     expect(result).toContain('nextPageToken');
     expect(result).toContain('next-page-token-123');
+  });
+});
+
+describe('get_issue_remote_links formatting', () => {
+  it('should handle empty links', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('No remote links found for TEST-1');
+  });
+
+  it('should format a Confluence link', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([
+      {
+        id: 1,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://bitwarden.atlassian.net/wiki/spaces/EN/pages/123/Design+Doc',
+          title: 'Design Doc',
+          summary: 'Authentication design document',
+        },
+        application: { name: 'Confluence' },
+      },
+    ]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('# Remote Links for TEST-1');
+    expect(result).toContain('**Total Links:** 1');
+    expect(result).toContain('## Confluence Pages');
+    expect(result).toContain('Design Doc');
+    expect(result).toContain('Authentication design document');
+  });
+
+  it('should categorize links by type', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([
+      {
+        id: 1,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://bitwarden.atlassian.net/wiki/spaces/EN/pages/123/Spec',
+          title: 'Spec Page',
+        },
+        application: { name: 'Confluence' },
+      },
+      {
+        id: 2,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://github.com/bitwarden/server/pull/456',
+          title: 'PR #456',
+        },
+        application: { name: 'GitHub' },
+      },
+      {
+        id: 3,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://figma.com/file/abc',
+          title: 'Figma Mockup',
+        },
+      },
+    ]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('**Total Links:** 3');
+    expect(result).toContain('## Confluence Pages');
+    expect(result).toContain('Spec Page');
+    expect(result).toContain('## GitHub');
+    expect(result).toContain('PR #456');
+    expect(result).toContain('## Other Links');
+    expect(result).toContain('Figma Mockup');
+  });
+
+  it('should detect Confluence by URL when application name is missing', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([
+      {
+        id: 1,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://bitwarden.atlassian.net/wiki/spaces/EN/pages/999/Page',
+          title: 'Wiki Page',
+        },
+      },
+    ]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('## Confluence Pages');
+    expect(result).toContain('Wiki Page');
+  });
+
+  it('should show relationship and status when present', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([
+      {
+        id: 1,
+        self: 'https://api.atlassian.com/...',
+        relationship: 'documented by',
+        object: {
+          url: 'https://example.com/doc',
+          title: 'External Doc',
+          status: { resolved: true },
+        },
+      },
+    ]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('documented by');
+    expect(result).toContain('Status: Resolved');
+  });
+
+  it('should show Open status when resolved is false', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([
+      {
+        id: 1,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://example.com/doc',
+          title: 'Open Doc',
+          status: { resolved: false },
+        },
+      },
+    ]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('Status: Open');
+  });
+
+  it('should detect GitHub by URL when application name is missing', async () => {
+    mockGetRemoteLinks.mockResolvedValueOnce([
+      {
+        id: 1,
+        self: 'https://api.atlassian.com/...',
+        object: {
+          url: 'https://github.com/bitwarden/server/pull/789',
+          title: 'PR #789',
+        },
+      },
+    ]);
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('## GitHub');
+    expect(result).toContain('PR #789');
+  });
+
+  it('should return error message on client failure', async () => {
+    mockGetRemoteLinks.mockRejectedValueOnce(new Error('JIRA authentication failed'));
+
+    const result = await getIssueRemoteLinksTool.handler({ issueIdOrKey: 'TEST-1' });
+
+    expect(result).toContain('Error retrieving remote links');
+    expect(result).toContain('JIRA authentication failed');
   });
 });

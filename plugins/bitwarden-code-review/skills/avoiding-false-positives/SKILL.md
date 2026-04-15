@@ -1,19 +1,31 @@
 ---
 name: avoiding-false-positives
-description: Use this skill when validating ANY potential code review finding. Apply BEFORE classifying to verify the finding is real; can you trace incorrect behavior, is it handled elsewhere, and are you certain about framework semantics? If any answer is no, DO NOT create the finding.
+description: Use this skill to validate findings during a code review. For each finding, run the rejection criteria and verification checks. If a finding fails any check, drop it.
 ---
 
-# Avoiding False Positives
+# Validating Findings
 
-## Before Flagging Anything
+## Rejection Criteria
 
-**MUST verify ALL three:**
+A finding is a false positive — **drop it** — if ANY of the following are true:
+
+- **Pre-existing** — code existed before this PR and was not modified by this change
+- **Not actually buggy** — appears wrong but is correct (e.g., variable IS defined, logic DOES produce correct results)
+- **Pedantic nitpick** — a senior engineer would not flag this in a real review
+- **Linter-catchable** — a linter or type checker will catch this; do not duplicate their work
+- **Generic concern** — "lacks test coverage", "general security issue" without a specific, traceable problem
+- **Explicitly silenced** — lint ignore comments, pragma suppressions, or documented exceptions
+- **Handled elsewhere** — error boundaries, middleware, validators, or framework guarantees make the issue moot
+
+## Verification Checks
+
+For each finding that passes rejection criteria, verify ALL three:
 
 1. Can you trace the execution path showing incorrect behavior?
 2. Is this handled elsewhere (error boundaries, middleware, validators)?
 3. Are you certain about framework behavior, API contracts, and language semantics?
 
-**If you cannot confidently answer all three, DO NOT create the finding.**
+**If you cannot confidently answer all three, drop the finding.**
 
 ## Patterns to Recognize (DO NOT flag)
 
@@ -22,12 +34,12 @@ description: Use this skill when validating ANY potential code review finding. A
 3. **Test code** - Different standards apply (hardcoded values, no error handling often OK)
 4. **Generated code** - Migrations, API clients, proto files (only review if hand-edited)
 5. **Copied patterns** - If code matches existing patterns in codebase, consistency > "better" approach
+6. **Automated dependency updates** - Renovate/Dependabot minor/patch updates to existing dependencies with passing CI are routine Stage 5 monitoring
+7. **Lock file regeneration** - A single manifest change can produce thousands of lock file diff lines; this is normal and not a review concern
 
 **When uncertain about a pattern, search the codebase for similar examples before flagging.**
 
 ## Codebase Conventions
-
-**Before suggesting changes:**
 
 1. **Check existing patterns** - How does this codebase handle similar cases?
 2. **Respect established conventions** - Even if non-standard, consistency > perfection
@@ -39,7 +51,7 @@ description: Use this skill when validating ANY potential code review finding. A
 - Codebase has no error handling in services → Don't flag one missing try-catch
 - Consistency matters more than isolated improvements
 
-## Common False Positives to Avoid
+## Common False Positives
 
 **Do NOT flag when handled elsewhere or guaranteed by framework:**
 
@@ -48,5 +60,6 @@ description: Use this skill when validating ANY potential code review finding. A
 - **Race conditions**: Framework synchronizes (React state, DB transactions), or operations idempotent
 - **Performance**: Data bounded (<100 items), runs once at startup, no profiling evidence
 - **Security**: Framework sanitizes (parameterized queries, JSX escaping), or API layer validates
+- **Lock file churn**: Large lock file diffs from a single manifest change are expected behavior, not a review concern
 
 **When uncertain, assume the developer knows something you don't.**
