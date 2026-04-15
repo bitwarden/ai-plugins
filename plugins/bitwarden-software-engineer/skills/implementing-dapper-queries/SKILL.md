@@ -13,8 +13,8 @@ The default pattern is stored procedures for all Dapper database operations. Som
 
 ## Workflow
 
-1. **Define/update the stored procedure** in `src/Sql/dbo/Stored Procedures/`
-2. **Create a migration script** in `util/Migrator/DbScripts/` that deploys it
+1. **Define/update the stored procedure** in `src/Sql/dbo/Stored Procedures/` — use plain `CREATE PROCEDURE` (SSDT syntax)
+2. **Create a migration script** in `util/Migrator/DbScripts/` that deploys it — use `CREATE OR ALTER PROCEDURE` (idempotent)
 3. **Implement the repository method** in `src/Infrastructure/Dapper/Repositories/` using `DapperServiceProvider` to call the procedure
 4. **Write integration tests** using `[DatabaseData]` attribute
 
@@ -26,9 +26,37 @@ Procedures follow `{Entity}_{Action}` pattern: `User_Create`, `Cipher_ReadManyBy
 
 ## Key Decisions That Trip Up AI Assistants
 
-### Always use `CREATE OR ALTER`
+### `CREATE OR ALTER` vs `CREATE PROCEDURE` — depends on file location
 
-Never use `CREATE PROCEDURE` or `DROP/CREATE`. `CREATE OR ALTER` is idempotent — it works whether the procedure exists or not. This is critical for migrations that might be re-run.
+Bitwarden maintains two copies of every stored procedure in different contexts with different toolchain constraints:
+
+| Context                | Location                         | Required syntax             |
+| ---------------------- | -------------------------------- | --------------------------- |
+| **SSDT schema source** | `src/Sql/dbo/Stored Procedures/` | `CREATE PROCEDURE` (plain)  |
+| **Migration script**   | `util/Migrator/DbScripts/`       | `CREATE OR ALTER PROCEDURE` |
+
+**Why they differ:**
+
+- **SSDT projects** do not support `CREATE OR ALTER` — using it produces build errors. SSDT manages object lifecycle through its own deployment model, so each source file must contain a bare `CREATE PROCEDURE`.
+- **Migration scripts** must be idempotent because they may be re-run. `CREATE OR ALTER` works whether the procedure exists or not. Never use bare `CREATE PROCEDURE` in a migration.
+
+### SSDT table files require `GO` batch separators
+
+In `src/Sql/dbo/Tables/`, SSDT requires a `GO` batch separator between `CREATE TABLE` and any subsequent `CREATE INDEX` or `CREATE NONCLUSTERED INDEX` statements.
+
+```sql
+-- CORRECT — GO separates DDL statements for SSDT
+CREATE TABLE [dbo].[Example] (
+    [Id] UNIQUEIDENTIFIER NOT NULL,
+    [Name] NVARCHAR(256) NOT NULL,
+    CONSTRAINT [PK_Example] PRIMARY KEY CLUSTERED ([Id] ASC)
+)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_Example_Name]
+    ON [dbo].[Example] ([Name] ASC)
+GO
+```
 
 ### New parameters must be nullable with defaults
 
@@ -64,16 +92,29 @@ These are the most frequently violated conventions. Claude cannot fetch the link
 
 - **`SET NOCOUNT ON`** at the start of every stored procedure
 - **Parameter naming:** `@ParamName` in PascalCase, matching C# property names
-- **All procedures must be idempotent** — use `CREATE OR ALTER`, never `CREATE` alone
+- **Migration scripts must be idempotent** — use `CREATE OR ALTER` in `util/Migrator/DbScripts/`; use plain `CREATE PROCEDURE` in SSDT source (`src/Sql/dbo/`)
 - **Constraint naming:** `PK_TableName`, `FK_Child_Parent`, `IX_Table_Column`, `DF_Table_Column`
 - **Stored procedure file naming:** one procedure per file, named `{Entity}_{Action}.sql`
 
 ## Examples
 
-### Stored procedure creation
+### Stored procedure creation — SSDT source vs migration script
 
 ```sql
--- CORRECT — idempotent
+-- SSDT source file: src/Sql/dbo/Stored Procedures/User_ReadById.sql
+-- Use plain CREATE PROCEDURE (SSDT does not support CREATE OR ALTER)
+CREATE PROCEDURE [dbo].[User_ReadById]
+    @Id UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON
+    SELECT * FROM [dbo].[User] WHERE [Id] = @Id
+END
+```
+
+```sql
+-- Migration script: util/Migrator/DbScripts/YYYY-MM-DD_00_AddUser_ReadById.sql
+-- Use CREATE OR ALTER for idempotency
 CREATE OR ALTER PROCEDURE [dbo].[User_ReadById]
     @Id UNIQUEIDENTIFIER
 AS
@@ -81,9 +122,6 @@ BEGIN
     SET NOCOUNT ON
     SELECT * FROM [dbo].[User] WHERE [Id] = @Id
 END
-
--- WRONG — fails if procedure already exists
-CREATE PROCEDURE [dbo].[User_ReadById]
 ```
 
 ### Adding a NOT NULL column
