@@ -43,7 +43,6 @@ For each selected repo:
 1. Ask the user for the base directory where their repos are cloned (if not already known). Check if a local clone exists at `<base-dir>/<repo>`. If not, inform the user and skip that repo.
 
 2. Create a fix branch:
-
    ```bash
    git checkout -b fix/action-remediation-<action-name-slug>
    ```
@@ -81,7 +80,7 @@ EOF
 Output a summary of all actions taken:
 
 | Repo | Files Changed | PR Created | Notes |
-| ---- | ------------- | ---------- | ----- |
-| ...  | ...           | ...        | ...   |
+|------|--------------|------------|-------|
+| ...  | ...          | ...        | ...   |
 
 Remind the user that code search results may have a lag and to verify no repos were missed by checking manually if this is a security incident.
