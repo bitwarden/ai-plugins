@@ -7,8 +7,8 @@ description: Bitwarden database architecture, migrations, and dual-ORM strategy.
 
 Bitwarden maintains two data access implementations, split by database provider:
 
-- **MSSQL (Cloud):** Dapper with stored procedures
-- **PostgreSQL, MySQL, SQLite (Self-hosted):** Entity Framework Core
+- **MSSQL:** Dapper with stored procedures
+- **PostgreSQL, MySQL, SQLite:** Entity Framework Core
 
 These implementations are **mutually exclusive at runtime** — SQL Server uses only Dapper, while the other providers use only EF Core. Both implementations conform to the same repository interfaces.
 
