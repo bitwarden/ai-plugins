@@ -43,13 +43,13 @@
     {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "description": "Full-stack software engineering assistant with skills for Bitwarden client, server, and database development patterns."
     },
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.2.2",
+      "version": "2.2.3",
       "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments"
     },
     {
@@ -61,7 +61,7 @@
     {
       "name": "bitwarden-devops-engineer",
       "source": "./plugins/bitwarden-devops-engineer",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     }
   ]
