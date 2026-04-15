@@ -100,5 +100,5 @@ gh pr create \
 After processing all repos, output a summary table:
 
 | Repo | Findings Fixed | PRs Created | Skipped / Notes |
-|------|---------------|-------------|-----------------|
-| ...  | ...           | ...         | ...             |
+| ---- | -------------- | ----------- | --------------- |
+| ...  | ...            | ...         | ...             |

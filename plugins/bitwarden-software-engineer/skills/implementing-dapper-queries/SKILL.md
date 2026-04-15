@@ -30,12 +30,13 @@ Procedures follow `{Entity}_{Action}` pattern: `User_Create`, `Cipher_ReadManyBy
 
 Bitwarden maintains two copies of every stored procedure in different contexts with different toolchain constraints:
 
-| Context | Location | Required syntax |
-|---|---|---|
-| **SSDT schema source** | `src/Sql/dbo/Stored Procedures/` | `CREATE PROCEDURE` (plain) |
-| **Migration script** | `util/Migrator/DbScripts/` | `CREATE OR ALTER PROCEDURE` |
+| Context                | Location                         | Required syntax             |
+| ---------------------- | -------------------------------- | --------------------------- |
+| **SSDT schema source** | `src/Sql/dbo/Stored Procedures/` | `CREATE PROCEDURE` (plain)  |
+| **Migration script**   | `util/Migrator/DbScripts/`       | `CREATE OR ALTER PROCEDURE` |
 
 **Why they differ:**
+
 - **SSDT projects** do not support `CREATE OR ALTER` — using it produces build errors. SSDT manages object lifecycle through its own deployment model, so each source file must contain a bare `CREATE PROCEDURE`.
 - **Migration scripts** must be idempotent because they may be re-run. `CREATE OR ALTER` works whether the procedure exists or not. Never use bare `CREATE PROCEDURE` in a migration.
 

@@ -75,7 +75,7 @@ For each result, determine:
 Display a table:
 
 | Repo | File | Current Reference | Pin Status |
-|------|------|-------------------|------------|
+| ---- | ---- | ----------------- | ---------- |
 | ...  | ...  | ...               | ...        |
 
 In `incident` mode, include all statuses. In `audit` mode, omit `hash` rows (already compliant).
@@ -87,6 +87,7 @@ If there are no findings, inform the user and stop.
 **Incident mode:**
 
 Determine the remediation approach:
+
 - If the user mentioned a replacement action: note it in the report.
 - Otherwise: resolve the safe hash for pinning.
 
@@ -99,6 +100,7 @@ gh api repos/<owner>/<repo>/commits/<ref> --jq '.sha'
 Where `<owner>/<repo>` is the action's repo and `<ref>` is the target tag or `main`.
 
 Present to the user:
+
 - Resolved SHA
 - Verification link: `https://github.com/<owner>/<repo>/commit/<sha>`
 
@@ -115,7 +117,7 @@ For each unique action found unpinned, resolve its current latest SHA the same w
 Output a final summary:
 
 | Repo | File | Current Reference | Pin Status | Resolved SHA |
-|------|------|-------------------|------------|-------------|
-| ...  | ...  | ...               | ...        | ...         |
+| ---- | ---- | ----------------- | ---------- | ------------ |
+| ...  | ...  | ...               | ...        | ...          |
 
 Inform the user that they can use the `action-remediate` skill to apply fixes based on these findings.
