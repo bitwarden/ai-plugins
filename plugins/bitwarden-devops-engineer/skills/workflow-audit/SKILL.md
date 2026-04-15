@@ -56,10 +56,12 @@ Capture both stdout and stderr. If operating on multiple repos, announce which r
 From the linter output, produce a structured list of findings. Group by file and rule. Consult the `bitwarden-workflow-linter-rules` skill to categorize each finding:
 
 **Mechanical** (can be auto-fixed):
+
 - `name_capitalized`, `permissions_exist`, `pinned_job_runner`, `step_pinned`, `underscore_outputs`, `job_environment_prefix`, `check_pr_target`
 - Simple `run_actionlint` findings (single-line shell fixes)
 
 **Judgment** (requires user input):
+
 - `name_exists`, `step_approved`, complex `run_actionlint` findings
 
 ## Step 5: Report
@@ -67,7 +69,7 @@ From the linter output, produce a structured list of findings. Group by file and
 Output a summary table per repo:
 
 | File | Finding | Rule | Category |
-|------|---------|------|----------|
+| ---- | ------- | ---- | -------- |
 | ...  | ...     | ...  | ...      |
 
 Include totals: mechanical findings, judgment findings, and repos with no issues.
