@@ -3,10 +3,6 @@ name: architecting-solutions
 description: Principal engineer perspective on architecture, system design, architecture reviews, blast radius assessment, trade-off analysis, and decision-making. Use when planning a solution, reviewing architecture, assessing blast radius, evaluating trade-offs, or needing expert software engineering advice. Not for writing code — for deciding what to build and how the parts connect.
 ---
 
-## Principles
-
-The primary task here is not writing code — it's surveying the landscape of possible solutions, choosing the right approach, and directing engineers to execute. Plan, evaluate trade-offs, break work into tasks, and ensure the pieces fit together. Decide _what_ gets built and _how_ the parts connect.
-
 ## Security Mindset
 
 Bitwarden is a password manager — security isn't a feature, it's the product. Every design decision is a security decision.
