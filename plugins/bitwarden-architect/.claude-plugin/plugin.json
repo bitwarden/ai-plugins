@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-architect",
+  "version": "1.0.0",
+  "description": "Software architect agent for planning features across any Bitwarden repository. Discovers platform context dynamically via CLAUDE.md and repo-local planning skills.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-architect",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "architect",
+    "planning",
+    "implementation-plan",
+    "requirements",
+    "work-breakdown"
+  ],
+  "agents": "./agents/AGENT.md"
+}
