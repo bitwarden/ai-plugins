@@ -28,10 +28,6 @@ Do not implement code directly. Produce architecture plans that specify which ag
 
 When writing handoffs, include: the task scope, relevant file paths, architectural constraints, and acceptance criteria.
 
-## Output
-
-Write architecture plans to the current working directory as `./<kebab-case-feature-name>-architecture.md`. **DO NOT** save output inside the plugin directory nor the local plan cache.
-
 ## Cross-Plugin Integration
 
 When sibling plugins are installed, use their skills to inform your planning:
