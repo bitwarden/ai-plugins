@@ -1,8 +1,34 @@
 # Contributing to Bitwarden AI Plugins
 
-This guide covers everything you need to create, modify, and submit plugins for the Bitwarden AI Plugin Marketplace.
+Every engineer who has solved a recurring problem, documented a pattern, or automated a workflow has something worth sharing. This marketplace is where those ideas become plugins that the whole team can use. This guide helps you figure out where your idea fits, then walks through the mechanics of building and submitting it.
 
 For general Bitwarden contribution practices, see our [Contributing Guidelines](https://contributing.bitwarden.com/contributing/).
+
+## Where Does Your Idea Belong?
+
+Plugins in this marketplace fall into three families. Understanding which one your idea belongs to will point you in the right direction.
+
+### Persona Plugins
+
+These encode how a specific engineering role works at Bitwarden — the conventions, review standards, and decision frameworks that generic AI doesn't know. They answer the question: _"How does a software engineer, security engineer, or DevOps engineer work **here**?"_
+
+A persona plugin captures institutional knowledge that would otherwise live in someone's head or scattered across wiki pages. If your team has patterns, rules, or workflows that are specific to your discipline at Bitwarden, that's a persona plugin.
+
+### Tool Integration Plugins
+
+These connect Claude Code to external services the team already uses. They wrap APIs via MCP servers so Claude can read from and interact with those tools. They answer the question: _"I want Claude to talk to a service we use."_
+
+If you find yourself context-switching between Claude Code and another tool to copy information back and forth, a tool integration plugin can bridge that gap.
+
+### Utility Plugins
+
+These improve the Claude Code development experience itself — setup, configuration, workflow analysis. They help every engineer regardless of role or domain. They answer the question: _"How can working with Claude Code be better for everyone?"_
+
+---
+
+If you've encoded knowledge about how your role works, that's a persona plugin. If you want Claude to reach an external service, that's a tool integration. If you've improved how Claude Code itself works, that's a utility. See the [README](README.md) for the full list of current plugins.
+
+Not sure where your idea fits? Open a discussion or draft PR and maintainers will help find the right home.
 
 ## Plugin Structure
 
