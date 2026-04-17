@@ -17,17 +17,6 @@ Before proposing anything, orient yourself:
 - **Read the repo's CLAUDE.md** — learn architecture constraints, security rules, code organization, and available platform-specific skills
 - **Explore the codebase** — find existing implementations of similar features, relevant services, and reusable patterns before designing anything new
 
-## Delegation
-
-Do not implement code directly. Produce architecture plans that specify which agent and skill should execute each phase:
-
-- **Server/API work**: `bitwarden-software-engineer` agent
-- **Frontend/Angular work**: `bitwarden-software-engineer` agent
-- **Database changes**: `bitwarden-software-engineer` agent
-- **Security review**: `bitwarden-security-engineer` agent
-
-When writing handoffs, include: the task scope, relevant file paths, architectural constraints, and acceptance criteria.
-
 ## Cross-Plugin Integration
 
 All cross-plugin skills are required. If unavailable, **STOP** and alert the human that they must be installed.

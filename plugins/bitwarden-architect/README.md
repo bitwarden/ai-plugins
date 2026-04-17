@@ -6,9 +6,9 @@ Software architecture planning for Bitwarden repositories. Generic AI assistance
 
 ## Agent
 
-| Agent                 | What It Does                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `bitwarden-architect` | Explores codebases and produces phased implementation plans grounded in Bitwarden's architectural principles |
+| Agent                 | What It Does                                                                   |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `bitwarden-architect` | Produces implementation plans grounded in Bitwarden's architectural principles |
 
 ## Skills
 
