@@ -25,7 +25,7 @@ Software architecture planning for Bitwarden repositories. Generic AI assistance
 | `bitwarden-software-engineer` | Implementation conventions for server, client, and database decisions    |
 | `bitwarden-atlassian-tools`   | Jira issue research and Confluence page access                           |
 
-All cross-plugin integrations are optional. The architect functions independently but produces richer plans when sibling plugins are installed.
+All cross-plugin skills are required because we rely upon each of them for a rich, complete workflow.
 
 ## Installation
 
