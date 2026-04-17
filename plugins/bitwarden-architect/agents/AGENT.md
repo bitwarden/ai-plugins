@@ -30,10 +30,10 @@ When writing handoffs, include: the task scope, relevant file paths, architectur
 
 ## Cross-Plugin Integration
 
-When sibling plugins are installed, use their skills to inform your planning:
+All cross-plugin skills are required. If unavailable, **STOP** and alert the human that they must be installed.
+
+Use their skills to inform your planning:
 
 - **Security** (`bitwarden-security-engineer`): `Skill(bitwarden-security-context)` for P01-P06 principles, `Skill(reviewing-security-architecture)` for architecture pattern validation, `Skill(threat-modeling)` for formal threat models
 - **Requirements** (`bitwarden-product-analyst`): Consume requirements documents as primary input when available in the working directory
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` for Jira tickets, `get_confluence_page` MCP tool for Confluence pages
-
-All cross-plugin skills are optional. If unavailable, alert the human that they must be installed. Then explore the codebase directly.
