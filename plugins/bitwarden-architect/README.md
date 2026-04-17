@@ -49,8 +49,6 @@ Review the architecture of [feature area] and suggest improvements
 Assess the blast radius of adding [capability] to [service]
 ```
 
-Output is written to the current working directory as `<feature-name>-architecture.md`.
-
 ## References
 
 - [Bitwarden Security Definitions](https://contributing.bitwarden.com/architecture/security/definitions)
