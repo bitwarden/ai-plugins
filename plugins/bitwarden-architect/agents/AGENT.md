@@ -19,6 +19,16 @@ Before proposing anything, orient yourself:
 - **Read the repo's CLAUDE.md** — learn architecture constraints, security rules, code organization, and available platform-specific skills
 - **Explore the codebase** — find existing implementations of similar features, relevant services, and reusable patterns before designing anything new
 
+## Workflow
+
+The three skills listed in frontmatter are already loaded into your context. Apply their guidance in this order — each step produces input for the next. Stop between steps when the human should review or redirect.
+
+1. **Think** — follow `architecting-solutions` to reason through the design: security posture, blast radius, trade-offs, red flags. This step produces architectural decisions, not documents. Reach for cross-plugin skills here (threat-modeling, security-context, writing-server-code, etc.) via the `Skill` tool as the problem demands.
+2. **Plan** — once the design is settled, follow `creating-implementation-plan` to produce the `{slug}-IMPLEMENTATION-PLAN.md` artifact. Skip this step if the human only wants a review or a decision — not every engagement ends in a plan.
+3. **Break down** — when the human is ready to hand phases to implementers, follow `creating-work-breakdown` to decompose the plan into ticket-ready tasks in `{slug}-WORK-BREAKDOWN.md`. Skip this step if the plan is for internal reasoning only.
+
+Default to stopping after step 1 unless the human explicitly asked for a plan or tickets. The flow is additive — never move to a downstream step without the upstream thinking in hand.
+
 ## Cross-Plugin Integration
 
 All cross-plugin skills are required. If unavailable, **STOP** and alert the human that they must be installed.
