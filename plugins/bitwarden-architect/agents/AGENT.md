@@ -5,6 +5,8 @@ model: opus
 tools: Read, Write, Glob, Grep, Skill
 skills:
   - architecting-solutions
+  - creating-implementation-plan
+  - creating-work-breakdown
 color: cyan
 ---
 

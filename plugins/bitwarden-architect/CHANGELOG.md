@@ -10,13 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `creating-implementation-plan` skill — produces a structured implementation plan artifact (`${CLAUDE_PLUGIN_DATA}/plans/{slug}-IMPLEMENTATION-PLAN.md`) with per-section guidance. Discovers per-repo planning skills in `<repo>/.claude/skills/` and defers to them when present; otherwise uses a default template (Current State → Blast Radius → Design → Phases → Risks & Open Questions).
-- `when_to_use` and `argument-hints` frontmatter fields on both skills for clearer trigger contexts and input expectations (Jira ticket, Confluence URL, plain-text feature description).
-- Named companion-skill pointers in `architecting-solutions` (threat-modeling, reviewing-security-architecture, requirements-elicitation, work-breakdown, writing-server-code, writing-client-code, writing-database-queries, implementing-dapper-queries, implementing-ef-core).
+- `creating-work-breakdown` skill — decomposes an implementation plan into ticket-ready tasks with file touchpoints, dependency ordering, and observable acceptance criteria. Pairs by slug with the corresponding plan; accepts an optional output filename and otherwise defaults to `{slug}-WORK-BREAKDOWN.md`.
+- `when_to_use` and `argument-hints` frontmatter fields on architect skills for clearer trigger contexts and input expectations (Jira ticket, Confluence URL, plain-text feature description).
+- Named companion-skill pointers in `architecting-solutions` (threat-modeling, reviewing-security-architecture, writing-server-code, writing-client-code, writing-database-queries, implementing-dapper-queries, implementing-ef-core).
+- `creating-implementation-plan` and `creating-work-breakdown` registered in the architect agent's `skills:` frontmatter so all three architect skills are discoverable.
 
 ### Changed
 
-- `architecting-solutions` scope narrowed to pure architectural thinking (principles, security mindset, judgment, red flags). Deliverable template, Work Breakdown Document, and Architecture Review sections moved out — plan production now lives in `creating-implementation-plan`; work breakdown routes to `bitwarden-product-analyst:work-breakdown`; security architecture review routes to `bitwarden-security-engineer:reviewing-security-architecture`.
+- `architecting-solutions` scope narrowed to pure architectural thinking (principles, security mindset, judgment, red flags). Deliverable template, Work Breakdown Document, and Architecture Review sections moved out — plan production lives in `creating-implementation-plan`; work breakdown lives in `creating-work-breakdown`; security architecture review routes to `bitwarden-security-engineer:reviewing-security-architecture`.
 - Threat-modeling reference now names `bitwarden-security-engineer:threat-modeling` directly instead of hand-waving at "a dedicated threat-modeling skill".
+- README refreshed: Skills table lists all three architect skills; Deliverables section reflects the two artifacts the plugin produces (Implementation Plan + Work Breakdown Document).
 
 ## [1.0.0] - 2026-04-16
 

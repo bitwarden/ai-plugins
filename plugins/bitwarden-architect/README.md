@@ -12,9 +12,11 @@ Software architecture planning for Bitwarden repositories. Generic AI assistance
 
 ## Skills
 
-| Skill                    | What It Does                                                                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `architecting-solutions` | Principal engineer perspective on architecture decisions. Provides the architectural judgment framework applied across all planning. |
+| Skill                         | What It Does                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `architecting-solutions`      | Principal engineer perspective on architecture decisions. Provides the architectural judgment framework applied across all planning. |
+| `creating-implementation-plan`| Produces a structured implementation plan artifact from architectural decisions. Discovers per-repo planning skills when present.    |
+| `creating-work-breakdown`     | Decomposes an implementation plan's phases into ticket-ready tasks with file touchpoints, dependencies, and acceptance criteria.     |
 
 ## Cross-Plugin Integration
 
@@ -59,9 +61,8 @@ Assess the blast radius of adding [capability] to [service]
 
 ## Deliverables
 
-- **Implementation Plan** (`{slug}-IMPLEMENTATION-PLAN.md`) — Architecture design, phased task breakdown, file manifest, risk assessment
-- **Work Breakdown Document** (`{slug}-WORK-BREAKDOWN.md`) — Jira-ready tasks consolidating product and technical breakdowns
-- **Architecture Review** — Verification of implementation adherence to the plan
+- **Implementation Plan** (`{slug}-IMPLEMENTATION-PLAN.md`) — Architecture design, phased task breakdown, file manifest, risk assessment (produced by `creating-implementation-plan`)
+- **Work Breakdown Document** (`{slug}-WORK-BREAKDOWN.md`) — Ticket-ready tasks with file touchpoints, dependencies, and acceptance criteria (produced by `creating-work-breakdown`)
 
 ## References
 
