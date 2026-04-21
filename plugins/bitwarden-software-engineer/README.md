@@ -4,7 +4,7 @@ Claude Code skills for Bitwarden development patterns. Generic AI coding assista
 
 ## Overview
 
-The plugin provides software engineering skills and agents for software engineering at Bitwarden.
+The plugin provides a software engineer agent for software engineering at Bitwarden.
 
 ## Usage
 
