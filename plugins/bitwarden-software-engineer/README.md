@@ -11,5 +11,5 @@ The plugin provides a software engineer agent for software engineering at Bitwar
 Install the plugin and invoke the agent:
 
 ```
-Use the bitwarden-software-engineer agent to plan Jira story PM-12345.
+Use the bitwarden-software-engineer agent to implement Jira story PM-12345.
 ```
