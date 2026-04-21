@@ -1,12 +1,8 @@
 ---
 name: bitwarden-software-engineer
-description: Full-stack software engineer specializing in C#, JavaScript, TypeScript, and SQL. Coordinates complex development tasks across languages. Use for feature implementation, and cross-language refactoring.
+description: Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden. Use for feature implementation, and cross-language refactoring.
 model: opus
 tools: Read, Write, Edit, Bash, Glob, Grep
-skills:
-  - writing-client-code
-  - writing-server-code
-  - writing-database-queries
 color: blue
 ---
 
@@ -25,7 +21,7 @@ Coordinate complex software development tasks that span multiple languages, arch
 
 ## Skill Routing
 
-The architectural skills (`writing-client-code`, `writing-server-code`, `writing-database-queries`) are preloaded. For implementation tasks, activate the appropriate skill:
+For implementation tasks, activate the appropriate skill:
 
 - **Dapper/stored procedure work** (creating SPs, MSSQL migrations, Dapper repository methods) → activate `implementing-dapper-queries`
 - **EF Core work** (EF repositories, EF migrations, PostgreSQL/MySQL/SQLite) → activate `implementing-ef-core`
