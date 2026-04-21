@@ -1,18 +1,22 @@
 # Contributing to Bitwarden AI Plugins
 
-Every engineer who has solved a recurring problem, documented a pattern, or automated a workflow has something worth sharing. This marketplace is where those ideas become plugins that the whole team can use. This guide helps you figure out where your idea fits, then walks through the mechanics of building and submitting it.
+Every engineer who has solved a recurring problem, documented a pattern, or automated a workflow has something worth sharing. This marketplace is where those ideas become plugins that the whole team can use. This guide helps you figure out where your work fits, then walks through the mechanics of building and submitting it.
 
 For general Bitwarden contribution practices, see our [Contributing Guidelines](https://contributing.bitwarden.com/contributing/).
 
-## Where Does Your Idea Belong?
+## Where Does Your Claude Tooling Belong?
 
-Plugins in this marketplace fall into three families. Understanding which one your idea belongs to will point you in the right direction.
+Plugins in this marketplace fall into three families. Repo-specific patterns usually belong closer to the code — see each repo's `.claude/CONTRIBUTING.md` for that. If your work is cross-repo and fits one of the families below, you're in the right place. If you're still unsure after reading them, raise a draft PR and maintainers will help find the right home.
 
 ### Persona Plugins
 
 These encode how a specific engineering role works at Bitwarden — the conventions, review standards, and decision frameworks that generic AI doesn't know. They answer the question: _"How does a software engineer, security engineer, or DevOps engineer work **here**?"_
 
-A persona plugin captures institutional knowledge that would otherwise live in someone's head or scattered across wiki pages. If your team has patterns, rules, or workflows that are specific to your discipline at Bitwarden, that's a persona plugin.
+Personas map to the _work_, not the title — when you're designing a system you're doing architecture work, and the matching persona is for you. Most engineers will reach for more than one persona across a week because engineers wear many hats.
+
+A persona plugin captures institutional knowledge that would otherwise live in someone's head or scattered across wiki pages. Persona plugins must clear three bars: the knowledge is institutional, domain-specific, and role-defining.
+
+Example: `bitwarden-security-engineer`
 
 ### Tool Integration Plugins
 
@@ -20,15 +24,13 @@ These connect Claude Code to external services the team already uses. They wrap 
 
 If you find yourself context-switching between Claude Code and another tool to copy information back and forth, a tool integration plugin can bridge that gap.
 
+Example: `bitwarden-atlassian-tools`
+
 ### Utility Plugins
 
 These improve the Claude Code development experience itself — setup, configuration, workflow analysis. They help every engineer regardless of role or domain. They answer the question: _"How can working with Claude Code be better for everyone?"_
 
----
-
-If you've encoded knowledge about how your role works, that's a persona plugin. If you want Claude to reach an external service, that's a tool integration. If you've improved how Claude Code itself works, that's a utility. See the [README](README.md) for the full list of current plugins.
-
-Not sure where your idea fits? Open a discussion or draft PR and maintainers will help find the right home.
+Examples: `bitwarden-init`
 
 ## Plugin Structure
 
