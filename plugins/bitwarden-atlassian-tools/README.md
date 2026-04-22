@@ -9,7 +9,7 @@ Read-only Atlassian access via a custom MCP server providing Jira issue retrieva
 Configure the following environment variables:
 
 ```bash
-# Required — Atlassian Cloud ID (find yours at https://your-domain.atlassian.net/_edge/tenant_info)
+# Required — Atlassian Cloud ID (find yours at https://bitwarden.atlassian.net/_edge/tenant_info)
 export ATLASSIAN_CLOUD_ID="your-cloud-id"
 export ATLASSIAN_EMAIL="your-email@company.com"
 export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-jira-scoped-token"
