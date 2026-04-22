@@ -2,7 +2,7 @@
 
 Use this template when creating security definitions for a new feature or system.
 
-Order SDs by **Criticality descending**. Reviewers anchor on what they see first — lead with the load-bearing threats.
+Order Security Definitions (SDs) by **Criticality descending**. Reviewers anchor on what they see first — lead with the load-bearing threats.
 
 Every Security Goal must carry a **Rationale** line linking the goal to a Bitwarden principle (P01–P06), the protected asset, and the user-visible harm. Goals without rationale are claims, not requirements.
 

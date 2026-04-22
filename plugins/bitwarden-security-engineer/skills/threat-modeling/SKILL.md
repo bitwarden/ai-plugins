@@ -37,7 +37,7 @@ Bitwarden follows a 4-phase engagement model for security work. This skill prima
 
 ## Security Definitions
 
-Security definitions are Bitwarden's formal construct for communicating the security posture of a system. Each definition has three components: a **threat model** (attacker capabilities), **security goals** (what the system guarantees), and an **accepted goal status** (honest assessment of whether the goal is currently met).
+Security Definitions (SDs) are Bitwarden's formal construct for communicating the security posture of a system. Each definition has three components: a **threat model** (attacker capabilities), **security goals** (what the system guarantees), and an **accepted goal status** (honest assessment of whether the goal is currently met).
 
 Use Bitwarden's standard vocabulary when writing definitions — see `references/bitwarden-vocabulary.md` for the full glossary. Align security goals with Bitwarden's security principles (P01-P06) — see `references/security-principles.md`.
 
