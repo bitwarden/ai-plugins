@@ -49,7 +49,7 @@ plugins/your-plugin-name/
 └── .mcp.json               (MCP servers - optional)
 ```
 
-For detailed guidance on building each component, see the [Plugin Reference](https://docs.claude.com/en/docs/claude-code/plugins-reference.md).
+For detailed guidance on building each component, see the [Plugin Reference](https://code.claude.com/docs/en/plugins-reference).
 
 ## Adding a New Plugin
 
