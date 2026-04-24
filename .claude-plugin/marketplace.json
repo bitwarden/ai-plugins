@@ -65,9 +65,9 @@
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     },
     {
-      "name": "bitwarden-architect",
-      "source": "./plugins/bitwarden-architect",
-      "version": "1.0.0",
+      "name": "bitwarden-tech-lead",
+      "source": "./plugins/bitwarden-tech-lead",
+      "version": "2.0.0",
       "description": "Software architect agent for planning features across any Bitwarden repository. Discovers platform context dynamically via CLAUDE.md and repo-local planning skills."
     }
   ]

@@ -1,6 +1,6 @@
 ---
 name: architecting-solutions
-description: Principal engineer perspective on architecture, system design, architecture reviews, blast radius assessment, trade-off analysis, and decision-making. Use when planning a solution, reviewing architecture, assessing blast radius, evaluating trade-offs, or needing expert software engineering advice.
+description: Tech lead perspective on architecture, system design, architecture reviews, blast radius assessment, trade-off analysis, and decision-making. Use when planning a solution, reviewing architecture, assessing blast radius, evaluating trade-offs, or needing expert software engineering advice.
 ---
 
 ## Security Mindset

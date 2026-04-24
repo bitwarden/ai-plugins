@@ -1,0 +1,78 @@
+# Bitwarden Tech Lead Plugin
+
+## Overview
+
+Tech lead agent for a Bitwarden product team. Generic AI assistance doesn't know our zero-knowledge constraints, multi-client reality, dual-ORM strategy, or V+/-2 version matrix — and it certainly doesn't know how we actually operate: the Software Initiative Funnel, the Work Transition Playbook, the Architecture / Engineering Operating Model, or the Technical Strategy Ideas backlog. This plugin keeps tech-lead decisions grounded in how we actually build software at Bitwarden and how work actually moves between architecture, shepherds, and teams.
+
+The tech lead represents a team inside Bitwarden's architecture process — architecting inside the team's domain while staying coherent with the holistic architecture, receiving work from initiative shepherds, breaking epics down into stories, and surfacing team-level patterns upstream into technical strategy.
+
+## Agent
+
+| Agent                 | What It Does                                                                                                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-tech-lead` | Plans and architects inside a team's scope, works alongside initiative shepherds, receives work transitions, breaks down initiative epics, and surfaces ideas to architecture |
+
+## Skills
+
+| Skill                    | What It Does                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `architecting-solutions` | Tech lead's architectural judgment framework: security mindset, blast radius, Bitwarden constraints, working with the architecture group and shepherds |
+
+## Cross-Plugin Integration
+
+| Plugin                        | How It's Used                                                            |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `bitwarden-security-engineer` | Security context (P01-P06), architecture pattern review, threat modeling |
+| `bitwarden-product-analyst`   | Consumes requirements documents as upstream input                        |
+| `bitwarden-software-engineer` | Implementation conventions for server, client, and database decisions    |
+| `bitwarden-atlassian-tools`   | Jira issue research and Confluence page access                           |
+
+All cross-plugin skills are required because we rely upon each of them for a rich, complete workflow.
+
+## Installation
+
+```bash
+/plugin install bitwarden-tech-lead@bitwarden-marketplace
+```
+
+### Upgrading from `bitwarden-architect`
+
+This plugin was previously named `bitwarden-architect`. The rename reflects Bitwarden's actual role nomenclature — teams are led by tech leads, not team-level architects; the architecture group operates upstream. To upgrade:
+
+```bash
+/plugin uninstall bitwarden-architect@bitwarden-marketplace
+/plugin install bitwarden-tech-lead@bitwarden-marketplace
+```
+
+The `architecting-solutions` skill is retained (refactored around the tech-lead perspective and holistic architecture). Three new skills are added: `navigating-the-initiative-funnel`, `receiving-work-transitions`, and `contributing-to-technical-strategy`.
+
+## Usage
+
+The tech lead agent activates when you're planning work inside your team's scope, receiving an initiative epic, preparing to break it down, receiving a work transition, or evaluating whether a team-level pattern of pain belongs upstream in the funnel:
+
+```
+Plan the implementation for PM-12345 within our team
+```
+
+```
+Break down the epic BW-2025-423 into stories for our team
+```
+
+```
+We're receiving a framework transition from the Platform team. Help me prepare.
+```
+
+```
+Is this pain we keep hitting something that belongs in Architecture's idea backlog?
+```
+
+## References
+
+- [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614)
+- [Work Transition Playbook](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2521038855)
+- [Architecture / Engineering Operating Model](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1286963201)
+- [Technical Strategy Ideas](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2344517656)
+- [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779)
+- [Bitwarden Security Definitions](https://contributing.bitwarden.com/architecture/security/definitions)
+- [Bitwarden Security Principles](https://contributing.bitwarden.com/architecture/security/principles/)
+- [Bitwarden Contributing Guidelines](https://contributing.bitwarden.com/contributing/)
