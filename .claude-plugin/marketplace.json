@@ -43,8 +43,8 @@
     {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
-      "version": "0.3.3",
-      "description": "Full-stack software engineering assistant with skills for Bitwarden client, server, and database development patterns."
+      "version": "0.4.0",
+      "description": "Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden."
     },
     {
       "name": "bitwarden-atlassian-tools",
