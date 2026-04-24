@@ -23,10 +23,25 @@ allowed-tools: Read, Glob, Grep, Bash(gh search code:*), Bash(gh api:*)
 - **No mutating API calls.** `gh api` GET requests are allowed freely. Do not use `-X POST`, `-X PUT`, `-X PATCH`, or `-X DELETE`.
 - **Flag uncertainty.** If a finding is ambiguous, note it in the report rather than guessing.
 
+## Pin Compliance Rules
+
+Bitwarden enforces two distinct pinning requirements depending on who owns the action. This mirrors the logic in `step_pinned.py` in the `bitwarden/workflow-linter` repo.
+
+**Internal actions** — any `uses:` reference starting with `bitwarden/`:
+- **Compliant:** pinned to `@main` (e.g., `bitwarden/gh-actions/azure-login@main`)
+- **Non-compliant:** pinned to a SHA, a tag, any other branch, or unpinned
+
+**Third-party actions** — any `uses:` reference not starting with `bitwarden/` and not a local path (`./`):
+- **Compliant:** pinned to a full 40-character commit SHA with an inline version comment (e.g., `actions/checkout@abc123...def456 # v4.1.1`)
+- **Non-compliant:** pinned to a tag, a branch, a short SHA (< 40 chars), missing the inline comment, or unpinned
+
+**Local/relative actions** — `uses:` values starting with `./`:
+- Skip entirely. These are local composite actions and are not subject to pinning rules.
+
 ## Modes
 
 - **`incident`** (default): Targeted search for a specific action — used when an action is compromised or deprecated.
-- **`audit`**: Sweep all workflow files org-wide for any unpinned action references.
+- **`audit`**: Sweep all workflow files org-wide for any non-compliant action references.
 
 ## Step 1: Parse Context
 
@@ -50,48 +65,57 @@ Also search without the `uses:` prefix to catch indirect references:
 gh search code "<action-name>" --owner <org> --path .github/workflows/ --limit 100
 ```
 
-**Audit mode** — find all workflow files with unpinned action references (not pinned to a full SHA):
+**Audit mode** — find all workflow files and extract `uses:` references:
 
 ```bash
 gh search code "uses:" --owner <org> --path .github/workflows/ --limit 100
 ```
 
-Then filter results to find `uses:` lines that do NOT match the pattern `@[a-f0-9]{40}` (i.e., not pinned to a hash).
+Then apply the two-rule filter:
+- **Internal** (`bitwarden/`): flag any reference NOT at `@main`
+- **Third-party** (all others, excluding `./`): flag any reference NOT matching `@[a-f0-9]{40}` with a trailing inline comment
 
 > **Note:** GitHub code search indexes can lag by minutes to hours after a recent push. Results may not reflect the very latest commits. Flag this caveat in the output.
 
 ## Step 3: Parse and Display Results
 
-For each result, determine:
+For each `uses:` reference (excluding local `./` paths), determine:
 
 1. **Repo** and **file path**
 2. **Current `uses:` value** (full line)
-3. **Pin status:**
-   - `hash` — pinned to a full 40-char SHA (compliant)
+3. **Action type:**
+   - `internal` — starts with `bitwarden/`
+   - `third-party` — all others (excluding local)
+4. **Pin status:**
+   - `hash` — pinned to a full 40-char SHA
    - `tag` — pinned to a version tag (e.g., `@v3`, `@v1.2.3`)
-   - `branch` — pointing to a branch (e.g., `@main`)
-   - `none` — no pin at all
+   - `branch` — pointing to a named branch (e.g., `@main`, `@master`)
+   - `none` — no ref at all
+5. **Compliant:**
+   - Internal + `branch` + branch is `main` → ✅
+   - Third-party + `hash` + has inline comment → ✅
+   - Everything else → ❌
 
 Display a table:
 
-| Repo | File | Current Reference | Pin Status |
-| ---- | ---- | ----------------- | ---------- |
-| ...  | ...  | ...               | ...        |
+| Repo | File | Current Reference | Type | Pin Status | Compliant |
+| ---- | ---- | ----------------- | ---- | ---------- | --------- |
+| ...  | ...  | ...               | ...  | ...        | ...       |
 
-In `incident` mode, include all statuses. In `audit` mode, omit `hash` rows (already compliant).
+In `incident` mode, include all rows. In `audit` mode, omit compliant (✅) rows.
 
-If there are no findings, inform the user and stop.
+If there are no non-compliant findings, inform the user and stop.
 
-## Step 4: Resolve SHAs
+## Step 4: Resolve Remediation Targets
 
-**Incident mode:**
+Apply the correct fix approach based on action type. Do **not** treat all non-compliant references the same way.
 
-Determine the remediation approach:
+**Internal actions** (`bitwarden/`):
+- The fix is always to change the ref to `@main`. No SHA resolution needed.
+- Flag if the action is currently on a SHA — this likely means it was incorrectly treated as third-party at some point.
 
-- If the user mentioned a replacement action: note it in the report.
-- Otherwise: resolve the safe hash for pinning.
-
-Resolve the SHA:
+**Third-party actions:**
+- Resolve the current SHA for each unique non-compliant action:
 
 ```bash
 gh api repos/<owner>/<repo>/commits/<ref> --jq '.sha'
@@ -108,16 +132,18 @@ Ask: "Does this SHA look correct? Type `yes` to confirm, or provide a different 
 
 Wait for confirmation before finalizing the report.
 
-**Audit mode:**
-
-For each unique action found unpinned, resolve its current latest SHA the same way and present a grouped list for the user to review.
+> In **audit mode**, group unique third-party actions and resolve each once rather than per-occurrence.
 
 ## Step 5: Summary Report
 
 Output a final summary:
 
-| Repo | File | Current Reference | Pin Status | Resolved SHA |
-| ---- | ---- | ----------------- | ---------- | ------------ |
-| ...  | ...  | ...               | ...        | ...          |
+| Repo | File | Current Reference | Type | Compliant | Remediation |
+| ---- | ---- | ----------------- | ---- | --------- | ----------- |
+| ...  | ...  | ...               | ...  | ...       | ...         |
+
+The **Remediation** column should contain:
+- For internal actions: `change ref to @main`
+- For third-party actions: the resolved 40-char SHA + inline comment to add (e.g., `@abc123...def456 # v4.1.1`)
 
 Inform the user that they can use the `action-remediate` skill to apply fixes based on these findings.
