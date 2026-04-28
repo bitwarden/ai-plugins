@@ -69,6 +69,12 @@
       "source": "./plugins/bitwarden-tech-lead",
       "version": "2.0.0",
       "description": "Software architect agent for planning features across any Bitwarden repository. Discovers platform context dynamically via CLAUDE.md and repo-local planning skills."
+    },
+    {
+      "name": "bitwarden-delivery-tools",
+      "source": "./plugins/bitwarden-delivery-tools",
+      "version": "1.0.0",
+      "description": "Delivery workflow skills for committing, PR creation, preflight checks, and change labeling across any Bitwarden repository."
     }
   ]
 }
