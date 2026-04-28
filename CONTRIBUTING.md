@@ -1,8 +1,36 @@
 # Contributing to Bitwarden AI Plugins
 
-This guide covers everything you need to create, modify, and submit plugins for the Bitwarden AI Plugin Marketplace.
+Every engineer who has solved a recurring problem, documented a pattern, or automated a workflow has something worth sharing. This marketplace is where those ideas become plugins that the whole team can use. This guide helps you figure out where your work fits, then walks through the mechanics of building and submitting it.
 
 For general Bitwarden contribution practices, see our [Contributing Guidelines](https://contributing.bitwarden.com/contributing/).
+
+## Where Does Your Claude Tooling Belong?
+
+Plugins in this marketplace fall into three families. Repo-specific patterns usually belong closer to the code — see each repo's `.claude/CONTRIBUTING.md` for that. If your work is cross-repo and fits one of the families below, you're in the right place. If you're still unsure after reading them, raise a draft PR and maintainers will help find the right home.
+
+### Persona Plugins
+
+These encode how a specific engineering role works at Bitwarden — the conventions, review standards, and decision frameworks that generic AI doesn't know. They answer the question: _"How does a software engineer, security engineer, or DevOps engineer work **here**?"_
+
+Personas map to the _work_, not the title — when you're designing a system you're doing architecture work, and the matching persona is for you. Most engineers will reach for more than one persona across a week because engineers wear many hats.
+
+A persona plugin captures institutional knowledge that would otherwise live in someone's head or scattered across wiki pages. Persona plugins must clear three bars: the knowledge is institutional, domain-specific, and role-defining.
+
+Example: `bitwarden-security-engineer`
+
+### Tool Integration Plugins
+
+These connect Claude Code to external services the team already uses, so Claude can read from and act on those tools. They answer the question: _"I want Claude to securely integrate to a service we use."_
+
+If you find yourself context-switching between Claude Code and another tool to copy information back and forth, a tool integration plugin can bridge that gap.
+
+Example: `bitwarden-atlassian-tools`
+
+### Utility Plugins
+
+These improve the Claude Code development experience itself — setup, configuration, workflow analysis. They help every engineer regardless of role or domain. They answer the question: _"How can working with Claude Code be better for everyone?"_
+
+Examples: `bitwarden-init`
 
 ## Plugin Structure
 
@@ -21,7 +49,7 @@ plugins/your-plugin-name/
 └── .mcp.json               (MCP servers - optional)
 ```
 
-For detailed guidance on building each component, see the [Plugin Reference](https://docs.claude.com/en/docs/claude-code/plugins-reference.md).
+For detailed guidance on building each component, see the [Plugin Reference](https://code.claude.com/docs/en/plugins-reference).
 
 ## Adding a New Plugin
 
