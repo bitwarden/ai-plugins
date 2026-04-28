@@ -5,6 +5,13 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2026-04-27
+
+### Changed
+
+- `code-review-local` command now declares `allowed-tools` in its frontmatter, mirroring `code-review`, so the read-only `gh` and `git` patterns it relies on are pre-authorized for the duration of the command and don't prompt on every invocation
+- `Write` access in `code-review-local` is scoped to the two output files (`review-summary.md`, `review-inline-comments.md`) rather than granted broadly
+
 ## [1.9.0] - 2026-04-06
 
 ### Added
