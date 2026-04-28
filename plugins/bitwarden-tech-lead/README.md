@@ -8,15 +8,15 @@ The tech lead represents a team inside Bitwarden's architecture process — arch
 
 ## Agent
 
-| Agent                 | What It Does                                                                                                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bitwarden-tech-lead` | Plans and architects inside a team's scope, works alongside initiative shepherds, receives work transitions, breaks down initiative epics, and surfaces ideas to architecture |
+| Agent                 | What It Does                               |
+| --------------------- | ------------------------------------------ |
+| `bitwarden-tech-lead` | Plans and architects inside a team's scope |
 
 ## Skills
 
-| Skill                    | What It Does                                                                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `architecting-solutions` | Tech lead's architectural judgment framework: security mindset, blast radius, Bitwarden constraints, working with the architecture group and shepherds |
+| Skill                    | What It Does                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `architecting-solutions` | Tech lead's architectural judgment framework: security mindset, blast radius, Bitwarden constraints |
 
 ## Cross-Plugin Integration
 
@@ -44,26 +44,20 @@ This plugin was previously named `bitwarden-architect`. The rename reflects Bitw
 /plugin install bitwarden-tech-lead@bitwarden-marketplace
 ```
 
-The `architecting-solutions` skill is retained (refactored around the tech-lead perspective and holistic architecture). Three new skills are added: `navigating-the-initiative-funnel`, `receiving-work-transitions`, and `contributing-to-technical-strategy`.
-
 ## Usage
 
-The tech lead agent activates when you're planning work inside your team's scope, receiving an initiative epic, preparing to break it down, receiving a work transition, or evaluating whether a team-level pattern of pain belongs upstream in the funnel:
+The tech lead agent activates when you're working inside your team's scope:
 
 ```
 Plan the implementation for PM-12345 within our team
 ```
 
 ```
-Break down the epic BW-2025-423 into stories for our team
+Break down the epic BW-123456 into stories for our team
 ```
 
 ```
 We're receiving a framework transition from the Platform team. Help me prepare.
-```
-
-```
-Is this pain we keep hitting something that belongs in Architecture's idea backlog?
 ```
 
 ## References
