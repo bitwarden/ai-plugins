@@ -15,35 +15,8 @@ The type keyword appears after the Jira ticket prefix:
 [PM-XXXXX] <type>: <imperative summary>
 ```
 
-## Type Keywords
+## Type Keywords and Selection Guidance
 
-| Type           | Label               | Use for                                    |
-| -------------- | ------------------- | ------------------------------------------ |
-| `feat`         | `t:feature`         | New features or functionality              |
-| `fix`          | `t:bug`             | Bug fixes                                  |
-| `refactor`     | `t:tech-debt`       | Code restructuring without behavior change |
-| `chore`        | `t:tech-debt`       | Maintenance, cleanup, minor tweaks         |
-| `test`         | `t:tech-debt`       | Adding or updating tests                   |
-| `perf`         | `t:tech-debt`       | Performance improvements                   |
-| `docs`         | `t:docs`            | Documentation changes                      |
-| `ci` / `build` | `t:ci`              | CI/CD and build system changes             |
-| `deps`         | `t:deps`            | Dependency updates                         |
-| `llm`          | `t:llm`             | LLM/Claude configuration changes           |
-| `breaking`     | `t:breaking-change` | Breaking changes requiring migration       |
-| `misc`         | `t:misc`            | Changes that do not fit other categories   |
+See [Change Type Labels](../../references/change-type-labels.md) for the full table of type keywords, their CI label mappings, and guidance for selecting a type (including ambiguous cases).
 
-## Selecting a Type
-
-Infer the type from the task description and changes made. **If the type cannot be confidently determined, ask the user.**
-
-The CI labeling script matches `<type>:` or `<type>(` in the lowercased PR title, so the keyword must be followed by a colon or parenthesis. CI also accepts additional aliases (e.g., `revert`, `bugfix`, `cleanup`). See `.github/label-pr.json` for the full mapping.
-
-### Examples
-
-Ambiguous cases where type selection is non-obvious:
-
-- Refactor that incidentally fixes a bug → use the **primary intent**: `fix:` if the bug was the goal, `refactor:` if the restructuring was the goal
-- Adding tests for existing untested code → `test:` (not `chore:`)
-- Updating a dependency to fix a vulnerability → `deps:` (not `fix:`)
-- Changing Claude/LLM configuration files → `llm:` (not `chore:`)
-- Removing dead code → `refactor:` (not `chore:` — it changes the codebase structure)
+The CI labeling script matches `<type>:` or `<type>(` in the lowercased PR title, so the keyword must be followed by a colon or parenthesis. **If the type cannot be confidently determined, ask the user.**

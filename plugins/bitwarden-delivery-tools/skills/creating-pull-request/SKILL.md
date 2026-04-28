@@ -11,22 +11,7 @@ description: Pull request creation workflow for Bitwarden repositories. Use when
 [PM-XXXXX] <type>: <short imperative summary>
 ```
 
-**Type keywords** (triggers automatic `t:` label via CI):
-
-| Type           | Label               | Use for                                    |
-| -------------- | ------------------- | ------------------------------------------ |
-| `feat`         | `t:feature`         | New features or functionality              |
-| `fix`          | `t:bug`             | Bug fixes                                  |
-| `refactor`     | `t:tech-debt`       | Code restructuring without behavior change |
-| `chore`        | `t:tech-debt`       | Maintenance, cleanup, minor tweaks         |
-| `test`         | `t:tech-debt`       | Adding or updating tests                   |
-| `perf`         | `t:tech-debt`       | Performance improvements                   |
-| `docs`         | `t:docs`            | Documentation changes                      |
-| `ci` / `build` | `t:ci`              | CI/CD and build system changes             |
-| `deps`         | `t:deps`            | Dependency updates                         |
-| `llm`          | `t:llm`             | LLM/Claude configuration changes           |
-| `breaking`     | `t:breaking-change` | Breaking changes requiring migration       |
-| `misc`         | `t:misc`            | Changes that do not fit other categories   |
+**Type keywords** (triggers automatic `t:` label via CI): see [Change Type Labels](../../references/change-type-labels.md) for the full table.
 
 **Examples:**
 
