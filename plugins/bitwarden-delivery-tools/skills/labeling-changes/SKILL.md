@@ -17,6 +17,6 @@ The type keyword appears after the Jira ticket prefix:
 
 ## Type Keywords and Selection Guidance
 
-See [Change Type Labels](../../references/change-type-labels.md) for the full table of type keywords, their CI label mappings, and guidance for selecting a type (including ambiguous cases).
+Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` for the full table of type keywords, their CI label mappings, and guidance for selecting a type (including ambiguous cases).
 
 The CI labeling script matches `<type>:` or `<type>(` in the lowercased PR title, so the keyword must be followed by a colon or parenthesis. **If the type cannot be confidently determined, ask the user.**

@@ -11,7 +11,7 @@ description: Pull request creation workflow for Bitwarden repositories. Use when
 [PM-XXXXX] <type>: <short imperative summary>
 ```
 
-**Type keywords** (triggers automatic `t:` label via CI): see [Change Type Labels](../../references/change-type-labels.md) for the full table.
+**Type keywords** (triggers automatic `t:` label via CI): read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` for the full table.
 
 **Examples:**
 

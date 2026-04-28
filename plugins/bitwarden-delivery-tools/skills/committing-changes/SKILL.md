@@ -16,7 +16,7 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 ### Rules
 
 1. **Ticket prefix**: Always include `[PM-XXXXX]` matching the Jira ticket
-2. **Type keyword**: See [Change Type Labels](../../references/change-type-labels.md) for the full table of conventional commit types and their CI label mappings. **If the type cannot be confidently determined, ask the user.**
+2. **Type keyword**: Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` for the full table of conventional commit types and their CI label mappings. **If the type cannot be confidently determined, ask the user.**
 
 ### Examples
 
