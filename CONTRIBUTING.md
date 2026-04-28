@@ -20,7 +20,7 @@ Example: `bitwarden-security-engineer`
 
 ### Tool Integration Plugins
 
-These connect Claude Code to external services the team already uses. They wrap APIs via MCP servers so Claude can read from and interact with those tools. They answer the question: _"I want Claude to talk to a service we use."_
+These connect Claude Code to external services the team already uses, so Claude can read from and act on those tools. They answer the question: _"I want Claude to securely integrate to a service we use."_
 
 If you find yourself context-switching between Claude Code and another tool to copy information back and forth, a tool integration plugin can bridge that gap.
 
