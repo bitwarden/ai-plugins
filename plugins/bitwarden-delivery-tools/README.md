@@ -21,4 +21,26 @@ Each skill owns the **workflow** (what steps to follow, what format to use). The
 
 ## Installation
 
-Install via the Bitwarden AI Marketplace.
+```bash
+/plugin install bitwarden-delivery-tools@bitwarden-marketplace
+```
+
+## Usage
+
+Skills activate based on natural-language triggers during your delivery workflow:
+
+```
+Commit these changes
+```
+
+```
+Create a PR for this branch
+```
+
+```
+Run preflight before I commit
+```
+
+```
+What change type should I use for this PR?
+```
