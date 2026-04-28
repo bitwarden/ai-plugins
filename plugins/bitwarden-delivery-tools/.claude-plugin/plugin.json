@@ -6,7 +6,7 @@
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-marketplace/tree/main/plugins/bitwarden-delivery-tools",
-  "repository": "https://github.com/bitwarden/ai-marketplace",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-delivery-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": ["delivery", "commit", "pull-request", "preflight", "labeling"]
 }

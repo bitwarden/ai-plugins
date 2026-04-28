@@ -28,7 +28,7 @@ Run this checklist before committing or creating a PR. Consult the repo's CLAUDE
 ## Architecture
 
 - [ ] Changes follow patterns in CLAUDE.md and architecture docs
-- [ ] DI/injection and error handling follow repo convention
+- [ ] Dependency injection and error handling follow repo convention
 - [ ] String resources added to the correct location (if applicable)
 
 ## On Failure
