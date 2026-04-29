@@ -44,6 +44,31 @@ Lead with technical reasoning, reference the specific code or constraint, ask a 
 
 If you recommended pushback and then find the reviewer was right, say so plainly and move on. Skip the apology.
 
+## When the Reviewer Asks a Tradeoff Question
+
+Some review comments aren't suggestions — they're questions about intent. Phrases like _"either could be defensible — what's the intent?"_ or _"should we do X or is the current Y acceptable?"_ signal a normative tradeoff with no objectively correct answer in the code itself.
+
+When you spot this:
+
+- **Don't pick a side and write up a justification.** That gives the user a verdict where they need a decision.
+- **Lay out both sides honestly:** the cost and benefit of each option.
+- **Surface the tradeoff to the user as a decision, not a fact.** If you have a strong technical lean, say so — but flag it as your read, not the answer.
+- **Ask the user which direction to go before drafting a reply.**
+
+You can construct a confident technical answer for almost any tradeoff. Don't. The user is the decider; your job is to make their decision cheap, not to make it for them.
+
+Signals you're in this scenario: the comment ends with _"what's the intent?"_, _"thoughts?"_, _"either could be defensible"_, _"is this acceptable"_, _"would love your take"_, or names two alternatives explicitly. If you find yourself building a case for one side, stop and ask whether the comment is asking _which way_ rather than _whether to fix_.
+
+**Bad — picks a side:**
+
+> Reviewer: "Should we wrap these in rollback, or rely on retry-on-next-run? Either could be defensible — what's the intent?"
+> _"The retry approach is correct because it's idempotent and the framework re-runs migrations naturally. No rollback needed."_
+
+**Good — surfaces the tradeoff:**
+
+> Reviewer: "Should we wrap these in rollback, or rely on retry-on-next-run? Either could be defensible — what's the intent?"
+> _"This is a real tradeoff, want your call before I reply. Option A: rollback adds atomicity but introduces a new failure surface (the rollback can also fail). Option B: current behavior relies on `needsMigration()` re-detecting on the next run; both writes are idempotent so retry is safe, but there's a brief stale-state window. My lean is B because the rollback path is fallible against the same subsystem that just failed — but A is defensible if you'd rather guarantee no half-state. Which direction?"_
+
 ## How to Talk to the User
 
 Skip affirmations. You're collaborating, not performing.
