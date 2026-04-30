@@ -1,7 +1,7 @@
 ---
 name: perform-multi-agent-code-review
-description: Perform a rigorous, multi-agent Bitwarden code review with architecture-compliance, parallel quality/security analysis, finding validation, and severity audit. Use whenever the user asks for a structured, deep, thorough, multi-pass, or multi-agent code review — or a review that includes architecture/pattern compliance, confidence-scored findings, or a severity audit — even if they don't say the exact phrase "multi-agent". Prefer this over a single-agent review when the user wants high-signal findings with validation.
-allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git check-ignore:*), Read, Write, Grep, Glob, Task, Skill"
+description: Perform a rigorous, multi-agent code review with architecture-compliance, parallel quality/security analysis, finding validation, and severity audit. Use whenever the user asks for a structured, deep, thorough, multi-pass, or multi-agent code review — or a review that includes architecture/pattern compliance, confidence-scored findings, or a severity audit — even if they don't say the exact phrase "multi-agent". Prefer this over a single-agent review when the user wants high-signal findings with validation. Also use whenever the user asks for a code review across a commit range, time window, or N most recent commits in a locally checked-out repo (e.g. "review the last week of commits in bitwarden/server", "review the last 20 commits", "review changes since 2026-04-23") — these route to the commit-range mode below.
+allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git check-ignore:*), Bash(git log:*), Bash(git rev-list:*), Read, Write, Grep, Glob, Task, Skill"
 ---
 
 # Overview
@@ -13,7 +13,7 @@ The process below **MUST** be followed precisely to ensure consistency and accur
 
 This skill depends on the following sibling plugins. If any are not installed, **abort the review with a clear error message** identifying the missing plugin — do not attempt to proceed with a degraded pipeline.
 
-- **`bitwarden-architect`** — provides the `bitwarden-architect` subagent type used in Step 2.
+- **`bitwarden-tech-lead`** — provides the `bitwarden-tech-lead` subagent type used in Step 2.
 - **`bitwarden-security-engineer`** — provides the `bitwarden-security-context` skill (invoked by every Step 2–5 subagent preamble) and the `analyzing-code-security`, `detecting-secrets`, and `reviewing-dependencies` skills referenced by Step 3 security evaluators.
   Before Step 1, verify each prerequisite is resolvable. If a prerequisite is missing, print:
 
@@ -23,12 +23,66 @@ This skill depends on the following sibling plugins. If any are not installed, *
 
 ## Mode
 
-Determine review mode from the invocation:
+Determine review mode from the invocation. Inspect both the slash-command argument and any natural-language framing the user provided. The four modes are mutually exclusive — if more than one seems to apply, invoke `AskUserQuestion` to disambiguate before proceeding rather than guessing.
 
-1. **Argument provided** → **PR mode**. Fetch title/description with `gh pr view`, diff with `gh pr diff`.
-2. **No argument** → run `git status --porcelain`.
-   - **Non-empty output** → **Local changes mode**. Fetch diff with `git diff`.
-   - **Empty output** → **Branch comparison mode**. Capture the current branch with `git rev-parse --abbrev-ref HEAD` (needed for the Step 9 filename), resolve the base with `git rev-parse --abbrev-ref origin/HEAD` (yields e.g. `origin/main`), then diff with `git diff origin/HEAD`.
+### Mode 1 — PR mode
+
+**Trigger:** the user supplied a GitHub pull request reference. Recognize a bare number (`123`), a `#`-prefixed reference (`#123`, `PR #123`), or a pull-request URL (`https://github.com/owner/repo/pull/123`).
+
+**Diff sources:**
+
+- Title & description: `gh pr view <number>`
+- Changed files: `gh pr diff <number> --name-only`
+- Diff: `gh pr diff <number>`
+
+### Mode 2 — Local changes mode
+
+**Trigger:** no PR reference, no commit-range framing, AND `git status --porcelain` returns non-empty (working tree has uncommitted changes).
+
+**Diff sources:**
+
+- Changed files: `git diff --name-only`
+- Diff: `git diff` (combines staged + unstaged)
+
+### Mode 3 — Branch comparison mode
+
+**Trigger:** no PR reference, no commit-range framing, AND `git status --porcelain` returns empty (clean working tree).
+
+**Diff sources:**
+
+- Current branch: `git rev-parse --abbrev-ref HEAD` (needed for the Step 9 filename)
+- Base ref: `git rev-parse --abbrev-ref origin/HEAD` (yields e.g. `origin/main`)
+- Changed files: `git diff origin/HEAD --name-only`
+- Diff: `git diff origin/HEAD`
+
+### Mode 4 — Commit-range mode
+
+**Trigger:** the user described a commit range, time window, or commit count against a locally checked-out repo. Recognize natural-language phrases such as:
+
+- **Time windows** — "the last week", "the last 7 days", "the past month", "since 2026-04-23", "between Apr 1 and Apr 28"
+- **Commit counts** — "the last 20 commits", "the last 5 commits"
+- **Explicit refs** — "from abc123 to def456", "between v1.0 and v1.1", "since the v2.0 tag"
+
+The user is expected to invoke this skill from inside the target repo's working tree. Mentions like "in the bitwarden/server repo" are confirmatory framing — the orchestrator does NOT navigate to other paths or search the filesystem.
+
+**Resolution sequence (perform before launching any subagents):**
+
+1. **Confirm the working directory is a git work tree.** Run `git rev-parse --is-inside-work-tree`. If it fails or returns false, abort with: "commit-range mode must be invoked from inside the target repo." Do not search elsewhere.
+
+2. **Resolve the commit range to a `<from>..<to>` pair.**
+   - **Time windows** → `<to>=HEAD`. Determine the oldest commit in the window with `git log --since='<window>' --reverse --pretty=%H | head -1`; `<from>` is that commit's first parent (suffix `^`). If the window contains zero commits, abort with a clear message — there is nothing to review.
+   - **Commit counts** → `<from>=HEAD~N`, `<to>=HEAD`.
+   - **Explicit refs** → use them verbatim after validating each with `git rev-parse <ref>`.
+
+3. **Confirm with the user before launching subagents.** Print the `<from>..<to>` range (with short SHAs), the commit count, and the changed-file list, then invoke `AskUserQuestion` to confirm before proceeding. Reason: the multi-agent pipeline is expensive — a wrong range wastes substantial tokens and time, and the natural-language inputs leave room for misinterpretation that subagents cannot recover from.
+
+**Diff sources (after confirmation):**
+
+- Commits in range (for context only, not validation): `git log <from>..<to> --oneline`
+- Changed files: `git diff <from>..<to> --name-only`
+- Diff (cumulative across the range): `git diff <from>..<to>`
+
+**Interpretation of "introduced by this change" in commit-range mode:** "introduced" means present in the cumulative diff of `<from>..<to>`; "pre-existing" means present at the parent of `<from>`. Step 4 validation subagents must use this interpretation when applying the dismissal rules.
 
 ## Operating Rules
 
@@ -135,12 +189,12 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 Every subagent prompt in Steps 2–5 must include the Project Preamble Propagation blocks, the Tool Discipline block, AND the Finding Shape block (from `references/finding-shape.md`) verbatim.
 
 1. Gather context (no subagents):
-   - Determine the mode (see the Mode section). Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), or `git diff origin/HEAD --name-only` (branch comparison). In PR mode, also fetch the title and description with `gh pr view`.
+   - Determine the mode (see the Mode section). Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), `git diff origin/HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
    - **READ** the content of CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
    - **READ** `references/report-template.md` (path resolved relative to this skill's directory — do NOT search elsewhere) for formatting the final report in Step 7.
    - **READ** `references/finding-shape.md` (path resolved relative to this skill's directory — do NOT search elsewhere). Its contents are pasted verbatim into every Step 2–5 subagent prompt.
 
-2. Launch a single architecture & pattern compliance agent using the `bitwarden-architect` subagent type (from the sibling `bitwarden-architect` plugin — see Prerequisites). Give it the diff fetched with the mode's diff command from Step 1, the list of changed file paths, and — in PR mode only — the PR title and description.
+2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead` subagent type (from the sibling `bitwarden-tech-lead` plugin — see Prerequisites). Give it the diff fetched with the mode's diff command from Step 1, the list of changed file paths, and — in PR mode only — the PR title and description.
 
    Unlike the diff agents in Step 3, this agent reads BEYOND the diff to check whether changes fit the codebase.
 
@@ -184,7 +238,7 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 4. Launch a validation subagent for each finding from steps 2 and 3. Each subagent receives the diff fetched with the mode's diff command from Step 1, the finding object, the Review Rules, and — in PR mode only — the PR title and description. Send all validation Agent tool calls in a single message (do NOT use run_in_background). Each subagent returns a Step 4 object per the Finding Shape schema.
 
    A finding is **dismissed** if ANY of the following are true:
-   - It is a pre-existing finding, not introduced by this change
+   - It is a pre-existing finding, not introduced by this change. In commit-range mode, treat the cumulative diff of `<from>..<to>` as "this change" and the parent of `<from>` as the pre-existing baseline.
    - **Bugs**: The problem does not actually exist in the code (e.g., the variable is not truly undefined, the logic error does not actually produce wrong results)
    - It is a nitpick that a senior engineer would not flag in a real code review
    - It would be caught by a linter (**do not run** the linter to verify)
@@ -206,10 +260,10 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 
 6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Partition by final status: validated (Step 5 `confirmed` or `downgraded`) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
 
-7. Format the report using the template in `references/report-template.md` (path resolved relative to this skill's directory — do NOT search elsewhere). Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found."
+7. Format the report using the template in `references/report-template.md` (path resolved relative to this skill's directory — do NOT search elsewhere). Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Do not omit this line — per-agent attribution is required for traceability.
 
 8. Print the full formatted report to the terminal.
 
 9. Write the formatted report to the repository root in a markdown file with the following naming convention:
 
-- File name: `code-review-PR-{number}.md` (PR mode), `code-review-{YYYY-MM-DD}.md` (local mode), or `code-review-{branch}-{YYYY-MM-DD}.md` (branch comparison mode).
+- File name: `code-review-PR-{number}.md` (PR mode), `code-review-{YYYY-MM-DD}.md` (local mode), `code-review-{branch}-{YYYY-MM-DD}.md` (branch comparison mode), or `code-review-{from-short}..{to-short}.md` (commit-range mode, where `{from-short}`/`{to-short}` are 7-char SHAs or shorter ref names).

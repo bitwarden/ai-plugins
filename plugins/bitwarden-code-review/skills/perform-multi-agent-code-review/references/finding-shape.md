@@ -19,6 +19,8 @@ Emit as a JSON array. Each finding:
 
 If an agent produces no findings, return `[]`.
 
+The orchestrator renders `source_agent` on every finding in the final report — set it accurately. The id-prefix → source_agent mapping is fixed: `arch → architect`, `quality → quality`, `simp → simplification`, `bug → bug`, `sec → security`, `val → validation`.
+
 ## Step 4 return (validation)
 
 One entry per incoming finding, keyed by `id`:

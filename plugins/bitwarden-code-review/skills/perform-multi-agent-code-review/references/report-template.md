@@ -7,6 +7,19 @@
 - ♻️ **Refactor** — Code restructuring needed
 - 💡 **Suggestion** — Nice-to-have improvement
 
+## Source-Agent Friendly Names
+
+Every finding carries a `source_agent` value (per `finding-shape.md`). Render it on each finding using the friendly label below — it tells the reader which subagent caught the issue, which aids triage and per-agent calibration.
+
+| `source_agent`   | Rendered label                  |
+| ---------------- | ------------------------------- |
+| `architect`      | Architecture agent              |
+| `quality`        | Code quality agent              |
+| `simplification` | Code simplification agent       |
+| `bug`            | Bug analysis agent              |
+| `security`       | Security & logic agent          |
+| `validation`     | Validation agent (collateral)   |
+
 ## Template
 
 ```markdown
@@ -32,6 +45,7 @@
 #### {One-line summary (<100 chars)}
 
 `{file/path.ext}:{line}`
+**Caught by:** {Friendly agent label}
 
   <details><summary>Details</summary>
   {Explanation, why it matters, suggested fix. Include code snippets where helpful.}
@@ -53,6 +67,7 @@
 
    #### {One-line summary}
    `{file/path.ext}:{line}`
+   **Caught by:** {Friendly agent label}
    **Original severity:** {🛑|⚠️|♻️|💡} {Blocker|Important|Refactor|Suggestion}
    **Original confidence:** {n}/100
    **Dismissed at:** {Step 4 validation | Step 5 severity audit}
