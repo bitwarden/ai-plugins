@@ -193,16 +193,16 @@ describe('GetConfluencePageCommentsSchema', () => {
     ).toThrow();
   });
 
-  it('should accept storage and view bodyFormat', () => {
+  it('should accept storage bodyFormat', () => {
     expect(
       GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'storage' }).bodyFormat
     ).toBe('storage');
-    expect(
-      GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'view' }).bodyFormat
-    ).toBe('view');
   });
 
-  it('should reject export_view bodyFormat', () => {
+  it('should reject view and export_view bodyFormat', () => {
+    expect(() =>
+      GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'view' })
+    ).toThrow();
     expect(() =>
       GetConfluencePageCommentsSchema.parse({ pageId: '1', bodyFormat: 'export_view' })
     ).toThrow();

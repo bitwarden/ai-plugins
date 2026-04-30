@@ -3,6 +3,7 @@
 **User Request**: "Read PROJ-123"
 
 **Workflow**:
+
 1. Fetch PROJ-123 via `get_issue` -> It's a Story with 3 sub-tasks, blocked by PROJ-100, and has a remote link to a Confluence page
 2. Fetch remote links via `get_issue_remote_links` -> Confirms Confluence page link and a GitHub PR
 3. Fetch PROJ-100 (blocking issue) via `get_issue` -> It's a Bug that's currently in progress

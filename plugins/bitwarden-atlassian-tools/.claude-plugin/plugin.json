@@ -1,16 +1,9 @@
 {
   "name": "bitwarden-atlassian-tools",
-  "version": "2.2.0",
+  "version": "2.2.3",
   "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments",
   "author": {
     "name": "Bitwarden"
   },
-  "keywords": [
-    "atlassian",
-    "jira",
-    "confluence",
-    "mcp",
-    "read-only",
-    "cql"
-  ]
+  "keywords": ["atlassian", "jira", "confluence", "mcp", "read-only", "cql"]
 }

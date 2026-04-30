@@ -170,9 +170,16 @@ if [ -f "$README_FILE" ]; then
     print_info "Updating README.md catalog table..."
     if grep -qE "^\|.*\[${PLUGIN_NAME}\]" "$README_FILE"; then
         # Replace the version number in the table row for this plugin
-        if sed -i.bak "s/\(\[${PLUGIN_NAME}\](plugins\/${PLUGIN_NAME}\/)\s*|\s*\)[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/\1${NEW_VERSION}/" "$README_FILE"; then
+        # Match the line by plugin name, then swap the | X.Y.Z | cell
+        if sed -i.bak "/\[${PLUGIN_NAME}\]/ s/|[[:space:]]*[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*[[:space:]]*|/| ${NEW_VERSION} |/" "$README_FILE"; then
             rm -f "$README_FILE.bak"
-            print_success "Updated README.md"
+            # Verify the update actually took effect
+            if grep -E "^\|.*\[${PLUGIN_NAME}\]" "$README_FILE" | grep -qF "$NEW_VERSION"; then
+                print_success "Updated README.md"
+            else
+                print_error "README.md sed ran but version was not updated — check table format"
+                exit 1
+            fi
         else
             print_error "Failed to update README.md"
             rm -f "$README_FILE.bak"
