@@ -15,20 +15,22 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
 - **Confidence Scoring**: Pre-filters findings with a 0-100 confidence score (≥75 threshold) before validation to reduce false positives
 
+## Skills
+
+| Skill                                                                             | Triggers                                            | Purpose                                                                                                              |
+| --------------------------------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [`classifying-review-findings`](./skills/classifying-review-findings/SKILL.md)         | "classify finding", "severity"                      | 5-tier severity system (CRITICAL / IMPORTANT / DEBT / SUGGESTED / QUESTION) with emoji and label mapping             |
+| [`avoiding-false-positives`](./skills/avoiding-false-positives/SKILL.md)               | "validate finding", "verify before posting"         | Rejection criteria and verification checks that drop low-confidence findings before they reach a comment             |
+| [`posting-bitwarden-review-comments`](./skills/posting-bitwarden-review-comments/SKILL.md) | "post inline comment", "post PR comment"            | Inline PR comment formatting per Bitwarden standards (severity emojis, explanation, actionable suggestion)           |
+| [`posting-review-summary`](./skills/posting-review-summary/SKILL.md)                   | "post summary", "summary comment"                   | Final summary comment handling — routes to sticky comment, GitHub Actions MCP tool, or local file based on context   |
+| [`reviewing-dependency-changes`](./skills/reviewing-dependency-changes/SKILL.md)       | "package.json", "Renovate PR", "dependency manifest" | Flags dependency manifest changes for AppSec approval, version-bump significance, and lock-file hygiene              |
+| [`addressing-code-review-comments`](./skills/addressing-code-review-comments/SKILL.md) | "address review comments", "respond to PR feedback" | Guides developers working through review comments locally — verify before implementing, surface ambiguity, no performative agreement |
+
 ## Architecture
 
 ### Code Review Agent
 
 The plugin provides a single agent (`bitwarden-code-reviewer`) that follows a linear 7-step review process — from context gathering through validation to posting. See [`AGENT.md`](./agents/bitwarden-code-reviewer/AGENT.md) for the full flow.
-
-### Skills
-
-The agent leverages specialized skills:
-
-- **`classifying-review-findings`**: Determines severity levels and validates finding criteria
-- **`posting-bitwarden-review-comments`**: Formats inline PR comments following Bitwarden standards
-- **`posting-review-summary`**: Posts or updates summary comments (handles sticky comment vs local file)
-- **`avoiding-false-positives`**: Validates findings against framework patterns and conventions
 
 ### Finding Classification
 
@@ -48,15 +50,7 @@ bitwarden-code-review/
 ├── commands/
 │   ├── code-review/                          # Code review command
 │   └── code-review-local/                    # Local review command
-├── skills/
-│   ├── avoiding-false-positives/
-│   │   └── SKILL.md                          # False positive prevention
-│   ├── classifying-review-findings/
-│   │   └── SKILL.md                          # Severity classification
-│   ├── posting-bitwarden-review-comments/
-│   │   └── SKILL.md                          # Inline comment formatting
-│   └── posting-review-summary/
-│       └── SKILL.md                          # Summary comment handling
+├── skills/                                   # See Skills table above
 ├── tests/
 │   └── TESTING.md                            # Test plan and validation
 └── README.md                                 # This file
