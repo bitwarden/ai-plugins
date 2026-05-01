@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Daily Recap — {{DATE}}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+        <style>
+            /* Bitwarden brand palette — https://bitwarden.com/brand/ */
+            :root {
+                /* Bitwarden primary */
+                --bw-blue: #175ddc;
+                --bw-deep-blue: #0c3276;
+                --bw-teal: #2cdde9;
+                --bw-light-teal: #a2f4fd;
+                --bw-green: #7bf1a8;
+                --bw-red: #ff6550;
+                --bw-yellow: #fdc700;
+                --bw-off-white: #f3f6f9;
+                --bw-light-grey: #d8e2eb;
+                --bw-medium-grey: #99a7b5;
+
+                /* Dark surface system tuned to Bitwarden palette */
+                --bg: #06122b;
+                --bg-elev: #0c1f3f;
+                --bg-card: #102747;
+                --bg-card-hover: #143058;
+                --border: #1f3d6e;
+                --border-soft: #16315a;
+
+                /* Text */
+                --text: var(--bw-off-white);
+                --text-dim: var(--bw-light-grey);
+                --text-muted: var(--bw-medium-grey);
+
+                /* Semantic — alias to brand tokens */
+                --accent: var(--bw-blue);
+                --accent-soft: #5b8ae6;
+                --accent-bg: rgba(23, 93, 220, 0.12);
+                --green: var(--bw-green);
+                --green-bg: rgba(123, 241, 168, 0.12);
+                --amber: var(--bw-yellow);
+                --amber-bg: rgba(253, 199, 0, 0.12);
+                --red: var(--bw-red);
+                --red-bg: rgba(255, 101, 80, 0.12);
+                --blue: var(--bw-teal);
+                --blue-bg: rgba(44, 221, 233, 0.1);
+                --purple: var(--bw-light-teal);
+                --code-bg: #050e22;
+            }
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    system-ui,
+                    sans-serif;
+                line-height: 1.6;
+                min-height: 100vh;
+                background-image:
+                    radial-gradient(
+                        circle at 15% 10%,
+                        rgba(23, 93, 220, 0.18),
+                        transparent 45%
+                    ),
+                    radial-gradient(
+                        circle at 85% 90%,
+                        rgba(44, 221, 233, 0.08),
+                        transparent 45%
+                    );
+            }
+            .page {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 60px 32px 80px;
+            }
+
+            header {
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 32px;
+                margin-bottom: 32px;
+            }
+            .brand-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            .brand-shield {
+                width: 32px;
+                height: 32px;
+                flex-shrink: 0;
+            }
+            .brand-name {
+                font-size: 14px;
+                font-weight: 700;
+                letter-spacing: -0.01em;
+                color: var(--bw-off-white);
+            }
+            .brand-name .dot {
+                color: var(--bw-blue);
+                margin: 0 6px;
+            }
+            .brand-name .sub {
+                color: var(--text-muted);
+                font-weight: 500;
+            }
+            .eyebrow {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--accent);
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                margin-bottom: 16px;
+            }
+            .eyebrow::before {
+                content: "";
+                width: 24px;
+                height: 1px;
+                background: var(--accent);
+            }
+            h1 {
+                font-size: 44px;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                line-height: 1.1;
+                margin-bottom: 12px;
+            }
+            h1 .date {
+                color: var(--accent);
+                font-variant-numeric: tabular-nums;
+            }
+            .subtitle {
+                color: var(--text-dim);
+                font-size: 18px;
+                max-width: 760px;
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 16px;
+                margin: 32px 0 0;
+            }
+            .stat {
+                background: var(--bg-card);
+                border: 1px solid var(--border-soft);
+                border-radius: 16px;
+                padding: 16px 20px;
+                transition:
+                    transform 0.15s,
+                    border-color 0.15s;
+            }
+            .stat:hover {
+                transform: translateY(-1px);
+                border-color: var(--border);
+            }
+            .stat-value {
+                font-size: 28px;
+                font-weight: 700;
+                color: var(--text);
+                font-variant-numeric: tabular-nums;
+                line-height: 1;
+                margin-bottom: 6px;
+            }
+            .stat-label {
+                color: var(--text-dim);
+                font-size: 11px;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+
+            /* Today banner */
+            .today-banner {
+                background: linear-gradient(
+                    135deg,
+                    rgba(44, 221, 233, 0.1),
+                    rgba(23, 93, 220, 0.06)
+                );
+                border: 1px solid var(--border);
+                border-left: 4px solid var(--bw-teal);
+                border-radius: 20px;
+                padding: 18px 24px;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: flex-start;
+                gap: 18px;
+                flex-wrap: wrap;
+            }
+            .today-banner-title {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--purple);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .today-banner-title::before {
+                content: "⚡";
+                font-size: 14px;
+            }
+            .today-banner-content {
+                flex: 1;
+                min-width: 240px;
+            }
+            .today-banner ul {
+                list-style: none;
+                padding: 0;
+            }
+            .today-banner li {
+                color: var(--text);
+                font-size: 14px;
+                padding: 4px 0;
+                position: relative;
+                padding-left: 22px;
+            }
+            .today-banner li::before {
+                content: "•";
+                position: absolute;
+                left: 6px;
+                color: var(--purple);
+                font-size: 18px;
+                line-height: 1;
+            }
+            .today-banner li .ts {
+                color: var(--text-muted);
+                font-family: "SF Mono", monospace;
+                font-size: 11px;
+                margin-right: 8px;
+                font-variant-numeric: tabular-nums;
+            }
+            .new-tag {
+                display: inline-block;
+                padding: 1px 8px;
+                border-radius: 999px;
+                background: rgba(44, 221, 233, 0.15);
+                color: var(--bw-teal);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                margin-right: 6px;
+                vertical-align: 1px;
+                border: 1px solid rgba(44, 221, 233, 0.3);
+            }
+
+            /* Standup card */
+            .standup {
+                background: linear-gradient(
+                    135deg,
+                    rgba(123, 241, 168, 0.06),
+                    rgba(23, 93, 220, 0.04)
+                );
+                border: 1px solid var(--border);
+                border-left: 4px solid var(--bw-green);
+                border-radius: 20px;
+                padding: 22px 28px;
+                margin-bottom: 32px;
+                position: relative;
+            }
+            .standup-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            .standup-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--green);
+            }
+            .standup-title::before {
+                content: "☕";
+                font-size: 16px;
+            }
+            .standup-meta {
+                color: var(--text-muted);
+                font-size: 12px;
+                font-variant-numeric: tabular-nums;
+            }
+            .standup-copy {
+                background: transparent;
+                color: var(--text-dim);
+                border: 1px solid var(--border);
+                padding: 6px 14px;
+                border-radius: 999px;
+                font-size: 11px;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all 0.15s;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-weight: 600;
+            }
+            .standup-copy:hover {
+                color: var(--text);
+                border-color: var(--text-muted);
+            }
+            .standup-copy.copied {
+                color: var(--green);
+                border-color: var(--green);
+            }
+            .standup-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            @media (max-width: 720px) {
+                .standup-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .standup-col h3 {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+            }
+            .standup-col ul {
+                list-style: none;
+                padding: 0;
+            }
+            .standup-col li {
+                position: relative;
+                padding-left: 18px;
+                margin-bottom: 6px;
+                color: var(--text);
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .standup-col.yesterday li::before {
+                content: "✓";
+                position: absolute;
+                left: 0;
+                top: 0;
+                color: var(--green);
+                font-weight: 700;
+            }
+            .standup-col.next li::before {
+                content: "→";
+                position: absolute;
+                left: 0;
+                top: 0;
+                color: var(--amber);
+                font-weight: 700;
+            }
+            .standup-col li strong {
+                color: var(--accent-soft);
+                font-weight: 600;
+            }
+
+            /* Toolbar */
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 12px;
+                background: var(--bg-card);
+                border: 1px solid var(--border-soft);
+                border-radius: 16px;
+                padding: 12px;
+                margin-bottom: 32px;
+                position: sticky;
+                top: 12px;
+                z-index: 10;
+                backdrop-filter: blur(8px);
+            }
+            .filter-group {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .chip {
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-dim);
+                padding: 6px 12px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.15s;
+                font-family: inherit;
+            }
+            .chip:hover {
+                color: var(--text);
+                border-color: var(--text-muted);
+            }
+            .chip.active {
+                background: var(--accent-bg);
+                color: var(--accent);
+                border-color: var(--accent);
+            }
+            .chip .count {
+                margin-left: 6px;
+                padding: 1px 6px;
+                border-radius: 999px;
+                background: var(--border-soft);
+                color: var(--text-muted);
+                font-size: 10px;
+            }
+            .chip.active .count {
+                background: rgba(255, 122, 24, 0.2);
+                color: var(--accent);
+            }
+            .search {
+                flex: 1;
+                min-width: 200px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                color: var(--text);
+                padding: 9px 16px;
+                border-radius: 999px;
+                font-size: 13px;
+                font-family: inherit;
+            }
+            .search:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(23, 93, 220, 0.18);
+            }
+            .toolbar-divider {
+                width: 1px;
+                height: 22px;
+                background: var(--border);
+            }
+            .view-toggle {
+                display: flex;
+                gap: 0;
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                overflow: hidden;
+            }
+            .view-toggle button {
+                background: transparent;
+                color: var(--text-dim);
+                border: none;
+                padding: 8px 14px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 500;
+                font-family: inherit;
+                transition: all 0.15s;
+            }
+            .view-toggle button:hover {
+                color: var(--text);
+                background: var(--bg-card-hover);
+            }
+            .view-toggle button.active {
+                background: var(--accent-bg);
+                color: var(--accent);
+            }
+
+            .project {
+                margin-bottom: 40px;
+                transition: opacity 0.2s;
+            }
+            .project.hidden {
+                display: none;
+            }
+            .project-header {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid var(--border-soft);
+            }
+            .project-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: var(--accent-bg);
+                border: 1px solid var(--border);
+                display: grid;
+                place-items: center;
+                font-size: 18px;
+            }
+            .project-title {
+                font-size: 22px;
+                font-weight: 600;
+                letter-spacing: -0.01em;
+            }
+            .project-meta {
+                color: var(--text-muted);
+                font-size: 13px;
+                margin-left: auto;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .stream {
+                background: var(--bg-card);
+                border: 1px solid var(--border-soft);
+                border-radius: 20px;
+                margin-bottom: 14px;
+                transition:
+                    border-color 0.15s,
+                    opacity 0.2s;
+                overflow: hidden;
+            }
+            .stream.hidden {
+                display: none;
+            }
+            .stream:hover {
+                border-color: var(--border);
+            }
+            .stream-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 18px 24px;
+                cursor: pointer;
+                user-select: none;
+                flex-wrap: wrap;
+            }
+            .stream-title {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text);
+                line-height: 1.4;
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .stream-toggle {
+                color: var(--text-muted);
+                font-size: 12px;
+                transition: transform 0.2s;
+                display: inline-block;
+            }
+            .stream.collapsed .stream-toggle {
+                transform: rotate(-90deg);
+            }
+            .stream-body {
+                padding: 0 24px 20px;
+                border-top: 1px solid var(--border-soft);
+                padding-top: 16px;
+                max-height: 1000px;
+                overflow: hidden;
+                transition:
+                    max-height 0.25s ease,
+                    padding 0.25s ease,
+                    opacity 0.2s ease;
+            }
+            .stream.collapsed .stream-body {
+                max-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                opacity: 0;
+                border-top-color: transparent;
+            }
+            .stream ul {
+                list-style: none;
+                padding: 0;
+            }
+            .stream li {
+                position: relative;
+                padding-left: 20px;
+                margin-bottom: 10px;
+                color: var(--text-dim);
+                font-size: 14.5px;
+            }
+            .stream li::before {
+                content: "▸";
+                position: absolute;
+                left: 0;
+                top: 0;
+                color: var(--accent);
+                font-size: 12px;
+            }
+            .stream li strong {
+                color: var(--text);
+                font-weight: 600;
+            }
+            .stream li em {
+                color: var(--accent-soft);
+                font-style: normal;
+            }
+            .stream li.highlight {
+                background: rgba(255, 122, 24, 0.06);
+                border-radius: 4px;
+                padding-right: 4px;
+            }
+
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 10px;
+                border-radius: 999px;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                white-space: nowrap;
+                border: 1px solid;
+            }
+            .badge-completed {
+                color: var(--green);
+                background: var(--green-bg);
+                border-color: rgba(63, 185, 80, 0.25);
+            }
+            .badge-open {
+                color: var(--amber);
+                background: var(--amber-bg);
+                border-color: rgba(210, 153, 34, 0.25);
+            }
+            .badge-deferred {
+                color: var(--blue);
+                background: var(--blue-bg);
+                border-color: rgba(88, 166, 255, 0.25);
+            }
+
+            code {
+                font-family:
+                    "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+                font-size: 0.88em;
+                background: var(--code-bg);
+                color: var(--bw-light-teal);
+                padding: 2px 7px;
+                border-radius: 6px;
+                border: 1px solid var(--border-soft);
+            }
+            .pr-ref {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-family: "SF Mono", monospace;
+                font-size: 0.85em;
+                color: var(--bw-teal);
+                background: var(--blue-bg);
+                padding: 2px 10px;
+                border-radius: 999px;
+                border: 1px solid rgba(44, 221, 233, 0.25);
+                text-decoration: none;
+                transition: all 0.15s;
+                font-weight: 600;
+            }
+            .pr-ref:hover {
+                background: rgba(44, 221, 233, 0.18);
+                border-color: var(--bw-teal);
+            }
+
+            .timeline {
+                display: none;
+            }
+            .timeline.active {
+                display: block;
+            }
+            .projects-view {
+                display: block;
+            }
+            .projects-view.hidden {
+                display: none;
+            }
+
+            .tl-header {
+                margin-bottom: 24px;
+                color: var(--text-dim);
+                font-size: 14px;
+            }
+            .tl-list {
+                position: relative;
+                padding-left: 28px;
+                border-left: 2px solid var(--border-soft);
+            }
+            .tl-event {
+                position: relative;
+                margin-bottom: 18px;
+                background: var(--bg-card);
+                border: 1px solid var(--border-soft);
+                border-radius: 16px;
+                padding: 14px 18px;
+                transition: border-color 0.15s;
+            }
+            .tl-event:hover {
+                border-color: var(--border);
+            }
+            .tl-event::before {
+                content: "";
+                position: absolute;
+                left: -36px;
+                top: 18px;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: var(--bg);
+                border: 2px solid var(--accent);
+            }
+            .tl-event.evt-merged::before {
+                border-color: var(--purple);
+            }
+            .tl-event.evt-opened::before {
+                border-color: var(--green);
+            }
+            .tl-event.evt-push::before {
+                border-color: var(--blue);
+            }
+            .tl-event.evt-review::before {
+                border-color: var(--amber);
+            }
+            .tl-event.evt-comment::before {
+                border-color: var(--text-muted);
+            }
+            .tl-event.evt-create::before {
+                border-color: var(--text-dim);
+            }
+
+            .tl-time {
+                font-family: "SF Mono", monospace;
+                font-size: 12px;
+                color: var(--text-muted);
+                font-variant-numeric: tabular-nums;
+            }
+            .tl-type {
+                display: inline-block;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                padding: 2px 8px;
+                border-radius: 4px;
+                margin-left: 8px;
+                vertical-align: 1px;
+            }
+            .tl-type.t-merged {
+                background: rgba(162, 244, 253, 0.12);
+                color: var(--bw-light-teal);
+            }
+            .tl-type.t-opened {
+                background: var(--green-bg);
+                color: var(--green);
+            }
+            .tl-type.t-push {
+                background: var(--accent-bg);
+                color: var(--accent);
+            }
+            .tl-type.t-review {
+                background: var(--amber-bg);
+                color: var(--amber);
+            }
+            .tl-type.t-comment {
+                background: rgba(153, 167, 181, 0.12);
+                color: var(--text-dim);
+            }
+            .tl-type.t-create {
+                background: rgba(153, 167, 181, 0.12);
+                color: var(--text-dim);
+            }
+            .tl-event-body {
+                margin-top: 6px;
+                color: var(--text);
+                font-size: 14px;
+            }
+            .tl-event-body .repo {
+                color: var(--text-muted);
+                font-family: "SF Mono", monospace;
+                font-size: 12px;
+            }
+            .tl-quote {
+                margin-top: 8px;
+                padding: 8px 12px;
+                border-left: 2px solid var(--border);
+                color: var(--text-dim);
+                font-size: 13px;
+                font-style: italic;
+            }
+            .tl-link-session {
+                margin-top: 6px;
+                font-size: 12px;
+                color: var(--accent-soft);
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .tl-link-session::before {
+                content: "⟶";
+                color: var(--accent);
+            }
+
+            .theme-block {
+                background: linear-gradient(
+                    135deg,
+                    rgba(23, 93, 220, 0.1),
+                    rgba(44, 221, 233, 0.05)
+                );
+                border: 1px solid var(--border);
+                border-left: 4px solid var(--accent);
+                border-radius: 24px;
+                padding: 28px 32px;
+                margin-top: 32px;
+            }
+            .theme-block h2 {
+                font-size: 13px;
+                color: var(--accent);
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                margin-bottom: 14px;
+                font-weight: 600;
+            }
+            .theme-block p {
+                color: var(--text);
+                font-size: 15.5px;
+                margin-bottom: 14px;
+            }
+            .theme-block p:last-child {
+                margin-bottom: 0;
+            }
+            .theme-block .open-threads {
+                color: var(--text-dim);
+                font-size: 14.5px;
+                border-top: 1px solid var(--border-soft);
+                padding-top: 14px;
+                margin-top: 14px;
+            }
+            .theme-block .open-threads strong {
+                color: var(--amber);
+            }
+
+            footer {
+                margin-top: 64px;
+                padding-top: 24px;
+                border-top: 1px solid var(--border);
+                color: var(--text-muted);
+                font-size: 13px;
+                text-align: center;
+            }
+            footer .invocation {
+                color: var(--accent);
+                font-weight: 600;
+                letter-spacing: 0.04em;
+                margin-bottom: 6px;
+            }
+            footer a {
+                color: var(--bw-teal);
+                text-decoration: none;
+            }
+            footer a:hover {
+                text-decoration: underline;
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(4px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .stream,
+            .tl-event {
+                animation: fadeIn 0.3s ease both;
+            }
+
+            @media (max-width: 720px) {
+                .page {
+                    padding: 32px 20px 60px;
+                }
+                h1 {
+                    font-size: 32px;
+                }
+                .stats {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .stream-header {
+                    padding: 16px;
+                }
+                .stream-body {
+                    padding: 0 16px 18px;
+                }
+                .theme-block {
+                    padding: 22px;
+                }
+                .toolbar {
+                    position: relative;
+                    top: 0;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page">
+            <header>
+                <div class="brand-row">
+                    <svg
+                        class="brand-shield"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="M12 2 L20.5 5 V12.5 C20.5 17.2 16.6 20.6 12 22 C7.4 20.6 3.5 17.2 3.5 12.5 V5 Z"
+                            fill="#175DDC"
+                        />
+                        <path
+                            d="M12 5 V19.4 C8.6 18.2 6 15.6 6 12.4 V7 Z"
+                            fill="#0C3276"
+                            opacity="0.7"
+                        />
+                    </svg>
+                    <div class="brand-name">
+                        Bitwarden<span class="dot">·</span
+                        ><span class="sub">Engineering Daily Recap</span>
+                    </div>
+                </div>
+                <div class="eyebrow">Daily Recap · Interactive</div>
+                <h1>Engineering Log <span class="date">{{DATE}}</span></h1>
+                <p class="subtitle">{{SUBTITLE}}</p>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">{{STAT_REPOS}}</div>
+                        <div class="stat-label">Repos Touched</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{STAT_SESSIONS}}</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{STAT_PRS_OPENED}}</div>
+                        <div class="stat-label">PRs Opened</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{STAT_PRS_APPROVED}}</div>
+                        <div class="stat-label">PRs Approved</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{STAT_GH_EVENTS}}</div>
+                        <div class="stat-label">GH Events</div>
+                    </div>
+                </div>
+            </header>
+
+            {{TODAY_BANNER}}
+
+            <div class="standup" id="standup">
+                <div class="standup-header">
+                    <div class="standup-title">Standup Recap · 30s read</div>
+                    <div style="display: flex; align-items: center; gap: 10px">
+                        <span class="standup-meta">Yesterday · {{DATE}}</span>
+                        <button class="standup-copy" id="copy-standup">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="standup-grid">
+                    <div class="standup-col yesterday">
+                        <h3>What I shipped</h3>
+                        <ul>
+                            {{STANDUP_SHIPPED}}
+                        </ul>
+                    </div>
+                    <div class="standup-col next">
+                        <h3>Today / Blockers</h3>
+                        <ul>
+                            {{STANDUP_NEXT}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="filter-group" id="project-filters">
+                    <button class="chip active" data-filter="all">
+                        All <span class="count" id="ct-all">0</span>
+                    </button>
+                    {{PROJECT_CHIPS}}
+                </div>
+                <div class="toolbar-divider"></div>
+                <div class="filter-group" id="status-filters">
+                    <button class="chip active" data-status="all">
+                        All status
+                    </button>
+                    <button class="chip" data-status="completed">
+                        ● Completed
+                    </button>
+                    <button class="chip" data-status="open">◐ Open</button>
+                    <button class="chip" data-status="deferred">
+                        ◇ Deferred
+                    </button>
+                </div>
+                <div class="toolbar-divider"></div>
+                <div class="view-toggle">
+                    <button class="active" data-view="projects">
+                        📋 Streams
+                    </button>
+                    <button data-view="timeline">🕒 GH Timeline</button>
+                </div>
+                <input
+                    type="search"
+                    class="search"
+                    id="search"
+                    placeholder="Filter by file, PR, commit, keyword…"
+                />
+            </div>
+
+            <div class="projects-view" id="projects-view">
+                {{PROJECT_SECTIONS}}
+            </div>
+
+            <div class="timeline" id="timeline-view">
+                <div class="tl-header">
+                    {{STAT_GH_EVENTS}} GitHub events in window. Cross-references
+                    to in-session work shown with the ⟶ marker. Overnight events
+                    sit at the bottom (newest last).
+                </div>
+                <div class="tl-list">{{TIMELINE_EVENTS}}</div>
+            </div>
+
+            <div class="theme-block">
+                <h2>Theme of the Day</h2>
+                {{THEME_PARAGRAPHS}}
+                <div class="open-threads">
+                    <strong>Open threads:</strong> {{OPEN_THREADS}}
+                </div>
+            </div>
+
+            <footer>
+                <div class="invocation">
+                    Bitwarden — Engineering Daily Recap
+                </div>
+                Generated from Claude Code session archives &amp; GitHub events
+                · {{GENERATED_AT}}
+            </footer>
+        </div>
+
+        <script>
+            (function () {
+                const projects = document.querySelectorAll(".project");
+                const streams = document.querySelectorAll(".stream");
+                const projectChips = document.querySelectorAll(
+                    "#project-filters .chip",
+                );
+                const statusChips = document.querySelectorAll(
+                    "#status-filters .chip",
+                );
+                const search = document.getElementById("search");
+                const projectsView = document.getElementById("projects-view");
+                const timelineView = document.getElementById("timeline-view");
+                const viewToggleBtns = document.querySelectorAll(
+                    ".view-toggle button",
+                );
+
+                const counts = { all: streams.length };
+                streams.forEach((s) => {
+                    const proj = s.closest(".project").dataset.project;
+                    counts[proj] = (counts[proj] || 0) + 1;
+                });
+                Object.keys(counts).forEach((k) => {
+                    const el = document.getElementById("ct-" + k);
+                    if (el) el.textContent = counts[k];
+                });
+
+                streams.forEach((s) => {
+                    const header = s.querySelector(".stream-header");
+                    header.addEventListener("click", () =>
+                        s.classList.toggle("collapsed"),
+                    );
+                });
+
+                let activeProject = "all";
+                let activeStatus = "all";
+                let activeQuery = "";
+
+                function applyFilters() {
+                    const q = activeQuery.trim().toLowerCase();
+                    projects.forEach((p) => {
+                        const proj = p.dataset.project;
+                        let visibleStreams = 0;
+                        const projStreams = p.querySelectorAll(".stream");
+                        projStreams.forEach((s) => {
+                            const status = s.dataset.status;
+                            const text = s.textContent.toLowerCase();
+                            const projOk =
+                                activeProject === "all" ||
+                                activeProject === proj;
+                            const statusOk =
+                                activeStatus === "all" ||
+                                activeStatus === status;
+                            const queryOk = !q || text.includes(q);
+                            const show = projOk && statusOk && queryOk;
+                            s.classList.toggle("hidden", !show);
+                            if (show) visibleStreams++;
+                            s.querySelectorAll("li").forEach((li) => {
+                                li.classList.toggle(
+                                    "highlight",
+                                    !!q &&
+                                        li.textContent
+                                            .toLowerCase()
+                                            .includes(q),
+                                );
+                            });
+                        });
+                        p.classList.toggle("hidden", visibleStreams === 0);
+                    });
+                }
+
+                projectChips.forEach((chip) =>
+                    chip.addEventListener("click", () => {
+                        projectChips.forEach((c) =>
+                            c.classList.remove("active"),
+                        );
+                        chip.classList.add("active");
+                        activeProject = chip.dataset.filter;
+                        applyFilters();
+                    }),
+                );
+                statusChips.forEach((chip) =>
+                    chip.addEventListener("click", () => {
+                        statusChips.forEach((c) =>
+                            c.classList.remove("active"),
+                        );
+                        chip.classList.add("active");
+                        activeStatus = chip.dataset.status;
+                        applyFilters();
+                    }),
+                );
+                search.addEventListener("input", (e) => {
+                    activeQuery = e.target.value;
+                    applyFilters();
+                });
+
+                viewToggleBtns.forEach((btn) =>
+                    btn.addEventListener("click", () => {
+                        viewToggleBtns.forEach((b) =>
+                            b.classList.remove("active"),
+                        );
+                        btn.classList.add("active");
+                        const view = btn.dataset.view;
+                        projectsView.classList.toggle(
+                            "hidden",
+                            view !== "projects",
+                        );
+                        timelineView.classList.toggle(
+                            "active",
+                            view === "timeline",
+                        );
+                    }),
+                );
+
+                const copyBtn = document.getElementById("copy-standup");
+                copyBtn.addEventListener("click", () => {
+                    const yesterday = Array.from(
+                        document.querySelectorAll(".standup-col.yesterday li"),
+                    )
+                        .map((li) => "✓ " + li.textContent.trim())
+                        .join("\n");
+                    const next = Array.from(
+                        document.querySelectorAll(".standup-col.next li"),
+                    )
+                        .map((li) => "→ " + li.textContent.trim())
+                        .join("\n");
+                    const text = `Standup · {{DATE}}\n\nWhat I shipped:\n${yesterday}\n\nToday / Blockers:\n${next}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        copyBtn.textContent = "Copied ✓";
+                        copyBtn.classList.add("copied");
+                        setTimeout(() => {
+                            copyBtn.textContent = "Copy";
+                            copyBtn.classList.remove("copied");
+                        }, 2000);
+                    });
+                });
+
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === "/" && document.activeElement !== search) {
+                        e.preventDefault();
+                        search.focus();
+                    }
+                    if (
+                        e.key === "Escape" &&
+                        document.activeElement === search
+                    ) {
+                        search.value = "";
+                        activeQuery = "";
+                        applyFilters();
+                        search.blur();
+                    }
+                });
+            })();
+        </script>
+    </body>
+</html>
