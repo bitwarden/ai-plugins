@@ -24,12 +24,18 @@ LOGIN="$(gh api user --jq .login)"
 
 # Convert "YYYY-MM-DD HH:00:00" interpreted in local TZ to a UTC ISO-8601
 # timestamp. Works with both BSD date (macOS) and GNU date (Linux).
+#
+# IMPORTANT: GNU `date -u -d` parses the input as UTC, not local — so we must
+# parse without `-u` and only switch to UTC when formatting the resulting epoch.
 local_to_utc() {
   local local_dt="$1"
-  if date -u -d "$local_dt" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null; then
+  local epoch
+  # GNU date: parse in local TZ to epoch, then format as UTC.
+  if epoch=$(date -d "$local_dt" "+%s" 2>/dev/null); then
+    date -u -d "@$epoch" "+%Y-%m-%dT%H:%M:%SZ"
     return 0
   fi
-  local epoch
+  # BSD date fallback (macOS).
   epoch=$(date -j -f "%Y-%m-%d %H:%M:%S" "$local_dt" "+%s" 2>/dev/null) || return 1
   date -u -r "$epoch" "+%Y-%m-%dT%H:%M:%SZ"
 }
