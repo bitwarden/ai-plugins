@@ -17,7 +17,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 0.4.0   | Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden.     |
 | [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                                      |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                          |
-| [daily-recap](plugins/daily-recap/)                                 | 1.0.0   | Generate polished, interactive HTML recaps of a person's daily work with Bitwarden brand styling                    |
+| [bitwarden-daily-recap](plugins/bitwarden-daily-recap/)             | 1.0.0   | Generate polished, interactive HTML recaps of a person's daily work with Bitwarden brand styling                    |
 
 ## Usage
 

@@ -1,4 +1,4 @@
-# Render Guide — daily-recap template
+# Render Guide — bitwarden-daily-recap template
 
 The template at `assets/template.html` uses `{{...}}` placeholders. Most are self-explanatory; this guide covers the HTML shapes you need to inject for `{{PROJECT_SECTIONS}}`, `{{TIMELINE_EVENTS}}`, and `{{TODAY_BANNER}}`. CSS is already tuned to the Bitwarden brand palette — don't regenerate.
 
