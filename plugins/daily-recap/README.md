@@ -37,6 +37,8 @@ daily-recap/
 ├── .claude-plugin/plugin.json
 ├── CHANGELOG.md
 ├── README.md
+├── examples/
+│   └── engineering-recap-sample.html            — Hydrated example with fake data
 └── skills/
     └── engineering-recap/
         ├── SKILL.md
@@ -44,3 +46,7 @@ daily-recap/
         ├── scripts/gather-gh-events.sh — Events feed window helper
         └── references/render-guide.md — Placeholder map + HTML recipes
 ```
+
+## Example
+
+Open [`examples/engineering-recap-sample.html`](examples/engineering-recap-sample.html) (one sample per skill) for a hydrated view of the produced report. The file uses fake data (persona "Alex Carter", date 2026-05-04) and exercises every section — stats, today banner, standup card with copy button, project chips and filters, collapsible streams across 5 projects, full GitHub timeline with cross-references and an after-midnight tail, and the theme block.
