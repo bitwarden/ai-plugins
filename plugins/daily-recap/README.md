@@ -18,7 +18,7 @@ The `engineering-recap` skill triggers on retrospective queries about the user's
 - _"summarize my work this morning"_
 - _"create me a daily recap for april 28 to show colleagues"_
 
-The output is saved to `~/Documents/daily-recap/recap-{YYYY-MM-DD}.html` and opened in the default browser.
+The output is saved to `${CLAUDE_PLUGIN_DATA}/recaps/engineering-recap-{YYYY-MM-DD}.html` and opened in the default browser. `${CLAUDE_PLUGIN_DATA}` is the per-plugin persistent directory provided by Claude Code (resolves to `~/.claude/plugins/data/{plugin-id}/`); recaps survive plugin updates and are not tied to a hardcoded user path. The `{recap-type}-recap-` filename pattern keeps the `recaps/` directory tidy as new recap skills are added to this plugin (e.g. `design-recap-`, `management-recap-`).
 
 ## Day boundary
 

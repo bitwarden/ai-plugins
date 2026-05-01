@@ -59,20 +59,22 @@ Cross-reference: branch creates / pushes that match worktree work → tag with `
 
 ### 6. Render the HTML
 
-Copy the template to the recap output, then fill the `{{...}}` placeholders:
+Output goes to `${CLAUDE_PLUGIN_DATA}/recaps/engineering-recap-{YYYY-MM-DD}.html` — `${CLAUDE_PLUGIN_DATA}` is a persistent per-plugin directory provided by Claude Code (resolves to `~/.claude/plugins/data/{plugin-id}/`) and survives plugin updates. The `{recap-type}-recap-` filename convention leaves room for sibling recap types in this plugin (design, management, etc.) to share the same `recaps/` directory.
 
 ```bash
-cp ${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/assets/template.html ~/Documents/daily-recap/recap-{YYYY-MM-DD}.html
+mkdir -p "${CLAUDE_PLUGIN_DATA}/recaps"
+cp "${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/assets/template.html" \
+   "${CLAUDE_PLUGIN_DATA}/recaps/engineering-recap-{YYYY-MM-DD}.html"
 ```
 
-CSS is tuned to the Bitwarden brand palette — don't regenerate it. `${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/references/render-guide.md` has the full placeholder map and HTML recipes for the more complex injection points (project sections, timeline events, today banner).
+Then fill the `{{...}}` placeholders. CSS is tuned to the Bitwarden brand palette — don't regenerate it. `${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/references/render-guide.md` has the full placeholder map and HTML recipes for the more complex injection points (project sections, timeline events, today banner).
 
 PR refs use `<a class="pr-ref" href="...">#NNNN</a>`. Always include PR titles (a bare `#6849` is useless). Late-night events (after midnight local but before today's cutoff hour) get a `🌙 After Midnight` divider in the timeline view, _not_ the Today banner — the Today banner is only for events past today's cutoff hour on the current calendar day.
 
 ### 7. Open in browser
 
 ```bash
-open ~/Documents/daily-recap/recap-{YYYY-MM-DD}.html
+open "${CLAUDE_PLUGIN_DATA}/recaps/engineering-recap-{YYYY-MM-DD}.html"
 ```
 
 Summarize to the user: stats, headline theme, and that the standup card has a Copy button.
