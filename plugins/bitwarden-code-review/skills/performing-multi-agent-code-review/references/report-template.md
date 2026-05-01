@@ -15,7 +15,6 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 | ---------------- | ------------------------------- |
 | `architect`      | Architecture agent              |
 | `quality`        | Code quality agent              |
-| `simplification` | Code simplification agent       |
 | `bug`            | Bug analysis agent              |
 | `security`       | Security & logic agent          |
 | `validation`     | Validation agent (collateral)   |
@@ -75,3 +74,4 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
    </details>
 ```
+

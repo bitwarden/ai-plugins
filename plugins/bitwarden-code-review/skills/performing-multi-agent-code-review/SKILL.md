@@ -6,15 +6,14 @@ allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(g
 
 # Overview
 
-The purpose of the skill is to execute a structured, multi-agent code review process on a set of code changes.
-The process below **MUST** be followed precisely to ensure consistency and accuracy of code reviews.
+Execute a structured, multi-agent code review on a set of code changes. Follow the process below precisely — skipping steps degrades consistency and accuracy.
 
 ## Prerequisites
 
 This skill depends on the following sibling plugins. If any are not installed, **abort the review with a clear error message** identifying the missing plugin — do not attempt to proceed with a degraded pipeline.
 
-- **`bitwarden-tech-lead`** — provides the `bitwarden-tech-lead` subagent type used in Step 2.
-- **`bitwarden-security-engineer`** — provides the `bitwarden-security-context` skill (invoked by every Step 2–5 subagent preamble) and the `analyzing-code-security`, `detecting-secrets`, and `reviewing-dependencies` skills referenced by Step 3 security evaluators.
+- **`bitwarden-tech-lead`** — provides the architecture review subagent.
+- **`bitwarden-security-engineer`** — provides security context and analysis skills.
   Before Step 1, verify each prerequisite is resolvable. If a prerequisite is missing, print:
 
 > Prerequisite plugin `<name>` is not installed. Install it and retry. Review aborted.
@@ -23,74 +22,15 @@ This skill depends on the following sibling plugins. If any are not installed, *
 
 ## Mode
 
-Determine review mode from the invocation. Inspect both the slash-command argument and any natural-language framing the user provided. The four modes are mutually exclusive — if more than one seems to apply, invoke `AskUserQuestion` to disambiguate before proceeding rather than guessing.
-
-### Mode 1 — PR mode
-
-**Trigger:** the user supplied a GitHub pull request reference. Recognize a bare number (`123`), a `#`-prefixed reference (`#123`, `PR #123`), or a pull-request URL (`https://github.com/owner/repo/pull/123`).
-
-**Diff sources:**
-
-- Title & description: `gh pr view <number>`
-- Changed files: `gh pr diff <number> --name-only`
-- Diff: `gh pr diff <number>`
-
-### Mode 2 — Local changes mode
-
-**Trigger:** no PR reference, no commit-range framing, AND `git status --porcelain` returns non-empty (working tree has uncommitted changes).
-
-**Diff sources:**
-
-- Changed files: `git diff --name-only`
-- Diff: `git diff` (combines staged + unstaged)
-
-### Mode 3 — Branch comparison mode
-
-**Trigger:** no PR reference, no commit-range framing, AND `git status --porcelain` returns empty (clean working tree).
-
-**Diff sources:**
-
-- Current branch: `git rev-parse --abbrev-ref HEAD` (needed for the Step 9 filename)
-- Base ref: `git rev-parse --abbrev-ref origin/HEAD` (yields e.g. `origin/main`)
-- Changed files: `git diff origin/HEAD --name-only`
-- Diff: `git diff origin/HEAD`
-
-### Mode 4 — Commit-range mode
-
-**Trigger:** the user described a commit range, time window, or commit count against a locally checked-out repo. Recognize natural-language phrases such as:
-
-- **Time windows** — "the last week", "the last 7 days", "the past month", "since 2026-04-23", "between Apr 1 and Apr 28"
-- **Commit counts** — "the last 20 commits", "the last 5 commits"
-- **Explicit refs** — "from abc123 to def456", "between v1.0 and v1.1", "since the v2.0 tag"
-
-The user is expected to invoke this skill from inside the target repo's working tree. Mentions like "in the bitwarden/server repo" are confirmatory framing — the orchestrator does NOT navigate to other paths or search the filesystem.
-
-**Resolution sequence (perform before launching any subagents):**
-
-1. **Confirm the working directory is a git work tree.** Run `git rev-parse --is-inside-work-tree`. If it fails or returns false, abort with: "commit-range mode must be invoked from inside the target repo." Do not search elsewhere.
-
-2. **Resolve the commit range to a `<from>..<to>` pair.**
-   - **Time windows** → `<to>=HEAD`. Determine the oldest commit in the window with `git log --since='<window>' --reverse --pretty=%H | head -1`; `<from>` is that commit's first parent (suffix `^`). If the window contains zero commits, abort with a clear message — there is nothing to review.
-   - **Commit counts** → `<from>=HEAD~N`, `<to>=HEAD`.
-   - **Explicit refs** → use them verbatim after validating each with `git rev-parse <ref>`.
-
-3. **Confirm with the user before launching subagents.** Print the `<from>..<to>` range (with short SHAs), the commit count, and the changed-file list, then invoke `AskUserQuestion` to confirm before proceeding. Reason: the multi-agent pipeline is expensive — a wrong range wastes substantial tokens and time, and the natural-language inputs leave room for misinterpretation that subagents cannot recover from.
-
-**Diff sources (after confirmation):**
-
-- Commits in range (for context only, not validation): `git log <from>..<to> --oneline`
-- Changed files: `git diff <from>..<to> --name-only`
-- Diff (cumulative across the range): `git diff <from>..<to>`
-
-**Interpretation of "introduced by this change" in commit-range mode:** "introduced" means present in the cumulative diff of `<from>..<to>`; "pre-existing" means present at the parent of `<from>`. Step 4 validation subagents must use this interpretation when applying the dismissal rules.
+Read `references/modes.md`. Loaded in Step 1; the orchestrator determines the mode from the invocation, runs the resolution sequence (commit-range mode only), and uses the matching diff-source commands to populate Step 1's gathered context. Modes are orchestrator-only and not propagated to subagents.
 
 ## Operating Rules
 
 Applies to all agents and subagents.
 
 - Model: Default to the opus model unless `--model` is specified.
-- **ALWAYS** tell the user which model is being used before starting the review.
-- **NEVER** write to GitHub. All findings go to a local markdown file.
+- Announce which model is being used before starting the review.
+- Don't write to GitHub. All findings go to a local markdown file.
 - Tool discipline (see Orchestration → Tool Discipline) applies to the main agent and is propagated verbatim to every subagent. Rationale for the WebFetch/WebSearch ban: bypasses `gh` auth, skips audit trails, can return stale cached pages.
 
 ## Orchestration
@@ -128,59 +68,17 @@ Include this block verbatim in every Step 2–5 subagent prompt, immediately aft
 
 Feature context — issue descriptions, Jira tickets, PR history, removed-predecessor rationale, product framing — sharpens adversarial thinking but biases baseline diff reading. Classify each subagent before launch:
 
-- **Context-allowed** (Step 2 architecture agent; Step 3 Agent 4 security & logic): pass full feature context. These agents think adversarially from intent.
-- **Context-forbidden** (Step 3 Agent 1 code quality; Step 3 Agent 2 simplification; Step 3 Agent 3 bug analysis): **ONLY** pass the diff and the Review Rules. **DO NOT** paste issue summaries, Jira tickets, or PR description prose into these prompts.
-- **Style-matching requirement.** The main agent's tone and framing across parallel agents leaks — a rich-context prompt for Agent 4 alongside a bare prompt for Agent 3 still implicitly biases Agent 3 through the shared authored reality. When drafting context-forbidden prompts, match the terse style of the diff-only sibling prompts; do not echo the framing of the context-allowed siblings.
+- **Context-allowed** (Step 2 architecture agent; Step 3 Agent 3 security & logic): pass full feature context. These agents think adversarially from intent.
+- **Context-forbidden** (Step 3 Agent 1 code quality; Step 3 Agent 2 bug analysis): **ONLY** pass the diff and the Review Rules. **DO NOT** paste issue summaries, Jira tickets, or PR description prose into these prompts.
+- **Style-matching requirement.** The main agent's tone and framing across parallel agents leaks — a rich-context prompt for the security agent alongside a bare prompt for the bug agent still implicitly biases the bug agent through the shared authored reality. When drafting context-forbidden prompts, match the terse style of the diff-only sibling prompts; do not echo the framing of the context-allowed siblings.
 
 ## Discovery Standards
 
-### Hygiene Sweep
-
-Agent 1 (code quality) performs a hygiene sweep of the diff before submitting findings; the Step 2 architect performs an analogous doc/code consistency pass per its own directive. When referenced, look specifically for:
-
-- **Dead code added by this PR** — allowlist/registry/lookup-table entries added for features that don't flow through the validated entry point; unused imports; unreachable branches.
-- **Stale references** — documentation, comments, error messages, or assertions in this diff that contradict the same diff's implementation.
-- **Cross-site inconsistency** — a new call site that differs from established sibling sites in a way not explained by the change (e.g., four platform dialogs where three carry a title and the fourth silently drops it).
-
-This is not an exhaustive checklist — surface anything diff-visible that a senior engineer would flag in a real review.
-
-### Line Number Accuracy
-
-Cite **actual file line numbers**, not positions within the diff. Derive them from the hunk header:
-
-- Parse `@@ -A,B +C,D @@` — `+C` is the starting file line for the hunk. New files use `@@ -0,0 +1,N @@`, so C=1.
-- From `+C`, count `+` lines and context lines (no prefix) up to your target. Skip `-` lines, `@@` lines, and `---`/`+++` lines.
-
-**Never guess. Always derive from the hunk header.**
+Read `references/discovery-standards.md`. Referenced by Step 2 (architect doc/code consistency pass) and Step 3 Agent 1 (Hygiene Sweep). The Line Number Accuracy rule is propagated verbatim into every Step 2–5 subagent prompt.
 
 ## Evaluation Standards
 
-Applied after a finding exists.
-
-### Severity Levels
-
-Every finding must be assigned one of the following. Do not guess — apply these definitions literally.
-
-- 🛑 **Blocker** — Will cause a production failure, data loss, or security breach.
-- ⚠️ **Important** — A real bug or significant risk that is likely to be hit in practice.
-- ♻️ **Refactor** — True technical debt being created that will cost more to maintain over time, even if it doesn't cause immediate problems.
-- 💡 **Suggestion** — Code structure or quality issue that makes the code harder to maintain or understand than necessary.
-
-### Confidence Scoring
-
-Rate each potential finding on a 0–100 scale:
-
-- **0**: Not confident — false positive or pre-existing issue.
-- **25**: Somewhat confident — might be real, might be a false positive. Stylistic issues not called out in project guidelines land here.
-- **50**: Moderately confident — real issue, but a nitpick, unlikely to hit in practice, or is a stylistic preference without project-rule backing.
-- **80**: Highly confident — verified; very likely to hit in practice. Directly impacts functionality or violates a project guideline.
-- **100**: Certain — evidence directly confirms it will happen frequently.
-
-**Only report findings with confidence ≥ 80.** Findings rated 50–79 are dismissed silently; do not re-rate upward to clear the threshold. Every finding must carry both a confidence score and a severity level. Quality over quantity.
-
-### Finding Shape
-
-Every finding and every Step 4/5 return object follows the JSON schema in `references/finding-shape.md`. The main orchestrator loads that file in Step 1 and propagates its contents verbatim to every subagent.
+Read `references/evaluation-standards.md`. Severity Levels and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt; the Finding Shape schema lives in `references/finding-shape.md` and is also propagated verbatim.
 
 ## Code Review Process
 
@@ -188,13 +86,16 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
 Every subagent prompt in Steps 2–5 must include the Project Preamble Propagation blocks, the Tool Discipline block, AND the Finding Shape block (from `references/finding-shape.md`) verbatim.
 
-1. Gather context (no subagents):
-   - Determine the mode (see the Mode section). Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), `git diff origin/HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
-   - **READ** the content of CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
-   - **READ** `references/report-template.md` (path resolved relative to this skill's directory — do NOT search elsewhere) for formatting the final report in Step 7.
-   - **READ** `references/finding-shape.md` (path resolved relative to this skill's directory — do NOT search elsewhere). Its contents are pasted verbatim into every Step 2–5 subagent prompt.
+1. Gather context (no subagents). All `references/...` paths below resolve relative to this skill's directory — do not search elsewhere.
+   - **READ** `references/modes.md`. The orchestrator follows it to determine the review mode and the matching diff-source commands.
+   - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), `git diff origin/HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
+   - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
+   - **READ** `references/report-template.md` for formatting the final report in Step 7.
+   - **READ** `references/finding-shape.md`. Its contents are pasted verbatim into every Step 2–5 subagent prompt.
+   - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt; Line Number Accuracy is propagated verbatim into every Step 2–5 subagent prompt.
+   - **READ** `references/evaluation-standards.md`. Severity Levels and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
 
-2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead` subagent type (from the sibling `bitwarden-tech-lead` plugin — see Prerequisites). Give it the diff fetched with the mode's diff command from Step 1, the list of changed file paths, and — in PR mode only — the PR title and description.
+2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead` subagent type. Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
 
    Unlike the diff agents in Step 3, this agent reads BEYOND the diff to check whether changes fit the codebase.
 
@@ -204,27 +105,24 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
    - Use Glob and Grep to find how similar code is structured elsewhere in the codebase.
    - **Doc/code consistency pass** — flag contradictions this diff creates between the code and same-repo documentation, configuration, or agent-facing files (e.g., a `CLAUDE.md` entry describing handler behavior the diff now changes; a README example that no longer matches the new signature; `.claude/` agent instructions referencing behavior the PR removes). Only flag divergence this change creates or worsens — do not audit pre-existing drift.
 
-   **Scope.** Raise pattern inconsistencies, architectural boundary violations, duplicated abstractions, and new conventions introduced where an established one applies. Do NOT raise correctness bugs, security issues, code style, or simplification — those belong to Step 3.
+   **Scope.** Raise pattern inconsistencies, architectural boundary violations, duplicated abstractions, and new conventions introduced where an established one applies. Do NOT raise correctness bugs, security issues, or code-quality concerns — those belong to Step 3.
 
    Apply the Severity Levels and Confidence Scoring from Evaluation Standards. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Launch 4 agents to independently review the changes. Each agent MUST be given the diff fetched with the mode's diff command from Step 1, and the full review rules included in this prompt — including the Severity Levels, Confidence Scoring, Line Number Accuracy, and Finding Shape sections. Each agent emits findings as a JSON array per the Finding Shape schema. In PR mode, pass the PR title and description **only** to Agent 4, per the Context Partitioning rule; Agents 1, 2, and 3 receive diff + rules only. Send all 4 Agent tool calls in a single message (do NOT use run_in_background).
+3. Launch 3 agents to independently review the changes. Each receives the diff and the review rules; each emits findings as a JSON array per the Finding Shape schema. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
 
    **Agent 1: Code quality agent**
-   Evaluate the introduced code for significant quality issues: code duplication, missing critical error handling, accessibility problems, and inadequate test coverage. Focus on issues that a senior engineer would flag in a real review.
+   Read the introduced code as a senior engineer reviewing it for the first time. Surface anything that hurts correctness, clarity, or long-term maintainability — code duplication, missing critical error handling, accessibility gaps, inadequate test coverage, overly complex logic, unclear naming, inconsistent patterns. Prefer readable, explicit code over compact solutions; flag readability problems alongside correctness ones rather than treating them as separate categories.
 
-   Before submitting findings, perform the **Hygiene Sweep** defined in Discovery Standards.
+   Before submitting findings, perform the **Hygiene Sweep** defined in `references/discovery-standards.md`.
 
-   **Agent 2: Code simplification agent**
-   Analyze the introduced code for clarity, consistency, and maintainability. Look for overly complex logic that could be simplified, unclear naming, inconsistent patterns, and opportunities to improve readability — without changing behavior. Prioritize readable, explicit code over compact solutions.
+   **Agent 2: Bug analysis agent**
+   Scan the diff for significant bugs visible without outside context. Skip nitpicks, likely false positives, and anything you'd need to read other files to confirm.
 
-   **Agent 3: Bug analysis agent**
-   Scan for obvious bugs. Focus only on the diff itself without reading extra context. Flag only significant bugs; ignore nitpicks and likely false positives. Do not flag issues that you cannot validate without looking at context outside of the git diff.
+   **Agent 3: Security & logic agent**
+   Find security flaws and logic errors in the introduced code. Stay scoped to changed lines.
 
-   **Agent 4: Security & logic agent**
-   Look for problems that exist in the introduced code. This could be security findings, incorrect logic, etc. Only look for findings that fall within the changed code.
-
-   Classic application-security items are covered by the `bitwarden-security-engineer` plugin — specifically `analyzing-code-security`, `detecting-secrets`, and `reviewing-dependencies`. **MUST** invoke those skills.
+   Invoke `analyzing-code-security`, `detecting-secrets`, and `reviewing-dependencies` from the `bitwarden-security-engineer` plugin to cover classic application-security items.
 
    In addition to attacker-as-LLM and attacker-as-server threat models, evaluate the **user-side threat surface**. Apply the **Trusted Channel** concept from the loaded security context — ask whether the user-facing surface qualifies:
    - **Authenticity of prompts shown to the user** — can the user tell which application is requesting sensitive input? Dialog titles, branding, and prompt strings should allow the user to resist spoofed-dialog phishing.
@@ -235,7 +133,9 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 
    Apply the Severity Levels and Confidence Scoring from Evaluation Standards. Threshold ≥ 80.
 
-4. Launch a validation subagent for each finding from steps 2 and 3. Each subagent receives the diff fetched with the mode's diff command from Step 1, the finding object, the Review Rules, and — in PR mode only — the PR title and description. Send all validation Agent tool calls in a single message (do NOT use run_in_background). Each subagent returns a Step 4 object per the Finding Shape schema.
+4. Launch a single validation subagent for all findings from Steps 2 and 3. The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
+
+   **Chunking escape hatch.** If raw findings from Steps 2 and 3 number more than 25, partition them into chunks of ≤ 15 (preserving collateral context within each chunk; do not split a `source_agent` group across chunks if it would put related findings on opposite sides) and launch one validation subagent per chunk in a single message (do NOT use run_in_background).
 
    A finding is **dismissed** if ANY of the following are true:
    - It is a pre-existing finding, not introduced by this change. In commit-range mode, treat the cumulative diff of `<from>..<to>` as "this change" and the parent of `<from>` as the pre-existing baseline.
@@ -258,9 +158,9 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 
    The agent returns a Step 5 object per the Finding Shape schema for each input finding.
 
-6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Partition by final status: validated (Step 5 `confirmed` or `downgraded`) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
+6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Creation-time fields are immutable (see `references/finding-shape.md`). For dismissed findings, set `dismissal_stage` to `"Step 4 validation"` or `"Step 5 severity audit"` based on which step set the dismissal status — it renders as `**Dismissed at:**`. Partition by final status: validated (Step 5 `confirmed` or `downgraded`) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
 
-7. Format the report using the template in `references/report-template.md` (path resolved relative to this skill's directory — do NOT search elsewhere). Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Do not omit this line — per-agent attribution is required for traceability.
+7. Format the report using the template in `references/report-template.md`. Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Dismissed findings additionally render `**Original severity:**`, `**Original confidence:**`, `**Dismissed at:**`, and `**Dismissed because:**` per the template — past runs have silently dropped these, so do not omit any of them; per-finding traceability requires the full set.
 
 8. Print the full formatted report to the terminal.
 
