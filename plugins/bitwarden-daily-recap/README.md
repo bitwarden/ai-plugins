@@ -1,4 +1,4 @@
-# Daily Recap
+# Bitwarden Daily Recap
 
 Generate polished, interactive HTML recaps of a person's daily work. Pulls activity from the relevant systems, shapes it into a standup-ready, colleague-shareable artifact, and applies Bitwarden brand styling.
 
@@ -38,7 +38,7 @@ Both knobs are env-var configurable:
 ## Files
 
 ```
-daily-recap/
+bitwarden-daily-recap/
 ├── .claude-plugin/plugin.json
 ├── CHANGELOG.md
 ├── README.md

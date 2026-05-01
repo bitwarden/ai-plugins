@@ -1,15 +1,15 @@
 {
-  "name": "daily-recap",
+  "name": "bitwarden-daily-recap",
   "version": "1.0.0",
   "description": "Generate polished, interactive HTML recaps of a person's daily work. Pulls activity from the relevant systems, shapes it into a standup-ready, colleague-shareable artifact, and applies Bitwarden brand styling.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/daily-recap",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-daily-recap",
   "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": [
-    "daily-recap",
+    "bitwarden-daily-recap",
     "standup",
     "summary",
     "retrospective",
