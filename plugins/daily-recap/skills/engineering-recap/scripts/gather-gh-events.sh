@@ -1,39 +1,52 @@
 #!/usr/bin/env bash
-# Pull GitHub events for the user and filter to the 7am-Eastern workday window.
+# Pull GitHub events and filter to the user's workday window.
+#
+# Day boundary: defaults to 07:00 in the user's local timezone (DST-safe via the
+# system date utility). Override the cutoff hour with DAILY_RECAP_CUTOFF_HOUR
+# (e.g. 6 for 6am-local). Override the timezone with the standard TZ env var
+# (e.g. TZ=America/Los_Angeles) — useful when scripting recaps for someone else.
 #
 # Usage:
 #   gather-gh-events.sh [date]
-#     date: yesterday's date in YYYY-MM-DD form (Eastern). Defaults to yesterday.
+#     date: target day in YYYY-MM-DD form, in the user's local timezone.
+#           Defaults to yesterday.
 #
-# Output: JSON array of events with summary fields, written to stdout.
+# Output: JSON array of events with summary fields on stdout.
 # Side effects: caches raw events at /tmp/gh-events-raw-${date}.json
 #
 # Requires: gh, jq, GNU or BSD date
 
 set -euo pipefail
 
-DATE="${1:-$(date -u -v-1d +%Y-%m-%d 2>/dev/null || date -u -d 'yesterday' +%Y-%m-%d)}"
+CUTOFF_HOUR="${DAILY_RECAP_CUTOFF_HOUR:-7}"
+DATE="${1:-$(date -v-1d +%Y-%m-%d 2>/dev/null || date -d 'yesterday' +%Y-%m-%d)}"
 LOGIN="$(gh api user --jq .login)"
 
-# Determine if the target date is during EDT (March–November) or EST (November–March).
-# Approximation: months 3–11 EDT (UTC-4), months 12,1,2 EST (UTC-5).
-# This is good enough for daily-recap purposes; refine if DST exact dates matter.
-MONTH=$(echo "$DATE" | cut -d- -f2)
-if [[ "$MONTH" -ge 3 && "$MONTH" -le 11 ]]; then
-  OFFSET_HOURS=11   # 7am EDT = 11:00Z
-  TZ_LABEL="EDT"
-else
-  OFFSET_HOURS=12   # 7am EST = 12:00Z
-  TZ_LABEL="EST"
-fi
+# Convert "YYYY-MM-DD HH:00:00" interpreted in local TZ to a UTC ISO-8601
+# timestamp. Works with both BSD date (macOS) and GNU date (Linux).
+local_to_utc() {
+  local local_dt="$1"
+  if date -u -d "$local_dt" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null; then
+    return 0
+  fi
+  local epoch
+  epoch=$(date -j -f "%Y-%m-%d %H:%M:%S" "$local_dt" "+%s" 2>/dev/null) || return 1
+  date -u -r "$epoch" "+%Y-%m-%dT%H:%M:%SZ"
+}
 
-START="${DATE}T$(printf '%02d' $OFFSET_HOURS):00:00Z"
-# End = next day at the same offset
-NEXT_DATE=$(date -u -j -v+1d -f "%Y-%m-%d" "$DATE" +%Y-%m-%d 2>/dev/null \
-            || date -u -d "$DATE + 1 day" +%Y-%m-%d)
-END="${NEXT_DATE}T$(printf '%02d' $OFFSET_HOURS):00:00Z"
+# Add one day to a YYYY-MM-DD string. Portable across BSD/GNU date.
+next_day() {
+  local d="$1"
+  date -j -v+1d -f "%Y-%m-%d" "$d" "+%Y-%m-%d" 2>/dev/null \
+    || date -d "$d + 1 day" "+%Y-%m-%d"
+}
 
-echo "# Window: $START → $END  (7am $TZ_LABEL boundary)" >&2
+NEXT_DATE=$(next_day "$DATE")
+START=$(local_to_utc "${DATE} $(printf '%02d' "$CUTOFF_HOUR"):00:00")
+END=$(local_to_utc "${NEXT_DATE} $(printf '%02d' "$CUTOFF_HOUR"):00:00")
+TZ_LABEL=$(date "+%Z")
+
+echo "# Window: $START → $END  (${CUTOFF_HOUR}am $TZ_LABEL boundary)" >&2
 
 CACHE="/tmp/gh-events-raw-${DATE}.json"
 gh api "users/${LOGIN}/events?per_page=100" > "$CACHE"

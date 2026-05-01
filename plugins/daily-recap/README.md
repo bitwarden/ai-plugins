@@ -22,7 +22,12 @@ The output is saved to `~/Documents/daily-recap/recap-{YYYY-MM-DD}.html` and ope
 
 ## Day boundary
 
-The skill treats **7am Eastern** as the day boundary, not midnight UTC. Late-night work folds into the prior calendar day. A "Today / Fresh" banner appears only when there is post-7am-Eastern activity on the current day.
+The skill treats **7am in the user's local timezone** as the day boundary, not midnight UTC. Late-night work folds into the prior calendar day. A "Today / Fresh" banner appears only when there is activity past today's cutoff hour.
+
+Both knobs are env-var configurable:
+
+- `DAILY_RECAP_CUTOFF_HOUR` (default `7`) — the hour-of-day cutoff. Set to `5` for early-morning crews, `9` for late risers.
+- `TZ` (standard env var) — override the timezone, e.g. `TZ=America/Los_Angeles` when generating a recap for someone else.
 
 ## Dependencies
 

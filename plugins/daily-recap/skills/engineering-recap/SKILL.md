@@ -7,9 +7,13 @@ description: Generates the user's engineering daily recap as an interactive HTML
 
 Generate a polished, interactive HTML recap of the user's engineering work for standup, 1:1s, or sharing with colleagues.
 
-## Day boundary: 7am Eastern
+## Day boundary: 7am local time
 
-The user works late, especially during Stanley Cup season. **Window for "yesterday" = (yesterday 7am Eastern) → (today 7am Eastern)** — UTC `11:00Z→11:00Z` during EDT, `12:00Z→12:00Z` during EST. Late-night work folds into the prior day. The "Today/Fresh" banner only shows events from 7am Eastern onward.
+Many engineers work past midnight. **Window for "yesterday" = (yesterday 7am local) → (today 7am local)**. Late-night work folds into the prior workday. The "Today/Fresh" banner only shows events from 7am local onward.
+
+The cutoff defaults to 07:00 in the system timezone (DST-safe). Override the hour with `DAILY_RECAP_CUTOFF_HOUR` (e.g. `5` for early-morning crews). Override the timezone with the standard `TZ` env var (e.g. `TZ=America/Los_Angeles`) — useful when generating a recap for someone else.
+
+When in doubt, look for a clustering gap. A clear 4+ hour quiet window after the early-morning activity is the natural boundary.
 
 ## Workflow
 
@@ -17,7 +21,7 @@ The user works late, especially during Stanley Cup season. **Window for "yesterd
 
 These are independent — run in parallel:
 
-**(a) GitHub events** — bundled script handles the EDT/EST window:
+**(a) GitHub events** — bundled script computes the local-time window and converts to UTC:
 
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/scripts/gather-gh-events.sh YYYY-MM-DD > /tmp/recap-events.json
@@ -63,7 +67,7 @@ cp ${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/assets/template.html ~/Documen
 
 CSS is tuned to the Bitwarden brand palette — don't regenerate it. `${CLAUDE_PLUGIN_ROOT}/skills/engineering-recap/references/render-guide.md` has the full placeholder map and HTML recipes for the more complex injection points (project sections, timeline events, today banner).
 
-PR refs use `<a class="pr-ref" href="...">#NNNN</a>`. Always include PR titles (a bare `#6849` is useless). Late-night events (00:00Z–7am Eastern today) get a `🌙 After Midnight` divider in the timeline view, _not_ the Today banner — the Today banner is only for post-7am events on the current calendar day.
+PR refs use `<a class="pr-ref" href="...">#NNNN</a>`. Always include PR titles (a bare `#6849` is useless). Late-night events (after midnight local but before today's cutoff hour) get a `🌙 After Midnight` divider in the timeline view, _not_ the Today banner — the Today banner is only for events past today's cutoff hour on the current calendar day.
 
 ### 7. Open in browser
 
@@ -80,7 +84,7 @@ Bitwarden brand palette + Inter font (already in template). Keep prose colleague
 ## Bundled resources
 
 - `assets/template.html` — HTML scaffold with `{{...}}` placeholders.
-- `scripts/gather-gh-events.sh` — pulls events feed with the 7am Eastern window applied.
+- `scripts/gather-gh-events.sh` — pulls events feed with the local-time workday window applied. Honors `DAILY_RECAP_CUTOFF_HOUR` and `TZ` env vars.
 - `references/render-guide.md` — placeholder map + HTML recipes (read only when you need a specific injection shape).
 
 ## Plugin dependency
