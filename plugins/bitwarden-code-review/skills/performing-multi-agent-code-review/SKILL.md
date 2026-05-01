@@ -1,5 +1,5 @@
 ---
-name: perform-multi-agent-code-review
+name: performing-multi-agent-code-review
 description: Perform a rigorous, multi-agent code review with architecture-compliance, parallel quality/security analysis, finding validation, and severity audit. Use whenever the user asks for a structured, deep, thorough, multi-pass, or multi-agent code review — or a review that includes architecture/pattern compliance, confidence-scored findings, or a severity audit — even if they don't say the exact phrase "multi-agent". Prefer this over a single-agent review when the user wants high-signal findings with validation. Also use whenever the user asks for a code review across a commit range, time window, or N most recent commits in a locally checked-out repo (e.g. "review the last week of commits in bitwarden/server", "review the last 20 commits", "review changes since 2026-04-23") — these route to the commit-range mode below.
 allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git check-ignore:*), Bash(git log:*), Bash(git rev-list:*), Read, Write, Grep, Glob, Task, Skill"
 ---
