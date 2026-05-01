@@ -8,7 +8,7 @@ Self-explanatory: `{{DATE}}`, `{{SUBTITLE}}`, `{{STAT_*}}`, `{{STANDUP_SHIPPED}}
 
 `{{PROJECT_CHIPS}}` — one per project: `<button class="chip" data-filter="{slug}">{emoji} {label} <span class="count" id="ct-{slug}">0</span></button>`
 
-`{{TODAY_BANNER}}` — empty string if no post-7am-Eastern events. Otherwise:
+`{{TODAY_BANNER}}` — empty string if no events past today's cutoff hour (local time). Otherwise:
 
 ```html
 <div class="today-banner">
@@ -80,7 +80,7 @@ Status semantics: `completed` = work landed (PR merged, decision made, fix shipp
 </div>
 ```
 
-For pre-7am-Eastern "today" events that belong to yesterday, insert this divider in the timeline before them:
+For "today" events that fall before today's cutoff hour (local time) — those belong to yesterday's workday — insert this divider in the timeline before them:
 
 ```html
 <div
