@@ -80,11 +80,21 @@ Read `references/discovery-standards.md`. Referenced by Step 2 (architect doc/co
 
 Read `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt; the Finding Shape schema lives in `references/finding-shape.md` and is also propagated verbatim.
 
+## Review Rules
+
+Every Step 2–5 subagent prompt MUST include all of the following blocks verbatim, in order. Throughout this skill, this bundle is referred to as the **Review Rules**:
+
+- **Project Preamble Propagation** (above) — Bitwarden security context, zero-knowledge invariant, threat-model directive.
+- **Tool Discipline** (above).
+- **Line Number Accuracy** from `references/discovery-standards.md`.
+- **Severity Levels**, **Do Not Flag**, and **Confidence Scoring** from `references/evaluation-standards.md`.
+- **Finding Shape** schema from `references/finding-shape.md`.
+
+When a step below says "the Review Rules," it means this exact bundle — never a subset.
+
 ## Code Review Process
 
 Execute these steps in order. Do not skip, reorder, or combine steps.
-
-Every subagent prompt in Steps 2–5 must include the Project Preamble Propagation blocks, the Tool Discipline block, AND the Finding Shape block (from `references/finding-shape.md`) verbatim.
 
 1. Gather context (no subagents). All `references/...` paths below resolve relative to this skill's directory — do not search elsewhere.
    - **READ** `references/modes.md`. The orchestrator follows it to determine the review mode and the matching diff-source commands.
@@ -107,9 +117,9 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 
    **Scope.** Raise pattern inconsistencies, architectural boundary violations, duplicated abstractions, and new conventions introduced where an established one applies. Do NOT raise correctness bugs, security issues, or code-quality concerns — those belong to Step 3.
 
-   Apply the Severity Levels and Confidence Scoring from Evaluation Standards. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
+   Apply the Review Rules. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Launch 3 agents to independently review the changes. Each receives the diff and the review rules; each emits findings as a JSON array per the Finding Shape schema. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
+3. Launch 3 agents using the `general-purpose` subagent type to independently review the changes. Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
 
    **Agent 1: Code quality agent**
    Read the introduced code as a senior engineer reviewing it for the first time. Surface anything that hurts correctness, clarity, or long-term maintainability — code duplication, missing critical error handling, accessibility gaps, inadequate test coverage, overly complex logic, unclear naming, inconsistent patterns. Prefer readable, explicit code over compact solutions; flag readability problems alongside correctness ones rather than treating them as separate categories.
@@ -131,9 +141,9 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 
    This vector is distinct from preventing secrets from reaching the LLM. Both must be evaluated.
 
-   Apply the Severity Levels and Confidence Scoring from Evaluation Standards. Threshold ≥ 80.
+   Apply the Review Rules. Threshold ≥ 80.
 
-4. Launch a single validation subagent for all findings from Steps 2 and 3. The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
+4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3. The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
    **Chunking escape hatch.** If raw findings from Steps 2 and 3 number more than 25, partition them into chunks of ≤ 15 (preserving collateral context within each chunk; do not split a `source_agent` group across chunks if it would put related findings on opposite sides) and launch one validation subagent per chunk in a single message (do NOT use run_in_background).
 
@@ -151,7 +161,7 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
 
    If the divergence is deliberate but its collateral was not updated, the collateral is a new finding (typically ♻️ Refactor) — do not dismiss the original finding silently; route the collateral problem as its own finding instead.
 
-5. Launch a single severity-audit agent. Give it all validated findings from step 4, the diff, and the full review rules included in this prompt. For each finding, the agent must:
+5. Launch a single `general-purpose` severity-audit agent. Give it all validated findings from step 4, the diff, and the Review Rules. For each finding, the agent must:
    - Confirm the severity assigned by the review agent, or
    - Downgrade it to a lower severity if the evidence doesn't support the original rating, or
    - Dismiss it entirely if it does not meet the bar for any severity level.
