@@ -78,7 +78,7 @@ Read `references/discovery-standards.md`. Referenced by Step 2 (architect doc/co
 
 ## Evaluation Standards
 
-Read `references/evaluation-standards.md`. Severity Levels and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt; the Finding Shape schema lives in `references/finding-shape.md` and is also propagated verbatim.
+Read `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt; the Finding Shape schema lives in `references/finding-shape.md` and is also propagated verbatim.
 
 ## Code Review Process
 
@@ -93,7 +93,7 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
    - **READ** `references/report-template.md` for formatting the final report in Step 7.
    - **READ** `references/finding-shape.md`. Its contents are pasted verbatim into every Step 2–5 subagent prompt.
    - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt; Line Number Accuracy is propagated verbatim into every Step 2–5 subagent prompt.
-   - **READ** `references/evaluation-standards.md`. Severity Levels and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
+   - **READ** `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
 
 2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead` subagent type. Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
 
@@ -149,12 +149,12 @@ Every subagent prompt in Steps 2–5 must include the Project Preamble Propagati
    - Schema, type, or interface definitions that still describe the pre-divergence contract.
    - Documentation, comments, or error messages that reference the abandoned path.
 
-   If the divergence is deliberate but its collateral was not updated, the collateral is a new finding (typically ♻️ Refactor or 💡 Suggestion) — do not dismiss the original finding silently; route the collateral problem as its own finding instead.
+   If the divergence is deliberate but its collateral was not updated, the collateral is a new finding (typically ♻️ Refactor) — do not dismiss the original finding silently; route the collateral problem as its own finding instead.
 
 5. Launch a single severity-audit agent. Give it all validated findings from step 4, the diff, and the full review rules included in this prompt. For each finding, the agent must:
    - Confirm the severity assigned by the review agent, or
    - Downgrade it to a lower severity if the evidence doesn't support the original rating, or
-   - Dismiss it entirely if it does not meet the bar for any severity level (even 💡 Suggestion).
+   - Dismiss it entirely if it does not meet the bar for any severity level.
 
    The agent returns a Step 5 object per the Finding Shape schema for each input finding.
 

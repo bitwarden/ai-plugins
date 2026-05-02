@@ -5,19 +5,18 @@
 - 🛑 **Blocker** — Must fix before merge
 - ⚠️ **Important** — Potential issue, should fix
 - ♻️ **Refactor** — Code restructuring needed
-- 💡 **Suggestion** — Nice-to-have improvement
 
 ## Source-Agent Friendly Names
 
 Every finding carries a `source_agent` value (per `finding-shape.md`). Render it on each finding using the friendly label below — it tells the reader which subagent caught the issue, which aids triage and per-agent calibration.
 
-| `source_agent`   | Rendered label                  |
-| ---------------- | ------------------------------- |
-| `architect`      | Architecture agent              |
-| `quality`        | Code quality agent              |
-| `bug`            | Bug analysis agent              |
-| `security`       | Security & logic agent          |
-| `validation`     | Validation agent (collateral)   |
+| `source_agent` | Rendered label                |
+| -------------- | ----------------------------- |
+| `architect`    | Architecture agent            |
+| `quality`      | Code quality agent            |
+| `bug`          | Bug analysis agent            |
+| `security`     | Security & logic agent        |
+| `validation`   | Validation agent (collateral) |
 
 ## Template
 
@@ -28,14 +27,13 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 ## Summary
 
-| Severity      | Count |
-| ------------- | ----- |
-| 🛑 Blocker    | {n}   |
-| ⚠️ Important  | {n}   |
-| ♻️ Refactor   | {n}   |
-| 💡 Suggestion | {n}   |
+| Severity     | Count |
+| ------------ | ----- |
+| 🛑 Blocker   | {n}   |
+| ⚠️ Important | {n}   |
+| ♻️ Refactor  | {n}   |
 
-{1-3 sentences for overall assessment.}
+{1-5 sentences for overall assessment.}
 
 ## Findings
 
@@ -54,8 +52,6 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 ### ♻️ Refactor
 
-### 💡 Suggestions
-
 <!-- Only if there are rejected findings. Omit entirely if all confirmed. -->
 
 ## Reviewed and Dismissed
@@ -64,14 +60,14 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
    <!-- Repeat the stanza below once per dismissed finding. -->
 
-   #### {One-line summary}
-   `{file/path.ext}:{line}`
-   **Caught by:** {Friendly agent label}
-   **Original severity:** {🛑|⚠️|♻️|💡} {Blocker|Important|Refactor|Suggestion}
-   **Original confidence:** {n}/100
-   **Dismissed at:** {Step 4 validation | Step 5 severity audit}
-   **Dismissed because:** {One-sentence rejection reason}
+#### {One-line summary}
+
+`{file/path.ext}:{line}`
+**Caught by:** {Friendly agent label}
+**Original severity:** {🛑|⚠️|♻️} {Blocker|Important|Refactor}
+**Original confidence:** {n}/100
+**Dismissed at:** {Step 4 validation | Step 5 severity audit}
+**Dismissed because:** {One-sentence rejection reason}
 
    </details>
 ```
-

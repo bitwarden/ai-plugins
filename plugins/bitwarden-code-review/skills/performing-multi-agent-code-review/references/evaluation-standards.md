@@ -1,6 +1,6 @@
 # Evaluation Standards
 
-Loaded by the orchestrator in Step 1. **Severity Levels** and **Confidence Scoring** below are propagated verbatim into every Step 2–5 subagent prompt. The **Finding Shape** schema lives in `finding-shape.md` and is propagated the same way.
+Loaded by the orchestrator in Step 1. **Severity Levels**, **Do Not Flag**, and **Confidence Scoring** below are propagated verbatim into every Step 2–5 subagent prompt. The **Finding Shape** schema lives in `finding-shape.md` and is propagated the same way.
 
 ## Severity Levels
 
@@ -8,8 +8,20 @@ Every finding must be assigned one of the following. Do not guess — apply thes
 
 - 🛑 **Blocker** — Will cause a production failure, data loss, or security breach.
 - ⚠️ **Important** — A real bug or significant risk that is likely to be hit in practice.
-- ♻️ **Refactor** — True technical debt being created that will cost more to maintain over time, even if it doesn't cause immediate problems.
-- 💡 **Suggestion** — Code structure or quality issue that makes the code harder to maintain or understand than necessary.
+- ♻️ **Refactor** — True technical debt being created that will cost more to maintain over time, even if it doesn't cause immediate problems. Must cite concrete evidence — duplication of an existing pattern, violation of a documented convention, or a measurable structural improvement. If the rationale can't be made concrete, it isn't a finding.
+
+There is no "suggestion" or other lower tier. Findings that don't clear the Refactor bar are not findings.
+
+## Do Not Flag
+
+The following are not valid findings under any tier. Subagents must not emit them, and Step 5 dismisses any that slip through.
+
+- Code style or quality concerns absent a documented project rule.
+- Subjective suggestions or improvements — "could be cleaner", "consider doing X", "this might be simpler".
+- Pedantic nit-picks a senior engineer would not raise in code review.
+- Issues a linter would catch.
+- Speculative issues that depend on specific inputs or runtime state without evidence those inputs occur in practice.
+- Pre-existing issues not introduced or worsened by this change.
 
 ## Confidence Scoring
 
