@@ -1,0 +1,897 @@
+// app.js — render, navigation, decisions, comments, theme, export.
+// Reads window.DIFFS and window.REVIEW_DATA.
+// Keys are PR numbers (strings) rather than commit SHAs.
+(function(){
+  'use strict';
+
+  const DIFFS_B64 = window.DIFFS || {};
+  const PAGES_DATA = window.REVIEW_DATA || {};
+
+
+// page numbering: 1 = cover, 2..N+1 = PAGES_DATA in stack order, N+2 = merge plan.
+// __BW_BLOCK_START__ stack-config
+const STACK_ORDER = __BW_STACK_ORDER__;
+const TOTAL_PAGES = __BW_TOTAL_PAGES__;
+const STORAGE_PREFIX = "__BW_STORAGE_PREFIX__";
+// __BW_BLOCK_END__ stack-config
+
+// ===== utils =====
+function $(sel, root) { return (root || document).querySelector(sel); }
+function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "class") e.className = attrs[k];
+    else if (k === "html") e.innerHTML = attrs[k];
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
+    else if (k === "dataset") Object.assign(e.dataset, attrs[k]);
+    else if (attrs[k] === false || attrs[k] == null) {}
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const c of children) {
+    if (c == null || c === false) continue;
+    if (typeof c === "string") e.appendChild(document.createTextNode(c));
+    else if (Array.isArray(c)) c.forEach(cc => cc && e.appendChild(typeof cc === "string" ? document.createTextNode(cc) : cc));
+    else e.appendChild(c);
+  }
+  return e;
+}
+function decodeB64(b) {
+  const bin = atob(b);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]);
+}
+function jiraUrl(ticket) { return `https://bitwarden.atlassian.net/browse/${ticket}`; }
+function ghPrUrl(pr) { return `https://github.com/__BW_GH_REPO__/pull/${pr}`; }
+function estimateMinutes(linesChanged, newFiles) {
+  return Math.max(1, Math.round((linesChanged / 50) + (newFiles * 0.5)));
+}
+
+// ===== diff parsing =====
+function parseUnifiedDiff(rawText) {
+  // returns array of { path, header (lines), hunks: [{oldStart, newStart, lines: [{type, text, oldLn, newLn}]}] }
+  const files = [];
+  const lines = rawText.split("\n");
+  let i = 0;
+  // skip past any commit/Author/Date/message before first 'diff --git'
+  while (i < lines.length && !lines[i].startsWith("diff --git")) i++;
+  while (i < lines.length) {
+    if (!lines[i].startsWith("diff --git")) { i++; continue; }
+    const fileHeader = [];
+    fileHeader.push(lines[i]); i++;
+    let path = null;
+    // header lines until first hunk
+    while (i < lines.length && !lines[i].startsWith("@@") && !lines[i].startsWith("diff --git")) {
+      fileHeader.push(lines[i]);
+      if (lines[i].startsWith("+++ b/")) path = lines[i].slice(6);
+      else if (lines[i].startsWith("+++ ") && !path) path = lines[i].slice(4);
+      else if (lines[i].startsWith("rename to ") && !path) path = lines[i].slice("rename to ".length);
+      i++;
+    }
+    const hunks = [];
+    while (i < lines.length && lines[i].startsWith("@@")) {
+      const hunkHead = lines[i];
+      const m = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/.exec(hunkHead);
+      let oldLn = m ? parseInt(m[1], 10) : 0;
+      let newLn = m ? parseInt(m[3], 10) : 0;
+      const hunk = { head: hunkHead, lines: [] };
+      i++;
+      while (i < lines.length && !lines[i].startsWith("@@") && !lines[i].startsWith("diff --git")) {
+        const l = lines[i];
+        if (l.startsWith("+")) {
+          hunk.lines.push({ type: "add", text: l.slice(1), oldLn: null, newLn: newLn++ });
+        } else if (l.startsWith("-")) {
+          hunk.lines.push({ type: "del", text: l.slice(1), oldLn: oldLn++, newLn: null });
+        } else if (l.startsWith(" ")) {
+          hunk.lines.push({ type: "ctx", text: l.slice(1), oldLn: oldLn++, newLn: newLn++ });
+        } else if (l.startsWith("\\")) {
+          // \ No newline at end of file
+          hunk.lines.push({ type: "meta", text: l, oldLn: null, newLn: null });
+        }
+        i++;
+      }
+      hunks.push(hunk);
+    }
+    files.push({ path, header: fileHeader, hunks });
+  }
+  return files;
+}
+
+function detectLanguage(path) {
+  if (!path) return "clike";
+  if (path.endsWith(".swift")) return "swift";
+  if (path.endsWith(".json")) return "json";
+  if (path.endsWith(".strings")) return "clike";
+  if (path.endsWith(".xml") || path.endsWith(".plist")) return "markup";
+  return "clike";
+}
+
+function highlightLine(text, lang) {
+  try {
+    if (window.Prism && Prism.languages[lang]) {
+      return Prism.highlight(text, Prism.languages[lang], lang);
+    }
+  } catch (e) {}
+  return escapeHtml(text);
+}
+
+function renderFileDiff(file, prKey) {
+  const lang = detectLanguage(file.path);
+  const view = el("div", { class: "diff-view" });
+  // header meta lines (index, ---/+++ etc) collapsed to a single small row
+  const metaSummary = file.header.filter(h => h.startsWith("index ") || h.startsWith("rename ") || h.startsWith("similarity ")).join(" · ");
+  if (metaSummary) {
+    const r = el("div", { class: "diff-row meta" });
+    r.appendChild(el("div", { class: "diff-ln" }));
+    r.appendChild(el("div", { class: "diff-rn" }));
+    r.appendChild(el("div", { class: "diff-marker" }));
+    r.appendChild(el("div", { class: "diff-content", html: escapeHtml(metaSummary) }));
+    r.appendChild(el("div", { class: "diff-action" }));
+    view.appendChild(r);
+  }
+  for (const hunk of file.hunks) {
+    const hr = el("div", { class: "diff-row hunk" });
+    hr.appendChild(el("div", { class: "diff-ln" }));
+    hr.appendChild(el("div", { class: "diff-rn" }));
+    hr.appendChild(el("div", { class: "diff-marker" }));
+    hr.appendChild(el("div", { class: "diff-content", html: escapeHtml(hunk.head) }));
+    hr.appendChild(el("div", { class: "diff-action" }));
+    view.appendChild(hr);
+    for (const ln of hunk.lines) {
+      const row = el("div", { class: "diff-row " + ln.type });
+      row.dataset.sha = prKey;
+      row.dataset.path = file.path || "";
+      row.dataset.lineKey = `${ln.oldLn || ""}_${ln.newLn || ""}`;
+      row.appendChild(el("div", { class: "diff-ln" }, ln.oldLn != null ? String(ln.oldLn) : ""));
+      row.appendChild(el("div", { class: "diff-rn" }, ln.newLn != null ? String(ln.newLn) : ""));
+      const marker = ln.type === "add" ? "+" : ln.type === "del" ? "−" : " ";
+      row.appendChild(el("div", { class: "diff-marker" }, marker));
+      const code = el("div", { class: "diff-content", html: highlightLine(ln.text, lang) });
+      row.appendChild(code);
+      // action button
+      const action = el("div", { class: "diff-action" });
+      if (ln.type !== "meta") {
+        const btn = el("button", { type: "button", "aria-label": "Add inline comment", title: "Comment on line" }, "+");
+        btn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openInlineCommentEditor(row, prKey, file.path, row.dataset.lineKey);
+        });
+        action.appendChild(btn);
+      }
+      row.appendChild(action);
+      view.appendChild(row);
+      // restore existing comment if any
+      const existing = loadInlineComment(prKey, file.path, row.dataset.lineKey);
+      if (existing) renderExistingCommentBelow(row, prKey, file.path, row.dataset.lineKey, existing);
+    }
+  }
+  return view;
+}
+
+// ===== inline comment storage =====
+function inlineKey(prKey, path, lineKey) { return `${STORAGE_PREFIX}:inline:${prKey}:${path}:${lineKey}`; }
+function loadInlineComment(prKey, path, lineKey) { return localStorage.getItem(inlineKey(prKey, path, lineKey)); }
+function saveInlineComment(prKey, path, lineKey, text) {
+  if (text && text.trim()) localStorage.setItem(inlineKey(prKey, path, lineKey), text.trim());
+  else localStorage.removeItem(inlineKey(prKey, path, lineKey));
+}
+function deleteInlineComment(prKey, path, lineKey) { localStorage.removeItem(inlineKey(prKey, path, lineKey)); }
+
+// thread management: append after diff-row
+function openInlineCommentEditor(row, prKey, path, lineKey, prefill) {
+  // remove any existing thread/editor immediately following this row first
+  let next = row.nextElementSibling;
+  if (next && next.classList && next.classList.contains("comment-thread")) next.remove();
+  const thread = el("div", { class: "comment-thread" });
+  const ta = el("textarea", { class: "comment-textarea", placeholder: "Inline note for this line…" });
+  if (prefill) ta.value = prefill;
+  const actions = el("div", { class: "comment-form-actions" });
+  const cancel = el("button", { class: "btn btn-ghost", type: "button" }, "Cancel");
+  const save = el("button", { class: "btn btn-primary", type: "button" }, "Save");
+  cancel.addEventListener("click", () => {
+    thread.remove();
+    const existing = loadInlineComment(prKey, path, lineKey);
+    if (existing) renderExistingCommentBelow(row, prKey, path, lineKey, existing);
+    refreshFileCommentCounts();
+  });
+  save.addEventListener("click", () => {
+    saveInlineComment(prKey, path, lineKey, ta.value);
+    thread.remove();
+    const existing = loadInlineComment(prKey, path, lineKey);
+    if (existing) renderExistingCommentBelow(row, prKey, path, lineKey, existing);
+    refreshFileCommentCounts();
+    showToast("Saved.");
+  });
+  actions.append(cancel, save);
+  thread.append(ta, actions);
+  row.parentNode.insertBefore(thread, row.nextElementSibling);
+  ta.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { e.preventDefault(); cancel.click(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); save.click(); }
+  });
+  setTimeout(() => ta.focus(), 0);
+}
+function renderExistingCommentBelow(row, prKey, path, lineKey, text) {
+  let next = row.nextElementSibling;
+  if (next && next.classList && next.classList.contains("comment-thread")) next.remove();
+  const thread = el("div", { class: "comment-thread" });
+  const card = el("div", { class: "comment-existing" }, text);
+  const actions = el("div", { class: "comment-actions" });
+  const editBtn = el("button", { type: "button" }, "Edit");
+  const delBtn = el("button", { type: "button" }, "Delete");
+  editBtn.addEventListener("click", () => {
+    thread.remove();
+    openInlineCommentEditor(row, prKey, path, lineKey, text);
+  });
+  delBtn.addEventListener("click", () => {
+    if (confirm("Delete this comment?")) {
+      deleteInlineComment(prKey, path, lineKey);
+      thread.remove();
+      refreshFileCommentCounts();
+    }
+  });
+  actions.append(editBtn, delBtn);
+  thread.append(card, actions);
+  row.parentNode.insertBefore(thread, row.nextElementSibling);
+}
+
+// counts per file
+function refreshFileCommentCounts() {
+  $$(".file-row").forEach(fr => {
+    const prKey = fr.dataset.sha;
+    const path = fr.dataset.path;
+    let count = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`${STORAGE_PREFIX}:inline:${prKey}:${path}:`)) count++;
+    }
+    const cmtEl = $(".cmt", fr);
+    if (cmtEl) {
+      cmtEl.textContent = count > 0 ? `· ${count} 💬` : "";
+    }
+  });
+}
+
+// ===== page-level comments =====
+function pageCommentKey(pageKey) { return `${STORAGE_PREFIX}:page:${pageKey}`; }
+function loadPageComment(pageKey) { return localStorage.getItem(pageCommentKey(pageKey)) || ""; }
+function savePageComment(pageKey, txt) {
+  if (txt && txt.trim()) localStorage.setItem(pageCommentKey(pageKey), txt.trim());
+  else localStorage.removeItem(pageCommentKey(pageKey));
+}
+
+// ===== decisions =====
+function decisionKey(prKey) { return `${STORAGE_PREFIX}:decision:${prKey}`; }
+function loadDecision(prKey) { return localStorage.getItem(decisionKey(prKey)); }
+function saveDecision(prKey, decision) {
+  if (decision) localStorage.setItem(decisionKey(prKey), decision);
+  else localStorage.removeItem(decisionKey(prKey));
+  refreshTriageList();
+  refreshDots();
+  refreshProgressReadout();
+}
+
+// ===== copy to clipboard =====
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((res, rej) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); res(); } catch (e) { rej(e); }
+    finally { document.body.removeChild(ta); }
+  });
+}
+
+// ===== toast =====
+let toastTimer = null;
+function showToast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ===== file row builder =====
+function deriveFileMeta(parsedFile) {
+  let added = 0, removed = 0;
+  for (const h of parsedFile.hunks) {
+    for (const ln of h.lines) {
+      if (ln.type === "add") added++;
+      else if (ln.type === "del") removed++;
+    }
+  }
+  const headerJoined = parsedFile.header.join("\n");
+  const isNew = /(^|\n)new file mode\b/.test(headerJoined);
+  const isRename = /(^|\n)rename (from|to)\b/.test(headerJoined);
+  const path = parsedFile.path || "";
+  const isTest = /(^|\/|_)(tests?|specs?|__tests__)(\/|\b|\.)/i.test(path);
+  return { path, added, removed, isNew, isRename, isTest };
+}
+
+function buildFileRow(file, prKey, parsedFiles) {
+  const matched = parsedFiles.find(p => p.path === file.path);
+  const fr = el("div", { class: "file-row" });
+  fr.dataset.sha = prKey;
+  fr.dataset.path = file.path;
+  if (file.isTest) fr.dataset.test = "1";
+  const tags = [];
+  if (file.isNew) tags.push(el("span", { class: "file-tag file-tag-new" }, "NEW"));
+  if (file.isTest) tags.push(el("span", { class: "file-tag file-tag-test" }, "TEST"));
+  if (file.isRename) tags.push(el("span", { class: "file-tag file-tag-role" }, "RENAME"));
+
+  const dirAndName = file.path.lastIndexOf("/");
+  const dirPart = dirAndName >= 0 ? file.path.slice(0, dirAndName + 1) : "";
+  const namePart = dirAndName >= 0 ? file.path.slice(dirAndName + 1) : file.path;
+
+  const header = el("button", { class: "file-row-header", type: "button", "aria-expanded": "false" },
+    el("svg", { class: "file-chev", viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", "stroke-width": "1.5", html: '<path d="M6 4l4 4-4 4"/>' }),
+    el("div", { class: "file-name" },
+      el("span", { class: "file-name-dim" }, dirPart),
+      namePart
+    ),
+    el("div", { class: "file-tags" }, ...tags),
+    el("div", { class: "file-stats" },
+      el("span", { class: "add" }, `+${file.added}`),
+      " ",
+      el("span", { class: "del" }, `−${file.removed}`),
+      el("span", { class: "cmt" })
+    )
+  );
+  fr.appendChild(header);
+  const body = el("div", { class: "file-row-body" });
+  fr.appendChild(body);
+  let renderedDiff = false;
+  header.addEventListener("click", () => {
+    fr.classList.toggle("open");
+    const expanded = fr.classList.contains("open");
+    header.setAttribute("aria-expanded", String(expanded));
+    if (expanded && !renderedDiff && matched) {
+      body.appendChild(renderFileDiff(matched, prKey));
+      renderedDiff = true;
+    }
+  });
+  return fr;
+}
+
+// ===== verdict mapping =====
+function verdictMeta(verdict) {
+  switch (verdict) {
+    case "approve":      return { class: "verdict-approve", label: "Approve" };
+    case "approve-fix":  return { class: "verdict-fix",     label: "Fix applied — re-review" };
+    case "block":        return { class: "verdict-block",   label: "Request changes" };
+    case "pending":
+    default:             return { class: "verdict-pending", label: "Pending review" };
+  }
+}
+
+// ===== findings section =====
+const SEVERITY_ORDER = ["critical", "important", "debt", "suggested", "question"];
+const SEVERITY_META = {
+  critical:  { label: "Critical",  emoji: "❌", cardClass: "finding-card-c" },
+  important: { label: "Important", emoji: "⚠️", cardClass: "finding-card-i" },
+  debt:      { label: "Debt",      emoji: "♻️", cardClass: "finding-card-d" },
+  suggested: { label: "Suggested", emoji: "🎨", cardClass: "finding-card-s" },
+  question:  { label: "Question",  emoji: "❓", cardClass: "finding-card-q" },
+};
+
+function renderFindingsSection(items) {
+  const section = el("section", { class: "findings-section" });
+  section.appendChild(el("h2", { class: "section-heading" }, "Findings",
+    el("span", { class: "section-count" },
+      `${items.length} item${items.length !== 1 ? "s" : ""}`)));
+
+  const sorted = items.slice().sort((a, b) => {
+    return SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity);
+  });
+
+  sorted.forEach(item => {
+    const meta = SEVERITY_META[item.severity] || SEVERITY_META.question;
+    const card = el("div", { class: `finding-card ${meta.cardClass}` });
+    const head = el("div", { class: "finding-head" },
+      el("span", { class: "finding-sev" }, `${meta.emoji} ${meta.label}`),
+      el("span", { class: "finding-title" }, item.message || "(no description)")
+    );
+    card.appendChild(head);
+    const bodyChildren = [];
+    if (item.location) {
+      bodyChildren.push(
+        el("div", { class: "finding-location" },
+          el("code", { class: "mono" }, item.location))
+      );
+    }
+    if (item.suggestion) {
+      bodyChildren.push(el("p", null, item.suggestion));
+    }
+    if (bodyChildren.length) {
+      card.appendChild(el("div", { class: "finding-body" }, ...bodyChildren));
+    }
+    section.appendChild(card);
+  });
+
+  return section;
+}
+
+// ===== per-PR page renderer =====
+function tickets(meta) {
+  // Accept either a single `ticket` string or an array `tickets`. Returns array.
+  if (Array.isArray(meta.tickets)) return meta.tickets.filter(Boolean);
+  if (meta.ticket) return [meta.ticket];
+  return [];
+}
+
+function renderPrPage(prKey, pageNumber) {
+  const meta = PAGES_DATA[prKey] || { kind: "pr", title: prKey, verdict: "pending", findings: {} };
+  const pageEl = $(`#page-${pageNumber}`);
+  if (!pageEl) return;
+  pageEl.dataset.pageKey = prKey;
+  pageEl.innerHTML = "";
+
+  const parsedFiles = DIFFS_B64[prKey]
+    ? parseUnifiedDiff(decodeB64(DIFFS_B64[prKey]))
+    : [];
+  const fileMetas = parsedFiles.map(deriveFileMeta);
+  const totalAdded = fileMetas.reduce((a, f) => a + f.added, 0);
+  const totalRemoved = fileMetas.reduce((a, f) => a + f.removed, 0);
+  const linesChanged = meta.linesChanged || (totalAdded + totalRemoved);
+
+  const ticketList = tickets(meta);
+  const ticketPills = ticketList.map(t =>
+    el("a", { class: "ticket-pill", href: jiraUrl(t), target: "_blank", rel: "noopener" }, t)
+  );
+  const eta = estimateMinutes(linesChanged, fileMetas.filter(f => f.isNew).length);
+  const v = verdictMeta(meta.verdict);
+
+  // Header band
+  const kindLabel = meta.kind === "commit" ? "commit" : "PR";
+  const refLabel = meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`;
+  const header = el("header", { class: "page-header" },
+    el("div", { class: "page-header-row" },
+      el("span", null, `Page ${pageNumber} of ${TOTAL_PAGES}`),
+      ticketPills.length
+        ? el("div", { class: "ph-tickets" }, ...ticketPills)
+        : null
+    ),
+    el("h1", { class: "ph-title display display-l" }, meta.title || prKey),
+    el("div", { class: "ph-meta-row" },
+      el("span", { class: "ph-meta" },
+        el("span", { class: "ph-meta-key" }, kindLabel),
+        meta.kind === "commit"
+          ? el("code", { class: "mono" }, refLabel)
+          : el("a", { class: "link", href: ghPrUrl(prKey), target: "_blank", rel: "noopener" }, refLabel)
+      ),
+      fileMetas.length
+        ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "files"), String(fileMetas.length))
+        : null,
+      (totalAdded + totalRemoved) > 0
+        ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "Δ"),
+            `+${totalAdded} / −${totalRemoved}`)
+        : null,
+      el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "ETA"), `~${eta} min`)
+    )
+  );
+  pageEl.appendChild(header);
+
+  const findings = meta.findings || {};
+  const importantCount = findings.important || 0;
+  const suggestedCount = findings.suggested || 0;
+  const questionCount = findings.question || 0;
+  const criticalCount = findings.critical || 0;
+  const isPending = meta.verdict === "pending";
+
+  const whyPanel = el("div", { class: "why-panel" },
+    el("span", { class: "eyebrow" }, "Why this change exists"),
+    el("p", null, meta.description || "No description provided.")
+  );
+
+  const anchorGrid = el("div", { class: "anchor-grid" },
+    whyPanel,
+    el("aside", { class: `verdict-card ${v.class}` },
+      el("span", { class: "eyebrow" }, "Verdict"),
+      el("h2", { class: "verdict-headline" }, meta.verdictLabel || v.label),
+      el("div", { class: "findings-grid" },
+        el("div", { class: "finding-cell" },
+          el("div", { class: `finding-cell-num ${(criticalCount + importantCount) > 0 ? "finding-cell-warn" : "finding-cell-zero"}` },
+            isPending ? "—" : String(criticalCount + importantCount)),
+          el("div", { class: "finding-cell-label" }, criticalCount > 0 ? "Critical+Imp" : "Important")
+        ),
+        el("div", { class: "finding-cell" },
+          el("div", { class: `finding-cell-num ${suggestedCount > 0 ? "finding-cell-warn" : "finding-cell-zero"}` },
+            isPending ? "—" : String(suggestedCount)),
+          el("div", { class: "finding-cell-label" }, "Suggested")
+        ),
+        el("div", { class: "finding-cell" },
+          el("div", { class: `finding-cell-num ${questionCount > 0 ? "finding-cell-info" : "finding-cell-zero"}` },
+            isPending && questionCount === 0 ? "—" : String(questionCount)),
+          el("div", { class: "finding-cell-label" }, "Question")
+        )
+      )
+    )
+  );
+  pageEl.appendChild(anchorGrid);
+
+  // Findings section (severity-grouped, with location)
+  const findingItems = (findings.items || []).slice();
+  if (findingItems.length) {
+    pageEl.appendChild(renderFindingsSection(findingItems));
+  }
+
+  // Files section
+  if (fileMetas.length) {
+    const filesSection = el("section", { class: "files-section" });
+    filesSection.appendChild(el("h2", { class: "section-heading" }, "Files changed",
+      el("span", { class: "section-count" }, `${fileMetas.length} file${fileMetas.length !== 1 ? "s" : ""}`)));
+    fileMetas.forEach(f => {
+      filesSection.appendChild(buildFileRow(f, prKey, parsedFiles));
+    });
+    pageEl.appendChild(filesSection);
+  } else {
+    const noDiff = el("section", { class: "files-section" },
+      el("h2", { class: "section-heading" }, "Files changed",
+        el("span", { class: "section-count" }, "no diff captured")),
+      el("p", { class: "small", style: "color: var(--ink-soft); padding: 16px 0;" },
+        "No diff was bundled for this entry. Re-run scaffold with ",
+        el("code", { class: "mono" }, "diff_b64"), " populated to see file-level review.")
+    );
+    pageEl.appendChild(noDiff);
+  }
+
+  // Decision widget
+  const decisionWidget = renderDecisionWidget(prKey, meta);
+  pageEl.appendChild(decisionWidget);
+}
+
+function renderDecisionWidget(prKey, meta) {
+  const widget = el("div", { class: "decision-widget" });
+  widget.appendChild(el("h3", { class: "decision-title" }, "Your decision"));
+  widget.appendChild(el("p", { class: "decision-sub" },
+    `Captured locally. Tally appears on the cover and in the export.`));
+
+  const decisions = [
+    { id: "approve", label: "Approve", desc: "Ship as-is" },
+    { id: "changes", label: "Request changes", desc: "Blocker before merge" },
+    { id: "discuss", label: "Needs discussion", desc: "Clarify before deciding" },
+  ];
+  const buttonsRow = el("div", { class: "decision-buttons" });
+  decisions.forEach(d => {
+    const current = loadDecision(prKey);
+    const btn = el("button", {
+      class: "decision-btn", type: "button", "data-decision": d.id,
+      "aria-pressed": String(current === d.id),
+    },
+      el("span", { class: "check" }),
+      el("span", null,
+        el("div", null, d.label),
+        el("div", { class: "small", style: "color: var(--ink-mute); font-weight: 400;" }, d.desc))
+    );
+    btn.addEventListener("click", () => {
+      const newVal = (loadDecision(prKey) === d.id) ? null : d.id;
+      saveDecision(prKey, newVal);
+      $$(".decision-btn", buttonsRow).forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.decision === newVal)));
+      if (newVal) showToast(`Marked: ${d.label}`);
+      else showToast("Decision cleared.");
+    });
+    buttonsRow.appendChild(btn);
+  });
+  widget.appendChild(buttonsRow);
+
+  const pageComments = el("div", { class: "page-comments" });
+  pageComments.appendChild(el("label", { for: `pc-${prKey}` }, "Page-level note (optional)"));
+  const ta = el("textarea", {
+    class: "comment-textarea", id: `pc-${prKey}`,
+    placeholder: "Anything not tied to a specific line — overall reasoning, follow-up suggestions…",
+  });
+  ta.value = loadPageComment(prKey);
+  ta.addEventListener("input", () => savePageComment(prKey, ta.value));
+  ta.addEventListener("keydown", (e) => { if (e.key === "Escape") ta.blur(); });
+  pageComments.appendChild(ta);
+  widget.appendChild(pageComments);
+
+  return widget;
+}
+
+// ===== triage list (cover) =====
+function refreshTriageList() {
+  const list = $("#triage-list");
+  if (!list) return;
+  list.innerHTML = "";
+  STACK_ORDER.forEach((prKey, idx) => {
+    const meta = PAGES_DATA[prKey];
+    if (!meta) return;
+    const decision = loadDecision(prKey);
+    const findings = meta.findings || {};
+    const criticalCount = findings.critical || 0;
+    const importantCount = findings.important || 0;
+    const suggestedCount = findings.suggested || 0;
+    const questionCount = findings.question || 0;
+    const isPending = meta.verdict === "pending";
+    const blockerCount = criticalCount + importantCount;
+
+    let statusBadge;
+    if (decision === "approve") statusBadge = el("span", { class: "triage-status badge-clean" }, "Approved");
+    else if (decision === "changes") statusBadge = el("span", { class: "triage-status badge-finding" }, "Changes");
+    else if (decision === "discuss") statusBadge = el("span", { class: "triage-status badge-question" }, "Discuss");
+    else if (isPending) statusBadge = el("span", { class: "triage-status badge-question" }, "Pending");
+    else if (meta.verdict === "block" || blockerCount > 0) statusBadge = el("span", { class: "triage-status badge-finding" }, "Important");
+    else if (suggestedCount > 0 || questionCount > 0) statusBadge = el("span", { class: "triage-status badge-question" }, "Non-blocking");
+    else statusBadge = el("span", { class: "triage-status badge-clean" }, "Clean");
+
+    const ticketList = tickets(meta);
+    const linesChanged = meta.linesChanged || 0;
+    const eta = estimateMinutes(linesChanged, 0);
+    const ticketsText = ticketList.length ? ticketList.join(" · ") : (meta.kind === "commit" ? "commit" : "PR");
+    const row = el("button", {
+      class: "triage-row" + (decision ? " decided" : ""),
+      type: "button",
+      "aria-label": `${ticketsText} — ${meta.title || prKey}`,
+    },
+      el("span", { class: "triage-num" }, String(idx + 2).padStart(2, "0")),
+      el("span", { class: "triage-title" },
+        el("span", { class: "triage-tickets" }, `#${prKey}` + (ticketList.length ? ` · ${ticketList.join(" · ")}` : "")),
+        el("span", { class: "triage-headline" }, meta.title || prKey)
+      ),
+      el("span", { class: "triage-meta" }, `~${eta} min · ${linesChanged} lines`),
+      statusBadge
+    );
+    row.addEventListener("click", () => navigate(idx + 2));
+    list.appendChild(row);
+  });
+}
+
+// ===== navigation =====
+function getCurrentPage() {
+  const m = /^#\/page\/(\d+)$/.exec(location.hash);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    if (n >= 1 && n <= TOTAL_PAGES) return n;
+  }
+  return 1;
+}
+function navigate(n) {
+  if (n < 1) n = 1; if (n > TOTAL_PAGES) n = TOTAL_PAGES;
+  location.hash = `#/page/${n}`;
+}
+function applyCurrentPage() {
+  const n = getCurrentPage();
+  $$(".page").forEach(p => p.classList.remove("active"));
+  $(`#page-${n}`).classList.add("active");
+  refreshDots();
+  refreshProgressReadout();
+  if (n > 1) {
+    localStorage.setItem(`${STORAGE_PREFIX}:lastVisited`, String(n));
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+window.addEventListener("hashchange", applyCurrentPage);
+
+function refreshDots() {
+  const dots = $("#dots");
+  if (!dots) return;
+  dots.innerHTML = "";
+  const current = getCurrentPage();
+  const lastPrPage = STACK_ORDER.length + 1;
+  for (let i = 1; i <= TOTAL_PAGES; i++) {
+    let classes = "dot";
+    if (i === current) classes += " active";
+    if (i >= 2 && i <= lastPrPage) {
+      const prKey = STACK_ORDER[i - 2];
+      const meta = PAGES_DATA[prKey] || {};
+      const findings = meta.findings || {};
+      const importantCount = (findings.critical || 0) + (findings.important || 0);
+      const suggestedCount = findings.suggested || 0;
+      const questionCount = findings.question || 0;
+      const decision = loadDecision(prKey);
+      if (decision) classes += " decided";
+      if ((importantCount > 0 || suggestedCount > 0 || questionCount > 0) && !decision) classes += " has-finding";
+    }
+    const dot = el("button", { class: classes, type: "button", "aria-label": `Go to page ${i}`, role: "tab" });
+    dot.addEventListener("click", () => navigate(i));
+    dots.appendChild(dot);
+  }
+}
+
+function refreshProgressReadout() {
+  const r = $("#progress-readout");
+  if (!r) return;
+  const current = getCurrentPage();
+  const decisions = STACK_ORDER.filter(s => loadDecision(s)).length;
+  const pending = STACK_ORDER.length - decisions;
+  r.textContent = `Page ${current} of ${TOTAL_PAGES}` +
+    (decisions > 0 ? ` · ${decisions}/${STACK_ORDER.length} decided` : "") +
+    (pending > 0 && decisions > 0 ? ` · ${pending} remaining` : "");
+}
+
+// ===== resume banner =====
+function refreshResumeBanner() {
+  const last = parseInt(localStorage.getItem(`${STORAGE_PREFIX}:lastVisited`) || "0", 10);
+  const banner = $("#resume-banner");
+  if (!banner) return;
+  if (last && last > 1 && last <= TOTAL_PAGES && getCurrentPage() === 1) {
+    let label;
+    const lastPrPage = STACK_ORDER.length + 1;
+    if (last === TOTAL_PAGES) label = `Page ${last} — Merge plan`;
+    else if (last >= 2 && last <= lastPrPage) {
+      const prKey = STACK_ORDER[last - 2];
+      const meta = PAGES_DATA[prKey] || {};
+      label = `Page ${last} — #${prKey} · ${meta.title || ""}`;
+    } else label = `Page ${last}`;
+    $("#resume-detail").textContent = label;
+    $("#resume-btn").onclick = () => navigate(last);
+    banner.hidden = false;
+  } else {
+    banner.hidden = true;
+  }
+}
+
+// ===== export to markdown =====
+function buildExportMarkdown() {
+  const lines = [];
+  const heading = (document.title || "Stack review").replace(/\s+/g, " ").trim();
+  lines.push(`# ${heading} — Reviewer notes`);
+  lines.push("");
+  lines.push(`Generated: ${new Date().toISOString()}`);
+  lines.push("");
+
+  // Decisions tally
+  lines.push("## Decisions");
+  STACK_ORDER.forEach(prKey => {
+    const meta = PAGES_DATA[prKey] || {};
+    const dec = loadDecision(prKey);
+    const decLabel = dec === "approve" ? "Approve" : dec === "changes" ? "Request changes" : dec === "discuss" ? "Needs discussion" : "(none)";
+    const ticketSuffix = tickets(meta).length ? ` · ${tickets(meta).join(" · ")}` : "";
+    lines.push(`- **#${prKey}${ticketSuffix}** — ${meta.title || prKey} → ${decLabel}`);
+  });
+  lines.push("");
+
+  // Per-PR notes
+  STACK_ORDER.forEach(prKey => {
+    const meta = PAGES_DATA[prKey] || {};
+    const pageNote = loadPageComment(prKey);
+    const inlineEntries = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`${STORAGE_PREFIX}:inline:${prKey}:`)) {
+        const rest = k.slice(`${STORAGE_PREFIX}:inline:${prKey}:`.length);
+        const lastColon = rest.lastIndexOf(":");
+        const path = rest.slice(0, lastColon);
+        const lineKey = rest.slice(lastColon + 1);
+        inlineEntries.push({ path, lineKey, text: localStorage.getItem(k) });
+      }
+    }
+    if (!pageNote && inlineEntries.length === 0 && !loadDecision(prKey)) return;
+    lines.push("");
+    const ticketSuffix = tickets(meta).length ? ` · ${tickets(meta).join(" · ")}` : "";
+    lines.push(`## #${prKey}${ticketSuffix} — ${meta.title || prKey}`);
+    if (meta.kind !== "commit") lines.push(`PR: ${ghPrUrl(prKey)}`);
+    if (pageNote) {
+      lines.push("");
+      lines.push("### Page-level note");
+      lines.push("");
+      lines.push(pageNote);
+    }
+    if (inlineEntries.length > 0) {
+      const byFile = {};
+      inlineEntries.forEach(e => { (byFile[e.path] = byFile[e.path] || []).push(e); });
+      lines.push("");
+      lines.push("### Inline comments");
+      Object.keys(byFile).sort().forEach(path => {
+        lines.push("");
+        lines.push(`**\`${path}\`**`);
+        byFile[path].sort((a, b) => a.lineKey.localeCompare(b.lineKey)).forEach(e => {
+          const [oldLn, newLn] = e.lineKey.split("_");
+          const lnLabel = newLn ? `L${newLn}` : `L${oldLn} (deleted)`;
+          lines.push("");
+          lines.push(`- ${lnLabel} — ${e.text}`);
+        });
+      });
+    }
+  });
+
+  const mergeNote = localStorage.getItem(pageCommentKey("merge"));
+  if (mergeNote) {
+    lines.push("");
+    lines.push("## Overall (merge plan page)");
+    lines.push("");
+    lines.push(mergeNote);
+  }
+  return lines.join("\n");
+}
+
+// ===== theme =====
+function applyTheme(theme) {
+  document.body.dataset.theme = theme || "";
+  $("#theme-icon").textContent = theme === "dark" ? "☾" : "☼";
+}
+function initTheme() {
+  const saved = localStorage.getItem(`${STORAGE_PREFIX}:theme`);
+  if (saved === "dark" || saved === "light") { applyTheme(saved); return; }
+  const dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(dark ? "dark" : "light");
+}
+
+// ===== keyboard nav =====
+function onKey(e) {
+  if (e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT")) return;
+  if (e.key === "ArrowRight") { navigate(getCurrentPage() + 1); }
+  else if (e.key === "ArrowLeft") { navigate(getCurrentPage() - 1); }
+  else if (e.key === "Home") { navigate(1); }
+  else if (e.key === "End") { navigate(TOTAL_PAGES); }
+  else if (e.key === "Escape") {
+    $$(".comment-thread").forEach(t => {
+      const ta = $(".comment-textarea", t);
+      if (ta && document.activeElement === ta) {
+        const cancel = $(".btn-ghost", t);
+        if (cancel) cancel.click();
+      }
+    });
+  }
+}
+
+// ===== bootstrap =====
+function init() {
+  initTheme();
+  refreshTriageList();
+  STACK_ORDER.forEach((prKey, idx) => {
+    try {
+      renderPrPage(prKey, idx + 2);
+    } catch (e) {
+      console.error(`renderPrPage failed for ${prKey}:`, e);
+    }
+  });
+  const mergeTa = $("#merge-comment-final");
+  if (mergeTa) {
+    mergeTa.value = localStorage.getItem(pageCommentKey("merge")) || "";
+    mergeTa.addEventListener("input", () => {
+      if (mergeTa.value && mergeTa.value.trim()) localStorage.setItem(pageCommentKey("merge"), mergeTa.value.trim());
+      else localStorage.removeItem(pageCommentKey("merge"));
+    });
+  }
+  refreshDots();
+  refreshFileCommentCounts();
+  refreshProgressReadout();
+  refreshResumeBanner();
+
+  applyCurrentPage();
+
+  const startBtn = $("#start-btn");
+  if (startBtn) startBtn.addEventListener("click", () => navigate(2));
+  const skipRisky = $("#skip-risky-btn");
+  if (skipRisky) skipRisky.addEventListener("click", () => {
+    const target = parseInt(skipRisky.dataset.targetPage || "0", 10);
+    if (target >= 1 && target <= TOTAL_PAGES) navigate(target);
+  });
+  const mergeBtn = $("#merge-plan-btn");
+  if (mergeBtn) mergeBtn.addEventListener("click", () => navigate(TOTAL_PAGES));
+  $("#prev-btn").addEventListener("click", () => navigate(getCurrentPage() - 1));
+  $("#next-btn").addEventListener("click", () => navigate(getCurrentPage() + 1));
+  $("#theme-btn").addEventListener("click", () => {
+    const next = document.body.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(`${STORAGE_PREFIX}:theme`, next);
+    applyTheme(next);
+  });
+  $("#export-btn").addEventListener("click", async () => {
+    const md = buildExportMarkdown();
+    try {
+      await copyToClipboard(md);
+      showToast("Notes copied as Markdown.");
+    } catch (e) {
+      showToast("Copy failed; check console.");
+      console.error(e);
+    }
+  });
+
+  document.addEventListener("keydown", onKey);
+}
+
+  init();
+})();

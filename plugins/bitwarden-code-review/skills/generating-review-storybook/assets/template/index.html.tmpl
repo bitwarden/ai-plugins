@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>__BW_DOC_TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" />
+<link rel="stylesheet" href="assets/styles.css" />
+<link rel="icon" type="image/svg+xml" href="assets/bw-shield.svg" />
+</head>
+<body data-theme="">
+<div class="app">
+
+<!-- ===== TOPBAR ===== -->
+<header class="topbar" role="banner">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-lockup" aria-label="Bitwarden">
+        <svg class="brand-shield" viewBox="0 0 24 28" aria-hidden="true">
+          <path class="shield-fill" d="M12 0C5.373 0 0 1.79 0 4v11c0 7.18 5.373 12.18 12 13 6.627-.82 12-5.82 12-13V4c0-2.21-5.373-4-12-4z"/>
+          <path class="shield-glyph" d="M12 4.5c-3.59 0-7 1-7 2.4v8.1c0 4.55 3.41 7.7 7 8.5 3.59-.8 7-3.95 7-8.5V6.9c0-1.4-3.41-2.4-7-2.4zm5 10.5c0 3.5-2.55 5.95-5 6.6V6.5c2.45 0 5 .68 5 1.4V15z"/>
+        </svg>
+        <span class="brand-wordmark">Bitwarden</span>
+      </span>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-meta">__BW_BRAND_META__</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="export-btn" title="Copy all comments and decisions to clipboard">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 5h2v9H3V5h2M5 5V2h6v3M8 8v5M5.5 10.5L8 13l2.5-2.5"/></svg>
+        Export notes
+      </button>
+      <button class="btn btn-ghost" id="theme-btn" aria-label="Toggle theme">
+        <span id="theme-icon">☼</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main role="main">
+
+<!-- ============================================================ -->
+<!-- PAGE 1: COVER -->
+<!-- ============================================================ -->
+<!-- __BW_BLOCK_START__ cover -->
+<section class="page" id="page-1" data-page-key="cover" data-page-relevance="reviewer designer pm">
+  <div class="cover-hero-mark" aria-hidden="true">
+    <svg class="brand-shield" viewBox="0 0 24 28" style="width: 44px; height: 52px;">
+      <path class="shield-fill" d="M12 0C5.373 0 0 1.79 0 4v11c0 7.18 5.373 12.18 12 13 6.627-.82 12-5.82 12-13V4c0-2.21-5.373-4-12-4z"/>
+      <path class="shield-glyph" d="M12 4.5c-3.59 0-7 1-7 2.4v8.1c0 4.55 3.41 7.7 7 8.5 3.59-.8 7-3.95 7-8.5V6.9c0-1.4-3.41-2.4-7-2.4zm5 10.5c0 3.5-2.55 5.95-5 6.6V6.5c2.45 0 5 .68 5 1.4V15z"/>
+    </svg>
+    <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 28px; color: var(--accent); letter-spacing: -0.022em;">Bitwarden</span>
+  </div>
+  <span class="eyebrow">Stack review · 6 PRs · two trees · iOS</span>
+  <h1 class="display display-xl" style="margin: 24px 0 0;">PM-32009 · iOS New Item Types stack</h1>
+  <p class="lead" style="margin-top: 28px;">
+    Six PRs across two branches, decided fast. Reviewer time is the bottleneck;
+    this walkthrough leads with verdict and the <em>why</em>, with diffs underneath as
+    drill-down detail. Plan to spend <strong>~18 minutes</strong> across the stack —
+    most of that on the two sibling parsers (Driver's License, Passport).
+  </p>
+
+  <div class="resume-banner" id="resume-banner" hidden>
+    <div class="resume-text">
+      <strong>Resume where you left off.</strong>
+      <span id="resume-detail" class="small" style="display:block;color:var(--ink-soft);margin-top:2px;"></span>
+    </div>
+    <button class="btn btn-primary" id="resume-btn">Resume →</button>
+  </div>
+
+  <div class="cover-grid" style="margin-top: 56px;">
+    <div>
+      <span class="eyebrow">The stack — two trees, one fork</span>
+      <h2 class="display display-m" style="margin: 12px 0 8px;">Tree A is the headline epic. Tree B lands the section-header primitive that vault-list work depends on.</h2>
+      <p class="body">
+        Tree A walks the new <code>Item Types</code> taxonomy on iOS: Bank Account foundation
+        (#2573) → SDK bridge (#2576) → fork into Driver's License (#2577) and Passport (#2578).
+        Tree B (#2582 → #2583) lifts <code>ExpandableHeaderView</code> from
+        <code>AuthenticatorShared</code> into <code>BitwardenKit</code> so both apps can share
+        one implementation. Tree B is independent of Tree A.
+      </p>
+
+      <!-- Stack topology dependency graph -->
+      <figure class="stack-graph" role="img" aria-label="Stack topology — two trees with a fork at PR 2576">
+        <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" />
+            </marker>
+          </defs>
+          <!-- Tree A label -->
+          <text x="20" y="22" class="sg-tree-label">Tree A · New Item Types (epic)</text>
+          <!-- main A -->
+          <g class="sg-node sg-main">
+            <rect x="20" y="40" width="80" height="36" rx="6"/>
+            <text x="60" y="63" text-anchor="middle">main</text>
+          </g>
+          <!-- 2573 -->
+          <g class="sg-node">
+            <rect x="140" y="40" width="170" height="36" rx="6"/>
+            <text x="225" y="58" text-anchor="middle">#2573 PM-32809</text>
+            <text x="225" y="71" text-anchor="middle" class="sg-sub">Bank Account foundation</text>
+          </g>
+          <line x1="100" y1="58" x2="140" y2="58" class="sg-edge" marker-end="url(#arrow)"/>
+          <!-- 2576 (fork point) -->
+          <g class="sg-node sg-fork">
+            <rect x="350" y="40" width="170" height="36" rx="6"/>
+            <text x="435" y="58" text-anchor="middle">#2576 PM-32809</text>
+            <text x="435" y="71" text-anchor="middle" class="sg-sub">SDK bridge · fork</text>
+          </g>
+          <line x1="310" y1="58" x2="350" y2="58" class="sg-edge" marker-end="url(#arrow)"/>
+          <!-- 2577 (top fork) -->
+          <g class="sg-node">
+            <rect x="555" y="20" width="170" height="36" rx="6"/>
+            <text x="640" y="38" text-anchor="middle">#2577 PM-32807</text>
+            <text x="640" y="51" text-anchor="middle" class="sg-sub">Driver's License</text>
+          </g>
+          <path d="M520 58 C 540 58, 540 38, 555 38" class="sg-edge" fill="none" marker-end="url(#arrow)"/>
+          <!-- 2578 (bottom fork) -->
+          <g class="sg-node">
+            <rect x="555" y="78" width="170" height="36" rx="6"/>
+            <text x="640" y="96" text-anchor="middle">#2578 PM-32805</text>
+            <text x="640" y="109" text-anchor="middle" class="sg-sub">Passport</text>
+          </g>
+          <path d="M520 58 C 540 58, 540 96, 555 96" class="sg-edge" fill="none" marker-end="url(#arrow)"/>
+
+          <!-- Divider -->
+          <line x1="20" y1="170" x2="700" y2="170" class="sg-divider"/>
+
+          <!-- Tree B label -->
+          <text x="20" y="200" class="sg-tree-label">Tree B · BitwardenKit primitive (PM-35398)</text>
+          <!-- main B -->
+          <g class="sg-node sg-main">
+            <rect x="20" y="220" width="80" height="36" rx="6"/>
+            <text x="60" y="243" text-anchor="middle">main</text>
+          </g>
+          <!-- 2582 -->
+          <g class="sg-node sg-flag">
+            <rect x="140" y="220" width="220" height="36" rx="6"/>
+            <text x="250" y="238" text-anchor="middle">#2582 PM-35398</text>
+            <text x="250" y="251" text-anchor="middle" class="sg-sub">Promote ExpandableHeaderView ⚑</text>
+          </g>
+          <line x1="100" y1="238" x2="140" y2="238" class="sg-edge" marker-end="url(#arrow)"/>
+          <!-- 2583 -->
+          <g class="sg-node">
+            <rect x="400" y="220" width="220" height="36" rx="6"/>
+            <text x="510" y="238" text-anchor="middle">#2583 PM-35398</text>
+            <text x="510" y="251" text-anchor="middle" class="sg-sub">Binding&lt;Bool&gt; init</text>
+          </g>
+          <line x1="360" y1="238" x2="400" y2="238" class="sg-edge" marker-end="url(#arrow)"/>
+
+          <!-- SDK hold annotation -->
+          <text x="640" y="135" class="sg-note" text-anchor="middle">held: sdk-swift</text>
+          <text x="640" y="148" class="sg-note" text-anchor="middle">2.0.0-6370-96753eef</text>
+        </svg>
+        <figcaption class="small" style="color: var(--ink-soft); margin-top: 8px;">
+          Fork at <code>#2576</code>. The two siblings (#2577, #2578) and the SDK-bridge that gates them
+          all share the same blocker: <code>sdk-swift 2.0.0-6370-96753eef</code> must publish before merge.
+          Tree B is independent and can land on its own cadence.
+        </figcaption>
+      </figure>
+
+      <ul class="triage-list" id="triage-list" role="list"></ul>
+
+      <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn btn-primary" id="start-btn">Start review →</button>
+        <button class="btn" id="skip-risky-btn">Jump to design-drift PR (#2582)</button>
+        <button class="btn btn-ghost" id="merge-plan-btn">See merge plan</button>
+      </div>
+    </div>
+
+    <aside>
+      <div class="cover-aside">
+        <span class="eyebrow">Verdicts</span>
+        <h3 class="display display-m" style="margin: 12px 0 18px;">Pending review</h3>
+        <p class="small" style="color: var(--ink-soft); margin: 0 0 18px;">
+          Reviews are running in parallel against six PRs. Verdicts will be stitched in
+          from <code>reviews/ios-pm32009/pr-NNNN-review.md</code> once each completes; until
+          then every row reads <em>pending</em>.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--rule);">
+            <span style="color: var(--ink-mute);">Critical</span><span style="color: var(--ink-faint); font-variant-numeric: tabular-nums;">—</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--rule);">
+            <span style="color: var(--ink-mute);">Important</span><span style="color: var(--ink-faint); font-variant-numeric: tabular-nums;">—</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--rule);">
+            <span style="color: var(--ink-mute);">Debt</span><span style="color: var(--ink-faint); font-variant-numeric: tabular-nums;">—</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--rule);">
+            <span style="color: var(--ink-mute);">Suggested</span><span style="color: var(--ink-faint); font-variant-numeric: tabular-nums;">—</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+            <span style="color: var(--ink-mute);">Question</span><span style="color: var(--info); font-variant-numeric: tabular-nums;">1 seeded</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cover-aside" style="margin-top: 16px;">
+        <span class="eyebrow">SDK dependency hold</span>
+        <div style="margin-top: 12px;">
+          <div class="conflict-zone">Blocked on sdk-swift</div>
+          <h4 class="mono" style="word-break: break-all; margin: 6px 0 8px;">2.0.0-6370-96753eef</h4>
+          <p class="small" style="color: var(--ink-soft); margin: 0;">
+            #2576, #2577, #2578 all reference SDK-side <code>CipherType.bankAccount</code> /
+            <code>.driversLicense</code> / <code>.passport</code> arms. None can merge until that
+            sdk-swift release publishes. #2573 is foundation-only and ships without it.
+          </p>
+        </div>
+        <div style="margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule-soft);">
+          <div class="conflict-zone">Independent · Tree B</div>
+          <h4 class="mono" style="word-break: break-all; margin: 6px 0 8px;">PM-35398</h4>
+          <p class="small" style="color: var(--ink-soft); margin: 0;">
+            #2582 self-flags Authenticator visual drift (token swaps captured on its page).
+            #2583 adds <code>Binding&lt;Bool&gt;</code> init for caller-owned expansion state —
+            paves the way for vault-list section headers landing later.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Engagement: stakeholder questions aggregator (mounted by engagement.js) -->
+  <section class="cover-questions" id="cover-questions" hidden></section>
+
+  <div class="cover-stat-grid">
+    <div class="cover-stat">
+      <div class="cover-stat-num">6</div>
+      <div class="cover-stat-label">PRs across two trees</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num">~960</div>
+      <div class="cover-stat-label">Lines changed</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num">~18<span style="font-size: 16px; color: var(--ink-mute); font-weight: 400; margin-left: 4px;">min</span></div>
+      <div class="cover-stat-label">Estimated read time</div>
+    </div>
+  </div>
+
+  <p class="small" style="margin-top: 56px; color: var(--ink-faint); text-align: center;">
+    Built locally — no GitHub or Jira data was fetched at runtime. Inline comments and decisions persist in your
+    browser only. Use <kbd style="font-family: inherit; font-size: 11px; padding: 2px 6px; border: 1px solid var(--rule); border-radius: 3px;">→</kbd>
+    and <kbd style="font-family: inherit; font-size: 11px; padding: 2px 6px; border: 1px solid var(--rule); border-radius: 3px;">←</kbd>
+    to navigate, <kbd style="font-family: inherit; font-size: 11px; padding: 2px 6px; border: 1px solid var(--rule); border-radius: 3px;">Esc</kbd>
+    to close any open editor.
+  </p>
+</section>
+
+<!-- __BW_BLOCK_END__ cover -->
+
+<!-- ============================================================ -->
+<!-- PER-PR PAGES (rendered by JS) -->
+<!-- Page-relevance markers gate the role-aware view. -->
+<!-- ============================================================ -->
+<!-- __BW_BLOCK_START__ pr-pages -->
+<section class="page" id="page-2" data-page-relevance="reviewer designer pm"></section>
+<section class="page" id="page-3" data-page-relevance="reviewer"></section>
+<section class="page" id="page-4" data-page-relevance="reviewer"></section>
+<section class="page" id="page-5" data-page-relevance="reviewer"></section>
+<section class="page" id="page-6" data-page-relevance="reviewer designer pm"></section>
+<section class="page" id="page-7" data-page-relevance="reviewer"></section>
+<!-- __BW_BLOCK_END__ pr-pages -->
+
+<!-- ============================================================ -->
+<!-- MERGE PLAN (final page) -->
+<!-- ============================================================ -->
+<!-- __BW_BLOCK_START__ merge-plan -->
+<section class="page" id="page-__BW_MERGE_PAGE__" data-page-key="merge" data-page-relevance="reviewer designer pm">
+  <span class="eyebrow">Page 8 · Merge plan</span>
+  <h1 class="display display-l" style="margin: 16px 0 0;">Recommended integration sequence</h1>
+  <p class="lead" style="margin-top: 24px;">
+    Two trees, one external dependency. Tree A merges in fork order behind the
+    <code>sdk-swift 2.0.0-6370-96753eef</code> release; Tree B merges independently.
+  </p>
+
+  <ol class="step-list" style="margin-top: 48px;">
+    <li class="step-item">
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h3>#2573 — Bank Account foundation (PM-32809)</h3>
+        <p>Foundation types, feature flag, icon. No SDK dependency. <strong>Merge first.</strong></p>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h3>#2576 — Bank Account SDK bridge (PM-32809)</h3>
+        <p>Adds <code>CipherType.bankAccount</code> + SDK bridge arms. <strong>Held</strong> until
+          <code class="mono">sdk-swift 2.0.0-6370-96753eef</code> publishes.</p>
+        <div class="step-zone">↳ Blocker: SDK release. Cannot merge until the bridge symbol exists in published SDK.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h3>#2577 + #2578 — Driver's License & Passport (PM-32807, PM-32805)</h3>
+        <p>Sibling parsers off the #2576 fork. Merge in either order once #2576 lands; both share the same
+          SDK hold. Expect mechanical conflict in <code class="mono">CipherType.swift</code> /
+          <code class="mono">CipherTypeTests.swift</code> / <code class="mono">BitwardenSdk+Vault.swift</code> —
+          accept both new arms.</p>
+        <div class="step-zone">↳ Whichever lands second: re-add its <code>CipherType</code> case + bridge arm + parser entry.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h3>#2582 — Promote ExpandableHeaderView (PM-35398)</h3>
+        <p>Independent of Tree A. Self-flagged Authenticator visual drift (token swaps). Awaiting design /
+          product input on the open question; can merge in parallel with Tree A as soon as that resolves.</p>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h3>#2583 — Binding&lt;Bool&gt; initializer (PM-35398)</h3>
+        <p>Builds on #2582. Lands the caller-owned expansion-state initializer. Vault-list section headers
+          (BWPM) consume this in a later PR.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h2 class="section-heading" style="margin-top: 64px;">Open items <span class="section-count">stitching pending</span></h2>
+  <div class="finding-card finding-card-q">
+    <div class="finding-head">
+      <span class="finding-sev">Question</span>
+      <span class="finding-title">Authenticator visual drift on #2582</span>
+      <span class="triage-status badge-question" style="margin-left: auto;">Seeded</span>
+    </div>
+    <div class="finding-body">
+      Self-flagged in the PR body. Three token swaps land different Authenticator visuals
+      (<code>textSecondary</code>, <code>backgroundPrimary</code>, <code>accessoryIcon → accessoryIcon16</code>).
+      Pre-seeded as a stakeholder question on the cover; tagged <em>design</em> + <em>product</em>. See PR #2582 page
+      for the full drift table and surrounding context.
+    </div>
+  </div>
+  <div class="finding-card">
+    <div class="finding-head">
+      <span class="finding-sev">Pending</span>
+      <span class="finding-title">Per-PR review verdicts</span>
+    </div>
+    <div class="finding-body">
+      Six per-PR reviews are running in parallel. As each completes, its
+      <code>verdict</code> field in <code>data.js</code> will be flipped from <code>pending</code> to
+      its real value (<code>approve</code> / <code>approve-fix</code> / <code>block</code>) and the
+      cover Verdicts table will populate. No code change needed in <code>app.js</code> for the swap.
+    </div>
+  </div>
+
+  <div class="decision-widget">
+    <h3 class="decision-title">Final disposition</h3>
+    <p class="decision-sub">Use the running tally above each page; this is space for an overall note.</p>
+    <div class="page-comments" style="border: none; padding: 0; margin: 0;">
+      <label for="merge-comment-final">Overall reviewer note (optional)</label>
+      <textarea class="comment-textarea" id="merge-comment-final" data-page-comment="merge" placeholder="e.g., 'Approved Tree A 1→2→3,4 once sdk-swift lands; Tree B 1→2 in parallel.'"></textarea>
+    </div>
+  </div>
+
+  <p class="small" style="margin-top: 64px; text-align: center; color: var(--ink-faint);">
+    End of stack · Use <strong>Export notes</strong> in the toolbar to copy all decisions and comments as Markdown.
+  </p>
+</section>
+<!-- __BW_BLOCK_END__ merge-plan -->
+
+</main>
+
+<!-- ===== FOOTBAR ===== -->
+<footer class="footbar" role="navigation">
+  <div class="footbar-inner">
+    <div class="footbar-progress" id="progress-readout">Page 1 of 8</div>
+    <div class="pagination-dots" id="dots" role="tablist" aria-label="Page navigation"></div>
+    <div class="footbar-nav">
+      <button class="btn btn-ghost" id="prev-btn">← Prev</button>
+      <button class="btn" id="next-btn">Next →</button>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Prism.js for Swift highlighting (pinned 1.29.0) -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+
+<!-- Storybook scripts: data → app -->
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

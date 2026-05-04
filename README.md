@@ -6,9 +6,9 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 
 | Plugin                                                              | Version | Description                                                                                                         |
 | ------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.0.0 | Software architect for technical planning, architecture reviews, and implementation phasing                         |
+| [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.0.0   | Software architect for technical planning, architecture reviews, and implementation phasing                         |
 | [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.2.3   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                       |
-| [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.10.0  | Autonomous code review agent following Bitwarden engineering standards with GitHub integration                      |
+| [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.11.0  | Autonomous code review agent following Bitwarden engineering standards with GitHub integration                      |
 | [bitwarden-delivery-tools](plugins/bitwarden-delivery-tools/)       | 1.0.0   | Generic delivery workflow skills for committing, PR creation, preflight checks, and change labeling                 |
 | [bitwarden-devops-engineer](plugins/bitwarden-devops-engineer/)     | 0.1.1   | DevOps engineering assistant: workflow compliance linting, action security auditing, and org-wide CI/CD remediation |
 | [bitwarden-init](plugins/bitwarden-init/)                           | 1.1.0   | Initialize and enhance CLAUDE.md files with Bitwarden's standardized template format                                |
