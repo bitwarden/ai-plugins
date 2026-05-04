@@ -74,7 +74,7 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 
    By default the storybook is written to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` only if the user explicitly asks for a different location.
 
-6. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR has a page; reviewer-identity prompt appears on first load; view-as toggle works; export-notes copies Markdown.
+6. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR has a page; per-PR Findings section lists items when verdicts were pre-baked; export-notes copies Markdown.
 
 ## Output Location Convention
 
