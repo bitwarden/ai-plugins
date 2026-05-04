@@ -5,9 +5,9 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.11.0] - 2026-05-01
+## [1.11.0] - 2026-05-04
 
-- New `performing-multi-agent-code-review` skill: orchestrates a multi-agent code review pipeline with architecture, code-quality, simplification, bug, and security agents; includes validation and severity-audit stages.
+- New `performing-multi-agent-code-review` skill: orchestrates a multi-agent code review pipeline.
 
 ## [1.10.0] - 2026-04-28
 
