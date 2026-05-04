@@ -6,8 +6,7 @@
   },
   "metadata": {
     "description": "Official Bitwarden Claude Plugin Marketplace",
-    "version": "1.0.1",
-    "pluginRoot": "./plugins"
+    "version": "1.1.0"
   },
   "plugins": [
     {
