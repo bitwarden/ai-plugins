@@ -25,7 +25,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.9.0",
+      "version": "1.10.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -43,8 +43,8 @@
     {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
-      "version": "0.3.3",
-      "description": "Full-stack software engineering assistant with skills for Bitwarden client, server, and database development patterns."
+      "version": "0.4.0",
+      "description": "Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden."
     },
     {
       "name": "bitwarden-atlassian-tools",
@@ -55,7 +55,7 @@
     {
       "name": "bitwarden-security-engineer",
       "source": "./plugins/bitwarden-security-engineer",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis."
     },
     {
@@ -65,10 +65,16 @@
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     },
     {
-      "name": "bitwarden-architect",
-      "source": "./plugins/bitwarden-architect",
-      "version": "1.0.0",
+      "name": "bitwarden-tech-lead",
+      "source": "./plugins/bitwarden-tech-lead",
+      "version": "2.0.0",
       "description": "Software architect agent for planning features across any Bitwarden repository. Discovers platform context dynamically via CLAUDE.md and repo-local planning skills."
+    },
+    {
+      "name": "bitwarden-delivery-tools",
+      "source": "./plugins/bitwarden-delivery-tools",
+      "version": "1.0.0",
+      "description": "Delivery workflow skills for committing, PR creation, preflight checks, and change labeling across any Bitwarden repository."
     }
   ]
 }
