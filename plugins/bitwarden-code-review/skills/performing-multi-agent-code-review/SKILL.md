@@ -14,7 +14,8 @@ This skill depends on the following sibling plugins. If any are not installed, *
 
 - **`bitwarden-tech-lead`** — provides the architecture review subagent.
 - **`bitwarden-security-engineer`** — provides security context and analysis skills.
-  Before Step 1, verify each prerequisite is resolvable. If a prerequisite is missing, print:
+
+Before Step 1, verify each prerequisite is resolvable. If a prerequisite is missing, print:
 
 > Prerequisite plugin `<name>` is not installed. Install it and retry. Review aborted.
 
