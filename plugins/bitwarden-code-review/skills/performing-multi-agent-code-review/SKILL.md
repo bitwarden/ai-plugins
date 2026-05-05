@@ -105,7 +105,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt; Line Number Accuracy is propagated verbatim into every Step 2–5 subagent prompt.
    - **READ** `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
 
-2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead` subagent type. Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
+2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead:bitwarden-tech-lead` subagent type. Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
 
    Unlike the diff agents in Step 3, this agent reads BEYOND the diff to check whether changes fit the codebase.
 
@@ -132,7 +132,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    **Agent 3: Security & logic agent**
    Find security flaws and logic errors in the introduced code. Stay scoped to changed lines.
 
-   Invoke `analyzing-code-security`, `detecting-secrets`, and `reviewing-dependencies` from the `bitwarden-security-engineer` plugin to cover classic application-security items.
+   Invoke `Skill(bitwarden-security-engineer:analyzing-code-security)`, `Skill(bitwarden-security-engineer:detecting-secrets)`, and `Skill(bitwarden-security-engineer:reviewing-dependencies)` from the `bitwarden-security-engineer` plugin to cover classic application-security items.
 
    In addition to attacker-as-LLM and attacker-as-server threat models, evaluate the **user-side threat surface**. Apply the **Trusted Channel** concept from the loaded security context — ask whether the user-facing surface qualifies:
    - **Authenticity of prompts shown to the user** — can the user tell which application is requesting sensitive input? Dialog titles, branding, and prompt strings should allow the user to resist spoofed-dialog phishing.
