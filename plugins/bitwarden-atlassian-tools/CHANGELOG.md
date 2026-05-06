@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-24
+
+### Added
+
+- `triaging-jira-issues` skill for verifying whether a single Jira issue is still relevant against the current codebase — fetches the ticket, searches for the described code path across clients/server/sdk-internal, checks git history since the filed date, and returns a verdict (still relevant / partially addressed / no longer relevant / cannot determine) with file:line evidence
+
 ## [2.3.0] - 2026-07-15
 
 ### Added
