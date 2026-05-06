@@ -1,6 +1,6 @@
 ---
 name: triaging-jira-issues
-description: Use when the user provides a single Jira issue key and asks whether it is still relevant, still applicable, still pending, still a bug, has been fixed, or can be closed. Trigger phrases include "Is [TICKET] still relevant?", "Is this still an issue?", "Is PM-123 still pending?", "Has this been fixed?", "Can we close this?", "Is this ticket still valid?", "Is this still applicable?", "Does this bug still exist?". Fetches the ticket and verifies the described problem against the current codebase to return a verdict with evidence. For bulk triage of multiple tickets or a JQL filter, use the bulk-triaging-jira-issues skill instead.
+description: Use when the user provides a single Jira issue key and asks whether it is still relevant, still applicable, still pending, still a bug, has been fixed, or can be closed. Trigger phrases include "Is [TICKET] still relevant?", "Is this still an issue?", "Is PM-123 still pending?", "Has this been fixed?", "Can we close this?", "Is this ticket still valid?", "Is this still applicable?", "Does this bug still exist?". Fetches the ticket and verifies the described problem against the current codebase to return a verdict with evidence. This skill triages a single ticket at a time; invoke it iteratively for multiple tickets.
 ---
 
 # Triaging a Jira Issue for Relevance
