@@ -5,6 +5,25 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-05
+
+### Changed
+
+- `threat-modeling` skill: revised based on AppSec review feedback on a real-world generated security definition document. Changes address noise, mis-scoped attacker assumptions, and missing rationale that surfaced when the skill was used to produce SDs for an unlock-flow feature.
+  - Skill now requires every Security Goal to carry a **Rationale** (principle → asset → user-visible harm); goals without rationale are treated as claims, not requirements.
+  - New guidance to prune **Dominated Threats** (SDs whose residual risk collapses to an already out-of-scope higher-privilege threat) and to add **Passive Observer** SDs wherever secrets cross into external services (LLM providers, log aggregators, analytics, training pipelines).
+  - New rule to reality-check goals against runtime — "cleared from memory" / "zeroized" / "not retained" are flagged as unenforceable in GC'd, string-interned runtimes (JavaScript, .NET, JVM, Python).
+  - New rule to prefer stdin or file-descriptor handoff over env/argv when a goal forbids secret exposure to `process.env` or `argv`.
+  - New rule to verify "attacker does not have X" limitations against every supported OS (common pitfall: assuming kernel privileges are required for reading another process's environment).
+  - Accepted Goal Status rationales of "brief" or "short-lived" now require a quantified **Exposure Window**.
+  - Each SD must carry a **Criticality** tag (Critical / High / Medium / Low) and the document must be ordered by Criticality descending.
+
+### Added
+
+- `references/writing-quality-sds.md`: six named anti-patterns (dominated threat, adversarial-only attacker, unenforceable goal, aspirational limitation, shell-quoting SD, "brief exposure" trap), a prioritization heuristic, and a five-question self-consistency checklist.
+- `references/bitwarden-vocabulary.md`: added **Passive Observer**, **Dominated Threat**, and **Exposure Window** to the standard terminology.
+- `examples/security-definition-document.md`: template extended with **Criticality** field per SD, **Rationale** line per Security Goal, and a quantified-exposure-window reminder for accepted status.
+
 ## [1.0.1] - 2026-04-08
 
 ### Changed

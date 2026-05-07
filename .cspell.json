@@ -39,6 +39,7 @@
     "lockfiles",
     "maxResults",
     "mcp",
+    "metacharacters",
     "nextPageToken",
     "NVARCHAR",
     "OAEP",
@@ -59,7 +60,10 @@
     "unresponded",
     "unsanitized",
     "userspace",
-    "xoxb"
+    "xoxb",
+    "Zeroize",
+    "zeroization",
+    "zeroized"
   ],
   "flagWords": [],
   "ignorePaths": [
