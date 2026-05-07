@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-05-07
+
+### Added
+
+- `auditing-hackerone-vulns` skill: audits all open HackerOne-sourced VULN Jira tickets and their linked engineering child items to produce a prioritized action table. Correlates VULN status against child item progress and merged PRs, determines whether fixes are included in a shipped release (using tag-range commit search to handle cherry-pick workflows), and emits per-ticket action tokens (🔴 Update Status / 🟡 Mark Remediated / 🟢 Verify & Close / 🔵 Monitor / ⚪ Waiting / ➖ No Child Item) sorted by urgency.
+
 ## [1.1.0] - 2026-05-05
 
 ### Changed

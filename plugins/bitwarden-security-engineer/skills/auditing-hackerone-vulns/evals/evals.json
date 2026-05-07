@@ -1,0 +1,23 @@
+{
+  "skill_name": "hackerone-vuln-tracker",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Check my HackerOne VULN tickets and tell me what needs attention",
+      "expected_output": "A markdown table showing all open VULN tickets linked to HackerOne, sorted by action priority (🔴 first), with columns for VULN key, HackerOne link, VULN status, child item(s), child status, PR/release info, and a clear action column. Followed by a summary count per token type.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Which of my VULN tickets are ready to be marked as remediated?",
+      "expected_output": "A focused view (or filtered table) showing only VULN tickets where the child engineering item is Done and the VULN needs to be moved to Remediated with a Remediation Date. Should include the merged PR date to use as the Remediation Date.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Run a full audit of open HackerOne vulnerabilities — I want to know if anything has been fixed and shipped that I haven't closed out yet",
+      "expected_output": "A complete action table with all non-Done VULN tickets, specifically calling out any 🟢 tokens where the fix is already in a deployed release and the ticket can be verified and closed. Should check GitHub release tags to determine deployment status.",
+      "files": []
+    }
+  ]
+}
