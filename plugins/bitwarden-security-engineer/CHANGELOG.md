@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-05-07
+
+### Fixed
+
+- Added `Skill` to the agent's `tools:` frontmatter so the agent can dispatch the six skills declared in its `skills:` block (`triaging-security-findings`, `threat-modeling`, `analyzing-code-security`, `reviewing-dependencies`, `detecting-secrets`, `reviewing-security-architecture`). Previously these declared skills could not be invoked.
+
 ## [1.1.0] - 2026-05-05
 
 ### Changed
