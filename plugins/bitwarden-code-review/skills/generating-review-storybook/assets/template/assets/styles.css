@@ -1392,96 +1392,504 @@ a.link:hover {
 }
 
 /* ---- finding card ---- */
-.finding-card {
+/* ---- scene page (one scene per page) ---- */
+.chapter-intro {
+    margin: 28px 0 24px;
+    padding: 22px 24px;
     background: var(--bg-elev);
-    border: 1px solid var(--rule);
-    border-left: 4px solid var(--warn-line);
-    padding: 22px 28px;
-    border-radius: var(--radius-card);
-    margin: 12px 0;
+    border: 1px solid var(--rule-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
 }
-.finding-card-c {
-    border-left-color: var(--crit-line);
+.chapter-intro .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
 }
-.finding-card-i {
-    border-left-color: var(--warn-line);
+.chapter-intro-title {
+    margin: 8px 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
 }
-.finding-card-d {
-    border-left-color: var(--ink-faint);
+.chapter-intro-narrative {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 72ch;
 }
-.finding-card-s {
-    border-left-color: var(--info-line);
+.scene-page-narrative {
+    margin: 24px 0 28px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 72ch;
 }
-.finding-card-q {
-    border-left-color: var(--info-line);
+.scene-files-section {
+    margin: 8px 0 0;
 }
-.finding-head {
+
+/* ---- cover TOC: chapter group headers + scene rows ---- */
+.toc-chapter-header {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+    padding: 18px 0 10px;
+    margin-top: 8px;
+    border-top: 1px solid var(--rule-soft);
+}
+.toc-chapter-header:first-child {
+    border-top: none;
+    padding-top: 4px;
+    margin-top: 0;
+}
+.toc-chapter-num {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    flex: 0 0 auto;
+}
+.toc-chapter-text {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.toc-chapter-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+}
+.toc-chapter-meta {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    font-weight: 600;
+}
+.toc-chapter-synopsis {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-top: 2px;
+}
+.toc-scene-row {
+    padding-left: 24px;
+}
+.toc-scene-row .toc-num {
+    font-size: 11.5px;
+    color: var(--ink-mute);
+}
+
+/* ---- chapter page narrative + scene grouping (legacy) ---- */
+.chapter-page-narrative {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 28px 0 36px;
+    max-width: 72ch;
+}
+.scenes-section {
+    margin: 8px 0 0;
+}
+.scene {
+    margin: 36px 0 0;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule-soft);
+}
+.scene:first-child {
+    margin-top: 8px;
+    padding-top: 0;
+    border-top: none;
+}
+.scene-head {
+    display: flex;
+    gap: 18px;
+    align-items: baseline;
+    margin-bottom: 10px;
+}
+.scene-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    flex: 0 0 auto;
+    padding-top: 2px;
+}
+.scene-head-text {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.scene-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.005em;
+}
+.scene-count {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    font-weight: 600;
+}
+.scene-narrative {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 0 0 16px 50px;
+    max-width: 70ch;
+}
+.scene-files {
+    margin: 8px 0 0;
+}
+
+/* verdict recap (last chapter page) */
+.verdict-recap {
+    margin: 32px 0 12px;
+}
+
+/* cover chapter TOC */
+.toc-pr-header {
     display: flex;
     gap: 12px;
     align-items: baseline;
     flex-wrap: wrap;
+    padding: 14px 0 6px;
+    margin-top: 18px;
+    border-bottom: 1px dashed var(--rule);
 }
-.finding-sev {
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    white-space: nowrap;
+.toc-pr-header:first-child {
+    margin-top: 0;
 }
-.finding-card-c .finding-sev {
-    color: var(--crit);
-    background: var(--crit-bg);
-}
-.finding-card-i .finding-sev {
-    color: var(--warn);
-    background: var(--warn-bg);
-}
-.finding-card-d .finding-sev {
+.toc-pr-key {
+    font-size: 12px;
     color: var(--ink-mute);
-    background: var(--bg-sunk);
-}
-.finding-card-s .finding-sev {
-    color: var(--info);
-    background: var(--info-bg);
-}
-.finding-card-q .finding-sev {
-    color: var(--info);
-    background: var(--info-bg);
-}
-.finding-title {
-    font-size: 16px;
     font-weight: 600;
+}
+.toc-pr-title {
+    font-size: 15px;
     color: var(--ink);
+    font-weight: 600;
     flex: 1 1 auto;
     min-width: 0;
 }
-.finding-body {
-    font-size: 14px;
-    color: var(--ink-soft);
-    margin-top: 12px;
-    line-height: 1.6;
+.toc-pr-ticket {
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
-.finding-body p {
-    margin: 8px 0 0;
-}
-.finding-body code {
+.toc-pr-verdict {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
     background: var(--bg-sunk);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 12.5px;
-    border: 1px solid var(--rule-soft);
-}
-.finding-location {
-    font-size: 12.5px;
     color: var(--ink-mute);
 }
-.finding-location code {
+.toc-pr-verdict.verdict-approve {
+    color: var(--good);
+    background: var(--good-bg);
+}
+.toc-pr-verdict.verdict-fix {
+    color: var(--warn);
+    background: var(--warn-bg);
+}
+.toc-pr-verdict.verdict-block {
+    color: var(--crit);
+    background: var(--crit-bg);
+}
+.toc-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 4px 0;
+    cursor: pointer;
+    transition:
+        background 120ms ease,
+        border-color 120ms ease;
+    font: inherit;
+    color: inherit;
+}
+.toc-row:hover {
+    background: var(--bg-elev);
+    border-color: var(--rule-soft);
+}
+.toc-row.decided {
+    opacity: 0.7;
+}
+.toc-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    flex: 0 0 auto;
+    padding-top: 2px;
+}
+.toc-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.toc-title {
+    font-size: 16px;
+    font-weight: 600;
     color: var(--ink);
 }
-.findings-section {
-    margin: 32px 0;
+.toc-synopsis {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+}
+.toc-meta {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    font-weight: 600;
+}
+
+/* ---- chapter (legacy, used inside file diffs only) ---- */
+.chapter {
+    margin: 32px 0 0;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule-soft);
+}
+.chapter:first-of-type {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 8px;
+}
+.chapter-head {
+    display: flex;
+    gap: 18px;
+    align-items: baseline;
+    margin-bottom: 14px;
+}
+.chapter-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    flex: 0 0 auto;
+    padding-top: 2px;
+}
+.chapter-head-text {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.chapter-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+.chapter-count {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    font-weight: 600;
+}
+.chapter-narrative {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 0 0 18px 46px;
+    max-width: 72ch;
+}
+.chapter-files {
+    margin-left: 0;
+}
+
+/* ---- inline gloss (findings + human comments rendered as marginalia) ---- */
+.gloss {
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--rule);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 6px 0;
+    font-family: "Inter", sans-serif;
+}
+.gloss-c {
+    border-left-color: var(--crit-line);
+}
+.gloss-i {
+    border-left-color: var(--warn-line);
+}
+.gloss-d {
+    border-left-color: var(--ink-faint);
+}
+.gloss-s {
+    border-left-color: var(--info-line);
+}
+.gloss-q {
+    border-left-color: var(--info-line);
+}
+.gloss-human {
+    border-left-color: var(--accent);
+}
+.gloss-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 11.5px;
+}
+.gloss-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+.gloss-c .gloss-tag {
+    color: var(--crit);
+}
+.gloss-i .gloss-tag {
+    color: var(--warn);
+}
+.gloss-s .gloss-tag,
+.gloss-q .gloss-tag {
+    color: var(--info);
+}
+.gloss-d .gloss-tag {
+    color: var(--ink-mute);
+}
+.gloss-emoji {
+    font-size: 13px;
+    line-height: 1;
+}
+.gloss-tag-human {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 12.5px;
+}
+.gloss-author-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+}
+.gloss-source {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-left: auto;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.gloss-body {
+    margin: 8px 0 0;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.55;
+}
+.gloss-suggestion {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    background: var(--bg-sunk);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+}
+.gloss-suggestion-label {
+    display: block;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+}
+.diff-file-notes {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--bg-sunk);
+}
+.diff-file-notes .gloss {
+    background: var(--bg-elev);
+    margin: 6px 0;
+}
+.orphan-notes {
+    margin: 24px 0;
+}
+.orphan-notes .eyebrow {
+    display: block;
+    margin-bottom: 8px;
+}
+.diff-row.gloss-row {
+    background: transparent;
+    padding: 4px 0;
+}
+.diff-row.gloss-row .diff-content {
+    padding: 0 12px;
+}
+.diff-row.gloss-row .gloss {
+    margin: 6px 0;
+}
+
+/* file-row severity dot indicators */
+.file-dots {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: auto;
+    padding-right: 12px;
+    align-items: center;
+}
+.file-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+    box-shadow: 0 0 0 1px var(--rule-soft);
+}
+.file-dot-critical {
+    background: var(--crit);
+}
+.file-dot-important {
+    background: var(--warn);
+}
+.file-dot-debt {
+    background: var(--ink-mute);
+}
+.file-dot-suggested {
+    background: var(--info);
+}
+.file-dot-question {
+    background: var(--info);
+}
+.file-dot-human {
+    background: var(--accent);
 }
 
 /* ---- merge plan grid ---- */

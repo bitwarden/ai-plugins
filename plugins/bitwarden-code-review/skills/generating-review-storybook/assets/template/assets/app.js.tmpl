@@ -6,6 +6,34 @@
 
   const DIFFS_B64 = window.DIFFS || {};
   const PAGES_DATA = window.REVIEW_DATA || {};
+  const PAGE_ORDER = window.PAGE_ORDER || [];
+
+  // Map prKey → array of scene page numbers (1-based) for this stack.
+  // Used to know the first/last scene page of each PR (decisions, intros).
+  const SCENE_PAGES_BY_PR = {};
+  PAGE_ORDER.forEach((p, i) => {
+    if (p.kind !== "scene") return;
+    (SCENE_PAGES_BY_PR[p.prKey] = SCENE_PAGES_BY_PR[p.prKey] || []).push(i + 1);
+  });
+  function firstScenePageOf(prKey) {
+    const arr = SCENE_PAGES_BY_PR[prKey] || [];
+    return arr[0];
+  }
+  function lastScenePageOf(prKey) {
+    const arr = SCENE_PAGES_BY_PR[prKey] || [];
+    return arr[arr.length - 1];
+  }
+  // First page index of a (prKey, chapterIndex) pair — used to know if the
+  // current page is the FIRST scene of its chapter (chapter intro renders there).
+  function firstPageOfChapter(prKey, chapterIndex) {
+    for (let i = 0; i < PAGE_ORDER.length; i++) {
+      const p = PAGE_ORDER[i];
+      if (p.kind === "scene" && p.prKey === prKey && p.chapterIndex === chapterIndex) {
+        return i + 1;
+      }
+    }
+    return -1;
+  }
 
 
 // page numbering: 1 = cover, 2..N+1 = PAGES_DATA in stack order, N+2 = merge plan.
@@ -119,9 +147,17 @@ function highlightLine(text, lang) {
   return escapeHtml(text);
 }
 
-function renderFileDiff(file, prKey) {
+function renderFileDiff(file, prKey, annotations) {
   const lang = detectLanguage(file.path);
   const view = el("div", { class: "diff-view" });
+
+  // File-level annotations render as a prologue above the first hunk.
+  if (annotations && annotations.fileLevel && annotations.fileLevel.length) {
+    const fileNotes = el("div", { class: "diff-file-notes" });
+    annotations.fileLevel.forEach(a => fileNotes.appendChild(renderGloss(a)));
+    view.appendChild(fileNotes);
+  }
+  const byLine = (annotations && annotations.byLine) || {};
   // header meta lines (index, ---/+++ etc) collapsed to a single small row
   const metaSummary = file.header.filter(h => h.startsWith("index ") || h.startsWith("rename ") || h.startsWith("similarity ")).join(" · ");
   if (metaSummary) {
@@ -167,6 +203,20 @@ function renderFileDiff(file, prKey) {
       // restore existing comment if any
       const existing = loadInlineComment(prKey, file.path, row.dataset.lineKey);
       if (existing) renderExistingCommentBelow(row, prKey, file.path, row.dataset.lineKey, existing);
+      // inline annotations anchored to this new-file line number
+      if (ln.newLn != null && byLine[ln.newLn]) {
+        byLine[ln.newLn].forEach(a => {
+          const glossRow = el("div", { class: "diff-row gloss-row" });
+          glossRow.appendChild(el("div", { class: "diff-ln" }));
+          glossRow.appendChild(el("div", { class: "diff-rn" }));
+          glossRow.appendChild(el("div", { class: "diff-marker" }));
+          const content = el("div", { class: "diff-content" });
+          content.appendChild(renderGloss(a));
+          glossRow.appendChild(content);
+          glossRow.appendChild(el("div", { class: "diff-action" }));
+          view.appendChild(glossRow);
+        });
+      }
     }
   }
   return view;
@@ -318,7 +368,7 @@ function deriveFileMeta(parsedFile) {
   return { path, added, removed, isNew, isRename, isTest };
 }
 
-function buildFileRow(file, prKey, parsedFiles) {
+function buildFileRow(file, prKey, parsedFiles, annotations) {
   const matched = parsedFiles.find(p => p.path === file.path);
   const fr = el("div", { class: "file-row" });
   fr.dataset.sha = prKey;
@@ -328,6 +378,23 @@ function buildFileRow(file, prKey, parsedFiles) {
   if (file.isNew) tags.push(el("span", { class: "file-tag file-tag-new" }, "NEW"));
   if (file.isTest) tags.push(el("span", { class: "file-tag file-tag-test" }, "TEST"));
   if (file.isRename) tags.push(el("span", { class: "file-tag file-tag-role" }, "RENAME"));
+
+  // Severity dot indicators: one dot per finding/comment touching this file.
+  const dots = el("div", { class: "file-dots", "aria-label": "Inline notes on this file" });
+  if (annotations) {
+    const items = [];
+    annotations.fileLevel.forEach(a => items.push(a));
+    Object.values(annotations.byLine).forEach(arr => arr.forEach(a => items.push(a)));
+    items.forEach(a => {
+      const cls = a.kind === "finding"
+        ? `file-dot file-dot-${a.severity}`
+        : "file-dot file-dot-human";
+      const title = a.kind === "finding"
+        ? `${a.label}: ${a.body}`
+        : `${a.author}: ${a.body}`;
+      dots.appendChild(el("span", { class: cls, title }));
+    });
+  }
 
   const dirAndName = file.path.lastIndexOf("/");
   const dirPart = dirAndName >= 0 ? file.path.slice(0, dirAndName + 1) : "";
@@ -340,6 +407,7 @@ function buildFileRow(file, prKey, parsedFiles) {
       namePart
     ),
     el("div", { class: "file-tags" }, ...tags),
+    dots,
     el("div", { class: "file-stats" },
       el("span", { class: "add" }, `+${file.added}`),
       " ",
@@ -356,7 +424,7 @@ function buildFileRow(file, prKey, parsedFiles) {
     const expanded = fr.classList.contains("open");
     header.setAttribute("aria-expanded", String(expanded));
     if (expanded && !renderedDiff && matched) {
-      body.appendChild(renderFileDiff(matched, prKey));
+      body.appendChild(renderFileDiff(matched, prKey, annotations));
       renderedDiff = true;
     }
   });
@@ -374,51 +442,106 @@ function verdictMeta(verdict) {
   }
 }
 
-// ===== findings section =====
+// ===== inline annotations (findings + human comments) =====
 const SEVERITY_ORDER = ["critical", "important", "debt", "suggested", "question"];
 const SEVERITY_META = {
-  critical:  { label: "Critical",  emoji: "❌", cardClass: "finding-card-c" },
-  important: { label: "Important", emoji: "⚠️", cardClass: "finding-card-i" },
-  debt:      { label: "Debt",      emoji: "♻️", cardClass: "finding-card-d" },
-  suggested: { label: "Suggested", emoji: "🎨", cardClass: "finding-card-s" },
-  question:  { label: "Question",  emoji: "❓", cardClass: "finding-card-q" },
+  critical:  { label: "Critical",  emoji: "❌", glossClass: "gloss-c" },
+  important: { label: "Important", emoji: "⚠️", glossClass: "gloss-i" },
+  debt:      { label: "Debt",      emoji: "♻️", glossClass: "gloss-d" },
+  suggested: { label: "Suggested", emoji: "🎨", glossClass: "gloss-s" },
+  question:  { label: "Question",  emoji: "❓", glossClass: "gloss-q" },
 };
 
-function renderFindingsSection(items) {
-  const section = el("section", { class: "findings-section" });
-  section.appendChild(el("h2", { class: "section-heading" }, "Findings",
-    el("span", { class: "section-count" },
-      `${items.length} item${items.length !== 1 ? "s" : ""}`)));
+function parseLocation(loc) {
+  // Accept "path/to/file.ext:42" or "path/to/file.ext" or "" → null
+  if (!loc) return { path: "", line: null };
+  const m = /^(.+?):(\d+)$/.exec(loc.trim());
+  if (m) return { path: m[1], line: parseInt(m[2], 10) };
+  return { path: loc.trim(), line: null };
+}
 
-  const sorted = items.slice().sort((a, b) => {
-    return SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity);
+function buildAnnotations(meta) {
+  // Returns { byFile: { path: { fileLevel: [...], byLine: { newLn: [...] } } } }
+  // Each annotation: { kind: "finding"|"comment", severity?, emoji, label, body, location, author?, created_at? }
+  const byFile = {};
+  function ensureFile(path) {
+    if (!byFile[path]) byFile[path] = { fileLevel: [], byLine: {} };
+    return byFile[path];
+  }
+  const findings = (meta.findings && meta.findings.items) || [];
+  const comments = meta.comments || [];
+
+  findings.forEach(f => {
+    const sev = SEVERITY_META[f.severity] || SEVERITY_META.question;
+    const ann = {
+      kind: "finding",
+      severity: f.severity,
+      emoji: sev.emoji,
+      label: sev.label,
+      glossClass: sev.glossClass,
+      body: f.message,
+      suggestion: f.suggestion,
+      location: f.location,
+    };
+    const { path, line } = parseLocation(f.location);
+    if (path && line) {
+      const bucket = ensureFile(path);
+      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
+    } else if (path) {
+      ensureFile(path).fileLevel.push(ann);
+    } else {
+      // No location at all — fall through to a per-page orphans bucket
+      ensureFile("__orphans__").fileLevel.push(ann);
+    }
   });
 
-  sorted.forEach(item => {
-    const meta = SEVERITY_META[item.severity] || SEVERITY_META.question;
-    const card = el("div", { class: `finding-card ${meta.cardClass}` });
-    const head = el("div", { class: "finding-head" },
-      el("span", { class: "finding-sev" }, `${meta.emoji} ${meta.label}`),
-      el("span", { class: "finding-title" }, item.message || "(no description)")
-    );
-    card.appendChild(head);
-    const bodyChildren = [];
-    if (item.location) {
-      bodyChildren.push(
-        el("div", { class: "finding-location" },
-          el("code", { class: "mono" }, item.location))
-      );
+  comments.forEach(c => {
+    const ann = {
+      kind: "comment",
+      glossClass: "gloss-human",
+      author: c.author || "Reviewer",
+      created_at: c.created_at || "",
+      body: c.body,
+      location: c.location,
+    };
+    const { path, line } = parseLocation(c.location);
+    if (path && line) {
+      const bucket = ensureFile(path);
+      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
+    } else if (path) {
+      ensureFile(path).fileLevel.push(ann);
+    } else {
+      ensureFile("__orphans__").fileLevel.push(ann);
     }
-    if (item.suggestion) {
-      bodyChildren.push(el("p", null, item.suggestion));
-    }
-    if (bodyChildren.length) {
-      card.appendChild(el("div", { class: "finding-body" }, ...bodyChildren));
-    }
-    section.appendChild(card);
   });
 
-  return section;
+  return byFile;
+}
+
+function renderGloss(ann) {
+  const wrap = el("div", { class: `gloss ${ann.glossClass || ""}` });
+  const head = el("div", { class: "gloss-head" });
+  if (ann.kind === "finding") {
+    head.appendChild(el("span", { class: "gloss-tag" },
+      el("span", { class: "gloss-emoji" }, ann.emoji), ann.label));
+    head.appendChild(el("span", { class: "gloss-source" }, "AI review"));
+  } else {
+    head.appendChild(el("span", { class: "gloss-tag gloss-tag-human" },
+      el("span", { class: "gloss-author-dot" }), ann.author));
+    if (ann.created_at) {
+      head.appendChild(el("span", { class: "gloss-source" }, ann.created_at));
+    }
+  }
+  wrap.appendChild(head);
+  if (ann.body) {
+    wrap.appendChild(el("p", { class: "gloss-body" }, ann.body));
+  }
+  if (ann.suggestion) {
+    wrap.appendChild(el("p", { class: "gloss-suggestion" },
+      el("span", { class: "gloss-suggestion-label" }, "Suggested fix"),
+      ann.suggestion));
+  }
+  return wrap;
 }
 
 // ===== per-PR page renderer =====
@@ -429,39 +552,83 @@ function tickets(meta) {
   return [];
 }
 
-function renderPrPage(prKey, pageNumber) {
+function renderScenePage(descriptor, pageNumber) {
+  const prKey = descriptor.prKey;
   const meta = PAGES_DATA[prKey] || { kind: "pr", title: prKey, verdict: "pending", findings: {} };
   const pageEl = $(`#page-${pageNumber}`);
   if (!pageEl) return;
   pageEl.dataset.pageKey = prKey;
+  pageEl.dataset.chapterIndex = String(descriptor.chapterIndex);
+  pageEl.dataset.sceneIndex = String(descriptor.sceneIndex);
   pageEl.innerHTML = "";
+
+  const chapters = (meta.chapters && meta.chapters.length) ? meta.chapters : null;
+  const chapter = chapters && descriptor.chapterIndex >= 0 ? chapters[descriptor.chapterIndex] : null;
+  const chapterNum = chapter ? (descriptor.chapterIndex + 1) : null;
+  const chapterCount = chapters ? chapters.length : null;
 
   const parsedFiles = DIFFS_B64[prKey]
     ? parseUnifiedDiff(decodeB64(DIFFS_B64[prKey]))
     : [];
-  const fileMetas = parsedFiles.map(deriveFileMeta);
-  const totalAdded = fileMetas.reduce((a, f) => a + f.added, 0);
-  const totalRemoved = fileMetas.reduce((a, f) => a + f.removed, 0);
-  const linesChanged = meta.linesChanged || (totalAdded + totalRemoved);
+  const allFileMetas = parsedFiles.map(deriveFileMeta);
+  const fileByPath = new Map(allFileMetas.map(f => [f.path, f]));
+
+  // Resolve THIS scene. Three flavors:
+  //   - chapter has scenes[] → pick scenes[sceneIndex]
+  //   - chapter has paths only → implicit single scene = chapter.paths
+  //   - no chapter → implicit single scene = all PR files
+  let scene;
+  let sceneNum = null;
+  let sceneCount = null;
+  if (chapter) {
+    const scenes = chapter.scenes && chapter.scenes.length ? chapter.scenes : null;
+    if (scenes) {
+      scene = scenes[descriptor.sceneIndex];
+      sceneNum = descriptor.sceneIndex + 1;
+      sceneCount = scenes.length;
+    } else {
+      scene = { title: "", narrative: "", paths: chapter.paths || [] };
+    }
+  } else {
+    scene = { title: "", narrative: "", paths: allFileMetas.map(f => f.path) };
+  }
+
+  const sceneFileMetas = (scene.paths || [])
+    .map(p => fileByPath.get(p))
+    .filter(Boolean);
+  const totalAdded = sceneFileMetas.reduce((a, f) => a + f.added, 0);
+  const totalRemoved = sceneFileMetas.reduce((a, f) => a + f.removed, 0);
 
   const ticketList = tickets(meta);
   const ticketPills = ticketList.map(t =>
     el("a", { class: "ticket-pill", href: jiraUrl(t), target: "_blank", rel: "noopener" }, t)
   );
-  const eta = estimateMinutes(linesChanged, fileMetas.filter(f => f.isNew).length);
-  const v = verdictMeta(meta.verdict);
-
-  // Header band
   const kindLabel = meta.kind === "commit" ? "commit" : "PR";
   const refLabel = meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`;
+
+  // Eyebrow tells the reader where they are in the larger story.
+  const eyebrowParts = [];
+  if (meta.title) eyebrowParts.push(meta.title);
+  if (chapter) {
+    eyebrowParts.push(`Chapter ${chapterNum}${chapterCount ? ` of ${chapterCount}` : ""}: ${chapter.title || ""}`.trim());
+    if (sceneNum != null && sceneCount != null) {
+      eyebrowParts.push(`Scene ${sceneNum} of ${sceneCount}`);
+    }
+  }
+  const headerTitle = (scene && scene.title)
+    || (chapter && chapter.title)
+    || meta.title
+    || prKey;
+
   const header = el("header", { class: "page-header" },
     el("div", { class: "page-header-row" },
       el("span", null, `Page ${pageNumber} of ${TOTAL_PAGES}`),
-      ticketPills.length
-        ? el("div", { class: "ph-tickets" }, ...ticketPills)
-        : null
+      ticketPills.length ? el("div", { class: "ph-tickets" }, ...ticketPills) : null
     ),
-    el("h1", { class: "ph-title display display-l" }, meta.title || prKey),
+    eyebrowParts.length
+      ? el("span", { class: "eyebrow" }, eyebrowParts.join(" · "))
+      : null,
+    el("h1", { class: "ph-title display display-l", style: "margin-top: 8px;" }, headerTitle),
     el("div", { class: "ph-meta-row" },
       el("span", { class: "ph-meta" },
         el("span", { class: "ph-meta-key" }, kindLabel),
@@ -469,85 +636,123 @@ function renderPrPage(prKey, pageNumber) {
           ? el("code", { class: "mono" }, refLabel)
           : el("a", { class: "link", href: ghPrUrl(prKey), target: "_blank", rel: "noopener" }, refLabel)
       ),
-      fileMetas.length
-        ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "files"), String(fileMetas.length))
+      sceneFileMetas.length
+        ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "files"),
+            String(sceneFileMetas.length))
         : null,
       (totalAdded + totalRemoved) > 0
         ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "Δ"),
             `+${totalAdded} / −${totalRemoved}`)
-        : null,
-      el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "ETA"), `~${eta} min`)
+        : null
     )
   );
   pageEl.appendChild(header);
 
-  const findings = meta.findings || {};
-  const importantCount = findings.important || 0;
-  const suggestedCount = findings.suggested || 0;
-  const questionCount = findings.question || 0;
-  const criticalCount = findings.critical || 0;
-  const isPending = meta.verdict === "pending";
-
-  const whyPanel = el("div", { class: "why-panel" },
-    el("span", { class: "eyebrow" }, "Why this change exists"),
-    el("p", null, meta.description || "No description provided.")
-  );
-
-  const anchorGrid = el("div", { class: "anchor-grid" },
-    whyPanel,
-    el("aside", { class: `verdict-card ${v.class}` },
-      el("span", { class: "eyebrow" }, "Verdict"),
-      el("h2", { class: "verdict-headline" }, meta.verdictLabel || v.label),
-      el("div", { class: "findings-grid" },
-        el("div", { class: "finding-cell" },
-          el("div", { class: `finding-cell-num ${(criticalCount + importantCount) > 0 ? "finding-cell-warn" : "finding-cell-zero"}` },
-            isPending ? "—" : String(criticalCount + importantCount)),
-          el("div", { class: "finding-cell-label" }, criticalCount > 0 ? "Critical+Imp" : "Important")
-        ),
-        el("div", { class: "finding-cell" },
-          el("div", { class: `finding-cell-num ${suggestedCount > 0 ? "finding-cell-warn" : "finding-cell-zero"}` },
-            isPending ? "—" : String(suggestedCount)),
-          el("div", { class: "finding-cell-label" }, "Suggested")
-        ),
-        el("div", { class: "finding-cell" },
-          el("div", { class: `finding-cell-num ${questionCount > 0 ? "finding-cell-info" : "finding-cell-zero"}` },
-            isPending && questionCount === 0 ? "—" : String(questionCount)),
-          el("div", { class: "finding-cell-label" }, "Question")
-        )
+  // Chapter intro — show the chapter's narrative on the FIRST scene page of
+  // each chapter only, so the reader gets the act-level framing once.
+  const isFirstSceneOfChapter = chapter
+    ? pageNumber === firstPageOfChapter(prKey, descriptor.chapterIndex)
+    : false;
+  if (isFirstSceneOfChapter && chapter && chapter.narrative) {
+    pageEl.appendChild(
+      el("aside", { class: "chapter-intro" },
+        el("span", { class: "eyebrow" }, `Chapter ${chapterNum}${chapterCount ? ` of ${chapterCount}` : ""}`),
+        el("h2", { class: "chapter-intro-title" }, chapter.title || ""),
+        el("p", { class: "chapter-intro-narrative" }, chapter.narrative)
       )
-    )
-  );
-  pageEl.appendChild(anchorGrid);
-
-  // Findings section (severity-grouped, with location)
-  const findingItems = (findings.items || []).slice();
-  if (findingItems.length) {
-    pageEl.appendChild(renderFindingsSection(findingItems));
-  }
-
-  // Files section
-  if (fileMetas.length) {
-    const filesSection = el("section", { class: "files-section" });
-    filesSection.appendChild(el("h2", { class: "section-heading" }, "Files changed",
-      el("span", { class: "section-count" }, `${fileMetas.length} file${fileMetas.length !== 1 ? "s" : ""}`)));
-    fileMetas.forEach(f => {
-      filesSection.appendChild(buildFileRow(f, prKey, parsedFiles));
-    });
-    pageEl.appendChild(filesSection);
-  } else {
-    const noDiff = el("section", { class: "files-section" },
-      el("h2", { class: "section-heading" }, "Files changed",
-        el("span", { class: "section-count" }, "no diff captured")),
-      el("p", { class: "small", style: "color: var(--ink-soft); padding: 16px 0;" },
-        "No diff was bundled for this entry. Re-run scaffold with ",
-        el("code", { class: "mono" }, "diff_b64"), " populated to see file-level review.")
     );
-    pageEl.appendChild(noDiff);
   }
 
-  // Decision widget
-  const decisionWidget = renderDecisionWidget(prKey, meta);
-  pageEl.appendChild(decisionWidget);
+  // Scene narrative
+  if (scene && scene.narrative) {
+    pageEl.appendChild(
+      el("p", { class: "scene-page-narrative" }, scene.narrative)
+    );
+  } else if (!chapter && meta.description) {
+    // No structured chapters/scenes → fall back to the PR description.
+    pageEl.appendChild(
+      el("p", { class: "scene-page-narrative" }, meta.description)
+    );
+  }
+
+  // Build all inline annotations (findings + human comments) keyed by file.
+  const annotationsByFile = buildAnnotations(meta);
+
+  // Orphan annotations (no path) — show only on the FIRST scene of the PR.
+  const isFirstSceneOfPr = pageNumber === firstScenePageOf(prKey);
+  if (isFirstSceneOfPr) {
+    const orphans = (annotationsByFile.__orphans__ && annotationsByFile.__orphans__.fileLevel) || [];
+    if (orphans.length) {
+      const orphanSection = el("section", { class: "orphan-notes" },
+        el("span", { class: "eyebrow" }, "Reviewer notes — not anchored to a file"));
+      orphans.forEach(a => orphanSection.appendChild(renderGloss(a)));
+      pageEl.appendChild(orphanSection);
+    }
+  }
+
+  if (sceneFileMetas.length) {
+    const filesWrap = el("section", { class: "scene-files-section" });
+    sceneFileMetas.forEach(f => {
+      const fileAnnotations = annotationsByFile[f.path] || { fileLevel: [], byLine: {} };
+      filesWrap.appendChild(buildFileRow(f, prKey, parsedFiles, fileAnnotations));
+    });
+    pageEl.appendChild(filesWrap);
+  } else {
+    pageEl.appendChild(
+      el("p", { class: "small", style: "color: var(--ink-soft); padding: 16px 0;" },
+        "No files declared for this scene.")
+    );
+  }
+
+  // Decision widget — last scene of the PR.
+  if (pageNumber === lastScenePageOf(prKey)) {
+    pageEl.appendChild(renderVerdictRecap(meta));
+    pageEl.appendChild(renderDecisionWidget(prKey, meta));
+  }
+}
+
+// ===== verdict recap (renders on the last chapter page of each PR) =====
+function renderVerdictRecap(meta) {
+  const v = verdictMeta(meta.verdict);
+  const findings = meta.findings || {};
+  const isPending = meta.verdict === "pending";
+  const total = ["critical", "important", "debt", "suggested", "question"]
+    .reduce((a, k) => a + (findings[k] || 0), 0);
+  return el("aside", { class: `verdict-recap verdict-card ${v.class}` },
+    el("span", { class: "eyebrow" }, "Verdict"),
+    el("h2", { class: "verdict-headline" }, meta.verdictLabel || v.label),
+    el("p", { class: "small", style: "color: var(--ink-soft); margin: 8px 0 0;" },
+      isPending
+        ? "No AI review pre-baked for this PR. Use this page to record your decision."
+        : `${total} finding${total !== 1 ? "s" : ""} surfaced inline at the diff line they reference.`)
+  );
+}
+
+// Renders one scene: small heading + narrative + the files that belong to it.
+function renderScene(chapterNum, sceneNum, scene, fileMetas, prKey, parsedFiles, annotationsByFile) {
+  const wrap = el("section", { class: "scene" });
+  if (scene.title) {
+    const head = el("header", { class: "scene-head" },
+      el("span", { class: "scene-num" },
+        chapterNum != null ? `${String(chapterNum).padStart(2, "0")}.${sceneNum}` : `Scene ${sceneNum}`),
+      el("div", { class: "scene-head-text" },
+        el("h3", { class: "scene-title" }, scene.title),
+        el("span", { class: "scene-count" },
+          `${fileMetas.length} file${fileMetas.length !== 1 ? "s" : ""}`)
+      )
+    );
+    wrap.appendChild(head);
+  }
+  if (scene.narrative) {
+    wrap.appendChild(el("p", { class: "scene-narrative" }, scene.narrative));
+  }
+  const files = el("div", { class: "scene-files" });
+  fileMetas.forEach(f => {
+    const fileAnnotations = annotationsByFile[f.path] || { fileLevel: [], byLine: {} };
+    files.appendChild(buildFileRow(f, prKey, parsedFiles, fileAnnotations));
+  });
+  wrap.appendChild(files);
+  return wrap;
 }
 
 function renderDecisionWidget(prKey, meta) {
@@ -600,50 +805,91 @@ function renderDecisionWidget(prKey, meta) {
   return widget;
 }
 
-// ===== triage list (cover) =====
+// ===== chapter / scene table-of-contents (cover) =====
+// Renders chapter group headers with their scenes as clickable rows.
 function refreshTriageList() {
   const list = $("#triage-list");
   if (!list) return;
   list.innerHTML = "";
-  STACK_ORDER.forEach((prKey, idx) => {
-    const meta = PAGES_DATA[prKey];
-    if (!meta) return;
+  let lastPr = null;
+  let lastChapterKey = null;
+  PAGE_ORDER.forEach((descriptor, idx) => {
+    if (descriptor.kind !== "scene") return;
+    const pageNum = idx + 1;
+    const prKey = descriptor.prKey;
+    const meta = PAGES_DATA[prKey] || {};
+    const chapters = (meta.chapters && meta.chapters.length) ? meta.chapters : null;
+    const chapter = chapters && descriptor.chapterIndex >= 0 ? chapters[descriptor.chapterIndex] : null;
+    const chapterNum = chapter ? (descriptor.chapterIndex + 1) : null;
+    const chapterCount = chapters ? chapters.length : null;
+
+    // PR header — render once per PR when in a multi-PR stack.
+    if (STACK_ORDER.length > 1 && prKey !== lastPr) {
+      const tList = tickets(meta);
+      const v = verdictMeta(meta.verdict);
+      list.appendChild(el("div", { class: "toc-pr-header" },
+        el("span", { class: "toc-pr-key mono" },
+          meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`),
+        el("span", { class: "toc-pr-title" }, meta.title || prKey),
+        tList.length ? el("span", { class: "toc-pr-ticket" }, tList.join(" · ")) : null,
+        el("span", { class: `toc-pr-verdict ${v.class}` }, meta.verdictLabel || v.label)
+      ));
+      lastChapterKey = null;
+    }
+    lastPr = prKey;
+
+    // Chapter group header — render once per chapter as a divider/title.
+    const chapterKey = `${prKey}::${descriptor.chapterIndex}`;
+    if (chapter && chapterKey !== lastChapterKey) {
+      const synopsis = chapter.narrative
+        ? chapter.narrative.split(/(?<=[.!?])\s+/)[0]
+        : "";
+      list.appendChild(el("div", { class: "toc-chapter-header" },
+        el("span", { class: "toc-chapter-num mono" }, String(chapterNum).padStart(2, "0")),
+        el("div", { class: "toc-chapter-text" },
+          el("span", { class: "toc-chapter-title" }, chapter.title || `Chapter ${chapterNum}`),
+          el("span", { class: "toc-chapter-meta" },
+            `Chapter ${chapterNum} of ${chapterCount}`),
+          synopsis ? el("span", { class: "toc-chapter-synopsis" }, synopsis) : null
+        )
+      ));
+      lastChapterKey = chapterKey;
+    }
+
+    // Scene row.
+    const scenes = chapter && chapter.scenes && chapter.scenes.length ? chapter.scenes : null;
+    const scene = scenes && descriptor.sceneIndex >= 0 ? scenes[descriptor.sceneIndex] : null;
+    const sceneNum = scene ? (descriptor.sceneIndex + 1) : null;
+    const sceneCount = scenes ? scenes.length : null;
+    const sceneTitle = (scene && scene.title)
+      || (chapter && chapter.title)
+      || (meta.title || prKey);
+    const sceneFiles = (scene && scene.paths && scene.paths.length)
+      || (chapter && (!scenes ? (chapter.paths || []).length : 0))
+      || 0;
     const decision = loadDecision(prKey);
-    const findings = meta.findings || {};
-    const criticalCount = findings.critical || 0;
-    const importantCount = findings.important || 0;
-    const suggestedCount = findings.suggested || 0;
-    const questionCount = findings.question || 0;
-    const isPending = meta.verdict === "pending";
-    const blockerCount = criticalCount + importantCount;
+    const numLabel = sceneNum != null
+      ? `${String(chapterNum).padStart(2, "0")}.${sceneNum}`
+      : String(idx).padStart(2, "0");
 
-    let statusBadge;
-    if (decision === "approve") statusBadge = el("span", { class: "triage-status badge-clean" }, "Approved");
-    else if (decision === "changes") statusBadge = el("span", { class: "triage-status badge-finding" }, "Changes");
-    else if (decision === "discuss") statusBadge = el("span", { class: "triage-status badge-question" }, "Discuss");
-    else if (isPending) statusBadge = el("span", { class: "triage-status badge-question" }, "Pending");
-    else if (meta.verdict === "block" || blockerCount > 0) statusBadge = el("span", { class: "triage-status badge-finding" }, "Important");
-    else if (suggestedCount > 0 || questionCount > 0) statusBadge = el("span", { class: "triage-status badge-question" }, "Non-blocking");
-    else statusBadge = el("span", { class: "triage-status badge-clean" }, "Clean");
-
-    const ticketList = tickets(meta);
-    const linesChanged = meta.linesChanged || 0;
-    const eta = estimateMinutes(linesChanged, 0);
-    const ticketsText = ticketList.length ? ticketList.join(" · ") : (meta.kind === "commit" ? "commit" : "PR");
     const row = el("button", {
-      class: "triage-row" + (decision ? " decided" : ""),
+      class: "toc-row toc-scene-row" + (decision ? " decided" : ""),
       type: "button",
-      "aria-label": `${ticketsText} — ${meta.title || prKey}`,
+      "aria-label": `Go to ${sceneTitle}`,
     },
-      el("span", { class: "triage-num" }, String(idx + 2).padStart(2, "0")),
-      el("span", { class: "triage-title" },
-        el("span", { class: "triage-tickets" }, `#${prKey}` + (ticketList.length ? ` · ${ticketList.join(" · ")}` : "")),
-        el("span", { class: "triage-headline" }, meta.title || prKey)
-      ),
-      el("span", { class: "triage-meta" }, `~${eta} min · ${linesChanged} lines`),
-      statusBadge
+      el("span", { class: "toc-num mono" }, numLabel),
+      el("span", { class: "toc-body" },
+        el("span", { class: "toc-title" }, sceneTitle),
+        scene && scene.narrative
+          ? el("span", { class: "toc-synopsis" }, scene.narrative.split(/(?<=[.!?])\s+/)[0])
+          : null,
+        el("span", { class: "toc-meta" },
+          sceneNum != null ? `Scene ${sceneNum} of ${sceneCount}` : "Walkthrough",
+          sceneFiles ? ` · ${sceneFiles} file${sceneFiles !== 1 ? "s" : ""}` : ""
+        )
+      )
     );
-    row.addEventListener("click", () => navigate(idx + 2));
+    row.addEventListener("click", () => navigate(pageNum));
     list.appendChild(row);
   });
 }
@@ -679,12 +925,12 @@ function refreshDots() {
   if (!dots) return;
   dots.innerHTML = "";
   const current = getCurrentPage();
-  const lastPrPage = STACK_ORDER.length + 1;
   for (let i = 1; i <= TOTAL_PAGES; i++) {
+    const descriptor = PAGE_ORDER[i - 1] || {};
     let classes = "dot";
     if (i === current) classes += " active";
-    if (i >= 2 && i <= lastPrPage) {
-      const prKey = STACK_ORDER[i - 2];
+    if (descriptor.kind === "scene") {
+      const prKey = descriptor.prKey;
       const meta = PAGES_DATA[prKey] || {};
       const findings = meta.findings || {};
       const importantCount = (findings.critical || 0) + (findings.important || 0);
@@ -718,12 +964,18 @@ function refreshResumeBanner() {
   if (!banner) return;
   if (last && last > 1 && last <= TOTAL_PAGES && getCurrentPage() === 1) {
     let label;
-    const lastPrPage = STACK_ORDER.length + 1;
-    if (last === TOTAL_PAGES) label = `Page ${last} — Merge plan`;
-    else if (last >= 2 && last <= lastPrPage) {
-      const prKey = STACK_ORDER[last - 2];
-      const meta = PAGES_DATA[prKey] || {};
-      label = `Page ${last} — #${prKey} · ${meta.title || ""}`;
+    const descriptor = PAGE_ORDER[last - 1] || {};
+    if (descriptor.kind === "merge") label = `Page ${last} — Merge plan`;
+    else if (descriptor.kind === "scene") {
+      const meta = PAGES_DATA[descriptor.prKey] || {};
+      const chapters = meta.chapters && meta.chapters.length ? meta.chapters : null;
+      const chapter = chapters && descriptor.chapterIndex >= 0 ? chapters[descriptor.chapterIndex] : null;
+      const scenes = chapter && chapter.scenes && chapter.scenes.length ? chapter.scenes : null;
+      const scene = scenes && descriptor.sceneIndex >= 0 ? scenes[descriptor.sceneIndex] : null;
+      const sceneLabel = (scene && scene.title)
+        || (chapter && chapter.title)
+        || (meta.title || descriptor.prKey);
+      label = `Page ${last} — ${sceneLabel}`;
     } else label = `Page ${last}`;
     $("#resume-detail").textContent = label;
     $("#resume-btn").onclick = () => navigate(last);
@@ -841,11 +1093,13 @@ function onKey(e) {
 function init() {
   initTheme();
   refreshTriageList();
-  STACK_ORDER.forEach((prKey, idx) => {
+  PAGE_ORDER.forEach((descriptor, idx) => {
+    if (descriptor.kind !== "scene") return;
+    const pageNumber = idx + 1;
     try {
-      renderPrPage(prKey, idx + 2);
+      renderScenePage(descriptor, pageNumber);
     } catch (e) {
-      console.error(`renderPrPage failed for ${prKey}:`, e);
+      console.error(`renderScenePage failed for ${descriptor.prKey} ch=${descriptor.chapterIndex} s=${descriptor.sceneIndex}:`, e);
     }
   });
   const mergeTa = $("#merge-comment-final");

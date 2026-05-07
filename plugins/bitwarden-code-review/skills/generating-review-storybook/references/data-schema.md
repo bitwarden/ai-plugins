@@ -19,20 +19,22 @@ The `scaffold.py` script consumes a single JSON config file. This document is th
 
 ## `stack[]` Item
 
-| Field           | Type   | Required | Default                | Notes                                                                                        |
-| --------------- | ------ | -------- | ---------------------- | -------------------------------------------------------------------------------------------- |
-| `key`           | string | **yes**  | —                      | PR number (e.g. `"2573"`) or short commit SHA. Stringified.                                  |
-| `kind`          | enum   | no       | `"pr"`                 | `"pr"` or `"commit"`. Drives the cover label (`PR 2573` vs `commit a1b2c3`).                 |
-| `title`         | string | no       | falls back to `key`    | Short human label.                                                                           |
-| `ticket`        | string | no       | `""`                   | Jira key, e.g. `"PM-32809"`. Renders next to the title; empty omits.                         |
-| `description`   | string | no       | `""`                   | One-paragraph PR/commit summary used in the merge plan default.                              |
-| `verdict`       | enum   | no       | `"pending"`            | One of `approve` / `approve-fix` / `block` / `pending`. See verdict notes below.             |
-| `verdict_label` | string | no       | derived from `verdict` | Override the badge text (rarely needed).                                                     |
-| `findings`      | object | no       | all zero               | `{ critical, important, debt, suggested, question }` — integers.                             |
-| `files_changed` | number | no       | `0`                    | Cover stats + cards.                                                                         |
-| `lines_changed` | number | no       | `0`                    | Cover stats + cards.                                                                         |
-| `diff_b64`      | string | no       | `""`                   | Base64-encoded unified diff text. Produced by `scripts/capture_diffs.py`.                    |
-| `diff_path`     | string | no       | `""`                   | Read a diff from disk and base64-encode it inline. Use **either** `diff_b64` OR `diff_path`. |
+| Field           | Type   | Required | Default                | Notes                                                                                                                                                  |
+| --------------- | ------ | -------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `key`           | string | **yes**  | —                      | PR number (e.g. `"2573"`) or short commit SHA. Stringified.                                                                                            |
+| `kind`          | enum   | no       | `"pr"`                 | `"pr"` or `"commit"`. Drives the cover label (`PR 2573` vs `commit a1b2c3`).                                                                           |
+| `title`         | string | no       | falls back to `key`    | Short human label.                                                                                                                                     |
+| `ticket`        | string | no       | `""`                   | Jira key, e.g. `"PM-32809"`. Renders next to the title; empty omits.                                                                                   |
+| `description`   | string | no       | `""`                   | One-paragraph PR/commit summary used in the merge plan default.                                                                                        |
+| `verdict`       | enum   | no       | `"pending"`            | One of `approve` / `approve-fix` / `block` / `pending`. See verdict notes below.                                                                       |
+| `verdict_label` | string | no       | derived from `verdict` | Override the badge text (rarely needed).                                                                                                               |
+| `findings`      | object | no       | all zero               | `{ critical, important, debt, suggested, question }` — integers.                                                                                       |
+| `files_changed` | number | no       | `0`                    | Cover stats + cards.                                                                                                                                   |
+| `lines_changed` | number | no       | `0`                    | Cover stats + cards.                                                                                                                                   |
+| `diff_b64`      | string | no       | `""`                   | Base64-encoded unified diff text. Produced by `scripts/capture_diffs.py`.                                                                              |
+| `diff_path`     | string | no       | `""`                   | Read a diff from disk and base64-encode it inline. Use **either** `diff_b64` OR `diff_path`.                                                           |
+| `comments`      | array  | no       | `[]`                   | Human reviewer comments — render as marginalia alongside findings. See below.                                                                          |
+| `chapters`      | array  | no       | `[]`                   | Ordered walkthrough groupings. Files declared here render under chapter headings; anything unlisted falls into a final "Other files" group. See below. |
 
 ### Verdict Values
 
@@ -98,6 +100,72 @@ Each item:
 | `message`    | string | yes      | The one-line description (text after the severity emoji in the review).     |
 | `location`   | string | no       | `path/to/file.ext:lineno` — surfaced as a `mono` code chip on the card.     |
 | `suggestion` | string | no       | Free-form follow-up text (anything in sub-bullets that isn't the location). |
+
+### `comments[]`
+
+Human reviewer comments on this PR/commit. Rendered inline at the diff line they
+reference, the same way findings are — distinguished only by an author label and
+a Bitwarden Blue accent line (rather than a severity color).
+
+```json
+[
+  {
+    "author": "Sam (security)",
+    "body": "Confirmed reproducible — `findUserByEmail(\"' OR 1=1 --\")` returns the first row.",
+    "location": "src/auth/queries.ts:86",
+    "created_at": "23 min ago"
+  },
+  {
+    "author": "Pat (reviewer)",
+    "body": "Worth confirming whether this helper is needed at all.",
+    "location": "src/auth/queries.ts",
+    "created_at": "2 hours ago"
+  }
+]
+```
+
+| Field        | Type   | Required | Notes                                                                                 |
+| ------------ | ------ | -------- | ------------------------------------------------------------------------------------- |
+| `author`     | string | yes      | Display name — keep short. Used as the gloss header and the file-row dot tooltip.     |
+| `body`       | string | yes      | The comment text.                                                                     |
+| `location`   | string | no       | `path/to/file.ext:lineno` anchors to that line. Path-only ⇒ file-level prologue.      |
+| `created_at` | string | no       | Free-form; e.g. `"23 min ago"`. Surfaces as a small right-aligned label on the gloss. |
+
+Only Claude findings ship with a producer (`parse_review_md.py`). Comments come
+from the user (or from a future `gh api reviewThreads` integration); for now,
+populate them by hand or from an external script.
+
+### `chapters[]`
+
+The walkthrough structure for one PR. Each chapter is a logical group of files with
+a heading and a narrative paragraph that tells the reviewer what this chapter is
+_about_ before they read code. Chapters render in declaration order; tests should
+typically belong to the same chapter as the code they cover.
+
+```json
+[
+  {
+    "title": "UpgradedToPremium screen (on-Plan celebration)",
+    "narrative": "A new full-screen celebration registered in vaultUnlockedGraph. Modal entry returns to the CTA host; Standard entry leaves the user on Plan. PremiumStateManager owns the upgrade-state stream that drives this surface.",
+    "paths": [
+      "app/src/main/.../UpgradedToPremiumScreen.kt",
+      "app/src/main/.../UpgradedToPremiumViewModel.kt",
+      "app/src/test/.../UpgradedToPremiumScreenTest.kt"
+    ]
+  }
+]
+```
+
+| Field       | Type   | Required | Notes                                                                                        |
+| ----------- | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| `title`     | string | yes      | Chapter heading — keep it short and concrete. Avoid generic labels like "Code" or "Other".   |
+| `narrative` | string | yes      | One paragraph (2–4 sentences) explaining what this chapter is about. Talk concept, not file. |
+| `paths`     | array  | yes      | File paths that belong to this chapter (must match `diff_b64` paths exactly).                |
+
+**Tip:** if you can't articulate a non-trivial narrative for a chapter, the grouping
+is probably wrong — merge it with another chapter or split it differently. A
+chapter that earns its keep is one a reviewer can read top-down and understand the
+intent of the change before they read the code.
 
 ## `merge_plan[]`
 

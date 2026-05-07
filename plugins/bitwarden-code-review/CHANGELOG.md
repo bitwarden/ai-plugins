@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `generating-review-storybook` skill that packages a stack of PRs (or commits) into a self-contained, double-clickable HTML walkthrough — verdict-first hierarchy, severity-grouped Findings section (with file:line locations and suggestions), per-PR diffs as drill-down detail, inline comments, and copy-as-Markdown export, designed to cut reviewer triage time on AI-generated PR stacks
+- New `generating-review-storybook` skill that packages a stack of PRs (or commits) into a self-contained, double-clickable HTML walkthrough for humans reviewing AI-written code — verdict-first hierarchy, file-row severity-dot index, AI findings and human reviewer comments rendered inline as marginalia at the diff line they reference (with file-level fallback when no line anchor exists), per-PR diffs as the primary read, and copy-as-Markdown export
 - `scripts/scaffold.py` renders the storybook from a JSON config; defaults output to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`
 - `scripts/capture_diffs.py` fetches PR diffs via `gh` or commit diffs via `git show` and emits them base64-encoded for inlining into the config
 - `scripts/parse_review_md.py` extracts verdicts, finding counts, and individual finding items (severity, message, location, suggestion) from existing `bitwarden-code-review` summary files for the pre-baked verdict workflow

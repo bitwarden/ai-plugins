@@ -64,9 +64,11 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
      --output /tmp/verdicts.json
    ```
 
-4. **Compose the config JSON.** See `references/data-schema.md` for the shape. Save to `/tmp/storybook.json`. Inline diffs from step 2 into each stack item's `diff_b64` field; merge verdicts from step 3 into each item's `verdict`, `verdict_label`, and `findings`.
+4. **Synthesize chapters.** Read the PR body and skim the file list. Break each PR into 2–5 logical chapters that walk the reviewer through the change in a meaningful order — not alphabetical. Each chapter declares a `title`, a `narrative` paragraph that says what this chapter is _about_ (not what each file does), and the `paths[]` that belong to it. Tests usually go in the same chapter as the code they cover. If you can't articulate a narrative for a group, that's a sign the grouping is wrong. **Skip this step only when the PR is genuinely a single concern** — even then, one chapter with a real narrative beats a flat file list.
 
-5. **Run the scaffolder.**
+5. **Compose the config JSON.** See `references/data-schema.md` for the shape. Save to `/tmp/storybook.json`. Inline diffs from step 2 into each stack item's `diff_b64` field; merge verdicts from step 3 into each item's `verdict`, `verdict_label`, and `findings`; attach the chapters from step 4 as `stack[i].chapters`.
+
+6. **Run the scaffolder.**
 
    ```bash
    python scripts/scaffold.py --config /tmp/storybook.json
@@ -74,7 +76,7 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 
    By default the storybook is written to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` only if the user explicitly asks for a different location.
 
-6. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR has a page; per-PR Findings section lists items when verdicts were pre-baked; export-notes copies Markdown.
+7. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR walks through chapters in a logical order with real narrative; AI findings and human comments (if any) appear inline at the diff line they reference; export-notes copies Markdown.
 
 ## Output Location Convention
 
@@ -91,6 +93,7 @@ Before reporting "done":
 
 - [ ] `index.html` opens and the cover renders.
 - [ ] Per-PR pages count = stack size; each has its diff.
+- [ ] Per-PR walkthrough is grouped into chapters with narrative — not a flat alphabetical file list.
 - [ ] Verdicts on the cover match what the user expects (pending / approve / approve-fix / block).
 - [ ] Inline-comment +/save flow works on at least one diff line.
 - [ ] Export-notes button copies the running tally as Markdown.
