@@ -6,8 +6,7 @@
   },
   "metadata": {
     "description": "Official Bitwarden Claude Plugin Marketplace",
-    "version": "1.0.1",
-    "pluginRoot": "./plugins"
+    "version": "1.1.0"
   },
   "plugins": [
     {
@@ -25,7 +24,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.10.0",
+      "version": "1.11.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
