@@ -10,9 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `generating-review-storybook` skill that packages a stack of PRs (or commits) into a self-contained, double-clickable HTML walkthrough for humans reviewing AI-written code — verdict-first hierarchy, file-row severity-dot index, AI findings and human reviewer comments rendered inline as marginalia at the diff line they reference (with file-level fallback when no line anchor exists), per-PR diffs as the primary read, and copy-as-Markdown export
-- `scripts/scaffold.py` renders the storybook from a JSON config; defaults output to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`
+- `scripts/scaffold.py` renders the storybook from a JSON config; defaults output to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`; validates `gh_repo` matches `^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$` in `load_config` so the value can be safely substituted into the `app.js.tmpl` JS template literal alongside the JSON-encoded and HTML-escaped fields
 - `scripts/capture_diffs.py` fetches PR diffs via `gh` or commit diffs via `git show` and emits them base64-encoded for inlining into the config
 - `scripts/parse_review_md.py` extracts verdicts, finding counts, and individual finding items (severity, message, location, suggestion) from existing `bitwarden-code-review` summary files for the pre-baked verdict workflow
+- `scripts/fetch_pr_threads.py` pulls existing GitHub review threads via `gh api graphql` and emits them in the storybook `comments[]` shape, ready to merge into a stack item; outdated threads skipped by default, resolved threads kept with a `_(resolved)_` suffix; documented in SKILL.md as an optional step (3b) and referenced from `references/data-schema.md`
 - `references/data-schema.md` documents the config shape and generated `data.js` payload (including `findings.items[]`); `references/customization.md` covers brand override, language imports, and storage-prefix hygiene
 
 ## [1.10.0] - 2026-04-28

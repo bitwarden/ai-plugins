@@ -48,6 +48,7 @@ def die(msg: str, code: int = 1) -> None:
 
 
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
+_GH_REPO_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 
 
 def slugify(text: str) -> str:
@@ -90,6 +91,8 @@ def load_config(path: Path) -> dict[str, Any]:
     config.setdefault("summary", "")
     config.setdefault("storage_prefix", "review-storybook-v1")
     config.setdefault("gh_repo", "bitwarden/server")
+    if not _GH_REPO_RE.match(config["gh_repo"]):
+        die(f"gh_repo must be 'owner/name', got: {config['gh_repo']!r}")
     config.setdefault("estimated_minutes", None)
     config.setdefault("merge_plan", [])
     config.setdefault("slug", slugify(config["title"]))

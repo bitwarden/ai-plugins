@@ -7,7 +7,7 @@ description: Generate a multi-file static "review storybook" website that walks 
 
 You are packaging a stack of PRs (or commits) into a self-contained HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/` — your job is to interview the user, build a config, and run the scaffolder.
 
-**What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review — the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer comments on the GitHub PR are not pulled in — those stay in the GitHub UI.
+**What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review — the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
 
 **Core principle:** The scaffolder is deterministic. Your job is synthesis: ask the user enough to fill the config faithfully, then let `scripts/scaffold.py` render the artifact.
 
@@ -63,6 +63,15 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
    python scripts/parse_review_md.py 1234=reviews/pr-1234.md 2345=reviews/pr-2345.md \
      --output /tmp/verdicts.json
    ```
+
+3b. **(Optional) Pull human reviewer comments.** When the user wants existing GitHub review threads inlined alongside Claude findings, run for each PR:
+
+```bash
+python scripts/fetch_pr_threads.py --repo <owner/name> --pr 1234 --key 1234 \
+  --output /tmp/threads-1234.json
+```
+
+The output is a `{ key: [...comments] }` map ready to merge into each stack item's `comments[]`. Outdated threads are skipped by default; resolved threads are kept with a `_(resolved)_` suffix so the reviewer can see "this was caught and fixed" context. See `references/data-schema.md` for the comment shape.
 
 4. **Synthesize chapters.** Read the PR body and skim the file list. Break each PR into 2–5 logical chapters that walk the reviewer through the change in a meaningful order — not alphabetical. Each chapter declares a `title`, a `narrative` paragraph that says what this chapter is _about_ (not what each file does), and the `paths[]` that belong to it. Tests usually go in the same chapter as the code they cover. If you can't articulate a narrative for a group, that's a sign the grouping is wrong. **Skip this step only when the PR is genuinely a single concern** — even then, one chapter with a real narrative beats a flat file list.
 

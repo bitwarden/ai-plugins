@@ -131,9 +131,11 @@ a Bitwarden Blue accent line (rather than a severity color).
 | `location`   | string | no       | `path/to/file.ext:lineno` anchors to that line. Path-only ⇒ file-level prologue.      |
 | `created_at` | string | no       | Free-form; e.g. `"23 min ago"`. Surfaces as a small right-aligned label on the gloss. |
 
-Only Claude findings ship with a producer (`parse_review_md.py`). Comments come
-from the user (or from a future `gh api reviewThreads` integration); for now,
-populate them by hand or from an external script.
+Two producers ship with the skill: `parse_review_md.py` for Claude findings, and
+`fetch_pr_threads.py` for human reviewer threads (wraps `gh api graphql` against
+`reviewThreads`). Use `fetch_pr_threads.py --key <PR>` to emit a
+`{ key: [...comments] }` map you can merge into each stack item's `comments[]`.
+Hand-authored comments are also supported — the producer is optional.
 
 ### `chapters[]`
 
