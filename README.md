@@ -6,7 +6,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 
 | Plugin                                                              | Version | Description                                                                                                         |
 | ------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.0.0   | Software architect for technical planning, architecture reviews, and implementation phasing                         |
+| [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.1.0   | Tech lead for technical planning, architecture coherence, and surfacing patterns to Technical Strategy Ideas        |
 | [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.2.3   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                       |
 | [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.10.0  | Autonomous code review agent following Bitwarden engineering standards with GitHub integration                      |
 | [bitwarden-delivery-tools](plugins/bitwarden-delivery-tools/)       | 1.1.0   | Delivery lifecycle skills: initiative funnel navigation, work transitions, commits, PRs, preflight checks, labeling |

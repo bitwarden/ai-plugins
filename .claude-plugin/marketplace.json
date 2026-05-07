@@ -67,8 +67,8 @@
     {
       "name": "bitwarden-tech-lead",
       "source": "./plugins/bitwarden-tech-lead",
-      "version": "2.0.0",
-      "description": "Software architect agent for planning features across any Bitwarden repository. Discovers platform context dynamically via CLAUDE.md and repo-local planning skills."
+      "version": "2.1.0",
+      "description": "Tech lead agent for a Bitwarden product team. Architects solutions holistically with the architecture group, dispatches to delivery-lifecycle skills (initiative funnel, work transitions) when work crosses teams, and surfaces team patterns to the Technical Strategy Ideas backlog."
     },
     {
       "name": "bitwarden-delivery-tools",
