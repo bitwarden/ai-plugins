@@ -3,9 +3,13 @@
  * List accessible JIRA projects
  */
 
-import { JiraClient } from '../jira/client.js';
-import { validateInput, ListProjectsSchema, ToolDefinition } from '../utils/validation.js';
-import { JiraProject } from '../jira/types.js';
+import { JiraClient } from "../jira/client.js";
+import {
+  validateInput,
+  ListProjectsSchema,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { JiraProject } from "../jira/types.js";
 
 /**
  * Format project list for display
@@ -26,7 +30,7 @@ function formatProjects(projects: JiraProject[]): string {
     output += `- ID: ${project.id}\n`;
     output += `- Type: ${project.projectTypeKey}\n`;
     if (project.description) {
-      output += `- Description: ${project.description.substring(0, 200)}${project.description.length > 200 ? '...' : ''}\n`;
+      output += `- Description: ${project.description.substring(0, 200)}${project.description.length > 200 ? "..." : ""}\n`;
     }
     if (project.lead) {
       output += `- Lead: ${project.lead.displayName}\n`;
@@ -58,14 +62,16 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const listProjectsTool: ToolDefinition = {
-  name: 'list_projects',
-  description: 'List accessible JIRA projects. Returns project names, keys, types, descriptions, and leads. Use project keys with search_issues.',
+  name: "list_projects",
+  description:
+    "List accessible JIRA projects. Returns project names, keys, types, descriptions, and leads. Use project keys with search_issues.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       maxResults: {
-        type: 'number',
-        description: 'Maximum number of projects to return (default: 50, max: 100)',
+        type: "number",
+        description:
+          "Maximum number of projects to return (default: 50, max: 100)",
         default: 50,
         minimum: 1,
         maximum: 100,

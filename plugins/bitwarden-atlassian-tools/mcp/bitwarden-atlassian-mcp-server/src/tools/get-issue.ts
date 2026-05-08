@@ -3,9 +3,14 @@
  * Retrieve detailed information about a specific JIRA issue
  */
 
-import { JiraClient } from '../jira/client.js';
-import { validateInput, GetIssueSchema, GetIssueInput, ToolDefinition } from '../utils/validation.js';
-import { extractPlainText } from '../utils/adf.js';
+import { JiraClient } from "../jira/client.js";
+import {
+  validateInput,
+  GetIssueSchema,
+  GetIssueInput,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { extractPlainText } from "../utils/adf.js";
 
 /**
  * Format issue details for display.
@@ -14,22 +19,25 @@ import { extractPlainText } from '../utils/adf.js';
  *   human-readable display names (e.g. "Replication Steps"), provided by
  *   the Jira API when the request includes `expand=names`.
  */
-function formatIssueDetails(issue: any, names?: Record<string, string>): string {
+function formatIssueDetails(
+  issue: any,
+  names?: Record<string, string>,
+): string {
   const fields = issue.fields;
-  let output = `# ${issue.key}: ${fields.summary || 'No summary'}\n\n`;
+  let output = `# ${issue.key}: ${fields.summary || "No summary"}\n\n`;
 
   // Basic information
   output += `## Basic Information\n\n`;
   output += `- **Issue Key:** ${issue.key}\n`;
   if (fields.issuetype) {
-    output += `- **Type:** ${fields.issuetype?.name || 'Unknown'}\n`;
+    output += `- **Type:** ${fields.issuetype?.name || "Unknown"}\n`;
   }
   if (fields.status) {
-    output += `- **Status:** ${fields.status?.name || 'Unknown'} (${fields.status?.statusCategory?.name || 'Unknown'})\n`;
+    output += `- **Status:** ${fields.status?.name || "Unknown"} (${fields.status?.statusCategory?.name || "Unknown"})\n`;
   }
-  output += `- **Priority:** ${fields.priority?.name || 'None'}\n`;
+  output += `- **Priority:** ${fields.priority?.name || "None"}\n`;
   if (fields.project) {
-    output += `- **Project:** ${fields.project?.name || 'Unknown'} (${fields.project?.key || 'Unknown'})\n`;
+    output += `- **Project:** ${fields.project?.name || "Unknown"} (${fields.project?.key || "Unknown"})\n`;
   }
   output += `\n`;
 
@@ -37,13 +45,13 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
   if (fields.reporter || fields.assignee) {
     output += `## People\n\n`;
     if (fields.reporter) {
-      output += `- **Reporter:** ${fields.reporter?.displayName || 'Unknown'}`;
+      output += `- **Reporter:** ${fields.reporter?.displayName || "Unknown"}`;
       if (fields.reporter?.emailAddress) {
         output += ` (${fields.reporter.emailAddress})`;
       }
       output += `\n`;
     }
-    output += `- **Assignee:** ${fields.assignee?.displayName || 'Unassigned'}`;
+    output += `- **Assignee:** ${fields.assignee?.displayName || "Unassigned"}`;
     if (fields.assignee?.emailAddress) {
       output += ` (${fields.assignee.emailAddress})`;
     }
@@ -72,14 +80,14 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
   if (fields.description) {
     output += `## Description\n\n`;
     const descText = extractPlainText(fields.description);
-    output += descText || '(Empty description)';
+    output += descText || "(Empty description)";
     output += `\n\n`;
   }
 
   // Labels
   if (fields.labels && fields.labels.length > 0) {
     output += `## Labels\n\n`;
-    output += fields.labels.map((label: string) => `- ${label}`).join('\n');
+    output += fields.labels.map((label: string) => `- ${label}`).join("\n");
     output += `\n\n`;
   }
 
@@ -87,7 +95,7 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
   if (fields.components && fields.components.length > 0) {
     output += `## Components\n\n`;
     for (const component of fields.components) {
-      output += `- **${component?.name || 'Unknown'}**`;
+      output += `- **${component?.name || "Unknown"}**`;
       if (component?.description) {
         output += `: ${component.description}`;
       }
@@ -100,7 +108,7 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
   if (fields.fixVersions && fields.fixVersions.length > 0) {
     output += `## Fix Versions\n\n`;
     for (const version of fields.fixVersions) {
-      output += `- **${version?.name || 'Unknown'}**`;
+      output += `- **${version?.name || "Unknown"}**`;
       if (version?.released) {
         output += ` (Released)`;
       }
@@ -116,7 +124,7 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
   if (fields.subtasks && fields.subtasks.length > 0) {
     output += `## Subtasks\n\n`;
     for (const subtask of fields.subtasks) {
-      output += `- **[${subtask.key}]** ${subtask.fields?.summary || 'No summary'} - ${subtask.fields?.status?.name || 'Unknown'}\n`;
+      output += `- **[${subtask.key}]** ${subtask.fields?.summary || "No summary"} - ${subtask.fields?.status?.name || "Unknown"}\n`;
     }
     output += `\n`;
   }
@@ -124,16 +132,16 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
   // Parent (if this is a subtask)
   if (fields.parent) {
     output += `## Parent Issue\n\n`;
-    output += `**[${fields.parent.key}]** ${fields.parent.fields?.summary || 'No summary'}\n\n`;
+    output += `**[${fields.parent.key}]** ${fields.parent.fields?.summary || "No summary"}\n\n`;
   }
 
   // Attachments
   if (fields.attachment && fields.attachment.length > 0) {
     output += `## Attachments\n\n`;
     for (const attachment of fields.attachment) {
-      output += `- **${attachment?.filename || 'Unknown'}** (${((attachment?.size || 0) / 1024).toFixed(2)} KB)\n`;
-      output += `  - Added by ${attachment?.author?.displayName || 'Unknown'} on ${attachment?.created ? new Date(attachment.created).toLocaleDateString() : 'Unknown'}\n`;
-      output += `  - URL: ${attachment?.content || 'N/A'}\n`;
+      output += `- **${attachment?.filename || "Unknown"}** (${((attachment?.size || 0) / 1024).toFixed(2)} KB)\n`;
+      output += `  - Added by ${attachment?.author?.displayName || "Unknown"} on ${attachment?.created ? new Date(attachment.created).toLocaleDateString() : "Unknown"}\n`;
+      output += `  - URL: ${attachment?.content || "N/A"}\n`;
     }
     output += `\n`;
   }
@@ -147,8 +155,10 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
       for (const comment of fields.comment.comments.slice(0, 3)) {
         const commentText = extractPlainText(comment.body);
         output += `---\n`;
-        output += `**${comment.author?.displayName || 'Unknown'}** on ${new Date(comment.created).toLocaleString()}:\n\n`;
-        output += commentText.substring(0, 300) + (commentText.length > 300 ? '...' : '');
+        output += `**${comment.author?.displayName || "Unknown"}** on ${new Date(comment.created).toLocaleString()}:\n\n`;
+        output +=
+          commentText.substring(0, 300) +
+          (commentText.length > 300 ? "..." : "");
         output += `\n\n`;
       }
       if (fields.comment.total > 3) {
@@ -159,19 +169,39 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
 
   // Custom fields
   const knownFields = new Set([
-    'summary', 'issuetype', 'status', 'priority', 'project',
-    'reporter', 'assignee', 'created', 'updated', 'duedate',
-    'resolutiondate', 'description', 'labels', 'components',
-    'fixVersions', 'subtasks', 'parent', 'attachment', 'comment',
+    "summary",
+    "issuetype",
+    "status",
+    "priority",
+    "project",
+    "reporter",
+    "assignee",
+    "created",
+    "updated",
+    "duedate",
+    "resolutiondate",
+    "description",
+    "labels",
+    "components",
+    "fixVersions",
+    "subtasks",
+    "parent",
+    "attachment",
+    "comment",
   ]);
 
   // Field names that produce low-value noise in output
-  const skippedFieldNames = new Set(['Rank', 'Development']);
+  const skippedFieldNames = new Set(["Rank", "Development"]);
 
   const customFields: Array<{ name: string; value: string }> = [];
 
   for (const key of Object.keys(fields)) {
-    if (!key.startsWith('customfield_') || knownFields.has(key) || fields[key] == null) continue;
+    if (
+      !key.startsWith("customfield_") ||
+      knownFields.has(key) ||
+      fields[key] == null
+    )
+      continue;
 
     const val = fields[key];
     const displayName = names?.[key] || key;
@@ -182,27 +212,35 @@ function formatIssueDetails(issue: any, names?: Record<string, string>): string 
     let rendered: string | null = null;
 
     // ADF rich-text field
-    if (val && typeof val === 'object' && val.type === 'doc' && Array.isArray(val.content)) {
+    if (
+      val &&
+      typeof val === "object" &&
+      val.type === "doc" &&
+      Array.isArray(val.content)
+    ) {
       const text = extractPlainText(val);
       if (text) rendered = text;
     }
     // Simple string
-    else if (typeof val === 'string' && val.trim()) {
+    else if (typeof val === "string" && val.trim()) {
       rendered = val;
     }
     // Number
-    else if (typeof val === 'number') {
+    else if (typeof val === "number") {
       rendered = String(val);
     }
     // Array of strings or objects with name/value
     else if (Array.isArray(val) && val.length > 0) {
-      rendered = val.map(item =>
-        typeof item === 'string' ? item :
-        item?.name || item?.value || JSON.stringify(item)
-      ).join(', ');
+      rendered = val
+        .map((item) =>
+          typeof item === "string"
+            ? item
+            : item?.name || item?.value || JSON.stringify(item),
+        )
+        .join(", ");
     }
     // Object with name or value (e.g., select fields)
-    else if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+    else if (typeof val === "object" && val !== null && !Array.isArray(val)) {
       if (val.name) rendered = val.name;
       else if (val.value) rendered = val.value;
       else if (val.displayName) rendered = val.displayName;
@@ -234,7 +272,7 @@ async function handler(input: any): Promise<string> {
     const issue = await client.getIssue(
       validated.issueIdOrKey,
       validated.fields,
-      validated.expand || ['renderedFields', 'names']
+      validated.expand || ["renderedFields", "names"],
     );
 
     return formatIssueDetails(issue, issue.names);
@@ -247,28 +285,30 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const getIssueTool: ToolDefinition = {
-  name: 'get_issue',
-  description: 'Get detailed information about a specific JIRA issue by key (e.g., "PM-12345") or ID. Returns comprehensive issue details including description, comments, attachments, and relationships.',
+  name: "get_issue",
+  description:
+    'Get detailed information about a specific JIRA issue by key (e.g., "PM-12345") or ID. Returns comprehensive issue details including description, comments, attachments, and relationships.',
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       issueIdOrKey: {
-        type: 'string',
+        type: "string",
         description: 'JIRA issue key (e.g., "PM-12345") or numeric ID',
-        pattern: '^[A-Z][A-Z0-9_]+-\\d+$|^\\d+$',
+        pattern: "^[A-Z][A-Z0-9_]+-\\d+$|^\\d+$",
       },
       fields: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Specific fields to return. Omit to get all fields.',
+        type: "array",
+        items: { type: "string" },
+        description: "Specific fields to return. Omit to get all fields.",
       },
       expand: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Additional entities to expand (e.g., ["changelog", "renderedFields"])',
+        type: "array",
+        items: { type: "string" },
+        description:
+          'Additional entities to expand (e.g., ["changelog", "renderedFields"])',
       },
     },
-    required: ['issueIdOrKey'],
+    required: ["issueIdOrKey"],
   },
   handler,
 };

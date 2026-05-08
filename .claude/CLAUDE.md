@@ -37,7 +37,14 @@ After creating a plugin, always:
 
 **CRITICAL**: All plugin changes MUST include a version bump and changelog entry.
 
-When making ANY changes to a plugin (code, documentation, configuration, scripts, agents):
+**Exemption**: Formatting-only changes (e.g., `prettier --write`, whitespace fixes,
+line-ending normalization) do NOT require a version bump or changelog entry, since
+they don't change plugin behavior. This applies whether the formatting touches code,
+documentation, or component files (AGENT.md, SKILL.md, hooks.json). If a PR mixes
+formatting with substantive changes, bump for the substantive changes.
+
+When making ANY substantive changes to a plugin (code, documentation, configuration,
+scripts, agents):
 
 1. **Determine the semantic version bump**:
    - MAJOR (X.0.0): Breaking changes, incompatible API changes

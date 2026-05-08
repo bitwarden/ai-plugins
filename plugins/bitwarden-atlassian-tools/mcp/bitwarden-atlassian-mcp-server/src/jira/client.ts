@@ -3,8 +3,8 @@
  * Provides typed methods for interacting with JIRA Cloud API v3 and Agile API v1
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import { loadJiraConfig, getJiraHeaders } from './auth.js';
+import axios, { AxiosInstance, AxiosError } from "axios";
+import { loadJiraConfig, getJiraHeaders } from "./auth.js";
 import {
   JiraConfig,
   JiraSearchParams,
@@ -17,13 +17,13 @@ import {
   JiraSprintsResponse,
   JiraSprintIssuesResponse,
   JiraRemoteLink,
-} from './types.js';
+} from "./types.js";
 
 export class JiraClient {
   private config: JiraConfig;
   private client: AxiosInstance;
-  private readonly API_BASE = '/rest/api/3';
-  private readonly AGILE_API_BASE = '/rest/agile/1.0';
+  private readonly API_BASE = "/rest/api/3";
+  private readonly AGILE_API_BASE = "/rest/agile/1.0";
 
   constructor() {
     this.config = loadJiraConfig();
@@ -38,7 +38,7 @@ export class JiraClient {
       (response) => response,
       (error: AxiosError) => {
         return Promise.reject(this.handleError(error));
-      }
+      },
     );
   }
 
@@ -52,24 +52,32 @@ export class JiraClient {
 
       switch (status) {
         case 401:
-          return new Error('JIRA authentication failed. Check your API token and email.');
+          return new Error(
+            "JIRA authentication failed. Check your API token and email.",
+          );
         case 403:
-          return new Error('JIRA access forbidden. Check your permissions.');
+          return new Error("JIRA access forbidden. Check your permissions.");
         case 404:
           return new Error(`JIRA resource not found: ${error.config?.url}`);
         case 410:
-          return new Error('JIRA API endpoint deprecated (410 Gone). The requested resource has been removed.');
+          return new Error(
+            "JIRA API endpoint deprecated (410 Gone). The requested resource has been removed.",
+          );
         case 429:
-          return new Error('JIRA API rate limit exceeded. Please try again later.');
+          return new Error(
+            "JIRA API rate limit exceeded. Please try again later.",
+          );
         default:
           return new Error(
-            `JIRA API error (${status}): ${data?.errorMessages?.join(', ') || error.message}`
+            `JIRA API error (${status}): ${data?.errorMessages?.join(", ") || error.message}`,
           );
       }
     }
 
     if (error.request) {
-      return new Error(`JIRA API request failed: ${error.message}. Check your ATLASSIAN_CLOUD_ID.`);
+      return new Error(
+        `JIRA API request failed: ${error.message}. Check your ATLASSIAN_CLOUD_ID.`,
+      );
     }
 
     return new Error(`JIRA client error: ${error.message}`);
@@ -90,19 +98,19 @@ export class JiraClient {
     }
 
     if (params.fields && params.fields.length > 0) {
-      queryParams.fields = params.fields.join(',');
+      queryParams.fields = params.fields.join(",");
     } else {
       // New endpoint only returns issue IDs by default; request all fields for backward compat
-      queryParams.fields = '*all';
+      queryParams.fields = "*all";
     }
 
     if (params.expand && params.expand.length > 0) {
-      queryParams.expand = params.expand.join(',');
+      queryParams.expand = params.expand.join(",");
     }
 
     const response = await this.client.get<JiraSearchResponse>(
       `${this.API_BASE}/search/jql`,
-      { params: queryParams }
+      { params: queryParams },
     );
 
     return response.data;
@@ -114,21 +122,21 @@ export class JiraClient {
   async getIssue(
     issueIdOrKey: string,
     fields?: string[],
-    expand?: string[]
+    expand?: string[],
   ): Promise<JiraIssue> {
     const queryParams: Record<string, any> = {};
 
     if (fields && fields.length > 0) {
-      queryParams.fields = fields.join(',');
+      queryParams.fields = fields.join(",");
     }
 
     if (expand && expand.length > 0) {
-      queryParams.expand = expand.join(',');
+      queryParams.expand = expand.join(",");
     }
 
     const response = await this.client.get<JiraIssue>(
       `${this.API_BASE}/issue/${issueIdOrKey}`,
-      { params: queryParams }
+      { params: queryParams },
     );
 
     return response.data;
@@ -140,7 +148,7 @@ export class JiraClient {
   async getIssueComments(
     issueIdOrKey: string,
     startAt: number = 0,
-    maxResults: number = 50
+    maxResults: number = 50,
   ): Promise<JiraCommentsResponse> {
     const response = await this.client.get<JiraCommentsResponse>(
       `${this.API_BASE}/issue/${issueIdOrKey}/comment`,
@@ -149,7 +157,7 @@ export class JiraClient {
           startAt,
           maxResults: Math.min(maxResults, 100),
         },
-      }
+      },
     );
 
     return response.data;
@@ -159,9 +167,7 @@ export class JiraClient {
    * Get current authenticated user information
    */
   async getCurrentUser(): Promise<JiraUser> {
-    const response = await this.client.get<JiraUser>(
-      `${this.API_BASE}/myself`
-    );
+    const response = await this.client.get<JiraUser>(`${this.API_BASE}/myself`);
 
     return response.data;
   }
@@ -181,8 +187,11 @@ export class JiraClient {
    */
   async downloadAttachment(attachmentUrl: string): Promise<Buffer> {
     const parsed = new URL(attachmentUrl);
-    if (!parsed.hostname.endsWith('.atlassian.net') || parsed.hostname === '.atlassian.net') {
-      throw new Error('Attachment URL must be an *.atlassian.net hostname');
+    if (
+      !parsed.hostname.endsWith(".atlassian.net") ||
+      parsed.hostname === ".atlassian.net"
+    ) {
+      throw new Error("Attachment URL must be an *.atlassian.net hostname");
     }
 
     // Route through the API gateway so scoped tokens work
@@ -190,7 +199,7 @@ export class JiraClient {
 
     try {
       const response = await this.client.get(gatewayUrl, {
-        responseType: 'arraybuffer',
+        responseType: "arraybuffer",
         timeout: 60000,
         maxContentLength: 50 * 1024 * 1024,
       });
@@ -198,10 +207,10 @@ export class JiraClient {
       return Buffer.from(response.data);
     } catch (error: any) {
       if (
-        error.code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED' ||
-        error.message?.includes('maxContentLength')
+        error.code === "ERR_FR_MAX_BODY_LENGTH_EXCEEDED" ||
+        error.message?.includes("maxContentLength")
       ) {
-        throw new Error('Attachment exceeds maximum download size (50MB)');
+        throw new Error("Attachment exceeds maximum download size (50MB)");
       }
       throw error; // already transformed by the response interceptor
     }
@@ -212,7 +221,10 @@ export class JiraClient {
   /**
    * List boards, optionally filtered by project
    */
-  async listBoards(projectKeyOrId?: string, maxResults: number = 50): Promise<JiraBoardsResponse> {
+  async listBoards(
+    projectKeyOrId?: string,
+    maxResults: number = 50,
+  ): Promise<JiraBoardsResponse> {
     const queryParams: Record<string, any> = {
       maxResults: Math.min(maxResults, 100),
     };
@@ -223,7 +235,7 @@ export class JiraClient {
 
     const response = await this.client.get<JiraBoardsResponse>(
       `${this.AGILE_API_BASE}/board`,
-      { params: queryParams }
+      { params: queryParams },
     );
 
     return response.data;
@@ -232,7 +244,11 @@ export class JiraClient {
   /**
    * Get sprints for a board, optionally filtered by state
    */
-  async getSprints(boardId: number, state?: string, maxResults: number = 50): Promise<JiraSprintsResponse> {
+  async getSprints(
+    boardId: number,
+    state?: string,
+    maxResults: number = 50,
+  ): Promise<JiraSprintsResponse> {
     const queryParams: Record<string, any> = {
       maxResults: Math.min(maxResults, 100),
     };
@@ -243,7 +259,7 @@ export class JiraClient {
 
     const response = await this.client.get<JiraSprintsResponse>(
       `${this.AGILE_API_BASE}/board/${boardId}/sprint`,
-      { params: queryParams }
+      { params: queryParams },
     );
 
     return response.data;
@@ -252,18 +268,22 @@ export class JiraClient {
   /**
    * Get all issues in a sprint
    */
-  async getSprintIssues(sprintId: number, fields?: string[], maxResults: number = 50): Promise<JiraSprintIssuesResponse> {
+  async getSprintIssues(
+    sprintId: number,
+    fields?: string[],
+    maxResults: number = 50,
+  ): Promise<JiraSprintIssuesResponse> {
     const queryParams: Record<string, any> = {
       maxResults: Math.min(maxResults, 100),
     };
 
     if (fields && fields.length > 0) {
-      queryParams.fields = fields.join(',');
+      queryParams.fields = fields.join(",");
     }
 
     const response = await this.client.get<JiraSprintIssuesResponse>(
       `${this.AGILE_API_BASE}/sprint/${sprintId}/issue`,
-      { params: queryParams }
+      { params: queryParams },
     );
 
     return response.data;
@@ -274,7 +294,7 @@ export class JiraClient {
    */
   async getRemoteLinks(issueIdOrKey: string): Promise<JiraRemoteLink[]> {
     const response = await this.client.get<JiraRemoteLink[]>(
-      `${this.API_BASE}/issue/${issueIdOrKey}/remotelink`
+      `${this.API_BASE}/issue/${issueIdOrKey}/remotelink`,
     );
     return response.data;
   }
@@ -289,7 +309,7 @@ export class JiraClient {
         params: {
           maxResults: Math.min(maxResults, 100),
         },
-      }
+      },
     );
 
     return response.data;

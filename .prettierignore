@@ -1,0 +1,13 @@
+# Lockfiles
+package-lock.json
+
+# Dependencies
+node_modules
+
+# TypeScript build output
+build
+dist
+
+# Coverage and caches
+coverage
+.cache

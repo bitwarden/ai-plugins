@@ -17,10 +17,10 @@ export interface JiraUser {
   active: boolean;
   timeZone?: string;
   avatarUrls?: {
-    '48x48': string;
-    '24x24': string;
-    '16x16': string;
-    '32x32': string;
+    "48x48": string;
+    "24x24": string;
+    "16x16": string;
+    "32x32": string;
   };
 }
 
@@ -162,7 +162,7 @@ export interface AttachmentDownloadResult {
   mimeType: string;
   sizeBytes: number;
   contentBase64: string;
-  warning?: string;  // For size warnings
+  warning?: string; // For size warnings
 }
 
 /**

@@ -1,19 +1,21 @@
-# EditorConfig is awesome: http://EditorConfig.org
+# EditorConfig is awesome: https://EditorConfig.org
 
 # top-most EditorConfig file
 root = true
 
-# Don't use tabs for indentation.
+# Default for all files
 [*]
-indent_size = 4
-indent_style = space
-tab_width = 4
 end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
-guidelines = 120
-
-# JSON files
-[*.{json,yml,md}]
+indent_style = space
 indent_size = 2
+
+# Shell scripts conventionally use 4-space indents
+[*.sh]
+indent_size = 4
+
+# Markdown trailing whitespace can be a deliberate line break
+[*.md]
+trim_trailing_whitespace = false
