@@ -1,5 +1,6 @@
 ---
 argument-hint: [PR#] | [PR URL]
+allowed-tools: Read, Write(review-summary.md), Write(review-inline-comments.md), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh pr list:*), Bash(git log:*), Bash(git diff:*), "Bash(gh api graphql -f query=:*)", Grep, Glob, Task, Skill
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
 ---
 

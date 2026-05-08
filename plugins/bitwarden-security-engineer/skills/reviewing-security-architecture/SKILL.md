@@ -27,10 +27,9 @@ Review these aspects of token-based authentication:
 
 ### Credential Storage
 
-- Passwords must be hashed with a modern KDF: Argon2id (preferred), bcrypt, or PBKDF2 with high iteration count
-- Never use MD5, SHA-1, or SHA-256 alone for password hashing (too fast, no salt by default)
-- Salt must be unique per credential, cryptographically random, at least 128 bits
-- Consider pepper (application-level secret added to hash input) for defense in depth
+- Passwords must be hashed with a modern KDF: Argon2id (preferred), bcrypt, or PBKDF2 with high work factor and a unique salt
+- Never use raw cryptographic hash functions alone for password hashing (too fast, no salt by default)
+- Salts should be unique per credential to prevent rainbow-tables from accelerating brute-force attacks
 
 ## Authorization Patterns
 
@@ -74,7 +73,7 @@ public async Task<Cipher> GetCipher(Guid cipherId) {
 ### Encryption at Rest
 
 - All sensitive data must be encrypted at rest using AES-256 or equivalent
-- Encryption keys must be stored separately from encrypted data (never in the same database)
+- Cryptographic keys MUST NEVER be stored directly accessible in a database, without being wrapped by another key
 - Use envelope encryption: data encrypted with a data encryption key (DEK), DEK encrypted with a key encryption key (KEK) in a key management system
 - Bitwarden's end-to-end encryption ensures vault data is encrypted before leaving the client
 

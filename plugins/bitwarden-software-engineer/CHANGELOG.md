@@ -5,6 +5,22 @@ All notable changes to the `bitwarden-software-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-05-07
+
+### Fixed
+
+- Added `Skill` to the agent's `tools:` frontmatter. Without it, the agent could not invoke Claude Code skills, so slash-command and skill-based workflows silently failed to dispatch.
+
+## [0.4.0] - 2026-04-21
+
+### Changed
+
+- Aligned description in the README.md with the plugin.json.
+
+### Removed
+
+- Removed the repo specific skills and migrated them to their respective repos. Claude Code uses progressive disclosure to use them when needed.
+
 ## [0.3.3] - 2026-04-15
 
 ### Changed

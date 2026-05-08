@@ -25,18 +25,7 @@ allowed-tools: Read, Glob, Grep, Bash(gh search code:*), Bash(gh api:*)
 
 ## Pin Compliance Rules
 
-Bitwarden enforces two distinct pinning requirements depending on who owns the action. This mirrors the logic in `step_pinned.py` in the `bitwarden/workflow-linter` repo.
-
-**Internal actions** — any `uses:` reference starting with `bitwarden/`:
-- **Compliant:** pinned to `@main` (e.g., `bitwarden/gh-actions/azure-login@main`)
-- **Non-compliant:** pinned to a SHA, a tag, any other branch, or unpinned
-
-**Third-party actions** — any `uses:` reference not starting with `bitwarden/` and not a local path (`./`):
-- **Compliant:** pinned to a full 40-character commit SHA with an inline version comment (e.g., `actions/checkout@abc123...def456 # v4.1.1`)
-- **Non-compliant:** pinned to a tag, a branch, a short SHA (< 40 chars), missing the inline comment, or unpinned
-
-**Local/relative actions** — `uses:` values starting with `./`:
-- Skip entirely. These are local composite actions and are not subject to pinning rules.
+Before classifying any action reference, read `plugins/bitwarden-devops-engineer/skills/bitwarden-workflow-linter-rules/SKILL.md` and apply the `step_pinned` rule as the compliance definition for all steps below. That skill is the single source of truth for what is and is not compliant.
 
 ## Modes
 
@@ -71,9 +60,7 @@ gh search code "<action-name>" --owner <org> --path .github/workflows/ --limit 1
 gh search code "uses:" --owner <org> --path .github/workflows/ --limit 100
 ```
 
-Then apply the two-rule filter:
-- **Internal** (`bitwarden/`): flag any reference NOT at `@main`
-- **Third-party** (all others, excluding `./`): flag any reference NOT matching `@[a-f0-9]{40}` with a trailing inline comment
+Then apply the `step_pinned` compliance filter from `bitwarden-workflow-linter-rules/SKILL.md` to each reference.
 
 > **Note:** GitHub code search indexes can lag by minutes to hours after a recent push. Results may not reflect the very latest commits. Flag this caveat in the output.
 
@@ -91,10 +78,7 @@ For each `uses:` reference (excluding local `./` paths), determine:
    - `tag` — pinned to a version tag (e.g., `@v3`, `@v1.2.3`)
    - `branch` — pointing to a named branch (e.g., `@main`, `@master`)
    - `none` — no ref at all
-5. **Compliant:**
-   - Internal + `branch` + branch is `main` → ✅
-   - Third-party + `hash` + has inline comment → ✅
-   - Everything else → ❌
+5. **Compliant:** Apply the `step_pinned` rule from `bitwarden-workflow-linter-rules/SKILL.md` — ✅ if compliant, ❌ otherwise.
 
 Display a table:
 
@@ -111,10 +95,12 @@ If there are no non-compliant findings, inform the user and stop.
 Apply the correct fix approach based on action type. Do **not** treat all non-compliant references the same way.
 
 **Internal actions** (`bitwarden/`):
+
 - The fix is always to change the ref to `@main`. No SHA resolution needed.
 - Flag if the action is currently on a SHA — this likely means it was incorrectly treated as third-party at some point.
 
 **Third-party actions:**
+
 - Resolve the current SHA for each unique non-compliant action:
 
 ```bash
@@ -143,6 +129,7 @@ Output a final summary:
 | ...  | ...  | ...               | ...  | ...       | ...         |
 
 The **Remediation** column should contain:
+
 - For internal actions: `change ref to @main`
 - For third-party actions: the resolved 40-char SHA + inline comment to add (e.g., `@abc123...def456 # v4.1.1`)
 

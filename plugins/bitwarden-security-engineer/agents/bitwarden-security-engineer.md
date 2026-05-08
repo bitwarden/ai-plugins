@@ -2,7 +2,7 @@
 name: bitwarden-security-engineer
 description: Application security engineer specializing in vulnerability triage, threat modeling, and secure code analysis. Use for security findings remediation, threat model generation, dependency audits, and architecture security review.
 model: opus
-tools: Read, Write, Edit, Bash, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 skills:
   - triaging-security-findings
   - threat-modeling
