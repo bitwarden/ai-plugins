@@ -8,13 +8,6 @@
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-software-engineer",
   "repository": "https://github.com/bitwarden/ai-plugins",
-  "keywords": [
-    "typescript",
-    "csharp",
-    "sql",
-    "fullstack"
-  ],
-  "agents": [
-    "./agents/bitwarden-software-engineer.md"
-  ]
+  "keywords": ["typescript", "csharp", "sql", "fullstack"],
+  "agents": ["./agents/bitwarden-software-engineer.md"]
 }
