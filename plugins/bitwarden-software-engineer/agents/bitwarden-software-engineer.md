@@ -2,7 +2,7 @@
 name: bitwarden-software-engineer
 description: Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden. Use for feature implementation, and cross-language refactoring.
 model: opus
-tools: Read, Write, Edit, Bash, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 color: blue
 ---
 

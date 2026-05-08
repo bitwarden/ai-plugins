@@ -1,12 +1,21 @@
 {
   "name": "bitwarden-delivery-tools",
-  "version": "1.0.0",
-  "description": "Delivery workflow skills for committing, PR creation, preflight checks, and change labeling across any Bitwarden repository.",
+  "version": "1.1.0",
+  "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, commits, pull requests, preflight checks, and change labeling.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-delivery-tools",
   "repository": "https://github.com/bitwarden/ai-plugins",
-  "keywords": ["delivery", "commit", "pull-request", "preflight", "labeling"]
+  "keywords": [
+    "delivery",
+    "lifecycle",
+    "initiative-funnel",
+    "work-transition",
+    "commit",
+    "pull-request",
+    "preflight",
+    "labeling"
+  ]
 }
