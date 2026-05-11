@@ -65,7 +65,7 @@ For VULNs with multiple children: the **highest-priority active child** drives t
 
 ## Step 4 — Search GitHub for PRs linked to child items
 
-**JSON parsing rule** — Always use `gh`'s built-in `--jq` flag or standalone `jq` for JSON parsing. Never pipe to `python3` or any other interpreter — Python is not in this skill's `allowed-tools` and will trigger a permission prompt. If stderr s uppression is needed, place `2>/dev/null` _after_ the full `gh api ... --jq '...'` command, not before:
+**JSON parsing rule** — Always use `gh`'s built-in `--jq` flag or standalone `jq` for JSON parsing. Never pipe to `python3` or any other interpreter — Python is not in this skill's `allowed-tools` and will trigger a permission prompt. If stderr suppression is needed, place `2>/dev/null` _after_ the full `gh api ... --jq '...'` command, not before:
 
 ```bash
 # Correct — 2>/dev/null after --jq, before the next pipe
