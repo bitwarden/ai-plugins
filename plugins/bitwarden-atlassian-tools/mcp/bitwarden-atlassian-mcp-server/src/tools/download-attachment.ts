@@ -3,9 +3,13 @@
  * Retrieve JIRA attachment content as Base64-encoded data
  */
 
-import { JiraClient } from '../jira/client.js';
-import { validateInput, DownloadAttachmentSchema, ToolDefinition } from '../utils/validation.js';
-import { AttachmentDownloadResult } from '../jira/types.js';
+import { JiraClient } from "../jira/client.js";
+import {
+  validateInput,
+  DownloadAttachmentSchema,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { AttachmentDownloadResult } from "../jira/types.js";
 
 /**
  * Extract filename from attachment URL
@@ -13,11 +17,11 @@ import { AttachmentDownloadResult } from '../jira/types.js';
 function extractFilename(url: string): string {
   try {
     const urlObj = new URL(url);
-    const pathParts = urlObj.pathname.split('/');
+    const pathParts = urlObj.pathname.split("/");
     const filename = pathParts[pathParts.length - 1];
     return decodeURIComponent(filename);
   } catch {
-    return 'attachment';
+    return "attachment";
   }
 }
 
@@ -25,23 +29,23 @@ function extractFilename(url: string): string {
  * Detect MIME type from filename extension
  */
 function guessMimeType(filename: string): string {
-  const ext = filename.split('.').pop()?.toLowerCase();
+  const ext = filename.split(".").pop()?.toLowerCase();
   const mimeMap: Record<string, string> = {
-    'pdf': 'application/pdf',
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif',
-    'txt': 'text/plain',
-    'json': 'application/json',
-    'xml': 'application/xml',
-    'zip': 'application/zip',
-    'doc': 'application/msword',
-    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xls': 'application/vnd.ms-excel',
-    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    pdf: "application/pdf",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    txt: "text/plain",
+    json: "application/json",
+    xml: "application/xml",
+    zip: "application/zip",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   };
-  return mimeMap[ext || ''] || 'application/octet-stream';
+  return mimeMap[ext || ""] || "application/octet-stream";
 }
 
 /**
@@ -85,19 +89,22 @@ async function handler(input: any): Promise<string> {
     // Check size against user-specified limit
     const maxSizeMB = validated.maxSizeMB ?? 10;
     if (sizeMB > maxSizeMB) {
-      return `Error: Attachment size (${sizeMB.toFixed(2)} MB) exceeds specified limit (${maxSizeMB} MB). ` +
-             `Use maxSizeMB parameter to increase limit (max: 50 MB).`;
+      return (
+        `Error: Attachment size (${sizeMB.toFixed(2)} MB) exceeds specified limit (${maxSizeMB} MB). ` +
+        `Use maxSizeMB parameter to increase limit (max: 50 MB).`
+      );
     }
 
     // Generate warning for large files
     let warning: string | undefined;
     if (sizeMB > 5) {
-      warning = `Large file (${sizeMB.toFixed(2)} MB) may cause token limit issues in MCP responses. ` +
-                `Consider downloading separately if processing fails.`;
+      warning =
+        `Large file (${sizeMB.toFixed(2)} MB) may cause token limit issues in MCP responses. ` +
+        `Consider downloading separately if processing fails.`;
     }
 
     // Convert to Base64
-    const contentBase64 = buffer.toString('base64');
+    const contentBase64 = buffer.toString("base64");
     const mimeType = guessMimeType(filename);
 
     const result: AttachmentDownloadResult = {
@@ -109,16 +116,15 @@ async function handler(input: any): Promise<string> {
     };
 
     return formatResult(result);
-
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes('403')) {
+      if (error.message.includes("403")) {
         return `Error: Access denied to attachment. Check JIRA permissions for this attachment.`;
       }
-      if (error.message.includes('404')) {
+      if (error.message.includes("404")) {
         return `Error: Attachment not found at URL. Verify the URL is correct and attachment still exists.`;
       }
-      if (error.message.includes('timeout')) {
+      if (error.message.includes("timeout")) {
         return `Error: Download timeout. Attachment may be too large or network is slow.`;
       }
     }
@@ -130,26 +136,29 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const downloadAttachmentTool: ToolDefinition = {
-  name: 'download_attachment',
-  description: 'Download a JIRA attachment and return Base64-encoded content. ' +
-               'Use the attachment URL from get_issue tool output. ' +
-               'Supports files up to 50MB with configurable size limits.',
+  name: "download_attachment",
+  description:
+    "Download a JIRA attachment and return Base64-encoded content. " +
+    "Use the attachment URL from get_issue tool output. " +
+    "Supports files up to 50MB with configurable size limits.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       attachmentUrl: {
-        type: 'string',
-        description: 'Full attachment URL from get_issue output (attachment.content field). ' +
-                     'Example: https://your-domain.atlassian.net/secure/attachment/12345/filename.pdf',
+        type: "string",
+        description:
+          "Full attachment URL from get_issue output (attachment.content field). " +
+          "Example: https://your-domain.atlassian.net/secure/attachment/12345/filename.pdf",
       },
       maxSizeMB: {
-        type: 'number',
-        description: 'Maximum file size to download in megabytes (default: 10, max: 50). ' +
-                     'Prevents downloading unexpectedly large files.',
+        type: "number",
+        description:
+          "Maximum file size to download in megabytes (default: 10, max: 50). " +
+          "Prevents downloading unexpectedly large files.",
         default: 10,
       },
     },
-    required: ['attachmentUrl'],
+    required: ["attachmentUrl"],
   },
   handler,
 };

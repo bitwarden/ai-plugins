@@ -3,15 +3,21 @@
  * Retrieve child pages of a Confluence page
  */
 
-import { ConfluenceClient } from '../confluence/client.js';
-import { validateInput, GetChildPagesSchema, ToolDefinition } from '../utils/validation.js';
-import { ConfluencePage } from '../confluence/types.js';
-
+import { ConfluenceClient } from "../confluence/client.js";
+import {
+  validateInput,
+  GetChildPagesSchema,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { ConfluencePage } from "../confluence/types.js";
 
 /**
  * Format child pages for display
  */
-function formatChildPages(pages: ConfluencePage[], parentPageId: string): string {
+function formatChildPages(
+  pages: ConfluencePage[],
+  parentPageId: string,
+): string {
   let output = `# Child Pages of ${parentPageId}\n\n`;
   output += `**Found:** ${pages.length} page(s)\n\n`;
 
@@ -61,24 +67,26 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const getChildPagesTool: ToolDefinition = {
-  name: 'get_child_pages',
-  description: 'Get child pages of a specific Confluence page. Returns page titles, IDs, statuses, and modification info. Useful for navigating page hierarchies and finding documentation.',
+  name: "get_child_pages",
+  description:
+    "Get child pages of a specific Confluence page. Returns page titles, IDs, statuses, and modification info. Useful for navigating page hierarchies and finding documentation.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       pageId: {
-        type: 'string',
-        description: 'Parent Confluence page ID (numeric string)',
+        type: "string",
+        description: "Parent Confluence page ID (numeric string)",
       },
       limit: {
-        type: 'number',
-        description: 'Maximum number of child pages to return (default: 25, max: 250)',
+        type: "number",
+        description:
+          "Maximum number of child pages to return (default: 25, max: 250)",
         default: 25,
         minimum: 1,
         maximum: 250,
       },
     },
-    required: ['pageId'],
+    required: ["pageId"],
   },
   handler,
 };

@@ -3,9 +3,14 @@
  * Retrieve all comments for a specific JIRA issue
  */
 
-import { JiraClient } from '../jira/client.js';
-import { validateInput, GetIssueCommentsSchema, GetIssueCommentsInput, ToolDefinition } from '../utils/validation.js';
-import { extractPlainText } from '../utils/adf.js';
+import { JiraClient } from "../jira/client.js";
+import {
+  validateInput,
+  GetIssueCommentsSchema,
+  GetIssueCommentsInput,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { extractPlainText } from "../utils/adf.js";
 
 /**
  * Format comments for display
@@ -36,8 +41,13 @@ function formatComments(issueKey: string, commentsResponse: any): string {
     output += `---\n\n`;
   }
 
-  if (commentsResponse.total > commentsResponse.startAt + commentsResponse.comments.length) {
-    const remaining = commentsResponse.total - (commentsResponse.startAt + commentsResponse.comments.length);
+  if (
+    commentsResponse.total >
+    commentsResponse.startAt + commentsResponse.comments.length
+  ) {
+    const remaining =
+      commentsResponse.total -
+      (commentsResponse.startAt + commentsResponse.comments.length);
     output += `\n**Note:** ${remaining} more comments available. Use startAt parameter to paginate.\n`;
   }
 
@@ -59,7 +69,7 @@ async function handler(input: any): Promise<string> {
     const comments = await client.getIssueComments(
       validated.issueIdOrKey,
       startAt,
-      maxResults
+      maxResults,
     );
 
     return formatComments(validated.issueIdOrKey, comments);
@@ -72,31 +82,32 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const getIssueCommentsTool: ToolDefinition = {
-  name: 'get_issue_comments',
-  description: 'Get all comments for a specific JIRA issue. Useful for understanding discussions, clarifications, and additional context around requirements.',
+  name: "get_issue_comments",
+  description:
+    "Get all comments for a specific JIRA issue. Useful for understanding discussions, clarifications, and additional context around requirements.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       issueIdOrKey: {
-        type: 'string',
+        type: "string",
         description: 'JIRA issue key (e.g., "PM-12345") or numeric ID',
-        pattern: '^[A-Z][A-Z0-9_]+-\\d+$|^\\d+$',
+        pattern: "^[A-Z][A-Z0-9_]+-\\d+$|^\\d+$",
       },
       startAt: {
-        type: 'number',
-        description: 'Pagination offset (default: 0)',
+        type: "number",
+        description: "Pagination offset (default: 0)",
         default: 0,
         minimum: 0,
       },
       maxResults: {
-        type: 'number',
-        description: 'Number of comments to return (default: 50, max: 100)',
+        type: "number",
+        description: "Number of comments to return (default: 50, max: 100)",
         default: 50,
         minimum: 1,
         maximum: 100,
       },
     },
-    required: ['issueIdOrKey'],
+    required: ["issueIdOrKey"],
   },
   handler,
 };

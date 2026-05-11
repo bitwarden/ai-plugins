@@ -88,7 +88,7 @@ export interface ConfluenceSearchResult {
 export interface ConfluenceGetPageParams {
   pageId: string;
   includeBody?: boolean;
-  bodyFormat?: 'storage' | 'view' | 'export_view';
+  bodyFormat?: "storage" | "view" | "export_view";
 }
 
 export interface ConfluenceSearchParams {
@@ -124,7 +124,7 @@ export interface ConfluenceComment {
   body?: ConfluenceCommentBody;
   createdAt?: string;
   properties?: ConfluenceInlineProperties;
-  resolutionStatus?: 'open' | 'resolved' | 'reopened';
+  resolutionStatus?: "open" | "resolved" | "reopened";
   _links?: {
     webui: string;
     self: string;
@@ -142,14 +142,14 @@ export interface ConfluenceCommentsResult {
 
 export interface ConfluenceGetCommentsParams {
   pageId: string;
-  bodyFormat?: 'storage';
+  bodyFormat?: "storage";
   limit?: number;
   cursor?: string;
 }
 
 export interface ConfluenceGetCommentRepliesParams {
   commentId: string;
-  bodyFormat?: 'storage';
+  bodyFormat?: "storage";
   limit?: number;
   cursor?: string;
 }
