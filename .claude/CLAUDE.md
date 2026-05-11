@@ -78,7 +78,21 @@ scripts, agents):
 
 After making any plugin changes, run the same validations that CI enforces. This catches issues before pushing.
 
-#### 1. Run the validation scripts
+#### 1. Run formatting and spell checks
+
+These run against any file in the repo, not just plugin changes, and are enforced by the `lint.yml` CI workflow:
+
+```bash
+# Check prettier formatting and cspell dictionary
+npm run lint
+
+# Auto-fix prettier formatting issues
+npm run format
+```
+
+If new domain-specific terms trip cspell, add them to `.cspell.json`. For deliberate test-fixture strings, use inline `// cspell:ignore <word>` comments rather than polluting the dictionary.
+
+#### 2. Run the validation scripts
 
 These are fast, local, and require no special environment:
 
@@ -92,7 +106,7 @@ These are fast, local, and require no special environment:
 
 Both scripts accept either a plugin name or a `plugins/<name>` path. Omit arguments to validate all plugins.
 
-#### 2. Run the plugin-dev validator agent
+#### 3. Run the plugin-dev validator agent
 
 Use the **plugin-validator** agent from `plugin-dev` for deeper structural and component checks:
 
@@ -105,7 +119,7 @@ Use the **plugin-validator** agent from `plugin-dev` for deeper structural and c
 
 Simply mention "validate my plugin" or "check plugin structure" and the plugin-validator agent will be triggered.
 
-#### 3. Review skills with the skill-reviewer agent
+#### 4. Review skills with the skill-reviewer agent
 
 When SKILL.md files are added or changed, use the **skill-reviewer** agent from `plugin-dev`:
 
@@ -116,7 +130,7 @@ When SKILL.md files are added or changed, use the **skill-reviewer** agent from 
 
 Simply mention "review my skill" or "check skill quality" to trigger it.
 
-#### 4. Run security validation
+#### 5. Run security validation
 
 Use the **reviewing-claude-config** skill from `claude-config-validator` to scan for:
 
