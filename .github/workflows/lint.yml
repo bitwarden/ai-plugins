@@ -34,7 +34,15 @@ jobs:
         run: npm ci
 
       - name: Run Prettier
+        id: prettier
         run: npm run lint:prettier
+        continue-on-error: true
 
       - name: Run cspell
+        id: cspell
+        if: always()
         run: npm run lint:spelling
+
+      - name: Fail if any linter failed
+        if: always() && (steps.prettier.outcome == 'failure' || steps.cspell.outcome == 'failure')
+        run: exit 1
