@@ -1,7 +1,7 @@
 ---
 name: auditing-hackerone-vulns
 description: Audit all open HackerOne-sourced VULN Jira tickets and their linked engineering child items to identify what needs action. Use this skill whenever the user wants to: check VULN ticket status, see which HackerOne findings need status updates, identify vulnerabilities ready to verify or close, run a remediation audit, check "what do I need to do on my VULN tickets today", or get a prioritized view of open vulnerabilities. Outputs a sorted action table with emoji tokens. Always use this skill for HackerOne/VULN remediation tracking and status correlation tasks — don't try to do it from scratch.
-allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, Bash(gh api --method GET *), Bash(gh pr view *), Bash(gh release list *), Bash(gh api repos/bitwarden/*/compare/*)
+allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, Bash(gh api --method GET *), Bash(gh pr view *), Bash(gh release list *), Bash(gh api repos/bitwarden/*/compare/*), Bash(gh search prs *)
 ---
 
 ## Action tokens (sorted order in output)
