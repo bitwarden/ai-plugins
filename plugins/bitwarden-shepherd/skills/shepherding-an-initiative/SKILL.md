@@ -75,7 +75,8 @@ Total: 150–300 hours of shepherd time over 4–9 months for a medium initiativ
 - The framework or foundation that broader rollout will reuse, plus 1–3 production-quality example implementations.
 - One or more PRs (may or may not be merged; mark "PoC" in title if not).
 - An Architecture Council walkthrough — 15–30 minutes, with the PoC PR, the findings (what worked, what didn't, what would need to change), and the proposed direction.
-- A **draft ADR** (status: Proposed) following the [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/), placed in the appropriate codebase's ADR directory.
+- A **draft ADR** (status: Proposed) following the [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/). ADRs live in the centralized [`bitwarden/contributing-docs`](https://github.com/bitwarden/contributing-docs) repository under `docs/architecture/adr/` — there is no per-repo ADR directory.
+- **Close-to-code documentation** for the framework and example implementations (per [Documentation Patterns](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1774977070)) — a `README.md` alongside the framework code, folder-level notes near examples, and CLAUDE.md updates where new patterns are introduced. The deep skill covers what each home (close-to-code vs. centralized `contributing-docs`) is for.
 - ARCH idea status updated to "3️⃣ Proof of Concept".
 
 **Decision gate:** Engineering leadership with Architecture Council recommendation. Proceed to Scoping / Revise PoC / Return to Research / Decline.

@@ -133,13 +133,21 @@ Documentation should not wait until the end. Per the funnel doc:
 - **Add content progressively.** As patterns stabilize and teams produce real implementations, add to the docs.
 - **Have teams contribute examples** from their own implementations.
 
-What to produce:
+Documentation lands in two homes per [Documentation Patterns](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1774977070). What goes where:
 
-- **Technical guide.** How to use the new pattern, with code examples.
-- **Migration guide.** How to convert old pattern to new (if applicable).
-- **ADR updates.** Final status, lessons learned, actual timeline.
-- **Contributing guide updates.** New standards or patterns for future code.
-- **Runbooks.** If operational/infrastructure changes are involved.
+**Close-to-code (alongside the team's code, in the repository):**
+
+- **Framework / pattern `README.md`** updates as the pattern stabilizes across teams. The PoC's initial framework README evolves with what teams discover during rollout.
+- **Folder-level notes** in each team's adopted area pointing to the framework README and the ADR.
+- **Inline docs** (JSDoc/XML comments for TypeScript/Angular/.NET; `rustdoc` for Rust) per the per-stack rubric in Documentation Patterns.
+- **CLAUDE.md updates** at the root and folder levels where the new pattern changes how engineers (and Claude tooling) should work. Use `@` syntax to link the `README.md` files that carry the canonical pattern.
+
+**Centralized (in [`bitwarden/contributing-docs`](https://github.com/bitwarden/contributing-docs), rendered at [contributing.bitwarden.com](https://contributing.bitwarden.com/)):**
+
+- **ADR updates** — final status (Accepted → Implemented if your numbering scheme uses that), lessons learned, actual timeline vs. predicted. Edit the same ADR file you opened during PoC; don't create a new one.
+- **Migration guide** — how to convert from the old pattern to the new. This is logistical / how-to content and belongs centrally so it's findable across repos.
+- **Contributing guide updates** — new standards or patterns that should govern future code beyond this initiative.
+- **Runbooks** — if the initiative involved operational or infrastructure changes, runbook content typically lives here too (or in SRE's home as appropriate).
 
 Timing per the funnel doc:
 
@@ -266,5 +274,6 @@ During Implementation (see [Idea-Based Initiatives](https://bitwarden.atlassian.
 
 - [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614) §5 — canonical phase description, examples of successful, troubled, and course-correcting implementations.
 - [Work Transition Playbook](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2521038855) — canonical six-phase transition; Phase 5 of the funnel is the originating-side support-period-through-closure portion.
+- [Documentation Patterns](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1774977070) — close-to-code vs. centralized `contributing-docs`, per-tech-stack best practices, CLAUDE.md conventions.
 - [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779) — how to update the BW Initiative through Implementation.
 - Related: `Skill(shepherding-an-initiative)` for the umbrella playbook; `Skill(running-work-transitions)` (in `bitwarden-delivery-tools`) for the originating-side support-period guidance; `Skill(scoping-and-handing-off-to-teams)` for the phase that hands work into this one.

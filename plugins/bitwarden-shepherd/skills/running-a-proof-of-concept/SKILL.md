@@ -1,6 +1,6 @@
 ---
 name: running-a-proof-of-concept
-description: Phase 3 (Proof of Concept) deep dive for an initiative shepherd. Covers selecting a representative-but-contained PoC area in coordination with the owning team, building the framework and 1–3 production-quality example implementations, presenting to Architecture Council, and drafting the ADR. Use when Research has produced an approved recommendation and the shepherd is validating it in real code before Scoping & Commitment.
+description: Phase 3 (Proof of Concept) deep dive for an initiative shepherd. Covers selecting a representative-but-contained PoC area in coordination with the owning team, building the framework and 1–3 production-quality example implementations, presenting to Architecture Council, drafting the ADR (in the centralized contributing-docs repository, not per-repo), and establishing Bitwarden's close-to-code and centralized documentation patterns for the new framework. Use when Research has produced an approved recommendation and the shepherd is validating it in real code before Scoping & Commitment.
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
@@ -75,7 +75,9 @@ What the Council does not provide: a green light independent of engineering lead
 
 ## Drafting the ADR
 
-If the PoC validates the approach, draft an Architecture Decision Record following the [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/). Place in the appropriate codebase's ADR directory.
+If the PoC validates the approach, draft an Architecture Decision Record following the [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/). ADRs live in the centralized [`bitwarden/contributing-docs`](https://github.com/bitwarden/contributing-docs) repository under `docs/architecture/adr/` (rendered at `contributing.bitwarden.com/architecture/adr/`). There is no per-repo ADR directory — Bitwarden's architectural decisions are intentionally centralized so they're discoverable across all codebases the decision touches.
+
+Open a PR against `contributing-docs` with the new ADR file, numbered sequentially after the latest accepted ADR. Example for reference: [`0020-observability-with-opentelemetry.md`](https://github.com/bitwarden/contributing-docs/blob/main/docs/architecture/adr/0020-observability-with-opentelemetry.md).
 
 The ADR is **not** the architecture plan — that comes in Scoping. The ADR is the decision artifact. Sections per the template:
 
@@ -87,6 +89,23 @@ The ADR is **not** the architecture plan — that comes in Scoping. The ADR is t
 - **Status: Proposed.** It moves to "Accepted" during Phase 4 once leadership has committed.
 
 The ADR is the durable artifact that survives the shepherd's departure. Six months from now, someone will hit a related decision and read this ADR to understand why the codebase is shaped the way it is. Write for that reader.
+
+## Establishing Documentation Patterns
+
+The ADR captures the _decision_. The PoC is also the moment to establish the _functional_ documentation that the new pattern needs to be discoverable and usable by the teams who will adopt it during Phase 5. Per [Documentation Patterns](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1774977070), Bitwarden splits documentation into two homes that you should land in deliberately:
+
+- **Close-to-code (functional, _what_).** Lives alongside the code in the repository. GitHub renders these `README.md` files automatically when engineers navigate, which is the discovery path that actually works. Use [Mermaid](https://github.blog/developer-skills/github/include-diagrams-markdown-files-mermaid/) for diagrams so they render in-place.
+- **Centralized (logistical and architectural, _how_ and _why_).** Lives in the [`bitwarden/contributing-docs`](https://github.com/bitwarden/contributing-docs) repository, rendered at [contributing.bitwarden.com](https://contributing.bitwarden.com/). ADRs, setup guides, feature-flag operating procedures, and cross-cutting architectural references go here.
+
+What the PoC should ship in each home:
+
+- **Alongside the framework code, a `README.md`** explaining what the framework is, its interface, how to extend or apply it, and what trade-offs were deliberately made. Reference the ADR for the decision rationale. Examples to model on: [EventIntegrations](https://github.com/bitwarden/server/blob/main/src/Core/Dirt/EventIntegrations/README.md), [DbSeederUtility](https://github.com/bitwarden/server/blob/main/util/DbSeederUtility/README.md), [EmergencyAccess](https://github.com/bitwarden/server/blob/main/src/Core/Auth/Services/EmergencyAccess/readme.md).
+- **Near the example implementation(s), short folder-level notes** that link out to the framework README and the ADR. Even thin folder docs help future engineers find their way to the canonical context.
+- **The ADR itself in `contributing-docs`** as covered above.
+- **Tech-stack-appropriate inline docs.** XML comments or JSDoc for TypeScript/Angular/.NET; `rustdoc` and crate/module-level `README` for Rust. The Documentation Patterns page has the per-stack rubric.
+- **CLAUDE.md updates where the PoC introduces a new pattern.** If the new pattern is one engineers (and Claude tooling) need to follow going forward, add it to the root or folder-area `CLAUDE.md` — link the `README.md` via `@` syntax and the ADR by URL. The `bitwarden-init` and `claude-config-validator` plugins help bootstrap and review these.
+
+The shape of the documentation matters because the PoC is what the receiving teams in Phase 4 will react to. A PoC PR + a framework `README` + an ADR is far more legible than a PoC PR alone — and the difference shows up as faster handoff meetings and less "wait, what was the intended pattern here?" during Implementation.
 
 ## Updates to the BW Initiative
 
@@ -123,6 +142,7 @@ For the leadership review, bring:
 ## Reference
 
 - [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614) §3 — canonical phase description, examples of effective vs. ineffective PoCs.
-- [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/) — canonical ADR structure.
+- [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/) — canonical ADR structure, served from the centralized [`bitwarden/contributing-docs`](https://github.com/bitwarden/contributing-docs) repository.
+- [Documentation Patterns](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1774977070) — canonical guidance on close-to-code vs. centralized documentation, tech-stack-specific best practices, and CLAUDE.md conventions.
 - [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779) — how to update the BW Initiative during PoC.
 - Related: `Skill(shepherding-an-initiative)` for the umbrella playbook, `Skill(running-an-architectural-assessment)` for the upstream Research-phase work the PoC validates, `Skill(scoping-and-handing-off-to-teams)` for what the PoC feeds into, `Skill(architecting-solutions)` (in `bitwarden-tech-lead`) for team-scope architectural constraints that shape PoC design.
