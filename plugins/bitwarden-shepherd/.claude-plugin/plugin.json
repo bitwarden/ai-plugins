@@ -1,0 +1,21 @@
+{
+  "name": "bitwarden-shepherd",
+  "version": "1.0.0",
+  "description": "Initiative shepherd agent for Bitwarden's Software Initiative Funnel. Drives a single cross-cutting initiative end-to-end — Identification, Research, Proof of Concept, Scoping & Commitment, Implementation — runs the architectural assessment and PoC, drafts the ADR, hands off epics to teams, coordinates cross-team consistency, and curates the upstream Technical Strategy Ideas backlog.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-shepherd",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "shepherd",
+    "initiative-funnel",
+    "architectural-assessment",
+    "proof-of-concept",
+    "adr",
+    "technical-strategy",
+    "cross-team-coordination"
+  ],
+  "agents": "./agents/AGENT.md"
+}

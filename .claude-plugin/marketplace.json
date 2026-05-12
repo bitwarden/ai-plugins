@@ -67,8 +67,14 @@
     {
       "name": "bitwarden-tech-lead",
       "source": "./plugins/bitwarden-tech-lead",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "description": "Tech lead agent for a Bitwarden product team. Architects solutions holistically with the architecture group, dispatches to delivery-lifecycle skills (initiative funnel, work transitions) when work crosses teams, and surfaces team patterns to the Technical Strategy Ideas backlog."
+    },
+    {
+      "name": "bitwarden-shepherd",
+      "source": "./plugins/bitwarden-shepherd",
+      "version": "1.0.0",
+      "description": "Initiative shepherd agent for Bitwarden's Software Initiative Funnel. Drives a single cross-cutting initiative end-to-end — Identification, Research, Proof of Concept, Scoping & Commitment, Implementation — runs the architectural assessment and PoC, drafts the ADR, hands off epics to teams, coordinates cross-team consistency, and curates the upstream Technical Strategy Ideas backlog."
     },
     {
       "name": "bitwarden-delivery-tools",

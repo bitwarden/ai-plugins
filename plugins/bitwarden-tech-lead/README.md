@@ -31,6 +31,10 @@ The tech lead represents a team inside Bitwarden's architecture process — arch
 
 All cross-plugin skills are required because we rely upon each of them for a rich, complete workflow.
 
+## Related Plugins
+
+- **`bitwarden-shepherd`** — the shepherd-side counterpart of this role. Use that plugin when operating as a Staff+ initiative shepherd driving a cross-cutting initiative end-to-end through the Software Initiative Funnel. Use this plugin (tech-lead) when representing a single team inside an initiative — receiving the epic, breaking it down, executing inside the team's roadmap.
+
 ## Installation
 
 ```bash
