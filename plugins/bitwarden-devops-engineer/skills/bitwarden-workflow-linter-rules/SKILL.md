@@ -43,7 +43,7 @@ description: >-
 
 Bitwarden enforces two distinct pinning requirements depending on who owns the action. Steps with no `uses:` field and local actions (starting with `./`) are skipped entirely.
 
-- **Trigger (internal actions):** A `uses:` reference starting with `bitwarden/` is not pinned to `@main`. Exception: paths containing `sm-action` are compliant at any ref and never trigger this rule.
+- **Trigger (internal actions):** A `uses:` reference starting with `bitwarden/` is not pinned to `@main`. Exception: references of the form `bitwarden/sm-action[/path]@<any-ref>` are compliant at any ref and never trigger this rule.
 - **Trigger (external actions):** A `uses:` reference not starting with `bitwarden/` is not pinned to a full 40-character commit SHA, or is missing an inline version comment.
 
 - **Fix (internal actions):**

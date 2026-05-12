@@ -2,8 +2,9 @@
 name: action-audit
 description: >
   Audit GitHub Actions action usage across an org. Searches for a specific action (incident mode)
-  or sweeps all workflow files for unpinned action references (audit mode). Produces a read-only
-  report of findings with pin status and resolved SHAs. Does not modify any files.
+  or sweeps all workflow files for non-compliant action references (audit mode). Produces a
+  read-only report of findings with compliance status and resolved SHAs. Does not modify any
+  files.
 
   <example>
   User: We need to check if any repos are using tj-actions/changed-files
@@ -25,7 +26,7 @@ allowed-tools: Read, Glob, Grep, Bash(gh search code:*), Bash(gh api:*)
 
 ## Pin Compliance Rules
 
-Before classifying any action reference, read `plugins/bitwarden-devops-engineer/skills/bitwarden-workflow-linter-rules/SKILL.md` and apply the `step_pinned` rule as the compliance definition for all steps below. That skill is the single source of truth for what is and is not compliant.
+Before classifying any action reference, read `${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-workflow-linter-rules/SKILL.md` and apply the `step_pinned` rule as the compliance definition for all steps below. That skill is the single source of truth for what is and is not compliant.
 
 ## Modes
 
@@ -60,7 +61,7 @@ gh search code "<action-name>" --owner <org> --path .github/workflows/ --limit 1
 gh search code "uses:" --owner <org> --path .github/workflows/ --limit 100
 ```
 
-Then apply the `step_pinned` compliance filter from `bitwarden-workflow-linter-rules/SKILL.md` to each reference.
+Then apply the `step_pinned` compliance filter from `${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-workflow-linter-rules/SKILL.md` to each reference.
 
 > **Note:** GitHub code search indexes can lag by minutes to hours after a recent push. Results may not reflect the very latest commits. Flag this caveat in the output.
 
@@ -78,7 +79,7 @@ For each `uses:` reference (excluding local `./` paths), determine:
    - `tag` — pinned to a version tag (e.g., `@v3`, `@v1.2.3`)
    - `branch` — pointing to a named branch (e.g., `@main`, `@master`)
    - `none` — no ref at all
-5. **Compliant:** Apply the `step_pinned` rule from `bitwarden-workflow-linter-rules/SKILL.md` — ✅ if compliant, ❌ otherwise.
+5. **Compliant:** Apply the `step_pinned` rule from `${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-workflow-linter-rules/SKILL.md` — ✅ if compliant, ❌ otherwise.
 
 Display a table:
 
@@ -92,12 +93,22 @@ If there are no non-compliant findings, inform the user and stop.
 
 ## Step 4: Resolve Remediation Targets
 
-Apply the correct fix approach based on action type. Do **not** treat all non-compliant references the same way.
+Apply the correct fix approach based on action type and mode. Do **not** treat all non-compliant references the same way.
+
+**Incident mode — replacement action provided:**
+
+If the user mentioned a replacement action in Step 1, do not resolve a SHA for the compromised action. Instead, resolve the SHA for the replacement action:
+
+```bash
+gh api repos/<owner>/<repo>/commits/<ref> --jq '.sha'
+```
+
+Present the resolved replacement SHA and a verification link (`https://github.com/<owner>/<repo>/commit/<sha>`) to the user. Ask for confirmation before finalizing.
 
 **Internal actions** (`bitwarden/`):
 
-- The fix is always to change the ref to `@main`. No SHA resolution needed.
-- Flag if the action is currently on a SHA — this likely means it was incorrectly treated as third-party at some point.
+- The expected fix is to change the ref to `@main`. No SHA resolution needed.
+- If the action is currently on a SHA, do not automatically treat this as non-compliant — a SHA pin is more restrictive than `@main` and may be intentional (e.g., frozen during a security incident or pinned for reproducibility). Inform the user and ask whether to change it to `@main` before including it in the remediation list.
 
 **Third-party actions:**
 

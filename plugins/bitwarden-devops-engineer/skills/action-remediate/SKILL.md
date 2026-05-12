@@ -1,9 +1,10 @@
 ---
 name: action-remediate
 description: >
-  Remediate GitHub Actions action findings identified by the action-audit skill. Applies hash pins
-  or action replacements across selected repos and creates draft PRs. Run the action-audit skill
-  first to identify findings before using this skill.
+  Remediate GitHub Actions action findings identified by the action-audit skill. Applies the
+  appropriate fix per action type — `@main` ref for internal `bitwarden/` actions, full SHA with
+  inline version comment for external actions, or full replacement — across selected repos and
+  creates draft PRs. Run the action-audit skill first to identify findings before using this skill.
 
   <example>
   User: Go ahead and fix the unpinned actions from the audit
