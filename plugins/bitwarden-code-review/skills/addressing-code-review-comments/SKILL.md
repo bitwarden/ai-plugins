@@ -22,6 +22,16 @@ For each review:
 
 If a comment is unclear, stop and ask the user before touching anything. Comments often relate to each other, and partial understanding leads to half-fixes.
 
+## Fetching the Full Set of Comments
+
+PR feedback lives across three separate GitHub API endpoints. Call all three:
+
+- **Inline review comments** — line-level, attached to a diff hunk: `repos/{owner}/{repo}/pulls/{pr}/comments`
+- **Reviews** — the summary message a reviewer leaves when they submit their review: `repos/{owner}/{repo}/pulls/{pr}/reviews`
+- **Conversation comments** — top-level PR comments not attached to any line, posted in the main conversation thread: `repos/{owner}/{repo}/issues/{pr}/comments` (note: `issues`, not `pulls` — PRs are issues underneath)
+
+If the user says you missed a comment, check coverage of all three endpoints before re-reading the data you already fetched — the gap may be that you missed an endpoint.
+
 ## Evaluating a Suggestion
 
 Before recommending the user implement, check:
