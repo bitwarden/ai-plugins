@@ -16,7 +16,7 @@ There is no "suggestion" or other lower tier. Findings that don't clear the Refa
 
 The following are not valid findings under any tier. Subagents must not emit them, and Step 5 dismisses any that slip through.
 
-- Code style or quality concerns absent a documented project rule.
+- Code style or quality concerns absent a rule explicitly documented in the repo's CLAUDE.md, README.md, or other project guidelines already loaded and forwarded by the orchestrator.
 - Subjective suggestions or improvements — "could be cleaner", "consider doing X", "this might be simpler".
 - Pedantic nit-picks a senior engineer would not raise in code review.
 - Issues a linter would catch.

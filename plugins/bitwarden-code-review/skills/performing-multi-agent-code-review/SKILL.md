@@ -1,7 +1,8 @@
 ---
 name: performing-multi-agent-code-review
 description: Perform a rigorous, multi-agent code review with architecture-compliance, parallel quality/security analysis, finding validation, and severity audit. Use whenever the user asks for a structured, deep, thorough, multi-pass, or multi-agent code review — or a review that includes architecture/pattern compliance, confidence-scored findings, or a severity audit — even if they don't say the exact phrase "multi-agent". Prefer this over a single-agent review when the user wants high-signal findings with validation. Also use whenever the user asks for a code review across a commit range, time window, or N most recent commits in a locally checked-out repo (e.g. "review the last week of commits in bitwarden/server", "review the last 20 commits", "review changes since 2026-04-23") — these route to the commit-range mode below.
-allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git check-ignore:*), Bash(git log:*), Bash(git rev-list:*), Read, Write, Grep, Glob, Task, Skill, AskUserQuestion"
+allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git check-ignore:*), Bash(git log:*), Bash(git rev-list:*), Read, Write, Grep, Glob, Agent, Skill, AskUserQuestion"
+argument-hint: "[pr-number | commit-range] [--model <model>] [--output-dir <path>]"
 ---
 
 # Overview
@@ -24,6 +25,15 @@ Before Step 1, verify each prerequisite is resolvable. If a prerequisite is miss
 ## Mode
 
 Read `references/modes.md`. Loaded in Step 1; the orchestrator determines the mode from the invocation, runs the resolution sequence (commit-range mode only), and uses the matching diff-source commands to populate Step 1's gathered context. Modes are orchestrator-only and not propagated to subagents.
+
+## Output Location
+
+Resolve immediately upon invocation — before Step 1 begins. The resolved path is used verbatim in Step 9 without re-prompting.
+
+If `--output-dir <path>` is present in `$ARGUMENTS`, use that path. Otherwise, invoke `AskUserQuestion`:
+
+- **Plugin data directory** _(recommended)_ — `${CLAUDE_PLUGIN_DATA}/code-reviews/` — organized across projects, never git-tracked.
+- **Working directory** — `${CLAUDE_PROJECT_ROOT}/` — report lands alongside the code (may appear in `git status`).
 
 ## Operating Rules
 
@@ -97,7 +107,7 @@ When a step below says "the Review Rules," it means this exact bundle — never 
 
 Execute these steps in order. Do not skip, reorder, or combine steps.
 
-1. Gather context (no subagents). All `references/...` paths below resolve relative to this skill's directory — do not search elsewhere.
+1. Gather context (no subagents). All `references/...` paths below resolve relative to `${CLAUDE_SKILL_DIR}/references` — do not search elsewhere.
    - **READ** `references/modes.md`. The orchestrator follows it to determine the review mode and the matching diff-source commands.
    - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), `git diff origin/HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
    - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
@@ -120,29 +130,24 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    Apply the Review Rules. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Launch 3 agents using the `general-purpose` subagent type to independently review the changes. Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
+3. Launch 3 agents as instructed below. Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
 
    **Agent 1: Code quality agent**
-   Read the introduced code as a senior engineer reviewing it for the first time. Surface anything that hurts correctness, clarity, or long-term maintainability — code duplication, missing critical error handling, accessibility gaps, inadequate test coverage, overly complex logic, unclear naming, inconsistent patterns. Prefer readable, explicit code over compact solutions; flag readability problems alongside correctness ones rather than treating them as separate categories.
+   Use the `general-purpose` subagent type. Read the diff as a senior engineer seeing it for the first time — surface anything that hurts correctness, clarity, or long-term maintainability, including code duplication, missing critical error handling, and inadequate test coverage.
 
    Before submitting findings, perform the **Hygiene Sweep** defined in `references/discovery-standards.md`.
 
    **Agent 2: Bug analysis agent**
-   Scan the diff for significant bugs visible without outside context. Skip nitpicks, likely false positives, and anything you'd need to read other files to confirm.
+   Use the `general-purpose` subagent type to evaluate the diff for significant bugs visible without outside context.
+   Skip nitpicks, likely false positives, and anything you'd need to read other files to confirm.
 
    **Agent 3: Security & logic agent**
-   Find security flaws and logic errors in the introduced code. Stay scoped to changed lines.
+   Use the `bitwarden-security-engineer:bitwarden-security-engineer` subagent type to locate security flaws and logic errors in the introduced code.
 
-   Invoke `Skill(bitwarden-security-engineer:analyzing-code-security)`, `Skill(bitwarden-security-engineer:detecting-secrets)`, and `Skill(bitwarden-security-engineer:reviewing-dependencies)` from the `bitwarden-security-engineer` plugin to cover classic application-security items.
-
-   In addition to attacker-as-LLM and attacker-as-server threat models, evaluate the **user-side threat surface**. Apply the **Trusted Channel** concept from the loaded security context — ask whether the user-facing surface qualifies:
-   - **Authenticity of prompts shown to the user** — can the user tell which application is requesting sensitive input? Dialog titles, branding, and prompt strings should allow the user to resist spoofed-dialog phishing.
-   - **Consent gates** — is every action requiring user authorization clearly labeled, with sufficient context for the user to make an informed decision?
-   - **Output authenticity** — are success/failure messages returned to the user distinguishable from messages an attacker could forge through the same channel?
-
-   This vector is distinct from preventing secrets from reaching the LLM. Both must be evaluated.
-
-   Apply the Review Rules. Threshold ≥ 80.
+   Also evaluate the **user-side threat surface** — distinct from secrets reaching the LLM, both must be checked:
+   - **Prompt authenticity** — can the user verify which app is requesting sensitive input?
+   - **Consent gates** — are authorization actions clearly labeled with sufficient context?
+   - **Output authenticity** — are responses distinguishable from attacker-forged messages?
 
 4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3. The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
@@ -175,6 +180,6 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
 8. Print the full formatted report to the terminal.
 
-9. Write the formatted report to the repository root in a markdown file with the following naming convention:
+9. Write the formatted report to the output directory resolved in **Output Location**. Create the directory if it does not exist. After writing, print the full resolved path.
 
-- File name: `code-review-PR-{number}.md` (PR mode), `code-review-{YYYY-MM-DD}.md` (local mode), `code-review-{branch}-{YYYY-MM-DD}.md` (branch comparison mode), or `code-review-{from-short}..{to-short}.md` (commit-range mode, where `{from-short}`/`{to-short}` are 7-char SHAs or shorter ref names).
+   File name: `code-review-{model}-PR-{number}.md` (PR mode), `code-review-{model}-{YYYY-MM-DD}.md` (local mode), `code-review-{model}-{branch}-{YYYY-MM-DD}.md` (branch comparison mode), or `code-review-{model}-{from-short}..{to-short}.md` (commit-range mode, where `{from-short}`/`{to-short}` are 7-char SHAs or shorter ref names).

@@ -23,7 +23,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 ```markdown
 # Code Review: {PR title} (#{number}) <!-- or "Code Review: Local Changes — {YYYY-MM-DD}" -->
 
-**Date:** {YYYY-MM-DD} | **Reviewed by:** Claude Code
+**Date:** {YYYY-MM-DD} | **Reviewed by:** Claude Code | **Model:** {model}
 
 ## Summary
 
