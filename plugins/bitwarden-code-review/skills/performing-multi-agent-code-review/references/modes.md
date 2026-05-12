@@ -20,8 +20,8 @@ Determine review mode from the invocation. Inspect both the slash-command argume
 
 **Diff sources:**
 
-- Changed files: `git diff --name-only`
-- Diff: `git diff` (combines staged + unstaged)
+- Changed files: `git diff HEAD --name-only`
+- Diff: `git diff HEAD` (combines staged + unstaged)
 
 ## Mode 3 — Branch comparison mode
 
