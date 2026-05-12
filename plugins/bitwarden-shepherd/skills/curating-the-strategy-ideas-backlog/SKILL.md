@@ -1,19 +1,19 @@
 ---
 name: curating-the-strategy-ideas-backlog
-description: Architecture-group-side curation of Bitwarden's Technical Strategy Ideas backlog in Jira Product Discovery. Covers the primary-owner / peer-reviewer pairing, the Stakeholder & Engagement Map as a gate before Research, RICE scoring discipline, theme and roadmap-placement (Now/Next/Later), quarterly prioritization with engineering leadership, the transition from approved idea to BW Initiative at the Identification phase, and the adoption retrospective at handoff. The curator-side counterpart to bitwarden-tech-lead's contributing-to-technical-strategy. Use when triaging new ideas, running peer review, refining RICE scores, presenting at quarterly prioritization, or running an adoption retrospective.
+description: Peer-Reviewer and portfolio-curator side of the TSI Shepherding Model. Covers serving as a constructive challenge function for someone else's idea, stewarding the broader TSI backlog in Jira Product Discovery, weekly new-idea triage, monthly RICE score updates, mid-quarter backlog management, theme and roadmap placement (Now/Next/Later), the quarterly prioritization review with engineering leadership, and the handoff of approved ideas to the funnel at Phase 1 Identification. Use when peer-reviewing an idea you are not the Primary Owner of, triaging incoming ideas, maintaining the backlog, or presenting the portfolio at the quarterly review. For the Primary-Owner side — driving a specific idea you hold accountability for — use championing-a-strategy-idea instead.
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 Bitwarden's [Technical Strategy Ideas](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2344517656) (TSI) backlog is the upstream idea-stage system that feeds the [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614). It lives in Jira Product Discovery under the `ARCH` project. Ideas get captured, RICE-scored, peer-reviewed, prioritized, and either transition to the funnel at Identification or move to Declined with rationale recorded.
 
-This skill is the **Architecture-group-curator side** of TSI work. The team-contributor side — recognizing patterns worth filing, framing an idea, naming friction — lives in `Skill(contributing-to-technical-strategy)` (in `bitwarden-tech-lead`). Read that skill when reasoning about the perspective of a tech lead filing an idea from a team; read this one when operating as Architecture deciding what advances.
+This skill is the **Peer-Reviewer and portfolio-curator side** of TSI work — one of two roles per active idea in the TSI Shepherding Model. The companion role is the **Primary Owner**, who takes accountability for driving a specific idea forward; that role's playbook is `Skill(championing-a-strategy-idea)` in this same plugin. Use this skill when you are assigned as peer reviewer to someone else's idea or stewarding the broader portfolio; use `Skill(championing-a-strategy-idea)` when you are the named owner of a specific idea. The team-contributor side — recognizing patterns worth filing, framing an idea from inside a team — lives in `Skill(contributing-to-technical-strategy)` (in `bitwarden-tech-lead`).
 
 ## The Two Roles per Active Idea
 
 Each TSI in active status (Research through Implementation) has two Architecture members assigned. The TSI page is explicit about this:
 
-- **Primary owner.** Drives the idea through the pipeline: writes the problem statement, conducts research, presents at Architecture Council, shepherds the transition to the funnel. Accountable for progress.
-- **Peer reviewer.** A second Architecture engineer who acts as a sounding board, stays informed, and provides a **constructive challenge function**. Not a co-owner. Their job is asking the hard questions, catching cross-initiative conflicts, ensuring stakeholder engagement is thorough.
+- **Primary owner.** Drives the idea through the pipeline: writes the problem statement, conducts research, presents at Architecture Council, shepherds the transition to the funnel. Accountable for progress. The Primary Owner's playbook is `Skill(championing-a-strategy-idea)`.
+- **Peer reviewer.** A second Architecture engineer who acts as a sounding board, stays informed, and provides a **constructive challenge function**. Not a co-owner. Their job is asking the hard questions, catching cross-initiative conflicts, ensuring stakeholder engagement is thorough. **This is your role when invoking this skill** — alongside the broader portfolio-curator practice covered in the rest of the skill.
 
 ### How Peer Review Works
 
@@ -109,16 +109,9 @@ Declined ideas remain visible in JPD with rationale recorded. The curator-side d
 
 ## The Adoption Retrospective (At Funnel Handoff)
 
-Per the TSI page, when an initiative reaches Implementation and begins the Work Transition Playbook handoff, the **primary owner and peer reviewer run a brief retrospective focused on influence effectiveness**:
+Per the TSI page, when an initiative reaches Implementation and begins the Work Transition Playbook handoff, the **Primary Owner and Peer Reviewer run a brief retrospective focused on influence effectiveness** — what engagement worked, where mandate was lacking, where disagreements surfaced late, what to do differently next time.
 
-- What engagement approaches worked to gain adoption?
-- Where did we lack mandate and how did we navigate it?
-- Where did we discover disagreements late that should have been surfaced earlier?
-- What would we do differently on the next initiative?
-
-Findings are shared in the Architecture working session and captured as a comment on the original idea for institutional memory.
-
-This is distinct from the funnel's end-of-Implementation retrospective (which is shepherd + receiving tech leads, focused on execution). The adoption retrospective is Architecture-internal, focused on **how Architecture used its influence**.
+When you are the Peer Reviewer on the idea, participate. The canonical retrospective playbook — the four questions, what to look for, where findings go — lives in `Skill(championing-a-strategy-idea)`, the Primary Owner's skill. The retrospective is Architecture-internal (Primary Owner + Peer Reviewer), focused on **how Architecture used its influence**, and is distinct from the funnel's end-of-Implementation retrospective (shepherd + receiving tech leads, focused on execution).
 
 ## Curator Practices When Reviewing a New Idea
 
@@ -136,7 +129,7 @@ When a tech lead or Staff+ engineer files a new idea, curator-side triage typica
 - **Score inflation.** Manufactured Confidence numbers and inflated Reach values produce a backlog that doesn't actually represent reality. The quarterly review depends on the scores being honest.
 - **Over-assigning peer review.** More than 2 active assignments per Architecture engineer dilutes the challenge function. The TSI page's "no more than two" rule is load-bearing.
 - **Treating decline as failure.** Declined ideas with recorded rationale are valuable institutional knowledge. Quiet drops, not declines, are the problem.
-- **Skipping the adoption retrospective at handoff.** Architecture's influence effectiveness only improves if its operating patterns get examined. Run it.
+- **Skipping the adoption retrospective at handoff.** Architecture's influence effectiveness only improves if its operating patterns get examined. Participate in it — the playbook for running it is in `Skill(championing-a-strategy-idea)`.
 - **Curating in isolation from the Operating Model.** The Now/Next/Later portfolio is communicated to engineering leadership at quarterly review and to Platform at the monthly sync — curate with that audience in mind.
 
 ## Reference
@@ -146,4 +139,4 @@ When a tech lead or Staff+ engineer files a new idea, curator-side triage typica
 - [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779) — what the ARCH idea becomes when it transitions to the funnel.
 - [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614) — where approved ideas go at Phase 1 Identification.
 - [Idea RICE Scoring](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2634252326/Idea+RICE+Scoring) — scoring reference guidelines.
-- Related: `Skill(contributing-to-technical-strategy)` (in `bitwarden-tech-lead`) for the contributor-side perspective; `Skill(shepherding-an-initiative)` for what happens once an idea is approved and enters the funnel.
+- Related: `Skill(championing-a-strategy-idea)` for the Primary-Owner side of the same Shepherding Model (driving a specific idea you hold accountability for); `Skill(contributing-to-technical-strategy)` (in `bitwarden-tech-lead`) for the team-tech-lead-as-contributor side of filing; `Skill(shepherding-an-initiative)` for what happens once an idea is approved and enters the funnel.

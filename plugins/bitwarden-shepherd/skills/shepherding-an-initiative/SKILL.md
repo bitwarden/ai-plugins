@@ -6,6 +6,8 @@ allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian_
 
 Bitwarden runs cross-cutting technical work through the [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614). A shepherd — typically a Staff+ engineer — owns one initiative end-to-end through five phases. This skill is the operating summary; fetch the canonical funnel page via `get_confluence_page` when entry/exit criteria, the example timeline table, or full template detail is needed.
 
+This skill picks up **after Architecture has approved an idea for funnel intake**. The pre-funnel half of the shepherd's role — championing a Technical Strategy Idea through peer review, Stakeholder & Engagement Map completion, Architecture Council, and quarterly prioritization — lives in `Skill(championing-a-strategy-idea)`. If you're not yet at Phase 1 Identification (i.e., the ARCH idea hasn't been approved at a quarterly review), start there instead.
+
 ## The Rule of Ownership (Hold Throughout)
 
 **You own the initiative. Each receiving team owns how it executes its part.**
