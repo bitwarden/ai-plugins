@@ -3,9 +3,14 @@
  * Retrieve a Confluence page by ID with full content
  */
 
-import { ConfluenceClient } from '../confluence/client.js';
-import { validateInput, GetConfluencePageSchema, GetConfluencePageInput, ToolDefinition } from '../utils/validation.js';
-import { htmlToMarkdown } from '../utils/format.js';
+import { ConfluenceClient } from "../confluence/client.js";
+import {
+  validateInput,
+  GetConfluencePageSchema,
+  GetConfluencePageInput,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { htmlToMarkdown } from "../utils/format.js";
 
 /**
  * Format page for display
@@ -40,11 +45,11 @@ function formatPage(page: any): string {
   if (page.body?.storage?.value) {
     output += `## Content\n\n`;
     const formattedContent = htmlToMarkdown(page.body.storage.value);
-    output += formattedContent + '\n';
+    output += formattedContent + "\n";
   } else if (page.body?.view?.value) {
     output += `## Content\n\n`;
     const formattedContent = htmlToMarkdown(page.body.view.value);
-    output += formattedContent + '\n';
+    output += formattedContent + "\n";
   } else {
     output += `_No content available_\n`;
   }
@@ -63,7 +68,7 @@ async function handler(input: any): Promise<string> {
     const page = await client.getPage({
       pageId: validated.pageId,
       includeBody: validated.includeBody ?? true,
-      bodyFormat: validated.bodyFormat ?? 'storage',
+      bodyFormat: validated.bodyFormat ?? "storage",
     });
 
     return formatPage(page);
@@ -76,28 +81,30 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const getConfluencePageTool: ToolDefinition = {
-  name: 'get_confluence_page',
-  description: 'Get detailed content from a specific Confluence page by ID. Retrieves the page title, metadata, and full content in readable format. Useful for reading documentation, requirements, and other knowledge base articles.',
+  name: "get_confluence_page",
+  description:
+    "Get detailed content from a specific Confluence page by ID. Retrieves the page title, metadata, and full content in readable format. Useful for reading documentation, requirements, and other knowledge base articles.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       pageId: {
-        type: 'string',
+        type: "string",
         description: 'Confluence page ID (numeric string, e.g., "2270330935")',
       },
       includeBody: {
-        type: 'boolean',
-        description: 'Whether to include page content (default: true)',
+        type: "boolean",
+        description: "Whether to include page content (default: true)",
         default: true,
       },
       bodyFormat: {
-        type: 'string',
-        description: 'Content format to retrieve: "storage" (raw), "view" (rendered HTML), or "export_view" (export format)',
-        enum: ['storage', 'view', 'export_view'],
-        default: 'storage',
+        type: "string",
+        description:
+          'Content format to retrieve: "storage" (raw), "view" (rendered HTML), or "export_view" (export format)',
+        enum: ["storage", "view", "export_view"],
+        default: "storage",
       },
     },
-    required: ['pageId'],
+    required: ["pageId"],
   },
   handler,
 };

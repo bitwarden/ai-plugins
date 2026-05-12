@@ -5,6 +5,19 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-05-07
+
+### Added
+
+- `contributing-to-technical-strategy` skill — guides the path from Technical Strategy Ideas through BW Initiatives down to team-level epic and story breakdown.
+- `architecting-solutions` gains _Working with the Architecture Group (Holistic Coherence)_ and _Working with the Initiative Shepherd_ sections.
+
+### Changed
+
+- Reframed `AGENT.md` from "senior software architect" to a tech lead embedded in a product team. Adds a scope-based decision tree for when to operate alongside a shepherd vs. take on the shepherd role.
+- Agent dispatches to `Skill(navigating-the-initiative-funnel)` and `Skill(running-work-transitions)` from `bitwarden-delivery-tools` (1.1.0+).
+- Plugin description and keywords updated to reflect the holistic-architecture and technical-strategy framing.
+
 ## [2.0.0] - 2026-04-24
 
 ### Changed

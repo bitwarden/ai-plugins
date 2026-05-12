@@ -3,14 +3,21 @@
  * Search for Confluence content using CQL (Confluence Query Language)
  */
 
-import { ConfluenceClient } from '../confluence/client.js';
-import { validateInput, SearchConfluenceCqlSchema, SearchConfluenceCqlInput, ToolDefinition } from '../utils/validation.js';
-
+import { ConfluenceClient } from "../confluence/client.js";
+import {
+  validateInput,
+  SearchConfluenceCqlSchema,
+  SearchConfluenceCqlInput,
+  ToolDefinition,
+} from "../utils/validation.js";
 
 /**
  * Format CQL search results for display
  */
-function formatCqlSearchResults(results: any, params: SearchConfluenceCqlInput): string {
+function formatCqlSearchResults(
+  results: any,
+  params: SearchConfluenceCqlInput,
+): string {
   let output = `# Confluence CQL Search Results\n\n`;
 
   output += `**CQL:** \`${params.cql}\`\n`;
@@ -71,7 +78,11 @@ async function handler(input: any): Promise<string> {
       start,
     });
 
-    return formatCqlSearchResults(results, { cql: validated.cql, limit, start });
+    return formatCqlSearchResults(results, {
+      cql: validated.cql,
+      limit,
+      start,
+    });
   } catch (error) {
     return `Error searching Confluence with CQL: ${error instanceof Error ? error.message : String(error)}`;
   }
@@ -81,30 +92,34 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const searchConfluenceCqlTool: ToolDefinition = {
-  name: 'search_confluence_cql',
-  description: 'Search for Confluence content using CQL (Confluence Query Language). Supports text search, label filtering, space filtering, ancestor queries, and date-based queries. Examples: text ~ "search term", space = "EN" AND label = "architecture", ancestor = 123456789.',
+  name: "search_confluence_cql",
+  description:
+    'Search for Confluence content using CQL (Confluence Query Language). Supports text search, label filtering, space filtering, ancestor queries, and date-based queries. Examples: text ~ "search term", space = "EN" AND label = "architecture", ancestor = 123456789.',
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       cql: {
-        type: 'string',
-        description: 'CQL query string (e.g., \'text ~ "search term"\', \'space = "EN" AND label = "docs"\')',
+        type: "string",
+        description:
+          'CQL query string (e.g., \'text ~ "search term"\', \'space = "EN" AND label = "docs"\')',
       },
       limit: {
-        type: 'number',
-        description: 'Maximum number of results to return (default: 10, max: 100)',
+        type: "number",
+        description:
+          "Maximum number of results to return (default: 10, max: 100)",
         default: 10,
         minimum: 1,
         maximum: 100,
       },
       start: {
-        type: 'number',
-        description: 'Pagination offset for retrieving next set of results (default: 0)',
+        type: "number",
+        description:
+          "Pagination offset for retrieving next set of results (default: 0)",
         default: 0,
         minimum: 0,
       },
     },
-    required: ['cql'],
+    required: ["cql"],
   },
   handler,
 };

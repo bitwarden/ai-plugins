@@ -3,14 +3,21 @@
  * Search for Confluence pages by space and/or title
  */
 
-import { ConfluenceClient } from '../confluence/client.js';
-import { validateInput, SearchConfluenceSchema, SearchConfluenceInput, ToolDefinition } from '../utils/validation.js';
-
+import { ConfluenceClient } from "../confluence/client.js";
+import {
+  validateInput,
+  SearchConfluenceSchema,
+  SearchConfluenceInput,
+  ToolDefinition,
+} from "../utils/validation.js";
 
 /**
  * Format search results for display
  */
-function formatSearchResults(results: any, params: SearchConfluenceInput): string {
+function formatSearchResults(
+  results: any,
+  params: SearchConfluenceInput,
+): string {
   let output = `# Confluence Search Results\n\n`;
 
   // Display search parameters
@@ -72,7 +79,7 @@ async function handler(input: any): Promise<string> {
 
   // Validate at least one search parameter is provided
   if (!validated.spaceKey && !validated.title) {
-    return 'Error: At least one search parameter (spaceKey or title) must be provided';
+    return "Error: At least one search parameter (spaceKey or title) must be provided";
   }
 
   try {
@@ -99,29 +106,32 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const searchConfluenceTool: ToolDefinition = {
-  name: 'search_confluence',
-  description: 'Search for Confluence pages by space key and/or title. Returns a list of matching pages with metadata and links. At least one search parameter (spaceKey or title) must be provided.',
+  name: "search_confluence",
+  description:
+    "Search for Confluence pages by space key and/or title. Returns a list of matching pages with metadata and links. At least one search parameter (spaceKey or title) must be provided.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       spaceKey: {
-        type: 'string',
-        description: 'Filter by Confluence space key (e.g., "EN" for Engineering space)',
+        type: "string",
+        description:
+          'Filter by Confluence space key (e.g., "EN" for Engineering space)',
       },
       title: {
-        type: 'string',
-        description: 'Filter by page title (partial match supported)',
+        type: "string",
+        description: "Filter by page title (partial match supported)",
       },
       limit: {
-        type: 'number',
-        description: 'Maximum number of results to return (default: 25, max: 250)',
+        type: "number",
+        description:
+          "Maximum number of results to return (default: 25, max: 250)",
         default: 25,
         minimum: 1,
         maximum: 250,
       },
       cursor: {
-        type: 'string',
-        description: 'Pagination cursor for retrieving next set of results',
+        type: "string",
+        description: "Pagination cursor for retrieving next set of results",
       },
     },
   },

@@ -3,7 +3,7 @@
  * Handles Basic Auth with API tokens for JIRA Cloud
  */
 
-import { JiraConfig } from './types.js';
+import { JiraConfig } from "./types.js";
 
 /**
  * Resolve an environment variable, treating unexpanded template strings
@@ -22,14 +22,14 @@ function resolveEnv(name: string): string | undefined {
  * @throws {Error} If required environment variables are missing
  */
 export function loadJiraConfig(): JiraConfig {
-  const cloudId = resolveEnv('ATLASSIAN_CLOUD_ID');
-  const email = resolveEnv('ATLASSIAN_EMAIL');
-  const apiToken = resolveEnv('ATLASSIAN_JIRA_READ_ONLY_TOKEN');
+  const cloudId = resolveEnv("ATLASSIAN_CLOUD_ID");
+  const email = resolveEnv("ATLASSIAN_EMAIL");
+  const apiToken = resolveEnv("ATLASSIAN_JIRA_READ_ONLY_TOKEN");
 
   if (!cloudId || !email || !apiToken) {
     throw new Error(
-      'Missing required JIRA environment variables. ' +
-      'Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_JIRA_READ_ONLY_TOKEN'
+      "Missing required JIRA environment variables. " +
+        "Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_JIRA_READ_ONLY_TOKEN",
     );
   }
 
@@ -49,7 +49,7 @@ export function loadJiraConfig(): JiraConfig {
  */
 export function getAuthHeader(config: JiraConfig): string {
   const credentials = `${config.email}:${config.apiToken}`;
-  const base64Credentials = Buffer.from(credentials).toString('base64');
+  const base64Credentials = Buffer.from(credentials).toString("base64");
   return `Basic ${base64Credentials}`;
 }
 
@@ -58,8 +58,8 @@ export function getAuthHeader(config: JiraConfig): string {
  */
 export function getJiraHeaders(config: JiraConfig): Record<string, string> {
   return {
-    'Authorization': getAuthHeader(config),
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
+    Authorization: getAuthHeader(config),
+    Accept: "application/json",
+    "Content-Type": "application/json",
   };
 }

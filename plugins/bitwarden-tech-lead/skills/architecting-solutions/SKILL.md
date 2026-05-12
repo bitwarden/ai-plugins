@@ -1,6 +1,7 @@
 ---
 name: architecting-solutions
-description: Tech lead perspective on architecture, system design, architecture reviews, blast radius assessment, trade-off analysis, and decision-making. Use when planning a solution, reviewing architecture, assessing blast radius, evaluating trade-offs, or needing expert software engineering advice.
+description: Framework for architecting solutions inside a team's domain while staying coherent with Bitwarden's holistic architecture. Covers security mindset, blast radius assessment, architectural judgment, Bitwarden-specific constraints, working with the architecture group, and working with initiative shepherds. Use when planning a solution, reviewing architecture within a team's scope, assessing blast radius, evaluating trade-offs, or deciding whether a choice needs architecture-group input.
+allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 ## Security Mindset
@@ -12,7 +13,7 @@ Bitwarden is a password manager — security isn't a feature, it's the product. 
 - **Audit trail by default.** Sensitive operations must be observable after the fact. If it can't be audited, it shouldn't ship.
 - **Fail closed.** When a security check is ambiguous or a dependency is unavailable, deny access. Never default to permissive.
 
-## Before You Advocate for a Design
+## Before Advocating for a Design
 
 - **Map the blast radius:** Which clients, services, and databases does this change touch?
 - **Read first:** Verify existing patterns before introducing new ones. The codebase already solved many problems — find those solutions first.
@@ -37,6 +38,40 @@ Bitwarden is a password manager — security isn't a feature, it's the product. 
 - **Version matrix (V +/- 2):** The server must support clients up to 2 major versions behind — and this is enforced by blocking outdated clients. Every API change must be additive: new fields are optional, responses degrade gracefully, and nothing breaks for a client that hasn't updated yet.
 - **No formal API versioning:** Breaking changes are actively discouraged. Without URL-path versioning in place, API models trend toward optional-everywhere to preserve backwards compatibility. Design new endpoints with this constraint in mind — don't add required fields to existing endpoints.
 
+## Working with the Architecture Group (Holistic Coherence)
+
+Teams have autonomy over decisions inside their domain. Architecture doesn't gate-keep team-level work. What Architecture does is maintain the holistic view — the portfolio of cross-cutting initiatives, the patterns that span teams, the decisions that will be expensive to change later. The job at the team level is to recognize when a choice has implications that benefit from that wider view, and pull Architecture in before — not after — the team ships.
+
+Watch for the five signals that warrant Architecture involvement (from the [Architecture / Engineering Operating Model](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1286963201)):
+
+- **Interface or contract definition.** The work defines an API, event schema, SDK surface, or pattern that other teams will build against or adopt.
+- **Structural decisions costly to change later.** Data model choices, service boundaries, protocol selection, auth integration — decisions whose cost compounds if they're wrong.
+- **Overlap with an existing initiative.** Architecture is already shepherding something adjacent, even if the connection isn't obvious. A quick check against the Now / Next / Later portfolio can save months of rework.
+- **New precedent.** Doing something Bitwarden hasn't done before in a way that will likely be repeated by others.
+- **External-facing output.** CLIs, SDKs, or public APIs that customers or integrators will interact with directly.
+
+If none of those apply, decide inside the team and move. If any of them apply, surface it — through the team's EM into the monthly Architecture/Platform sync, by attending Architecture Council, or by filing a Technical Strategy Idea (see `Skill(contributing-to-technical-strategy)`).
+
+The framing to hold: Architecture's role is input and portfolio tracking, not approval. Pulling them in early is cheaper for everyone than letting them discover the work downstream.
+
+## Working with the Initiative Shepherd
+
+When a team is receiving an initiative epic, the shepherd is the team's counterpart. They are typically a Staff+ engineer who has owned the initiative since Identification — they wrote the Architectural Assessment, built the PoC, drafted the ADR, and got executive commitment. For smaller-scope initiatives that live largely inside one team's domain or extend only to a single adjacent team, the tech lead may be the shepherd; in that case the principles below describe the role being filled for the receiving team, not someone else's role being operated alongside. What the shepherd does **not** do — regardless of who fills the role — is write the receiving team's stories or run their implementation.
+
+The clean division during Scoping & Commitment and Implementation (from the [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614)):
+
+- **The shepherd owns:** the initiative vision, the ADR, the epic definition, cross-team consistency, leadership reporting, and the decision to pause/pivot the whole effort.
+- **The team owns:** story breakdown, acceptance criteria, sizing, implementation sequencing, and the team's PRs.
+
+Expect and insist on the handoff meeting: shepherd presents PoC findings and architecture plan, team does Q&A, team commits to a breakdown date. After that, the team does the breakdown — not the shepherd. The shepherd is available for approach questions, reviews 1–2 early PRs from the team for alignment with the PoC pattern, and surfaces cross-team dependencies. Everything else belongs to the team.
+
+Two failure modes to avoid:
+
+- **The shepherd writes the team's stories.** Stories the team didn't write are stories the team won't own. Insist on a handoff meeting and a team breakdown session.
+- **The team drifts from the PoC pattern without flagging it.** Drift across teams is exactly what the shepherd is there to prevent. If deviation emerges, tell the shepherd before merging, not after.
+
+`Skill(navigating-the-initiative-funnel)` covers the phase-by-phase mechanics in depth. This section is the working principle.
+
 ## Red Flags to Surface
 
 - Over-engineering for hypothetical requirements (YAGNI)
@@ -45,3 +80,5 @@ Bitwarden is a password manager — security isn't a feature, it's the product. 
 - Missing test coverage for new code paths
 - Security shortcuts in the name of velocity
 - Refactors bundled with feature work without explicit scope approval
+- Work that should have been a Technical Strategy Idea slipping in as team-level scope because surfacing it feels like overhead
+- Accepting an initiative epic without capacity explicitly allocated by the team's EM and engineering leadership

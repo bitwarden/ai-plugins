@@ -3,10 +3,13 @@
  * List accessible Confluence spaces
  */
 
-import { ConfluenceClient } from '../confluence/client.js';
-import { validateInput, ListSpacesSchema, ToolDefinition } from '../utils/validation.js';
-import { ConfluenceSpace } from '../confluence/types.js';
-
+import { ConfluenceClient } from "../confluence/client.js";
+import {
+  validateInput,
+  ListSpacesSchema,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { ConfluenceSpace } from "../confluence/types.js";
 
 /**
  * Format space list for display
@@ -57,20 +60,22 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const listSpacesTool: ToolDefinition = {
-  name: 'list_spaces',
-  description: 'List accessible Confluence spaces. Returns space names, keys, types, and statuses. Use space keys with search_confluence to find pages in a specific space.',
+  name: "list_spaces",
+  description:
+    "List accessible Confluence spaces. Returns space names, keys, types, and statuses. Use space keys with search_confluence to find pages in a specific space.",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       limit: {
-        type: 'number',
-        description: 'Maximum number of spaces to return (default: 25, max: 250)',
+        type: "number",
+        description:
+          "Maximum number of spaces to return (default: 25, max: 250)",
         default: 25,
         minimum: 1,
         maximum: 250,
       },
       type: {
-        type: 'string',
+        type: "string",
         description: 'Filter by space type (e.g., "global", "personal")',
       },
     },

@@ -3,30 +3,35 @@
  * Search for JIRA issues using JQL (JIRA Query Language)
  */
 
-import { JiraClient } from '../jira/client.js';
-import { validateInput, SearchIssuesSchema, SearchIssuesInput, ToolDefinition } from '../utils/validation.js';
-import { extractPlainTextTruncated } from '../utils/adf.js';
+import { JiraClient } from "../jira/client.js";
+import {
+  validateInput,
+  SearchIssuesSchema,
+  SearchIssuesInput,
+  ToolDefinition,
+} from "../utils/validation.js";
+import { extractPlainTextTruncated } from "../utils/adf.js";
 
 /**
  * Format issue for display in results
  */
 function formatIssue(issue: any): string {
   const fields = issue.fields;
-  const assignee = fields.assignee?.displayName || 'Unassigned';
-  const priority = fields.priority?.name || 'None';
-  const labels = fields.labels?.join(', ') || 'None';
+  const assignee = fields.assignee?.displayName || "Unassigned";
+  const priority = fields.priority?.name || "None";
+  const labels = fields.labels?.join(", ") || "None";
 
   return `
-**[${issue.key}]** ${fields.summary || 'No summary'}
-- Status: ${fields.status?.name || 'Unknown'}
-- Type: ${fields.issuetype?.name || 'Unknown'}
+**[${issue.key}]** ${fields.summary || "No summary"}
+- Status: ${fields.status?.name || "Unknown"}
+- Type: ${fields.issuetype?.name || "Unknown"}
 - Priority: ${priority}
 - Assignee: ${assignee}
-- Reporter: ${fields.reporter?.displayName || 'Unknown'}
-${fields.created ? `- Created: ${new Date(fields.created).toLocaleDateString()}` : ''}
-${fields.updated ? `- Updated: ${new Date(fields.updated).toLocaleDateString()}` : ''}
+- Reporter: ${fields.reporter?.displayName || "Unknown"}
+${fields.created ? `- Created: ${new Date(fields.created).toLocaleDateString()}` : ""}
+${fields.updated ? `- Updated: ${new Date(fields.updated).toLocaleDateString()}` : ""}
 - Labels: ${labels}
-${fields.description ? `- Description: ${extractPlainTextTruncated(fields.description)}` : ''}
+${fields.description ? `- Description: ${extractPlainTextTruncated(fields.description)}` : ""}
 `;
 }
 
@@ -54,7 +59,7 @@ async function handler(input: any): Promise<string> {
 
     let output = `# JIRA Search Results\n\n`;
     output += `**Query:** ${validated.jql}\n`;
-    output += `**Results:** ${result.issues.length}${result.total != null ? ` of ${result.total} total` : ''}\n\n`;
+    output += `**Results:** ${result.issues.length}${result.total != null ? ` of ${result.total} total` : ""}\n\n`;
     output += `---\n\n`;
 
     for (const issue of result.issues) {
@@ -78,38 +83,43 @@ async function handler(input: any): Promise<string> {
  * Tool definition export
  */
 const searchIssuesTool: ToolDefinition = {
-  name: 'search_issues',
-  description: 'Search for JIRA issues using JQL (JIRA Query Language). Supports pagination and field selection. Examples: "project = PM AND status = Open", "assignee = currentUser() ORDER BY priority DESC"',
+  name: "search_issues",
+  description:
+    'Search for JIRA issues using JQL (JIRA Query Language). Supports pagination and field selection. Examples: "project = PM AND status = Open", "assignee = currentUser() ORDER BY priority DESC"',
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       jql: {
-        type: 'string',
-        description: 'JQL query string (e.g., "project = ABC AND status = Open")',
+        type: "string",
+        description:
+          'JQL query string (e.g., "project = ABC AND status = Open")',
       },
       maxResults: {
-        type: 'number',
-        description: 'Number of results to return (default: 50, max: 100)',
+        type: "number",
+        description: "Number of results to return (default: 50, max: 100)",
         default: 50,
         minimum: 1,
         maximum: 100,
       },
       fields: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Specific fields to return (e.g., ["summary", "status", "assignee"])',
+        type: "array",
+        items: { type: "string" },
+        description:
+          'Specific fields to return (e.g., ["summary", "status", "assignee"])',
       },
       expand: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Additional entities to expand (e.g., ["changelog", "renderedFields"])',
+        type: "array",
+        items: { type: "string" },
+        description:
+          'Additional entities to expand (e.g., ["changelog", "renderedFields"])',
       },
       nextPageToken: {
-        type: 'string',
-        description: 'Token for fetching the next page of results (returned in previous response)',
+        type: "string",
+        description:
+          "Token for fetching the next page of results (returned in previous response)",
       },
     },
-    required: ['jql'],
+    required: ["jql"],
   },
   handler,
 };

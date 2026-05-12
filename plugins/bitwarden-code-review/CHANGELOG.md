@@ -5,11 +5,17 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.11.0] - 2026-05-04
+## [1.11.0] - 2026-05-12
 
 ### Added
 
 - New `performing-multi-agent-code-review` skill: orchestrates a multi-agent code review pipeline.
+
+## [1.10.1] - 2026-05-12
+
+### Changed
+
+- `addressing-code-review-comments` skill now explicitly instructs fetching PR feedback from all three GitHub endpoints (`/pulls/{n}/comments` for inline, `/pulls/{n}/reviews` for review summaries, `/issues/{n}/comments` for top-level conversation comments). Previously the skill said "read the full set of comments" without naming the endpoints, which let the model silently miss conversation comments that live only at `/issues/`
 
 ## [1.10.0] - 2026-04-28
 
