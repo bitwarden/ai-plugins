@@ -31,8 +31,8 @@ Determine review mode from the invocation. Inspect both the slash-command argume
 
 - Current branch: `git rev-parse --abbrev-ref HEAD` (needed for the Step 9 filename)
 - Base ref: `git rev-parse --abbrev-ref origin/HEAD` (yields e.g. `origin/main`)
-- Changed files: `git diff origin/HEAD --name-only`
-- Diff: `git diff origin/HEAD`
+- Changed files: `git diff origin/HEAD...HEAD --name-only`
+- Diff: `git diff origin/HEAD...HEAD`
 
 ## Mode 4 — Commit-range mode
 

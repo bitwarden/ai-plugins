@@ -109,7 +109,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
 1. Gather context (no subagents). All `references/...` paths below resolve relative to `${CLAUDE_SKILL_DIR}/references` — do not search elsewhere.
    - **READ** `references/modes.md`. The orchestrator follows it to determine the review mode and the matching diff-source commands.
-   - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), `git diff origin/HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
+   - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff --name-only` (local), `git diff origin/HEAD...HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
    - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
    - **READ** `references/report-template.md` for formatting the final report in Step 7.
    - **READ** `references/finding-shape.md`. Its contents are pasted verbatim into every Step 2–5 subagent prompt.
