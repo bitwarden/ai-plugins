@@ -174,7 +174,7 @@ jobs:
           claude_args: |
             --verbose
             --model opus
-            --allowedTools "Task,Skill,Read,Write,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(ls:*),Bash(find:*),Bash(cat:*)"
+            --allowedTools "Task,Skill,Read,Write,Grep,Glob"
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
