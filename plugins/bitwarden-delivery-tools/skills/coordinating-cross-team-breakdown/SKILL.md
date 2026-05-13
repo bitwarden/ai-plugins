@@ -43,6 +43,8 @@ When no initiative exists, or when the initiative's affected-teams list is missi
 
 ## The Part 3 Signoff Table
 
+A worked example with both in-flight and fully-signed-off shapes lives at `${CLAUDE_PLUGIN_ROOT}/skills/coordinating-cross-team-breakdown/examples/signoff-table.md`. Use it as a shape reference for what good cells look like, the Blocking-vs-advisory distinction, and what a healthy table looks like at PROPOSED versus ACCEPTED.
+
 The template specifies five columns. Treat each as load-bearing:
 
 | Column                              | What goes in it                                                                                                                                                                                                                                          |
@@ -104,7 +106,7 @@ When implementation has shipped and the breakdown is ready to move to `COMPLETE`
 
 Then set status to `COMPLETE`. The breakdown is now a reference artifact — no further edits except corrections to factual errors.
 
-### REJECTED
+## The REJECTED Terminal State
 
 The terminal alternative to COMPLETE. Use when cross-team review surfaces incompatibilities or blockers that can't be resolved within the breakdown's scope. Preserve the breakdown — it's the historical record of why the approach didn't work — and produce a new breakdown if the work is being re-shaped. Communicate the rejection on `#team-eng-tech-breakdowns` so other teams know not to plan against the original.
 

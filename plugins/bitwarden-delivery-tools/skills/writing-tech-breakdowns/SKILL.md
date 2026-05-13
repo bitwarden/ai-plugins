@@ -131,8 +131,8 @@ Will this feature be feature-flagged, or live on a long-lived feature branch? If
 
 Answer all three:
 
-- **Cryptographic work** — does it need internal review, external review, or a security proof? If unsure, treat as needing internal review; route through `Skill(bitwarden-security-context)` and the security engineer plugin.
-- **Existing security definitions** — are there ones in this area? Can new ones be built? `Skill(threat-modeling)` in the security engineer plugin is the source for definition format.
+- **Cryptographic work** — does it need internal review, external review, or a security proof? If unsure, treat as needing internal review; route through `Skill(bitwarden-security-context)` (in the `bitwarden-security-engineer` plugin).
+- **Existing security definitions** — are there ones in this area? Can new ones be built? `Skill(threat-modeling)` (in the `bitwarden-security-engineer` plugin) is the source for definition format.
 - **Breaking changes** — will any existing security definitions be invalidated by this work? If yes, the breakdown is incomplete until Security Engineering is consulted.
 
 ### Testing considerations

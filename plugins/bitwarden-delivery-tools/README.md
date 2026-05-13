@@ -25,10 +25,10 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Technical design
 
-| Skill                               | Triggers                                                           | Purpose                                                                                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting Parts 1, 2, 4, 5, 6 of Bitwarden's Tech Breakdown Template plus the IN PLANNING → PROPOSED → ACCEPTED → COMPLETE status lifecycle |
-| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Part 3 signoff table, cross-team checklist, and the completion-communication workflow that closes a breakdown                              |
+| Skill                               | Triggers                                                           | Purpose                                                                                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting Parts 1, 2, 4, 5, 6 of Bitwarden's Tech Breakdown Template plus the full status lifecycle (IN PLANNING → IN PROGRESS → PROPOSED → ACCEPTED → COMPLETE / REJECTED) |
+| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Part 3 signoff table, cross-team checklist, and the completion-communication workflow that closes a breakdown                                                              |
 
 ### Mechanics
 
