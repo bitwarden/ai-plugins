@@ -172,7 +172,7 @@ Per the funnel doc:
 - **Decision maker:** VP of Engineering / CTO with stakeholder sync agreement.
 - **Possible decisions:** Proceed to Implementation / Rescope (smaller scope, re-estimate) / Defer (timing conflict, schedule for future quarter) / Decline.
 
-The four key success factors the funnel doc names:
+The five key success factors the funnel doc names:
 
 1. Engineering leadership must explicitly say "yes, we're doing this."
 2. Teams must have capacity allocated with clear start/end dates.

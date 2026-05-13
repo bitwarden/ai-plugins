@@ -1,6 +1,6 @@
 ---
 name: curating-the-strategy-ideas-backlog
-description: Peer-Reviewer and portfolio-curator side of the TSI Shepherding Model. Covers serving as a constructive challenge function for someone else's idea, stewarding the broader TSI backlog in Jira Product Discovery, weekly new-idea triage, monthly RICE score updates, mid-quarter backlog management, theme and roadmap placement (Now/Next/Later), the quarterly prioritization review with engineering leadership, and the handoff of approved ideas to the funnel at Phase 1 Identification. Use when peer-reviewing an idea you are not the Primary Owner of, triaging incoming ideas, maintaining the backlog, or presenting the portfolio at the quarterly review. For the Primary-Owner side — driving a specific idea you hold accountability for — use championing-a-strategy-idea instead.
+description: Peer-Reviewer and portfolio-curator side of the TSI Shepherding Model. Covers serving as constructive challenge function for someone else's idea, stewarding the backlog (weekly triage, monthly RICE updates, Now/Next/Later placement), the quarterly prioritization review with engineering leadership, and the handoff of approved ideas to the funnel. Use when peer-reviewing an idea, maintaining the backlog, or presenting the portfolio at the quarterly review. For the Primary-Owner side (driving a specific idea), use `championing-a-strategy-idea` instead.
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
@@ -27,17 +27,9 @@ Per the TSI page:
 
 ## The Stakeholder & Engagement Map as a Gate
 
-The single highest-leverage thing the curator-side enforces. Per the TSI page, the map is what prevents the pattern of "technically sound proposals that stall at adoption." The map has five fields:
+The map is the gate ideas must pass through before advancing from Backlog to Research. Its five fields — Decision makers, Must consult, Must inform, Known friction points, Engagement approach — are detailed in `Skill(championing-a-strategy-idea)`, the canonical home for the map's mechanics from the Primary-Owner side. The map is **completed collaboratively** by Primary Owner and Peer Reviewer; ideas do not enter Research without it.
 
-- **Decision makers.** Specific people or roles (not just team names) and the aspect they have authority over.
-- **Must consult.** People with expertise or context that will materially affect direction. Input sought during Research, not after.
-- **Must inform.** People affected by the outcome who need to stay aware. Shouldn't be surprised when the initiative reaches them.
-- **Known friction points.** Where disagreement, resistance, or competing priorities will come from. Honest, named, before Research starts.
-- **Engagement approach.** How each group will be engaged — 1:1 conversations, RFC review, Architecture Council presentation, team sprint review attendance, async Confluence review.
-
-The map is **completed collaboratively** by the primary owner and peer reviewer. Ideas do not enter Research without it. When triaging an idea ready to advance from Backlog → Research, that is the question to ask: is the map complete and honest?
-
-The TSI page is explicit that this section is where ideas frequently stall if done poorly. The peer reviewer's job is to push on it.
+As Peer Reviewer, your specific job is to push on the map — especially **Known friction points**, the field where ideas most often get soft-pedaled and the TSI page explicitly names as where "technically sound proposals stall at adoption." When triaging an idea ready to advance from Backlog → Research, the question is: is the map complete and honest? Push back if friction is hand-waved, if decision makers are vague ("the Vault team" rather than a named role with stated authority), or if the engagement approach doesn't match the stakeholder's communication style.
 
 ## RICE Scoring Discipline
 
