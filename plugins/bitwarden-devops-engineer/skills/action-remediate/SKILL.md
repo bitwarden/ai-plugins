@@ -1,9 +1,10 @@
 ---
 name: action-remediate
 description: >
-  Remediate GitHub Actions action findings identified by the action-audit skill. Applies hash pins
-  or action replacements across selected repos and creates draft PRs. Run the action-audit skill
-  first to identify findings before using this skill.
+  Remediate GitHub Actions action findings identified by the action-audit skill. Applies the
+  appropriate fix per action type — `@main` ref for internal `bitwarden/` actions, full SHA with
+  inline version comment for external actions, or full replacement — across selected repos and
+  creates draft PRs. Run the action-audit skill first to identify findings before using this skill.
 
   <example>
   User: Go ahead and fix the unpinned actions from the audit
@@ -31,8 +32,11 @@ allowed-tools: Read, Edit, Glob, Grep, Bash(gh pr create:*), Bash(git checkout:*
 Before proceeding, verify that the user has audit findings to act on. These should come from a prior run of the `action-audit` skill. Confirm:
 
 - Which repos to remediate (all, a subset, or specific ones)
-- The remediation approach: **pin update** (update to a verified SHA) or **replace** (swap to a different action)
-- The target SHA or replacement action
+- The remediation approach:
+  - **pin to main** — for internal `bitwarden/` actions: change the ref to `@main`
+  - **pin update** — for external actions: update to a verified 40-character SHA with an inline version comment
+  - **replace** — swap to a different action entirely
+- The target SHA, replacement action, or confirmation that `@main` is the fix
 
 If any of this is unclear, ask the user before continuing.
 
@@ -48,9 +52,10 @@ For each selected repo:
    git checkout -b fix/action-remediation-<action-name-slug>
    ```
 
-3. Apply the fix to each affected file:
-   - **Pin update:** Replace the `uses:` line with `uses: <action>@<sha> # <original-ref>`
-   - **Replace:** Swap `uses: <old-action>@<ref>` with `uses: <new-action>@<sha> # <tag>`
+3. Apply the fix to each affected file based on the remediation approach:
+   - **Pin to main (internal `bitwarden/` actions):** Replace the ref with `@main` — e.g., `uses: bitwarden/gh-actions/action@v1` → `uses: bitwarden/gh-actions/action@main`. No SHA resolution needed.
+   - **Pin update (external actions):** Replace the `uses:` line with `uses: <action>@<sha> # <original-ref>`
+   - **Replace:** Before applying, verify the replacement action is on Bitwarden's approved actions list in `bitwarden/workflow-linter`. Then swap `uses: <old-action>@<ref>` with `uses: <new-action>@<sha> # <tag>`
 
 4. Show a `git diff` of changes in this repo and get confirmation before proceeding.
 

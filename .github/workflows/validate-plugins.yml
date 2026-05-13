@@ -144,6 +144,20 @@ jobs:
         if: steps.changed-files.outputs.has_components == 'true'
         uses: bitwarden/gh-actions/azure-logout@main
 
+      - name: Create PR comment placeholder
+        id: create-comment
+        if: steps.changed-files.outputs.has_components == 'true'
+        uses: bitwarden/gh-actions/update-pr-comment@main
+        with:
+          token: ${{ github.token }}
+          pr_number: ${{ github.event.pull_request.number }}
+          repository: ${{ github.repository }}
+          marker_id: bitwarden-plugin-validation
+          body: |
+            **Claude Code** is validating plugin components and security...
+
+            If this comment does not update with results, check the [Actions log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
       - name: Validate plugin components and security
         id: components
         if: steps.changed-files.outputs.has_components == 'true'
@@ -157,9 +171,26 @@ jobs:
           plugins: |
             plugin-dev@claude-code-plugins
             claude-config-validator@bitwarden-marketplace
+          claude_args: |
+            --verbose
+            --model opus
+            --allowedTools "Task,Skill,Read,Write,Grep,Glob"
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            STICKY COMMENT ID: ${{ steps.create-comment.outputs.comment_id }}
+
             You have access to two plugins: plugin-dev and claude-config-validator.
             Use their specialized agents to validate the changed plugin files below.
+
+            # RULES
+
+            1. The repository is already checked out at the PR head.
+            2. You can read files directly to inspect the changed plugin components.
+            3. When your validation is complete, write your final report in markdown
+               format to /tmp/validation-summary.md. This file will be used to update
+               the sticky PR comment automatically. Do not attempt to post PR comments
+               yourself.
 
             Changed files:
             ${{ steps.changed-files.outputs.changed_files }}
@@ -218,12 +249,27 @@ jobs:
 
             ## Output Requirements
 
-            Combine all findings into a single structured report:
+            Write your final report to /tmp/validation-summary.md as a single
+            structured markdown document:
             - Categorize issues by severity: critical, major, minor
             - Include the exact file path and line for each issue
             - Provide specific remediation guidance for each violation
             - Distinguish errors (must fix) from warnings (should fix)
             - If all checks pass, confirm with a summary of what was validated
+
+            The report must be written to /tmp/validation-summary.md even when
+            all checks pass — the sticky PR comment is replaced with its contents.
+
+      - name: Update PR comment with validation summary
+        if: always() && steps.changed-files.outputs.has_components == 'true' && steps.create-comment.outputs.comment_id != ''
+        uses: bitwarden/gh-actions/update-pr-comment@main
+        with:
+          token: ${{ github.token }}
+          pr_number: ${{ github.event.pull_request.number }}
+          repository: ${{ github.repository }}
+          marker_id: bitwarden-plugin-validation
+          comment_id: ${{ steps.create-comment.outputs.comment_id }}
+          body_file: /tmp/validation-summary.md
 
       - name: Summary
         if: always()

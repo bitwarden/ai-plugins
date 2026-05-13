@@ -41,8 +41,16 @@ description: >-
 
 **`step_pinned`**
 
-- **Trigger:** A `uses:` reference is not pinned to a full commit SHA (e.g., uses a tag like `@v3` or branch like `@main`).
-- **Fix:**
+Bitwarden enforces two distinct pinning requirements depending on who owns the action. Steps with no `uses:` field and local actions (starting with `./`) are skipped entirely.
+
+- **Trigger (internal actions):** A `uses:` reference starting with `bitwarden/` is not pinned to `@main`. Exception: references of the form `bitwarden/sm-action[/path]@<any-ref>` are compliant at any ref and never trigger this rule.
+- **Trigger (external actions):** A `uses:` reference not starting with `bitwarden/` is not pinned to a full 40-character commit SHA, or is missing an inline version comment.
+
+- **Fix (internal actions):**
+  - Change the ref to `@main` (e.g., `bitwarden/gh-actions/azure-login@v1` → `bitwarden/gh-actions/azure-login@main`)
+  - Do not resolve a SHA — `@main` is the required and compliant state.
+
+- **Fix (external actions):**
   1. Resolve the correct commit SHA via the GitHub API: `gh api repos/{owner}/{repo}/commits/{ref} --jq '.sha'`
   2. Show the SHA and a verification link (`https://github.com/{owner}/{repo}/commit/{sha}`) to the user before applying.
   3. Wait for the user to confirm the SHA. If they provide a different SHA, use that instead.
