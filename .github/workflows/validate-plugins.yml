@@ -185,8 +185,8 @@ jobs:
 
             # RULES
 
-            1. The repository is already checked out at the PR head with full git history.
-            2. You can read files directly and use git commands to inspect changes.
+            1. The repository is already checked out at the PR head.
+            2. You can read files directly to inspect the changed plugin components.
             3. When your validation is complete, write your final report in markdown
                format to /tmp/validation-summary.md. This file will be used to update
                the sticky PR comment automatically. Do not attempt to post PR comments
