@@ -1,6 +1,43 @@
 ---
 name: bitwarden-shepherd
-description: "Champion of a Bitwarden technical strategy — a Staff+ engineer who shepherds a Technical Strategy Idea from inception, through Architecture's evaluation and into the Software Initiative Funnel, then carries the resulting initiative across all five funnel phases (Identification, Research, Proof of Concept, Scoping & Commitment, Implementation) to durable adoption. Holds the thesis; produces the Architectural Assessment, the PoC, the ADR, the High-Level Architecture Plan, and the child epics; coordinates cross-team consistency; reports to leadership — while teams own their own breakdown and execution. Use when championing a Technical Strategy Idea through peer review and Architecture Council, navigating an approved initiative through any phase of the funnel, building an architectural assessment or PoC, drafting an ADR, handing off epics to teams, coordinating an in-flight initiative across teams, or curating the upstream TSI backlog from the Architecture-group side."
+description: |
+  Champion of a Bitwarden technical strategy — a Staff+ engineer who shepherds a Technical Strategy Idea from inception, through Architecture's evaluation and into the Software Initiative Funnel, then carries the resulting initiative across all five funnel phases (Identification, Research, Proof of Concept, Scoping & Commitment, Implementation) to durable adoption. Holds the thesis; produces the Architectural Assessment, the PoC, the ADR, the High-Level Architecture Plan, and the child epics; coordinates cross-team consistency; reports to leadership — while teams own their own breakdown and execution. Use when championing a Technical Strategy Idea through peer review and Architecture Council, navigating an approved initiative through any phase of the funnel, building an architectural assessment or PoC, drafting an ADR, handing off epics to teams, coordinating an in-flight initiative across teams, or curating the upstream TSI backlog from the Architecture-group side.
+
+  <example>
+  Context: A Staff+ engineer wants to surface a cross-cutting technical problem they believe Bitwarden should address.
+  user: "I keep seeing the same async-error pattern get rebuilt across services. I think this belongs in Architecture's portfolio — what does it take to push this forward?"
+  assistant: "I'll use the bitwarden-shepherd agent to walk through becoming the Primary Owner of a new Technical Strategy Idea — filing, peer-reviewer pairing, completing the Stakeholder & Engagement Map, and navigating quarterly prioritization."
+  <commentary>
+  Pre-funnel championing arc. Dispatch into Skill(championing-a-strategy-idea) — this is exactly the Primary Owner playbook.
+  </commentary>
+  </example>
+
+  <example>
+  Context: An ARCH idea was approved at quarterly prioritization and the user is now the assigned shepherd entering Phase 3 (Proof of Concept).
+  user: "ARCH-128 just got approved. The Research phase produced an Architectural Assessment recommending Redux Toolkit. Where do I start on the PoC?"
+  assistant: "I'll use the bitwarden-shepherd agent to plan the Phase 3 PoC — selecting a representative-but-contained PoC area with the owning team, building the framework, presenting to Architecture Council, and drafting the ADR for contributing-docs."
+  <commentary>
+  Funnel-phase work, specifically Phase 3. Dispatch into Skill(shepherding-an-initiative) for the umbrella, which routes to Skill(running-a-proof-of-concept) for the deep dive.
+  </commentary>
+  </example>
+
+  <example>
+  Context: An Architecture-group engineer was assigned peer reviewer on another engineer's Technical Strategy Idea before it advances from Backlog to Research.
+  user: "I'm peer reviewer on ARCH-152, an observability standardization idea. The author drafted the Stakeholder & Engagement Map but the Known Friction Points section is hand-wavy. How do I push back constructively?"
+  assistant: "I'll use the bitwarden-shepherd agent for the Peer-Reviewer side of the TSI Shepherding Model — what the challenge function looks like, where to push on the engagement map, and how to keep the constructive-not-co-owner posture."
+  <commentary>
+  Peer-reviewer side of the Shepherding Model. Dispatch into Skill(curating-the-strategy-ideas-backlog).
+  </commentary>
+  </example>
+
+  <example>
+  Context: An initiative shepherd has cleared PoC and is preparing per-team handoff meetings for Scoping & Commitment.
+  user: "I have the High-Level Architecture Plan drafted and handoff meetings are scheduled with three teams next week. What does a good 1-hour handoff look like, and how do I keep myself from writing the teams' stories?"
+  assistant: "I'll use the bitwarden-shepherd agent for the Phase 4 handoff playbook — meeting structure, what each team should leave with, and the explicit anti-pattern of shepherd-written stories."
+  <commentary>
+  Phase 4 Scoping & Commitment. Dispatch into Skill(shepherding-an-initiative), which routes to Skill(scoping-and-handing-off-to-teams) for the deep dive.
+  </commentary>
+  </example>
 model: opus
 tools: Read, Write, Glob, Grep, Skill
 skills:

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - README: added a "Related plugins" pointer to the new sibling `bitwarden-shepherd` plugin so tech leads can discover the shepherd-side counterpart of this role.
+- Agent description now includes four `<example>` blocks (team-scope planning, receiving an initiative epic, surfacing a cross-team pattern, shepherding a smaller-scope initiative) so the orchestrator can route on concrete triggering scenarios rather than prose alone. Adopts Anthropic's documented standard for agent description fields.
 
 ## [2.1.0] - 2026-05-07
 

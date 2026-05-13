@@ -18,7 +18,9 @@ Hold the line. Your job is to give each team enough context, scope, and pattern 
 
 ## What You Produce
 
-### 1. The High-Level Architecture Plan
+Phase 4 produces eight artifacts, in roughly this order: the High-Level Architecture Plan, child epics in Jira, the per-team handoff meetings, a cost/benefit analysis, the assigned initiative priority, the leadership presentation for go/no-go, operational prioritization with capacity allocation, and the finalized ADR. Each follows below as its own section.
+
+## The High-Level Architecture Plan
 
 A Confluence page placed under the EN-space architecture-planning folder, following the "High-Level Architecture Planning" template. The funnel doc specifies its content:
 
@@ -32,7 +34,7 @@ A Confluence page placed under the EN-space architecture-planning folder, follow
 
 The architecture plan is the document each team's tech lead reads before the handoff meeting. Write it for that reader.
 
-### 2. Child Epics in Jira
+## Child Epics in Jira
 
 Create epics under the BW initiative — typically one per team or major module. Each epic carries:
 
@@ -54,7 +56,7 @@ Example epic shape from the funnel doc:
 
 What does not go in the epic: the implementing stories. Those come from the team's own breakdown session.
 
-### 3. Per-Team Handoff Meetings
+## Per-Team Handoff Meetings
 
 Schedule one handoff meeting per team, 1 hour each. Per the funnel doc, the structure is:
 
@@ -84,7 +86,7 @@ After the meeting:
 - The team's tech lead shares the completed breakdown with you.
 - You **review for consistency** with the initiative's vision — not to rewrite stories or micromanage. The funnel doc names the question pattern: "this looks good but uses callbacks instead of the async/await pattern from the PoC — was that intentional?"
 
-### 4. Cost/Benefit Analysis
+## Cost/Benefit Analysis
 
 Document in the architecture plan. The funnel doc's framing:
 
@@ -94,7 +96,7 @@ Document in the architecture plan. The funnel doc's framing:
   - **Qualitative:** developer experience, maintainability, consistency, security posture, future flexibility.
 - **Comparison.** Honest. If qualitative benefits dominate, say so — leadership can weigh that. Pretending you have a quantitative case when you don't damages the next initiative's credibility.
 
-### 5. Initiative Priority
+## Initiative Priority
 
 Per the funnel doc, work with engineering leadership to set priority against other initiatives and the [Architecture / Engineering Operating Model](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1286963201) portfolio:
 
@@ -105,7 +107,7 @@ Per the funnel doc, work with engineering leadership to set priority against oth
 
 Update the priority on the BW initiative in Jira.
 
-### 6. Leadership Presentation
+## Leadership Presentation
 
 Present the plan to engineering leadership at a stakeholder sync. Per the funnel doc, include:
 
@@ -119,7 +121,7 @@ Present the plan to engineering leadership at a stakeholder sync. Per the funnel
 
 Seek an **explicit go/no-go decision**. Executive commitment means: "Yes, we're allocating resources to complete this initiative."
 
-### 7. Operational Prioritization
+## Operational Prioritization
 
 This is the step the funnel doc explicitly distinguishes from executive commitment. Executive commitment says "yes, eventually." Operational prioritization says "starting on these dates with this much capacity."
 
@@ -146,7 +148,7 @@ Outputs from this step (per the funnel doc):
 
 The funnel doc names this failure mode explicitly: an initiative with executive commitment but no operational prioritization stalls in backlogs indefinitely. Do not advance to Implementation without operational prioritization.
 
-### 8. Finalize the ADR
+## Finalize the ADR
 
 - Update ADR status to "Accepted" if not already.
 - Add the implementation timeline and final scope.
