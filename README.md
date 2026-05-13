@@ -10,7 +10,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.2.3   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                       |
 | [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.11.0  | Autonomous code review agent following Bitwarden engineering standards with GitHub integration                      |
 | [bitwarden-delivery-tools](plugins/bitwarden-delivery-tools/)       | 1.1.0   | Delivery lifecycle skills: initiative funnel navigation, work transitions, commits, PRs, preflight checks, labeling |
-| [bitwarden-devops-engineer](plugins/bitwarden-devops-engineer/)     | 0.1.1   | DevOps engineering assistant: workflow compliance linting, action security auditing, and org-wide CI/CD remediation |
+| [bitwarden-devops-engineer](plugins/bitwarden-devops-engineer/)     | 0.1.3   | DevOps engineering assistant: workflow compliance linting, action security auditing, and org-wide CI/CD remediation |
 | [bitwarden-init](plugins/bitwarden-init/)                           | 1.1.0   | Initialize and enhance CLAUDE.md files with Bitwarden's standardized template format                                |
 | [bitwarden-product-analyst](plugins/bitwarden-product-analyst/)     | 0.1.5   | Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources             |
 | [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 1.2.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis                   |
