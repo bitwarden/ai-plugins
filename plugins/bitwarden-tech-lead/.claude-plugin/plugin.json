@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-tech-lead",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Tech lead agent for a Bitwarden product team. Architects solutions holistically with the architecture group, dispatches to delivery-lifecycle skills (initiative funnel, work transitions) when work crosses teams, and surfaces team patterns to the Technical Strategy Ideas backlog.",
   "author": {
     "name": "Bitwarden",

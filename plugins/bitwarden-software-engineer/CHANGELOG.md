@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-software-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-05-13
+
+### Added
+
+- New "Planning and Coordination" section in `bitwarden-software-engineer.md` that dispatches to `Skill(writing-tech-breakdowns)` and `Skill(coordinating-cross-team-breakdown)` from `bitwarden-delivery-tools` (1.2.0+) for drafting the team's Tech Breakdown and running cross-team signoff before implementation begins.
+
 ## [0.4.1] - 2026-05-07
 
 ### Fixed

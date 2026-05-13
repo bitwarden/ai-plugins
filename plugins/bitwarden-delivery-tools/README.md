@@ -1,14 +1,15 @@
 # Bitwarden Delivery Tools
 
-Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and chasing cross-team signoffs, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
 
 ## Overview
 
-These skills define delivery **process** — initiative phases, transition playbooks, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
+These skills define delivery **process** — initiative phases, transition playbooks, tech-breakdown drafting and cross-team signoff workflows, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
 
-The plugin spans two concerns:
+The plugin spans three concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
+- **Technical design** — how teams draft and circulate Tech Breakdowns under Bitwarden's standard template, and how cross-team signoff and completion communication get coordinated.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
 
 Any agent (tech-lead, software-engineer, shepherds, others) can compose these skills as needed.
@@ -21,6 +22,13 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | ---------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `navigating-the-initiative-funnel` | "initiative funnel", "scoping & commitment", "shepherd" | Phase-by-phase tech-lead participation across Bitwarden's Software Initiative Funnel                       |
 | `running-work-transitions`         | "work transition", "handoff", "transition playbook"     | Both-sides playbook for receiving or originating ownership transitions (initiatives, frameworks, runbooks) |
+
+### Technical design
+
+| Skill                               | Triggers                                                           | Purpose                                                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting Parts 1, 2, 4, 5, 6 of Bitwarden's Tech Breakdown Template plus the IN PLANNING → PROPOSED → ACCEPTED → COMPLETE status lifecycle |
+| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Part 3 signoff table, cross-team checklist, and the completion-communication workflow that closes a breakdown                              |
 
 ### Mechanics
 
@@ -53,6 +61,14 @@ What's my role at the scoping & commitment phase of the funnel?
 
 ```
 We're handing off this framework to another team — walk me through the playbook
+```
+
+```
+Start a Tech Breakdown for this feature — walk me through the scope checklist
+```
+
+```
+The breakdown is at PROPOSED — who needs to sign off and how do I chase them?
 ```
 
 ```

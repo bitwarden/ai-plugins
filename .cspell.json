@@ -85,6 +85,7 @@
     "shellcheck",
     "shortlog",
     "shortstat",
+    "signoffs",
     "Smartlinks",
     "sonarcloud",
     "sonarqube",

@@ -43,7 +43,7 @@
     {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "description": "Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden."
     },
     {
@@ -67,14 +67,14 @@
     {
       "name": "bitwarden-tech-lead",
       "source": "./plugins/bitwarden-tech-lead",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "description": "Tech lead agent for a Bitwarden product team. Architects solutions holistically with the architecture group, dispatches to delivery-lifecycle skills (initiative funnel, work transitions) when work crosses teams, and surfaces team patterns to the Technical Strategy Ideas backlog."
     },
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "1.1.0",
-      "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, commits, pull requests, preflight checks, and change labeling."
+      "version": "1.2.0",
+      "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and cross-team signoffs, commits, pull requests, preflight checks, and change labeling."
     }
   ]
 }

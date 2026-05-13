@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-05-13
+
+### Changed
+
+- Agent dispatches to `Skill(writing-tech-breakdowns)` and `Skill(coordinating-cross-team-breakdown)` from `bitwarden-delivery-tools` (1.2.0+) when drafting team-level technical designs or coordinating cross-team signoffs. The new skills are added to both the Orientation classification block and the Cross-Plugin Integration section.
+
 ## [2.1.0] - 2026-05-07
 
 ### Added

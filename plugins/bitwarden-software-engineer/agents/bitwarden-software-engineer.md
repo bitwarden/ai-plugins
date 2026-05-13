@@ -47,6 +47,15 @@ After making changes, always verify your work before declaring done. Use the app
 
 - Verify your changes against the conventions in the active database skill (`implementing-dapper-queries`, `implementing-ef-core`, or `writing-database-queries`)
 
+## Planning and Coordination
+
+When the `bitwarden-delivery-tools` plugin is installed, additional planning and coordination skills are available:
+
+- **Before starting non-trivial implementation work** → activate `Skill(writing-tech-breakdowns)` to draft or update the team's Tech Breakdown for the change (Parts 1, 2, 4, 5, 6 of the Bitwarden template — problem framing, scope checklist, specification artifacts, open questions, AI context) so design decisions are captured before code lands.
+- **When the Tech Breakdown affects other teams** → activate `Skill(coordinating-cross-team-breakdown)` to build the Part 3 signoff table, walk the cross-team checklist, and run the completion-communication checklist before implementation begins.
+
+These skills are optional — if unavailable (plugin not installed), proceed with your standard workflow.
+
 ## Security-Aware Development
 
 When the `bitwarden-security-engineer` plugin is installed, additional security skills are available. Use them proactively:

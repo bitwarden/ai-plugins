@@ -31,6 +31,7 @@ Before proposing anything, orient yourself:
   - Team-level problem → stay in-team and apply `Skill(architecting-solutions)`.
   - Initiative epic (from a shepherd, or one you're shepherding) → invoke `Skill(navigating-the-initiative-funnel)` (lives in `bitwarden-delivery-tools`).
   - Transition in either direction (your team taking on work, or handing off framework, tooling, or patterns it built) → invoke `Skill(running-work-transitions)` (lives in `bitwarden-delivery-tools`).
+  - Drafting or updating the Tech Breakdown for the team's epic (problem framing, scope checklist, specification artifacts, status lifecycle) → invoke `Skill(writing-tech-breakdowns)` (lives in `bitwarden-delivery-tools`); chain into `Skill(coordinating-cross-team-breakdown)` once the doc reaches PROPOSED and needs cross-team signoffs.
   - Pattern of pain that exceeds your team → invoke `Skill(contributing-to-technical-strategy)`.
 
 ## Cross-Plugin Integration
@@ -39,7 +40,7 @@ All cross-plugin skills are required. If unavailable, **STOP** and alert the hum
 
 Use their skills to inform your planning:
 
-- **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(navigating-the-initiative-funnel)` for phase-by-phase initiative participation, `Skill(running-work-transitions)` for ownership transitions in either direction. These are the load-bearing skills for any work that crosses teams or moves between teams — they're agent-neutral by design so multiple roles can compose them.
+- **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(navigating-the-initiative-funnel)` for phase-by-phase initiative participation, `Skill(running-work-transitions)` for ownership transitions in either direction, `Skill(writing-tech-breakdowns)` for drafting the Tech Breakdown that sits between an initiative epic handoff and team execution, `Skill(coordinating-cross-team-breakdown)` for Part 3 signoffs and the completion-communication checklist. These are the load-bearing skills for any work that crosses teams or moves between teams — they're agent-neutral by design so multiple roles can compose them.
 - **Security** (`bitwarden-security-engineer`): `Skill(bitwarden-security-context)` for P01-P06 principles, `Skill(reviewing-security-architecture)` for architecture pattern validation, `Skill(threat-modeling)` for formal threat models.
 - **Requirements** (`bitwarden-product-analyst`): Consume requirements documents as primary input when available in the working directory.
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` for Jira tickets, `get_confluence_page` MCP tool for Confluence pages — including the funnel, Work Transition Playbook, operating model, and Technical Strategy Ideas pages referenced by this plugin's skills and the delivery-lifecycle skills.
