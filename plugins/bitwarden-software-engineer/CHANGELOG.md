@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-software-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-05-13
+
+### Fixed
+
+- Added `dotnet format` to the server repo verification steps so the agent auto-corrects encoding and style violations (including BOM) after file edits.
+
 ## [0.4.1] - 2026-05-07
 
 ### Fixed

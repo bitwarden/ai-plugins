@@ -34,6 +34,7 @@ After making changes, always verify your work before declaring done. Use the app
 ### Server repo (C#/.NET)
 
 - **Build:** `dotnet build` from the solution root
+- **Format:** `dotnet format` to fix encoding and style violations (including BOM)
 - **Unit tests:** `dotnet test` targeting the relevant test project (e.g., `test/Core.Test`)
 - **Integration tests:** Run tests with `[DatabaseData]` attribute when database changes are involved
 
