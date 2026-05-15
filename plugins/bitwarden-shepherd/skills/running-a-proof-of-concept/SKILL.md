@@ -1,12 +1,11 @@
 ---
 name: running-a-proof-of-concept
-description: Phase 3 (Proof of Concept) deep dive for an initiative shepherd. Covers selecting a representative-but-contained PoC area in coordination with the owning team, building the framework and 1–3 production-quality example implementations, presenting to Architecture Council, drafting the ADR (in the centralized contributing-docs repository, not per-repo), and establishing Bitwarden's close-to-code and centralized documentation patterns for the new framework. Use when Research has produced an approved recommendation and the shepherd is validating it in real code before Scoping & Commitment.
+description: Phase 3 (Proof of Concept) deep dive for an initiative shepherd. Covers selecting a representative-but-contained PoC area in coordination with the owning team, building the framework and 1–3 production-quality example implementations, presenting to Architecture Council, drafting the ADR (in the centralized contributing-docs repository, not per-repo), and establishing close-to-code and centralized documentation patterns for the new framework. Time budget: 2–4 weeks, 40–80 hours.
+when_to_use: Use when Research has produced an approved recommendation at Architecture Council and the shepherd is validating it in real Bitwarden code before Scoping & Commitment. Trigger phrases include "PoC time", "building the framework PoC", "selecting the PoC area", "PoC documentation", "drafting the ADR", "presenting the PoC to Council". Do not invoke for the High-Level Architecture Plan or per-team handoffs (Phase 4 — use `scoping-and-handing-off-to-teams`) or for ongoing cross-team coordination after the PoC merges (Phase 5 — use `coordinating-implementation-across-teams`).
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
-Phase 3 of the [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614) is where the recommendation from the Architectural Assessment gets validated in real Bitwarden code. The deliverables: one or more PRs that demonstrate the pattern, Architecture Council review, and a draft ADR.
-
-Time budget: 2–4 weeks, 40–80 hours of shepherd time. PoCs that stretch past 4 weeks usually signal either the wrong scope (too ambitious) or the wrong approach (the recommendation isn't working).
+Phase 3 (Proof of Concept) deep-dive playbook for an initiative shepherd.
 
 ## What the PoC Is For
 
