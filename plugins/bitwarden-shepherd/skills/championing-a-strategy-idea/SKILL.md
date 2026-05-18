@@ -1,11 +1,13 @@
 ---
 name: championing-a-strategy-idea
-description: Primary-Owner playbook for the pre-funnel arc — driving a Technical Strategy Idea (TSI) from filing through Architecture Council and quarterly prioritization into Software Initiative Funnel intake. Covers filing the ARCH idea, pairing with a peer reviewer, completing the Stakeholder & Engagement Map (especially Known Friction Points), presenting at Architecture Council, navigating quarterly prioritization, and running the Adoption Retrospective at Implementation handoff.
-when_to_use: Use when you are the named Primary Owner driving a specific Technical Strategy Idea forward. Trigger phrases include "I think Bitwarden should…", "I want to propose a strategy idea", "I'm Primary Owner on ARCH-…", "I'm driving ARCH-…", "running the Adoption Retrospective". Do not invoke for the Peer Reviewer or portfolio-curator side (use `curating-the-strategy-ideas-backlog`) or for the team-tech-lead-as-contributor framing where the driving will pass to a Staff+ owner (use `contributing-to-technical-strategy` in `bitwarden-tech-lead`) — that skill is about _filing_ the idea well, this one is about _driving_ it well.
+description: Primary-Owner playbook for shepherding a Technical Strategy Idea through Architecture's pre-funnel evaluation into the Software Initiative Funnel.
+when_to_use: Use when driving a specific TSI as its named Primary Owner. Triggers — "I think Bitwarden should…", "I'm Primary Owner on ARCH-…", "running the Adoption Retrospective". Not for peer-reviewer or portfolio work (use `curating-the-strategy-ideas-backlog`).
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
-Pre-funnel Primary-Owner playbook: driving one Technical Strategy Idea from filing to funnel intake.
+Primary-Owner playbook for shepherding a [Technical Strategy Idea](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2344517656) (TSI) through Architecture's pre-funnel evaluation. Spans filing the ARCH idea, pairing with a peer reviewer, completing the Stakeholder & Engagement Map (with Known Friction Points), presenting at Architecture Council, navigating quarterly prioritization, and running the Adoption Retrospective at Implementation handoff. Time horizon: driven by the quarterly review cadence, not a fixed clock.
+
+For the Peer Reviewer / portfolio-curator side use `Skill(curating-the-strategy-ideas-backlog)`; for the team-tech-lead-as-contributor framing (filing well, driving passes to a Staff+ owner) use `Skill(contributing-to-technical-strategy)` in `bitwarden-tech-lead`.
 
 ## The Shepherding Model
 

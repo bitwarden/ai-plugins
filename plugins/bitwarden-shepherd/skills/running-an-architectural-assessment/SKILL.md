@@ -1,11 +1,11 @@
 ---
 name: running-an-architectural-assessment
-description: Phase 2 (Research) deep dive for an initiative shepherd. Covers running 3–5 stakeholder interviews, conducting current-state analysis with quantified impact, generating and trading off 2–4 solution approaches, drafting the Architectural Assessment Confluence page, socializing with stakeholders, and optionally previewing at Architecture Council. Time budget: 3–5 weeks, 40–80 hours of shepherd time.
-when_to_use: Use when an initiative has cleared Phase 1 Identification and the shepherd is producing the Research-phase deliverable that goes to Architecture Council for Phase 3 approval. Trigger phrases include "starting Research phase", "drafting the Architectural Assessment", "who should I interview for ARCH-X", "comparing solution options", "current-state analysis". Do not invoke for Phase 3 PoC work (use `running-a-proof-of-concept`) or for the High-Level Architecture Plan, which lives in Phase 4 (use `scoping-and-handing-off-to-teams`).
+description: Phase 2 (Research) deep-dive playbook — drafts the Architectural Assessment.
+when_to_use: Use when an initiative has cleared Phase 1 Identification and the shepherd is producing the Architectural Assessment for Architecture Council. Triggers — "starting Research phase", "drafting the Architectural Assessment", "comparing solution options". Not for PoC (use `running-a-proof-of-concept`).
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
-Phase 2 (Research) deep-dive playbook for an initiative shepherd. Splits into Part A — understanding the problem — and Part B — finding the right direction.
+Phase 2 (Research) deep-dive playbook for an initiative shepherd. Deliverable: an **Architectural Assessment** — a Confluence page in the EN-space assessments folder that captures the refined problem statement, current state, 2–4 evaluated solution options, and a recommendation with rationale. Time budget: 3–5 weeks, 40–80 hours of shepherd time. Splits into Part A (~weeks 1–2) understanding the problem, Part B (~weeks 3–5) finding the right direction.
 
 ## Part A: Understanding the Problem (~Weeks 1–2)
 

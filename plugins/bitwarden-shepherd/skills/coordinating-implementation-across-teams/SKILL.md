@@ -1,11 +1,13 @@
 ---
 name: coordinating-implementation-across-teams
-description: Phase 5 (Implementation) deep dive for an initiative shepherd. Covers establishing communication channels, running the kickoff, reviewing for consistency without doing detailed code review, detecting drift early, maintaining an FAQ, reporting progress at multiple cadences, managing documentation produced progressively, knowledge transfer, retrospective, and post-implementation impact measurement. Composes `Skill(running-work-transitions)` in `bitwarden-delivery-tools` for the originating-side Support Period, Pulse Check, Retrospective, and Closure phases. Time budget: 2–6 months wall clock, 10–20 hours/month.
-when_to_use: Use when an initiative is in active execution across teams and the shepherd is coordinating, not implementing. Trigger phrases include "support period", "early PR review for drift", "writing the FAQ", "monthly stakeholder update", "Adoption Retrospective", "post-implementation impact measurement", "closing out the initiative". Do not invoke for Phase 4 scoping or handoff meetings (use `scoping-and-handing-off-to-teams`) or for individual-team code review — that's the receiving team's tech lead's job.
+description: Phase 5 (Implementation) deep-dive playbook — shepherd coordinates teams executing the initiative across the support period, pulse check, retrospective, and closure.
+when_to_use: Use when an initiative is in active execution and the shepherd is coordinating, not implementing. Triggers — "support period", "early PR review for drift", "monthly stakeholder update", "Adoption Retrospective", "closing out the initiative". Not for Phase 4 scoping (use `scoping-and-handing-off-to-teams`).
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
-Phase 5 (Implementation) deep-dive playbook for an initiative shepherd. **You are not doing the implementation.** You enable teams, maintain consistency, ensure the initiative completes, and step back when it does. The funnel doc's mental model:
+Phase 5 (Implementation) deep-dive playbook for an initiative shepherd. **You are not doing the implementation.** You enable teams, maintain consistency, ensure the initiative completes, and step back when it does. Time budget: 2–6 months wall clock, 10–20 hours/month of shepherd time. Composes `Skill(running-work-transitions)` in `bitwarden-delivery-tools` for the originating-side Support Period, Pulse Check, Retrospective, and Closure phases of the [Work Transition Playbook](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2521038855).
+
+The funnel doc's mental model:
 
 > **Think of the shepherd as:**
 >
