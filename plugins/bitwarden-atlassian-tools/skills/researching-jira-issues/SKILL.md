@@ -1,6 +1,6 @@
 ---
 name: researching-jira-issues
-description: Use whenever the user mentions a Jira issue key and wants more than a surface-level lookup — "Read PROJ-123", "What's PROJ-123 about?", "Give me context on PROJ-123", "Deep dive PROJ-123", "What's blocking PROJ-123?", "Summarize PROJ-123 and its dependencies", "I need to work on PROJ-123, what should I know?", or any request to understand an issue's purpose, scope, or requirements. Thoroughly researches and synthesizes a Jira issue including all linked issues, sub-tasks, blocked dependencies, and supporting Confluence documentation.
+description: This skill should be used when the user mentions a Jira issue key and wants more than a surface-level lookup — "Read PROJ-123", "What's PROJ-123 about?", "Give me context on PROJ-123", "Deep dive PROJ-123", "What's blocking PROJ-123?", "Summarize PROJ-123 and its dependencies", "I need to work on PROJ-123, what should I know?", or any request to understand an issue's purpose, scope, or requirements. Thoroughly researches and synthesizes a Jira issue including all linked issues, sub-tasks, blocked dependencies, and supporting Confluence documentation.
 ---
 
 # Researching Jira Issues
@@ -20,6 +20,7 @@ Extract and note:
 - Current status and priority
 - Assignee and reporter
 - Key fields relevant to understanding the work (labels, components, sprint, etc.)
+- Tech Breakdown (custom field, when present — the technical implementation plan written and refined by the team)
 - Comments that provide important context (clarifications from stakeholders, technical decisions, implementation guidance)
 - **Custom fields**: Surface all non-null custom fields from the Additional Fields section of the response. The `names` expansion maps field IDs to human-readable display names automatically.
 
@@ -128,6 +129,7 @@ Organize all gathered information into a comprehensive understanding:
 - Technical decisions or constraints from comments/documentation
 - Risks or concerns mentioned
 - Important historical context (why was this cloned, what was superseded, etc.)
+- Divergences between supporting documentation and the specification of work in the ticket
 
 ### Context Budget
 
