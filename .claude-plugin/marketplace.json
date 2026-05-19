@@ -42,7 +42,7 @@
     {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
-      "version": "0.5.0",
+      "version": "0.4.2",
       "description": "Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden."
     },
     {

@@ -1,22 +1,12 @@
 ---
 name: coordinating-cross-team-breakdown
-description: Cross-team coordination for a Bitwarden Tech Breakdown — Part 3 signoff table (Team / Interface / Blocking / Other-team breakdown / Signoff), the cross-team checklist (mobile changes, components outside the team's domain, dependencies on other teams' services, APIs built for other teams), and the completion-communication checklist (post to `#team-eng-tech-breakdowns`, contact QA, contact the refinement facilitator, verify all signoffs). Use when identifying affected teams, building or updating the signoff table, chasing signoffs to move from PROPOSED to ACCEPTED, or running the completion-communication checklist before a breakdown moves to COMPLETE. Pair with `writing-tech-breakdowns` for the engineering content of the doc itself.
+description: Coordinate cross-team review and signoff for a Bitwarden Tech Breakdown. Use when identifying affected teams, building the Part 3 signoff table, chasing signoffs to move from PROPOSED to ACCEPTED, or running the completion-communication checklist before COMPLETE.
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 This is the cross-team half of Bitwarden's [Tech Breakdown Template](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2920349776). It covers Part 3 (the signoff table and cross-team checklist) and the completion-communication checklist that closes the breakdown. The engineering content of the breakdown — Parts 1, 2, 4, 5, 6 — lives in `Skill(writing-tech-breakdowns)`; the canonical state machine (`IN PLANNING → IN PROGRESS → PROPOSED → ACCEPTED → COMPLETE`) is documented there. This skill is what runs when the breakdown reaches `PROPOSED` and what runs again when implementation lands and the breakdown is ready to move to `COMPLETE`.
 
 When the canonical template is needed, fetch page `2920349776` via `get_confluence_page`.
-
-## When to Reach for This Skill
-
-Three triggers:
-
-1. **The breakdown has reached `PROPOSED`** in `Skill(writing-tech-breakdowns)`. Parts 1, 2, 4, 5 are drafted; the team has reviewed internally. Now affected teams need to be identified, the signoff table needs to be built, and signoffs need to be chased.
-2. **A signoff has stalled** or an affected team has surfaced an interface concern. Coordination work continues until the breakdown moves to `ACCEPTED`.
-3. **Implementation has shipped** and the breakdown is ready to move to `COMPLETE`. The completion-communication checklist is the closing ritual.
-
-Don't reach for this skill while the breakdown is still `IN PROGRESS` — cross-team review on a half-drafted doc wastes the affected teams' time and yields signoffs nobody trusts.
 
 ## Identifying Affected Teams
 

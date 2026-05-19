@@ -68,7 +68,6 @@ Before proposing anything, orient yourself:
   - Team-level problem → stay in-team and apply `Skill(architecting-solutions)`.
   - Initiative epic (from a shepherd, or one you're shepherding) → invoke `Skill(navigating-the-initiative-funnel)` (lives in `bitwarden-delivery-tools`).
   - Transition in either direction (your team taking on work, or handing off framework, tooling, or patterns it built) → invoke `Skill(running-work-transitions)` (lives in `bitwarden-delivery-tools`).
-  - Drafting or updating the Tech Breakdown for the team's epic (problem framing, scope checklist, specification artifacts, status lifecycle) → invoke `Skill(writing-tech-breakdowns)` (lives in `bitwarden-delivery-tools`); chain into `Skill(coordinating-cross-team-breakdown)` once the doc reaches PROPOSED and needs cross-team signoffs.
   - Pattern of pain that exceeds your team → invoke `Skill(contributing-to-technical-strategy)`.
 
 ## Cross-Plugin Integration

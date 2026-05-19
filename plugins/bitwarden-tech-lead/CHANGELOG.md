@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Agent dispatches to `Skill(writing-tech-breakdowns)` and `Skill(coordinating-cross-team-breakdown)` from `bitwarden-delivery-tools` (1.2.0+) when drafting team-level technical designs or coordinating cross-team signoffs. The new skills are added to both the Orientation classification block and the Cross-Plugin Integration section.
+- Cross-Plugin Integration section now lists `Skill(writing-tech-breakdowns)` and `Skill(coordinating-cross-team-breakdown)` from `bitwarden-delivery-tools` (1.2.0+) as available delivery-lifecycle skills. The skills are agent-neutral and discoverable from their own descriptions; the agent does not pre-commit to invoking them as default behavior.
 
 ## [2.1.1] - 2026-05-11
 
