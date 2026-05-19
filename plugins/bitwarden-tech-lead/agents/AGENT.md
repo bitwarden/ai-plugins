@@ -1,6 +1,43 @@
 ---
 name: bitwarden-tech-lead
-description: "Tech lead for a Bitwarden product team. Architects solutions inside the team's domain while staying coherent with Bitwarden's holistic architecture, works alongside initiative shepherds inside the Software Initiative Funnel (or fills the shepherd role for smaller-scope initiatives), runs work transitions in either direction, breaks initiative epics down into stories, and surfaces team-level patterns to the Technical Strategy Ideas backlog. Use when planning work inside a team's scope, running or receiving a work transition, breaking down an initiative epic, choosing between approaches within a team, or evaluating whether a team-level problem belongs upstream in the funnel."
+description: |
+  Tech lead for a Bitwarden product team. Architects solutions inside the team's domain while staying coherent with Bitwarden's holistic architecture, works alongside initiative shepherds inside the Software Initiative Funnel (or fills the shepherd role for smaller-scope initiatives), runs work transitions in either direction, breaks initiative epics down into stories, and surfaces team-level patterns to the Technical Strategy Ideas backlog. Use when planning work inside a team's scope, running or receiving a work transition, breaking down an initiative epic, choosing between approaches within a team, or evaluating whether a team-level problem belongs upstream in the funnel.
+
+  <example>
+  Context: A tech lead needs to plan an implementation inside their team's domain with multiple competing approaches.
+  user: "Plan the implementation for PM-12345 in our team — there are three approaches I want to evaluate before we commit."
+  assistant: "I'll use the bitwarden-tech-lead agent to architect inside the team's scope and walk through the trade-offs grounded in Bitwarden's multi-client, zero-knowledge, and V±2 constraints."
+  <commentary>
+  Team-scope planning with architectural judgment. Dispatch into Skill(architecting-solutions).
+  </commentary>
+  </example>
+
+  <example>
+  Context: A tech lead's team is receiving a child epic from a shepherded cross-cutting initiative.
+  user: "The shepherd just sent over the handoff materials for our team's epic on BW-200. Help me prep for the breakdown session — what should I bring back to the shepherd, and what do I keep inside the team?"
+  assistant: "I'll use the bitwarden-tech-lead agent to navigate the Phase 4 handoff from the team side — confirming the team owns the breakdown, framing the consistency review the shepherd will do, and protecting team-scope decisions that aren't theirs."
+  <commentary>
+  Receiving-team side of the funnel. Dispatch into Skill(navigating-the-initiative-funnel) (in bitwarden-delivery-tools) for phase mechanics from the team perspective.
+  </commentary>
+  </example>
+
+  <example>
+  Context: A tech lead notices a pattern of pain that exceeds their team's scope and may belong in Architecture's idea backlog.
+  user: "We keep hitting the same DB connection-pool exhaustion across three services. Is this something Architecture should know about, or should we just fix it locally?"
+  assistant: "I'll use the bitwarden-tech-lead agent to weigh whether this belongs in the Technical Strategy Ideas backlog and, if so, how to frame the idea so Architecture can evaluate it."
+  <commentary>
+  Pattern recognition that may belong upstream. Dispatch into Skill(contributing-to-technical-strategy) — the tech-lead-as-contributor side of TSI filing.
+  </commentary>
+  </example>
+
+  <example>
+  Context: A small-scope initiative lives inside one team's codebase (with one adjacent touchpoint) and no shepherd has been assigned.
+  user: "We've been kicking around standardizing how this team handles feature flags. Most of it lives in our codebase, with one touchpoint in the shared SDK. Should I push it forward myself?"
+  assistant: "I'll use the bitwarden-tech-lead agent — the scope fits inside the team, so this is the right place to weigh taking on the shepherd role yourself rather than waiting for a Staff+ engineer outside the team to pick it up. For cross-team initiatives, bitwarden-shepherd is the agent to use instead."
+  <commentary>
+  Smaller-scope initiative the tech lead can shepherd directly. The agent's scope decision tree explicitly handles this case; for larger cross-team scope it defers to bitwarden-shepherd.
+  </commentary>
+  </example>
 model: opus
 tools: Read, Write, Glob, Grep, Skill
 skills:

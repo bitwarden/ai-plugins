@@ -6,8 +6,7 @@
   },
   "metadata": {
     "description": "Official Bitwarden Claude Plugin Marketplace",
-    "version": "1.0.1",
-    "pluginRoot": "./plugins"
+    "version": "1.1.0"
   },
   "plugins": [
     {
@@ -25,7 +24,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.10.1",
+      "version": "1.11.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -69,6 +68,12 @@
       "source": "./plugins/bitwarden-tech-lead",
       "version": "2.2.0",
       "description": "Tech lead agent for a Bitwarden product team. Architects solutions holistically with the architecture group, dispatches to delivery-lifecycle skills (initiative funnel, work transitions) when work crosses teams, and surfaces team patterns to the Technical Strategy Ideas backlog."
+    },
+    {
+      "name": "bitwarden-shepherd",
+      "source": "./plugins/bitwarden-shepherd",
+      "version": "1.0.0",
+      "description": "Champion-of-a-technical-strategy agent for Bitwarden. Shepherds a Technical Strategy Idea through Architecture's evaluation into the Software Initiative Funnel, then drives the resulting initiative across all five funnel phases to durable adoption."
     },
     {
       "name": "bitwarden-delivery-tools",

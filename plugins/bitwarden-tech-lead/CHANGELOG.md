@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Agent dispatches to `Skill(writing-tech-breakdowns)` and `Skill(coordinating-cross-team-breakdown)` from `bitwarden-delivery-tools` (1.2.0+) when drafting team-level technical designs or coordinating cross-team signoffs. The new skills are added to both the Orientation classification block and the Cross-Plugin Integration section.
 
+## [2.1.1] - 2026-05-11
+
+### Changed
+
+- README: added a "Related plugins" pointer to the new sibling `bitwarden-shepherd` plugin so tech leads can discover the shepherd-side counterpart of this role.
+- Agent description now includes four `<example>` blocks (team-scope planning, receiving an initiative epic, surfacing a cross-team pattern, shepherding a smaller-scope initiative) so the orchestrator can route on concrete triggering scenarios rather than prose alone. Adopts Anthropic's documented standard for agent description fields.
+
 ## [2.1.0] - 2026-05-07
 
 ### Added

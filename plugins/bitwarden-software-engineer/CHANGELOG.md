@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New "Planning and Coordination" section in `bitwarden-software-engineer.md` that dispatches to `Skill(writing-tech-breakdowns)` and `Skill(coordinating-cross-team-breakdown)` from `bitwarden-delivery-tools` (1.2.0+) for drafting the team's Tech Breakdown and running cross-team signoff before implementation begins.
+- `tech-breakdown` and `planning` keywords to the plugin manifest so the new dispatch behavior is discoverable from marketplace search.
+
+## [0.4.2] - 2026-05-13
+
+### Fixed
+
+- Added `dotnet format` to the server repo verification steps so the agent auto-corrects encoding and style violations (including BOM) after file edits.
 
 ## [0.4.1] - 2026-05-07
 

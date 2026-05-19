@@ -1,0 +1,23 @@
+{
+  "name": "bitwarden-shepherd",
+  "version": "1.0.0",
+  "description": "Champion-of-a-technical-strategy agent for Bitwarden. Shepherds a Technical Strategy Idea through Architecture's evaluation into the Software Initiative Funnel, then drives the resulting initiative across all five funnel phases (Identification, Research, Proof of Concept, Scoping & Commitment, Implementation) to durable adoption. Produces the Architectural Assessment, PoC, ADR, High-Level Architecture Plan, and child epics; coordinates cross-team consistency; reports to leadership; and curates the upstream TSI backlog from the Peer-Reviewer side.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-shepherd",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "shepherd",
+    "champion",
+    "technical-strategy",
+    "technical-strategy-idea",
+    "initiative-funnel",
+    "architectural-assessment",
+    "proof-of-concept",
+    "adr",
+    "cross-team-coordination"
+  ],
+  "agents": "./agents/AGENT.md"
+}

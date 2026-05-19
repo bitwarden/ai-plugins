@@ -54,13 +54,15 @@ jobs:
           # Extract unique plugin directories from changed files
           CHANGED_PLUGINS=$(echo "$CHANGED_FILES" | cut -d/ -f1-2 | sort -u | tr '\n' ' ' | sed 's/ $//')
 
-          # Filter for AGENT.md, SKILL.md, and hooks.json files
+          # Filter for AGENT.md, SKILL.md, command, and hooks.json files
           # Agent files can be in two patterns:
           #   1. plugins/*/agents/*/AGENT.md (subdirectory with AGENT.md)
           #   2. plugins/*/agents/*.md (direct .md files in agents directory)
           AGENT_FILES=$(echo "$CHANGED_FILES" | grep -E '/agents/.*\.md$' || echo "")
           # Skill files are in plugins/*/skills/*/SKILL.md
           SKILL_FILES=$(echo "$CHANGED_FILES" | grep '/skills/.*/SKILL\.md$' || echo "")
+          # Command files are in plugins/*/commands/*.md or plugins/*/commands/*/*.md
+          COMMAND_FILES=$(echo "$CHANGED_FILES" | grep -E '/commands/.*\.md$' || echo "")
           HOOK_FILES=$(echo "$CHANGED_FILES" | grep 'hooks\.json$' || echo "")
 
           {
@@ -74,13 +76,16 @@ jobs:
             echo "skill_files<<EOF"
             echo "$SKILL_FILES"
             echo "EOF"
+            echo "command_files<<EOF"
+            echo "$COMMAND_FILES"
+            echo "EOF"
             echo "hook_files<<EOF"
             echo "$HOOK_FILES"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
           # Check if there are any plugin component files to validate
-          if [[ -n "$AGENT_FILES" ]] || [[ -n "$SKILL_FILES" ]] || [[ -n "$HOOK_FILES" ]]; then
+          if [[ -n "$AGENT_FILES" ]] || [[ -n "$SKILL_FILES" ]] || [[ -n "$COMMAND_FILES" ]] || [[ -n "$HOOK_FILES" ]]; then
             echo "has_components=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_components=false" >> "$GITHUB_OUTPUT"
@@ -203,6 +208,9 @@ jobs:
 
             Skill files changed:
             ${{ steps.changed-files.outputs.skill_files }}
+
+            Command files changed:
+            ${{ steps.changed-files.outputs.command_files }}
 
             Hook files changed:
             ${{ steps.changed-files.outputs.hook_files }}
