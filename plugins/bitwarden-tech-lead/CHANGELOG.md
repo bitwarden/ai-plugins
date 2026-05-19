@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Agent definition realigned with the canonical "Team Tech Lead" role from Confluence page 214041059. The agent is now defined by its three core relationships — to the team (primary technical resource, PR-review authority, roadblock removal), to peer tech leads (cross-team architecture and design challenges), and to the EM (backlog scoping, Tech Debt prioritization, design-session sounding board) — rather than by its participation in any specific workflow.
-- Introduced an explicit "workflows orchestrate the agent; the agent does not orchestrate workflows" principle in the agent body. Workflow-specific skills (Software Initiative Funnel, work transitions, Tech Breakdowns, cross-team signoffs) remain available via `bitwarden-delivery-tools` and are composed by whichever role is participating in the workflow.
-- Orientation block reduced to the two genuinely tech-lead-owned skills (`architecting-solutions`, `contributing-to-technical-strategy`). Workflow-classification bullets (funnel epic, transition, tech breakdown) removed — those workflows bring their own context when they invoke the agent.
-- Two of four `<example>` blocks replaced to reflect the canonical role: an EM-partnership scoping scenario and a cross-team-conduit scenario now sit alongside the original team-scope planning and upstream-pattern examples. The "receiving a shepherded epic" and "small-scope initiative I could shepherd" examples were removed — those capabilities are still present (via the relevant skills) but no longer define the agent.
-- Plugin and marketplace descriptions rewritten to match the new framing.
+- Agent definition realigned with the canonical "Team Tech Lead" role: three core relationships (team, peer tech leads, EM) rather than participation in any specific workflow.
+- Two of four `<example>` blocks replaced — EM-partnership scoping and cross-team conduit, alongside the original team-scope planning and upstream-pattern examples. The funnel-specific examples were removed; those capabilities still exist via the relevant skills but no longer define the agent.
+- Orientation block reduced to the two tech-lead-owned skills (`architecting-solutions`, `contributing-to-technical-strategy`). Workflow-classification bullets removed — workflows bring their own dispatch context when they invoke the agent.
+- Body intro makes the principle explicit: workflows orchestrate the agent, not the other way around.
+- Plugin and marketplace descriptions rewritten to match.
 
 ## [2.2.0] - 2026-05-13
 
