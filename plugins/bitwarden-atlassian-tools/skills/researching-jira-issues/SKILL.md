@@ -17,6 +17,8 @@ Extract and note:
 
 - Issue type (Epic, Story, Task, Bug, Sub-task, etc.)
 - Summary and description
+- Tech Breakdown
+- Reproduction steps for bugs
 - Current status and priority
 - Assignee and reporter
 - Key fields relevant to understanding the work (labels, components, sprint, etc.)
@@ -128,6 +130,7 @@ Organize all gathered information into a comprehensive understanding:
 - Technical decisions or constraints from comments/documentation
 - Risks or concerns mentioned
 - Important historical context (why was this cloned, what was superseded, etc.)
+- Divergences between supporting documentation and the specification of work in the ticket
 
 ### Context Budget
 
