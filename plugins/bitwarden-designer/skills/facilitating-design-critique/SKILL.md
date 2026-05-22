@@ -114,7 +114,7 @@ When facilitating (not just participating):
   the agreed format. Hold the parking lot for off-scope discussion.
 - **After the review.** Prioritize the issues raised. Confirm next steps with the presenter.
 
-## Composing with other skills in this plugin
+## Composing with other skills
 
 - **`design-review`.** During the session, the _substance_ of feedback runs through
   `design-review` — the 30/60/90 framework, the Code of Conduct, and (at 60%/90%) the

@@ -130,7 +130,7 @@ designers don't see UI in Figma that doesn't yet exist in product. But there are
 
 Default to the disciplined order. Use the exception sparingly.
 
-## Composing with other skills in this plugin
+## Composing with other skills
 
 - **`using-figma`.** `search_design_system` and `get_libraries` for the pre-proposal search;
   `get_metadata` and `get_variable_defs` for inspecting existing components; the Code Connect

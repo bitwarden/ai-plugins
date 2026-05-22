@@ -1,18 +1,24 @@
 ---
 name: design-review
 description: >
-  Bitwarden design team's Code of Conduct combined with the 30-60-90 critique framework. Use this
-  skill when giving feedback on a design, reviewing a Figma file or UI mockup for critique (not
-  implementation — that's figma-to-angular), evaluating a design proposal, or when the user asks
-  for a design critique. Triggers on phrases like "review this design", "critique this",
-  "feedback on this mockup", "what do you think of this UI", "design review", or when a design
-  is shared for review rather than build.
+  This skill should be used when the user asks to "review this design", "critique this",
+  "feedback on this mockup", "what do you think of this UI", "design review", or shares a
+  design (Figma file or UI mockup) for critique rather than implementation. Grounds the
+  Bitwarden design team's Code of Conduct combined with the 30/60/90 critique framework —
+  stage-appropriate critique, product-not-designer focus, content evaluated alongside visual
+  design at 60% and 90%. Composes `content-style-guide` (in `bitwarden-design-tools`) at
+  60%/90% and `using-figma` (in `bitwarden-design-tools`) when the design lives in Figma. Not
+  for implementation — that's `figma-to-angular` in the clients repo (external, not bundled).
 ---
 
 # Design Principles & Critique
 
 This skill grounds design feedback in the Bitwarden design team's Code of Conduct and the
-30-60-90 maturity framework. Critique the product, not the designer. Feedback must be
+30-60-90 maturity framework. The Code of Conduct and 30/60/90 framework originate from the
+[`designer-agent-skills` branch](https://github.com/bitwarden/clients/tree/designer-agent-skills)
+of `bitwarden/clients` (authored by the design team) and have no separate Confluence canonical
+— this skill is the authoritative source within Claude tooling. Critique the product, not the
+designer. Feedback must be
 actionable, stage-appropriate, and rooted in product goals — not personal preference.
 
 ## Step 1: Identify the stage
@@ -97,7 +103,7 @@ language, and the rest. Treat content findings as first-class critique points, n
 
 Skip content nitpicks at **30%** — direction, not copy, is the question at that stage.
 
-## Composing with other skills in this plugin
+## Composing with other skills
 
 - **`content-style-guide`.** Compose at 60% and 90% stages to evaluate user-visible copy
   alongside visual design — voice and tone, sentence case, no ampersands, accessibility rules.

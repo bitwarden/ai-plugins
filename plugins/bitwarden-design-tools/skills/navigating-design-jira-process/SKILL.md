@@ -112,7 +112,7 @@ _labels_ differ between boards (the engineering board has phases like `DESIGN AN
 `IN PROGRESS`, `DONE`; the design board has `TO DO`, `IN PROGRESS`, `DONE`, `ON HOLD`). When
 moving work, name the board explicitly to avoid ambiguity.
 
-## Composing with other skills in this plugin
+## Composing with other skills
 
 - **`preparing-design-handoff`.** The Jira transitions in Act 3 (Design Done) are the
   pre-handoff side of the handoff process. The handoff skill composes this one for those

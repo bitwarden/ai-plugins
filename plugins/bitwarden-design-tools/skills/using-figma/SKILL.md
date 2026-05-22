@@ -1,15 +1,14 @@
 ---
 name: using-figma
 description: >
-  Read, inspect, and reason about Figma designs via the Figma Dev Mode MCP server. This skill
-  should be used when the user shares a Figma URL, asks to "look at this design", "extract
-  tokens from Figma", "what variables does this use", "what's in this Figma file", "compare
-  these two Figma frames", "inspect this component", or any task that needs design context
-  from Figma without generating production code. The repo-specific output skill (such as
-  `figma-to-angular` in the clients repo — external, not bundled) handles framework-bound code
-  generation; this skill handles the Figma side of the boundary — selecting the right MCP
-  tool, parsing URLs into fileKey and nodeId, and turning Figma context into useful information
-  for critique, copy review, handoff prep, and Design System work.
+  This skill should be used when the user shares a Figma URL, asks to "look at this design",
+  "extract tokens from Figma", "what variables does this use", "what's in this Figma file",
+  "compare these two Figma frames", "inspect this component", or any task that reads design
+  context from Figma without generating production code. Selects the right Figma Dev Mode MCP
+  tool, parses Figma URLs into fileKey and nodeId, and turns design context into useful input
+  for critique, copy review, handoff prep, and Design System work. Stops at extracted context;
+  framework-bound code generation belongs in repo-specific skills like `figma-to-angular` in
+  the clients repo (external, not bundled).
 ---
 
 # Using Figma via the Dev Mode MCP Server
@@ -106,7 +105,7 @@ Per-tool parameters and full output shape are in `references/figma-mcp-tools.md`
   output skills like `figma-to-angular` in the clients repo. This skill stops at extracted
   design context.
 
-## Composing with the other skills in this plugin
+## Composing with other skills
 
 - **`design-review`.** When critiquing a design, start with `get_screenshot` + `get_metadata`
   to orient. Pull `get_variable_defs` if tokens are part of the critique (off-system colors,

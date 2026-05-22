@@ -103,7 +103,7 @@ Asset paths and full sizing tables are in `references/brand-assets.md`.
 - "Bitwarden" is a registered trademark of Bitwarden Inc. — surface this when content is
   external-facing and trademark attribution is appropriate.
 
-## Composing with other skills in this plugin
+## Composing with other skills
 
 - **`content-style-guide`.** Brand sits alongside content style. When reviewing user-visible
   surfaces, walk both: this skill catches color, logo, and capitalization issues; the content
