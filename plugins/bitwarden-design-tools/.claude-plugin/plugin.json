@@ -1,0 +1,20 @@
+{
+  "name": "bitwarden-design-tools",
+  "version": "0.1.0",
+  "description": "Apply Bitwarden brand identity (palette, typography, logo, radius foundation) to standalone HTML deliverables, dashboards, and mockups.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-design-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "design",
+    "branding",
+    "bitwarden-brand",
+    "html",
+    "dashboard",
+    "report",
+    "deliverable"
+  ]
+}
