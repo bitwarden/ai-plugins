@@ -80,6 +80,12 @@
       "source": "./plugins/bitwarden-delivery-tools",
       "version": "1.2.0",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and cross-team signoffs, commits, pull requests, preflight checks, and change labeling."
+    },
+    {
+      "name": "bitwarden-design-tools",
+      "source": "./plugins/bitwarden-design-tools",
+      "version": "0.1.0",
+      "description": "Apply Bitwarden brand identity (palette, typography, logo, radius foundation) to standalone HTML deliverables, dashboards, and mockups."
     }
   ]
 }
