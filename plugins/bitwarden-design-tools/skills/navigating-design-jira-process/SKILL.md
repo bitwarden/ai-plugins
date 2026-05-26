@@ -1,14 +1,8 @@
 ---
 name: navigating-design-jira-process
-description: >
-  Move design work through Bitwarden's Product and Design Jira workflow — engineering epics
-  with nested design tasks, the 30/60/90 iteration cadence, status transitions across the
-  design and engineering boards, and one-off engineering stories that need design support.
-  This skill should be used when the user asks to "set up Jira for this design project",
-  "what's the design Jira status", "move this to Ready for Dev", "create design tasks for
-  an epic", "Jira workflow for design", "30/60/90 in Jira", "design board", "design task
-  status", or any task about the Jira choreography that surrounds design work — distinct from
-  the design substance itself.
+description: Move design work through Bitwarden's Product and Design Jira workflow — engineering epics with nested design tasks, the 30/60/90 iteration cadence, status transitions across the design and engineering boards, and one-off engineering stories that need design support.
+when_to_use: Use when a task is about the Jira choreography that surrounds design work — distinct from the design substance itself. Triggers — "set up Jira for this design project", "what's the design Jira status", "move this to Ready for Dev", "create design tasks for an epic", "Jira workflow for design", "30/60/90 in Jira", "design board", "design task status". Not for the full handoff workflow (use `preparing-design-handoff`).
+allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Navigating the Product and Design Jira Process

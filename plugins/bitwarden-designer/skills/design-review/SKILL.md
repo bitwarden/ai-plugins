@@ -1,14 +1,8 @@
 ---
 name: design-review
-description: >
-  This skill should be used when the user asks to "review this design", "critique this",
-  "feedback on this mockup", "what do you think of this UI", "design review", or shares a
-  design (Figma file or UI mockup) for critique rather than implementation. Grounds the
-  Bitwarden design team's Code of Conduct combined with the 30/60/90 critique framework —
-  stage-appropriate critique, product-not-designer focus, content evaluated alongside visual
-  design at 60% and 90%. Composes `content-style-guide` (in `bitwarden-design-tools`) at
-  60%/90% and `using-figma` (in `bitwarden-design-tools`) when the design lives in Figma. Not
-  for implementation — that's `figma-to-angular` in the clients repo (external, not bundled).
+description: Bitwarden design team's Code of Conduct combined with the 30/60/90 critique framework — stage-appropriate critique, product-not-designer focus, content evaluated alongside visual design at 60% and 90%.
+when_to_use: Use when a design (Figma file or UI mockup) is shared for critique rather than implementation. Triggers — "review this design", "critique this", "feedback on this mockup", "what do you think of this UI", "design review". Not for implementation (use `figma-to-angular` in the clients repo, external) or for running a critique session (use `facilitating-design-critique`).
+allowed-tools: Skill
 ---
 
 # Design Principles & Critique

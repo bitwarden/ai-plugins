@@ -1,14 +1,8 @@
 ---
 name: facilitating-design-critique
-description: >
-  Run or participate in a Bitwarden design critique session — the weekly team critique and
-  one-off product design reviews — grounded in the design team's published etiquette guide
-  and the Product Design Review Guidelines. This skill should be used when the user asks to
-  "facilitate critique", "run a design review", "present at critique", "prep for design
-  critique", "set up a design review meeting", or any task about the *meeting itself* rather
-  than the substance of the design feedback. For the substance of the feedback — the 30/60/90
-  framework and Code of Conduct — use `design-review`. The two skills compose: this one
-  shapes the room; that one shapes what's said.
+description: Run or participate in a Bitwarden design critique session — the weekly team critique and one-off product design reviews — grounded in the team's published etiquette guide and the Product Design Review Guidelines.
+when_to_use: Use when the task is about the *meeting itself* rather than the substance of the feedback. Triggers — "facilitate critique", "run a design review", "present at critique", "prep for design critique", "set up a design review meeting". Not for the substance of feedback (use `design-review`).
+allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Facilitating Design Critique

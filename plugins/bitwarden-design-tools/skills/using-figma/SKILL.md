@@ -1,14 +1,8 @@
 ---
 name: using-figma
-description: >
-  This skill should be used when the user shares a Figma URL, asks to "look at this design",
-  "extract tokens from Figma", "what variables does this use", "what's in this Figma file",
-  "compare these two Figma frames", "inspect this component", or any task that reads design
-  context from Figma without generating production code. Selects the right Figma Dev Mode MCP
-  tool, parses Figma URLs into fileKey and nodeId, and turns design context into useful input
-  for critique, copy review, handoff prep, and Design System work. Stops at extracted context;
-  framework-bound code generation belongs in repo-specific skills like `figma-to-angular` in
-  the clients repo (external, not bundled).
+description: Read and inspect Figma designs via the Dev Mode MCP server — selects the right tool, parses Figma URLs into fileKey and nodeId, and turns design context into useful input for critique, copy review, handoff prep, and Design System work.
+when_to_use: Use when a task reads design context from Figma without generating production code. Triggers — Figma URL shared, "look at this design", "extract tokens from Figma", "what variables does this use", "what's in this Figma file", "compare these two Figma frames", "inspect this component". Not for framework-bound code generation (use `figma-to-angular` in the clients repo, external — not bundled).
+allowed-tools: Skill, mcp__figma__get_design_context, mcp__figma__get_metadata, mcp__figma__get_screenshot, mcp__figma__get_variable_defs, mcp__figma__get_libraries, mcp__figma__search_design_system, mcp__figma__get_figjam, mcp__figma__whoami, mcp__figma__get_code_connect_map, mcp__figma__get_code_connect_suggestions, mcp__figma__get_context_for_code_connect, mcp__figma__add_code_connect_map, mcp__figma__send_code_connect_mappings, mcp__figma__use_figma, mcp__figma__create_new_file, mcp__figma__upload_assets, mcp__figma__generate_figma_design, mcp__figma__generate_diagram
 ---
 
 # Using Figma via the Dev Mode MCP Server

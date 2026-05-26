@@ -1,13 +1,8 @@
 ---
 name: applying-bitwarden-branding
-description: >
-  Apply Bitwarden brand standards — logo usage, color palette, typography, iconography, and the
-  capitalization rules — in design work and design-adjacent assets. This skill should be used
-  when the user asks to "check the brand", "apply Bitwarden branding", "use the brand colors",
-  "is this on-brand", "what color is Bitwarden blue", "what font does Bitwarden use", "logo
-  usage", "brand guidelines", "brand assets", "shield", "icon", or any task that touches the
-  visual brand surface. Grounded in [bitwarden.com/brand](https://bitwarden.com/brand/) and the
-  [bitwarden/brand](https://github.com/bitwarden/brand) repository — the two canonical sources.
+description: Apply Bitwarden brand standards — logo usage, color palette, typography, iconography, and capitalization rules — grounded in bitwarden.com/brand and the bitwarden/brand repository.
+when_to_use: Use when a task touches Bitwarden's visual brand surface in design work or design-adjacent assets. Triggers — "check the brand", "apply Bitwarden branding", "use the brand colors", "is this on-brand", "what color is Bitwarden blue", "what font does Bitwarden use", "logo usage", "brand guidelines", "brand assets", "shield". Not for product content voice or grammar (use `content-style-guide`).
+allowed-tools: Skill
 ---
 
 # Applying Bitwarden Branding

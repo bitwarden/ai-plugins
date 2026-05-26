@@ -1,14 +1,8 @@
 ---
 name: preparing-design-handoff
-description: >
-  Prepare a Bitwarden design handoff — the Confluence handoff page, the Figma "Ready for Dev"
-  state, and the Jira transitions that go with them. This skill should be used when the user
-  asks to "prep handoff", "create a handoff page", "what goes in a handoff", "hand this off to
-  engineering", "finish the design phase", or any task at the end of the In Design phase
-  before engineering picks the work up. For Jira-specific state transitions on their own
-  (e.g., "move this to Ready for Dev"), use `navigating-design-jira-process`. This skill
-  composes that one for the Jira moves and `using-figma` for verifying the Figma file is
-  handoff-ready.
+description: Prepare a Bitwarden design handoff — the Confluence handoff page, the Figma "Ready for Dev" state, and the Jira transitions that go with them.
+when_to_use: Use at the end of the In Design phase before engineering picks the work up. Triggers — "prep handoff", "create a handoff page", "what goes in a handoff", "hand this off to engineering", "finish the design phase". Not for Jira-specific state transitions on their own (use `navigating-design-jira-process`); composes that one for the Jira moves and `using-figma` for verifying the Figma file is handoff-ready.
+allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Preparing a Design Handoff

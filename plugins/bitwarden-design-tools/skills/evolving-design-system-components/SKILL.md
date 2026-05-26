@@ -1,12 +1,8 @@
 ---
 name: evolving-design-system-components
-description: >
-  Propose a new UI pattern or modify an existing Design System component per Bitwarden's
-  published governance process. This skill should be used when the user asks to "add a
-  component", "create a new design pattern", "modify a component", "should this be in the
-  Component Library", "make this a core component", "is this a snowflake", "Figma component
-  properties", or any task that touches the Component Library or its Figma source of truth.
-  Composes `using-figma` for searching and inspecting the library.
+description: Propose a new UI pattern or modify an existing Design System component per Bitwarden's published governance process — design-team alignment, Core vs. Recipe/Snowflake decision with UI Foundation, Figma branching and property conventions, review gates, merge timing.
+when_to_use: Use when a task touches the Component Library or its Figma source of truth. Triggers — "add a component", "create a new design pattern", "modify a component", "should this be in the Component Library", "make this a core component", "is this a snowflake", "Figma component properties". Composes `using-figma` for searching and inspecting the library. Not for handoff prep on a specific project (use `preparing-design-handoff`).
+allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Evolving Design System Components

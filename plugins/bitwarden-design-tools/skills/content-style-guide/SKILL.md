@@ -1,15 +1,8 @@
 ---
 name: content-style-guide
-description: >
-  This skill should be used when the user asks to "review this copy", "is this error message
-  ok", "rewrite this button label", "check the wording", "what should this say", or when
-  end-user-facing GUI strings are being authored or critiqued — button labels, error messages,
-  toasts, modal copy, onboarding, empty states, form labels, helper text, link text. Grounds
-  Bitwarden's product content style guide: voice, tone, AP-style-with-exceptions grammar,
-  sentence case in UI, and accessibility-first language at a U.S. 7th-grade reading level.
-  Composed by `design-review` at 60%/90% stages and by `figma-to-angular` (external, not
-  bundled) during code generation. Does NOT cover developer-facing strings, code comments,
-  design tokens, or marketing/long-form content.
+description: Bitwarden's product content style guide for end-user-facing GUI copy — voice, tone, AP-style-with-exceptions grammar, sentence case in UI, and accessibility-first language at a U.S. 7th-grade reading level.
+when_to_use: Use when end-user-facing GUI strings are being authored or critiqued — button labels, error messages, toasts, modal copy, onboarding, empty states, form labels, helper text, link text. Triggers — "review this copy", "is this error message ok", "rewrite this button label", "check the wording", "what should this say". Composed by `design-review` at 60%/90% stages and by `figma-to-angular` (external, not bundled) during code generation. Not for developer-facing strings, code comments, design tokens, or marketing/long-form content.
+allowed-tools: Skill
 ---
 
 # Product Content Style Guide
