@@ -9,16 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `creating-pull-request` skill: hardened workflow into six ordered steps with a mandatory pre-submission preview block (title, type prefix, label, body) so reviewers and label automation no longer silently miss the PR template or the AI-review label, addressing a recurring user-reported failure where PRs landed without the template applied or without the chosen label
-- `creating-pull-request` skill: Step 1 preflight check now uses the `AskUserQuestion` tool with structured options (Yes — proceed / No — run it now / Skip preflight) instead of an unstructured "ask the user", aligning Step 1 with the AskUserQuestion pattern used by Steps 4 and 5
-- `creating-pull-request/evals` runner no longer persists `samples` into the per-query result; samples are still printed to stderr for failing queries to aid debugging. Prevents environment-specific data (absolute paths from `Read` tool calls) from being baked into the committed `baseline.json` and restores the README's documented "empty diff means no regression" workflow for any contributor running the eval
-- `creating-pull-request` skill: Step 5 confirmation now uses the `AskUserQuestion` tool with structured options (Submit / Edit title or body / Change ai-review label / Cancel) instead of a free-text question, mirroring Step 4's pattern and removing parse ambiguity
-- `creating-pull-request` skill: Step 4 ai-review label options reordered to surface `ai-review` first, then `ai-review-vnext`, matching the default-stable-before-preview convention
-- `creating-pull-request` skill: rewrote description to assert precedence over `labeling-changes` when the user is in a PR-creation context, while explicitly excluding conceptual/educational and existing-PR-management queries. Split the long single-field text into `description` (what the skill does) and `when_to_use` (when to invoke it) per the Claude Code skills frontmatter reference, distilling combined listing chars from ~1,485 to 771 (cap 1,536)
+- `creating-pull-request`: hardened workflow into six ordered steps with `AskUserQuestion`-driven preflight, label selection, and a mandatory pre-submission preview (title, type prefix, label, body) so the PR template and `ai-review` label are no longer silently dropped. Rewrote the description to trigger on natural-language PR phrasings and split it into `description` and `when_to_use` per the Claude Code skills frontmatter reference.
 
 ### Added
 
-- `creating-pull-request/evals/` directory containing the trigger eval set (`trigger-eval.json`), a custom runner (`run_real_eval.py`) that works around an upstream skill-creator harness false-negative when the skill under test is already plugin-registered, and a passing baseline (`baseline.json`) for diff-based regression checks on future description changes
+- `creating-pull-request/evals/` — trigger eval set, custom runner, and baseline for diff-based regression checks on future description changes.
 
 ## [1.2.0] - 2026-05-13
 
