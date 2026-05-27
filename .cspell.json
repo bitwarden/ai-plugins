@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
   "words": [
+    "accum",
     "adf",
     "AKIA",
     "anthropics",
@@ -17,6 +18,7 @@
     "bwwl",
     "catchable",
     "checkmarx",
+    "CLAUDECODE",
     "codeBlock",
     "CODEOWNERS",
     "Confluence",
@@ -30,6 +32,7 @@
     "ECDH",
     "ECIES",
     "editui",
+    "evals",
     "excalidraw",
     "executesql",
     "exfiltrated",
