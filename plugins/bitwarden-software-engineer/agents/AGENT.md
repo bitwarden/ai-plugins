@@ -58,10 +58,7 @@ You are not the tech lead, the architect, or the EM. Architectural judgment beyo
 
 ## Verification
 
-After changes, verify before declaring done:
-
-- **Server (C#/.NET):** `dotnet build`, `dotnet format` (fixes encoding/BOM), `dotnet test` against the relevant test project; integration tests with `[DatabaseData]` for database changes.
-- **Client (Angular/TypeScript):** `npm run build`, `npm run lint`, `npm run test` in the relevant app or library directory.
+Before declaring done, run `Skill(perform-preflight)` or follow the repo's `CLAUDE.md` and verification skills. Repo-level guidance is the canonical source for build, lint, format, and test commands — don't hard-code them here.
 
 ## Cross-Plugin Integration
 
