@@ -42,8 +42,8 @@
     {
       "name": "bitwarden-software-engineer",
       "source": "./plugins/bitwarden-software-engineer",
-      "version": "0.4.2",
-      "description": "Comprehensive full-stack software engineering assistant proficient in modern software development at Bitwarden."
+      "version": "1.0.0",
+      "description": "Software engineer agent for a Bitwarden product team. Implements stories, tasks, and bugs in the team's domain with code quality, performance, and security in mind. Participates in refinement, reviews PRs, collaborates with QA, and follows Git conventions."
     },
     {
       "name": "bitwarden-atlassian-tools",
@@ -78,7 +78,7 @@
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and cross-team signoffs, commits, pull requests, preflight checks, and change labeling."
     }
   ]

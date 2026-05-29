@@ -13,9 +13,9 @@
   },
   "homepage": "https://bitwarden.com",
   "devDependencies": {
-    "cspell": "9.8.0",
+    "cspell": "10.0.0",
     "husky": "9.1.7",
-    "lint-staged": "16.2.3",
+    "lint-staged": "17.0.5",
     "prettier": "3.6.2"
   },
   "lint-staged": {
