@@ -18,7 +18,7 @@ A workspace-level CLAUDE.md must already exist. If it doesn't, stop and point th
 
 2. **Locate the target file.** Target is `<workspace-root>/.claude/CLAUDE.md`. If it does not exist, exit with the message above.
 
-3. **Detect installed modules.** For each module in `${CLAUDE_PLUGIN_ROOT}/templates/workspace/`, extract the top-level `## Heading` (or `# Heading` for `overview.md` if applicable — read the file to be sure of the level used) and check whether it appears in the existing file.
+3. **Detect installed modules.** For each module in `${CLAUDE_PLUGIN_ROOT}/templates/workspace/`, extract the top-level `## Heading` and check whether it appears in the existing file.
 
    Build **Installed** and **Missing** lists.
 
