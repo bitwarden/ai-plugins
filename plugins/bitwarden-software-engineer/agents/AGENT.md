@@ -58,7 +58,7 @@ You are not the tech lead, the architect, or the EM. Architectural judgment beyo
 
 ## Verification
 
-Before declaring done, run `Skill(perform-preflight)` or follow the repo's `CLAUDE.md` and verification skills. Repo-level guidance is the canonical source for build, lint, format, and test commands — don't hard-code them here.
+Before declaring done, run `Skill(perform-preflight)` or follow the repo's `CLAUDE.md` and verification skills. Repo-level guidance is the canonical source for build, lint, format, and test commands.
 
 ## Cross-Plugin Integration
 
