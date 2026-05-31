@@ -45,11 +45,12 @@ Three phases, not three folders. Design is a single `.md`; construction is a fol
 
 Before drafting anything, orient on the work:
 
-1. **Read the Jira ticket** the breakdown is being written against. Pull description, comments, and any linked Confluence pages.
-2. **Check for an originating BW Initiative.** If the work sits under one, **run `Skill(navigating-the-initiative-funnel)` first** to pull the shepherd, sibling teams, architecture plan, and PoC PRs. The initiative context feeds the Specification and Cross-team engagement sections of `design.md`.
-3. **Identify the owning team** and confirm the breakdown will live in `breakdowns/<team>/`.
-4. **Copy `templates/tech-breakdown.md`** into the team's folder, renamed to `<JIRA-KEY>-<short-name>.md` (e.g., `PM-23289-sync-push-notifications.md`).
-5. **Delete the template checklist** at the top of the copied file.
+1. **Read the Jira epic** the breakdown is being written against. Pull description, comments, and any linked Confluence pages.
+2. **Read all child user stories** under the epic and their acceptance criteria. Stories are **inputs** to the design — they describe user-observable outcomes the breakdown must deliver. If no user stories exist for the epic, **stop and surface this as a blocker**: stories belong to Product and should exist before engineering decomposition begins. Either work with Product to author them, or scope the breakdown to a single existing story.
+3. **Check for an originating BW Initiative.** If the work sits under one, **run `Skill(navigating-the-initiative-funnel)` first** to pull the shepherd, sibling teams, architecture plan, and PoC PRs. The initiative context feeds the Specification and Cross-team engagement sections of `design.md`.
+4. **Identify the owning team** and confirm the breakdown will live in `breakdowns/<team>/`.
+5. **Copy `templates/tech-breakdown.md`** into the team's folder, renamed to `<JIRA-KEY>-<short-name>.md` (e.g., `PM-23289-sync-push-notifications.md`).
+6. **Delete the template checklist** at the top of the copied file.
 
 ## The three phases
 
@@ -61,8 +62,8 @@ Single file: `breakdowns/<team>/<JIRA-KEY>-<short-name>.md`. Covers Specificatio
 
 Drafting order:
 
-1. **Specification.** Description, User Value, Functional Requirements, Alternatives, Success Criteria. Don't paste Product spec; link it and frame in the team's voice.
-2. **Architecture.** Current State (what exists today in code, with paths), Proposed architecture (prefer Mermaid diagrams over images), Out of Scope, Known Limitations, Prototypes.
+1. **Specification.** Description, User Value, **User Stories** (list each one with Jira ID, "As a … I want …" line, and AC summary — these are inputs, not authored here), Functional Requirements (each mapped to the story IDs it implements), Alternatives, Success Criteria. Don't paste Product spec; link it and frame in the team's voice.
+2. **Architecture.** Current State (what exists today in code, with paths), Proposed architecture (prefer Mermaid diagrams over images), Out of Scope, Known Limitations, Prototypes. The architecture must cover every user story listed in the Specification.
 3. **Cross-team engagement.** Walk the three subsections — consuming other teams' APIs, changes required in other teams' code, sequencing & ordering. Populate the signoff table. **Hand off to `Skill(coordinating-cross-team-breakdown)`** when chasing signoffs.
 4. **Agent Context.** Repos affected (with `CLAUDE.md` pointers), existing patterns to follow, external references, things an agent should not assume. This block is what makes the breakdown useful to future Claude conversations — populate it explicitly, not as an afterthought.
 5. **Clarifications Log.** Run an AI clarify pass against the draft _before_ requesting cross-team review. AI-raised questions go in `clarifications/q-<topic>.md` files via the Q→D→A pattern; resolved answers fold back into Spec or Architecture and the log entry becomes a short stub.
@@ -76,11 +77,25 @@ Five artifacts in the sibling folder, each through its own approval gate:
 1. **`functional-design.md` first.** Per-layer changes: data model, server logic, API surface, SDK, client services, UI, background jobs, testing strategy. Fill only the layers this change touches; remove the rest. Each subsection's checklist evaluated explicitly (mark N/A when skipped, don't leave blank).
 2. **`non-functional.md` and `infrastructure.md` in parallel** once functional design is approved. NFR covers security, cryptography, observability, operations. Infrastructure covers deployment, environments, feature flagging.
 3. **`codegen-plan.md`** — numbered, checkbox-tracked list of every file to create or modify, in execution order. Each file traces back to a construction doc (e.g., "Source: `functional-design.md` § Data model changes"). Sequencing constraints called out explicitly (interfaces before consumers, types before usages).
-4. **`tasks.md` — the final construction gate.** Carve the codegen plan into **vertical, QA-testable slices**. Each slice = one Jira ticket. Typical grain: 3-7 tasks per breakdown. For each task: title (the user-observable behavior), scope (which codegen-plan steps), acceptance criteria in Given/When/Then, test scenarios, blocked-on, Jira ID (filled after refinement).
-   - ✅ "Web client receives SyncPush and triggers vault refresh" — observable, testable
-   - ✅ "API endpoint accepts and validates SyncPush payload" — testable contract
-   - ❌ "All data model changes" — horizontal, not testable
-   - ❌ "All files in `apps/web/`" — file boundary, not a behavior
+4. **`tasks.md` — the final construction gate.** Carve the codegen plan into **engineering tasks**, each a vertical slice of implementation work that delivers (part of) one or more user stories. Typical grain: 3-7 tasks per breakdown, ~1-3 days each.
+
+   Engineering tasks are **not user stories**. The relationship is one-to-many: one story → multiple engineering tasks. Each task has:
+   - **Stories served** — Jira IDs from the design's User Stories section
+   - **Scope** — codegen-plan steps it implements
+   - **Definition of Done** — engineering-shaped (tests pass, code reviewed, build green), **not** user-AC. Story AC stays on the Jira story; engineering tasks don't duplicate it.
+   - **Test scenarios** — edge cases for QA to cross-check (story AC is the user-facing contract)
+   - **Blocked on** — prerequisites among the other tasks
+   - **Jira ID** — typically created as a sub-task of the parent story
+
+   Include a **Coverage check** subsection mapping every user story from the design to at least one task. If a story is uncovered, the decomposition is incomplete.
+
+   Slicing principle: vertical implementation slices, not horizontal layer batches.
+   - ✅ "Implement SyncPush dispatcher and validation" — vertical, coherent implementation unit
+   - ✅ "Implement web client SyncPush handler" — vertical for the client side
+   - ❌ "All data model changes" — horizontal layer
+   - ❌ "All files in `apps/web/`" — file boundary, not implementation logic
+
+   Note the exception path: if user stories don't exist (the blocker from bootstrap wasn't resolved), engineering tasks may carry story-shaped AC and become Jira stories rather than sub-tasks. Use sparingly; the right fix is upstream.
 
 Before approving `tasks.md`, two engagements happen — these are gating, not optional:
 
@@ -91,15 +106,39 @@ Each artifact ends with a 2-option approval gate. After each approval, update `s
 
 ### Phase 3 — Execution
 
-Not a folder. Once the Tasks gate is signed, execution begins:
+Not a folder. Once the Tasks gate is signed, execution begins.
 
-1. **Create Jira tickets** from each approved task (carry over AC + test scenarios). Cross-link the breakdown.
+**Task "done" and story "done" are different events.** Tasks close on engineering DoD (tests, review, build, behind flag if applicable). Stories close on QA validation against story AC. QA does **not** gate individual task merges; it validates at the story boundary. The flagging path (chosen in `construction/infrastructure.md`) determines how tasks merge safely without per-task QA.
+
+Execution loop:
+
+1. **Create Jira tickets** from each approved task — typically as sub-tasks of the parent stories. Cross-link the breakdown.
 2. **Engineer + agent work `codegen-plan.md` file-by-file.** Check off each file as it lands.
-3. **Transition the Jira ticket** when all files in its slice are complete. Move it to QA review.
-4. **QA validates** against the AC and test scenarios. Ticket closes when QA passes.
-5. **Update `state.md`** after every meaningful event — codegen step complete, ticket created, ticket transitioned, ticket closed, QA blocked, clarification surfaced.
+3. **Task done — engineering DoD met:** tests pass, code reviewed, build green, behind flag if applicable. Merge. Close the Jira sub-task. Update `state.md`'s Tasks complete counter.
+4. **Story enters QA** when all tasks serving it have merged (and the flag is enabled in staging, if flagged). Engineer/pair notifies QA; add the story to `state.md`'s Stories awaiting QA section.
+5. **QA validates** against story AC (not task DoD). Story closes on pass. Update `state.md`'s Stories validated counter.
+6. **Flag flip (flagged path only):** once the story is validated in staging, coordinate the production flag flip per the team's release process. Update `state.md`'s Stories awaiting prod flag flip section.
 
-Repeat until all tickets are through QA. The breakdown is complete when `state.md` shows all tasks closed.
+The breakdown is complete when `state.md` shows all stories validated (and all flags flipped, if applicable).
+
+### QA testing process
+
+See the README's QA testing process section for the full model. Skill-level summary:
+
+**Two paths**, decided in `construction/infrastructure.md`:
+
+- **Feature-flagged (default).** Tasks merge to main behind the flag. Story-level QA happens when all tasks for a story land + flag is enabled in staging. Flag flips to prod after QA passes.
+- **Non-flagged.** Three sub-cases:
+  - **Task = story:** one task delivers a whole user-observable behavior; QA validates story AC at task merge.
+  - **Sequenced harmless intermediates:** tasks merge in dependency order; the final wiring task is QA's validation point.
+  - **Feature branch:** discouraged; must justify in `infrastructure.md`.
+
+**QA's two touchpoints:**
+
+- **Upstream — during construction refinement.** QA reviews `tasks.md`, confirms story AC is clear, suggests edge cases. Gating for the Tasks Approval Gate.
+- **Downstream — during execution.** QA validates each story when its tasks have merged (+ flag enabled in staging if flagged). Gating for the story closing in Jira.
+
+QA does not validate individual engineering tasks. Engineering DoD covers implementation correctness; story AC covers the user-facing contract.
 
 ## Clarifications: two mechanisms, one index
 
@@ -169,6 +208,8 @@ These come from the AI-DLC pattern and are not negotiable:
 6. **Always validate content before file creation.** Mermaid diagrams parse, links resolve, file paths exist where claimed.
 7. **Always read the canonical templates** before drafting an artifact. Templates evolve; don't work from memory.
 8. **Never carve work across teams.** A breakdown is single-team. Cross-team work means multiple breakdowns, one per owning team.
+9. **User stories are inputs, not outputs.** Read them during bootstrap from Jira; reference them in the design's Specification; ensure construction's `tasks.md` covers every story. Don't author stories in this breakdown — they belong to Product and live in Jira. If they're missing, that's a blocker.
+10. **Engineering task Definition of Done is not user AC.** Story AC stays on the Jira story. Engineering tasks describe implementation work; their DoD is implementation-shaped (tests pass, code reviewed, build green).
 
 ## Cross-references
 
@@ -184,6 +225,8 @@ These come from the AI-DLC pattern and are not negotiable:
 - **Skipping the Q→D→A pattern for "small" questions.** Conversational clarifications get lost. Question files survive the next context reset; chat does not.
 - **Slicing tasks horizontally instead of vertically.** "All data model changes" is not a QA-testable slice. Each task must deliver something QA can validate end-to-end.
 - **Creating Jira tickets before QA reviews `tasks.md`.** QA's job gets harder when ticket scope/scenarios are baked in without their input. Walk them through first.
+- **Confusing engineering tasks with user stories.** Stories describe user-observable outcomes with Given/When/Then AC, authored by Product, living in Jira. Engineering tasks describe implementation work and reference stories. Duplicating story AC onto engineering tasks creates two sources of truth and confuses QA.
+- **Starting design without user stories.** Stories are inputs to the breakdown. Bootstrap should pull them; missing stories is a blocker, not a section to fill in. Engineering doesn't author stories on Product's behalf.
 - **Carving work across teams within one breakdown.** Cross-team execution means separate breakdowns, linked via the Cross-team engagement section. Trying to track multi-team work in one breakdown's `tasks.md` collapses the model.
 - **Editing a template instead of copying it.** Templates are canonical; teams copy them. Editing in place corrupts the next breakdown's starting point.
 - **Approving a gate to "save time" without reading the artifact.** Downstream gates treat upstream approvals as authoritative. A rubber-stamped functional-design becomes the source the codegen-plan trusts.
