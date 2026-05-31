@@ -1,10 +1,10 @@
 ---
 name: running-ai-dlc-breakdown
-description: Drive a Bitwarden tech breakdown end-to-end through the three-phase AI-DLC model (design → construction → delivery) in the bitwarden/tech-breakdowns repo. Use when starting, drafting, or executing any tech breakdown — single engineer or pair driving with a Claude agent, per-artifact approval gates, Q→D→A clarifications, codegen-plan-to-Jira slicing, and `state.md` as the file-grain ↔ ticket-grain bridge.
+description: Drive a Bitwarden tech breakdown end-to-end through the three-phase AI-DLC model (design → construction → execution) in the bitwarden/tech-breakdowns repo. Use when starting, drafting, or executing any tech breakdown — single engineer or pair driving with a Claude agent, per-artifact approval gates, Q→D→A clarifications, codegen-plan-to-Jira slicing with team refinement, and `state.md` as the breakdown-wide tracker.
 allowed-tools: Skill, Read, Write, Edit, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence
 ---
 
-This skill drives a Bitwarden tech breakdown from a fresh Jira ticket through to all-shipped, using the three-phase AI-DLC model captured in the [bitwarden/tech-breakdowns](https://github.com/bitwarden/tech-breakdowns) repo. It is the operating playbook for the new mode of work: a single engineer or pair, with a Claude agent, driving the design → construction → delivery loop end-to-end against per-artifact approval gates.
+This skill drives a Bitwarden tech breakdown from a fresh Jira ticket through to all-shipped, using the three-phase AI-DLC model captured in the [bitwarden/tech-breakdowns](https://github.com/bitwarden/tech-breakdowns) repo. It is the operating playbook for the new mode of work: a single engineer or pair, with a Claude agent, driving the design → construction → execution loop end-to-end against per-artifact approval gates.
 
 This skill assumes:
 
@@ -21,24 +21,25 @@ Cross-team coordination _during the design phase_ (interface review, signoff fro
 breakdowns/<team>/
   PM-12345-feature-name.md            ← design (Phase 1)
   PM-12345-feature-name/              ← sibling folder, created when construction starts
+    state.md                          ← breakdown-wide tracker (all phases)
     construction/
       functional-design.md            ← per-layer implementation design
       non-functional.md               ← security, observability
       infrastructure.md               ← deployment, environments
       codegen-plan.md                 ← file-level execution plan
-    delivery/
-      tasks.md                        ← QA-testable Jira slices
-      state.md                        ← file progress ↔ ticket progress bridge
+      tasks.md                        ← QA-testable Jira slices (final construction gate)
     clarifications/                   ← Q→D→A files (created on demand)
       q-<topic>.md
 templates/
   tech-breakdown.md
+  state.md
   construction/
-  delivery/
   clarifications/question.md
 ```
 
 Templates are canonical. Copy from `templates/`, never edit in place.
+
+Three phases, not three folders. Design is a single `.md`; construction is a folder of artifacts; execution is the loop of running the codegen plan, transitioning Jira tickets, and updating `state.md` — no folder of its own.
 
 ## Bootstrap
 
@@ -66,31 +67,39 @@ Drafting order:
 4. **Agent Context.** Repos affected (with `CLAUDE.md` pointers), existing patterns to follow, external references, things an agent should not assume. This block is what makes the breakdown useful to future Claude conversations — populate it explicitly, not as an afterthought.
 5. **Clarifications Log.** Run an AI clarify pass against the draft _before_ requesting cross-team review. AI-raised questions go in `clarifications/q-<topic>.md` files via the Q→D→A pattern; resolved answers fold back into Spec or Architecture and the log entry becomes a short stub.
 
-**Design Approval Gate.** Sign the gate at the bottom of `design.md` to advance from PROPOSED to ACCEPTED. Update `state.md` (in `delivery/`) with the transition once the gate is signed and the sibling folder is created.
+**Design Approval Gate.** Sign the gate at the bottom of the design doc to advance from PROPOSED to ACCEPTED. Create the sibling folder, copy `templates/construction/*.md` and `templates/state.md` into it, and initialize `state.md` with the transition.
 
 ### Phase 2 — Construction
 
-Create the sibling folder. Copy `templates/construction/*.md` into it. Four artifacts, each through its own approval gate:
+Five artifacts in the sibling folder, each through its own approval gate:
 
 1. **`functional-design.md` first.** Per-layer changes: data model, server logic, API surface, SDK, client services, UI, background jobs, testing strategy. Fill only the layers this change touches; remove the rest. Each subsection's checklist evaluated explicitly (mark N/A when skipped, don't leave blank).
 2. **`non-functional.md` and `infrastructure.md` in parallel** once functional design is approved. NFR covers security, cryptography, observability, operations. Infrastructure covers deployment, environments, feature flagging.
-3. **`codegen-plan.md` last.** Numbered, checkbox-tracked list of every file to create or modify, in execution order. Each file traces back to a construction doc (e.g., "Source: `functional-design.md` § Data model changes"). Sequencing constraints called out explicitly (interfaces before consumers, types before usages).
-
-Each artifact ends with a 2-option approval gate. After each approval, update `state.md` with the artifact name, approval date, and what changed since the last gate.
-
-### Phase 3 — Delivery
-
-Copy `templates/delivery/*.md`. Two artifacts:
-
-1. **`tasks.md`** — carve the codegen plan into **vertical, QA-testable slices**. Each slice = one Jira ticket. Typical grain: 3-7 tasks per breakdown. For each task: title (the user-observable behavior), scope (which codegen-plan steps), acceptance criteria in Given/When/Then, test scenarios, blocked-on, Jira ID.
+3. **`codegen-plan.md`** — numbered, checkbox-tracked list of every file to create or modify, in execution order. Each file traces back to a construction doc (e.g., "Source: `functional-design.md` § Data model changes"). Sequencing constraints called out explicitly (interfaces before consumers, types before usages).
+4. **`tasks.md` — the final construction gate.** Carve the codegen plan into **vertical, QA-testable slices**. Each slice = one Jira ticket. Typical grain: 3-7 tasks per breakdown. For each task: title (the user-observable behavior), scope (which codegen-plan steps), acceptance criteria in Given/When/Then, test scenarios, blocked-on, Jira ID (filled after refinement).
    - ✅ "Web client receives SyncPush and triggers vault refresh" — observable, testable
    - ✅ "API endpoint accepts and validates SyncPush payload" — testable contract
    - ❌ "All data model changes" — horizontal, not testable
    - ❌ "All files in `apps/web/`" — file boundary, not a behavior
-2. **QA engagement.** Walk the responsible QA Engineer through `tasks.md` _before_ creating Jira tickets. Adjust scenarios and slice boundaries based on their input. Capture name, date, and notes in the QA engagement subsection.
-3. **Create Jira tickets** from the approved tasks. Each ticket carries its AC and test scenarios from `tasks.md`. Cross-link the breakdown.
 
-Then execute: engineer + agent work the codegen plan file-by-file. As each file lands, check it off in `codegen-plan.md`. When all files in a slice are done, transition the Jira ticket. Update `state.md` after each ticket transitions.
+Before approving `tasks.md`, two engagements happen — these are gating, not optional:
+
+- **Team refinement session.** The driving engineer/pair walks the whole team (engineers, tech lead, QA, PM as appropriate) through the construction artifacts and the proposed task slicing. This is where the broader team gets read-in, catches what the pair missed, and aligns with QA. Capture session date, attendees, and changes in the Team refinement section of `tasks.md`.
+- **QA review.** The responsible QA Engineer reviews tasks and test scenarios (typically as part of refinement). Capture separately so QA ownership is unambiguous.
+
+Each artifact ends with a 2-option approval gate. After each approval, update `state.md` with the artifact name, approval date, and what changed since the last gate.
+
+### Phase 3 — Execution
+
+Not a folder. Once the Tasks gate is signed, execution begins:
+
+1. **Create Jira tickets** from each approved task (carry over AC + test scenarios). Cross-link the breakdown.
+2. **Engineer + agent work `codegen-plan.md` file-by-file.** Check off each file as it lands.
+3. **Transition the Jira ticket** when all files in its slice are complete. Move it to QA review.
+4. **QA validates** against the AC and test scenarios. Ticket closes when QA passes.
+5. **Update `state.md`** after every meaningful event — codegen step complete, ticket created, ticket transitioned, ticket closed, QA blocked, clarification surfaced.
+
+Repeat until all tickets are through QA. The breakdown is complete when `state.md` shows all tasks closed.
 
 ## Clarifications: two mechanisms, one index
 
@@ -101,19 +110,19 @@ Clarifications come from two sources and use two different mechanisms. Keep them
 | **Human-raised** (PM, AppSec, peer team)  | Free-form table entry                           | Clarifications Log in `design.md` | Yes — full lifecycle (Open → Resolved)       |
 | **AI-raised** (this skill, mid-iteration) | Q→D→A files: multi-choice with `[Answer]:` tags | `clarifications/q-<topic>.md`     | Only as a resolved stub after fold-back      |
 
-The Clarifications Log is the **unified index** a future reader uses to see what questions drove the design. Q→D→A files are the **working artifacts** the agent uses during iteration. Open AI-raised questions live in their q-file and are tracked in `delivery/state.md`'s Open clarifications section — **not** in the design log (they're noise until resolved).
+The Clarifications Log is the **unified index** a future reader uses to see what questions drove the design. Q→D→A files are the **working artifacts** the agent uses during iteration. Open AI-raised questions live in their q-file and are tracked in `state.md`'s Open clarifications section — **not** in the design log (they're noise until resolved).
 
 ### The Question → Doc → Approval pattern (AI-raised only)
 
 When clarification is needed mid-iteration (any phase), do not chase the question conversationally. Use the Q→D→A pattern:
 
 1. **Create a question file** at `breakdowns/<team>/<breakdown-name>/clarifications/q-<topic>.md` using `templates/clarifications/question.md`. Questions use multiple-choice format with options A/B/C/X (X = custom) and `[Answer]:` tags.
-2. **Stop and announce.** Tell the user: "Created `clarifications/q-<topic>.md` with N questions. Fill in each `[Answer]:` tag and let me know when ready." Add the file to `delivery/state.md`'s Open clarifications section.
+2. **Stop and announce.** Tell the user: "Created `clarifications/q-<topic>.md` with N questions. Fill in each `[Answer]:` tag and let me know when ready." Add the file to `state.md`'s Open clarifications section.
 3. **Wait.** Do not proceed past the questions. Do not infer answers.
 4. **On the trigger phrase** — when the user says some variant of _"We have answered your clarification questions. Please re-read the file and proceed"_ — re-read the question file from disk (the user has edited it), validate answers for ambiguity, then **fold significant decisions back into the relevant phase doc** (Spec, Architecture, functional-design, etc.). Three follow-on updates:
    - The question file's Resolved decisions section gets the fold-back note (q-file becomes audit trail).
    - The Clarifications Log in `design.md` gets a short stub row: status Resolved, source `q-<topic>.md`, resolver name, one-line answer with link to the updated section.
-   - `delivery/state.md`'s Open clarifications section drops the q-file.
+   - `state.md`'s Open clarifications section drops the q-file.
 5. **Resume.** Continue the phase work with the new context.
 
 Answer-format guidance for the user (encoded in the template):
