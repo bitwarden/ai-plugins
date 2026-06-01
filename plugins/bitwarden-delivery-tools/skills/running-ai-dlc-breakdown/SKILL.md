@@ -92,17 +92,17 @@ Two artifacts in the sibling `construction/` folder. Each has a completion check
    - **Definition of Done** — engineering-shaped (tests pass, code reviewed, build green), **not** user-AC. Story AC stays on the Jira story; engineering tasks don't duplicate it.
    - **Test scenarios** — edge cases for QA to cross-check (story AC is the user-facing contract)
    - **Blocked on** — prerequisites among the other tasks
-   - **Jira ID** — typically created as a sub-task of the parent story
+   - **Jira ID** — created as a Jira **Task** under the parent epic, linked to the story or stories it serves via "implements" or similar (not as a sub-task; engineering tasks need their own QA-capable status lifecycle)
 
    Include a **Coverage check** subsection mapping every user story from the overview to at least one task. If a story is uncovered, the decomposition is incomplete.
 
    Slicing principle: vertical implementation slices, not horizontal layer batches.
 
-   Note the exception path: if user stories don't exist (the blocker from bootstrap wasn't resolved), engineering tasks may carry story-shaped AC and become Jira stories rather than sub-tasks. Use sparingly; the right fix is upstream.
+   Note the exception path: if user stories don't exist (the blocker from bootstrap wasn't resolved), engineering tasks may carry story-shaped AC and be created as Jira Stories instead of Tasks-linked-to-stories. Use sparingly; the right fix is upstream.
 
 Before signing the Tasks Approval Gate, two engagements happen — these are gating, not optional:
 
-- **Team refinement session.** The driving engineer/pair walks the whole team (engineers, tech lead, QA, PM as appropriate) through the construction artifacts and the proposed task slicing. This is where the broader team gets read-in, catches what the pair missed, and aligns with QA. Capture session date, attendees, and changes in the Team refinement section of `tasks.md`.
+- **Team refinement session.** The driving engineer/pair walks the whole team (engineers, tech lead, QA, PM as appropriate) through the construction artifacts and the proposed task slicing. Two things happen: (1) the broader team gets read-in, catches what the pair missed, and aligns with QA on test scenarios; (2) each task's ticket-ready content gets fleshed out — the implementation pointers, one-paragraph context, sharpened scenarios, affected file list. The task entries in `tasks.md` carry structural fields out of construction; refinement is where the team adds the rest so each task is ready to become a Jira Task. Capture session date, attendees, and changes in the Team refinement section of `tasks.md`.
 - **QA review.** The responsible QA Engineer reviews tasks and test scenarios (typically as part of refinement). Capture separately so QA ownership is unambiguous.
 
 After the Tasks Approval Gate is signed, update `state.md` with the transition and proceed to execution.
@@ -115,9 +115,9 @@ Not a folder. Once the Tasks gate is signed, execution begins.
 
 Execution loop (each step shows the owner):
 
-1. **Create Jira tickets** — **engineer** (or agent via Atlassian MCP, with engineer review) creates a Jira sub-task per engineering task, typically linked to the parent stories. Cross-link the breakdown.
+1. **Create Jira Tasks** — **engineer** (or agent via Atlassian MCP, with engineer review) creates a Jira **Task** per engineering task (siblings of the parent stories under the same epic), linking each Task to the story or stories it serves via "implements" or similar. Cross-link the breakdown.
 2. **Execute the codegen plan** — **engineer + agent** work `codegen-plan.md` file-by-file. Agent generates each file; engineer reviews the diff and commits. Check off each file as it lands.
-3. **Close tasks as they merge** — **engineer** transitions the Jira sub-task to Done when engineering DoD is met (tests, review, build, behind flag if applicable).
+3. **Close tasks as they merge** — **engineer** transitions the Jira Task to Done when engineering DoD is met (tests, review, build, behind flag if applicable).
 4. **Notify QA when a story is ready** — when all tasks serving a story have merged (and the flag is enabled in staging if flagged), **engineer/pair** notifies the QA Engineer.
 5. **QA validates** — **QA Engineer** validates the story against its AC (not task DoD). Story closes on pass.
 6. **Flag flip (flagged path only)** — once the story is validated in staging, **engineer** coordinates the production flag flip per the team's release process.
