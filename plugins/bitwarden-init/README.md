@@ -1,13 +1,18 @@
 # Bitwarden Init Plugin
 
-Generates CLAUDE.md files using Bitwarden's standardized documentation template.
+Generates CLAUDE.md files at three scopes — repository, workspace, and user — using Bitwarden's templates.
 
 ## What It Does
 
-This plugin creates comprehensive CLAUDE.md files that document your codebase. It works in two phases:
+Claude Code reads `CLAUDE.md` files by walking up the directory tree from the current working directory and concatenating every file it finds. That makes three scopes useful:
 
-1. **Phase 1**: Runs Anthropic's built-in `/init` to analyze your codebase and generate initial documentation
-2. **Phase 2**: Extends the output with Bitwarden's template structure, adding standardized sections
+| Scope          | Path                                 | Applies to                                  |
+| -------------- | ------------------------------------ | ------------------------------------------- |
+| **User**       | `~/.claude/CLAUDE.md`                | Every project, every conversation           |
+| **Workspace**  | `<bw-source-root>/.claude/CLAUDE.md` | Every Bitwarden repo cloned under that root |
+| **Repository** | `<repo>/CLAUDE.md`                   | One specific repo                           |
+
+This plugin has commands for all three.
 
 ## Installation
 
@@ -19,18 +24,74 @@ Restart Claude Code after installation.
 
 ## Commands
 
-### `/bitwarden-init:init`
+### Repository scope
 
-Generates a new CLAUDE.md file. Runs both phases automatically:
+#### `/bitwarden-init:init`
 
-1. Anthropic's `/init` analyzes the codebase
-2. `/enhance` restructures and extends the output
+Generates a new repository-level `CLAUDE.md`. Runs both phases automatically:
 
-### `/bitwarden-init:enhance`
+1. Anthropic's `/init` analyzes the codebase.
+2. `/enhance` restructures and extends the output using the 11-section project template (see below).
 
-Enhances an existing CLAUDE.md file. Reads your current file, performs additional codebase research, and reorganizes content to match Bitwarden's template sections.
+#### `/bitwarden-init:enhance`
 
-## Template Structure
+Enhances an existing repository-level `CLAUDE.md`. Reads the current file, performs supplementary codebase research, and reorganizes content into the 11 project sections.
+
+### User scope
+
+#### `/bitwarden-init:init-user`
+
+Walks you through a Q&A to assemble `~/.claude/CLAUDE.md` from opt-in behavioral modules (intellectual honesty, simplicity, surgical changes, code-review mutation lockdown, …). The modules are a starting point assembled from one engineer's preferences — pick what fits you and edit freely.
+
+#### `/bitwarden-init:enhance-user`
+
+Detects which behavioral modules are already present in `~/.claude/CLAUDE.md` and offers to append any that are missing.
+
+### Workspace scope
+
+#### `/bitwarden-init:init-workspace`
+
+Walks you through a Q&A to assemble `<workspace-root>/.claude/CLAUDE.md` for the folder where you keep all your locally-cloned Bitwarden repos. Auto-detects the workspace root by walking up from `cwd` looking for an ancestor with two or more sibling git repositories. Always asks for confirmation before writing. Modules include the zero-knowledge invariant, security principles P01–P06, core vocabulary, and operating defaults like worktrees and plan mode.
+
+#### `/bitwarden-init:enhance-workspace`
+
+Detects which Bitwarden domain modules are already present in the workspace-level file and offers to append any that are missing.
+
+### Safety guardrails for user / workspace scopes
+
+Both new init and enhance flows for the user and workspace scopes:
+
+- Show a unified diff preview before any write.
+- Require an explicit `Apply` confirmation.
+- Create a timestamped `*.bak-<ISO-timestamp>` copy of the existing file before overwriting.
+- Surface the backup path in the success message.
+
+## Usage
+
+Typical first-time setup, in order:
+
+```text
+# 1. Set up your user-level CLAUDE.md (applies to every project)
+/bitwarden-init:init-user
+
+# 2. From any directory under the folder where you keep your cloned Bitwarden repos
+/bitwarden-init:init-workspace
+
+# 3. In each repo, set up the repo-level CLAUDE.md
+/bitwarden-init:init
+```
+
+Later, to refresh a CLAUDE.md after the plugin adds new modules:
+
+```text
+/bitwarden-init:enhance-user        # append any missing user-scope modules
+/bitwarden-init:enhance-workspace   # append any missing workspace-scope modules
+/bitwarden-init:enhance             # refresh a repo CLAUDE.md against the 11-section template
+```
+
+All four user/workspace commands open an interactive Q&A: pick the modules you want, review a unified diff against the existing file (if any), then confirm `Apply`. A timestamped `*.bak-<...>` is written before any overwrite.
+
+## Repository Template Structure
 
 The generated CLAUDE.md includes these sections:
 
