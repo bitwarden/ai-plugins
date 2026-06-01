@@ -113,14 +113,16 @@ Not a folder. Once the Tasks gate is signed, execution begins.
 
 **Task "done" and story "done" are different events.** Tasks close on engineering DoD (tests, review, build, behind flag if applicable). Stories close on QA validation against story AC. QA does **not** gate individual task merges; it validates at the story boundary. The flagging path (chosen in `design/infrastructure-design.md`) determines how tasks merge safely without per-task QA.
 
-Execution loop:
+Execution loop (each step shows the owner):
 
-1. **Create Jira tickets** from each approved task — typically as sub-tasks of the parent stories. Cross-link the breakdown.
-2. **Engineer + agent work `codegen-plan.md` file-by-file.** Check off each file as it lands.
-3. **Task done — engineering DoD met:** tests pass, code reviewed, build green, behind flag if applicable. Merge. Close the Jira sub-task. Update `state.md`'s Tasks complete counter.
-4. **Story enters QA** when all tasks serving it have merged (and the flag is enabled in staging, if flagged). Engineer/pair notifies QA; add the story to `state.md`'s Stories awaiting QA section.
-5. **QA validates** against story AC (not task DoD). Story closes on pass. Update `state.md`'s Stories validated counter.
-6. **Flag flip (flagged path only):** once the story is validated in staging, coordinate the production flag flip per the team's release process. Update `state.md`'s Stories awaiting prod flag flip section.
+1. **Create Jira tickets** — **engineer** (or agent via Atlassian MCP, with engineer review) creates a Jira sub-task per engineering task, typically linked to the parent stories. Cross-link the breakdown.
+2. **Execute the codegen plan** — **engineer + agent** work `codegen-plan.md` file-by-file. Agent generates each file; engineer reviews the diff and commits. Check off each file as it lands.
+3. **Close tasks as they merge** — **engineer** transitions the Jira sub-task to Done when engineering DoD is met (tests, review, build, behind flag if applicable).
+4. **Notify QA when a story is ready** — when all tasks serving a story have merged (and the flag is enabled in staging if flagged), **engineer/pair** notifies the QA Engineer.
+5. **QA validates** — **QA Engineer** validates the story against its AC (not task DoD). Story closes on pass.
+6. **Flag flip (flagged path only)** — once the story is validated in staging, **engineer** coordinates the production flag flip per the team's release process.
+
+**Who updates `state.md`:** the engineer owns it. During an AI-DLC session, the agent updates `state.md` as a side-effect of its work (codegen step complete, gate signed, clarification surfaced) — the agent can only update what it observes in-session. For asynchronous events (a PR merging hours later, QA validating a story a day later, a flag flip), the engineer updates `state.md` directly or asks the agent in the next session to record what's changed. Stale state means anyone picking up cold reconstructs the picture from scratch.
 
 The breakdown is complete when `state.md` shows all stories validated (and all flags flipped, if applicable).
 
