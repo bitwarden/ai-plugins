@@ -19,27 +19,29 @@ Cross-team coordination _during the design phase_ (interface review, signoff fro
 
 ```
 breakdowns/<team>/
-  PM-12345-feature-name.md            ← design (Phase 1)
-  PM-12345-feature-name/              ← sibling folder, created when construction starts
+  PM-12345-feature-name.md            ← design overview (cold-start entry, Phase 1)
+  PM-12345-feature-name/              ← sibling folder, created when design begins
     state.md                          ← breakdown-wide tracker (all phases)
-    construction/
+    design/
       functional-design.md            ← per-layer implementation design
-      non-functional.md               ← security, observability
-      infrastructure.md               ← deployment, environments
+      non-functional-design.md        ← security, observability
+      infrastructure-design.md        ← deployment, environments, flagging
+    construction/
       codegen-plan.md                 ← file-level execution plan
       tasks.md                        ← QA-testable Jira slices (final construction gate)
     clarifications/                   ← Q→D→A files (created on demand)
       q-<topic>.md
 templates/
-  tech-breakdown.md
+  tech-breakdown.md                   ← design overview template
   state.md
-  construction/
+  design/                             ← detailed design artifacts
+  construction/                       ← codegen plan + tasks
   clarifications/question.md
 ```
 
 Templates are canonical. Copy from `templates/`, never edit in place.
 
-Three phases, not three folders. Design is a single `.md`; construction is a folder of artifacts; execution is the loop of running the codegen plan, transitioning Jira tickets, and updating `state.md` — no folder of its own.
+Three phases. Design is the overview `.md` plus detailed sub-artifacts in `design/` (each with its own approval sub-gate, rolled up by the Design Approval Gate at the bottom of the overview). Construction is thin — just the codegen plan and task decomposition. Execution is the loop of running the codegen plan, transitioning Jira tickets, and updating `state.md` — no folder of its own.
 
 ## Bootstrap
 
@@ -50,65 +52,66 @@ Before drafting anything, orient on the work:
 3. **Check for an originating BW Initiative.** If the work sits under one, **run `Skill(navigating-the-initiative-funnel)` first** to pull the shepherd, sibling teams, architecture plan, and PoC PRs. The initiative context feeds the Specification and Cross-team engagement sections of `design.md`.
 4. **Identify the owning team** and confirm the breakdown will live in `breakdowns/<team>/`.
 5. **Copy `templates/tech-breakdown.md`** into the team's folder, renamed to `<JIRA-KEY>-<short-name>.md` (e.g., `PM-23289-sync-push-notifications.md`).
-6. **Delete the template checklist** at the top of the copied file.
+6. **Create the sibling folder** with the same name and copy `templates/design/*.md`, `templates/construction/*.md`, and `templates/state.md` into it.
+7. **Delete the template checklist** at the top of the overview file.
 
 ## The three phases
 
-The skill runs each phase as a gated loop: draft → clarify (Q→D→A as needed) → request approval → either iterate or advance. Phase boundaries are explicit; gates are explicit.
+The skill runs each phase as a gated loop: draft → clarify (Q→D→A as needed) → complete artifacts → request gate approval → either iterate or advance. **Two approval gates total per breakdown**: the Design Approval Gate (rolls up all design work) and the Tasks Approval Gate (rolls up all construction work). Individual artifacts have completion checklists, not per-artifact gates.
 
 ### Phase 1 — Design
 
-Single file: `breakdowns/<team>/<JIRA-KEY>-<short-name>.md`. Covers Specification, Clarifications Log, Architecture (high-level), Cross-team engagement, Agent Context.
+Two parts: the overview (single file: `breakdowns/<team>/<JIRA-KEY>-<short-name>.md`) and the detailed design artifacts (in the sibling `design/` folder).
 
-Drafting order:
+**Overview drafting order:**
 
 1. **Specification.** Description, User Value, **User Stories** (list each one with Jira ID, "As a … I want …" line, and AC summary — these are inputs, not authored here), Functional Requirements (each mapped to the story IDs it implements), Alternatives, Success Criteria. Don't paste Product spec; link it and frame in the team's voice.
-2. **Architecture.** Current State (what exists today in code, with paths), Proposed architecture (prefer Mermaid diagrams over images), Out of Scope, Known Limitations, Prototypes. The architecture must cover every user story listed in the Specification.
+2. **Architecture (high-level).** Current State (what exists today in code, with paths), Proposed architecture (prefer Mermaid diagrams over images), Out of Scope, Known Limitations, Prototypes. The architecture must cover every user story listed in the Specification. Per-layer detail lives in `design/functional-design.md`, not here.
 3. **Cross-team engagement.** Walk the three subsections — consuming other teams' APIs, changes required in other teams' code, sequencing & ordering. Populate the signoff table. **Hand off to `Skill(coordinating-cross-team-breakdown)`** when chasing signoffs.
-4. **Agent Context.** Repos affected (with `CLAUDE.md` pointers), existing patterns to follow, external references, things an agent should not assume. This block is what makes the breakdown useful to future Claude conversations — populate it explicitly, not as an afterthought.
+4. **Agent Context.** Durable reference content for future agent invocations: repos affected (with `CLAUDE.md` pointers), existing patterns to follow, external references, things an agent should not assume. Stable design-phase context only — current-position state (which phase, who's driving, last gate) lives in `state.md`, not here. Populate explicitly, not as an afterthought.
 5. **Clarifications Log.** Run an AI clarify pass against the draft _before_ requesting cross-team review. AI-raised questions go in `clarifications/q-<topic>.md` files via the Q→D→A pattern; resolved answers fold back into Spec or Architecture and the log entry becomes a short stub.
 
-**Design Approval Gate.** Sign the gate at the bottom of the design doc to advance from PROPOSED to ACCEPTED. Create the sibling folder, copy `templates/construction/*.md` and `templates/state.md` into it, and initialize `state.md` with the transition.
+**Detailed design artifacts in `design/`.** Each has a completion checklist but no per-artifact gate; they roll up to the overview's Design Approval Gate.
+
+1. **`functional-design.md`** — per-layer changes: data model, server logic, API surface, SDK, client services, UI, background jobs, testing strategy. Fill only the layers this change touches; remove the rest. Each subsection's checklist evaluated explicitly (mark N/A when skipped, don't leave blank).
+2. **`non-functional-design.md`** — security, cryptography, observability, operations. Drafted in parallel with step 3 once functional-design is complete.
+3. **`infrastructure-design.md`** — deployment, environments, feature flagging strategy. Drafted in parallel with step 2 once functional-design is complete.
+
+**Design Approval Gate.** Sign the gate at the bottom of the overview when all three design artifacts have their completion checklists satisfied AND cross-team signoffs are complete. Status advances PROPOSED → ACCEPTED. Update `state.md` with the transition.
 
 ### Phase 2 — Construction
 
-Five artifacts in the sibling folder, each through its own approval gate:
+Two artifacts in the sibling `construction/` folder. Each has a completion checklist but no per-artifact gate; both roll up to the single **Tasks Approval Gate**.
 
-1. **`functional-design.md` first.** Per-layer changes: data model, server logic, API surface, SDK, client services, UI, background jobs, testing strategy. Fill only the layers this change touches; remove the rest. Each subsection's checklist evaluated explicitly (mark N/A when skipped, don't leave blank).
-2. **`non-functional.md` and `infrastructure.md` in parallel** once functional design is approved. NFR covers security, cryptography, observability, operations. Infrastructure covers deployment, environments, feature flagging.
-3. **`codegen-plan.md`** — numbered, checkbox-tracked list of every file to create or modify, in execution order. Each file traces back to a construction doc (e.g., "Source: `functional-design.md` § Data model changes"). Sequencing constraints called out explicitly (interfaces before consumers, types before usages).
-4. **`tasks.md` — the final construction gate.** Carve the codegen plan into **engineering tasks**, each a vertical slice of implementation work that delivers (part of) one or more user stories. Typical grain: 3-7 tasks per breakdown, ~1-3 days each.
+1. **`codegen-plan.md`** — numbered, checkbox-tracked list of every file to create or modify, in execution order. Each file traces back to a design artifact (e.g., "Source: `../design/functional-design.md` § Data model changes"). Sequencing constraints called out explicitly (interfaces before consumers, types before usages).
+2. **`tasks.md`** — the artifact that carries the Tasks Approval Gate at its bottom. Carve the codegen plan into **engineering tasks**, each a vertical slice of implementation work that delivers (part of) one or more user stories. Typical grain: 3-7 tasks per breakdown, ~1-3 days each.
 
    Engineering tasks are **not user stories**. The relationship is one-to-many: one story → multiple engineering tasks. Each task has:
-   - **Stories served** — Jira IDs from the design's User Stories section
+   - **Stories served** — Jira IDs from the overview's User Stories section
    - **Scope** — codegen-plan steps it implements
    - **Definition of Done** — engineering-shaped (tests pass, code reviewed, build green), **not** user-AC. Story AC stays on the Jira story; engineering tasks don't duplicate it.
    - **Test scenarios** — edge cases for QA to cross-check (story AC is the user-facing contract)
    - **Blocked on** — prerequisites among the other tasks
    - **Jira ID** — typically created as a sub-task of the parent story
 
-   Include a **Coverage check** subsection mapping every user story from the design to at least one task. If a story is uncovered, the decomposition is incomplete.
+   Include a **Coverage check** subsection mapping every user story from the overview to at least one task. If a story is uncovered, the decomposition is incomplete.
 
    Slicing principle: vertical implementation slices, not horizontal layer batches.
-   - ✅ "Implement SyncPush dispatcher and validation" — vertical, coherent implementation unit
-   - ✅ "Implement web client SyncPush handler" — vertical for the client side
-   - ❌ "All data model changes" — horizontal layer
-   - ❌ "All files in `apps/web/`" — file boundary, not implementation logic
 
    Note the exception path: if user stories don't exist (the blocker from bootstrap wasn't resolved), engineering tasks may carry story-shaped AC and become Jira stories rather than sub-tasks. Use sparingly; the right fix is upstream.
 
-Before approving `tasks.md`, two engagements happen — these are gating, not optional:
+Before signing the Tasks Approval Gate, two engagements happen — these are gating, not optional:
 
 - **Team refinement session.** The driving engineer/pair walks the whole team (engineers, tech lead, QA, PM as appropriate) through the construction artifacts and the proposed task slicing. This is where the broader team gets read-in, catches what the pair missed, and aligns with QA. Capture session date, attendees, and changes in the Team refinement section of `tasks.md`.
 - **QA review.** The responsible QA Engineer reviews tasks and test scenarios (typically as part of refinement). Capture separately so QA ownership is unambiguous.
 
-Each artifact ends with a 2-option approval gate. After each approval, update `state.md` with the artifact name, approval date, and what changed since the last gate.
+After the Tasks Approval Gate is signed, update `state.md` with the transition and proceed to execution.
 
 ### Phase 3 — Execution
 
 Not a folder. Once the Tasks gate is signed, execution begins.
 
-**Task "done" and story "done" are different events.** Tasks close on engineering DoD (tests, review, build, behind flag if applicable). Stories close on QA validation against story AC. QA does **not** gate individual task merges; it validates at the story boundary. The flagging path (chosen in `construction/infrastructure.md`) determines how tasks merge safely without per-task QA.
+**Task "done" and story "done" are different events.** Tasks close on engineering DoD (tests, review, build, behind flag if applicable). Stories close on QA validation against story AC. QA does **not** gate individual task merges; it validates at the story boundary. The flagging path (chosen in `design/infrastructure-design.md`) determines how tasks merge safely without per-task QA.
 
 Execution loop:
 
@@ -125,7 +128,7 @@ The breakdown is complete when `state.md` shows all stories validated (and all f
 
 See the README's QA testing process section for the full model. Skill-level summary:
 
-**Two paths**, decided in `construction/infrastructure.md`:
+**Two paths**, decided in `design/infrastructure-design.md`:
 
 - **Feature-flagged (default).** Tasks merge to main behind the flag. Story-level QA happens when all tasks for a story land + flag is enabled in staging. Flag flips to prod after QA passes.
 - **Non-flagged.** Three sub-cases:
@@ -216,7 +219,7 @@ These come from the AI-DLC pattern and are not negotiable:
 - **`Skill(coordinating-cross-team-breakdown)`** — the design-phase cross-team signoff workflow. Drives the Cross-team engagement section of `design.md`. Treat blocking signoffs as gates on Design Approval.
 - **`Skill(navigating-the-initiative-funnel)`** — load-bearing when the breakdown sits under a BW Initiative. Pulls the shepherd, sibling teams' epics, architecture plan, and PoC PRs that feed Specification, Architecture, and Cross-team engagement.
 - **`Skill(architecting-solutions)` (in `bitwarden-tech-lead`)** — the architectural-judgment lens to apply when drafting Architecture and reviewing functional-design.
-- **`Skill(bitwarden-security-context)` (in `bitwarden-security-engineer`)** — route through this when `non-functional.md`'s Security section flags cryptographic work or new security definitions.
+- **`Skill(bitwarden-security-context)` (in `bitwarden-security-engineer`)** — route through this when `design/non-functional-design.md`'s Security section flags cryptographic work or new security definitions.
 
 ## Common mistakes
 
