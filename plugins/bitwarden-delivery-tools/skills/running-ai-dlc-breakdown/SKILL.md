@@ -11,7 +11,7 @@ This skill assumes:
 - The breakdown lives as markdown files in the `tech-breakdowns` repo.
 - Execution is single-team, single-engineer/pair. A breakdown is **never** a cross-team carve-up; if the design surfaces work another team must own, that team owns a separate breakdown.
 - Implementation is driven by sequential codegen, file-by-file, with the agent executing and the engineer reviewing each diff.
-- Jira tracks delivery via QA-testable slices, not via file-grained codegen steps.
+- Jira tracks delivery via engineering tasks (PR-review-sized implementation units), not via file-grained codegen steps. QA validates at the story boundary, not the task boundary.
 
 Cross-team coordination _during the design phase_ (interface review, signoff from peer teams) happens through the Cross-team engagement section of `design.md` and the companion `Skill(coordinating-cross-team-breakdown)`. What this skill changes is the execution model, not the coordination model.
 
@@ -24,7 +24,7 @@ breakdowns/<team>/
     state.md                          ← breakdown-wide tracker (all phases)
     construction/
       codegen-plan.md                 ← file-level execution plan
-      tasks.md                        ← QA-testable Jira slices (final construction gate)
+      tasks.md                        ← engineering tasks for Jira tracking (final construction gate)
     clarifications/                   ← Q→D→A files (created on demand)
       q-<topic>.md
 templates/
@@ -220,7 +220,7 @@ These come from the AI-DLC pattern and are not negotiable:
 - **Drafting without the Jira ticket and initiative context.** A breakdown drafted in a vacuum diverges from the work that triggered it. Always start from the ticket and (when applicable) the initiative.
 - **Treating `state.md` as optional.** Stale state means anyone picking up cold reads codegen-plan, tasks, and Jira separately and reconstructs the picture. The whole point of `state.md` is that they don't have to.
 - **Skipping the Q→D→A pattern for "small" questions.** Conversational clarifications get lost. Question files survive the next context reset; chat does not.
-- **Slicing tasks horizontally instead of vertically.** "All data model changes" is not a QA-testable slice. Each task must deliver something QA can validate end-to-end.
+- **Slicing tasks horizontally instead of by logical implementation unit.** "All data model changes" produces a PR that mixes unrelated changes and isn't reviewable as one coherent unit. Each task should be sized for one code review pass and one merge event.
 - **Creating Jira tickets before QA reviews `tasks.md`.** QA's job gets harder when ticket scope/scenarios are baked in without their input. Walk them through first.
 - **Confusing engineering tasks with user stories.** Stories describe user-observable outcomes with Given/When/Then AC, authored by Product, living in Jira. Engineering tasks describe implementation work and reference stories. Duplicating story AC onto engineering tasks creates two sources of truth and confuses QA.
 - **Starting design without user stories.** Stories are inputs to the breakdown. Bootstrap should pull them; missing stories is a blocker, not a section to fill in. Engineering doesn't author stories on Product's behalf.
