@@ -1,6 +1,6 @@
 ---
 description: Refresh an existing workspace-level CLAUDE.md by adding missing Bitwarden domain modules
-allowed-tools: Read, Write, Edit, Bash(find:*), Bash(wc:*), Bash(tr:*), Bash(dirname:*), Bash(diff:*), Bash(cp:*), Bash(date:*), Bash(rm:*), Glob
+allowed-tools: Read, Write, Edit, Bash(diff:*), Bash(cp:*), Bash(date:*), Bash(rm:*), Glob
 ---
 
 Refresh an existing workspace-level CLAUDE.md by detecting which Bitwarden domain modules are already present and offering to add the missing ones. Same safety guardrails as `/bitwarden-init:init-workspace` — backup before overwrite, diff preview, explicit Apply confirmation.
@@ -11,10 +11,7 @@ A workspace-level CLAUDE.md must already exist. If it doesn't, stop and point th
 
 ## Steps
 
-1. **Resolve workspace root** the same way `/bitwarden-init:init-workspace` does:
-   - Walk up from `cwd`. For each ancestor, count subdirectories containing a `.git` entry. If any ancestor has 2+, propose it.
-   - If detection succeeds, ask the user to confirm via `AskUserQuestion` (**Yes, use this** / **No, let me type a different path** / **Cancel**).
-   - If detection fails or the user declines, ask them to provide the absolute path.
+1. **Ask the user for the workspace root.** Use `AskUserQuestion` with options pre-filled as common candidates (e.g. `~/Source/bw`, `~/dev/bitwarden`, `~/code/bw`) — the "Other" affordance lets them type anything. Validate that the resolved `<workspace-root>/.claude/CLAUDE.md` exists; if not, re-ask. No auto-detection — a user invoking `enhance-workspace` has already chosen where this file lives during a prior `init-workspace` session.
 
 2. **Locate the target file.** Target is `<workspace-root>/.claude/CLAUDE.md`. If it does not exist, exit with the message above.
 

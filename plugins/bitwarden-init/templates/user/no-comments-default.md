@@ -1,4 +1,6 @@
-## Default to [YOUR-PREFERENCE: No Comments | Documented Comments]
+## Comment Policy
+
+### Default to [YOUR-PREFERENCE: No Comments | Documented Comments]
 
 **A comment earns its place only when removing it would mislead a future reader.**
 

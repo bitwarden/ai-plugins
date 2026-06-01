@@ -16,12 +16,14 @@ This represents one engineer's opinion. Modules are opt-in; the user picks which
    ```bash
    dir="$PWD"
    while [ "$dir" != "/" ]; do
+     if [ "$dir" = "$HOME" ]; then break; fi
      count=$(find "$dir" -mindepth 2 -maxdepth 2 -name .git 2>/dev/null | wc -l | tr -d ' ')
      if [ "$count" -ge 2 ]; then echo "$dir"; break; fi
      dir=$(dirname "$dir")
    done
    ```
 
+   The `$HOME` guard prevents the loop from proposing `~` as the workspace root for engineers who keep multiple git repos directly under their home directory (dotfiles, config repos, personal projects) — `~/.claude/CLAUDE.md` is reserved for the user-scope file managed by `/bitwarden-init:init-user`.
    - If the script prints a path, use `AskUserQuestion` to ask: "Detected workspace root: `<path>` (contains `<count>` git repos). Use this?" with options **Yes, use this**, **No, let me type a different path**, **Cancel**.
    - If the script prints nothing, skip the proposal and go straight to the "type a path" branch.
 
@@ -74,8 +76,8 @@ This represents one engineer's opinion. Modules are opt-in; the user picks which
 
 7. **Backup, then write.**
    - Ensure `<workspace-root>/.claude/` exists (`mkdir -p`).
-   - If the target file already exists, copy it to `<target>.bak-$(date -u +%Y%m%dT%H%M%SZ)`.
-   - Use `Write` to create the target with the rendered content. (If `Write` rejects modifying a file that already exists, fall back to `Edit` with the full-file replacement.)
+   - **If the target file already exists** (Merge or Replace path from step 3): copy it to `<target>.bak-$(date -u +%Y%m%dT%H%M%SZ)`, then use `Edit` to update the target with the full rendered content. Fall back to `Write` only if `Edit`'s old-string match fails — which shouldn't happen since step 3 already Read the file.
+   - **If the target file is new** (step 3 found nothing to read): use `Write` to create it. `Edit` is not viable here because Edit requires a previously-Read file.
    - Clean up the temp preview file.
 
 8. **Summary.** Report:

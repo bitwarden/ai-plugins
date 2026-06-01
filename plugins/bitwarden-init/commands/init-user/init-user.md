@@ -62,8 +62,8 @@ The plugin ships ten user-level modules under `${CLAUDE_PLUGIN_ROOT}/templates/u
    Then use `AskUserQuestion` with options **Apply**, **Show diff again**, **Cancel**. On **Show diff again**, redisplay and ask again. On **Cancel**, stop without writing.
 
 5. **Backup, then write.**
-   - If the target file already exists, copy it to `~/.claude/CLAUDE.md.bak-$(date -u +%Y%m%dT%H%M%SZ)` using `Bash`. Capture the backup path.
-   - Use `Write` to create `~/.claude/CLAUDE.md` with the rendered content. (If `Write` rejects modifying a file that exists, fall back to `Edit` with the full-file replacement.)
+   - **If the target file already exists** (Merge or Replace path from step 1): copy it to `~/.claude/CLAUDE.md.bak-$(date -u +%Y%m%dT%H%M%SZ)` using `Bash` and capture the backup path. Then use `Edit` to update `~/.claude/CLAUDE.md` with the full rendered content. Fall back to `Write` only if `Edit`'s old-string match fails — which shouldn't happen since step 1 already Read the file.
+   - **If the target file is new** (step 1 found nothing to read): use `Write` to create `~/.claude/CLAUDE.md` with the rendered content. `Edit` is not viable here because Edit requires a previously-Read file.
    - Clean up the temp preview file.
 
 6. **Summary.** Report:
