@@ -73,6 +73,7 @@
     "nextPageToken",
     "numstat",
     "NVARCHAR",
+    "nvmrc",
     "OAEP",
     "officedocument",
     "oneline",
