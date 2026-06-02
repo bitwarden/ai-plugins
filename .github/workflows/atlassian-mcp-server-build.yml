@@ -1,0 +1,70 @@
+name: Atlassian MCP Server Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/**"
+      - ".github/workflows/atlassian-mcp-server-build.yml"
+      - ".nvmrc"
+  push:
+    branches:
+      - main
+    paths:
+      - "plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/**"
+      - ".github/workflows/atlassian-mcp-server-build.yml"
+      - ".nvmrc"
+  workflow_dispatch:
+
+permissions: {}
+
+defaults:
+  run:
+    working-directory: plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Get package version
+        id: retrieve-package-version
+        run: |
+          PKG_VERSION=$(jq -r .version package.json)
+          echo "package_version=$PKG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Get Node version
+        id: retrieve-node-version
+        working-directory: ${{ github.workspace }}
+        run: |
+          NODE_NVMRC=$(cat .nvmrc)
+          NODE_VERSION=${NODE_NVMRC/v/''}
+          echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: ${{ steps.retrieve-node-version.outputs.node_version }}
+          cache: "npm"
+          cache-dependency-path: plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bitwarden-atlassian-mcp-server-${{ steps.retrieve-package-version.outputs.package_version }}
+          path: plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/build/**
+          if-no-files-found: error

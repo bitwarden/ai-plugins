@@ -16,6 +16,10 @@ indent_size = 2
 [*.sh]
 indent_size = 4
 
+# Python conventionally uses 4-space indents (PEP 8)
+[*.py]
+indent_size = 4
+
 # Markdown trailing whitespace can be a deliberate line break
 [*.md]
 trim_trailing_whitespace = false

@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-init",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Initialize Claude Code configuration with Bitwarden's standardized template format",
   "author": {
     "name": "Bitwarden",
@@ -9,5 +9,12 @@
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-init",
   "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": ["init", "initialization", "setup", "configuration", "template"],
-  "commands": ["./commands/init/init.md", "./commands/enhance/enhance.md"]
+  "commands": [
+    "./commands/init/init.md",
+    "./commands/enhance/enhance.md",
+    "./commands/init-user/init-user.md",
+    "./commands/init-workspace/init-workspace.md",
+    "./commands/enhance-user/enhance-user.md",
+    "./commands/enhance-workspace/enhance-workspace.md"
+  ]
 }

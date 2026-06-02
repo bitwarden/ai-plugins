@@ -1,18 +1,30 @@
-name: Lint
+name: Atlassian MCP Server Testing
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/**"
+      - ".github/workflows/atlassian-mcp-server-test.yml"
+      - ".nvmrc"
   push:
     branches:
       - main
+    paths:
+      - "plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/**"
+      - ".github/workflows/atlassian-mcp-server-test.yml"
+      - ".nvmrc"
   workflow_dispatch:
 
 permissions: {}
 
+defaults:
+  run:
+    working-directory: plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server
+
 jobs:
-  lint:
-    name: Lint
+  testing:
+    name: Run tests
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -25,6 +37,7 @@ jobs:
 
       - name: Get Node version
         id: retrieve-node-version
+        working-directory: ${{ github.workspace }}
         run: |
           NODE_NVMRC=$(cat .nvmrc)
           NODE_VERSION=${NODE_NVMRC/v/''}
@@ -35,21 +48,10 @@ jobs:
         with:
           node-version: ${{ steps.retrieve-node-version.outputs.node_version }}
           cache: "npm"
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Prettier
-        id: prettier
-        run: npm run lint:prettier
-        continue-on-error: true
-
-      - name: Run cspell
-        id: cspell
-        if: always()
-        run: npm run lint:spelling
-
-      - name: Fail if any linter failed
-        if: always() && (steps.prettier.outcome == 'failure' || steps.cspell.outcome == 'failure')
-        run: exit 1
+      - name: Run tests
+        run: npm run test
