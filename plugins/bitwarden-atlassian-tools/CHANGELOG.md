@@ -5,6 +5,17 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.4] - 2026-06-02
+
+### Added
+
+- CI workflows (`atlassian-mcp-server-build.yml`, `atlassian-mcp-server-test.yml`) that build and test the bundled Atlassian MCP server, path-scoped so they only run when the MCP server changes
+- `.nvmrc` at the repository root pinning Node 24 for all workflows
+
+### Changed
+
+- Raised the bundled MCP server's `engines.node` requirement from `>=18.0.0` to `>=24.0.0`
+
 ## [2.2.3] - 2026-04-15
 
 ### Changed
