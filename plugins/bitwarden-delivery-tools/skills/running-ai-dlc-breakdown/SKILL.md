@@ -1,6 +1,6 @@
 ---
 name: running-ai-dlc-breakdown
-description: Drive a Bitwarden tech breakdown end-to-end through the three-phase AI-DLC model (design → construction → execution) in the bitwarden/tech-breakdowns repo. Use when starting, drafting, or executing any tech breakdown — single engineer or pair driving with a Claude agent, per-artifact approval gates, Q→D→A clarifications, codegen-plan-to-Jira slicing with team refinement, and `state.md` as the breakdown-wide tracker.
+description: Drive a Bitwarden tech breakdown end-to-end through the three-phase AI-DLC model (design → construction → execution) in the bitwarden/tech-breakdowns repo. Use when starting, drafting, or executing any tech breakdown — single engineer or pair driving with a Claude agent, two approval gates (Design and Tasks), Q→D→A clarifications, codegen-plan-to-Jira slicing with team refinement, and `state.md` for breakdown-level state that Jira can't capture (phase progress, codegen position, open clarifications).
 allowed-tools: Skill, Read, Write, Edit, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence
 ---
 
@@ -21,7 +21,7 @@ Cross-team coordination _during the design phase_ (interface review, signoff fro
 breakdowns/<team>/
   PM-12345-feature-name.md            ← the full design (cold-start entry, Phase 1)
   PM-12345-feature-name/              ← sibling folder, created when design begins
-    state.md                          ← breakdown-wide tracker (all phases)
+    state.md                          ← breakdown-level state (phase progress, codegen position, open clarifications); Jira is the source of truth for ticket-level state
     construction/
       codegen-plan.md                 ← file-level execution plan
       tasks.md                        ← engineering tasks for Jira tracking (final construction gate)
@@ -116,7 +116,7 @@ Execution loop (each step shows the owner):
 
 **Who updates `state.md`:** the engineer owns it. During an AI-DLC session, the agent updates `state.md` as a side-effect of its work (codegen step complete, gate signed, clarification surfaced) — the agent can only update what it observes in-session. For asynchronous events (a PR merging hours later, QA validating a story a day later, a flag flip), the engineer updates `state.md` directly or asks the agent in the next session to record what's changed. Stale state means anyone picking up cold reconstructs the picture from scratch.
 
-The breakdown is complete when `state.md` shows all stories validated (and all flags flipped, if applicable).
+The breakdown is complete when the Jira board shows all stories closed (and all flags flipped, if applicable). `state.md`'s Phase progress section reflects this via the Execution checkboxes.
 
 ### QA testing process
 
@@ -172,26 +172,28 @@ Answer-format guidance for the user (encoded in the template):
 
 Questions from PM, AppSec, peer teams, or anyone else reviewing the design come in free-form and don't fit the multi-choice shape. **Log them directly in the Clarifications Log table** in `design.md` with status Open, the source (person), an owner, and a target resolution date. Update to Resolved with a one-line answer and link to the section when the question is answered. Do not create a q-file for human-raised questions — the Q→D→A mechanism is specifically the agent's working tool.
 
-## `state.md` — the bridge
+## `state.md` — breakdown-level state
 
-**This file is non-optional.** It is what an agent picking up cold reads first, and what a human (manager, peer team, QA) reads to see status without opening codegen-plan, tasks, and Jira separately. Keep it current.
+**`state.md` captures what Jira can't show.** Jira is the source of truth for ticket-level state (task counts, story status, assignees, who's in QA right now); `state.md` captures breakdown-level state (which approval gates have been signed, file-by-file codegen position, open Q→D→A clarifications). An agent picking up cold reads the design + `state.md` + the Jira board. Don't duplicate ticket counts in `state.md`.
 
-`state.md` tracks three axes:
+`state.md` tracks four things:
 
-1. **Phase progress** — checkboxes per artifact (design → construction artifacts → delivery artifacts) showing what's approved and what's pending.
-2. **Execution status** — codegen plan progress (`N of M files complete`), tasks complete (`N of M tickets closed`), active codegen step (which file the agent is touching now, and which task it's part of), tickets in QA, active engineer/pair.
-3. **Last gate** — most recent approval gate, date, outcome (Approved and Continue / Request Changes), notes on anything that changed since approval.
+1. **Jira pointers** — epic ID and board/filter link, so anyone navigating from `state.md` can drill into ticket detail.
+2. **Phase progress** — checkboxes for breakdown-level milestones that Jira doesn't represent: design sections complete, cross-team signoffs done, Design Approval Gate signed, Tasks Approval Gate signed.
+3. **Codegen execution** — flagging path, codegen plan progress (`N of M files complete`), active codegen step (which file the agent is touching now, which Jira Task it's part of). Sub-task granularity that Jira doesn't carry.
+4. **Open clarifications** — pending `clarifications/q-*.md` files. Q-files are repo artifacts, not Jira items.
+5. **Last gate** — most recent approval gate, date, outcome (Approved / Request Changes), notes on anything that changed since approval.
 
-**Update `state.md` on every gate transition and every meaningful execution event:**
+**Update `state.md` on:**
 
 - Approval gate signed → update Phase progress + Last gate
-- Codegen step complete → bump the codegen progress counter
-- Task complete → bump the tasks-complete counter and move the ticket to "In QA"
-- QA passes → close the ticket and remove from "In QA"
+- Codegen step complete → bump the codegen progress counter; update Active codegen step
 - New clarification file created → add to Open clarifications
 - Clarification resolved → remove from Open clarifications
 
-The skill should never advance phases without checking `state.md` is current. If state and reality diverge, fix state first.
+**Don't update `state.md` for ticket events** — those live in Jira. PR merges, Jira Task transitions to Done, QA passing a story, flag flips: these are visible on the Jira board, which `state.md` links to.
+
+The skill should never advance phases without checking `state.md` is current for the things it owns. If state and reality diverge on the items above, fix state first.
 
 ## Hard rules (AI-DLC inheritance)
 
@@ -218,7 +220,8 @@ These come from the AI-DLC pattern and are not negotiable:
 ## Common mistakes
 
 - **Drafting without the Jira ticket and initiative context.** A breakdown drafted in a vacuum diverges from the work that triggered it. Always start from the ticket and (when applicable) the initiative.
-- **Treating `state.md` as optional.** Stale state means anyone picking up cold reads codegen-plan, tasks, and Jira separately and reconstructs the picture. The whole point of `state.md` is that they don't have to.
+- **Treating `state.md` as optional.** Stale state means anyone picking up cold has to reconstruct phase progress and codegen position by reading the design, scanning the codegen plan, and clicking through clarifications. `state.md` exists so they don't have to.
+- **Duplicating Jira state in `state.md`.** Task counts, story statuses, QA queue, assignees — these all live in Jira. Adding them to `state.md` creates drift between two trackers. `state.md` carries only what Jira can't (phase gates, codegen position, open Q→D→A clarifications).
 - **Skipping the Q→D→A pattern for "small" questions.** Conversational clarifications get lost. Question files survive the next context reset; chat does not.
 - **Slicing tasks horizontally instead of by logical implementation unit.** "All data model changes" produces a PR that mixes unrelated changes and isn't reviewable as one coherent unit. Each task should be sized for one code review pass and one merge event.
 - **Creating Jira tickets before QA reviews `tasks.md`.** QA's job gets harder when ticket scope/scenarios are baked in without their input. Walk them through first.
