@@ -9,7 +9,7 @@ This skill drives a Bitwarden tech breakdown from a fresh Jira ticket through to
 This skill assumes:
 
 - The breakdown lives as markdown files in the `tech-breakdowns` repo.
-- Execution is single-team, single-engineer/pair. A breakdown is **never** a cross-team carve-up; if the design surfaces work another team must own, that team owns a separate breakdown.
+- Execution is single-team. By default, one engineer or pair drives the breakdown end-to-end; teams may opt to hand off between design and execution at the Tasks Approval Gate (see the README's [Handoff option](https://github.com/bitwarden/tech-breakdowns#handoff-option) section for when and how). A breakdown is **never** a cross-team carve-up; if the design surfaces work another team must own, that team owns a separate breakdown.
 - Implementation is driven by sequential codegen, file-by-file, with the agent executing and the engineer reviewing each diff.
 - Jira tracks delivery via engineering tasks (PR-review-sized implementation units), not via file-grained codegen steps. QA validates at the story boundary, not the task boundary.
 
@@ -114,7 +114,7 @@ Execution loop (each step shows the owner):
 5. **QA validates** — **QA Engineer** validates the story against its AC (not task DoD). Story closes on pass.
 6. **Flag flip (flagged path only)** — once the story is validated in staging, **engineer** coordinates the production flag flip per the team's release process.
 
-**Who updates `state.md`:** the engineer owns it. During an AI-DLC session, the agent updates `state.md` as a side-effect of its work (codegen step complete, gate signed, clarification surfaced) — the agent can only update what it observes in-session. For asynchronous events (a PR merging hours later, QA validating a story a day later, a flag flip), the engineer updates `state.md` directly or asks the agent in the next session to record what's changed. Stale state means anyone picking up cold reconstructs the picture from scratch.
+**Who updates `state.md`:** the engineer owns it for the things `state.md` tracks (phase progress, codegen position, open clarifications, last gate). During an AI-DLC session, the agent updates `state.md` as a side-effect of its work (codegen step complete, gate signed, clarification surfaced). For asynchronous breakdown-level events (a gate signed outside the session, a clarification answered later), the engineer updates `state.md` directly or asks the agent in the next session. **Ticket-level events (PR merges, Jira Task transitions, QA validations, flag flips) update Jira, not `state.md`** — Jira is the source of truth for those.
 
 The breakdown is complete when the Jira board shows all stories closed (and all flags flipped, if applicable). `state.md`'s Phase progress section reflects this via the Execution checkboxes.
 
