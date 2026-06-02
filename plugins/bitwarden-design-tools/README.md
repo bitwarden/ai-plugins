@@ -13,9 +13,9 @@ This plugin ships skills only — no agent. The persona half lives in [`bitwarde
 | `content-style-guide`               | Bitwarden's product content style guide for GUI copy — voice, tone, AP-style-with-exceptions grammar, sentence case in UI, no ampersands, and accessibility-first language at a U.S. 7th-grade reading level. Lean SKILL.md with detailed rules split across `references/grammar-mechanics.md` and `references/accessibility-rules.md`.                  |
 | `using-figma`                       | Read and inspect Figma designs via the Dev Mode MCP server. Per-job-to-be-done tool selection for read tools (`get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `search_design_system`, `get_libraries`), with Code Connect and write tools documented in their own subsections. Foundational — most other skills compose it. |
 | `applying-bitwarden-branding`       | Apply Bitwarden brand standards — logo usage, color palette, typography, iconography, and capitalization rules. Grounded in [bitwarden.com/brand](https://bitwarden.com/brand/) and the [bitwarden/brand](https://github.com/bitwarden/brand) repository. Full palette and asset inventory in `references/`.                                             |
-| `preparing-design-handoff`          | Prepare a Bitwarden design handoff — the Confluence handoff page (Background, Stakeholders, Userflows, Message Text File, Figma Prototype, Annotated Prototype), the Figma file in Ready-for-Dev state, and the Jira state transitions that go with them. Full template reference in `references/handoff-template.md`.                                   |
+| `preparing-design-handoff`          | The end-of-In-Design gate / checklist. Confirm the Figma file is Ready-for-Dev (sections aligned to stories, tokens library-bound, strings annotated, edge states covered) and that the Jira state is aligned (Figma linked to the Epic's Design field, sections marked Ready for Dev, EM transitions the Epic).                                         |
 | `evolving-design-system-components` | Propose a new UI pattern or modify an existing Component Library component per Bitwarden's published governance process — design-team alignment, Core vs. Recipe/Snowflake with UI Foundation, Figma branching and property conventions, review gates, merge timing. Figma conventions in `references/figma-conventions.md`.                             |
-| `navigating-design-jira-process`    | Move design work through Bitwarden's Product and Design Jira workflow — design tasks nested under engineering epics, the 30/60/90 iteration cadence, status transitions across the design and engineering boards, and the one-off engineering story flow.                                                                                                |
+| `navigating-design-jira-process`    | Move design work through Bitwarden's Product and Design Jira workflow — final designs attached to tickets, the 30/60/90 critique cadence tracked in Figma, status transitions, and the one-off engineering story flow.                                                                                                                                   |
 
 ## Cross-Plugin Integration
 
@@ -62,7 +62,7 @@ Is this banner on-brand? #175DDC headline, green CTA, Inter font.
 ```
 
 ```
-Walk me through prepping the handoff page for the new vault filter project.
+Walk me through the end-of-In-Design gate for the new vault filter project — is the Figma ready and the Jira state aligned?
 ```
 
 ```
@@ -70,7 +70,7 @@ We keep building variations of this segmented selector — should it become a co
 ```
 
 ```
-PM created the epic, designs are at 60%. Walk me through the Jira moves so the design board and engineering board stay in sync.
+PM created the epic, designs are at 60%. Walk me through the Jira choreography so engineering sees the right state.
 ```
 
 ## Related Plugins

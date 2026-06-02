@@ -106,8 +106,9 @@ Asset paths and full sizing tables are in `references/brand-assets.md`.
 - **`using-figma`.** Use `get_variable_defs` to check whether a design's colors are
   library-bound and aligned to the brand palette; use `get_libraries` to confirm the right
   design library is loaded before claiming a design is on-brand.
-- **`preparing-design-handoff`.** Brand findings belong in the handoff page's Background or as
-  open questions when something is off-brand at handoff time. Don't quietly fix; surface.
+- **`preparing-design-handoff`.** Surface brand findings as part of the handoff gate — flag
+  them as Figma annotations or as open questions in the Epic when something is off-brand at
+  handoff time. Don't quietly fix.
 - **`evolving-design-system-components`.** New patterns must respect the brand palette and the
   36px radius system (with the button exception). The Component Library governance review
   catches obvious violations, but raise them explicitly when sponsoring a pattern.

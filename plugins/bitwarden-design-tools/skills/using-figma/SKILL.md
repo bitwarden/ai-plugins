@@ -109,9 +109,9 @@ Per-tool parameters and full output shape are in `references/figma-mcp-tools.md`
   user-visible string in a frame, then walk each string through the style guide. Do not
   rewrite Figma copy from inside this skill — return findings with proposed alternatives and
   let the designer apply.
-- **`preparing-design-handoff`.** Use `get_metadata` to verify the file has the expected page
-  structure (Userflows page, Annotated Prototype, "Ready for Dev" sections). Use
-  `get_variable_defs` to confirm tokens are library-bound rather than raw hex.
+- **`preparing-design-handoff`.** Use `get_metadata` to verify the file has the expected
+  Ready-for-Dev sections with names aligned to engineering stories. Use `get_variable_defs`
+  to confirm tokens are library-bound rather than raw hex.
 - **`evolving-design-system-components`.** Use `search_design_system` and `get_libraries`
   before proposing a new pattern — most "we need this new thing" cases turn out to be
   "this thing exists in the library and we didn't know." Use the Code Connect tools when the

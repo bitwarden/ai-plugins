@@ -72,7 +72,7 @@ I'm facilitating critique this week and presenting two screens of my own. How do
 ```
 
 ```
-Help me prep the handoff page for the new vault filter project — Figma file is here, engineering epic is PM-XXXX.
+I'm wrapping up design on the new vault filter project — Figma file is here, engineering epic is PM-XXXX. Is this ready to hand off?
 ```
 
 ```
@@ -84,7 +84,7 @@ We keep building variations of this segmented selector — should it become a co
 ```
 
 ```
-PM created the epic, designs are at 60%. Walk me through the Jira moves so the design board and engineering board stay in sync.
+PM created the epic, designs are at 60%. Walk me through the Jira choreography so engineering sees the right state.
 ```
 
 ## Related Plugins

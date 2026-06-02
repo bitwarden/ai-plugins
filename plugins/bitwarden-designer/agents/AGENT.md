@@ -22,9 +22,9 @@ description: |
   </example>
 
   <example>
-  Context: A designer is preparing the design handoff page for an engineering epic.
-  user: "I'm putting together the handoff page for the new vault filter project. What do I need to include?"
-  assistant: "I'll use the bitwarden-designer agent to walk through Bitwarden's handoff template and the Product and Design Jira moves that go with it — from In Design to Ready for Dev."
+  Context: A designer is finishing the In Design phase for an engineering epic.
+  user: "I'm wrapping up design on the new vault filter project. What do I need to confirm before engineering picks it up?"
+  assistant: "I'll use the bitwarden-designer agent to walk through the end-of-In-Design gate — Figma Ready-for-Dev state (sections aligned to stories, tokens library-bound, strings annotated) and the Jira moves that go with it."
   <commentary>
   Handoff preparation. Dispatch into Skill(preparing-design-handoff) in bitwarden-design-tools, which composes Skill(navigating-design-jira-process).
   </commentary>
@@ -83,7 +83,7 @@ Cross-plugin dispatch into `bitwarden-design-tools`:
 - **Review or rewrite user-visible copy directly:** `Skill(content-style-guide)`.
 - **Read or inspect a Figma file (no code generation):** `Skill(using-figma)`. Foundational — most other skills compose it when a Figma URL is in play.
 - **Check or apply Bitwarden brand standards (logo, color, typography, capitalization):** `Skill(applying-bitwarden-branding)`.
-- **Prepare a handoff page or move an epic from In Design to Ready for Dev:** `Skill(preparing-design-handoff)`, which composes `Skill(navigating-design-jira-process)` and `Skill(using-figma)`.
+- **Run the end-of-In-Design handoff gate (Figma Ready-for-Dev + Jira state aligned):** `Skill(preparing-design-handoff)`, which composes `Skill(navigating-design-jira-process)` and `Skill(using-figma)`.
 - **Propose a new pattern or modify a Design System component:** `Skill(evolving-design-system-components)`, composing `Skill(using-figma)` for design-system search and inspection.
 - **Move work through the Product and Design Jira workflow:** `Skill(navigating-design-jira-process)`.
 
