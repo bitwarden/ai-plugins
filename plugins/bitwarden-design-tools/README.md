@@ -19,10 +19,10 @@ This plugin ships skills only — no agent. The persona half lives in [`bitwarde
 
 ## Cross-Plugin Integration
 
-| Plugin                      | How It's Used                                                                                                                                                                                                                                                                                              |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bitwarden-designer`        | Primary consumer. The designer persona dispatches into every skill here by name. Either plugin works standalone, but the pair is the intended shape.                                                                                                                                                       |
-| `bitwarden-atlassian-tools` | Required. The Confluence-grounded skills here (`preparing-design-handoff`, `evolving-design-system-components`, `navigating-design-jira-process`, `facilitating-design-critique` reference, etc.) assume `get_confluence_page` is available to fetch the canonical pages directly when prepping real work. |
+| Plugin                      | How It's Used                                                                                                                                                                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-designer`        | Primary consumer. The designer persona dispatches into every skill here by name. Either plugin works standalone, but the pair is the intended shape.                                                                                                       |
+| `bitwarden-atlassian-tools` | Required. The Confluence-grounded skills here (`preparing-design-handoff`, `evolving-design-system-components`, `navigating-design-jira-process`) assume `get_confluence_page` is available to fetch the canonical pages directly when prepping real work. |
 
 All cross-plugin skills are required.
 

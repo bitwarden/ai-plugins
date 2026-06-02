@@ -1,6 +1,6 @@
 # Figma Dev Mode MCP Server — Setup & Troubleshooting
 
-The Figma MCP server is not bundled with `bitwarden-designer`. It is Figma's own product, and
+The Figma MCP server is not bundled with this plugin. It is Figma's own product, and
 the user installs and authenticates it themselves. This reference is for the moments when
 something isn't working and a quick check helps unblock the work.
 
