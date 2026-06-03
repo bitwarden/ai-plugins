@@ -1,0 +1,70 @@
+[
+  {
+    "query": "analyze yesterday's claude sessions and generate me an interactive html recap of what i did, similar to the one we built earlier this week",
+    "should_trigger": true
+  },
+  {
+    "query": "standup's in 12 mins, can you throw together what i shipped yesterday — the stacked PRs, the skill stuff, all of it — so i don't have to scramble through gh activity",
+    "should_trigger": true
+  },
+  {
+    "query": "make me a daily recap page for april 28 that i can show colleagues in the Bitwarden ai-marketplace standup tomorrow morning. mostly the bitwarden-delivery-tools work.",
+    "should_trigger": true
+  },
+  {
+    "query": "can you pull together a polished interactive recap of my last 24 hours, like the interactive recap page we generated earlier this week?",
+    "should_trigger": true
+  },
+  {
+    "query": "im at the airport waiting on a flight and want to see what i pushed yesterday across the bitwarden/android and bitwarden/ai-plugins repos in one page",
+    "should_trigger": true
+  },
+  {
+    "query": "weekly summary please — pull together my PRs and reviews from the past week into one of those interactive html pages, want to email it to my manager",
+    "should_trigger": true
+  },
+  {
+    "query": "got my 1:1 with john at 3 today, throw together a recap of my work this week so i have something visual to show him",
+    "should_trigger": true
+  },
+  {
+    "query": "recap please. yesterday. include the cross-repo PR sweep and the late-night merge.",
+    "should_trigger": true
+  },
+  {
+    "query": "show me the commits i made yesterday on the bitwarden/android repo — just the SHAs and titles, no need to dress it up",
+    "should_trigger": false
+  },
+  {
+    "query": "review the diff on PR #6849 and tell me if anything looks off before i merge",
+    "should_trigger": false
+  },
+  {
+    "query": "show me which tools the agent called in my last claude session for the android repo",
+    "should_trigger": false
+  },
+  {
+    "query": "write a PR description for the changes on the new-item-types/PM-32810_bank-account branch",
+    "should_trigger": false
+  },
+  {
+    "query": "what tickets do i have in flight in jira right now? need to update the PM",
+    "should_trigger": false
+  },
+  {
+    "query": "any new review comments on my PRs from overnight i need to address?",
+    "should_trigger": false
+  },
+  {
+    "query": "how many PRs did i merge this month total? just need a number for my self-review",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the status of PR #6828 — is it still blocked on the sdk-internal change?",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize what's been happening in the bitwarden/clients repo over the past few days, not specifically my work",
+    "should_trigger": false
+  }
+]

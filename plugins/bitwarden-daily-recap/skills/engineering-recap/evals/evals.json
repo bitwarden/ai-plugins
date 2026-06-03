@@ -1,0 +1,147 @@
+{
+  "skill_name": "engineering-recap",
+  "_comment": "Behavior + output-quality regression suite. Assertions test the skill's STRUCTURE and LOGIC (day-boundary folding, sweep deduplication, themed streams, output location, PR-title enrichment) rather than specific PR numbers or dates, so they stay valid as the underlying GitHub events feed ages out (the events API only returns ~90 days / ~300 events). Run on a machine with real Claude Code session history and GitHub activity in the requested window. Where a prompt names a relative day ('yesterday', 'this morning'), the grader resolves it against the run date; the explicit-date scenario uses 'the day before yesterday' to exercise non-default window selection without hardcoding a perishable date.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "direct-recap",
+      "prompt": "analyze yesterday's sessions and generate me an interactive html recap of what i did",
+      "expected_output": "Self-contained interactive HTML written to ${CLAUDE_PLUGIN_DATA}/recaps/engineering-recap-{yesterday}.html, opened in the browser. Combines Claude Code sessions (via claude-retrospective:extracting-session-data) with GitHub events for the yesterday-7am-local -> today-7am-local window. Includes header, 5-stat strip, standup card, themed project streams, GH timeline, and theme block.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Output HTML file is written under ${CLAUDE_PLUGIN_DATA}/recaps/ with the engineering-recap-{YYYY-MM-DD} filename convention (NOT ~/Documents)"
+        },
+        { "text": "Output HTML is at least 8KB of real content (not a stub)" },
+        {
+          "text": "Filename and <h1> reference yesterday's date relative to the run date"
+        },
+        {
+          "text": "Has a 5-stat strip (Repos Touched, Sessions, PRs Opened, PRs Approved, GH Events) with values consistent with the window"
+        },
+        {
+          "text": "Contains a Standup Recap card with green-bordered styling and a working Copy button"
+        },
+        {
+          "text": "Standup card has both 'What I shipped' and 'Today / Blockers' columns populated from real activity"
+        },
+        {
+          "text": "Contains at least 2 .stream cards grouped by feature/theme (not one card per session) across project sections"
+        },
+        {
+          "text": "GH timeline view exists with .tl-event entries and an interactive view toggle"
+        },
+        {
+          "text": "Theme block present at the bottom with at least 2 paragraphs and an 'Open threads' line"
+        },
+        {
+          "text": "PR references render with titles, not bare numbers — uses <a class=\"pr-ref\"> with a human-readable title"
+        },
+        {
+          "text": "Day-boundary logic applied: late-night work (after midnight local, before the cutoff hour) folds into the prior workday under the '🌙 After Midnight' divider, NOT the Today banner"
+        },
+        {
+          "text": "Sweep detection applied: 3+ approvals within a ~5-minute window across repos collapse into a single 'cross-repo sweep' stream rather than N separate items (when such a cluster exists in the data)"
+        },
+        {
+          "text": "References interactive features present in the template: search input, filter chips, click-to-collapse streams"
+        },
+        {
+          "text": "Session data was sourced by delegating to claude-retrospective:extracting-session-data, not a hand-rolled find/jq over the JSONL"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "standup-pressure",
+      "prompt": "i've got standup in 15 mins, can you put together a quick recap of what I shipped yesterday so i don't have to scramble",
+      "expected_output": "Same HTML artifact as the direct recap, but the standup card must be immediately usable: concise shipped bullets, concrete next actions, working copy-to-clipboard. Time pressure must not degrade the artifact into an inline chat summary.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Output HTML file is written under ${CLAUDE_PLUGIN_DATA}/recaps/ (still produces the artifact under time pressure, not an inline chat summary)"
+        },
+        { "text": "Output HTML is at least 8KB" },
+        {
+          "text": "Standup Recap card is present and prominent (within the first viewport when opened)"
+        },
+        {
+          "text": "'What I shipped' column has 4-7 punchy bullets — not a wall of text"
+        },
+        {
+          "text": "'Today / Blockers' column populated with concrete next actions"
+        },
+        {
+          "text": "Copy button is wired up with a click handler that copies plain text to the clipboard"
+        },
+        {
+          "text": "Bullets reference real PRs, files, or commit hashes from the window (not generic placeholders)"
+        },
+        {
+          "text": "Day-boundary logic applied: yesterday's late-night merges and any pre-cutoff sweep appear in yesterday's content, not Today"
+        },
+        {
+          "text": "Prose is neutral and colleague-presentable — no persona framing injected"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "explicit-past-date",
+      "prompt": "create me a daily recap for the day before yesterday that I can show colleagues",
+      "expected_output": "HTML recap scoped to the explicitly requested day (the day before yesterday), NOT yesterday. The window is that day 7am local -> the following day 7am local. Demonstrates correct non-default window selection and exclusion of adjacent days.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Output HTML file is written under ${CLAUDE_PLUGIN_DATA}/recaps/ with the requested date in the filename (the day before yesterday, NOT yesterday)"
+        },
+        { "text": "Output HTML is at least 8KB" },
+        {
+          "text": "Header <h1> shows the requested date, not the run date or yesterday"
+        },
+        {
+          "text": "Window covers the requested day 7am local -> following day 7am local; events from adjacent days are EXCLUDED"
+        },
+        {
+          "text": "Late-night tail of the requested day (events after midnight but before the cutoff hour on the following calendar day) are folded into the requested day if any exist"
+        },
+        {
+          "text": "PR references include titles; file references include paths"
+        },
+        {
+          "text": "Contains all required sections: stats, standup, project sections, timeline, theme block"
+        },
+        {
+          "text": "Prose is neutral and colleague-presentable — no persona framing injected"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "partial-morning",
+      "prompt": "summarize what I worked on this morning before lunch",
+      "expected_output": "HTML recap for the current day from the cutoff hour (7am local) through the current time. Light data is acceptable, but the artifact structure must remain intact and stats must reflect the small window honestly.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Output HTML file is written under ${CLAUDE_PLUGIN_DATA}/recaps/ (artifact produced even for a light-data day)"
+        },
+        {
+          "text": "Recap window is correctly interpreted as today, from the cutoff hour (7am local) to roughly the current time"
+        },
+        {
+          "text": "Today's activity (sessions and GitHub events since the cutoff hour) is included and not skipped as 'too small'"
+        },
+        {
+          "text": "Does NOT include yesterday's events (the window starts at today's cutoff hour)"
+        },
+        {
+          "text": "Structure remains intact even with light data: stats, header with today's date, at least one section, theme block"
+        },
+        {
+          "text": "Stat values reflect the small window honestly (low numbers, not inflated to look busier)"
+        }
+      ]
+    }
+  ]
+}

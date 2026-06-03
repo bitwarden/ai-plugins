@@ -1,6 +1,7 @@
 ---
 name: engineering-recap
-description: Generates the user's engineering daily recap as an interactive HTML deliverable combining Claude Code sessions with GitHub events. **YOUR FIRST ACTION** for any retrospective query about the user's own coding work MUST be to invoke this skill — do NOT gather context first or respond with an inline summary. Trigger phrases include time words ("yesterday", "this morning", "last night", "this week", "before lunch", any past date); activity questions ("what did I work on/ship/merge/push", "what was I doing"); single-word retrospectives ("recap", "summary", "standup", "1:1 prep"); deliverable verbs ("throw together", "pull together", "summarize", "analyze sessions"); audience cues ("show colleagues", "for my manager"); format mentions ("html page", "interactive recap"). The user expects the HTML artifact every time, not a chat summary. SKIP only for specific PR/commit/ticket lookups, someone else's activity, meeting recaps, or repo-level overviews.
+description: Generates the user's engineering daily recap as an interactive HTML deliverable, combining Claude Code sessions with GitHub events into a standup-ready, colleague-shareable page.
+when_to_use: Use as your FIRST action — produce the HTML artifact, never an inline summary — for any question about what the user worked on, shipped, or accomplished in their own coding over a time window. Fire even on casual, format-free phrasings ("what was I working on this morning", "what did I get done before lunch"), partial-day windows (today so far), single-word retrospectives ("recap", "summary", "standup", "1:1 prep"), past dates, "this week", and audience cues ("for my manager"). Do NOT use for a single specific PR/commit/ticket lookup, count, or status; raw-data requests ("just the SHAs", "no need to dress it up"); someone else's activity; or repo-level overviews. Critically, to "recap" or "summarize" a MEETING, call, or conversation the user attended (zoom, design sync, 1:1) is NOT this skill — it recaps the user's coding work, not what was discussed.
 ---
 
 # Engineering Recap
@@ -9,7 +10,7 @@ Generate a polished, interactive HTML recap of the user's engineering work for s
 
 ## Day boundary: 7am local time
 
-Many engineers work past midnight. **Window for "yesterday" = (yesterday 7am local) → (today 7am local)**. Late-night work folds into the prior workday. The "Today/Fresh" banner only shows events from 7am local onward.
+Some engineers work past midnight. **Window for "yesterday" = (yesterday 7am local) → (today 7am local)**. Late-night work folds into the prior workday. The "Today/Fresh" banner only shows events from 7am local onward.
 
 The cutoff defaults to 07:00 in the system timezone (DST-safe). Override the hour with `DAILY_RECAP_CUTOFF_HOUR` (e.g. `5` for early-morning crews). Override the timezone with the standard `TZ` env var (e.g. `TZ=America/Los_Angeles`) — useful when generating a recap for someone else.
 
