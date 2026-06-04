@@ -1,6 +1,6 @@
 ---
 name: running-ai-dlc-breakdown
-description: Drive a Bitwarden tech breakdown end-to-end through the three-phase AI-DLC model (design → construction → execution) in the bitwarden/tech-breakdowns repo. Use when starting, drafting, or executing any tech breakdown — single engineer or pair driving with a Claude agent, two approval gates (Design and Tasks), Q→D→A clarifications, codegen-plan-to-Jira slicing with team refinement, and `state.md` for breakdown-level state that Jira can't capture (phase progress, codegen position, open clarifications).
+description: Drive a Bitwarden tech breakdown end-to-end through the three-phase AI-DLC model (design → construction → execution) in the bitwarden/tech-breakdowns repo. Use when starting, drafting, or executing any tech breakdown — single engineer or pair driving with a Claude agent, two approval gates (Design and Tasks), Q→D→A clarifications, engineering tasks that carry their affected files inline (no separate codegen plan), team refinement, and `state.md` for breakdown-level state that Jira can't capture (phase progress, active task and file, open clarifications).
 allowed-tools: Skill, Read, Write, Edit, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence
 ---
 
@@ -23,20 +23,19 @@ breakdowns/<team>/
   PM-12345-feature-name/              ← sibling folder, created when design begins
     state.md                          ← breakdown-level state (phase progress, codegen position, open clarifications); Jira is the source of truth for ticket-level state
     construction/
-      codegen-plan.md                 ← file-level execution plan
-      tasks.md                        ← engineering tasks for Jira tracking (final construction gate)
+      tasks.md                        ← engineering tasks (each carries its affected files); the construction artifact and final construction gate
     clarifications/                   ← Q→D→A files (created on demand)
       q-<topic>.md
 templates/
   tech-breakdown.md                   ← single-file design template
   state.md
-  construction/                       ← codegen plan + tasks
+  construction/                       ← the single tasks artifact
   clarifications/question.md
 ```
 
 Templates are canonical. Copy from `templates/`, never edit in place.
 
-Three phases. Design is a single self-contained `.md` containing spec, architecture, functional design (per layer), non-functional design, infrastructure design, cross-team coordination, and agent context — gated by one Design Approval Gate at its bottom. Construction is thin — just the codegen plan and task decomposition, gated by one Tasks Approval Gate. Execution is the loop of running the codegen plan, transitioning Jira tickets, and updating `state.md` — no folder of its own.
+Three phases. Design is a single self-contained `.md` containing spec, architecture, functional design (per layer), non-functional design, infrastructure design, cross-team coordination, and agent context — gated by one Design Approval Gate at its bottom. Construction is thin — just `tasks.md`, where each engineering task carries its affected files inline (no separate codegen plan), gated by one Tasks Approval Gate. Execution is the loop of working each task, transitioning Jira Tasks, and updating `state.md` — no folder of its own.
 
 ## Bootstrap
 
@@ -75,22 +74,22 @@ Single file: `breakdowns/<team>/<JIRA-KEY>-<short-name>.md`. Self-contained — 
 
 Two artifacts in the sibling `construction/` folder. Each has a completion checklist but no per-artifact gate; both roll up to the single **Tasks Approval Gate**.
 
-1. **`codegen-plan.md`** — numbered, checkbox-tracked list of every file to create or modify, in execution order. Each file traces back to a section in the design (e.g., "Source: `../<breakdown-name>.md` § Functional Design § Data model changes"). Sequencing constraints called out explicitly (interfaces before consumers, types before usages).
-2. **`tasks.md`** — the artifact that carries the Tasks Approval Gate at its bottom. Carve the codegen plan into **engineering tasks**, each a vertical slice of implementation work that delivers (part of) one or more user stories. Typical grain: 3-7 tasks per breakdown, ~1-3 days each.
+**`tasks.md`** is the single construction artifact, carrying the Tasks Approval Gate at its bottom. Decompose the design into **engineering tasks**, each a coherent implementation slice that delivers (part of) one or more user stories. Typical grain: 3-7 tasks per breakdown, ~1-3 days each.
 
-   Engineering tasks are **not user stories**. The relationship is one-to-many: one story → multiple engineering tasks. Each task has:
-   - **Stories served** — Jira IDs from the overview's User Stories section
-   - **Scope** — codegen-plan steps it implements
-   - **Definition of Done** — engineering-shaped (tests pass, code reviewed, build green), **not** user-AC. Story AC stays on the Jira story; engineering tasks don't duplicate it.
-   - **Test scenarios** — edge cases for QA to cross-check (story AC is the user-facing contract)
-   - **Blocked on** — prerequisites among the other tasks
-   - **Jira ID** — created as a Jira **Task** under the parent epic, linked to the story or stories it serves via "implements" or similar (not as a sub-task; engineering tasks need their own QA-capable status lifecycle)
+Engineering tasks are **not user stories**. The relationship is one-to-many: one story → multiple engineering tasks. Each task has:
 
-   Include a **Coverage check** subsection mapping every user story from the overview to at least one task. If a story is uncovered, the decomposition is incomplete.
+- **Stories served** — Jira IDs from the design's User Stories section
+- **Files affected** — explicit file list with `(N)` for new / `(M)` for modified. This is the agent's execution scope for the task; no separate codegen plan.
+- **Definition of Done** — engineering-shaped (tests pass, code reviewed, build green), **not** user-AC. Story AC stays on the Jira story; engineering tasks don't duplicate it.
+- **Test scenarios** — edge cases for QA to cross-check (story AC is the user-facing contract)
+- **Blocked on** — prerequisites among the other tasks
+- **Jira ID** — created as a Jira **Task** under the parent epic, linked to the story or stories it serves via "implements" or similar (not as a sub-task; engineering tasks need their own QA-capable status lifecycle)
 
-   Slicing principle: vertical implementation slices, not horizontal layer batches.
+  Include a **Coverage check** subsection mapping every user story from the overview to at least one task. If a story is uncovered, the decomposition is incomplete.
 
-   Note the exception path: if user stories don't exist (the blocker from bootstrap wasn't resolved), engineering tasks may carry story-shaped AC and be created as Jira Stories instead of Tasks-linked-to-stories. Use sparingly; the right fix is upstream.
+  Slicing principle: vertical implementation slices, not horizontal layer batches.
+
+  Note the exception path: if user stories don't exist (the blocker from bootstrap wasn't resolved), engineering tasks may carry story-shaped AC and be created as Jira Stories instead of Tasks-linked-to-stories. Use sparingly; the right fix is upstream.
 
 Before signing the Tasks Approval Gate, two engagements happen — these are gating, not optional:
 
@@ -108,7 +107,7 @@ Not a folder. Once the Tasks gate is signed, execution begins.
 Execution loop (each step shows the owner):
 
 1. **Create Jira Tasks** — **engineer** (or agent via Atlassian MCP, with engineer review) creates a Jira **Task** per engineering task (siblings of the parent stories under the same epic), linking each Task to the story or stories it serves via "implements" or similar. Cross-link the breakdown.
-2. **Execute the codegen plan** — **engineer + agent** work `codegen-plan.md` file-by-file. Agent generates each file; engineer reviews the diff and commits. Check off each file as it lands.
+2. **Execute task by task** — **engineer + agent** work each engineering task in `tasks.md`. For the current task, the agent generates / modifies each file listed in the task's Files affected; engineer reviews the diff and commits. Move to the next file, then the next task.
 3. **Close tasks as they merge** — **engineer** transitions the Jira Task to Done when engineering DoD is met (tests, review, build, behind flag if applicable).
 4. **Notify QA when a story is ready** — when all tasks serving a story have merged (and the flag is enabled in staging if flagged), **engineer/pair** notifies the QA Engineer.
 5. **QA validates** — **QA Engineer** validates the story against its AC (not task DoD). Story closes on pass.
@@ -180,7 +179,7 @@ Questions from PM, AppSec, peer teams, or anyone else reviewing the design come 
 
 1. **Jira pointers** — epic ID and board/filter link, so anyone navigating from `state.md` can drill into ticket detail.
 2. **Phase progress** — checkboxes for breakdown-level milestones that Jira doesn't represent: design sections complete, cross-team signoffs done, Design Approval Gate signed, Tasks Approval Gate signed.
-3. **Codegen execution** — flagging path, codegen plan progress (`N of M files complete`), active codegen step (which file the agent is touching now, which Jira Task it's part of). Sub-task granularity that Jira doesn't carry.
+3. **Task execution** — flagging path, active task (which Jira Task is in progress now, which story it serves), active file within the task (which file the agent is touching now, file N of M for this task). Sub-task granularity that Jira doesn't carry.
 4. **Open clarifications** — pending `clarifications/q-*.md` files. Q-files are repo artifacts, not Jira items.
 5. **Last gate** — most recent approval gate, date, outcome (Approved / Request Changes), notes on anything that changed since approval.
 
@@ -202,7 +201,7 @@ These come from the AI-DLC pattern and are not negotiable:
 1. **2-option approval format only.** Each approval gate is "Request Changes" or "Approve and Continue." Never present a 3-option menu. Never invent an emergent navigation pattern.
 2. **Never proceed past a gate without explicit approval.** "Looks fine" is not approval. The user must signal Approve and Continue.
 3. **Never proceed past open Q→D→A questions.** If a `clarifications/q-*.md` file has unanswered `[Answer]:` tags, the phase work stops.
-4. **Update plan checkboxes immediately.** Don't batch. Don't defer. As soon as a file is generated, mark the corresponding `codegen-plan.md` checkbox.
+4. **Update progress immediately.** Don't batch. Don't defer. As soon as a file is generated, update `state.md`'s Active file within task line; when a task's files are all merged, update Phase progress.
 5. **Never overwrite `state.md` or audit content.** Update in place via Edit; don't Write over the whole file.
 6. **Always validate content before file creation.** Mermaid diagrams parse, links resolve, file paths exist where claimed.
 7. **Always read the canonical templates** before drafting an artifact. Templates evolve; don't work from memory.
@@ -220,7 +219,7 @@ These come from the AI-DLC pattern and are not negotiable:
 ## Common mistakes
 
 - **Drafting without the Jira ticket and initiative context.** A breakdown drafted in a vacuum diverges from the work that triggered it. Always start from the ticket and (when applicable) the initiative.
-- **Treating `state.md` as optional.** Stale state means anyone picking up cold has to reconstruct phase progress and codegen position by reading the design, scanning the codegen plan, and clicking through clarifications. `state.md` exists so they don't have to.
+- **Treating `state.md` as optional.** Stale state means anyone picking up cold has to reconstruct phase progress and active-task position by reading the design, scanning tasks.md, and clicking through clarifications. `state.md` exists so they don't have to.
 - **Duplicating Jira state in `state.md`.** Task counts, story statuses, QA queue, assignees — these all live in Jira. Adding them to `state.md` creates drift between two trackers. `state.md` carries only what Jira can't (phase gates, codegen position, open Q→D→A clarifications).
 - **Skipping the Q→D→A pattern for "small" questions.** Conversational clarifications get lost. Question files survive the next context reset; chat does not.
 - **Slicing tasks horizontally instead of by logical implementation unit.** "All data model changes" produces a PR that mixes unrelated changes and isn't reviewable as one coherent unit. Each task should be sized for one code review pass and one merge event.
@@ -229,8 +228,8 @@ These come from the AI-DLC pattern and are not negotiable:
 - **Starting design without user stories.** Stories are inputs to the breakdown. Bootstrap should pull them; missing stories is a blocker, not a section to fill in. Engineering doesn't author stories on Product's behalf.
 - **Carving work across teams within one breakdown.** Cross-team execution means separate breakdowns, linked via the Cross-team engagement section. Trying to track multi-team work in one breakdown's `tasks.md` collapses the model.
 - **Editing a template instead of copying it.** Templates are canonical; teams copy them. Editing in place corrupts the next breakdown's starting point.
-- **Approving a gate to "save time" without reading the artifact.** Downstream gates treat upstream approvals as authoritative. A rubber-stamped functional-design becomes the source the codegen-plan trusts.
-- **Letting `codegen-plan.md` checkboxes lag execution.** Drift between checkboxes and actual files breaks the file-grain ↔ ticket-grain bridge `state.md` depends on.
+- **Approving a gate to "save time" without reading the artifact.** Downstream gates treat upstream approvals as authoritative. A rubber-stamped Functional Design section becomes the source the tasks trust.
+- **Letting `state.md` progress lag execution.** Drift between `state.md`'s active-task line and reality breaks the cold-start dashboard property.
 
 ## Reference
 
