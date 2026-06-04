@@ -43,7 +43,7 @@ For each file or module outside the team's domain that needs to change: name the
 Two specific rules from the checklist:
 
 - **Mobile changes** must be defined as separate Jira Tasks/Stories on the Mobile team's board. Don't fold mobile work into the originating team's stories — the Mobile team owns its sprint and its codebase.
-- **Components, services, or files outside the team's domain** — contact the owning team via DM to evaluate impact before adding them to the signoff table. Surprise signoff requests don't work well. If a sibling team's breakdown for related work already exists, link it.
+- **Components, services, or files outside the team's domain** — post on the owning team's public Slack channel to evaluate impact before adding them to the signoff table. Public channels (not DMs) so the rest of the team has visibility into the request and can self-route to whoever's best positioned to respond. Surprise signoff requests don't work well. If a sibling team's breakdown for related work already exists, link it.
 
 ### Cross-team sequencing & ordering
 
@@ -85,7 +85,7 @@ Fill this in when the table alone doesn't tell the full coordination story. Empt
 
 Once the table is built, signoffs become the gating work to move from `Proposed` to `Accepted`. A few rules:
 
-- **Reach out directly to the named human in the other team's signoff row.** A DM to the team contact beats an @-channel post; an @-channel post beats nothing. The breakdown link (file path or GitHub link) is sufficient — they should be able to evaluate from the doc plus any inline Plan content.
+- **Post on the other team's public Slack channel, tagging the named human in the signoff row.** Public channels give the rest of the team visibility and allow self-routing if the tagged person is unavailable. Don't DM — the request loses team-level visibility. The breakdown link (file path or GitHub link) is sufficient — they should be able to evaluate from the doc plus any inline Plan content.
 - **Don't accept "looks fine" without a name and date in the signoff column.** A breakdown that moves to `Accepted` with empty signoff cells defeats the artifact.
 - **Treat blocking signoffs as blockers.** If a Blocking row has been outstanding for more than a sprint, escalate — to the initiative owner if there's one, to the team's EM if not. Long-open blocking signoffs are usually a symptom that the cross-team interface is contested and needs renegotiation, not just patience.
 - **When a signoff surfaces an issue, route it back through `Skill(writing-tech-breakdowns)`.** Material design changes belong in the engineering content, not in Slack threads attached to a signoff request. Update Specification or Plan in the breakdown, re-confirm with anyone who has already signed off, then re-circulate.
@@ -102,11 +102,16 @@ Run `Skill(navigating-the-initiative-funnel)` for the escalation paths — they'
 
 ## Moving to Accepted
 
-The breakdown moves from `Proposed` to `Accepted` when **every blocking signoff is captured in the signoff table with a named human and a date**. Advisory signoffs that remain open are not a gate; they should be chased to closure but don't block `Accepted`.
+Two gates must close before the breakdown moves from `Proposed` to `Accepted`:
 
-The state machine is defined in `Skill(writing-tech-breakdowns)`; confirm the transition rules there. In practice the move to `Accepted` means updating the Status block at the top of the breakdown (status + Last substantive update), **running the stakeholder-communication checklist below** (announcement, QA contact, refinement-facilitator handoff), and merging the PR.
+1. **Cross-team signoff** — every blocking signoff is captured in the signoff table with a named human and a date. Advisory signoffs that remain open should be chased to closure but don't block `Accepted` on their own.
+2. **Team refinement** — the implementing team has completed a refinement pass on the Tasks section, with refinement feedback folded back into the breakdown and the team confirming the Task decomposition is workable. This skill drives gate 1; gate 2 is owned in `Skill(writing-tech-breakdowns)` and runs in parallel during `Proposed`.
 
-Once `Accepted`, implementation can begin. Material changes after `Accepted` require either superseding the breakdown or moving it back to `Proposed` and re-circulating affected signoffs — see the lifecycle rules in `Skill(writing-tech-breakdowns)`.
+Both gates are required. A breakdown that has every external signoff but hasn't been refined by the implementing team is **not** ready for `Accepted` — the implementing team's understanding and ownership of the work is part of what `Accepted` signals.
+
+The state machine is defined in `Skill(writing-tech-breakdowns)`; confirm the transition rules there. In practice the move to `Accepted` means confirming both gates have closed, updating the Status block at the top of the breakdown (status + Last substantive update), **running the stakeholder-communication checklist below** (announcement, QA contact, Jira story creation, refinement-facilitator handoff for scheduling), and merging the PR.
+
+Once `Accepted`, implementation can begin. Material changes after `Accepted` require either superseding the breakdown or moving it back to `Proposed` and re-circulating affected signoffs and refinement — see the lifecycle rules in `Skill(writing-tech-breakdowns)`.
 
 ## The Stakeholder-Communication Checklist (at Accepted)
 
@@ -142,6 +147,7 @@ The terminal alternative to `Complete`. Use when cross-team review surfaces inco
 - **Skipping the file move to `complete/`.** Without it, the team's active folder fills with finished work and CODEOWNERS reviewers can't tell at a glance what needs attention.
 - **Running the stakeholder-communication checklist at the wrong transition.** Posting on `#team-eng-tech-breakdowns`, contacting QA, and looping in the refinement facilitator happen at `Accepted`, when the design is settled and downstream work needs to be scheduled. Deferring them to the post-implementation `Complete` transition means QA tests get written after the code lands and refinement is too late to shape sprint pickup.
 - **Editing the signoff table to record a signoff that wasn't actually given.** If a signoff is genuinely contingent ("yes, with these caveats"), capture the caveats in the Clarifications Log before moving to `Accepted`. Don't paper over conditional signoffs.
+- **Treating the signoff table as the only gate on `Accepted`.** Cross-team signoff is one of two required gates; the other is the implementing team's own refinement pass on the Tasks section. A breakdown with every external signoff but no team refinement isn't ready for `Accepted` — the implementing team's understanding and ownership of the work is part of what the state signals.
 
 ## Reference
 
