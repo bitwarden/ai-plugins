@@ -1,8 +1,8 @@
 ---
 name: using-figma
 description: Read and inspect Figma designs via the Dev Mode MCP server — selects the right tool, parses Figma URLs into fileKey and nodeId, and turns design context into useful input for critique, copy review, handoff prep, and Design System work.
-when_to_use: Use when a task reads design context from Figma without generating production code. Triggers — Figma URL shared, "look at this design", "extract tokens from Figma", "what variables does this use", "what's in this Figma file", "compare these two Figma frames", "inspect this component". Not for framework-bound code generation (use `figma-to-angular` in the clients repo, external — not bundled).
-allowed-tools: Skill, mcp__figma__get_design_context, mcp__figma__get_metadata, mcp__figma__get_screenshot, mcp__figma__get_variable_defs, mcp__figma__get_libraries, mcp__figma__search_design_system, mcp__figma__get_figjam, mcp__figma__whoami, mcp__figma__get_code_connect_map, mcp__figma__get_code_connect_suggestions, mcp__figma__get_context_for_code_connect, mcp__figma__add_code_connect_map, mcp__figma__send_code_connect_mappings, mcp__figma__use_figma, mcp__figma__create_new_file, mcp__figma__upload_assets, mcp__figma__generate_figma_design, mcp__figma__generate_diagram
+when_to_use: Use when a task reads design context from Figma without generating production code or modifying Figma state. Triggers — Figma URL shared, "look at this design", "extract tokens from Figma", "what variables does this use", "what's in this Figma file", "compare these two Figma frames", "inspect this component". Not for framework-bound code generation (use `figma-to-angular` in the clients repo, external — not bundled), and not for Figma mutations (this skill's `allowed-tools` is read-only).
+allowed-tools: Skill, mcp__figma__get_design_context, mcp__figma__get_metadata, mcp__figma__get_screenshot, mcp__figma__get_variable_defs, mcp__figma__get_libraries, mcp__figma__search_design_system, mcp__figma__get_figjam, mcp__figma__whoami, mcp__figma__get_code_connect_map, mcp__figma__get_code_connect_suggestions, mcp__figma__get_context_for_code_connect
 ---
 
 # Using Figma via the Dev Mode MCP Server
@@ -12,9 +12,13 @@ exposes design context, variables, screenshots, metadata, and design-system sear
 Apply it whenever a task needs to _read_ a Figma design — extract structure, tokens,
 screenshots, or strings. Composing skills like `design-review`, `content-style-guide`,
 `preparing-design-handoff`, and `evolving-design-system-components` call into here whenever a
-Figma file is referenced. Write tools (creating files, uploading assets, generating diagrams,
-mapping Code Connect) exist on the MCP server and are documented below for completeness, but
-this skill's center of gravity is read.
+Figma file is referenced.
+
+The Figma MCP server also exposes write tools (creating files, uploading assets, generating
+diagrams, mapping Code Connect, mutating Figma objects). Those are intentionally **out of
+scope** for this skill — its `allowed-tools` is read-only. If a task genuinely needs a Figma
+mutation, invoke the underlying MCP tool directly with explicit user consent rather than
+extending this skill's surface.
 
 ## Prerequisite: the MCP server must be installed
 
@@ -24,7 +28,8 @@ a Dev or Full seat on a paid Figma plan) or the remote server. If the Figma MCP 
 available in the session, stop and tell the user to install and authenticate the Figma MCP
 server before continuing.
 
-Detailed setup notes live in `references/setup.md`.
+Some MCP tools are remote-only and unavailable on the desktop server; check Figma's docs when
+a tool isn't where you expect it. Detailed setup notes live in `references/setup.md`.
 
 ## Anatomy of a Figma URL
 
@@ -57,7 +62,7 @@ The Figma MCP server exposes many tools. Pick the smallest one that answers the 
 | Inspect a FigJam board                                       | `get_figjam`           | Same role as `get_metadata` but for FigJam content.                                   |
 | Identify the authenticated Figma user                        | `whoami`               | Useful when permission / seat type matters.                                           |
 
-### Code Connect tools
+### Code Connect tools (read-only)
 
 These map Figma components to their code counterparts. Mostly relevant inside
 `evolving-design-system-components`; rarely needed for critique or copy review.
@@ -66,21 +71,9 @@ These map Figma components to their code counterparts. Mostly relevant inside
   instances.
 - `get_code_connect_suggestions` — suggested mappings for selected components.
 - `get_context_for_code_connect` — property definitions and variant options for a component.
-- `add_code_connect_map` — writes a Figma-node-to-code mapping. **Write tool — confirm first.**
-- `send_code_connect_mappings` — submits confirmed mappings.
 
-### Write tools
-
-All write tools modify Figma state. Confirm scope and target with the user before invoking,
-and report exactly what was created or changed.
-
-- `use_figma` — generic create / modify / delete on Figma objects.
-- `create_new_file` — creates a new Design or FigJam file.
-- `upload_assets` — uploads PNG/JPG/GIF/WebP images (max 10 MB) as fills or new frames.
-- `generate_figma_design` — sends UI code into Figma as design layers.
-- `generate_diagram` — generates a FigJam diagram from Mermaid syntax or natural language.
-
-Per-tool parameters and full output shape are in `references/figma-mcp-tools.md`.
+(The two write Code Connect tools — `add_code_connect_map` and `send_code_connect_mappings` —
+are out of scope for this skill. Invoke them directly with explicit user consent if needed.)
 
 ## Decision rules
 
@@ -92,9 +85,6 @@ Per-tool parameters and full output shape are in `references/figma-mcp-tools.md`
   move.
 - **Use `get_screenshot` for human reference, `get_metadata` for machine reasoning.** Don't
   load both unless both are needed.
-- **Write tools require confirmation.** `use_figma`, `upload_assets`, `create_new_file`,
-  `generate_figma_design`, and `generate_diagram` modify Figma. Confirm scope and target with
-  the user before calling.
 - **Don't generate code from this skill.** Production code generation belongs in repo-specific
   output skills like `figma-to-angular` in the clients repo. This skill stops at extracted
   design context.
@@ -114,8 +104,8 @@ Per-tool parameters and full output shape are in `references/figma-mcp-tools.md`
   to confirm tokens are library-bound rather than raw hex.
 - **`evolving-design-system-components`.** Use `search_design_system` and `get_libraries`
   before proposing a new pattern — most "we need this new thing" cases turn out to be
-  "this thing exists in the library and we didn't know." Use the Code Connect tools when the
-  question crosses into how a Figma component maps to its code counterpart.
+  "this thing exists in the library and we didn't know." Use the Code Connect read tools when
+  the question crosses into how a Figma component maps to its code counterpart.
 
 ## Asking the user before extracting
 
@@ -142,7 +132,8 @@ When reporting what's in a Figma file, structure the response as:
 
 ## Additional resources
 
-- **`references/figma-mcp-tools.md`** — per-tool parameter and output reference, drawn from
-  Figma's official MCP documentation.
 - **`references/setup.md`** — installing and authenticating the Figma Dev Mode MCP server
   (desktop vs. remote), seat-type requirements, and troubleshooting unavailable tools.
+- **Figma's canonical per-tool reference:**
+  [`developers.figma.com/docs/figma-mcp-server/tools-and-prompts/`](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/) —
+  the source of truth for tool parameters, return shapes, and desktop-vs-remote availability.

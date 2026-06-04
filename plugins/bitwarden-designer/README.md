@@ -87,13 +87,6 @@ We keep building variations of this segmented selector — should it become a co
 PM created the epic, designs are at 60%. Walk me through the Jira choreography so engineering sees the right state.
 ```
 
-## Related Plugins
-
-- **`bitwarden-design-tools`** — required. The toolkit half of this plugin; six skills the persona dispatches into.
-- **`bitwarden-atlassian-tools`** — required. Confluence access for the canonical design-team process pages.
-- **`bitwarden-tech-lead`** — engineering counterpart on the team-scope surface.
-- **`bitwarden-shepherd`** — engineering counterpart on the cross-team initiative surface.
-
 ## References
 
 - [Weekly Design Critique & Etiquette (Quick Guide)](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/2329542659)

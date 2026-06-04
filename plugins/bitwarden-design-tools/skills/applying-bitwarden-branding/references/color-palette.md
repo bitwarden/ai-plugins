@@ -27,7 +27,7 @@ colors.
 | Color           | HEX       | RGB             | HSL                      | SCSS variable      | Typical use                |
 | --------------- | --------- | --------------- | ------------------------ | ------------------ | -------------------------- |
 | Tertiary Green  | `#7BF1A8` | `123, 241, 168` | `hsla(143, 80%, 71%, 1)` | `$tertiary-green`  | Success states             |
-| Tertiary Yellow | `#FDC700` | `255, 215, 0`   | `hsla(47, 100%, 50%, 1)` | `$tertiary-yellow` | Warning states             |
+| Tertiary Yellow | `#FDC700` | `253, 199, 0`   | `hsla(47, 100%, 50%, 1)` | `$tertiary-yellow` | Warning states             |
 | Tertiary Red    | `#FF6550` | `255, 101, 80`  | `hsla(5, 100%, 66%, 1)`  | `$tertiary-red`    | Error / destructive states |
 
 ## CMYK (for print)

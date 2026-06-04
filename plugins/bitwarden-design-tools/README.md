@@ -73,11 +73,6 @@ We keep building variations of this segmented selector — should it become a co
 PM created the epic, designs are at 60%. Walk me through the Jira choreography so engineering sees the right state.
 ```
 
-## Related Plugins
-
-- **`bitwarden-designer`** — persona half. Dispatches into the skills here.
-- **`bitwarden-atlassian-tools`** — required. Confluence access for the canonical pages this plugin's skills reference.
-
 ## References
 
 - [bitwarden.com/brand](https://bitwarden.com/brand/) — brand guidelines hub.
