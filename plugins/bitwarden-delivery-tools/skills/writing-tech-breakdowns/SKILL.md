@@ -23,6 +23,24 @@ If the change exists under a larger BW Initiative (an epic the team received fro
 
 If no initiative exists (the work is purely team-scoped) skip this step and note it explicitly in Specification ("not part of an active initiative"). A breakdown without an initiative is fine; a breakdown drafted in a vacuum when an initiative exists is not.
 
+## Before You Start: Check for Collisions in the Same Codebase
+
+Before drafting, **scan for other in-flight work touching the same repos, modules, or files**. Two teams shaping overlapping changes in the same domain produces wasted design effort at best and merge-conflict-driven rework at worst. The check is cheap; the cost of skipping it is high.
+
+Run this scan in two places, against the affected repos you'll list in Agent Context's "Repos affected":
+
+1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just your own; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with yours. A simple `grep -ri <repo-name> bitwarden/tech-breakdowns/` (excluding `complete/`) is a reasonable first pass; refine with file-path searches once you've identified candidates.
+2. **Open PRs in the affected repos.** For each repo on your "Repos affected" list, run `gh pr list -R bitwarden/<repo> --state open --json number,title,headRefName,files` (or equivalent) and look for PRs touching the same paths your breakdown's Tasks section will. Long-lived feature branches and renovate/refactor PRs are the common collision sources.
+
+When a collision is found:
+
+- **Link the colliding work** in the Cross-team engagement section's `Coordination notes` (other team's breakdown) or in the Plan's `Current State` (open PR). Future readers should be able to see the overlap from the breakdown itself.
+- **Contact the owning team on their public Slack channel** (tag the named human if known) to align on sequencing, scope boundary, or whether the work should merge into a single breakdown. Don't draft in parallel and discover the conflict at signoff time.
+- **Add the affected team to the signoff table** (handled in `Skill(coordinating-cross-team-breakdown)`) if their work overlaps with yours enough that they need to evaluate your design. Treat overlap as a signoff trigger, not just a coordination note.
+- **Capture unresolved overlap as a Clarifications Log entry** if alignment can't be reached quickly. Don't move to `Proposed` with an unresolved collision in the same domain.
+
+Re-run this scan when status flips to `Proposed`. New work can appear in the gap between starting and circulating; a colliding PR that opened mid-draft is exactly the kind of surprise that derails cross-team review.
+
 ## Starting a New Breakdown
 
 The breakdown is a markdown file in the `bitwarden/tech-breakdowns` repo. Setup steps from the template's preamble:
@@ -231,6 +249,8 @@ Once Specification, Clarifications Log (any Open items have owners + targets), P
 
 Engage the team's refinement facilitator yourself while the breakdown is in `Proposed` — get the Task decomposition into a refinement pass alongside the cross-team signoff work.
 
+**Re-run the collision scan** from "Before You Start: Check for Collisions in the Same Codebase" at this point. New breakdowns and PRs can appear in the gap between starting the draft and circulating for review; surfacing them at `Proposed` is materially cheaper than discovering them during signoff or implementation.
+
 For Jira ticket mechanics (creation, updates, sync, summary comments on significant edits), route through `Skill(jira-manager)` or `Skill(jira-cli)`. This skill names the timing and shape; those skills do the writes. See "Keeping Tasks and Jira stories in sync" above for the bidirectional-sync rules once stories exist.
 
 The state machine lives in this skill; the cross-team workflow lives in the companion. They compose by cross-reference, not auto-invocation.
@@ -239,6 +259,7 @@ The state machine lives in this skill; the cross-team workflow lives in the comp
 
 - **Drafting a "Part 4 child page" out of habit.** The new format is a single self-contained file. Per-layer specs are subsections inside Plan, not separate pages. Drafting child pages re-fragments the artifact the format is designed to prevent.
 - **Drafting in a vacuum.** Initiative context (shepherd, sibling teams' epics, architecture plan) is the input that makes Specification and Cross-team engagement correct. Skipping `Skill(navigating-the-initiative-funnel)` when an initiative exists is the most common upstream error.
+- **Skipping the collision scan.** Other teams may be shaping changes in the same codebase right now. A breakdown drafted without checking in-flight breakdowns and open PRs in the affected repos discovers the conflict at signoff or merge time, when both designs are far harder to reshape. Run the scan before drafting and again at the `Proposed` transition.
 - **Pasting Product spec into Specification.** The breakdown is a technical document. Link the spec; don't reproduce it.
 - **Treating Plan's per-layer subsections as yes/no checklists.** The value is in the follow-ups. "Yes, DB changes" with no scope and no compatibility analysis is no better than skipping the question.
 - **Skipping the AI clarify pass before circulating.** Running clarify after cross-team review surfaces questions the team should have answered first; running it before means cross-team review focuses on real interface concerns.
