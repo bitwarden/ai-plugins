@@ -14,6 +14,10 @@ Read the Confluence pages directly when prepping a real session — the `get_con
 tool fetches them. This skill is the practitioner's quick reference, not a replacement for
 those pages.
 
+> **Cross-plugin dependency.** When the design under discussion lives in a Figma file, this
+> skill composes `using-figma` from the `bitwarden-design-tools` plugin — install it
+> alongside `bitwarden-designer` for the full composition to work.
+
 ## Pick the right mode
 
 Bitwarden runs two distinct kinds of critique. Treat them differently.

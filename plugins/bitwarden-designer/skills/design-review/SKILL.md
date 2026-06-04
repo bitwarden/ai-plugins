@@ -15,6 +15,11 @@ of `bitwarden/clients` (authored by the design team) and have no separate Conflu
 designer. Feedback must be
 actionable, stage-appropriate, and rooted in product goals — not personal preference.
 
+> **Cross-plugin dependency.** This skill composes `content-style-guide` (at 60% and 90%
+> stages) and `using-figma` (when the design lives in a Figma file). Both ship in the
+> `bitwarden-design-tools` plugin, which is required alongside `bitwarden-designer` —
+> install both for the full composition to work.
+
 ## Step 1: Identify the stage
 
 Before giving feedback, identify (or ask) what stage the design is at. The kind of feedback
