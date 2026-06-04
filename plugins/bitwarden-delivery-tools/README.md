@@ -25,10 +25,10 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Technical design
 
-| Skill                               | Triggers                                                           | Purpose                                                                                                                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting Parts 1, 2, 4, 5, 6 of Bitwarden's Tech Breakdown Template plus the full status lifecycle (IN PLANNING → IN PROGRESS → PROPOSED → ACCEPTED → COMPLETE / REJECTED) |
-| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Part 3 signoff table, cross-team checklist, and the completion-communication workflow that closes a breakdown                                                              |
+| Skill                               | Triggers                                                           | Purpose                                                                                                                                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting the engineering content of a Tech Breakdown (Specification, Clarifications Log, Plan, Tasks, Agent Context) and managing the In Planning → In Progress → Proposed → Accepted → Complete / Rejected status lifecycle |
+| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Cross-team engagement signoff table, cross-team checklist, and the stakeholder-communication checklist that runs at `Proposed → Accepted`                                                                                    |
 
 ### Mechanics
 
@@ -68,7 +68,7 @@ Start a Tech Breakdown for this feature — walk me through the scope checklist
 ```
 
 ```
-The breakdown is at PROPOSED — who needs to sign off and how do I chase them?
+The breakdown is at Proposed — who needs to sign off and how do I chase them?
 ```
 
 ```

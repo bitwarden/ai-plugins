@@ -1,6 +1,6 @@
 ---
 name: writing-tech-breakdowns
-description: Draft engineering work breakdowns following the Bitwarden Tech Breakdown template. Use when starting a new tech breakdown, filling in the scope checklist, drafting specification child pages, capturing open questions, or moving the doc between status states (IN PLANNING / IN PROGRESS / PROPOSED / ACCEPTED / COMPLETE).
+description: Draft engineering work breakdowns following the Bitwarden Tech Breakdown template. Use when starting a new tech breakdown, filling in the scope checklist, drafting specification sections, capturing open questions, or moving the doc between status states.
 allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
@@ -14,12 +14,12 @@ Read `templates/tech-breakdown.md` directly when you need literal headings, chec
 
 ## Before You Start: Orient on the Initiative
 
-If the change exists under a larger BW Initiative (an epic the team received from a shepherd through the Software Initiative Funnel), **run `Skill(navigating-the-initiative-funnel)` first**. It surfaces the context that feeds multiple parts of the breakdown:
+If the change exists under a larger BW Initiative (an epic the team received from an owner through the Software Initiative Funnel), **run `Skill(navigating-the-initiative-funnel)` first**. It surfaces the context that feeds multiple parts of the breakdown:
 
-- The originating initiative epic, its architecture plan, and the PoC PRs the shepherd produced — these are the source material for Specification and Plan.
-- The shepherd's stated success criteria and constraints — Plan questions get answered against these, not against guesses.
+- The originating initiative epic, its architecture plan, and the PoC PRs the owner produced — these are the source material for Specification and Plan.
+- The owner's stated success criteria and constraints — Plan questions get answered against these, not against guesses.
 - Sibling teams' epics under the same initiative — these seed the Cross-team engagement section (handled in `Skill(coordinating-cross-team-breakdown)`).
-- The shepherd themselves — escalate ambiguous scope or cross-team interface questions to them rather than resolving unilaterally.
+- The owner themselves — escalate ambiguous scope or cross-team interface questions to them rather than resolving unilaterally.
 
 If no initiative exists (the work is purely team-scoped) skip this step and note it explicitly in Specification ("not part of an active initiative"). A breakdown without an initiative is fine; a breakdown drafted in a vacuum when an initiative exists is not.
 
@@ -29,7 +29,7 @@ Before drafting, **scan for other in-flight work touching the same repos, module
 
 Run this scan in two places, against the affected repos you'll list in Agent Context's "Repos affected":
 
-1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just your own; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with yours. A simple `grep -ri <repo-name> bitwarden/tech-breakdowns/` (excluding `complete/`) is a reasonable first pass; refine with file-path searches once you've identified candidates.
+1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just your own; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with yours. Use the Grep tool (or ripgrep) for a first-pass scan of the affected repo names across the tree, excluding `**/complete/**`; refine with file-path searches once you've identified candidates.
 2. **Open PRs in the affected repos.** For each repo on your "Repos affected" list, run `gh pr list -R bitwarden/<repo> --state open --json number,title,headRefName,files` (or equivalent) and look for PRs touching the same paths your breakdown's Tasks section will. Long-lived feature branches and renovate/refactor PRs are the common collision sources.
 
 When a collision is found:
@@ -162,54 +162,15 @@ Task decomposition is part of the breakdown itself. For each task, include:
 
 Tasks are at the implementation-unit level — what becomes Jira stories. Sequence them by blocking relationships so the team can see the critical path. Don't restate architectural decisions on tasks; the breakdown is the source for cross-cutting decisions and the task carries a pointer.
 
-### Creating Jira stories from Tasks
+### Creating and syncing Jira stories from Tasks
 
-Jira stories are created at the `Proposed → Accepted` transition, after signoff is captured and before the refinement-facilitator handoff. Each story mirrors one row of the Tasks section and carries the Ticket Shape described below.
+Jira stories are created at the `Proposed → Accepted` transition, after signoff is captured and before the refinement-facilitator handoff. Each story mirrors one row of the Tasks section and carries the Ticket Shape (see below).
 
-Mechanics live in **`Skill(jira-manager)`** (read/write via MCP) or **`Skill(jira-cli)`** (CLI). This skill names _when_ and _what_ to create; those skills know _how_.
+Once stories exist, the Tasks section and the Jira stories are a synchronized pair: substantive Tasks-section edits must be mirrored on the matching Jira story in the same change; significant edits (scope, acceptance criteria) also get a summary comment on the Jira story for traceability.
 
-#### Field mapping
+Detailed field-by-field mapping, inter-ticket link-type rules (`is blocked by` / `depends on` / `relates to`), and the trivial / substantive / significant sync taxonomy live in `references/jira-story-mechanics.md`. Read that file when actually creating or updating stories.
 
-Putting Ticket Shape content into the right Jira fields matters — sprint teams, refinement, QA, and reporting all key off specific fields, and the wrong field placement (especially folding acceptance criteria into the description) makes the story invisible to those workflows.
-
-| Ticket Shape content                  | Jira field                              | Notes                                                                                                                                                                                                                                                                                              |
-| ------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Task title                            | **Summary**                             | The Tasks-section task title, trimmed for ticket length. When the task applies to only one part of the stack, prefix the Summary with a tag identifying that part (examples: `[Clients]`, `[Web]`, `[Server]`, `[SDK]`, `[iOS]`, `[Android]`). Omit the prefix when the task spans multiple parts. |
-| Story-specific tech breakdown         | **Description** (top)                   | One or two paragraphs of context specific to this story. Don't re-state architectural decisions from the breakdown — link to them.                                                                                                                                                                 |
-| Breakdown deep link                   | **Description** (top) + **Remote link** | Inline link in the Description (so it's visible to anyone reading), plus a Remote/Web link on the issue pointing to the breakdown file in the `bitwarden/tech-breakdowns` repo. The Remote link is what GitHub/Confluence Smartlinks pick up.                                                      |
-| Implementation pointers               | **Description** (mid)                   | File paths, patterns to follow, and references to specific Plan subsections. From the breakdown's Tasks-section `Affected files / crates / modules`.                                                                                                                                               |
-| Test scenarios                        | **Description** (lower)                 | Beyond the standard unit/integration baseline. From Plan's `Testing strategy` subsection where applicable.                                                                                                                                                                                         |
-| Acceptance criteria (Given/When/Then) | **Acceptance Criteria** (custom field)  | Use the dedicated Acceptance Criteria custom field, not the Description. Refinement and QA filter on this field; burying criteria in Description breaks those workflows. If a project doesn't have the custom field, raise the gap rather than collapsing criteria into Description.               |
-| Issue Type                            | **Issue Type**                          | `Story` for most Tasks-section rows; `Task` for non-user-facing implementation work; `Sub-task` only when the story is decomposed below the breakdown's granularity.                                                                                                                               |
-| Parent epic                           | **Epic Link** (or **Parent**)           | The Jira epic the breakdown is shaping. If under a BW Initiative, the initiative epic is typically the grandparent — link to the team's epic, not the initiative.                                                                                                                                  |
-| Owner team                            | **Team** (custom field)                 | The Tasks-section `Owner` value. Use the project's Team custom field for team attribution.                                                                                                                                                                                                         |
-
-When the stories exist, **update the Tasks section to carry each story's Jira key inline** (for example, `Task 1: Introduce PinProtectedKeyEnvelope type [PM-12345]`). The breakdown points forward to the tickets; each ticket points back at the breakdown's Tasks section via the Description link and Remote link. The bidirectional linkage is what keeps the two artifacts findable from each other later.
-
-#### Linkages between tickets
-
-The Tasks section's `Blocked on` and `Depends on` rows are Jira issue links, not Description text. Create them explicitly when the stories are created:
-
-- **Blocked on:** Tasks-section `Blocked on` row → **`is blocked by`** issue link on the target story, pointing back to the prior story. Jira's blocked-by reporting and dependency graphs key off this link type.
-- **Depends on:** Tasks-section `Depends on` row → **`depends on`** issue link (or **`relates to`** if the project doesn't have the `depends on` type) to the parallel story whose interface must exist. Use the more specific link type when available — refinement uses it to identify interface-coupled work.
-- **Sibling team breakdowns:** if the work has cross-team interfaces with sibling-team tickets (from the Cross-team engagement signoff table's `Associated breakdown` column), add **`relates to`** links between the corresponding stories. This is how cross-team dependency tracking surfaces in initiative-level reporting.
-- **Parent / containing work:** the **Epic Link** field (above) is the structural parent; don't duplicate it as an issue link.
-- **Breakdown file:** the **Remote link** to the markdown file in `bitwarden/tech-breakdowns` (above) is the canonical pointer back to the design artifact. Don't put the breakdown into an issue link — Remote/Web link is the right surface.
-
-When `Skill(jira-manager)` or `Skill(jira-cli)` doesn't expose the exact link type for a given relationship, default to `relates to` and capture the intended semantics in the Description ("Blocks PM-12346 — interface must land before consumer can build"). The downstream refinement pass can refine the link type.
-
-### Keeping Tasks and Jira stories in sync
-
-Once stories exist, the breakdown's Tasks section and the corresponding Jira stories become a synchronized pair. **Any edit to a Task's scope, owner, affected files, or dependencies must be mirrored on the matching Jira story in the same change.** The breakdown remains the architectural source of truth; the Jira story is the sprint-level source of truth (status, assignee, sprint allocation, refinement notes). They diverge silently if not maintained together.
-
-Some practical rules:
-
-- **Trivial edits** (prose tightening, formatting, clarifying wording without changing scope) — update the breakdown only. No Jira sync needed.
-- **Substantive edits** (scope change, new acceptance criterion, file-path changes, added/removed dependency, owner change) — update both the Tasks section in the breakdown PR **and** the matching Jira story. Use `Skill(jira-manager)` or `Skill(jira-cli)` for the Jira update.
-- **Significant edits** (anything a sprint team picking up the story would need to re-evaluate against, especially scope or acceptance-criteria changes) — also post a **summary comment on the Jira story** linking back to the breakdown PR / section and naming what changed and why. This is the traceability trail; without it, the story's history loses the "why."
-- **Edits affecting cross-team interfaces** — also trigger the lifecycle rule for material changes to an `Accepted` breakdown. Move the breakdown back to `Proposed` and re-run affected signoffs before merging. The Jira-side sync still happens, but it's downstream of the lifecycle reset.
-
-Sync flows in both directions. If a story is materially re-scoped during refinement or implementation, the breakdown's Tasks section gets a corresponding update in a follow-up PR, with the change noted under "Last substantive update" in the Status block.
+Mechanics-level Jira writes are intentionally not in this skill's `allowed-tools` — they're delegated to whatever Jira authoring tooling the engineer has available (for example, a `jira-manager` or `jira-cli` skill if installed, direct Atlassian MCP write calls, or the Jira UI). This skill names _when_ and _what_; the authoring tool handles _how_.
 
 ## Agent Context
 
@@ -222,20 +183,11 @@ Four required subsections:
 - **External references.** Standards, RFCs, third-party docs, prior ADRs. Each item must be load-bearing for some decision above; if it isn't, leave it out.
 - **Things an agent should not assume.** Counter-intuitive constraints, defaults that look obvious but aren't, invariants that an agent might violate by following standard patterns. **This is the highest-leverage section for preventing wrong-shaped AI-generated code.** Treat empty as a smell — at minimum, list "no surprising assumptions identified" rather than leaving the section blank.
 
-## Ticket Shape (reference, not fill-in)
+## Ticket Shape
 
-The template's Ticket Shape appendix is a reference, not a section to fill in. Tickets carved from the breakdown carry:
+The template's Ticket Shape appendix is a reference, not a section to fill in the breakdown itself. Each Jira story carved from a Tasks row carries a deep link to the relevant breakdown section, story-specific tech context, acceptance criteria in Given/When/Then, test scenarios beyond the unit/integration baseline, implementation pointers, and issue links to blockers, dependencies, and sibling-team tickets.
 
-- A deep link to the relevant breakdown section.
-- One or two paragraphs of story-specific tech context not duplicated from the breakdown.
-- Acceptance criteria (story-specific, observable outcomes) in Given/When/Then.
-- Test scenarios that aren't obvious from the standard unit/integration baseline.
-- Implementation pointers — file paths, patterns, dependencies on other tickets.
-- Issue links to blockers, dependencies, and sibling-team tickets.
-
-Field mapping (which Jira field receives which piece) and link-type guidance live in the **"Creating Jira stories from Tasks → Field mapping"** subsection above. Treat that as the operating reference when creating or updating tickets.
-
-Tickets **don't** restate the breakdown's architectural decisions. If an architectural decision affects a story, the ticket points at the breakdown section that contains it. This keeps cross-cutting decisions in one place and prevents drift.
+Full Ticket Shape reference is in `references/ticket-shape.md`; the field-by-field mapping that places each piece into the right Jira field lives in `references/jira-story-mechanics.md`.
 
 ## When You Move to Proposed
 
@@ -251,14 +203,14 @@ Engage the team's refinement facilitator yourself while the breakdown is in `Pro
 
 **Re-run the collision scan** from "Before You Start: Check for Collisions in the Same Codebase" at this point. New breakdowns and PRs can appear in the gap between starting the draft and circulating for review; surfacing them at `Proposed` is materially cheaper than discovering them during signoff or implementation.
 
-For Jira ticket mechanics (creation, updates, sync, summary comments on significant edits), route through `Skill(jira-manager)` or `Skill(jira-cli)`. This skill names the timing and shape; those skills do the writes. See "Keeping Tasks and Jira stories in sync" above for the bidirectional-sync rules once stories exist.
+For Jira ticket mechanics (creation, updates, sync, summary comments on significant edits), use whichever Jira authoring tooling the engineer has available. This skill names the timing and shape; the authoring tool handles the writes. See `references/jira-story-mechanics.md` for the field mapping, link-type rules, and bidirectional-sync taxonomy once stories exist.
 
 The state machine lives in this skill; the cross-team workflow lives in the companion. They compose by cross-reference, not auto-invocation.
 
 ## Common Mistakes
 
 - **Drafting a "Part 4 child page" out of habit.** The new format is a single self-contained file. Per-layer specs are subsections inside Plan, not separate pages. Drafting child pages re-fragments the artifact the format is designed to prevent.
-- **Drafting in a vacuum.** Initiative context (shepherd, sibling teams' epics, architecture plan) is the input that makes Specification and Cross-team engagement correct. Skipping `Skill(navigating-the-initiative-funnel)` when an initiative exists is the most common upstream error.
+- **Drafting in a vacuum.** Initiative context (owner, sibling teams' epics, architecture plan) is the input that makes Specification and Cross-team engagement correct. Skipping `Skill(navigating-the-initiative-funnel)` when an initiative exists is the most common upstream error.
 - **Skipping the collision scan.** Other teams may be shaping changes in the same codebase right now. A breakdown drafted without checking in-flight breakdowns and open PRs in the affected repos discovers the conflict at signoff or merge time, when both designs are far harder to reshape. Run the scan before drafting and again at the `Proposed` transition.
 - **Pasting Product spec into Specification.** The breakdown is a technical document. Link the spec; don't reproduce it.
 - **Treating Plan's per-layer subsections as yes/no checklists.** The value is in the follow-ups. "Yes, DB changes" with no scope and no compatibility analysis is no better than skipping the question.
@@ -275,4 +227,4 @@ The state machine lives in this skill; the cross-team workflow lives in the comp
 - [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) — the breakdowns repo. Template at `templates/tech-breakdown.md`. Each team's in-flight work is under `<team>/`; completed work is under `<team>/complete/`.
 - [EDD — Evolutionary Database Design](https://contributing.bitwarden.com/contributing/database-migrations/edd) — referenced in Plan for DB-change backwards compatibility.
 - [Adding functionality to the SDK](https://contributing.bitwarden.com/architecture/sdk/adding-functionality) — referenced in Plan for new SDK crates.
-- Related: `Skill(navigating-the-initiative-funnel)` — load-bearing when the breakdown sits under a BW Initiative; provides shepherd, sibling-team, and architecture-plan context that feeds Specification, Plan, and Cross-team engagement. `Skill(coordinating-cross-team-breakdown)` — the Cross-team engagement table, cross-team checklist, and completion-communication workflow that closes the breakdown. `Skill(architecting-solutions)` (in the `bitwarden-tech-lead` plugin) — the architectural-judgment lens to apply through Plan.
+- Related: `Skill(navigating-the-initiative-funnel)` — load-bearing when the breakdown sits under a BW Initiative; provides owner, sibling-team, and architecture-plan context that feeds Specification, Plan, and Cross-team engagement. `Skill(coordinating-cross-team-breakdown)` — the Cross-team engagement table, cross-team checklist, and completion-communication workflow that closes the breakdown. `Skill(architecting-solutions)` (in the `bitwarden-tech-lead` plugin) — the architectural-judgment lens to apply through Plan.

@@ -1,0 +1,48 @@
+# Creating and Syncing Jira Stories from a Tech Breakdown's Tasks Section
+
+Load this reference when actually creating or updating the Jira stories that mirror a breakdown's Tasks section. The parent SKILL.md (`writing-tech-breakdowns`) names _when_ to create stories (at the `Proposed → Accepted` transition) and _what_ each carries (the Ticket Shape — see `references/ticket-shape.md`). This file covers the field-by-field mechanics, the inter-ticket linkages, and the bidirectional-sync rules once the stories exist.
+
+Mechanics-level Jira write operations live in whatever Jira authoring tool the engineer has available — for example, a `jira-manager` skill, a `jira-cli` skill, direct MCP calls against the Atlassian server, or the Jira UI. This skill is intentionally read-only at the MCP layer; write capability is delegated.
+
+## Field mapping
+
+Putting Ticket Shape content into the right Jira fields matters — sprint teams, refinement, QA, and reporting all key off specific fields, and the wrong field placement (especially folding acceptance criteria into the description) makes the story invisible to those workflows.
+
+| Ticket Shape content                  | Jira field                              | Notes                                                                                                                                                                                                                                                                                              |
+| ------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Task title                            | **Summary**                             | The Tasks-section task title, trimmed for ticket length. When the task applies to only one part of the stack, prefix the Summary with a tag identifying that part (examples: `[Clients]`, `[Web]`, `[Server]`, `[SDK]`, `[iOS]`, `[Android]`). Omit the prefix when the task spans multiple parts. |
+| Story-specific tech breakdown         | **Description** (top)                   | One or two paragraphs of context specific to this story. Don't re-state architectural decisions from the breakdown — link to them.                                                                                                                                                                 |
+| Breakdown deep link                   | **Description** (top) + **Remote link** | Inline link in the Description (so it's visible to anyone reading), plus a Remote/Web link on the issue pointing to the breakdown file in the `bitwarden/tech-breakdowns` repo. The Remote link is what GitHub/Confluence Smartlinks pick up.                                                      |
+| Implementation pointers               | **Description** (mid)                   | File paths, patterns to follow, and references to specific Plan subsections. From the breakdown's Tasks-section `Affected files / crates / modules`.                                                                                                                                               |
+| Test scenarios                        | **Description** (lower)                 | Beyond the standard unit/integration baseline. From Plan's `Testing strategy` subsection where applicable.                                                                                                                                                                                         |
+| Acceptance criteria (Given/When/Then) | **Acceptance Criteria** (custom field)  | Use the dedicated Acceptance Criteria custom field, not the Description. Refinement and QA filter on this field; burying criteria in Description breaks those workflows. If a project doesn't have the custom field, raise the gap rather than collapsing criteria into Description.               |
+| Issue Type                            | **Issue Type**                          | `Story` for most Tasks-section rows; `Task` for non-user-facing implementation work; `Sub-task` only when the story is decomposed below the breakdown's granularity.                                                                                                                               |
+| Parent epic                           | **Epic Link** (or **Parent**)           | The Jira epic the breakdown is shaping. If under a BW Initiative, the initiative epic is typically the grandparent — link to the team's epic, not the initiative.                                                                                                                                  |
+| Owner team                            | **Team** (custom field)                 | The Tasks-section `Owner` value. Use the project's Team custom field for team attribution.                                                                                                                                                                                                         |
+
+When the stories exist, **update the Tasks section to carry a link to each story or task**. The breakdown points forward to the tickets; each ticket points back at the breakdown's Tasks section via the Description link and Remote link. The bidirectional linkage is what keeps the two artifacts findable from each other later.
+
+## Linkages between tickets
+
+The Tasks section's `Blocked on` and `Depends on` rows are Jira issue links, not Description text. Create them explicitly when the stories are created:
+
+- **Blocked on:** Tasks-section `Blocked on` row → **`is blocked by`** issue link on the target story, pointing back to the prior story. Jira's blocked-by reporting and dependency graphs key off this link type.
+- **Depends on:** Tasks-section `Depends on` row → **`depends on`** issue link (or **`relates to`** if the project doesn't have the `depends on` type) to the parallel story whose interface must exist. Use the more specific link type when available — refinement uses it to identify interface-coupled work.
+- **Sibling team breakdowns:** if the work has cross-team interfaces with sibling-team tickets (from the Cross-team engagement signoff table's `Associated breakdown` column), add **`relates to`** links between the corresponding stories. This is how cross-team dependency tracking surfaces in initiative-level reporting.
+- **Parent / containing work:** the **Epic Link** field (above) is the structural parent; don't duplicate it as an issue link.
+- **Breakdown file:** the **Remote link** to the markdown file in `bitwarden/tech-breakdowns` (above) is the canonical pointer back to the design artifact. Don't put the breakdown into an issue link — Remote/Web link is the right surface.
+
+When the Jira authoring tool doesn't expose the exact link type for a given relationship, default to `relates to` and capture the intended semantics in the Description ("Blocks PM-12346 — interface must land before consumer can build"). The downstream refinement pass can refine the link type.
+
+## Keeping Tasks and Jira stories in sync
+
+Once stories exist, the breakdown's Tasks section and the corresponding Jira stories become a synchronized pair. **Any edit to a Task's scope, owner, affected files, or dependencies must be mirrored on the matching Jira story in the same change.** The breakdown remains the architectural source of truth; the Jira story is the sprint-level source of truth (status, assignee, sprint allocation, refinement notes). They diverge silently if not maintained together.
+
+Some practical rules:
+
+- **Trivial edits** (prose tightening, formatting, clarifying wording without changing scope) — update the breakdown only. No Jira sync needed.
+- **Substantive edits** (scope change, new acceptance criterion, file-path changes, added/removed dependency, owner change) — update both the Tasks section in the breakdown PR **and** the matching Jira story, using whichever Jira authoring tool is available.
+- **Significant edits** (anything a sprint team picking up the story would need to re-evaluate against, especially scope or acceptance-criteria changes) — also post a **summary comment on the Jira story** linking back to the breakdown PR / section and naming what changed and why. This is the traceability trail; without it, the story's history loses the "why."
+- **Edits affecting cross-team interfaces** — also trigger the lifecycle rule for material changes to an `Accepted` breakdown. Move the breakdown back to `Proposed` and re-run affected signoffs before merging. The Jira-side sync still happens, but it's downstream of the lifecycle reset.
+
+Sync flows in both directions. If a story is materially re-scoped during refinement or implementation, the breakdown's Tasks section gets a corresponding update in a follow-up PR, with the change noted under "Last substantive update" in the Status block.
