@@ -1,0 +1,72 @@
+{
+  "skill_name": "writing-tech-breakdowns",
+  "evals": [
+    {
+      "id": 1,
+      "name": "start-new-breakdown-from-initiative-handoff",
+      "prompt": "I'm starting work on PM-15847 next sprint, the dual-data-access migration for emergency access. The shepherd handed off the epic last week and I need to put together the tech breakdown before our refinement on the 12th. Where do I start?",
+      "expected_output": "Should walk the user through the bitwarden/tech-breakdowns repo workflow: clone, copy the template into platform/, rename with the Jira key, fill the Status block (start at In Planning, today's date, named owner/contact), open a PR. Should also surface the two Before You Start gates: run navigating-the-initiative-funnel since this came from a shepherd handoff, and run the collision scan against affected repos. Should NOT start drafting Plan or Specification content before orientation is done.",
+      "assertions": [
+        "Recommends running Skill(navigating-the-initiative-funnel) because the work came from a shepherd handoff",
+        "Recommends a collision scan against in-flight breakdowns and open PRs in the affected repos",
+        "Names the file location as a markdown file under <team>/ in bitwarden/tech-breakdowns (not Confluence)",
+        "Mentions filling the Status block with at least Status, Last substantive update, and Active owner / contact",
+        "Uses Title Case lifecycle states (In Planning / In Progress / Proposed / Accepted / Complete / Rejected), not all-caps"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "drafting-plan-section",
+      "prompt": "Can you help me draft the Plan section of this breakdown? We're touching the data model, server, and sdk-internal. The breakdown is at platform/PM-15847-emergency-access-dual-access.md.",
+      "expected_output": "Should point the user at the template's per-layer checklists rather than enumerating layers inline. Should surface the Bitwarden-specific gotchas that aren't in the template: cryptographic work routes through Skill(bitwarden-security-context), V±2 client compatibility lens for API surface changes, Mermaid source over image-only diagrams, Out of Scope vs Known Limitations distinction. Should also recommend Skill(architecting-solutions) as the architectural lens.",
+      "assertions": [
+        "Points at the template's per-layer checklists (data model, server, sdk-internal) rather than enumerating them inline",
+        "Mentions Skill(architecting-solutions) or the architectural-judgment lens",
+        "Surfaces the Out of Scope vs Known Limitations distinction",
+        "Recommends Mermaid source over image-only diagrams",
+        "References Skill(bitwarden-security-context) for any cryptographic considerations"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "moving-from-proposed-to-accepted",
+      "prompt": "My breakdown is at Proposed and I want to move it to Accepted. What do I need to verify before I flip the status?",
+      "expected_output": "Should name both gates: (a) all blocking signoffs captured with a named human + date, AND (b) the implementing team's refinement pass on the Tasks section complete. Should explicitly delegate the stakeholder-communication checklist (#team-eng-tech-breakdowns post, QA contact, Jira story creation, refinement-facilitator handoff) to coordinating-cross-team-breakdown. Should not try to run the checklist itself.",
+      "assertions": [
+        "Names both gates required for Accepted: cross-team signoff AND team refinement pass",
+        "Explicitly delegates the stakeholder-communication checklist to Skill(coordinating-cross-team-breakdown)",
+        "Mentions Jira story creation at the Proposed → Accepted transition",
+        "Does NOT walk the user through the signoff table or QA contact mechanics (that's the companion skill's job)"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "tasks-jira-sync-question",
+      "prompt": "Do tasks in the breakdown's Tasks section need Jira keys before we move to Accepted? Or is creating the Jira stories part of the Accepted transition itself?",
+      "expected_output": "Should explain that Jira stories are created at the Proposed → Accepted transition (after signoff, before refinement-facilitator handoff). Should point at references/jira-story-mechanics.md for field mapping and sync rules. Should mention that Tasks section gets updated with the new Jira keys/links after stories exist for bidirectional traceability.",
+      "assertions": [
+        "Names the Proposed → Accepted transition as when Jira stories are created",
+        "Points at references/jira-story-mechanics.md for the field-mapping and sync details",
+        "Mentions bidirectional linkage (Tasks section updated with story keys/links after creation)",
+        "Does NOT inline the full field mapping table or link-type taxonomy"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "collision-scan-on-overlapping-work",
+      "prompt": "We're scoping a new feature in the server repo and I just noticed the Vault team has an open PR (#7821) touching the same OrganizationUserRepository. We're also seeing a draft breakdown from them in vault/ that mentions OrganizationUserRepository changes. How do I handle this?",
+      "expected_output": "Should treat this as a Before You Start: Check for Collisions hit. Should recommend: linking the colliding work in either Coordination notes or Plan's Current State, contacting the Vault team on their public Slack channel (not DM), adding Vault to the signoff table if overlap is material, and capturing unresolved overlap as a Clarifications Log entry if alignment can't be reached.",
+      "assertions": [
+        "Recommends linking the colliding PR/breakdown in Coordination notes or Plan's Current State",
+        "Recommends contacting the Vault team on their public Slack channel rather than DM",
+        "Recommends adding Vault to the cross-team signoff table if overlap is material",
+        "Mentions capturing unresolved overlap as a Clarifications Log entry"
+      ],
+      "files": []
+    }
+  ]
+}
