@@ -16,13 +16,15 @@ const mockListProjects = vi.fn();
 
 vi.mock("../jira/client.js", () => {
   return {
-    JiraClient: vi.fn().mockImplementation(() => ({
-      getIssue: mockGetIssue,
-      getIssueComments: mockGetIssueComments,
-      getRemoteLinks: mockGetRemoteLinks,
-      searchIssues: mockSearchIssues,
-      listProjects: mockListProjects,
-    })),
+    JiraClient: vi.fn().mockImplementation(function () {
+      return {
+        getIssue: mockGetIssue,
+        getIssueComments: mockGetIssueComments,
+        getRemoteLinks: mockGetRemoteLinks,
+        searchIssues: mockSearchIssues,
+        listProjects: mockListProjects,
+      };
+    }),
   };
 });
 
