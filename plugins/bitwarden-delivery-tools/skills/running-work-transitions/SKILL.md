@@ -203,4 +203,4 @@ The one thing that should not be skipped regardless of scale is the **30-day pul
 ## Reference
 
 - [Work Transition Playbook](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2521038855) — canonical. Fetch via `get_confluence_page` for the full phase-by-phase detail, summary table, and adaptation guidance.
-- Related: `Skill(navigating-the-initiative-funnel)` for the initiative context that often triggers a transition; `Skill(architecting-solutions)` for the architectural judgment to apply when evaluating what's being handed over (in either direction).
+- Related: `Skill(navigating-the-initiative-funnel)` for the initiative context that often triggers a transition; `Skill(choosing-collaboration-model)` for picking a collaboration model when the transition involves cross-team code changes (framework rollout, codebase handoff, operational responsibility move) — different phases of a transition often use different models; `Skill(architecting-solutions)` for the architectural judgment to apply when evaluating what's being handed over (in either direction).

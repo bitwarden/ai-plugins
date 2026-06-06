@@ -1,10 +1,10 @@
 ---
 name: writing-tech-breakdowns
-description: Draft engineering work breakdowns following the Bitwarden Tech Breakdown template. Use when starting a new tech breakdown, filling in the scope checklist, drafting specification sections, capturing open questions, or moving the doc between status states.
+description: Draft engineering work breakdowns following the Bitwarden Tech Breakdown template. Use when starting a new tech breakdown, walking the Plan section's per-layer subsections, drafting the Tasks section, capturing open questions, or moving the doc between status states.
 allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments
 ---
 
-Bitwarden's Tech Breakdown is the standard artifact a team produces before implementation begins on a non-trivial change. It captures the technical design (what's being built, what it touches, what alternatives were considered, what the cross-team impact is) at the level of fidelity another engineer or another team can act on. This skill is the working playbook for drafting the engineering content (Specification, Clarifications Log, Plan, Tasks, Agent Context) and managing the document's status lifecycle. Cross-team engagement and the completion-communication checklist live in the companion skill `Skill(coordinating-cross-team-breakdown)`.
+Bitwarden's Tech Breakdown is the standard artifact a team produces before implementation begins on a non-trivial change. It captures the technical design (what's being built, what it touches, what alternatives were considered, what the cross-team impact is) at the level of fidelity another engineer or another team can act on. This skill is the working playbook for drafting the engineering content (Specification, Clarifications Log, Plan, Tasks, Agent Context) and managing the document's status lifecycle. Cross-team engagement and the stakeholder-communication checklist live in the companion skill `Skill(coordinating-cross-team-breakdown)`.
 
 ## Canonical source
 
@@ -33,7 +33,7 @@ Before drafting, **scan for other in-flight work touching the same repos, module
 
 Run this scan in two places, against the affected repos you'll list in Agent Context's "Repos affected":
 
-1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just your own; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with yours. Use the Grep tool (or ripgrep) for a first-pass scan of the affected repo names across the tree, excluding `**/complete/**`; refine with file-path searches once you've identified candidates.
+1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just your own; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with yours. Use the Grep tool for a first-pass scan of the affected repo names across the tree, excluding `**/complete/**`; refine with file-path searches once you've identified candidates.
 2. **Open PRs in the affected repos.** For each repo on your "Repos affected" list, run `gh pr list -R bitwarden/<repo> --state open --json number,title,headRefName,files` (or equivalent) and look for PRs touching the same paths your breakdown's Tasks section will. Long-lived feature branches and renovate/refactor PRs are the common collision sources.
 
 When a collision is found:
@@ -113,6 +113,12 @@ The template at `templates/tech-breakdown.md` enumerates the sections and their 
 - **Jira stories are created at the `Proposed → Accepted` transition**, after signoff and before the refinement-facilitator handoff. Each story mirrors one Tasks row and carries the Ticket Shape (template appendix; full reference in `references/ticket-shape.md`).
 - Once stories exist, the Tasks section and the Jira stories are a **synchronized pair**: substantive edits mirror on the matching story in the same change; significant edits also get a summary comment on the story for traceability. Detailed field mapping, link-type rules, and sync taxonomy in `references/jira-story-mechanics.md`.
 - **Mechanics-level Jira writes are intentionally not in this skill's `allowed-tools`** — delegated to whichever Jira authoring tooling the engineer has available (a `jira-manager` or `jira-cli` skill if installed, direct Atlassian MCP write calls, or the Jira UI).
+- **Watch the task count and nudge a split when it grows.** A breakdown's value comes partly from being refinable end-to-end and from supporting a credible release-date estimate when work starts. Both degrade as the task count climbs. As the Tasks section is being drafted (or grows during refinement), flag the size and propose split candidates rather than letting the breakdown carry forward as one oversized artifact. Rough thresholds, calibrated to a ~2-week sprint with a typical team capacity:
+  - **5–15 tasks** — healthy. Refinable in one or two sessions; release prediction holds.
+  - **15–25 tasks** — watch zone. Review for natural seams: sequential phases, independently-shippable subsets, interface boundaries. Ask whether one or more subsets could ship as its own breakdown.
+  - **More than 25 tasks** — split. At this size a single breakdown can't be refined in time to start work with a credible release date. Carry the original forward as a meta-document if useful (linking to the children); the implementation work belongs in multiple breakdowns.
+  - **Fewer than 5 tasks** — likely doesn't justify a breakdown at all. Consider whether a single Jira story with a short design note is the right artifact instead.
+  - When a split is being considered or executed, raise it explicitly in `Coordination notes` so cross-team reviewers see the scope change; each child breakdown gets its own cross-team signoff cycle.
 
 ### Agent Context
 
@@ -153,6 +159,7 @@ The state machine lives in this skill; the cross-team workflow lives in the comp
 - **Editing the Tasks section without syncing Jira.** Once stories exist, the Tasks section and the Jira stories are a synchronized pair. Substantive edits to one must be mirrored on the other in the same change; significant edits also get a summary comment on the Jira story. Silent drift between the two leaves sprint teams working off stale acceptance criteria or wrong file paths.
 - **Folding acceptance criteria into the Description field.** Acceptance criteria belong in the dedicated Acceptance Criteria custom field. Refinement and QA filter on that field; criteria buried in Description are invisible to those workflows. The Description carries the story-specific tech breakdown, implementation pointers, test scenarios, and the breakdown deep link — not the criteria.
 - **Skipping issue links for Blocked on / Depends on rows.** Tasks-section dependencies become Jira issue links (`is blocked by`, `depends on`), not free-text in Description. Without the links, Jira's dependency graphs and refinement views can't see the work order; sprint teams pick up stories that aren't actually unblocked yet.
+- **Letting the Tasks section grow past a refinable, predictable size without splitting.** A breakdown with 30+ tasks can't be refined end-to-end in time to start work, and any release-date estimate produced from it is fiction. Push past 25 tasks deliberately or split — but if the split is being deferred because "we'll figure it out in refinement," that's the failure mode this guidance is meant to prevent.
 
 ## Reference
 
