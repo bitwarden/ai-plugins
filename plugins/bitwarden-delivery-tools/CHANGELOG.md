@@ -5,6 +5,22 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-06-06
+
+### Fixed
+
+- `writing-tech-breakdowns/evals/evals.json` — renamed the per-case `assertions` field to `expectations` to match the skill-creator grader schema. With the old field name the grader found zero expectations to evaluate and vacuously passed all 5 cases.
+- `writing-tech-breakdowns` — dropped `search_confluence` and `search_confluence_cql` from `allowed-tools`. The skill's body has no Confluence-search step after the 1.4.0 re-anchor to `bitwarden/tech-breakdowns`; the companion skill already dropped these. Removes dead tool surface.
+- `navigating-the-initiative-funnel` — updated the Phase 4 Tech Breakdown pointer and the related-skills block to the new template structure introduced in 1.4.0. Replaced `Parts 1, 2, 4, 5, 6` / `specification child pages` / all-caps lifecycle / `Part 3 signoffs` / `completion-communication checklist` with the named sections (Specification, Clarifications Log, Plan, Tasks, Agent Context), Title Case lifecycle, Cross-team engagement section, and `stakeholder-communication checklist`. Engineers entering the breakdown workflow via the funnel skill no longer hit contradictory guidance.
+
+### Security
+
+- `writing-tech-breakdowns` and `coordinating-cross-team-breakdown` — added an untrusted-input boundary callout to the Canonical source section of each skill. Engineer-authored markdown in `bitwarden/tech-breakdowns`, PR titles, and branch names are now explicitly framed as data under analysis rather than instructions to execute. Addresses CWE-1427 exposure introduced when the 1.4.0 `allowed-tools` expansion gave both skills `Bash`/`Write`/`Edit` access while they read engineer-authored repo content.
+
+### Changed
+
+- `writing-tech-breakdowns` and `coordinating-cross-team-breakdown` — distinguished Engineering-owned BW Initiatives (routed through the Software Initiative Funnel) from Product-owned BW Initiatives (which do not use the funnel). `Skill(navigating-the-initiative-funnel)` references are now qualified as applying only to Engineering-owned initiatives; for Product-owned initiatives, the skills point at the linked PRD and the named Product owner for the equivalent context and escalation paths.
+
 ## [1.4.0] - 2026-06-04
 
 ### Changed
