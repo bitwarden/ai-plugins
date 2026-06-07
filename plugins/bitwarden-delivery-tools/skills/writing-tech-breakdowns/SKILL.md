@@ -1,6 +1,6 @@
 ---
 name: writing-tech-breakdowns
-description: Draft and run engineering work breakdowns following the Bitwarden Tech Breakdown template — from initial drafting through cross-team signoff and the stakeholder-communication checklist that opens the Proposed phase. Use when starting a new tech breakdown, walking the Plan section's per-layer subsections, drafting the Tasks section, capturing open questions, identifying affected teams, building the Cross-team engagement signoff table, chasing signoffs to move from Proposed to Accepted, running the stakeholder-communication checklist at the In Progress → Proposed transition (the items that kick off cross-team signoff, refinement, and QA test design), or moving the doc between status states.
+description: Draft and run a Bitwarden Tech Breakdown end-to-end — drafting, status lifecycle, stakeholder-communication checklist, cross-team signoff table, and gate verification. Use when starting a tech breakdown, drafting Plan or Tasks sections, identifying affected teams, chasing signoffs, or moving the doc between status states.
 allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments
 ---
 
@@ -31,10 +31,10 @@ If no initiative exists (the work is purely team-scoped) skip this step and note
 
 Before drafting, **scan for other in-flight work touching the same repos, modules, or files**. Two teams shaping overlapping changes in the same domain produces wasted design effort at best and merge-conflict-driven rework at worst. The check is cheap; the cost of skipping it is high.
 
-Run this scan in two places, against the affected repos you'll list in Agent Context's "Repos affected":
+Run this scan in two places, against the affected repos listed in Agent Context's "Repos affected":
 
-1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just your own; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with yours. Use the Grep tool for a first-pass scan of the affected repo names across the tree; refine with file-path searches once you've identified candidates.
-2. **Open PRs in the affected repos.** For each repo on your "Repos affected" list, run `gh pr list -R bitwarden/<repo> --state open --json number,title,headRefName,files` and look for PRs touching the same paths your breakdown's Tasks section will. Long-lived feature branches and renovate/refactor PRs are the common collision sources.
+1. **In-flight tech breakdowns from other teams.** Search the `bitwarden/tech-breakdowns` repo across all teams' folders (not just the driving team's; exclude `**/complete/**`). Look for breakdowns whose Agent Context names the same repos, Plan subsections discuss the same modules, or Tasks-section `Affected files` overlap with the breakdown's. Use the Grep tool for a first-pass scan of the affected repo names across the tree; refine with file-path searches once candidates are identified.
+2. **Open PRs in the affected repos.** For each repo on the "Repos affected" list, run `gh pr list -R bitwarden/<repo> --state open --json number,title,headRefName,files` and look for PRs touching the same paths the breakdown's Tasks section will. Long-lived feature branches and renovate/refactor PRs are the common collision sources.
 
 When a collision is found:
 

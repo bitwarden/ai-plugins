@@ -1,6 +1,6 @@
 ---
 name: navigating-the-initiative-funnel
-description: Phase-by-phase guidance for participating in Bitwarden's Software Initiative Funnel. Covers ownership boundaries between shepherd and tech lead at each phase, how to run an epic breakdown after handoff, sizing and estimation, cross-team dependency tracking, and the escalation paths that protect team autonomy. Use when a team is about to receive an initiative epic, when participating in an Architectural Assessment or PoC, when preparing a team breakdown, or when surfacing concerns back to the shepherd or engineering leadership.
+description: Phase-by-phase guidance for participating in Bitwarden's Software Initiative Funnel. Use when a team is about to receive an initiative epic, participating in an Architectural Assessment or PoC, preparing a team breakdown, or surfacing concerns back to the shepherd or engineering leadership.
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
