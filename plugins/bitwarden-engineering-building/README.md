@@ -2,7 +2,7 @@
 
 ## Overview
 
-Software engineer agent for a Bitwarden product team. Generic AI coding assistance doesn't know our zero-knowledge constraints, multi-client reality, dual-ORM strategy, Angular/RxJs conventions, or the verification commands we actually run before declaring work done — let alone the canonical Bitwarden "Software Engineer" role on the [Engineering Career Ladder](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1027899486/Engineering+Ladder) that frames what the role is evaluated on. This plugin grounds the agent in that role: implementing stories, tasks, and bugs in the team's domain with code quality, performance, and security in mind, communicating clearly, and following our Git conventions.
+Software engineer agent for a Bitwarden engineering team. Generic AI coding assistance doesn't know our zero-knowledge constraints, multi-client reality, dual-ORM strategy, Angular/RxJs conventions, or the verification commands we actually run before declaring work done — let alone the canonical Bitwarden "Software Engineer" role on the [Engineering Career Ladder](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1027899486/Engineering+Ladder) that frames what the role is evaluated on. This plugin grounds the agent in that role: implementing stories, tasks, and bugs in the team's domain with code quality, performance, and security in mind, communicating clearly, and following our Git conventions.
 
 ## Agent
 

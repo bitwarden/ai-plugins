@@ -1,9 +1,15 @@
 # Changelog
 
-All notable changes to the `bitwarden-software-engineer` plugin will be documented in this file.
+All notable changes to the `bitwarden-engineering-building` plugin (previously published as `bitwarden-software-engineer`) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2026-06-07
+
+### Changed (BREAKING)
+
+- **Renamed plugin from `bitwarden-software-engineer` → `bitwarden-engineering-building`.** Reframed from a role-based identity ("the software engineer") into an activity-mode identity ("an engineer in building mode — implementing stories, reviewing PRs, preparing commits and pull requests, shipping code"). The split with `bitwarden-engineering-shaping` (formerly `bitwarden-tech-lead`) is by activity, not seniority — same engineer steps between modes as the work demands. Any agent or workflow invoking `Agent(bitwarden-software-engineer)` must switch to `Agent(bitwarden-engineering-building)`. The plugin directory, `plugin.json` name, `marketplace.json` entry, root README catalog row, and agent frontmatter `name:` are all renamed; the agent body rewrite (absorbing the mode reframe into the AGENT.md prose, examples, and orientation rubric) lands in subsequent commits on this PR before the draft moves out of draft.
 
 ## [1.0.0] - 2026-05-19
 
