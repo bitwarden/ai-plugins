@@ -1,9 +1,15 @@
 # Changelog
 
-All notable changes to the `bitwarden-tech-lead` plugin will be documented in this file.
+All notable changes to the `bitwarden-engineering-shaping` plugin (previously published as `bitwarden-tech-lead`) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.0] - 2026-06-07
+
+### Changed (BREAKING)
+
+- **Renamed plugin from `bitwarden-tech-lead` → `bitwarden-engineering-shaping`.** Reframed from a role-based identity ("the team's tech lead") into an activity-mode identity ("an engineer in shaping mode — discovery, scoping, architectural reasoning, cross-team coordination, tech-breakdown drafting"). The split with `bitwarden-engineering-building` (formerly `bitwarden-software-engineer`) is by activity, not seniority — same engineer steps between modes as the work demands. Any agent or workflow invoking `Agent(bitwarden-tech-lead)` must switch to `Agent(bitwarden-engineering-shaping)`. The plugin directory, `plugin.json` name, `marketplace.json` entry, root README catalog row, and agent frontmatter `name:` are all renamed; the agent body rewrite (absorbing the mode reframe into the AGENT.md prose, examples, and orientation rubric) lands in subsequent commits on this PR before the draft moves out of draft.
 
 ## [2.3.1] - 2026-06-07
 

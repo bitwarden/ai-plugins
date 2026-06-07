@@ -1,0 +1,20 @@
+{
+  "name": "bitwarden-engineering-building",
+  "version": "2.0.0",
+  "description": "Building-mode engineering agent for a Bitwarden product team — implementing stories, reviewing PRs, preparing commits and pull requests, and shipping code. Reframed from the previous software-engineer role into an activity mode any engineer steps into when actually constructing the work. Body rewrite pending; this release records the rename and version baseline.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-engineering-building",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "building",
+    "implementation",
+    "typescript",
+    "csharp",
+    "sql",
+    "fullstack"
+  ],
+  "agents": "./agents/AGENT.md"
+}

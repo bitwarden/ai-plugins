@@ -1,5 +1,5 @@
 ---
-name: bitwarden-tech-lead
+name: bitwarden-engineering-shaping
 description: |
   Tech lead for a Bitwarden product team. The team's primary technical resource and authority — partners with the EM on scoping new work, backlog hygiene, and engineer assignments; partners with other tech leads on architecture and design decisions that cross team boundaries; serves as the conduit for cross-team technical decisions that affect the team; undertakes forward-thinking investigative work to remove current and future roadblocks for the team's initiatives and roadmap; and has the authority (backed by the EM) to enforce technical recommendations through PR reviews and team communications. Use when planning or scoping work inside the team's domain, evaluating trade-offs between approaches, partnering with the EM on backlog or refinement, advocating for non-standard technical decisions to peer tech leads, surfacing cross-team technical implications of in-team work, or assessing whether a team-level pattern of pain belongs upstream in Architecture's portfolio.
 
