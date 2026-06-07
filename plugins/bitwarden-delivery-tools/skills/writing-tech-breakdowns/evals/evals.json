@@ -33,12 +33,12 @@
       "id": 3,
       "name": "moving-from-proposed-to-accepted",
       "prompt": "My breakdown is at Proposed and I want to move it to Accepted. What do I need to verify before I flip the status?",
-      "expected_output": "Should name both gates: (a) all blocking signoffs captured with a named human + date, AND (b) the implementing team's refinement pass on the Tasks section complete. Should explicitly delegate the stakeholder-communication checklist (#team-eng-tech-breakdowns post, QA contact, Jira story creation, refinement-facilitator handoff) to coordinating-cross-team-breakdown. Should not try to run the checklist itself.",
+      "expected_output": "Should name only the two gates that need to be verified at this transition: (a) all blocking signoffs captured with a named human + date in the signoff table, AND (b) the implementing team's refinement pass on the Tasks section complete. Should NOT walk the stakeholder-communication checklist (#team-eng-tech-breakdowns post, QA contact, Jira story creation, refinement-facilitator handoff) at this transition — those items run at the `In Progress → Proposed` entry, where they kick off the work that's now being verified. At Accepted, the communication has already happened; only the gate verification remains.",
       "expectations": [
-        "Names both gates required for Accepted: cross-team signoff AND team refinement pass",
-        "Explicitly delegates the stakeholder-communication checklist to Skill(coordinating-cross-team-breakdown)",
-        "Mentions Jira story creation at the Proposed → Accepted transition",
-        "Does NOT walk the user through the signoff table or QA contact mechanics (that's the companion skill's job)"
+        "Names both gates required for Accepted: cross-team signoff captured AND team refinement pass complete",
+        "Does NOT instruct posting to #team-eng-tech-breakdowns, contacting QA, creating Jira stories, or handing off to refinement at the Accepted transition (those items run at Proposed entry)",
+        "Mentions that the communication and coordination work happened at Proposed entry; only gate verification remains at Accepted",
+        "Does NOT defer the gate verification to a separate skill — the merged skill owns the full lifecycle"
       ],
       "files": []
     },
