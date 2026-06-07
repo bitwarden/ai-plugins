@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tech lead agent for a Bitwarden product team. Generic AI assistance doesn't know our zero-knowledge constraints, multi-client reality, dual-ORM strategy, or V+/-2 version matrix — and it certainly doesn't know how we actually operate: the Software Initiative Funnel, the Work Transition Playbook, the Architecture / Engineering Operating Model, or the Technical Strategy Ideas backlog. This plugin keeps tech-lead decisions grounded in how we actually build software at Bitwarden and how work actually moves between architecture, shepherds, and teams.
+Tech lead agent for a Bitwarden engineering team. Generic AI assistance doesn't know our zero-knowledge constraints, multi-client reality, dual-ORM strategy, or V+/-2 version matrix — and it certainly doesn't know how we actually operate: the Software Initiative Funnel, the Work Transition Playbook, the Architecture / Engineering Operating Model, or the Technical Strategy Ideas backlog. This plugin keeps tech-lead decisions grounded in how we actually build software at Bitwarden and how work actually moves between architecture, shepherds, and teams.
 
 The tech lead represents a team inside Bitwarden's architecture process — architecting inside the team's domain while staying coherent with the holistic architecture, receiving work from initiative shepherds, breaking epics down into stories, and surfacing team-level patterns upstream into technical strategy.
 

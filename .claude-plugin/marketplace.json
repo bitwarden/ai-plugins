@@ -43,7 +43,7 @@
       "name": "bitwarden-engineering-building",
       "source": "./plugins/bitwarden-engineering-building",
       "version": "2.0.0",
-      "description": "Building-mode engineering agent for a Bitwarden product team — implementing stories, reviewing PRs, preparing commits and pull requests, and shipping code. Reframed from the previous software-engineer role into an activity mode any engineer steps into when actually constructing the work."
+      "description": "Building-mode engineering agent for a Bitwarden engineering team — implementing stories, reviewing PRs, preparing commits and pull requests, and shipping code. Reframed from the previous software-engineer role into an activity mode any engineer steps into when actually constructing the work."
     },
     {
       "name": "bitwarden-atlassian-tools",
@@ -67,7 +67,7 @@
       "name": "bitwarden-engineering-shaping",
       "source": "./plugins/bitwarden-engineering-shaping",
       "version": "3.0.0",
-      "description": "Shaping-mode engineering agent for a Bitwarden product team — discovery, scoping, architectural reasoning, cross-team coordination, and tech-breakdown drafting. Reframed from the previous tech-lead role into an activity mode any engineer steps into when planning work rather than implementing it."
+      "description": "Shaping-mode engineering agent for a Bitwarden engineering team — discovery, scoping, architectural reasoning, cross-team coordination, and tech-breakdown drafting. Reframed from the previous tech-lead role into an activity mode any engineer steps into when planning work rather than implementing it."
     },
     {
       "name": "bitwarden-shepherd",

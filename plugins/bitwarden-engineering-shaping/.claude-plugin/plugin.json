@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-engineering-shaping",
   "version": "3.0.0",
-  "description": "Shaping-mode engineering agent for a Bitwarden product team — discovery, scoping, architectural reasoning, cross-team coordination, and tech-breakdown drafting. Reframed from the previous tech-lead role into an activity mode any engineer steps into when planning work rather than implementing it. Body rewrite pending; this release records the rename and version baseline.",
+  "description": "Shaping-mode engineering agent for a Bitwarden engineering team — discovery, scoping, architectural reasoning, cross-team coordination, and tech-breakdown drafting. Reframed from the previous tech-lead role into an activity mode any engineer steps into when planning work rather than implementing it. Body rewrite pending; this release records the rename and version baseline.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
