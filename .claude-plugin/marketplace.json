@@ -48,7 +48,7 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.2.5",
+      "version": "2.2.6",
       "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments"
     },
     {
@@ -80,6 +80,18 @@
       "source": "./plugins/bitwarden-delivery-tools",
       "version": "2.0.0",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and cross-team signoffs, commits, pull requests, preflight checks, and change labeling."
+    },
+    {
+      "name": "bitwarden-designer",
+      "source": "./plugins/bitwarden-designer",
+      "version": "0.1.0",
+      "description": "Product designer agent for Bitwarden. Holds the design team's Code of Conduct and the 30/60/90 critique framework, and dispatches into the bitwarden-design-tools toolkit for content style, Figma reads, brand application, handoff prep, Design System governance, and the Product and Design Jira workflow."
+    },
+    {
+      "name": "bitwarden-design-tools",
+      "source": "./plugins/bitwarden-design-tools",
+      "version": "0.1.0",
+      "description": "Design toolkit for Bitwarden — non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
     }
   ]
 }

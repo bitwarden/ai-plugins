@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Check out repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -167,7 +167,7 @@ jobs:
         id: components
         if: steps.changed-files.outputs.has_components == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@c3d45e8e941e1b2ad7b278c57482d9c5bf1f35b3 # v1.0.99
+        uses: anthropics/claude-code-action@787c5a0ce96a9a6cfb050ea0c8f4c05f2447c251 # v1.0.133
         with:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
           plugin_marketplaces: |

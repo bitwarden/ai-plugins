@@ -19,19 +19,21 @@ const mockSearchCql = vi.fn();
 
 vi.mock("../confluence/client.js", () => {
   return {
-    ConfluenceClient: vi.fn().mockImplementation(() => ({
-      getPage: mockGetPage,
-      searchPages: mockSearchPages,
-      getPageWithContent: vi.fn(),
-      testConnection: vi.fn(),
-      getPageComments: mockGetPageComments,
-      getCommentReplies: mockGetCommentReplies,
-      getPageInlineComments: mockGetPageInlineComments,
-      getInlineCommentReplies: mockGetInlineCommentReplies,
-      getChildPages: mockGetChildPages,
-      listSpaces: mockListSpaces,
-      searchCql: mockSearchCql,
-    })),
+    ConfluenceClient: vi.fn().mockImplementation(function () {
+      return {
+        getPage: mockGetPage,
+        searchPages: mockSearchPages,
+        getPageWithContent: vi.fn(),
+        testConnection: vi.fn(),
+        getPageComments: mockGetPageComments,
+        getCommentReplies: mockGetCommentReplies,
+        getPageInlineComments: mockGetPageInlineComments,
+        getInlineCommentReplies: mockGetInlineCommentReplies,
+        getChildPages: mockGetChildPages,
+        listSpaces: mockListSpaces,
+        searchCql: mockSearchCql,
+      };
+    }),
   };
 });
 
