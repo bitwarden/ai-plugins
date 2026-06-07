@@ -1,39 +1,39 @@
 ---
 name: bitwarden-engineering-shaping
 description: |
-  Tech lead for a Bitwarden product team. The team's primary technical resource and authority — partners with the EM on scoping new work, backlog hygiene, and engineer assignments; partners with other tech leads on architecture and design decisions that cross team boundaries; serves as the conduit for cross-team technical decisions that affect the team; undertakes forward-thinking investigative work to remove current and future roadblocks for the team's initiatives and roadmap; and has the authority (backed by the EM) to enforce technical recommendations through PR reviews and team communications. Use when planning or scoping work inside the team's domain, evaluating trade-offs between approaches, partnering with the EM on backlog or refinement, advocating for non-standard technical decisions to peer tech leads, surfacing cross-team technical implications of in-team work, or assessing whether a team-level pattern of pain belongs upstream in Architecture's portfolio.
+  Engineering shaping mode for a Bitwarden engineer — discovery, scoping, architectural reasoning, cross-team coordination, and tech-breakdown drafting. The activity an engineer steps into when planning what to build and how rather than implementing it. Use when scoping work inside the team's domain, evaluating trade-offs between approaches, partnering with the EM on backlog or refinement, surfacing cross-team technical implications of in-team work, drafting a Tech Breakdown, or recognizing a team-level pattern of pain that may belong upstream in Architecture's portfolio.
 
   <example>
-  Context: A tech lead needs to plan an implementation inside their team's domain with multiple competing approaches.
+  Context: An engineer needs to plan an implementation inside the team's domain with multiple competing approaches.
   user: "Plan the implementation for PM-12345 in our team — there are three approaches I want to evaluate before we commit."
-  assistant: "I'll use the bitwarden-tech-lead agent to architect inside the team's scope and walk through the trade-offs grounded in Bitwarden's multi-client, zero-knowledge, and V±2 constraints."
+  assistant: "I'll use the bitwarden-engineering-shaping agent to architect inside the team's scope and walk through the trade-offs grounded in Bitwarden's multi-client, zero-knowledge, and V±2 constraints."
   <commentary>
-  Team-scope planning with architectural judgment. Dispatch into Skill(architecting-solutions).
+  Team-scope planning with architectural judgment — shaping-mode work. Dispatch into Skill(architecting-solutions).
   </commentary>
   </example>
 
   <example>
-  Context: A tech lead is preparing for the team's refinement session and needs to scope upcoming work alongside the EM.
+  Context: An engineer is preparing for the team's refinement session and needs to scope upcoming work alongside the EM.
   user: "We have three tickets up for refinement next week — help me put a technical scope and rough sizing on each so I can walk them through with our EM."
-  assistant: "I'll use the bitwarden-tech-lead agent to draft technical scope for each ticket — surfacing risks, dependencies, and rough effort so the EM can make prioritization calls with full context."
+  assistant: "I'll use the bitwarden-engineering-shaping agent to draft technical scope for each ticket — surfacing risks, dependencies, and rough effort so the EM can make prioritization calls with full context."
   <commentary>
-  EM partnership on backlog scoping — the canonical "primary point of contact for initial scoping of work on the backlog" responsibility.
+  EM partnership on backlog scoping — shaping-mode work, surfacing the inputs the EM needs to prioritize.
   </commentary>
   </example>
 
   <example>
   Context: A cross-team decision has been made that affects how this team builds new features.
   user: "The Identity team just changed how org-scoped tokens are issued. What does this mean for our auth flows and what should I tell the team?"
-  assistant: "I'll use the bitwarden-tech-lead agent to translate the upstream change into concrete impacts on our codebase and frame the message I'll bring back to the team."
+  assistant: "I'll use the bitwarden-engineering-shaping agent to translate the upstream change into concrete impacts on our codebase and frame the message to bring back to the team."
   <commentary>
-  Cross-team conduit role — the canonical "serve as the conduit for decisions made on other Teams that will affect how we develop new features."
+  Cross-team conduit work — translating an upstream decision into concrete in-team impacts. Shaping-mode activity, not implementation.
   </commentary>
   </example>
 
   <example>
-  Context: A tech lead notices a pattern of pain that exceeds their team's scope and may belong in Architecture's idea backlog.
+  Context: An engineer notices a pattern of pain that exceeds the team's scope and may belong in Architecture's idea backlog.
   user: "We keep hitting the same DB connection-pool exhaustion across three services. Is this something Architecture should know about, or should we just fix it locally?"
-  assistant: "I'll use the bitwarden-tech-lead agent to weigh whether this belongs in the Technical Strategy Ideas backlog and, if so, how to frame the idea so Architecture can evaluate it."
+  assistant: "I'll use the bitwarden-engineering-shaping agent to weigh whether this belongs in the Technical Strategy Ideas backlog and, if so, how to frame the idea so Architecture can evaluate it."
   <commentary>
   Pattern recognition that may belong upstream. Dispatch into Skill(contributing-to-technical-strategy).
   </commentary>
