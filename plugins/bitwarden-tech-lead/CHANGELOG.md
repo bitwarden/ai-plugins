@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-06-07
+
+### Changed
+
+- `agents/AGENT.md` — updated Cross-Plugin Integration references to track the `bitwarden-delivery-tools` 2.0.0 reorganization. Removed references to `Skill(coordinating-cross-team-breakdown)` (merged into `Skill(writing-tech-breakdowns)` in that plugin's 2.0.0 release) and added a reference to `Skill(choosing-collaboration-model)` (new in that release; per-impact collaboration-model picker). The integration block and the workflow-orchestration sentence both now point at the merged skill and the new model-picker skill.
+
 ## [2.3.0] - 2026-05-19
 
 ### Changed
