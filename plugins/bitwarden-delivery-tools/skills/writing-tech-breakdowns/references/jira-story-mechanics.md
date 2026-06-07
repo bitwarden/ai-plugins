@@ -1,6 +1,6 @@
 # Creating and Syncing Jira Stories from a Tech Breakdown's Tasks Section
 
-Load this reference when actually creating or updating the Jira stories that mirror a breakdown's Tasks section. The parent SKILL.md (`writing-tech-breakdowns`) names _when_ to create stories (at the `Proposed → Accepted` transition) and _what_ each carries (the Ticket Shape — see `references/ticket-shape.md`). This file covers the field-by-field mechanics, the inter-ticket linkages, and the bidirectional-sync rules once the stories exist.
+Load this reference when actually creating or updating the Jira stories that mirror a breakdown's Tasks section. The parent SKILL.md (`writing-tech-breakdowns`) names _when_ to create stories — either at the `In Progress → Proposed` entry (default, for teams whose refinement ritual is ticket-shaped) or deferred to the `Proposed → Accepted` gate (for teams who refine on the breakdown's Tasks section) — and _what_ each carries (the Ticket Shape — see `references/ticket-shape.md`). This file covers the field-by-field mechanics, the inter-ticket linkages, and the bidirectional-sync rules once the stories exist.
 
 Mechanics-level Jira write operations live in whatever Jira authoring tool the engineer has available — for example, a `jira-manager` skill, a `jira-cli` skill, direct MCP calls against the Atlassian server, or the Jira UI. This skill is intentionally read-only at the MCP layer; write capability is delegated.
 
