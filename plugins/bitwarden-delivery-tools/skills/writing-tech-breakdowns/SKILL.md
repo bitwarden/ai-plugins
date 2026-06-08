@@ -116,7 +116,7 @@ Two rules worth holding in mind here:
 - **The model is a joint decision.** A model that lands in `Accepted` without owning-team confirmation isn't an agreement — it's a guess. Treat counter-proposals as material design changes that re-circulate the breakdown.
 - **File a Ticket transfers planning load, not just execution.** The owning team takes the work into their own domain (their own breakdown if warranted, their own epic and stories). Confirm absorption before defaulting to it.
 
-**Load `references/cross-team-engagement.md` when working through this section.** The reference carries: the per-subsection walkthrough (mobile rules, public-Slack contact convention, interface-first pattern), the full signoff-table column descriptions and Blocking? rule of thumb, and the Coordination notes prompts. A worked example with both in-flight and fully-signed-off shapes lives at `examples/signoff-table.md`.
+**Load `references/cross-team-engagement.md` when working through this section.** The reference carries: the per-subsection walkthrough (mobile rules, public-Slack contact convention, interface-first pattern), the full signoff-table column descriptions, and the Coordination notes prompts. A worked example with both in-flight and fully-signed-off shapes lives at `examples/signoff-table.md`.
 
 ## Chasing signoffs
 
@@ -129,7 +129,7 @@ Once the table is built, signoffs become the gating work to move from `Proposed`
 
 By the time the breakdown is ready to move from `Proposed` to `Accepted`, the parallel work that the stakeholder-communication checklist kicked off at `Proposed` entry has closed out. Two gates must be verified before flipping the status:
 
-1. **Cross-team signoff captured** — every blocking signoff in the signoff table has a named human and a date. Advisory signoffs that remain open should be chased to closure but don't block `Accepted` on their own. Re-read the table at this point and confirm no gaps; a gap here is a blocker on the transition.
+1. **Cross-team signoff captured** — every signoff in the signoff table has a named human and a date. Re-read the table at this point and confirm no gaps; a gap here prevents the transition.
 2. **Team refinement complete** — the implementing team has completed a refinement pass on the Tasks section (and the Jira stories created at Proposed), with feedback folded back into the breakdown and the team confirming the Task decomposition is workable.
 
 **Both gates are required.** A breakdown that has every external signoff but hasn't been refined by the implementing team is **not** ready for `Accepted` — the implementing team's understanding and ownership of the work is part of what `Accepted` signals.
@@ -161,9 +161,7 @@ The terminal alternative to `Complete`. Use when cross-team review surfaces inco
 - **Skipping the AI clarify pass before circulating.** Run clarify before cross-team review so review focuses on real interface concerns.
 - **Leaving "Things an agent should not assume" empty.** Cheap to populate while drafting; very expensive to reconstruct later.
 - **Building the signoff table without initiative context.** When an initiative exists, the owner has already done team-identification work. Ignoring that produces drift and duplicated signoffs.
-- **Over-marking signoffs as Blocking.** Every blocking row is a hard gate; if half the table is blocking the breakdown won't move to `Accepted`. Reserve Blocking for teams whose code the change touches or whose contract the change depends on.
-- **Under-marking signoffs as Blocking.** Advisory signoffs from teams that own the code being modified produce signoffs that get ignored — and surprises during implementation.
-- **Letting signoffs go open without escalation.** A blocking row outstanding for a sprint is a contested interface, not a patience problem. Escalate via the initiative owner or EMs.
+- **Letting signoffs go open without escalation.** A signoff outstanding for a sprint is a contested interface, not a patience problem. Escalate via the initiative owner or EMs.
 - **Omitting the collaboration model.** Every cross-team impact that involves work needs a named model. Use `Skill(choosing-collaboration-model)` to pick one. Pure consumption of an unchanged API is the one case where no model is required.
 - **Picking the model unilaterally from the driving side.** The driving team proposes; the owning team confirms or counter-proposes during signoff. A model that lands in `Accepted` without owning-team confirmation isn't a working agreement.
 - **Treating File a Ticket as the low-cost option for the driving team.** It transfers planning load to the owning team (their breakdown if the change warrants one, their epic and stories on their board), not just execution. Confirm the owning team can absorb that load before defaulting to it.
