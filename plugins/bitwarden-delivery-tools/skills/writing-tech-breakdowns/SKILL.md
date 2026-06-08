@@ -62,61 +62,23 @@ The Status block is metadata that downstream readers (QA, refinement facilitator
 
 ## The Status Lifecycle
 
-The template defines six states. Status is how cross-team consumers know whether to engage — move through them deliberately.
+The template defines six states (`In Planning`, `In Progress`, `Proposed`, `Accepted`, `Complete`, with `Rejected` as the terminal alternative to `Complete`). Status is how cross-team consumers know whether to engage — move through them deliberately. The **Proposed → Accepted** transition is the load-bearing one: two gates must close (cross-team signoff captured and the team's own refinement pass complete) before flipping.
 
-| State           | Meaning                                                        | Entry criteria                                                                                                  |
-| --------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **In Planning** | Committed to but not actively being drafted yet.               | Team has agreed to produce a breakdown; nobody has started writing.                                             |
-| **In Progress** | Actively being drafted. Cross-team review not yet appropriate. | Drafting Specification, Plan, and supporting sections; intra-team discussion to flesh out questions.            |
-| **Proposed**    | Ready for review. Two parallel streams run during this state.  | Specification, Plan, Tasks, Agent Context complete; Cross-team engagement signoff table identifies reviewers.   |
-| **Accepted**    | The agreed-on technical design. Implementation can begin.      | **Two gates closed:** all blocking signoffs captured **and** the team has completed a refinement pass on Tasks. |
-| **Complete**    | Implementation has shipped.                                    | File moved to `<team>/complete/` on the same PR that flips status.                                              |
-| **Rejected**    | Terminal alternative to Complete.                              | Review surfaced incompatibilities or blockers that can't be resolved; a new breakdown supersedes it.            |
-
-Files under `**/complete/**` are point-in-time records, not source of truth. Don't edit them except to correct factual errors.
+**For the per-state meaning and entry criteria, load `references/status-lifecycle.md`.** Files under `**/complete/**` are point-in-time records, not source of truth.
 
 ## Drafting the Engineering Content
 
-The template at `templates/tech-breakdown.md` enumerates the sections and their subsections — read it directly for the structural prompts. This skill captures the Bitwarden-specific guidance and gotchas the template can't:
+The template at `templates/tech-breakdown.md` enumerates the sections and their subsections — read it directly for the structural prompts. This skill keeps the Bitwarden-specific guidance and gotchas that the template can't carry — across **Specification**, **Clarifications Log**, **Plan**, **Tasks**, and **Agent Context**.
 
-### Specification
+**Load `references/section-drafting-guide.md` when actively drafting any of these sections.** Highlights:
 
-- **Don't paste the Product spec.** The breakdown is a technical document; the description is the bridge from Product intent to engineering work. Link the Product feature document, don't reproduce it.
-- **If Product intent is ambiguous, surface it to the Clarifications Log** rather than guessing. Ambiguous Product intent is the single biggest source of churn.
-- **Specification Alternatives vs Plan Alternatives.** Specification alternatives ask "could we satisfy Product with a smaller change?"; Plan alternatives ask "given we're building this, which designs did we reject for each component?" Don't conflate.
+- Tasks include a **two-timings rule** for Jira story creation (Proposed entry as the default for ticket-refinement teams; deferred to the Accepted gate for teams who refine on the breakdown) and a **task-count nudge** (10 or fewer is healthy; more than 10 means split).
+- Plan applies the architectural lens via `Skill(architecting-solutions)` and routes cryptographic work through `Skill(bitwarden-security-context)`.
+- Specification distinguishes Spec Alternatives ("smaller change?") from Plan Alternatives ("which design did we reject?").
+- Clarifications Log gets an AI clarify pass before cross-team review.
+- Agent Context's "Things an agent should not assume" is the highest-leverage subsection — empty is a smell.
 
-### Clarifications Log
-
-- **Run an AI clarify pass against the draft before requesting cross-team review** (Spec Kit's `/speckit.clarify`, Claude, or equivalent). Decisions from that pass fold back into Specification or Plan; what lands in the log is the residue — questions that needed a human stakeholder.
-- **Open clarifications can ship to `Proposed`** as long as each has an owner and a target. **Don't reach `Accepted` with material Open questions** — block or owner-assign first.
-
-### Plan
-
-- **Apply `Skill(architecting-solutions)` (in the `bitwarden-tech-lead` plugin) as the architectural lens** — blast-radius assessment, dual-data-access parity, V±2 client compatibility, multi-client reality.
-- **Prefer Mermaid source over image-only diagrams** — AI-readable, diffs cleanly, reviewers can suggest edits in text.
-- **Out of Scope vs Known Limitations.** Out of Scope is what this work explicitly does not deliver (use to short-circuit drift). Known Limitations are in-scope-but-deferred constraints inside the work being shipped — name the rationale and the follow-up.
-- **Walk each per-layer subsection.** The template enumerates the layers and carries a checklist for each — work through the checklists and either fill in the changes required or state explicitly that the layer isn't touched. Don't leave subsections silently empty; the value is in the follow-ups, not the yes/no.
-- **Cryptographic work routes through `Skill(bitwarden-security-context)`** (in the `bitwarden-security-engineer` plugin); `Skill(threat-modeling)` is the source for definition format when existing security definitions are touched.
-- **API surface changes apply a V±2 client compatibility lens.** Backwards compatibility isn't optional for self-hosted; phase changes accordingly.
-
-### Tasks
-
-- Tasks are at the implementation-unit level — what becomes Jira stories. **Sequence them by `Blocked on` / `Depends on`** so the team can see the critical path.
-- **Don't restate architectural decisions on tasks** — the breakdown is the source for cross-cutting decisions; the task carries a pointer.
-- **Jira stories are created at one of two valid timings** depending on how the team refines: at the `In Progress → Proposed` entry (default, for teams whose refinement ritual is ticket-shaped) or deferred to the `Proposed → Accepted` gate (for teams who refine on the breakdown's Tasks section). Either way, by `Accepted` the stories must exist and be bidirectionally linked. Each story mirrors one Tasks row and carries the Ticket Shape (template appendix; full reference in `references/ticket-shape.md`). The choice and its rationale are explained under "Stakeholder-communication checklist (at Proposed entry)" item 3 below.
-- Once stories exist, the Tasks section and the Jira stories are a **synchronized pair**: substantive edits mirror on the matching story in the same change; significant edits also get a summary comment on the story for traceability. Detailed field mapping, link-type rules, and sync taxonomy in `references/jira-story-mechanics.md`.
-- **Mechanics-level Jira writes are intentionally not in this skill's `allowed-tools`** — delegated to whichever Jira authoring tooling the engineer has available (a `jira-manager` or `jira-cli` skill if installed, direct Atlassian MCP write calls, or the Jira UI).
-- **Watch the task count and nudge a split when it grows.** A breakdown's value comes partly from being refinable end-to-end and from supporting a credible release-date estimate when work starts. Both degrade as the task count climbs. Rough thresholds, calibrated to a ~2-week sprint with typical team capacity:
-  - **10 or fewer tasks** — healthy. Refinable in one or two sessions; release prediction holds.
-  - **more than 10 tasks** — at this size a single breakdown can't be refined in time to start work with a credible release date. Review for natural seams: sequential phases, independently-shippable subsets, interface boundaries. Ask whether one or more subsets could ship as its own breakdown.
-  - When a split is being considered or executed, raise it in `Coordination notes` so cross-team reviewers see the scope change; each child breakdown gets its own cross-team signoff cycle.
-
-### Agent Context
-
-The breakdown is self-contained; Agent Context is pointers to existing code and external references that supplement the inline spec — what makes the breakdown useful in future Claude conversations.
-
-- **Repos affected** should pair with a bidirectional `CLAUDE.md` pointer: each repo's `CLAUDE.md` should point agents back to this breakdown.
-- **"Things an agent should not assume" is the highest-leverage subsection** for preventing wrong-shaped AI-generated code. Treat empty as a smell — at minimum, list "no surprising assumptions identified" rather than leaving it blank.
+Detailed per-section discipline (don't paste the Product spec, walk every per-layer subsection, etc.) is in the reference.
 
 ## Moving to Proposed
 
@@ -145,66 +107,16 @@ These four items kick off the parallel work that has to close before `Accepted`.
 
 ## Cross-team engagement
 
-### The three cross-team engagement subsections
+The template splits cross-team work into three subsections — **Consuming other teams' APIs**, **Changes required in other teams' code**, and **Cross-team sequencing & ordering** — plus a five-column signoff table and free-form Coordination notes. Walk each subsection before considering the section complete.
 
-The template splits cross-team work into three explicit subsections. Walk each before considering the section complete.
+Every cross-team impact that involves work names a **collaboration model** — File a Ticket, Internal Open-Source, or Embedded Expert (Bitwarden's three adopted patterns from Pete Hodgson's collaboration patterns). The model is a **joint decision**: driving team proposes, owning team confirms or counter-proposes at signoff. **Use `Skill(choosing-collaboration-model)` to pick a model for each impact** — that skill walks the change shape through a depth/familiarity/history evaluation, scans the owning team's in-flight work for collision risk, and outputs a recommendation. This section consumes that recommendation; it doesn't re-derive it.
 
-**Consuming other teams' APIs.** For each external service or component used: name the team, the interface, the assumed behavior, and any known constraints or roadmap risk on the providing team's side. Check publicly visible tech debt indicators, recent incidents, or planned deprecations on the providing team. If concerns exist, surface them as Clarifications Log entries. If the consumption requires changes or extensions to the owning team's API, **propose a collaboration model** (see below) — pure consumption of an unchanged API is the one case where no model is needed.
+Two rules worth holding in mind here:
 
-**Changes required in other teams' code.** For each file or module outside the team's domain that needs to change: name the team, the file or module, the change, the **proposed collaboration model**, and the Jira items. Two specific rules:
+- **The model is a joint decision.** A model that lands in `Accepted` without owning-team confirmation isn't an agreement — it's a guess. Treat counter-proposals as material design changes that re-circulate the breakdown.
+- **File a Ticket transfers planning load, not just execution.** The owning team takes the work into their own domain (their own breakdown if warranted, their own epic and stories). Confirm absorption before defaulting to it.
 
-- **Mobile changes** must be defined as separate Jira Tasks/Stories on the Mobile team's board. Mobile parity is almost always File a Ticket; the Mobile team writes its own breakdown for the screens.
-- **Components, services, or files outside the team's domain** — post on the owning team's public Slack channel (not DMs, tagging the human TL/EM) to evaluate impact before adding them to the signoff table. Surprise signoff requests don't work well. If a sibling team's breakdown for related work already exists, link it.
-
-**Cross-team sequencing & ordering.** If this change delivers an API or service for another team, follow the **interface-first pattern**:
-
-- Define the interface early so the consuming team can code against it while implementation is in flight.
-- Consult the consuming team twice — once at design (after the interface is defined in the breakdown), and again at PR (after the implementation lands). Both touchpoints belong on the signoff list.
-- **Propose a collaboration model** for landing the interface in the owning team's code (often Internal Open-Source, but let the change shape pick).
-
-If the order matters in the other direction (the team needs another team's work to land first), capture it in Coordination notes so the dependency is explicit.
-
-### Collaboration models per impact
-
-Every cross-team impact that involves work must name a **collaboration model** — File a Ticket, Internal Open-Source, or Embedded Expert (the three Bitwarden-adopted patterns from Pete Hodgson's cross-team collaboration patterns). The model determines who writes the code, who carries the planning load, and how the request flows; leaving it implicit defers the question to signoff or, worse, mid-implementation. Pure consumption of an existing, unchanged API is the one case where no model is required.
-
-**Use `Skill(choosing-collaboration-model)` to pick a model for each impact.** That skill walks the change shape through a depth/familiarity/history evaluation, scans the owning team's in-flight breakdowns and open PRs for collision risk, surfaces escape hatches, and outputs a recommendation with reasoning, a runner-up, and the velocity findings. This section consumes the recommendation; it doesn't re-derive it.
-
-Two rules on top of the chooser:
-
-- **The model is a joint decision.** The driving team proposes the model in the breakdown; the owning team confirms or counter-proposes during signoff. A model that lands in `Accepted` without owning-team confirmation isn't a working agreement, it's a guess. Treat counter-proposals as material design changes — update the breakdown and re-circulate to anyone who has already signed off.
-- **File a Ticket transfers planning load, not just execution.** If the owning team accepts a File a Ticket impact, they take the work into their own domain — their own breakdown if it warrants one, their own epic and stories. The driving team's roadmap looks lighter; the owning team's gets heavier. Confirm absorption before defaulting to File a Ticket.
-
-Surface the proposed model in the signoff table's `Interface` cell with reasoning. Once signoff lands, mark the row as confirmed (e.g., `Model: Internal Open-Source — confirmed @platform-tl, 2026-05-15`).
-
-### The signoff table
-
-A worked example with both in-flight and fully-signed-off shapes lives at `examples/signoff-table.md`. Use it as a shape reference for what good cells look like and what a healthy table looks like at `Proposed` versus `Accepted`.
-
-The template's five columns:
-
-| Column                   | What goes in it                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Team**                 | The owning team's name. One row per team — combine sub-interfaces under that row's `Interface` cell.                                                                                                                                                                                                                                                                       |
-| **Interface**            | What this breakdown asks of the other team, the **proposed collaboration model**, and brief reasoning. Specific enough that an engineer on the other team can react without re-reading the whole breakdown. The model is a proposal until signoff lands; mark it confirmed once it does. Pure consumption of an unchanged API is the one case where the model is optional. |
-| **Blocking?**            | Yes/No. Hard gate on moving to `Accepted` vs advisory (FYI-level). Over-marking stalls breakdowns; under-marking produces signoffs that get ignored.                                                                                                                                                                                                                       |
-| **Associated breakdown** | Link to the sibling breakdown if the other team is producing their own. Empty when they aren't (common for advisory rows).                                                                                                                                                                                                                                                 |
-| **Signoff**              | Named human + date. Not "the team" — a specific person. The template renders this as a checkbox; capture the human + date inline.                                                                                                                                                                                                                                          |
-
-**Rule of thumb on Blocking?:** if the other team owns code the change directly modifies, calls into, or depends on the contract of, signoff is Blocking. If the other team is being informed because their area is adjacent or could be incidentally affected, signoff is advisory.
-
-### Coordination notes
-
-The template's free-form `Coordination notes` subsection captures anything about the cross-team seams that isn't obvious from the table:
-
-- Which team's PR lands first.
-- Whether a temporary API stub is needed.
-- Whether one team's work needs to land in a feature branch.
-- Sequencing constraints outside the standard interface-first pattern.
-- Counter-proposals from owning teams on the collaboration model.
-- Collisions surfaced by the in-flight scan and how the sequencing accounts for them.
-
-Empty is fine when the table is self-explanatory; vague is not.
+**Load `references/cross-team-engagement.md` when working through this section.** The reference carries: the per-subsection walkthrough (mobile rules, public-Slack contact convention, interface-first pattern), the full signoff-table column descriptions and Blocking? rule of thumb, and the Coordination notes prompts. A worked example with both in-flight and fully-signed-off shapes lives at `examples/signoff-table.md`.
 
 ## Chasing signoffs
 
