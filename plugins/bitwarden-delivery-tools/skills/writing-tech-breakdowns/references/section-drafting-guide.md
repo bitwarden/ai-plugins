@@ -17,7 +17,7 @@ Load this reference when actively drafting Specification, Clarifications Log, Pl
 
 ## Plan
 
-- **Apply `Skill(architecting-solutions)` (in the `bitwarden-engineering-shaping` plugin) as the architectural lens** — blast-radius assessment, dual-data-access parity, V±2 client compatibility, multi-client reality.
+- **Apply `Skill(architecting-solutions)` (in the `bitwarden-tech-lead` plugin) as the architectural lens** — blast-radius assessment, dual-data-access parity, V±2 client compatibility, multi-client reality.
 - **Prefer Mermaid source over image-only diagrams** — AI-readable, diffs cleanly, reviewers can suggest edits in text.
 - **Out of Scope vs Known Limitations.** Out of Scope is what this work explicitly does not deliver (use to short-circuit drift). Known Limitations are in-scope-but-deferred constraints inside the work being shipped — name the rationale and the follow-up.
 - **Walk each per-layer subsection.** The template enumerates the layers and carries a checklist for each — work through the checklists and either fill in the changes required or state explicitly that the layer isn't touched. Don't leave subsections silently empty; the value is in the follow-ups, not the yes/no.
