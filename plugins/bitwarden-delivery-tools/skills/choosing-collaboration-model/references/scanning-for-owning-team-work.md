@@ -69,7 +69,7 @@ A recommendation that says "Internal Open-Source — assuming the area is quiet,
 
 ## When to skip the scan
 
-Pure consumption of an unchanged API doesn't need a model and doesn't need a scan. Advisory-only signoffs (no code change on the owning team's side) don't need a scan either. Everything else does — the scan is cheap enough that skipping it is rarely defensible.
+Pure consumption of an unchanged API doesn't need a model and doesn't need a scan. Signoffs where the owning team has no code change (design review only) don't need a scan either. Everything else does — the scan is cheap enough that skipping it is rarely defensible.
 
 ## Relationship to the breakdown-level collision scan
 

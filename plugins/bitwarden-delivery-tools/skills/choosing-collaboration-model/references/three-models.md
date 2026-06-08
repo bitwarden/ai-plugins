@@ -10,6 +10,8 @@ The three models are drawn from Pete Hodgson's [cross-team collaboration pattern
 
 **What this implies for the driving team:** File a Ticket is **not** a low-cost option for the driving team's roadmap. It transfers planning and execution load to the owning team, who must absorb it into their sprint, their breakdown queue, and their metrics. Confirm the owning team can absorb it before defaulting to File a Ticket.
 
+**File a Ticket is not "file and forget."** The ticket lands on the owning team's backlog, but it needs collaboration to get scheduled and to land correctly. The driving team stays engaged on alignment, refinement, clarifying intent during design, and reviewing the implementation when it lands. If the driving team disappears after filing, the work tends to stall or land off-target.
+
 **Change shape this fits:**
 
 - The change requires domain knowledge the driving team doesn't have.

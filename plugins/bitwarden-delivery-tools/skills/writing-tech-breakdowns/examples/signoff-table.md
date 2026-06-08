@@ -33,7 +33,7 @@ If either team came back with concerns the design needed to address, the row wou
 
 ### Specific, codable interface descriptions
 
-The "Interface" column names the actual contract: a specific component (`bit-audit-log-row`), a specific event-bus topic, a concrete Mobile screen with filter affordances. An engineer on the other team can react to these without re-reading the whole breakdown.
+The "Interface" column names the actual contract: a specific component (`bit-audit-log-row`), a specific event-bus topic, a concrete Mobile screen with filters. An engineer on the other team can react to these without re-reading the whole breakdown.
 
 ### Named collaboration model per impact
 

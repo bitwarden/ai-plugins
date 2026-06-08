@@ -47,7 +47,7 @@ The template's five columns:
 | **Associated breakdown** | Link to the sibling breakdown if the other team is producing their own. Empty when they aren't (common for FYI-level rows).                                                                                                                                                                                                                                                |
 | **Signoff**              | Named human + date. Not "the team" — a specific person. The template renders this as a checkbox; capture the human + date inline.                                                                                                                                                                                                                                          |
 
-Every row in the table is a signoff the breakdown needs before moving to `Accepted` — there's no separate "advisory vs. blocking" distinction to over- or under-mark. If a team only needs to be informed and doesn't need to sign off on the design, they don't belong in the table; mention them in Coordination notes or post an FYI in their public Slack channel instead.
+Every row in the table is a signoff the breakdown needs before moving to `Accepted`. If a team only needs to be informed and doesn't need to sign off on the design, they don't belong in the table; mention them in Coordination notes or post an FYI in their public Slack channel instead.
 
 ## Coordination notes
 
