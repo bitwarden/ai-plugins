@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `agents/AGENT.md` — updated Cross-Plugin Integration references to track the `bitwarden-delivery-tools` 2.0.0 reorganization. Removed references to `Skill(coordinating-cross-team-breakdown)` (merged into `Skill(writing-tech-breakdowns)` in that plugin's 2.0.0 release) and added a reference to `Skill(choosing-collaboration-model)` (new in that release; per-impact collaboration-model picker). Aligned the stakeholder-communication checklist timing to the corrected `In Progress → Proposed` entry (was advertising the old `Proposed → Accepted` framing). The integration block and the workflow-orchestration sentence both now point at the merged skill and the new model-picker skill.
+- `agents/AGENT.md` — updated Cross-Plugin Integration references to track the `bitwarden-delivery-tools` 2.0.0 reorganization. The monolithic `writing-tech-breakdowns` skill was replaced with phase-scoped `starting-a-tech-breakdown`, `doing-a-tech-breakdown`, and `syncing-tasks-with-jira`.
 
 ## [2.3.0] - 2026-05-19
 
