@@ -1,8 +1,30 @@
 # Creating and Syncing Jira Stories from a Tech Breakdown's Tasks Section
 
-Load this reference when actually creating or updating the Jira stories that mirror a breakdown's Tasks section. The parent SKILL.md (`writing-tech-breakdowns`) names _when_ to create stories — either at the `In Progress → Proposed` entry (default, for teams whose refinement ritual is ticket-shaped) or deferred to the `Proposed → Accepted` gate (for teams who refine on the breakdown's Tasks section) — and _what_ each carries (the Ticket Shape — see `references/ticket-shape.md`). This file covers the field-by-field mechanics, the inter-ticket linkages, and the bidirectional-sync rules once the stories exist.
+Load this reference when actually creating or updating the Jira stories that mirror a breakdown's Tasks section. This file covers when stories get created, what each carries (the Ticket Shape), the field-by-field mechanics, the inter-ticket linkages, and the bidirectional-sync rules once the stories exist.
 
 Mechanics-level Jira write operations live in whatever Jira authoring tool the engineer has available — for example, a `jira-manager` skill, a `jira-cli` skill, direct MCP calls against the Atlassian server, or the Jira UI. This skill is intentionally read-only at the MCP layer; write capability is delegated.
+
+## Two valid timings for story creation
+
+The parent SKILL.md offers two valid timings; the team picks based on how it refines. Either way, by `Accepted` the stories must exist and the bidirectional link between breakdown and Jira must be in place.
+
+- **Create stories at Proposed entry** (default for ticket-refinement teams). Stories carry the rough Ticket Shape; refinement runs on the Jira tickets themselves, with AC, scope tightening, and dependencies folded into the stories. The breakdown's Tasks section and the stories are a synchronized pair from this point on; refinement edits land on both. This is the right choice for teams whose refinement ritual is ticket-shaped (story-pointing, AC discussion on the ticket, etc.).
+- **Defer story creation to the Accepted gate** (for teams who prefer to refine on the breakdown). Refinement runs on the Tasks section in the breakdown PR (Owner, Affected files, Blocked on, Depends on, plus AC folded into the Tasks subsection as refinement progresses). At the `Proposed → Accepted` transition, the refined Tasks are mechanically converted to Jira stories. This keeps the backlog clean of provisional work and the breakdown PR as the atomic record of refinement decisions.
+
+If the team deferred to the Accepted gate, the conversion is mostly copy-paste from the refined Tasks section into the right Jira fields below — refinement has folded AC, scope adjustments, and dependencies back into the breakdown by then. Update the Tasks section with story IDs and confirm the bidirectional link as the last step before flipping status.
+
+## Ticket Shape
+
+Each story carved from a Tasks row carries:
+
+- A deep link to the relevant breakdown section.
+- One or two paragraphs of story-specific tech context not duplicated from the breakdown.
+- Acceptance criteria (story-specific, observable outcomes) in Given/When/Then.
+- Test scenarios that aren't obvious from the standard unit/integration baseline.
+- Implementation pointers — file paths, patterns, dependencies on other tickets.
+- Issue links to blockers, dependencies, and sibling-team tickets.
+
+Tickets **don't** restate the breakdown's architectural decisions. If an architectural decision affects a story, the ticket points at the breakdown section that contains it. This keeps cross-cutting decisions in one place and prevents drift.
 
 ## Field mapping
 
@@ -46,3 +68,9 @@ Some practical rules:
 - **Edits affecting cross-team interfaces** — also trigger the lifecycle rule for material changes to an `Accepted` breakdown. Move the breakdown back to `Proposed` and re-run affected signoffs before merging. The Jira-side sync still happens, but it's downstream of the lifecycle reset.
 
 Sync flows in both directions. If a story is materially re-scoped during refinement or implementation, the breakdown's Tasks section gets a corresponding update in a follow-up PR, with the change noted under "Last substantive update" in the Status block.
+
+## Common mistakes (Jira-side)
+
+- **Editing the Tasks section without syncing Jira.** Once stories exist, the Tasks section and the Jira stories are a synchronized pair. Substantive edits to one must be mirrored on the other in the same change; significant edits also get a summary comment on the Jira story.
+- **Folding story-specific content into the Description field.** Use the dedicated custom fields — `Technical breakdown` (`customfield_10313`) for story-specific tech-breakdown content, `Acceptance Criteria` (`customfield_10192`) for Given/When/Then. On a breakdown-derived ticket, Description's only job is to carry the inline link back to the breakdown file.
+- **Skipping issue links for Blocked on / Depends on rows.** Tasks-section dependencies become Jira issue links (`is blocked by`, `depends on`), not free-text in Description.
