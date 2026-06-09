@@ -1,6 +1,6 @@
 ---
-name: breakdown-spec
-description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Spec-Kit's /specify analog. Use after a breakdown document has been created in its empty state or resuming a partly-resolved breakdown. Phrasings like "understand the work", "resolve open questions", "write the breakdown spec", "develop the specification", "Spec Alternatives", "continue the breakdown".
+name: developing-the-breakdown-spec
+description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Spec-Kit's /specify analog. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Phrasings like "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
 allowed-tools: Skill, Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion
 ---
 
@@ -18,7 +18,7 @@ Make sure the user creates an empty Tech Breakdown document. If there isn't one,
 
 - **Resolve first, specify second.** No Spec content while design questions are open.
 - **One question at a time.** Focused decisions, not a list to review.
-- **This is not the HOW.**. Focus on the WHAT and the WHY to drive the HOW when making a Plan. Do not define the HOW now.
+- **This is not the HOW.** Focus on the WHAT and the WHY to drive the HOW when making a Plan. Do not define the HOW now.
 - **Verify before claiming.** Read the file or grep before saying "the code does X."
 - **Link, don't paste.** PRDs and architecture plans live elsewhere; reference them.
 - **Cite source for every factual claim.** Distinguish facts from hypotheses.
@@ -76,4 +76,4 @@ Surface the question explicitly: is there a smaller change that delivers most of
 
 ## Output
 
-When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user invoke `developing-the-plan` to develop the HOW for the work.
+When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed.

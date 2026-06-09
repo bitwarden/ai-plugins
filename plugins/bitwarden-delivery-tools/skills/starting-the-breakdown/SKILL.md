@@ -1,7 +1,7 @@
 ---
-name: breakdown-start
+name: starting-the-breakdown
 description: Set up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, copies the template, and fills the Status block.
-allowed-tools: Read, Edit, Bash, TaskCreate
+allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion
 ---
 
 # Starting a Tech Breakdown
@@ -35,7 +35,7 @@ Ask the user for each of these. Do not assume defaults; an empty answer is a val
 
 - **Jira key.** The epic, task, or story this breakdown corresponds to.
 - **Summary.** One-line description of the work being broken down.
-- **Team** What team is the breakdown owner a part of?
+- **Team.** What team is the breakdown owner a part of?
 - **Active owner / contact.** Who is performing this breakdown?
 
 Produce a short summary and surface it to the user before continuing:
@@ -46,7 +46,7 @@ Produce a short summary and surface it to the user before continuing:
 ### Phase 2: Create the file
 
 1. Confirm `bitwarden/tech-breakdowns` is cloned locally and on `main`. If not, clone or pull.
-2. Copy `templates/tech-breakdown.md` into `<team>/`. Do not edit the template itself.
+2. Copy `templates/tech-breakdown.md` (from the `bitwarden/tech-breakdowns` clone) into `<team>/`. Do not edit the template itself.
 3. Confirm the slug with the user, then rename the copy: `<team>/<JIRA-KEY>-<short-slug>.md`. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim).
 4. Delete the template's preamble checklist at the top of the new file.
 5. Fill the Status block:

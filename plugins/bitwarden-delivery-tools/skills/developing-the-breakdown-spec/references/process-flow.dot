@@ -1,4 +1,4 @@
-// Process flow for Skill(breakdown-spec).
+// Process flow for Skill(developing-the-breakdown-spec).
 // cspell:ignore Tpng rankdir fontname
 // Render with: dot -Tpng process-flow.dot -o process-flow.png
 //
@@ -7,7 +7,7 @@
 // external sources (Jira, PRD, PoC); the user picks up from whichever phase remains
 // unfinished.
 
-digraph breakdown_spec {
+digraph developing_the_breakdown_spec {
   rankdir=TB;
   node [fontname="Helvetica"];
   edge [fontname="Helvetica"];
