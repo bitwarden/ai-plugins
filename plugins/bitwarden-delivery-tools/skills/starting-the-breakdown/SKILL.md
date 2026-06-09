@@ -1,7 +1,7 @@
 ---
 name: starting-the-breakdown
 description: Sets up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, copies the template, and fills the Status block.
-allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion
+allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
 ---
 
 # Starting a Tech Breakdown
@@ -11,7 +11,7 @@ allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion
 Help the user set up a new Tech Breakdown file with enough captured context that the design work can start from solid ground. This skill stops at "file created, status `In Planning`."
 
 <HARD-GATE>
-Do NOT create the breakdown file until all the following are confirmed with the user:
+Do NOT create the breakdown file until all the following are confirmed with the user. Prompt the user for each if not provided.
 - The Jira key for the work.
 - A brief summary of the work.
 - The responsible team.
