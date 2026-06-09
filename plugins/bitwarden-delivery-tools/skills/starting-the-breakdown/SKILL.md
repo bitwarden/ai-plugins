@@ -11,7 +11,7 @@ allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion
 Help the user set up a new Tech Breakdown file with enough captured context that the design work can start from solid ground. This skill stops at "file created, status `In Planning`."
 
 <HARD-GATE>
-Do NOT create the breakdown file until both are confirmed with the user:
+Do NOT create the breakdown file until all the following are confirmed with the user:
 - The Jira key for the work.
 - A brief summary of the work.
 - The responsible team.
