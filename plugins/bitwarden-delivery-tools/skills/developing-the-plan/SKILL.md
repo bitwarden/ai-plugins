@@ -1,6 +1,6 @@
 ---
 name: developing-the-plan
-description: Develop the Plan and Tasks for a Bitwarden Tech Breakdown once the Specification is set. Consider Plan Alternatives, map per-layer impact, decompose into Tasks with the 10-task heuristic, scan for in-flight work, identify cross-team impacts (depth + churn), surface what would surprise a reader, curate the Clarifications Log, run an AI clarify pass. Spec-Kit's /plan + /tasks equivalent. Use after Skill(developing-the-spec). Also handles resumption against a partly-developed Plan. Phrasings like "develop the plan", "plan the implementation", "decompose into tasks", "map per-layer impact", "continue planning".
+description: Develop the Plan and Tasks for a Bitwarden Tech Breakdown once the Specification is set. Spec-Kit's /plan + /tasks analog. Use after Skill(developing-the-spec). Also handles resumption against a partly-developed Plan. Phrasings like "develop the plan", "plan the implementation", "decompose into tasks", "map per-layer impact", "continue planning".
 allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep
 ---
 
