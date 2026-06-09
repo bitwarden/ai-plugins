@@ -1,0 +1,28 @@
+{
+  "name": "bitwarden-playwright-testing",
+  "version": "1.0.0",
+  "description": "Automated UI testing framework for Bitwarden web changes using Playwright",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-playwright-testing",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "testing",
+    "web",
+    "playwright",
+    "bitwarden",
+    "ui-testing",
+    "automation"
+  ],
+  "agents": [
+    "./agents/context-gatherer/AGENT.md",
+    "./agents/code-explorer/AGENT.md",
+    "./agents/service-mapper/AGENT.md",
+    "./agents/test-planner/AGENT.md",
+    "./agents/service-manager/AGENT.md",
+    "./agents/test-runner/AGENT.md",
+    "./agents/report-compiler/AGENT.md"
+  ]
+}
