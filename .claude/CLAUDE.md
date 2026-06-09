@@ -84,10 +84,10 @@ These run against any file in the repo, not just plugin changes, and are enforce
 
 ```bash
 # Check prettier formatting and cspell dictionary
-npm run lint
+pnpm run lint
 
 # Auto-fix prettier formatting issues
-npm run format
+pnpm run format
 ```
 
 If new domain-specific terms trip cspell, add them to `.cspell.json`. For deliberate test-fixture strings, use inline `// cspell:ignore <word>` comments rather than polluting the dictionary.

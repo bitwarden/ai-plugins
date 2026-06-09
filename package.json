@@ -8,6 +8,7 @@
   },
   "author": "Bitwarden Inc. <hello@bitwarden.com> (https://bitwarden.com)",
   "license": "SEE LICENSE IN LICENSE.txt",
+  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916",
   "bugs": {
     "url": "https://github.com/bitwarden/ai-plugins/issues"
   },
@@ -23,9 +24,16 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint": "npm run lint:prettier && npm run lint:spelling",
+    "lint": "pnpm run lint:prettier && pnpm run lint:spelling",
     "lint:prettier": "prettier --check .",
     "lint:spelling": "cspell lint --no-progress --no-summary --gitignore '**'",
     "format": "prettier --write ."
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.5.2",
+      "onFail": "error"
+    }
   }
 }
