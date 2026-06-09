@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `agents/AGENT.md` — Cross-Plugin Integration references updated to track the `bitwarden-delivery-tools` 2.0.0 reorganization. The monolithic `writing-tech-breakdowns` skill was replaced with five phase-scoped skills: `starting-a-tech-breakdown`, `understanding-the-work`, `developing-the-spec`, `developing-the-plan`, and `syncing-tasks-with-jira`.
+- `agents/AGENT.md` — Cross-Plugin Integration references updated to track the `bitwarden-delivery-tools` 2.0.0 reorganization. The monolithic `writing-tech-breakdowns` skill was replaced with four phase-scoped skills: `starting-a-tech-breakdown`, `developing-the-spec`, `developing-the-plan`, and `syncing-tasks-with-jira`.
 
 ## [2.3.0] - 2026-05-19
 

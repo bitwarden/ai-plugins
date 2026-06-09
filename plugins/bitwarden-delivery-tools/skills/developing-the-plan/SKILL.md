@@ -15,7 +15,7 @@ The next skill is `Skill(syncing-tasks-with-jira)` (when the team is ready to cr
 <HARD-GATE>
 Do NOT capture Plan or Tasks content if either condition holds:
 - Specification is empty or partial — return to `Skill(developing-the-spec)` to finish it. The Plan needs the Spec as its anchor; without one, the Plan has no constraint to design against.
-- Open design questions remain in the Clarifications Log — return to `Skill(understanding-the-work)` to resolve them first.
+- Open design questions remain in the Clarifications Log — return to `Skill(developing-the-spec)` to resolve them first.
 
 A Plan written against an unstable Spec or unresolved questions reads as decisions; the author then has to rewrite when the assumptions get challenged at signoff.
 </HARD-GATE>
@@ -65,7 +65,7 @@ Create a task for each phase as you start it (`TaskCreate`), mark it in progress
 Read the breakdown in full and verify both gates pass:
 
 1. **Specification filled?** If empty or partial, redirect to `Skill(developing-the-spec)`.
-2. **Open clarifications resolved?** If `Open` items exist, redirect to `Skill(understanding-the-work)`.
+2. **Open clarifications resolved?** If `Open` items exist, redirect to `Skill(developing-the-spec)`.
 
 If both gates pass, triage which activities (below) are complete and which remain. Continue with the next unfinished one.
 
@@ -161,7 +161,7 @@ Also list the repos the breakdown touches — the `Repos affected` list anchors 
 
 #### 7. Curate the Clarifications Log
 
-`Skill(understanding-the-work)` Phase 2 captured Q-and-A liberally, including drafting micro-decisions. The Log is reviewer-facing — by `Proposed`, cross-team reviewers and QA will read it expecting design substance, not drafting transcript. Walk the user through each entry and decide whether to **keep** or **prune**:
+`Skill(developing-the-spec)` Phase 2 captured Q-and-A liberally, including drafting micro-decisions. The Log is reviewer-facing — by `Proposed`, cross-team reviewers and QA will read it expecting design substance, not drafting transcript. Walk the user through each entry and decide whether to **keep** or **prune**:
 
 - **Keep** — entries that (a) shaped Specification or Plan content, (b) document a tradeoff someone else might revisit ("we chose X over Y because Z"), (c) name a compatibility decision or interface choice another team relies on, or (d) remain genuinely `Open`.
 - **Prune** — entries that are drafting trivia: slug or naming bikeshedding, decisions about which section to put something in, items that were `Open` but turned out not to matter once the design firmed up. Delete the entry entirely.
@@ -172,7 +172,7 @@ Curation is a judgment call. If unsure, keep — the cost of an extra Resolved r
 
 Re-read Specification and Plan with the question _"what does a reviewer need to know that I haven't said?"_ Add gaps as `Open` entries in the Clarifications Log or revise the affected sections. New `Open` entries surfaced here are by definition material — they do not need curation.
 
-If the clarify pass surfaces enough Open items that the design isn't really resolved, route back to `Skill(understanding-the-work)`. The HARD-GATE applies retroactively.
+If the clarify pass surfaces enough Open items that the design isn't really resolved, route back to `Skill(developing-the-spec)`. The HARD-GATE applies retroactively.
 
 ## Output
 

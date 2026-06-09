@@ -198,7 +198,7 @@ Reply "go" to proceed, or flag specific Task numbers to discuss.
 
 #### Step 2: Resolve flagged rows one at a time
 
-Same one-at-a-time discipline as `Skill(understanding-the-work)`'s Phase 2 question resolution. For each flagged row:
+Same one-at-a-time discipline as `Skill(developing-the-spec)`'s Phase 2 question resolution. For each flagged row:
 
 1. Show the full diff (every field side-by-side) and the proposed action
 2. Ask which side is correct or what to change
