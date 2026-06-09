@@ -1,6 +1,6 @@
 # Bitwarden Delivery Tools
 
-Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and chasing cross-team signoffs, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through starting and developing Tech Breakdowns and syncing their Tasks sections with Jira, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
 
 ## Overview
 
@@ -25,10 +25,12 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Technical design
 
-| Skill                               | Triggers                                                           | Purpose                                                                                                                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting Parts 1, 2, 4, 5, 6 of Bitwarden's Tech Breakdown Template plus the full status lifecycle (IN PLANNING → IN PROGRESS → PROPOSED → ACCEPTED → COMPLETE / REJECTED) |
-| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Part 3 signoff table, cross-team checklist, and the completion-communication workflow that closes a breakdown                                                              |
+| Skill                       | Triggers                                                                                                            | Purpose                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `starting-a-tech-breakdown` | "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file"                               | Set up a new Tech Breakdown file in `bitwarden/tech-breakdowns`: gather context from the user, copy the template, fill the Status block. Stops at status `In Planning`.                                                                                                                                                                     |
+| `developing-the-spec`       | "understand the work", "resolve open questions", "write the spec", "develop the specification", "Spec Alternatives" | Resolve open design questions one at a time with concrete options, then capture what's being built into the Specification section. Spec-Kit's `/specify` analog. Articulate scope, then consider Spec Alternatives (is there a smaller change that delivers most of the value?).                                                            |
+| `developing-the-plan`       | "develop the plan", "plan the implementation", "decompose into tasks", "map per-layer impact"                       | Develop the Plan and Tasks once the Specification is set. Spec-Kit's `/plan` + `/tasks` analog. Eight activities: Plan Alternatives, per-layer impact, Tasks decomposition with the 10-task heuristic, in-flight collision scan, cross-team impact identification (depth + churn), Agent Context, Clarifications curation, AI clarify pass. |
+| `syncing-tasks-with-jira`   | "sync the Jira stories with the breakdown", "create stories from the breakdown", "reconcile"                        | Keep the Tasks section and its Jira stories in sync — initial creation and ongoing bidirectional reconciliation. Bakes in Bitwarden field mapping (`Technical breakdown`, `Acceptance Criteria`, `Team`), stack-area prefix, dependency links.                                                                                              |
 
 ### Mechanics
 
@@ -64,11 +66,11 @@ We're handing off this framework to another team — walk me through the playboo
 ```
 
 ```
-Start a Tech Breakdown for this feature — walk me through the scope checklist
+Start a Tech Breakdown for this feature
 ```
 
 ```
-The breakdown is at PROPOSED — who needs to sign off and how do I chase them?
+Sync the breakdown's Tasks section with Jira
 ```
 
 ```
