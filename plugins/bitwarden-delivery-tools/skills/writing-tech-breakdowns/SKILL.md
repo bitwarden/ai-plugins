@@ -1,6 +1,6 @@
 ---
 name: writing-tech-breakdowns
-description: Draft engineering work breakdowns following the Bitwarden Tech Breakdown template. Use when starting a new tech breakdown, filling in the scope checklist, drafting specification child pages, capturing open questions, or moving the doc between status states (IN PLANNING / IN PROGRESS / PROPOSED / ACCEPTED / COMPLETE).
+description: DEPRECATED — superseded by `starting-the-breakdown` and `developing-the-breakdown-spec`. Retained for historical reference only. Drafted engineering work breakdowns following the Bitwarden Tech Breakdown template; covered starting a new tech breakdown, the scope checklist, specification child pages, open questions, and the status lifecycle (IN PLANNING / IN PROGRESS / PROPOSED / ACCEPTED / COMPLETE).
 allowed-tools: Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
