@@ -21,7 +21,7 @@ Determine review mode from the invocation:
 
 ## Security Review Process
 
-**Model selection:** If `--model` is specified, use that model for all agents. Otherwise, default to `opus`.
+**Model selection:** If `--model` is specified, use that model for all agents. Otherwise, default to `fable`. Note: Fable 5 carries built-in safeguards for high-risk domains (including cybersecurity) and falls back to Claude Opus 4.8 automatically when they trigger — the authorized-engagement framing required in step 2 keeps this defensive review on-task.
 
 Execute these steps in order. Do not skip, reorder, or combine steps.
 

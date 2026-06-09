@@ -5,6 +5,14 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-06-09
+
+### Changed
+
+- Switched the default model from Claude Opus to **Claude Fable 5** (`fable`), Anthropic's Mythos-class model released 2026-06-09 with stronger software-engineering and security-analysis capabilities.
+  - `bitwarden-security-engineer` agent: `model` is now `fable`.
+  - `perform-security-review` skill: the security-review agents now default to `fable` (the `--model` override is unchanged). Documented that Fable 5's built-in cybersecurity safeguards fall back to Claude Opus 4.8 automatically when triggered, so authorized defensive reviews degrade gracefully rather than refusing.
+
 ## [1.2.0] - 2026-05-08
 
 ### Added
