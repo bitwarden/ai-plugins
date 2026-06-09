@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `writing-tech-breakdowns` marked **obsolete** in the README, superseded by `starting-the-breakdown` and `developing-the-breakdown-spec`. The skill remains available but future work will fold remaining pieces into successor skills referencing the `bitwarden/tech-breakdowns` document.
+- `writing-tech-breakdowns` marked **obsolete** in the README and via a deprecation banner at the top of its `SKILL.md` so the deprecation surfaces at activation time. Superseded by `starting-the-breakdown` and `developing-the-breakdown-spec`; the skill remains available but future work will fold remaining pieces into successor skills referencing the `bitwarden/tech-breakdowns` document.
 
 ## [1.3.0] - 2026-05-20
 

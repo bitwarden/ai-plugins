@@ -1,7 +1,7 @@
 ---
 name: developing-the-breakdown-spec
 description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Spec-Kit's /specify analog. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Phrasings like "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
-allowed-tools: Skill, Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion
+allowed-tools: Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion
 ---
 
 # Developing the Spec
@@ -27,7 +27,7 @@ Make sure the user creates an empty Tech Breakdown document. If there isn't one,
 
 ## Phases
 
-Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. If resuming, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing.
+Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. If resuming, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full phase + decision graph, including the resume entry and the gaps-block stop condition.
 
 ### Phase 1: Gather context
 

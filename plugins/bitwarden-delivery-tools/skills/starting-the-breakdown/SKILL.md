@@ -1,6 +1,6 @@
 ---
 name: starting-the-breakdown
-description: Set up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, copies the template, and fills the Status block.
+description: Sets up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, copies the template, and fills the Status block.
 allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion
 ---
 
@@ -31,7 +31,7 @@ Create a task for each phase as you start it (`TaskCreate`), mark it in progress
 
 ### Phase 1: Gather context from the user
 
-Ask the user for each of these. Do not assume defaults; an empty answer is a valid answer.
+Ask the user for each of these. All four are required by the HARD-GATE; if any is missing, prompt for it before continuing.
 
 - **Jira key.** The epic, task, or story this breakdown corresponds to.
 - **Summary.** One-line description of the work being broken down.
@@ -56,4 +56,4 @@ Produce a short summary and surface it to the user before continuing:
 
 ## Output
 
-When both phases are complete, tell the user the path to the new file.
+When all phases are complete, tell the user the path to the new file.
