@@ -1,16 +1,14 @@
 ---
 name: starting-a-tech-breakdown
 description: Set up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user (initiative epic, PRD, Slack threads, PoC, or none), copies the template, and fills the Status block. Stops at status `In Planning`.
-allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
+allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep
 ---
 
 # Starting a Tech Breakdown
 
 ## Overview
 
-Help the user set up a new Tech Breakdown file with enough captured context that the design work can start from solid ground. This skill stops at "file created, status `In Planning`." Developing and capturing the design is `Skill(doing-a-tech-breakdown)`; later status transitions are their own skills.
-
-The framework and policy behind this process (what a breakdown is, the status lifecycle, the upstream paths into the lifecycle) lives on the Confluence page **Tech Breakdowns: Process and Framework**. This skill operates inside that framework; it does not re-explain it.
+Help the user set up a new Tech Breakdown file with enough captured context that the design work can start from solid ground. This skill stops at "file created, status `In Planning`." Understanding the work is `Skill(understanding-the-work)`; writing the Spec is `Skill(developing-the-spec)`; developing the Plan is `Skill(developing-the-plan)`; later status transitions are their own skills.
 
 <HARD-GATE>
 Do NOT create the breakdown file until both are confirmed with the user:
@@ -63,12 +61,12 @@ When both phases are complete, tell the user:
 
 - The path to the new file.
 - The context confirmed in Phase 1 (initiative path with named owner, or team-scoped — whatever the user confirmed).
-- Next step: invoke `Skill(doing-a-tech-breakdown)` to develop the design and capture the understanding in the breakdown sections. The in-flight collision scan runs inside that skill, once Plan and Tasks have produced a concrete file and module list.
+- Next step: invoke `Skill(understanding-the-work)` to orient on the change and resolve open design questions. After that, `Skill(developing-the-spec)` writes the Specification and `Skill(developing-the-plan)` develops the Plan and Tasks (with the in-flight collision scan and cross-team impact identification).
 
 ## What this skill does NOT do
 
-- **It does not develop or capture design content.** Specification, Plan, Tasks, Clarifications Log, and Agent Context are owned by `Skill(doing-a-tech-breakdown)`. Stop at "file created, status `In Planning`."
-- **It does not scan for collisions in the codebase.** Affected files are not known until drafting; a scan against the rough repo list is premature. The scan runs inside `Skill(doing-a-tech-breakdown)` after decomposition.
+- **It does not develop or capture design content.** Understanding the work, writing the Spec, and developing the Plan + Tasks are owned by `Skill(understanding-the-work)`, `Skill(developing-the-spec)`, and `Skill(developing-the-plan)` respectively. Stop at "file created, status `In Planning`."
+- **It does not scan for collisions in the codebase.** Affected files are not known until drafting; a scan against the rough repo list is premature. The scan runs inside `Skill(developing-the-plan)` after decomposition.
 - **It does not transition status past `In Planning`.** Move-to-Proposed, move-to-Accepted, and move-to-Complete are their own skills.
 - **It does not create Jira stories.** Stories come from the Tasks section once drafted; timing is a proposing- or accepting-skill concern (`Skill(syncing-tasks-with-jira)`).
 
@@ -82,4 +80,4 @@ When both phases are complete, tell the user:
 ## Reference
 
 - [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) — the breakdowns repo. Template at `templates/tech-breakdown.md`. Each team's in-flight work is under `<team>/`; completed work is under `<team>/complete/`.
-- `Skill(doing-a-tech-breakdown)` — what to invoke next.
+- `Skill(understanding-the-work)` — what to invoke next.

@@ -5,11 +5,11 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.1] - 2026-06-07
+## [2.3.1] - 2026-06-08
 
 ### Changed
 
-- `agents/AGENT.md` — updated Cross-Plugin Integration references to track the `bitwarden-delivery-tools` 2.0.0 reorganization. The monolithic `writing-tech-breakdowns` skill was replaced with phase-scoped `starting-a-tech-breakdown`, `doing-a-tech-breakdown`, and `syncing-tasks-with-jira`.
+- `agents/AGENT.md` — Cross-Plugin Integration references updated to track the `bitwarden-delivery-tools` 2.0.0 reorganization. The monolithic `writing-tech-breakdowns` skill was replaced with five phase-scoped skills: `starting-a-tech-breakdown`, `understanding-the-work`, `developing-the-spec`, `developing-the-plan`, and `syncing-tasks-with-jira`.
 
 ## [2.3.0] - 2026-05-19
 

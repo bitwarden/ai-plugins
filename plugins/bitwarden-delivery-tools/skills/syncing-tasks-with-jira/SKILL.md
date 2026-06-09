@@ -1,7 +1,7 @@
 ---
 name: syncing-tasks-with-jira
 description: Keep a Bitwarden Tech Breakdown's Tasks section and its Jira stories in sync — covers both initial creation (Tasks rows → new stories) and ongoing reconciliation (drift in either direction once stories exist). Reads the breakdown markdown file in bitwarden/tech-breakdowns, parses each Tasks row, queries the epic for existing stories, detects drift, presents a triage plan, confirms with the user, then delegates writes to whichever Jira authoring tool the engineer has (jira-cli, jira-manager, direct Atlassian MCP, or the Jira UI). Use at Proposed entry (first creation), at the Accepted gate (deferred creation or pre-gate reconciliation), or any time the Tasks section or a Jira story has materially changed. Phrasings like "sync the Jira stories with the breakdown", "create stories from the breakdown", "reconcile Tasks with Jira", "update Jira to match the breakdown", "pull refinement back into the breakdown".
-allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_jira_issue_type_meta_with_fields
+allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep
 ---
 
 # Syncing Tasks with Jira
@@ -21,7 +21,12 @@ Run this skill at:
 - **The `Accepted` gate** — either deferred first creation (for teams that refine on the breakdown) or pre-gate reconciliation before status flips
 - **Any time after material edits** — to either the Tasks section or a Jira story, so the pair stays consistent
 
-Sync policy (which edits require sync, which trigger lifecycle resets) lives on the Confluence page **Tech Breakdowns: Process and Framework**, under "Keeping Tasks and Jira stories in sync." This skill operationalizes that policy.
+Edits fall into four tiers that determine what syncs and what triggers a lifecycle reset:
+
+- **Trivial** (prose tightening, formatting, wording with no scope change) — breakdown only; no Jira sync.
+- **Substantive** (scope change, AC change, file-path change, dependency add/remove, owner change) — update both the breakdown PR and the matching Jira story in the same change.
+- **Significant** (anything a sprint team picking up the story would re-evaluate against) — sync both sides plus a summary comment on the Jira story linking back to the breakdown PR.
+- **Cross-team-affecting** (changes an interface another team already signed off on) — trigger the lifecycle reset: move the breakdown back to `Proposed` and re-run affected signoffs before merging. The Jira-side sync is downstream of the lifecycle reset.
 
 <HARD-GATE>
 Do NOT create, update, or pull any changes until the user has confirmed the full triage plan. Single-row-at-a-time writes without confirmation produce mismatched pairs that are expensive to undo, and re-deleting stories that should not have been created leaves orphan keys in Jira history.
@@ -175,7 +180,7 @@ Reply "go" to proceed, or flag specific Task numbers to discuss.
 
 #### Step 2: Resolve flagged rows one at a time
 
-Same one-at-a-time discipline as `Skill(doing-a-tech-breakdown)`'s Phase 2 question resolution. For each flagged row:
+Same one-at-a-time discipline as `Skill(understanding-the-work)`'s Phase 2 question resolution. For each flagged row:
 
 1. Show the full diff (every field side-by-side) and the proposed action
 2. Ask which side is correct or what to change
@@ -326,6 +331,6 @@ Surface at the end of Phase 5 with the lifecycle-reset flag. Recommend moving th
 ## Reference
 
 - The breakdown template at `bitwarden/tech-breakdowns/templates/tech-breakdown.md` — Tasks-section column conventions.
-- `Skill(doing-a-tech-breakdown)` — what produces and refines the Tasks rows this skill consumes.
+- `Skill(developing-the-plan)` — what produces and refines the Tasks rows this skill consumes.
 - `Skill(jira-cli)` / `Skill(jira-manager)` — typical Jira authoring tools this skill delegates writes to.
 - `Skill(committing-changes)` — for committing the sync-back update to the breakdown file.
