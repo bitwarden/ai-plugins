@@ -23,7 +23,7 @@ digraph developing_the_breakdown_spec {
   Alternatives      [shape=box,     label="Phase 4: Spec Alternatives"];
   SpecReady         [shape=diamond, label="Spec + Alternatives\ncomplete?"];
   Stop              [shape=ellipse, label="Stop:\nclose gaps before\nproceeding"];
-  Done              [shape=ellipse, label="Done →\nSkill(developing-the-plan)"];
+  Done              [shape=ellipse, label="Done →\nDevelop the Plan"];
 
   Start         -> EntryMode;
   EntryMode     -> GatherContext [label="fresh"];
