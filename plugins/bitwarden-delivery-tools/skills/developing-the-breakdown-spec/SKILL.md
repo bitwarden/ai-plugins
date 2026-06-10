@@ -33,12 +33,14 @@ Create a task for each phase as you start it (`TaskCreate`), mark it in progress
 
 Ask the user for each. Don't assume defaults; an empty answer is valid.
 
-- The Jira issue and any related or child tickets.
-- The PRD or Architecture Plan, if any.
-- A PoC branch or relevant code, if any.
-- Slack threads, meeting notes, or prior design decisions.
+- **The Jira issue and any related or child tickets.** Read the description, acceptance criteria, comments, and any linked tickets in full. Do not paraphrase from the issue title alone.
+- **The PRD or Architecture Plan, if any.** Read every linked Confluence page in full and follow inline links to related pages.
+- **A PoC branch or relevant code, if any.** Check it out or read it on GitHub. Verify behavior against the code, not against descriptions.
+- **Slack threads, meeting notes, or prior design decisions.** Read whatever the user references directly.
 
-Fetch and read everything. Where there is code, read it; don't summarize from descriptions.
+**Read what you reference; never proceed on a description alone.** The Jira tickets and Confluence pages the user named are the source of truth for Phase 1's context gathering.
+
+**If a source cannot be read, stop and surface this to the user explicitly**. Name the source, name the error, and ask how to proceed. Do not silently work around a missing source.
 
 Produce and surface a three-section triage before continuing:
 
