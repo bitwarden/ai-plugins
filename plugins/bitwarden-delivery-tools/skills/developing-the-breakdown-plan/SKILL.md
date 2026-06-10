@@ -1,6 +1,6 @@
 ---
 name: developing-the-breakdown-plan
-description: Develop the Plan for a Bitwarden Tech Breakdown after the Specification is filled — technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Also handles resumption against a partly-developed Plan. Use this whenever the user references the Plan section of a tech breakdown, mentions mapping per-layer impact, scanning for in-flight work, identifying which teams are affected, or wants to take a partly-drafted breakdown to reviewer-ready. Phrasings like "develop the plan", "draft the implementation plan", "plan the implementation", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts", "continue planning".
+description: Develop the Plan section of a Bitwarden Tech Breakdown after the Specification is filled — technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption against a partly-developed Plan. Triggers: "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts", "continue planning", "plan the breakdown".
 allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQuestion
 ---
 
@@ -9,12 +9,12 @@ allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQu
 ## Overview
 
 Assist a Bitwarden engineer in developing the HOW a change will be built, anchored to the already-defined Specification section of the breakdown document. The skill iterates on a technical architecture with the user, walks the change against every part of our technical stack to surface impact, scans for in-flight work that could collide, identifies and characterizes every cross-team impact, and runs a final self-review pass against the breakdown template.
-
 <HARD-GATE>
 Do NOT capture Plan content if either condition holds:
+
 - Specification is empty or partial — prompt the user to define the Specification before continuing. The Plan needs the Spec as its anchor; without one, the Plan has no constraint to design against.
 - Open design questions remain in the Clarifications Log. Instruct the user to resolve them first.
-</HARD-GATE>
+  </HARD-GATE>
 
 ## Key Principles
 
