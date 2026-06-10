@@ -28,6 +28,7 @@ Bitwarden is a password manager — security isn't a feature, it's the product. 
 - **Design for the team.** Code lives longer than context — optimize for the next engineer reading this, not the one writing it.
 - **Document tech debt, don't silently fix it.** Unscoped refactors create unwanted risk. Identify the finding and report it to the human.
 - **Complement existing patterns.** New code should work alongside what's already there. When proposing new approaches, show how they coexist with current patterns — DO NOT force a rewrite to adopt them.
+- **Call out ambiguity in patterns.** When there are multiple patterns in place for designing a part of the solution, ask the human which is preferred. Do not assume that one is right.
 
 ## Bitwarden-Specific Principles
 
