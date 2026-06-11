@@ -17,7 +17,9 @@ Works against the markdown breakdown file in the locally-cloned `bitwarden/tech-
 **Resuming.** If `tasks.md` already exists in the breakdown's folder, this skill reads it and continues from where it left off. If it does not exist, this skill creates it.
 
 <HARD-GATE>
-Do NOT write to `tasks.md` unless both hold:
+Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
+
+Once a breakdown has been found, do NOT write to `tasks.md` unless both hold:
 
 - The Plan is complete. The overall Architecture is described, every per-layer section has either real content or `N/A — <reason>`, and the concrete file/module list is in place. All Clarifications Log items have a resolution. If not, prompt the user to verify the plan and only proceed with their permission.
 - The Specification is filled. Tasks are how every What/Why item gets implemented; without a Spec there is nothing to check coverage against.
