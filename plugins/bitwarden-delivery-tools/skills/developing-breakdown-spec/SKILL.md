@@ -1,6 +1,6 @@
 ---
 name: developing-breakdown-spec
-description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Spec-Kit's /specify analog. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Phrasings like "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
+description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Phrasings like "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
 allowed-tools: Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
@@ -8,10 +8,10 @@ allowed-tools: Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion, mcp__plugin_
 
 ## Overview
 
-Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against the markdown breakdown file in the locally-cloned `bitwarden/tech-breakdowns` repo.
+Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against `breakdown.md` inside a per-breakdown folder under the locally-cloned `bitwarden/tech-breakdowns` repo: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
 
 <HARD-GATE>
-Make sure the user creates an empty Tech Breakdown document. If there isn't one, prompt them to create it.
+Make sure a breakdown folder exists with `breakdown.md` inside it. If there isn't one, ask the user to create it, or offer to do so by invoking `Skill(starting-breakdown)`.
 </HARD-GATE>
 
 ## Key Principles
