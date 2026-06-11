@@ -9,6 +9,7 @@ allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQu
 ## Overview
 
 Assist a Bitwarden engineer in developing the HOW a change will be built, anchored to the already-defined Specification section of the breakdown document. The skill iterates on a technical architecture with the user, walks the change against every part of our technical stack to surface impact, scans for in-flight work that could collide, identifies and characterizes every cross-team impact, and runs a final self-review pass against the breakdown template.
+
 <HARD-GATE>
 Do NOT capture Plan content if either condition holds:
 
@@ -35,13 +36,13 @@ Work each question one at a time. For each:
 4. Wait for the user's decision.
 5. Record it in the Clarifications Log as `Resolved`, with owner and date.
 
-## Phases
+## Workflow
 
-Ask the user up front: starting a new Plan, or continuing a Plan? If continuing, start with Phase 1. If starting new, start with Phase 2.
+Ask the user up front: starting a new Plan, or continuing one? If continuing, work through **Resuming a Plan** first, then **Developing the Plan**. If starting new, go straight to **Developing the Plan**.
 
-Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. If continuing, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full phase + decision graph.
+Create a task for each section as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. If resuming, use `AskUserQuestion` to confirm which activity to pick up at and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full decision graph.
 
-### Phase 1: Continuing a Plan
+### Resuming a Plan
 
 Read the breakdown in full and verify both gates pass:
 
@@ -50,7 +51,7 @@ Read the breakdown in full and verify both gates pass:
 
 If both gates pass, triage which activities (below) are complete and which remain. Continue with the next unfinished one.
 
-### Phase 2: Developing the Plan
+### Developing the Plan
 
 Work through these activities. Order is sequential — each depends on the previous — and the self-review at the end is explicitly the last step.
 
@@ -114,14 +115,7 @@ Per signoff row:
 
 _Captured in **Cross-team engagement** (Consuming other teams' APIs, Changes required in other teams' code, Cross-team sequencing & ordering, plus the signoff table and Coordination notes)._
 
-**Worked example.** Auth wants to add a new push-notification type to alert clients when a security key is registered. Walking the impact:
-
-- **(A) Ownership crossing**: the push-notification dispatch lives under Platform's `CODEOWNERS`. Yes, this crosses.
-- **(B1) Domain-overlap depth**: _Mid_ — Auth needs to follow Platform's established push-type contract (enum extension, payload shape, client-side handler registration). No deep invariants touched.
-- **(B2) Owning-team churn**: grep `bitwarden/tech-breakdowns/platform/` for `push-notification` returns one in-flight breakdown about delivery retry semantics, but not about the push-type registry. `git log --since="3 months ago" -- src/notifications/` shows two recent merges, both bug fixes. No material churn in the area Auth is touching.
-- **(C) Captured as**: Owning team = Platform; Interface = "Add new push type `SECURITY_KEY_REGISTERED` to the existing registry; payload follows the standard envelope (Mid depth, no churn in this area)"; Associated breakdown = link to Platform's retry-semantics breakdown for context; Model and Signoff columns left empty. Add a Coordination note flagging the adjacent retry-semantics work in case sequencing matters.
-
-The Mid + no-churn cell typically points to a standard signoff row and a self-service PR by Auth — no proactive Slack alignment needed before review. If churn had been _Yes_, a Slack heads-up to Platform's public channel would be the right call before drafting.
+For an end-to-end illustration of the (A) → (B) → (C) walk for one realistic impact, see `references/worked-example.md`.
 
 #### 5. Self-review the breakdown
 
