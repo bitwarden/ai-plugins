@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`developing-the-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled
+- **`developing-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled
 
 ## [1.4.0] - 2026-06-09
 

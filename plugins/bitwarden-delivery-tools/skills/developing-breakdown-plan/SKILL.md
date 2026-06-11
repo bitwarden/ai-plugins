@@ -1,5 +1,5 @@
 ---
-name: developing-the-breakdown-plan
+name: developing-breakdown-plan
 description: Develop the Plan section of a Bitwarden Tech Breakdown after the Specification is filled — technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption against a partly-developed Plan. Triggers: "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts", "continue planning", "plan the breakdown".
 allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQuestion
 ---

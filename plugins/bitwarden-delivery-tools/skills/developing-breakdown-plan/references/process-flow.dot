@@ -1,4 +1,4 @@
-// Process flow for Skill(developing-the-breakdown-plan).
+// Process flow for Skill(developing-breakdown-plan).
 // cspell:ignore Tpng rankdir fontname
 // Render with: dot -Tpng process-flow.dot -o process-flow.png
 //
