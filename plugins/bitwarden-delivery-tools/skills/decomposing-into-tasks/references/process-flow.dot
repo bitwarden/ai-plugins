@@ -1,0 +1,49 @@
+// Process flow for Skill(decomposing-into-tasks).
+// cspell:ignore Tpng rankdir fontname
+// Render with: dot -Tpng process-flow.dot -o process-flow.png
+//
+// Boxes are activities; diamonds are decision points; ellipses are terminal states.
+// Tasks live in a sibling `tasks.md` file next to the breakdown. If that file
+// already exists when the skill is invoked, the flow enters Phase 1 (resume);
+// otherwise it enters Phase 2 (fresh).
+
+digraph decomposing_into_tasks {
+  rankdir=TB;
+  node [fontname="Helvetica"];
+  edge [fontname="Helvetica"];
+
+  Start          [shape=ellipse, label="Start"];
+  Init           [shape=box,     label="Phase 0: Initialize\nResolve breakdown path\n(CLI arg, open file, or\nAskUserQuestion);\nderive tasks.md path"];
+  TasksExist     [shape=diamond, label="tasks.md already exists?"];
+  Triage         [shape=box,     label="Phase 1: Triage\nexisting rows in tasks.md;\nfind next incomplete"];
+  GatesPass      [shape=diamond, label="Plan complete\nand Spec filled?"];
+  StopGate       [shape=ellipse, label="Stop:\nsurface gaps;\nawait user permission"];
+  ProposeRow     [shape=box,     label="Phase 2:\nPropose next row\n(Owner, Affected, Blocked by,\nDepends on, Description,\nAC, Tech Breakdown)"];
+  RowOk          [shape=diamond, label="Row scoped and MECE?"];
+  AskUser        [shape=box,     label="AskUserQuestion:\nsplit / merge / scope"];
+  CaptureRow     [shape=box,     label="Append row to tasks.md"];
+  MoreRows       [shape=diamond, label="More units of\nchange in the Plan?"];
+  RowCountCheck  [shape=box,     label="Row count check\n(10-task heuristic;\nsoft prompt only)"];
+  SelfReview     [shape=box,     label="Phase 3: Self-review\n(placeholders,\nspec coverage,\ndependency sanity,\nstand-alone,\nowner attribution,\nMECE)"];
+  ReviewerReady  [shape=diamond, label="Reviewer-ready?"];
+  Done           [shape=ellipse, label="Phase 4: Output\ntasks.md ready at\n<breakdown-folder>/tasks.md"];
+
+  Start         -> Init;
+  Init          -> TasksExist;
+  TasksExist    -> Triage        [label="yes (resume)"];
+  TasksExist    -> GatesPass     [label="no (fresh)"];
+  Triage        -> GatesPass;
+  GatesPass     -> StopGate      [label="no"];
+  GatesPass     -> ProposeRow    [label="yes"];
+  ProposeRow    -> RowOk;
+  RowOk         -> AskUser       [label="no"];
+  AskUser       -> ProposeRow;
+  RowOk         -> CaptureRow    [label="yes"];
+  CaptureRow    -> MoreRows;
+  MoreRows      -> ProposeRow    [label="yes"];
+  MoreRows      -> RowCountCheck [label="no"];
+  RowCountCheck -> SelfReview;
+  SelfReview    -> ReviewerReady;
+  ReviewerReady -> ProposeRow    [label="no, fix gaps"];
+  ReviewerReady -> Done          [label="yes"];
+}

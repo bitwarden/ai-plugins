@@ -33,6 +33,8 @@ Use `AskUserQuestion` for any ambiguities discovered during design - do not fill
 
 ### Phase 1: Continuing a Plan
 
+If the user provided a file in the command line, use that as the breakdown. If none was provided, prompt the user for the breakdown that they would like to continue.
+
 Read the breakdown in full and verify both gates pass:
 
 1. **Specification filled?** If empty or partial, instruct the user to complete the Specification so that the Plan can be accurate and complete.
@@ -79,12 +81,12 @@ Walk every cross-team impact this breakdown creates. For each impact, do three t
 
 1. **Domain-overlap depth** — _Surface_ (mechanical, well-documented patterns, no domain reasoning), _Mid_ (must follow established contracts, naming, error-handling conventions), _Deep_ (touches the owning team's core invariants, mental model, or design rationale).
 2. **Owning-team domain churn** — is the owning team actively reshaping the area? **Scan explicitly; don't guess.** Three surfaces:
-   - **In-flight breakdowns in the owning team's folder of `bitwarden/tech-breakdowns`**, excluding `**/complete/**`:
+   - **In-flight breakdowns in the owning team's folder of `bitwarden/tech-breakdowns`**, excluding `**/complete/**`. Each breakdown lives in `<team>/<JIRA-KEY>-<short-slug>/`; grep recurses through these folders catching both `breakdown.md` and any sibling `tasks.md`:
      ```
      grep -rli "<repo-name>" <owning-team>/ --include="*.md" --exclude-dir=complete
      grep -rli "<file-or-module-name>" <owning-team>/ --include="*.md" --exclude-dir=complete
      ```
-     Read candidate breakdowns' Tasks and Plan sections to confirm overlap rather than relying on grep matches alone.
+     Read candidate breakdowns' Plan sections (in `breakdown.md`) and the sibling `tasks.md` if present to confirm overlap rather than relying on grep matches alone.
    - **Open PRs from owning-team engineers in the affected repos**: `gh pr list -R bitwarden/<repo> --state open --json number,title,headRefName,files,author --limit 50`.
    - **Recent merged PRs** in the affected paths: `git log --since="3 months ago" -- <path>`. Recent material churn means conventions may not be stable.
 

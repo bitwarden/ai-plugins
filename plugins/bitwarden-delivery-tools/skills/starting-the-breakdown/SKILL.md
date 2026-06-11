@@ -1,6 +1,6 @@
 ---
 name: starting-the-breakdown
-description: Sets up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, copies the template, and fills the Status block.
+description: Sets up a new Bitwarden Tech Breakdown in the bitwarden/tech-breakdowns repo. Creates a per-breakdown folder (`<team>/<JIRA-KEY>-<short-slug>/`) containing `breakdown.md` from the template, so the future `tasks.md` and any specification artifacts can live alongside it. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, creates the folder, copies the template, and fills the Status block.
 allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
 ---
 
@@ -8,7 +8,7 @@ allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion, mcp__plugin_bitwar
 
 ## Overview
 
-Help the user set up a new Tech Breakdown file with enough captured context that the design work can start from solid ground. This skill stops at "file created, status `In Planning`."
+Help the user set up a new Tech Breakdown with enough captured context that the design work can start from solid ground. Each breakdown lives in its own folder under the team's directory: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. This skill stops at "folder created, `breakdown.md` written, status `In Planning`."
 
 <HARD-GATE>
 Do NOT create the breakdown file until all the following are confirmed with the user. Prompt the user for each if not provided.
@@ -43,17 +43,18 @@ Produce a short summary and surface it to the user before continuing:
 1. **Context found** — link to the Jira issue.
 2. Confirm the summary, team, and owner.
 
-### Phase 2: Create the file
+### Phase 2: Create the breakdown folder and file
 
 1. Confirm `bitwarden/tech-breakdowns` is cloned locally and on `main`. If not, clone or pull.
-2. Copy `templates/tech-breakdown.md` (from the `bitwarden/tech-breakdowns` clone) into `<team>/`. Do not edit the template itself.
-3. Confirm the slug with the user, then rename the copy: `<team>/<JIRA-KEY>-<short-slug>.md`. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim).
-4. Delete the template's preamble checklist at the top of the new file.
-5. Fill the Status block:
+2. **Confirm the slug** with the user before creating anything. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim). The full path will be `<team>/<JIRA-KEY>-<short-slug>/`.
+3. **Create the breakdown folder**: `<team>/<JIRA-KEY>-<short-slug>/`. This folder is the single home for everything tied to this breakdown — the breakdown itself, the future `tasks.md`, any sibling specification artifacts, PoC notes. Do not place breakdown files directly under `<team>/`.
+4. **Copy the template into the new folder as `breakdown.md`**: copy `templates/tech-breakdown.md` to `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. Do not edit the template itself.
+5. Delete the template's preamble checklist at the top of `breakdown.md`.
+6. Fill the Status block in `breakdown.md`:
    - `Status:` — `In Planning`
    - `Last substantive update:` — today's date + the literal note `initial draft`
    - `Active owner / contact:` — the specific human from Phase 1.
 
 ## Output
 
-When all phases are complete, tell the user the path to the new file.
+When all phases are complete, tell the user the path to the new folder and the breakdown file inside it: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.

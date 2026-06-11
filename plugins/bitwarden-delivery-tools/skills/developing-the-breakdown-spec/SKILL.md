@@ -8,10 +8,10 @@ allowed-tools: Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion, mcp__plugin_
 
 ## Overview
 
-Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against the markdown breakdown file in the locally-cloned `bitwarden/tech-breakdowns` repo.
+Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against `breakdown.md` inside a per-breakdown folder under the locally-cloned `bitwarden/tech-breakdowns` repo: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
 
 <HARD-GATE>
-Make sure the user creates an empty Tech Breakdown document. If there isn't one, prompt them to create it.
+Make sure a breakdown folder exists with `breakdown.md` inside it. If there isn't one, ask the user to create it; do not create the folder or file here.
 </HARD-GATE>
 
 ## Key Principles
