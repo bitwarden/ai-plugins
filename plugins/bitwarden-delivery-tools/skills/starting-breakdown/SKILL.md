@@ -1,5 +1,5 @@
 ---
-name: starting-the-breakdown
+name: starting-breakdown
 description: Sets up a new Bitwarden Tech Breakdown file in the bitwarden/tech-breakdowns repo. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, copies the template, and fills the Status block.
 allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
 ---
