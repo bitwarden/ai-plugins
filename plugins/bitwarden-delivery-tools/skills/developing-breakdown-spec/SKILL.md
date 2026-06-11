@@ -11,7 +11,9 @@ allowed-tools: Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion, mcp__plugin_
 Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against `breakdown.md` inside a per-breakdown folder under the locally-cloned `bitwarden/tech-breakdowns` repo: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
 
 <HARD-GATE>
-Make sure a breakdown folder exists with `breakdown.md` inside it. If there isn't one, ask the user to create it, or offer to do so by invoking `Skill(starting-breakdown)`.
+Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
+
+Verify the folder exists with `breakdown.md` inside it. If there isn't one, ask the user to create it, or offer to do so by invoking `Skill(starting-breakdown)`.
 </HARD-GATE>
 
 ## Key Principles
