@@ -11,7 +11,9 @@ allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQu
 Assist a Bitwarden engineer in developing the HOW a change will be built, anchored to the already-defined Specification section of the breakdown document. The skill iterates on a technical architecture with the user, walks the change against every part of our technical stack to surface impact, scans for in-flight work that could collide, identifies and characterizes every cross-team impact, and runs a final self-review pass against the breakdown template.
 
 <HARD-GATE>
-Do NOT continue to develop the Plan if either condition holds:
+Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
+
+Once a breakdown is found, do NOT continue to develop the Plan if either condition holds:
 
 - Specification is empty or partial — prompt the user to define the Specification before continuing. The Plan needs the Spec as its anchor; without one, the Plan has no constraint to design against.
 - Open design questions remain in the Clarifications Log. Instruct the user to resolve them first.
