@@ -11,7 +11,7 @@ allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQu
 Assist a Bitwarden engineer in developing the HOW a change will be built, anchored to the already-defined Specification section of the breakdown document. The skill iterates on a technical architecture with the user, walks the change against every part of our technical stack to surface impact, scans for in-flight work that could collide, identifies and characterizes every cross-team impact, and runs a final self-review pass against the breakdown template.
 
 <HARD-GATE>
-Do NOT capture Plan content if either condition holds:
+Do NOT continue to develop the Plan if either condition holds:
 
 - Specification is empty or partial — prompt the user to define the Specification before continuing. The Plan needs the Spec as its anchor; without one, the Plan has no constraint to design against.
 - Open design questions remain in the Clarifications Log. Instruct the user to resolve them first.
