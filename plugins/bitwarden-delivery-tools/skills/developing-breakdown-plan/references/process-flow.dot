@@ -1,0 +1,41 @@
+// Process flow for Skill(developing-breakdown-plan).
+// cspell:ignore Tpng rankdir fontname
+// Render with: dot -Tpng process-flow.dot -o process-flow.png
+//
+// Boxes are activities; diamonds are decision points; ellipses are terminal states.
+// The "resume" entry point re-enters the flow at the Triage step after re-reading
+// the breakdown file and re-fetching external sources (Jira, PRD, PoC); the user
+// picks up from whichever activity remains unfinished.
+
+digraph developing_the_breakdown_plan {
+  rankdir=TB;
+  node [fontname="Helvetica"];
+  edge [fontname="Helvetica"];
+
+  Start          [shape=ellipse, label="Start"];
+  EntryMode      [shape=diamond, label="Fresh or resume?"];
+  Triage         [shape=box,     label="Triage:\nwhich activities are\ncomplete vs. remaining"];
+  GatesPass      [shape=diamond, label="Spec filled and\nclarifications resolved?"];
+  StopGate       [shape=ellipse, label="Stop:\nreturn to Spec or\nresolve clarifications"];
+  Architecture   [shape=box,     label="Activity 1:\nTechnical architecture\n(invoke architecting-solutions)"];
+  LayerImpact    [shape=box,     label="Activity 2:\nMap per-layer impact"];
+  InFlight       [shape=box,     label="Activity 3:\nScan for in-flight work"];
+  CrossTeam      [shape=box,     label="Activity 4:\nIdentify cross-team impacts"];
+  SelfReview     [shape=box,     label="Activity 5:\nSelf-review\n(template coverage,\nspec coverage,\nplaceholders, consistency)"];
+  ReviewerReady  [shape=diamond, label="Reviewer-ready?"];
+  Done           [shape=ellipse, label="Done →\nteam-internal review,\nthen move to Proposed"];
+
+  Start         -> EntryMode;
+  EntryMode     -> GatesPass     [label="fresh"];
+  EntryMode     -> Triage        [label="resume\n(re-read file,\nre-fetch sources)"];
+  Triage        -> GatesPass;
+  GatesPass     -> StopGate      [label="no"];
+  GatesPass     -> Architecture  [label="yes"];
+  Architecture  -> LayerImpact;
+  LayerImpact   -> InFlight;
+  InFlight      -> CrossTeam;
+  CrossTeam     -> SelfReview;
+  SelfReview    -> ReviewerReady;
+  ReviewerReady -> Architecture  [label="no, next\nunfinished activity"];
+  ReviewerReady -> Done          [label="yes"];
+}

@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-delivery-tools",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and cross-team signoffs, commits, pull requests, preflight checks, and change labeling.",
   "author": {
     "name": "Bitwarden",
