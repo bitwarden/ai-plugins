@@ -11,7 +11,7 @@ allowed-tools: Read, Edit, Glob, Grep, Skill, TaskCreate, AskUserQuestion, mcp__
 Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against `breakdown.md` inside a per-breakdown folder under the locally-cloned `bitwarden/tech-breakdowns` repo: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
 
 <HARD-GATE>
-Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
+Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. Use the pattern `**/*<JIRA-KEY>*/breakdown.md` when given a Jira key, or `<team>/*<slug>*/breakdown.md` when given a team/slug, so resolution is deterministic across runs. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
 
 Verify the folder exists with `breakdown.md` inside it. If there isn't one, ask the user to create it, or offer to do so by invoking `Skill(starting-breakdown)`.
 </HARD-GATE>
@@ -29,7 +29,7 @@ Verify the folder exists with `breakdown.md` inside it. If there isn't one, ask 
 
 ## Phases
 
-Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. If resuming, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full phase + decision graph, including the resume entry and the gaps-block stop condition.
+Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. `TaskCreate` is a deferred Claude Code tool; if it is not already available in the session, load it via `ToolSearch` with `select:TaskCreate` before calling it. If resuming, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full phase + decision graph, including the resume entry and the gaps-block stop condition.
 
 ### Phase 1: Gather context
 
