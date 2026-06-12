@@ -1,7 +1,7 @@
 ---
 name: decomposing-into-tasks
-description: Decompose a breakdown Plan into a tasks.md document with one entry per future Jira work item. Also handles resumption against a partly-drafted task list. Phrasings like "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table", "continue task decomposition".
-allowed-tools: Skill, Read, Edit, Write, Bash, Grep, Glob, TaskCreate, AskUserQuestion
+description: Decompose a breakdown Plan into a tasks.md document with one entry per future Jira work item. Also handles resumption against a partly-drafted task list. Triggers: "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table", "continue task decomposition".
+allowed-tools: Skill, Read, Edit, Write, Grep, Glob, TaskCreate, AskUserQuestion
 ---
 
 # Decomposing into Tasks
@@ -17,7 +17,8 @@ Once a breakdown has been found, do NOT write to `tasks.md` unless both hold:
 
 - The Plan is complete. The overall Architecture is described, every per-layer section has either real content or `N/A — <reason>`, and the concrete file/module list is in place. All Clarifications Log items have a resolution. If not, prompt the user to verify the plan and only proceed with their permission.
 - The Specification is filled. Tasks are how every What/Why item gets implemented; without a Spec there is nothing to check coverage against.
-  </HARD-GATE>
+
+</HARD-GATE>
 
 ## Key Principles
 
@@ -43,7 +44,7 @@ Surface the resolved paths to the user once before moving on: _"Working against 
 
 Walk the Plan from multiple dimensions to gather full context before decomposing:
 
-1. The overall Architecture, to understand broadly what what the implementation is across all layers of the application.
+1. The overall Architecture, to understand broadly what the implementation is across all layers of the application.
 2. The per-layer breakdown, for details as to how the plan applies in each layer of our application.
 3. The external inputs around security, deployment, and testing strategies.
 4. Any PoCs attached in the breakdown. Read those into context as well and use any code in the PoC to inform your task details.
@@ -58,7 +59,7 @@ When decomposing into tasks, make sure that the solution is **MECE**:
 - **Mutually exclusive**: The work does not overlap.
 - **Collectively exhaustive**: All work described in the Plan is captured in a task, and the tasks satisfies all the requirements of the Spec.
 
-If you encounter gaps that the tasks will not fill, or duplicative work between tasks. Attempt to resolve the gap by reframing the task split. If that cannot be done, use `AskUserQuestion` to present the problem and ask user input.
+If you encounter gaps that the tasks will not fill, or duplicative work between tasks, attempt to resolve the gap by reframing the task split. If that cannot be done, use `AskUserQuestion` to present the problem and ask user input.
 
 **Row count check.** Once a full task decomposition is done, count the rows. If 10 or more, surface to the user: _"Tasks section has N rows — past the 10-task heuristic. Have you considered splitting along a natural seam (sequential phase, independently shippable subset, interface boundary)?"_ Soft prompt, not a block. Tightly coupled work that genuinely cannot split is allowed. This may result in Plan decomposition.
 
@@ -158,7 +159,7 @@ If the task is purely a configuration change with no code, the Tech Breakdown ca
 
 ### Titles
 
-If the change only applies to one layer of the application (e.g. only clients, one specific client, or only server, prefix the title with the layer in brackets (e.g. `[Server]` or `Extension`).
+If the change only applies to one layer of the application (e.g. only clients, one specific client, or only server), prefix the title with the layer in brackets (e.g. `[Server]` or `[Extension]`).
 
 ### Task vs. Story
 

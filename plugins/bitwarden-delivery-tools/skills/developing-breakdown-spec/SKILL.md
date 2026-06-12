@@ -9,7 +9,6 @@ allowed-tools: Read, Edit, Glob, Grep, Skill, TaskCreate, AskUserQuestion, mcp__
 ## Overview
 
 Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against `breakdown.md` inside a per-breakdown folder under the locally-cloned `bitwarden/tech-breakdowns` repo: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
-Assist a Bitwarden engineer with defining the WHAT and WHY for an upcoming body of work. The end result is a Specification, which defines the boundaries and solution shape for the Plan, which will define HOW that work is executed. Tease out any ambiguity through question and answer cycles, with open questions being captured in the Clarifications Log. Works against `breakdown.md` inside a per-breakdown folder under the locally-cloned `bitwarden/tech-breakdowns` repo: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
 
 <HARD-GATE>
 Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. Use the pattern `**/*<JIRA-KEY>*/breakdown.md` when given a Jira key, or `<team>/*<slug>*/breakdown.md` when given a team/slug, so resolution is deterministic across runs. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
@@ -81,4 +80,4 @@ Surface the question explicitly: is there a smaller change that delivers most of
 
 ## Output
 
-When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed, by invoking `Skill(developing-breakdown-plan)
+When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed, by invoking `Skill(developing-breakdown-plan)`.
