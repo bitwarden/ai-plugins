@@ -1,6 +1,6 @@
 ---
 name: decomposing-into-tasks
-description: Decompose a Bitwarden Tech Breakdown's Plan into a tasks.md document with one entry per future Jira work item. Use after the Plan section is reviewer-ready (concrete file/module list, no placeholders). Also handles resumption against a partly-drafted task list. Phrasings like "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table", "continue task decomposition".
+description: Decompose a breakdown Plan into a tasks.md document with one entry per future Jira work item. Also handles resumption against a partly-drafted task list. Phrasings like "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table", "continue task decomposition".
 allowed-tools: Skill, Read, Edit, Write, Bash, Grep, Glob, TaskCreate, AskUserQuestion
 ---
 
@@ -8,13 +8,7 @@ allowed-tools: Skill, Read, Edit, Write, Bash, Grep, Glob, TaskCreate, AskUserQu
 
 ## Overview
 
-Assist a Bitwarden engineer in turning the **Plan** section of a Tech Breakdown into a separate `tasks.md` file, containing a numbered list where each entry is a future Jira story.
-
-Works against the markdown breakdown file in the locally-cloned `bitwarden/tech-breakdowns` repo.
-
-**Output location.** The Tasks file lives at `tasks.md` in the **same folder as the breakdown file**. If the breakdown is at `bitwarden/tech-breakdowns/<team>/<slug>/breakdown.md`, then the Tasks file is at `bitwarden/tech-breakdowns/<team>/<slug>/tasks.md`. This is the only place Tasks live; do not write a Tasks section into the breakdown document and do not link from the breakdown to the Tasks file.
-
-**Resuming.** If `tasks.md` already exists in the breakdown's folder, this skill reads it and continues from where it left off. If it does not exist, this skill creates it.
+Assist a Bitwarden engineer in turning a breakdown Plan into a separate `tasks.md` file, containing a numbered list where each entry is a future Jira story.
 
 <HARD-GATE>
 Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
@@ -36,17 +30,11 @@ Once a breakdown has been found, do NOT write to `tasks.md` unless both hold:
 
 Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. Use `AskUserQuestion` for any ambiguities discovered during decomposition; do not fill in the blanks or make assumptions yourself. See `references/process-flow.dot` for the full phase + decision graph.
 
-### Phase 1: Locate the breakdown and the tasks file if it exists
-
-This skill cannot decompose without knowing which breakdown to work against. Resolve the breakdown path in this order:
-
-1. **Command-line argument.** If the user invoked the skill with a path to a breakdown file (e.g. `Skill(decomposing-into-tasks) bitwarden/tech-breakdowns/auth/security-key-push/breakdown.md`), use that path. Verify the file exists; if it does not, surface the error and ask for the correct path.
-2. **Open file in editor.** If no argument was given but the user has a breakdown file open in their editor (path ends in `.md` and lives under `tech-breakdowns/`), confirm with `AskUserQuestion`: _"Use the open breakdown at `<path>` for task decomposition?"_ Wait for the user to confirm before continuing.
-3. **Prompt for the breakdown path.** If neither of the above resolves, use `AskUserQuestion` to ask: _"Which breakdown file should I decompose? Provide the path relative to the repo root (e.g. `auth/security-key-push/breakdown.md`)."_ Verify the file exists. If the user names a team/feature without a full path, use `Glob` to locate candidates under `tech-breakdowns/` and confirm the right one before continuing.
+### Phase 1: Locate the tasks file if it exists
 
 Once the breakdown file is known, derive the Tasks file path: `tasks.md` in the same folder as the breakdown. Check whether it exists:
 
-- **`tasks.md` does not exist.** This is a fresh decomposition. Create `tasks.md` and continue.
+- **`tasks.md` does not exist.** This is a fresh decomposition. Create `tasks.md` from the template at `bitwarden/tech-breakdowns/template/tasks.md` and continue.
 - **`tasks.md` exists.** This is a resumption. Continue with the existing `tasks.md`.
 
 Surface the resolved paths to the user once before moving on: _"Working against breakdown `<path>`, Tasks file at `<path>/tasks.md` (<new | resuming>)."_
