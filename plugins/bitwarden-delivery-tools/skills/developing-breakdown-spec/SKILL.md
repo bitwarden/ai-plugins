@@ -1,7 +1,7 @@
 ---
 name: developing-breakdown-spec
-description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Phrasings like "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
-allowed-tools: Read, Edit, Bash, Grep, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
+description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Triggered by phrasings such as "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
+allowed-tools: Read, Edit, Glob, Grep, Skill, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Developing the Spec
@@ -80,4 +80,4 @@ Surface the question explicitly: is there a smaller change that delivers most of
 
 ## Output
 
-When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed.
+When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed, by invoking `Skill(developing-breakdown-spec)`.

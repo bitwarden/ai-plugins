@@ -1,7 +1,7 @@
 ---
 name: starting-breakdown
-description: Sets up a new Bitwarden Tech Breakdown in the bitwarden/tech-breakdowns repo. Creates a per-breakdown folder (`<team>/<JIRA-KEY>-<short-slug>/`) containing `breakdown.md` from the template, so the future `tasks.md` and any specification artifacts can live alongside it. Use when a team is creating a new breakdown — phrasings like "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown". Gathers context from the user, creates the folder, copies the template, and fills the Status block.
-allowed-tools: Read, Edit, Bash, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
+description: Sets up a new Bitwarden Tech Breakdown in the bitwarden/tech-breakdowns repo. Creates a per-breakdown folder (`<team>/<JIRA-KEY>-<short-slug>/`) containing `breakdown.md` from the template, so the future `tasks.md` and any specification artifacts can live alongside it. Use when a team is creating a new breakdown — triggered by phrasings such as "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown".
+allowed-tools: Read, Edit, Glob, Skill, TaskCreate, AskUserQuestion, Bash(git clone:*), Bash(git pull:*), Bash(git status:*), Bash(cp:*), Bash(mkdir:*), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
 ---
 
 # Starting a Tech Breakdown
@@ -48,13 +48,14 @@ Produce a short summary and surface it to the user before continuing:
 1. Confirm `bitwarden/tech-breakdowns` is cloned locally and on `main`. If not, clone or pull.
 2. **Confirm the slug** with the user before creating anything. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim). The full path will be `<team>/<JIRA-KEY>-<short-slug>/`.
 3. **Create the breakdown folder**: `<team>/<JIRA-KEY>-<short-slug>/`. This folder is the single home for everything tied to this breakdown — the breakdown itself, the future `tasks.md`, any sibling specification artifacts, PoC notes. Do not place breakdown files directly under `<team>/`.
-4. **Copy the template into the new folder as `breakdown.md`**: copy `templates/tech-breakdown.md` to `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. Do not edit the template itself.
-5. Delete the template's preamble checklist at the top of `breakdown.md`.
-6. Fill the Status block in `breakdown.md`:
+4. **Locate the template.** The canonical template lives at `templates/tech-breakdown.md` inside the `bitwarden/tech-breakdowns` working copy..
+5. **Copy the template into the new folder as `breakdown.md`**: copy `templates/tech-breakdown.md` to `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. Do not edit the template itself.
+6. Delete the template's preamble checklist at the top of `breakdown.md`.
+7. Fill the Status block in `breakdown.md`:
    - `Status:` — `In Planning`
    - `Last substantive update:` — today's date + the literal note `initial draft`
    - `Active owner / contact:` — the specific human from Phase 1.
 
 ## Output
 
-When all phases are complete, tell the user the path to the new folder and the breakdown file inside it: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`.
+When all phases are complete, tell the user the path to the new folder and the breakdown file inside it: `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. Then offer to continue inline by invoking `Skill(developing-breakdown-spec)` against the new file so the user can move straight from setup into resolving open questions and writing the Specification.
