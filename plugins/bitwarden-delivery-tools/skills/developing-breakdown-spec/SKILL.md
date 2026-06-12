@@ -78,4 +78,4 @@ Surface the question explicitly: is there a smaller change that delivers most of
 
 ## Output
 
-When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed.
+When the Spec and Spec Alternatives are filled, surface remaining `Open` clarifications with their owners, then suggest the user move on to developing the Plan for HOW the work will be executed, by invoking `Skill(developing-breakdown-plan)
