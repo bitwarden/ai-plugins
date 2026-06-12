@@ -51,7 +51,7 @@ Walk the Plan from multiple dimensions to gather full context before decomposing
 
 Identify the units of change that would land independently, in reviewable, testable chunks of work. Each unit becomes one row.
 
-If, when constructing a task, you encounter ambiguity in individual task scope - whether splitting or merging may be desireable - present 2 or 3 options with tradeoffs via `AskUserQuestion`. Do not pick unilaterally; task-boundary calls are the user's. If there are no questions, do not prompt the user.
+If, when constructing a task, you encounter ambiguity in individual task scope - whether splitting or merging may be desirable - present 2 or 3 options with tradeoffs via `AskUserQuestion`. Do not pick unilaterally; task-boundary calls are the user's. If there are no questions, do not prompt the user.
 
 When decomposing into tasks, make sure that the solution is **MECE**:
 
@@ -163,7 +163,7 @@ If the change only applies to one layer of the application (e.g. only clients, o
 ### Task vs. Story
 
 - **Story** - Represents work that captures a user interaction with the product. It describes a QA-testable deliverable.
-- **Task** - A body of work that is necessary in support of a Story, or an indepdendent required Engineering body of work in order to enable some other user interaction.
+- **Task** - A body of work that is necessary in support of a Story, or an independent required Engineering body of work in order to enable some other user interaction.
 
 ### Blocked by vs Depends on
 
