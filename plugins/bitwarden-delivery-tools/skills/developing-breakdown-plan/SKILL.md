@@ -17,7 +17,8 @@ Once a breakdown is found, do NOT continue to develop the Plan if either conditi
 
 - Specification is empty or partial — prompt the user to define the Specification before continuing. The Plan needs the Spec as its anchor; without one, the Plan has no constraint to design against.
 - Open design questions remain in the Clarifications Log. Instruct the user to resolve them first.
-  </HARD-GATE>
+
+</HARD-GATE>
 
 ## Key Principles
 
