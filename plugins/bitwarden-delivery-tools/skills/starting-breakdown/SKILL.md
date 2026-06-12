@@ -48,7 +48,7 @@ Produce a short summary and surface it to the user before continuing:
 1. Confirm `bitwarden/tech-breakdowns` is cloned locally and on `main`. If not, clone or pull.
 2. **Confirm the slug** with the user before creating anything. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim). The full path will be `<team>/<JIRA-KEY>-<short-slug>/`.
 3. **Create the breakdown folder**: `<team>/<JIRA-KEY>-<short-slug>/`. This folder is the single home for everything tied to this breakdown — the breakdown itself, the future `tasks.md`, any sibling specification artifacts, PoC notes. Do not place breakdown files directly under `<team>/`.
-4. **Locate the template.** The canonical template lives at `templates/tech-breakdown.md` inside the `bitwarden/tech-breakdowns` working copy..
+4. **Locate the template.** The canonical template lives at `templates/tech-breakdown.md` inside the `bitwarden/tech-breakdowns` working copy.
 5. **Copy the template into the new folder as `breakdown.md`**: copy `templates/tech-breakdown.md` to `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. Do not edit the template itself.
 6. Delete the template's preamble checklist at the top of `breakdown.md`.
 7. Fill the Status block in `breakdown.md`:
