@@ -1,0 +1,54 @@
+// Process flow for Skill(decomposing-into-tasks).
+// cspell:ignore Tpng rankdir fontname
+// Render with: dot -Tpng process-flow.dot -o process-flow.png
+//
+// Boxes are activities; diamonds are decision points; ellipses are terminal states.
+// Tasks live in a sibling `tasks.md` file next to the breakdown. The HARD-GATE
+// (breakdown orientation + Plan complete + Spec filled) fires before Phase 1.
+// Phase 2 is a bulk decomposition (not a per-row loop): walk the Plan across
+// multiple dimensions, propose all rows, then run the row-count heuristic.
+
+digraph decomposing_into_tasks {
+  rankdir=TB;
+  node [fontname="Helvetica"];
+  edge [fontname="Helvetica"];
+
+  Start              [shape=ellipse, label="Start"];
+  ResolveBreakdown   [shape=box,     label="Resolve breakdown path\n(path, Jira key, or team/slug;\nGlob bitwarden/tech-breakdowns/;\nconfirm via AskUserQuestion)"];
+  GatesPass          [shape=diamond, label="Plan complete\nand Spec filled?"];
+  StopGate           [shape=ellipse, label="Stop:\nsurface gaps;\nawait user permission"];
+  LocateTasks        [shape=box,     label="Phase 1: Derive tasks.md path\n(sibling of breakdown.md)"];
+  TasksExist         [shape=diamond, label="tasks.md exists?"];
+  CreateFromTemplate [shape=box,     label="Create tasks.md from\nbitwarden/tech-breakdowns/template/tasks.md"];
+  SurfacePaths       [shape=box,     label="Surface resolved paths\n(breakdown + tasks.md,\nnew | resuming)"];
+  Decompose          [shape=box,     label="Phase 2: Decompose Plan into tasks\n(walk Architecture, per-layer,\nsecurity/deploy/testing inputs,\nPoCs, existing rows;\nidentify MECE units of change)"];
+  Ambiguity          [shape=diamond, label="Scope or boundary\nambiguity?"];
+  AskUser            [shape=box,     label="AskUserQuestion:\n2-3 split/merge options\nwith tradeoffs"];
+  RowCount           [shape=diamond, label="10 or more rows?"];
+  SoftPrompt         [shape=box,     label="Soft prompt:\nconsider splitting along\na natural seam"];
+  SelfReview         [shape=box,     label="Phase 3: Self-review\n(placeholder scan,\nspec coverage,\ndependency graph sanity,\nstand-alone check,\nowner attribution,\nMECE)"];
+  IssuesFound        [shape=diamond, label="Issues found?"];
+  FixOrSurface       [shape=box,     label="Fix inline in tasks.md\nor surface to user\nfor clarification"];
+  Done               [shape=ellipse, label="Phase 4: Output\ntasks.md ready at\n<breakdown-folder>/tasks.md"];
+
+  Start              -> ResolveBreakdown;
+  ResolveBreakdown   -> GatesPass;
+  GatesPass          -> StopGate           [label="no"];
+  GatesPass          -> LocateTasks        [label="yes"];
+  LocateTasks        -> TasksExist;
+  TasksExist         -> CreateFromTemplate [label="no (fresh)"];
+  TasksExist         -> SurfacePaths       [label="yes (resume)"];
+  CreateFromTemplate -> SurfacePaths;
+  SurfacePaths       -> Decompose;
+  Decompose          -> Ambiguity;
+  Ambiguity          -> AskUser            [label="yes"];
+  AskUser            -> Decompose;
+  Ambiguity          -> RowCount           [label="no"];
+  RowCount           -> SoftPrompt         [label="yes"];
+  SoftPrompt         -> SelfReview;
+  RowCount           -> SelfReview         [label="no"];
+  SelfReview         -> IssuesFound;
+  IssuesFound        -> FixOrSurface       [label="yes"];
+  FixOrSurface       -> SelfReview;
+  IssuesFound        -> Done               [label="no"];
+}
