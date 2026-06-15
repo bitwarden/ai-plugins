@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.7] - 2026-06-08
+
+### Changed
+
+- Migrated the bundled MCP server's tooling from npm to pnpm (pinned `pnpm@11.5.2`, installed via Corepack) as part of the repo-wide migration. **Consumers now need Corepack** (bundled with Node.js) and Node.js 22+; npm is no longer used to install or build the server
+
 ## [2.2.6] - 2026-06-05
 
 ### Changed

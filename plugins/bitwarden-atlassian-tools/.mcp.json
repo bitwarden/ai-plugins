@@ -5,7 +5,7 @@
       "command": "bash",
       "args": [
         "-c",
-        "cd \"${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server\" && npm install --silent >/dev/null && npm run build >/dev/null && exec node build/index.js"
+        "cd \"${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server\" && corepack pnpm install --frozen-lockfile --silent >/dev/null && corepack pnpm run build >/dev/null && exec node build/index.js"
       ],
       "env": {
         "ATLASSIAN_CLOUD_ID": "${ATLASSIAN_CLOUD_ID}",
