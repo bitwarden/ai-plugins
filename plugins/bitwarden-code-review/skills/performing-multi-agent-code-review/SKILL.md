@@ -2,7 +2,7 @@
 name: performing-multi-agent-code-review
 description: Perform a rigorous, multi-agent code review with architecture-compliance, parallel quality/security analysis, finding validation, and severity audit. Use whenever the user asks for a structured, deep, thorough, multi-pass, or multi-agent code review — or a review that includes architecture/pattern compliance, confidence-scored findings, or a severity audit — even if they don't say the exact phrase "multi-agent". Prefer this over a single-agent review when the user wants high-signal findings with validation. Also use whenever the user asks for a code review across a commit range, time window, or N most recent commits in a locally checked-out repo (e.g. "review the last week of commits in bitwarden/server", "review the last 20 commits", "review changes since 2026-04-23") — these route to the commit-range mode below.
 allowed-tools: "Bash(gh pr diff:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git log:*), Read, Write, Grep, Glob, Skill, AskUserQuestion"
-argument-hint: "[pr-number | commit-range] [--model <model>] [--output-dir <path>]"
+argument-hint: "[pr-number | commit-range] [--model <model>] [--model-analysis <model>] [--model-security <model>] [--model-validation <model>] [--model-audit <model>] [--output-dir <path>]"
 ---
 
 # Overview
@@ -16,7 +16,7 @@ This skill depends on the following sibling plugins. If any are not installed, *
 - **`bitwarden-tech-lead`** — provides the architecture review subagent.
 - **`bitwarden-security-engineer`** — provides security context and analysis skills.
 
-Before Step 1, verify each prerequisite is resolvable. If a prerequisite is missing, print:
+Before Step 1, verify each prerequisite is resolvable (verification is heuristic — if a subagent type fails to resolve, treat that as the signal). If a prerequisite is missing, print:
 
 > Prerequisite plugin `<name>` is not installed. Install it and retry. Review aborted.
 
@@ -34,12 +34,36 @@ If `--output-dir <path>` is present in `$ARGUMENTS`, use that path verbatim — 
 
 Otherwise, default to `${CLAUDE_PLUGIN_DATA}/code-reviews/` — organized across projects, never git-tracked.
 
+## Model Selection
+
+Resolve per-stage models upon invocation before Step 1 begins.
+
+Flag values are the Agent tool's model nicknames, in ascending tier order: `haiku` < `sonnet` < `opus` < `fable`.
+The **global model** is `--model` if specified, otherwise the session's model.
+
+| Stage          | Agents                              | Flag                 | Default    |
+| -------------- | ----------------------------------- | -------------------- | ---------- |
+| Analysis       | Step 2 architect; Step 3 Agents 1–2 | `--model-analysis`   | global     |
+| Security       | Step 3 Agent 3 (security & logic)   | `--model-security`   | global     |
+| Validation     | Step 4                              | `--model-validation` | global     |
+| Severity audit | Step 5                              | `--model-audit`      | **sonnet** |
+
+Each stage resolves to its flag if present, otherwise its default.
+Exception: an explicit `--model` overrides the audit's sonnet default.
+
+**Security floor.** `--model-security` may only pin at or above the global model. On a lower pin, run security at the global model and note the ignored pin in the announcement. Rationale: P01–P06 evaluation quality must not silently degrade.
+
+**Analysis downgrade caveat.** Bugs missed by a cheaper analysis model cannot be recovered by downstream validation.
+
+**Announce** the resolved stage → model table before starting the review.
+
+**Steps 6–9 run in the main agent** — the merge needs the full finding state and reference content in context. One model per stage; parallel same-stage runs collide finding IDs.
+
 ## Operating Rules
 
 Applies to all agents and subagents.
 
-- Model: Default to the opus model unless `--model` is specified.
-- Announce which model is being used before starting the review.
+- Models: resolved per stage in Model Selection above.
 - Don't write to GitHub. All findings go to a local markdown file.
 - Tool discipline (see Orchestration → Tool Discipline) applies to the main agent and is propagated verbatim to every subagent. Rationale for the WebFetch/WebSearch ban: bypasses `gh` auth, skips audit trails, can return stale cached pages.
 
@@ -122,7 +146,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt; Line Number Accuracy is propagated verbatim into every Step 2–5 subagent prompt.
    - **READ** `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
 
-2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead:bitwarden-tech-lead` subagent type. Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
+2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead:bitwarden-tech-lead` subagent type, with the resolved analysis model (see Model Selection). Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
 
    Unlike the diff agents in Step 3, this agent reads BEYOND the diff to check whether changes fit the codebase.
 
@@ -136,7 +160,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    Apply the Review Rules. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Launch 3 agents as instructed below. Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
+3. Send all 3 Agent tool calls in a single message (do NOT use run_in_background). Launch the 3 agents as instructed below — Agents 1–2 with the resolved analysis model, Agent 3 with the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only.
 
    **Agent 1: Code quality agent**
    Use the `general-purpose` subagent type. Read the diff as a senior engineer seeing it for the first time — surface anything that hurts correctness, clarity, or long-term maintainability, including code duplication, missing critical error handling, and inadequate test coverage.
@@ -155,7 +179,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **Consent gates** — are authorization actions clearly labeled with sufficient context?
    - **Output authenticity** — are responses distinguishable from attacker-forged messages?
 
-4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3. The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
+4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3, with the resolved validation model (see Model Selection). The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
    **Chunking escape hatch.** If raw findings from Steps 2 and 3 number more than 25, partition them into chunks of ≤ 15 (preserving collateral context within each chunk; do not split a `source_agent` group across chunks if it would put related findings on opposite sides) and launch one validation subagent per chunk in a single message (do NOT use run_in_background).
 
@@ -173,7 +197,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    If the divergence is deliberate but its collateral was not updated, the collateral is a new finding (typically ♻️ Refactor) — do not dismiss the original finding silently; route the collateral problem as its own finding instead.
 
-5. Launch a single `general-purpose` severity-audit agent. Give it all validated findings from step 4, the diff, and the Review Rules. For each finding, the agent must:
+5. Launch a single `general-purpose` severity-audit agent, with the resolved audit model — sonnet unless overridden (see Model Selection). Give it all validated findings from step 4, the diff, and the Review Rules. For each finding, the agent must:
    - Confirm the severity assigned by the review agent, or
    - Downgrade it to a lower severity if the evidence doesn't support the original rating, or
    - Dismiss it entirely if it does not meet the bar for any severity level.
@@ -182,10 +206,12 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
 6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Before merging Step 5 returns, insert the full Finding object for each Step 4 collateral finding (`source_agent: "validation"`, `id: "val-N"`) into the master map — their creation-time fields come from those Finding objects, not from Step 4's status returns. Creation-time fields are immutable (see `references/finding-shape.md`). For dismissed findings, set `dismissal_stage` to `"Step 4 validation"` or `"Step 5 severity audit"` based on which step set the dismissal status — it renders as `**Dismissed at:**`. Partition by final status: validated (Step 5 `confirmed` or `downgraded`) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
 
-7. Format the report using the template in `references/report-template.md`. Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Dismissed findings additionally render `**Original severity:**`, `**Original confidence:**`, `**Dismissed at:**`, and `**Dismissed because:**` per the template — past runs have silently dropped these, so do not omit any of them; per-finding traceability requires the full set.
+7. Format the report using the template in `references/report-template.md`; `examples/sample-report.md` shows a complete rendered example, including the dismissed-finding stanza. Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Dismissed findings additionally render `**Original severity:**`, `**Original confidence:**`, `**Dismissed at:**`, and `**Dismissed because:**` per the template — past runs have silently dropped these, so do not omit any of them; per-finding traceability requires the full set.
 
 8. Print the full formatted report to the terminal.
 
 9. Write the formatted report to the output directory resolved in **Output Location**. Do not test whether the directory exists, do not create it, and do not prompt the user — write directly. If the write fails because the caller-supplied path is invalid, surface the error as-is. After a successful write, print the full resolved path.
 
    File name: `code-review-{model}-PR-{number}.md` (PR mode), `code-review-{model}-{YYYY-MM-DD}.md` (local mode), `code-review-{model}-{branch}-{YYYY-MM-DD}.md` (branch comparison mode), or `code-review-{model}-{from-short}..{to-short}.md` (commit-range mode, where `{from-short}`/`{to-short}` are 7-char SHAs or shorter ref names).
+
+   `{model}` is the resolved global model's nickname, never a dated model ID. Append `-mixed` when an explicit stage flag differs from the global model; the audit's sonnet default does not count. The report's Model Header follows its own rule — see `references/report-template.md`.

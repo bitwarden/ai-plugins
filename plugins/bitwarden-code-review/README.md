@@ -1,10 +1,12 @@
 # Bitwarden Code Review Plugin
 
-Comprehensive AI-powered code review agent following Bitwarden engineering standards.
+AI-powered code review for Bitwarden — an autonomous review agent for everyday PRs, plus a rigorous multi-agent pipeline for the changes that warrant a deeper look.
 
 ## Overview
 
 This plugin provides an autonomous code review agent that conducts thorough, professional code reviews following Bitwarden's organizational standards. The agent focuses on security, correctness, and high-value feedback while maintaining a high signal-to-noise ratio.
+
+It offers two complementary lenses. The autonomous `bitwarden-code-reviewer` agent reviews a pull request the way a human reviewer would and posts inline comments to GitHub. The `performing-multi-agent-code-review` skill takes a different approach — it has Claude evaluate code _as Claude_ across a pipeline of specialized sub-agents, trading human-style commentary for depth and high-signal findings written to a local report. Use the agent for everyday PR review; reach for the skill when a change is complex or security-sensitive enough that one reviewer can't hold every concern in view at once.
 
 ## Features
 
@@ -14,6 +16,9 @@ This plugin provides an autonomous code review agent that conducts thorough, pro
 - **Security-First Approach**: Prioritizes security vulnerabilities, data exposure, and authentication issues
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
 - **Confidence Scoring**: Pre-filters findings with a 0-100 confidence score (≥75 threshold) before validation to reduce false positives
+- **Multi-Agent Review Pipeline**: A separate `performing-multi-agent-code-review` skill runs six specialized sub-agents — architecture compliance, code quality, bug analysis, security & logic, validation, and severity audit — for depth on complex or security-sensitive changes
+- **Any Model, Per Stage**: Per-stage model flags dial cost against depth; a security floor prevents the security pass from ever running below your global model
+- **Local-Only, Multi-Mode**: Reviews draft or published PRs, local changes, branch comparisons, or commit ranges — and writes findings to a local report, never to GitHub
 
 ## Skills
 
@@ -83,6 +88,50 @@ The agent is automatically invoked by Claude when:
 # Invoke the review agent explicitly
 Use the bitwarden-code-reviewer agent to review this PR
 ```
+
+### Multi-agent code review skill
+
+The `performing-multi-agent-code-review` skill is built for changes complex or security-sensitive enough that one reviewer — human or AI — can't hold every concern in view at once. Instead of a single pass, it puts a team of specialized agents on the same diff, each reviewing from its own perspective — architecture and pattern compliance, code quality, bugs, and security & logic — then validates and severity-audits everything they surface. It started from [Anthropic's `code-review` command](https://github.com/anthropics/claude-code/blob/main/plugins/code-review/commands/code-review.md) and was rebuilt for the control that command lacks: it wires in our own `bitwarden-security-engineer` and `bitwarden-tech-lead` plugins, runs on any model you choose, reviews **draft or published** PRs — plus local changes, branch comparisons, and commit ranges — and writes its report to a local file instead of posting to GitHub.
+
+It's a deliberately different lens from the `bitwarden-code-reviewer` agent. That agent reviews the way a human reviewer would; this skill has **Claude evaluate code as Claude** — optimized for signal, not parity. It spotlights blockers, real bugs, and known-bad patterns, and stays out of the nit-picking lane. Each potential finding is scored 0–100, and only those clearing an 80-confidence bar are raised; every one it keeps is cited with file, line, and the agent that caught it. What clears the bar still gets challenged — the validation and severity-audit agents can overturn a finding — but an overturned finding is never dropped: it moves into a collapsed **Reviewed and Dismissed** section, tagged with its original severity, original confidence, and the reason it was set aside. That section is deliberate — a human sees everything the first pass surfaced and can judge when a dismissal was wrong and the original call was right; without it, that signal is lost.
+
+**Relaying the "why" to each teammate.** Those agents start cold — a sub-agent inherits none of the main session's context — so the skill briefs every one of them explicitly. Each receives Bitwarden's zero-knowledge invariant and the P01–P06 threat-model directive verbatim. Feature context — the PR's intent, the ticket, the product framing — is handed out deliberately: the architecture and security agents get the full "why" so they can reason adversarially from intent, while the quality and bug agents see only the diff, so their first read stays unbiased.
+
+It slots cleanly into a [Claude Code agent-teams](https://code.claude.com/docs/en/agent-teams) loop — run it at the end of a coding session, address what it finds, refactor — or as a depth-of-review gate on a draft PR before you publish.
+
+#### Examples
+
+Invoke the skill explicitly with the slash command, or with natural language — it triggers on phrasing like "thorough", "deep", "multi-pass", or "multi-agent" review, and on commit-range framing like "review the last week of commits". With no model flags, the review runs on your session's model, with the severity audit defaulting to sonnet.
+
+**1. Local changes, all defaults.** The simplest run — review your uncommitted work before you commit:
+
+> Perform a thorough multi-agent code review of my local changes.
+
+**2. A specific pull request.** Pass a PR number or URL; it reviews draft and published PRs alike:
+
+```markdown
+/bitwarden-code-review:performing-multi-agent-code-review https://github.com/bitwarden/ios/pulls/1234567 --model opus
+```
+
+**3. Changes over a period of time.** Commit-range mode reviews the cumulative diff across a time window, commit count, or explicit ref pair. Run it from inside the target repo; it confirms the resolved range with you before spending tokens:
+
+```markdown
+Review the last week of commits using /bitwarden-code-review:performing-multi-agent-code-review --model-analysis opus --model-security fable --model-validation opus --model-audit sonnet --output-dir ./code-reviews
+```
+
+**4. Full control, per stage.** Tune each stage independently — opus for analysis and validation, fable for security, sonnet for the audit — and send the report to a specific directory:
+
+```bash
+/bitwarden-code-review:performing-multi-agent-code-review \
+  https://github.com/bitwarden/gh-actions/pull/604 \
+  --model-analysis opus \
+  --model-security fable \
+  --model-validation opus \
+  --model-audit sonnet \
+  --output-dir ./reviews
+```
+
+A **security floor** keeps `--model-security` from ever dropping below your global model, so threat-model evaluation never silently degrades. Omit `--output-dir` and the report lands in `${CLAUDE_PLUGIN_DATA}`, organized across projects and never git-tracked.
 
 ### In GitHub Actions
 

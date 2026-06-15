@@ -1,0 +1,8 @@
+[
+  { "id": "arch-1", "status": "confirmed", "final_severity": "important" },
+  {
+    "id": "val-1",
+    "status": "dismissed",
+    "dismissal_reason": "A meta-observation about sibling findings is not a code issue in the change under review."
+  }
+]

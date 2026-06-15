@@ -5,6 +5,19 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-06-10
+
+### Added
+
+- `performing-multi-agent-code-review`: per-stage model flags (`--model-analysis`, `--model-security`, `--model-validation`, `--model-audit`) with a security floor rule
+- `performing-multi-agent-code-review`: `examples/` (sample report + merge walkthrough)
+
+### Changed
+
+- `performing-multi-agent-code-review`: subagents inherit the session model instead of forcing Opus; severity audit defaults to Sonnet
+- `performing-multi-agent-code-review`: `{model}` in file names and report headers is the resolved model nickname; `-mixed` suffix when stage flags differ
+- Improved the README.md to better describe the purpose and usage of the multi-agent review.
+
 ## [1.11.0] - 2026-05-12
 
 ### Added

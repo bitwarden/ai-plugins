@@ -1,5 +1,14 @@
 # Report Template
 
+## Model Header
+
+`{model}` is the resolved global model's nickname, never a dated model ID. When any stage's resolved model differs from the global model — including the audit's sonnet default — list each differing stage in parentheses:
+
+```
+**Model:** opus                              <!-- all stages at global -->
+**Model:** opus (security: fable, audit: sonnet)   <!-- differing stages listed -->
+```
+
 ## Severity Icons
 
 - 🛑 **Blocker** — Must fix before merge

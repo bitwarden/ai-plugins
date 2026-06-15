@@ -33,6 +33,8 @@ One entry per incoming finding, keyed by `id`:
 
 **Collateral findings** produced during Step 4 (per the collateral-change check) use the full **Finding object** schema above with `source_agent: "validation"` and `id: "val-N"`. They append to Step 5's input.
 
+Extra fields beyond this schema are ignored by the merge — creation-time fields come only from the original Finding object, never from Step 4 or Step 5 returns.
+
 ## Step 5 return (severity audit)
 
 One entry per incoming finding, keyed by `id`:
@@ -51,3 +53,5 @@ One entry per incoming finding, keyed by `id`:
 - Creation-time fields — `severity`, `confidence`, `source_agent`, `title`, `detail`, `file`, `line` — are set by the Step 2/3 agent and **MUST NOT** be rewritten in Step 4, Step 5, or Step 6 merge. Step 4 and Step 5 returns carry only `id`, `status`, and disposition fields by design; the merge MUST preserve all creation-time fields from the original Step 2/3 finding.
 - For dismissed findings, the orchestrator records a `dismissal_stage` field on the master-map entry: `"Step 4 validation"` if Step 4 set the dismissal status, or `"Step 5 severity audit"` if Step 5 did. This field is rendered in the final report as `**Dismissed at:**`.
 - Step 6 partitions the master map by final status (validated vs dismissed); Steps 7–9 format, print, and write the report.
+
+A worked merge trace — including the collateral-finding path (`val-1` created at Step 4, dismissed at Step 5) — is in `examples/merge-walkthrough.md` with its Step 4/5 return JSON alongside.
