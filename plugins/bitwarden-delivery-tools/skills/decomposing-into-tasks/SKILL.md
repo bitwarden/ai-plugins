@@ -35,7 +35,7 @@ Create a task for each phase as you start it (`TaskCreate`), mark it in progress
 
 Once the breakdown file is known, derive the Tasks file path: `tasks.md` in the same folder as the breakdown. Check whether it exists:
 
-- **`tasks.md` does not exist.** This is a fresh decomposition. Create `tasks.md` from the template at `bitwarden/tech-breakdowns/template/tasks.md` and continue.
+- **`tasks.md` does not exist.** This is a fresh decomposition. Create `tasks.md` from the template at `bitwarden/tech-breakdowns/templates/tasks.md` and continue.
 - **`tasks.md` exists.** This is a resumption. Continue with the existing `tasks.md`.
 
 Surface the resolved paths to the user once before moving on: _"Working against breakdown `<path>`, Tasks file at `<path>/tasks.md` (<new | resuming>)."_
