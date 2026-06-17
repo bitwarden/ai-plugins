@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `applying-bitwarden-branding` now covers both **building** on-brand standalone deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and **reviewing** whether a deliverable is on-brand. Reviews are calibrated to separate canonical violations from brand-silent pragmatic choices. The canon is now bundled (assets + tokens) for offline, verbatim use rather than referenced externally, and the skill composes with the rest of the design suite (`using-figma`, `content-style-guide`, `preparing-design-handoff`, `evolving-design-system-components`).
+- `applying-bitwarden-branding` now covers both **building** on-brand standalone deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and **reviewing** whether a deliverable is on-brand. Reviews are calibrated to separate canonical violations from brand-silent pragmatic choices, and brand-silent choices that visibly shape the deliverable (surface mode, voice and tone) are surfaced to the requester when working interactively rather than silently defaulted. The canon is now bundled (assets + tokens) for offline, verbatim use rather than referenced externally.
 
 ### Added
 

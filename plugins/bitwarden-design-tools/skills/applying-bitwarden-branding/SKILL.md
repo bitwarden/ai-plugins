@@ -20,7 +20,7 @@ Staying current is optional. Bundled values can fall behind the source over time
 ${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh
 ```
 
-It fetches the authoritative palette from the brand repository and reports any drift. On a reported mismatch, use the correct value it prints when branding the deliverable; do not edit the bundled tokens in-session (refreshing them is a separate marketplace PR). On error or no network, fall back to the bundled canon. The same check runs in CI.
+It fetches the authoritative palette from the brand repository and reports any drift. On a reported mismatch, use the correct value it prints when branding the deliverable; do not edit the bundled tokens in-session (refreshing them is a separate marketplace PR). On error or no network, fall back to the bundled canon.
 
 ## The brand-canon checklist
 
@@ -51,7 +51,7 @@ That is the canonical surface. Everything else is a pragmatic choice — see bel
 
 ## Where the brand site is silent
 
-These decisions still have to be made, but the brand site does not prescribe them. Treat them as pragmatic, not canonical.
+These decisions still have to be made, but the brand site does not prescribe them; they are pragmatic, not canonical. When working interactively and the choice will visibly shape the deliverable (surface mode and voice/tone most of all), ask the requester rather than assume. Otherwise apply the default below and note the assumption in the deliverable.
 
 - Surface mode (light vs. dark). Pragmatic. Default to a light surface (`--bw-off-white` or `--bw-true-white` with `--bw-deep-blue` text). For a dark surface, derive the background from `--bw-deep-blue` rather than inventing a new neutral.
 - Type scale (heading sizes, weights, line-heights). Pragmatic. A safe four-step default: display 2.5rem/700, section 1.5rem/600, body 1rem/400, caption 0.8125rem/500. See [`references/typography.md`](references/typography.md).
@@ -59,8 +59,6 @@ These decisions still have to be made, but the brand site does not prescribe the
 - Component shapes (cards, banners, chips, toolbars, badges). Pragmatic. The brand defines no component vocabulary. Apply the 36px radius to container surfaces (canonical); choose whatever padding, spacing, and border treatment fits.
 - Voice and tone. Pragmatic. Not in the brand site. Match the audience and channel.
 - Accessibility and contrast specifics. Pragmatic. No published contrast matrix, so defer to WCAG AA. See the recommended pairings in [`references/color-palette.md`](references/color-palette.md).
-
-When making one of these choices, note it in the deliverable so a reader knows it is a deliverable-level decision, not brand law.
 
 ## Reviewing for brand compliance
 
@@ -76,21 +74,9 @@ Calibrate severity — this is where reviews go wrong. Separate canon violations
 - Canon violation (flag it): off-palette color, non-Inter type, a recreated or altered logo, capitalizing the W in Bitwarden. These break the brand canon.
 - Brand-silent choice (note as a judgment-call, never a hard failure): the existence of a dark surface mode, how strictly to apply the 36px radius to dense internal-tool components (the radius is canonical for primary brand surfaces; forcing it onto dense data cards is a judgment call), emoji vs. custom icons, a code-font choice, loading Inter from a CDN. The brand does not rule on these. Mention them as optional refinements, but do not mark them as failures or non-negotiable violations. Over-flagging defensible pragmatic choices erodes trust in the review.
 
-## Within the design lifecycle
-
-This skill also serves design work, not only standalone deliverables. When it does:
-
-- `using-figma`. With a Figma URL in play, use `get_variable_defs` to check whether a design's colors are library-bound to the brand palette, and `get_libraries` to confirm the right library is loaded, before declaring a design on-brand.
-- `content-style-guide`. Brand sits alongside content. When reviewing user-visible surfaces, walk both: this skill catches color, logo, and capitalization; the style guide catches voice, tone, sentence case, and accessibility.
-- `preparing-design-handoff`. Surface brand findings as part of the handoff gate, as Figma annotations or open questions in the Epic. Do not quietly fix.
-- `evolving-design-system-components`. New patterns must respect the brand palette and the 36px radius system (buttons excepted). Raise brand concerns explicitly when sponsoring a pattern.
-
 ## References
 
 - [`references/color-palette.md`](references/color-palette.md): full palette (HEX/RGB/CMYK), WCAG-AA pairings, pragmatic surface guidance.
 - [`references/typography.md`](references/typography.md): Inter loading and fallback, a pragmatic type scale, a pragmatic code-font stack.
 - [`references/logo-usage.md`](references/logo-usage.md): lockup choice, clear-space rules, the official SVG URL, the do-not list.
-
-## See it applied
-
-[`examples/on-brand-one-pager.html`](examples/on-brand-one-pager.html) applies the canon (palette, Inter, shield, 36px radius) across light and dark compositions. The dark composition is labeled pragmatic — background derived from `--bw-deep-blue`, elevated surfaces lifted with a small `--bw-true-white` overlay, no invented neutral. It is one valid composition, not the prescribed one. Build something richer when appropriate; keep the canon, swap the pragmatics to fit.
+- [`examples/on-brand-one-pager.html`](examples/on-brand-one-pager.html): a worked template to read and adapt — the canon (palette, Inter, shield, 36px radius) assembled in real markup across a light and a dark composition. The dark composition is one pragmatic option (background derived from `--bw-deep-blue`, surfaces lifted with a small `--bw-true-white` overlay, no invented neutral), not the prescribed one. Copy the structure, keep the canon, swap the pragmatics to fit.
