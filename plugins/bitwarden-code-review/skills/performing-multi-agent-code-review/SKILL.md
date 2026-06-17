@@ -13,7 +13,6 @@ Execute a structured, multi-agent code review on a set of code changes. Follow t
 
 This skill depends on the following sibling plugins. If any are not installed, **abort the review with a clear error message** identifying the missing plugin — do not attempt to proceed with a degraded pipeline.
 
-- **`bitwarden-tech-lead`** — provides the architecture review subagent.
 - **`bitwarden-security-engineer`** — provides security context and analysis skills.
 
 Before Step 1, verify each prerequisite is resolvable (verification is heuristic — if a subagent type fails to resolve, treat that as the signal). If a prerequisite is missing, print:
@@ -146,7 +145,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt; Line Number Accuracy is propagated verbatim into every Step 2–5 subagent prompt.
    - **READ** `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
 
-2. Launch a single architecture & pattern compliance agent using the `bitwarden-tech-lead:bitwarden-tech-lead` subagent type, with the resolved analysis model (see Model Selection). Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
+2. Launch a single architecture & pattern compliance agent using the `general-purpose` subagent type, with the resolved analysis model (see Model Selection). Open the subagent prompt with: "You are a software architect reviewing code changes for architectural and pattern compliance." Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
 
    Unlike the diff agents in Step 3, this agent reads BEYOND the diff to check whether changes fit the codebase.
 
@@ -158,9 +157,9 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    **Scope.** Raise pattern inconsistencies, architectural boundary violations, duplicated abstractions, and new conventions introduced where an established one applies. Do NOT raise correctness bugs, security issues, or code-quality concerns — those belong to Step 3.
 
-   Apply the Review Rules. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
+   Apply the Review Rules. Also include the **Hygiene Sweep** definition from `references/discovery-standards.md` in the subagent prompt — the Hygiene Sweep's stale-references and cross-site-inconsistency lenses complement the doc/code consistency pass and are within the architect's scope. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Send all 3 Agent tool calls in a single message (do NOT use run_in_background). Launch the 3 agents as instructed below — Agents 1–2 with the resolved analysis model, Agent 3 with the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only.
+3. Send all 3 Agent tool calls in a single message (**DO NOT** use run_in_background because the agents must run synchronously to guarantee findings are validated together at Step 4). Launch the 3 agents as instructed below — Agents 1–2 with the resolved analysis model, Agent 3 with the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only.
 
    **Agent 1: Code quality agent**
    Use the `general-purpose` subagent type. Read the diff as a senior engineer seeing it for the first time — surface anything that hurts correctness, clarity, or long-term maintainability, including code duplication, missing critical error handling, and inadequate test coverage.
@@ -181,7 +180,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
 4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3, with the resolved validation model (see Model Selection). The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
-   **Chunking escape hatch.** If raw findings from Steps 2 and 3 number more than 25, partition them into chunks of ≤ 15 (preserving collateral context within each chunk; do not split a `source_agent` group across chunks if it would put related findings on opposite sides) and launch one validation subagent per chunk in a single message (do NOT use run_in_background).
+   **Chunking escape hatch.** If raw findings from Steps 2 and 3 number more than 25, partition them into chunks of ≤ 15 (preserving collateral context within each chunk; do not split a `source_agent` group across chunks if it would put related findings on opposite sides) and launch one validation subagent per chunk in a single message (**DO NOT** use run_in_background because the agents must run synchronously to guarantee accuracy).
 
    A finding is **dismissed** if ANY of the following are true:
    - It is a pre-existing finding, not introduced by this change. In commit-range mode, treat the cumulative diff of `<from>..<to>` as "this change" and the parent of `<from>` as the pre-existing baseline.

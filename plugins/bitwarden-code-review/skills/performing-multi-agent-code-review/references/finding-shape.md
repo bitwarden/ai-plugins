@@ -35,6 +35,28 @@ One entry per incoming finding, keyed by `id`:
 
 Extra fields beyond this schema are ignored by the merge — creation-time fields come only from the original Finding object, never from Step 4 or Step 5 returns.
 
+```json
+// Example Step 4 return
+[
+  { "id": "arch-1", "status": "validated" },
+  {
+    "id": "quality-3",
+    "status": "dismissed",
+    "dismissal_reason": "Substantively covered by arch-1 at higher severity."
+  },
+  {
+    "id": "val-1",
+    "file": "plugins/example/.claude-plugin/plugin.json",
+    "line": "4",
+    "severity": "refactor",
+    "confidence": 100,
+    "title": "quality findings cite wrong file line for plugin.json description field",
+    "detail": "Both citations are diff-offset artifacts; the description field is at file line 4.",
+    "source_agent": "validation"
+  }
+]
+```
+
 ## Step 5 return (severity audit)
 
 One entry per incoming finding, keyed by `id`:
@@ -46,6 +68,18 @@ One entry per incoming finding, keyed by `id`:
 | `final_severity`   | string | Severity value. Omit when `status = "dismissed"`. |
 | `dismissal_reason` | string | Present only when `status = "dismissed"`.         |
 
+```json
+// Example Step 5 return
+[
+  { "id": "arch-1", "status": "confirmed", "final_severity": "important" },
+  {
+    "id": "val-1",
+    "status": "dismissed",
+    "dismissal_reason": "A meta-observation about sibling findings is not a code issue in the change under review."
+  }
+]
+```
+
 ## Orchestrator behavior
 
 - Maintains a master finding map keyed by `id`.
@@ -53,5 +87,3 @@ One entry per incoming finding, keyed by `id`:
 - Creation-time fields — `severity`, `confidence`, `source_agent`, `title`, `detail`, `file`, `line` — are set by the Step 2/3 agent and **MUST NOT** be rewritten in Step 4, Step 5, or Step 6 merge. Step 4 and Step 5 returns carry only `id`, `status`, and disposition fields by design; the merge MUST preserve all creation-time fields from the original Step 2/3 finding.
 - For dismissed findings, the orchestrator records a `dismissal_stage` field on the master-map entry: `"Step 4 validation"` if Step 4 set the dismissal status, or `"Step 5 severity audit"` if Step 5 did. This field is rendered in the final report as `**Dismissed at:**`.
 - Step 6 partitions the master map by final status (validated vs dismissed); Steps 7–9 format, print, and write the report.
-
-A worked merge trace — including the collateral-finding path (`val-1` created at Step 4, dismissed at Step 5) — is in `examples/merge-walkthrough.md` with its Step 4/5 return JSON alongside.
