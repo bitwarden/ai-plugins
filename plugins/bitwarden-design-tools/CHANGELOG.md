@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `--bw-yellow` corrected to `#FDC700` to match the brand repository's `$tertiary-yellow` (was `#FFD700`).
 
+### Removed
+
+- `references/brand-assets.md` — its repo-path asset inventory and trademark note are folded into `references/logo-usage.md`.
+
 ## [0.1.0] - 2026-05-22
 
 ### Added

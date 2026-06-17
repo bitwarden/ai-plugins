@@ -59,10 +59,21 @@ If you want a single shield/wordmark asset to flow with the deliverable's surfac
 - **Don't recreate from scratch** when the official SVG is available — your trace will not match the canonical outlines.
 - **Don't rotate** or apply effects (drop shadow, glow, gradient overlay).
 
-## Official source
+## Non-bundled assets and source
 
-If you ever need a variant this plugin doesn't ship (a product-specific lockup, an alternate composition), fetch directly from `bitwarden.com/brand`. The canonical source URL embedded in this plugin's lockup file is:
+This plugin bundles the lockups, shield, and wordmark above. For anything else, the canonical source is the [bitwarden/brand](https://github.com/bitwarden/brand) repository (raw URLs: `https://github.com/bitwarden/brand/raw/main/<path>`) or [bitwarden.com/brand](https://bitwarden.com/brand):
+
+- **Product-specific lockups** (Password Manager, Secrets Manager, etc.) — for in-product UI and comparative diagrams; not bundled.
+- **Product icon, PNG** — rounded `/icons/<size>x<size>.png` and square `/icons/square-<size>x<size>.png` at 16, 32, 64, 128, 256 px. The bare shield mark is at `/shield/`; the vector shield is `/logos/icon.svg` (`/logos/icon-inverse.svg` for dark contexts).
+
+For a missing size, request it on the brand repo rather than scaling a PNG (rounded corners and shield proportions do not scale cleanly). For a missing color variant, do not generate one. Blue and inverse-white are the only sanctioned variants, so surface the gap to the brand owners.
+
+The bundled lockups were extracted verbatim from the official source file:
 
 ```
 https://images.ctfassets.net/7rncvj1f8mw7/6RNJEeiUeUvaJFcUXV5R49/e73a356cad20bce2336afcff8829485b/BitwardenLogo.svg
 ```
+
+## Trademark
+
+"Bitwarden" is a registered trademark of Bitwarden Inc. Apply the ® mark or trademark attribution per the destination surface's standards (typically the first reference per page in external-facing content; not required in product UI).
