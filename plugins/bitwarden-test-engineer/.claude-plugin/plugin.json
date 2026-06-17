@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-test-engineer",
   "version": "1.0.0",
-  "description": "Test engineering toolkit for Bitwarden. An orchestrator dispatches specialized testing skills — strategy and planning, automation, exploratory testing, and quality assessment.",
+  "description": "Test engineering toolkit for Bitwarden. A generalist test-engineer agent dispatches specialized testing skills — strategy and planning, automation, exploratory testing, and quality assessment.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
@@ -19,5 +19,5 @@
     "qa",
     "orchestrator"
   ],
-  "agents": "./agents/test-engineer-orchestrator/AGENT.md"
+  "agents": "./agents/AGENT.md"
 }
