@@ -12,8 +12,7 @@
 # tokens themselves is a separate change to the bitwarden-design-tools plugin
 # (a marketplace PR), not something to do mid-session.
 #
-# Run it in CI (scheduled and on plugin PRs) and optionally before building a
-# deliverable when network is available.
+# Run it before building a deliverable when network is available.
 #
 # Exit codes:
 #   0  bundle matches the source
