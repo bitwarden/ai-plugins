@@ -5,6 +5,39 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.7] - 2026-06-08
+
+### Changed
+
+- Migrated the bundled MCP server's tooling from npm to pnpm (pinned `pnpm@11.5.2`, installed via Corepack) as part of the repo-wide migration. **Consumers now need Corepack** (bundled with Node.js) and Node.js 22+; npm is no longer used to install or build the server
+
+## [2.2.6] - 2026-06-05
+
+### Changed
+
+- Updated bundled MCP server dependencies to new major versions, with minor source and test adjustments for compatibility
+
+## [2.2.5] - 2026-06-02
+
+### Added
+
+- Commit `package-lock.json` for the bundled MCP server so every consumer install (which runs `npm install` at MCP startup) resolves the same pinned transitive dependency tree
+
+### Changed
+
+- CI now installs the MCP server with `npm ci` against the committed lockfile, with npm caching enabled
+
+## [2.2.4] - 2026-06-02
+
+### Added
+
+- CI workflows (`atlassian-mcp-server-build.yml`, `atlassian-mcp-server-test.yml`) that build and test the bundled Atlassian MCP server, path-scoped so they only run when the MCP server changes
+- `.nvmrc` at the repository root pinning Node 24 for all workflows
+
+### Changed
+
+- Raised the bundled MCP server's `engines.node` requirement from `>=18.0.0` to `>=24.0.0`
+
 ## [2.2.3] - 2026-04-15
 
 ### Changed

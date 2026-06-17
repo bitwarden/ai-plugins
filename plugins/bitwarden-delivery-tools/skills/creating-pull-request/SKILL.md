@@ -1,70 +1,145 @@
 ---
 name: creating-pull-request
-description: Pull request creation workflow for Bitwarden repositories. Use when creating PRs, writing PR descriptions, or preparing branches for review. Triggered by "create PR", "pull request", "open PR", "gh pr create", "PR description".
+description: Open a pull request from a branch in a Bitwarden repository — pick the conventional commit type prefix that drives the t: label, fill in the repo's PR template, choose an ai-review label, and confirm a full submission preview before running gh pr create.
+when_to_use: Use when the user is ready to open a pull request from a branch — phrasings like "create a PR", "open a PR", "ship a draft", "put it up for review", "ready for review", or "ship it". Also use when drafting a PR title or body, picking the conventional commit type prefix, or choosing the t: or ai-review label for a PR being opened (takes precedence over labeling-changes in PR-creation contexts). Do not use for conceptual questions ("how do PRs work") or managing existing PRs (status, merging, addressing comments).
 ---
 
-# Create Pull Request
+# Creating a Pull Request
 
-## PR Title Format
+This workflow exists because Bitwarden PRs depend on three signals that are easy to forget and hard to fix after submission:
+
+- the **conventional commit type prefix** in the title (CI reads it to apply the `t:` label),
+- the **repo's PR template** (reviewers use its sections to orient),
+- the **AI review label** (routes the PR to specific automation).
+
+Missing any one of these is silent — CI won't reject the PR, and the reviewer just becomes confused. So this workflow surfaces each decision step by step and shows a full submission preview before anything is pushed, so slip-ups are caught while they're cheap to fix.
+
+## Workflow
+
+Follow these steps in order. Each one produces information the next step needs, and the preview in Step 5 depends on all of them.
+
+### Step 1 — Confirm preflight is done
+
+A PR opened on broken work wastes reviewer time and tends to mask the real problem under a pile of comment threads. Use the `AskUserQuestion` tool to confirm preflight before continuing:
+
+- **Question**: "Has `perform-preflight` already run on this branch?"
+- **Options**:
+  - `Yes — proceed` — continue to Step 2
+  - `No — run it now` — invoke `perform-preflight`, then continue to Step 2 once it passes
+  - `Skip preflight` — proceed only if the user explicitly opts out
+
+### Step 2 — Determine change type and propose the title
+
+The title must follow this exact format:
 
 ```
 [PM-XXXXX] <type>: <short imperative summary>
 ```
 
-**Type keywords** (triggers automatic `t:` label via CI): read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` for the full table.
+The `<type>:` prefix is what CI scans (lowercased) to assign the `t:` label. Without it, the PR ships with no type label and triage can't filter it. Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` to pick the right keyword.
 
-**Examples:**
+If the Jira ticket key isn't in the branch name or recent conversation, ask the user. Don't leave `PM-XXXXX` as a placeholder — a real ticket key is required for tracking links to resolve.
 
-- `[PM-12345] feat: Add autofill support for passkeys`
-- `[PM-12345] fix: Resolve crash during vault sync`
-- `[PM-12345] refactor: Simplify authentication flow`
+**Show the proposed title to the user before continuing.** This is the first chance for them to catch typos, a missing prefix, or the wrong ticket key.
 
----
+### Step 3 — Read the repo's PR template
 
-## PR Body
+Always read `.github/PULL_REQUEST_TEMPLATE.md` from the target repo before drafting the body. Even when you have a body draft in mind, the template's sections are what other reviewers expect to scan. Skipping this is a common failure mode — PRs ship with improvised bodies that miss sections reviewers depend on.
 
-**Always follow the repo's PR template at `.github/PULL_REQUEST_TEMPLATE.md`.** Read it and fill in each section. If no template exists, use this fallback:
+If the template exists:
+
+- use its sections verbatim as the body structure,
+- fill each section based on the actual change,
+- keep section headers (e.g. `## 🎟️ Tracking`, `## 📔 Objective`) — they're load-bearing for reviewer scanning,
+- delete sections that don't apply (Screenshots with no UI change, for example), unless the template comments say to leave them.
+
+If no template exists, fall back to:
 
 ```markdown
 ## 🎟️ Tracking
 
-<!-- Paste the link to the Jira or GitHub issue or otherwise describe / point to where this change is coming from. -->
+<!-- Link to the Jira issue or GitHub issue this change comes from. -->
 
 ## 📔 Objective
 
-<!-- Describe what the purpose of this PR is, for example what bug you're fixing or new feature you're adding. -->
+<!-- Describe what this PR accomplishes — what bug, what feature, what refactor. -->
 
 ## 📸 Screenshots
 
-<!-- Required for any UI changes; delete if not applicable. Use fixed width images for better display. -->
+<!-- Required for UI changes; delete if not applicable. -->
 ```
 
-Delete the Screenshots section entirely if there are no UI changes.
+### Step 4 — Ask about the AI review label
 
+Use the `AskUserQuestion` tool to ask:
+
+- **Question**: "Would you like to add an AI review label to this PR?"
+- **Options**: `ai-review`, `ai-review-vnext`, `No label`
+
+Capture the answer. You'll surface it in Step 5 and pass it on the command line in Step 6.
+
+### Step 5 — Show the full submission preview, then confirm
+
+This is the most important step in this workflow. **Before running any `git push` or `gh pr create`, show the user a single preview block containing every decision made above.** This is the catch-net for failure modes like title typos, missing type prefix, body drifting from the template, or the AI review label getting dropped between Step 4 and submission.
+
+Use this exact format:
+
+```
+═══════════════════════════════════════
+  PULL REQUEST SUBMISSION PREVIEW
+═══════════════════════════════════════
+Target repo:    <owner/repo>
+Branch:         <branch-name>
+Draft:          <Yes / No>
+Title:          <full title as it will be submitted>
+Type prefix:    <type>  →  will apply  t:<label>
+AI review:      <ai-review / ai-review-vnext / No label>
+
+Body:
 ---
+<full body, exactly as it will be submitted>
+---
+═══════════════════════════════════════
+```
 
-## Creating the PR
+Then use the `AskUserQuestion` tool to confirm:
 
-Before creating, run `perform-preflight` if not already done.
+- **Question**: "Submit this PR as previewed?"
+- **Options**:
+  - `Submit as shown` — proceed to Step 6 with the previewed values
+  - `Edit title or body` — apply the requested edit, then redisplay the preview and re-ask
+  - `Change ai-review label` — re-run the Step 4 label question, then redisplay the preview and re-ask
+  - `Cancel` — stop without pushing or creating the PR
+
+Only continue to Step 6 when the user selects `Submit as shown`. The recap is non-negotiable — some failures (title in the merge commit, label-driven automation routing) are painful to undo once the PR is live, so a visible chance to catch issues at submission time pays for itself many times over.
+
+### Step 6 — Push and create
+
+Push the branch and run `gh pr create` with the confirmed values:
 
 ```bash
 git push -u origin <branch-name>
-gh pr create --draft --title "[PM-XXXXX] feat: Short summary" --body "<fill in from PR template>"
+gh pr create --draft \
+  --title "[PM-XXXXX] <type>: <summary>" \
+  --body "<body from template>" \
+  --label "<label>"
 ```
 
-**Default to draft PRs.** Only create a non-draft PR if the user explicitly requests it.
+Defaults that hold unless the user said otherwise:
 
----
+- create as **draft** — only skip `--draft` if the user explicitly asked for a ready-for-review PR,
+- include `--label` only if the user picked a label in Step 4 (omit it for "No label"),
+- multiple labels can be passed by repeating `--label`.
 
-## AI Review Label
+After `gh pr create` returns, post the PR URL back to the user.
 
-Before running `gh pr create`, **always** use the `AskUserQuestion` tool to ask whether to add an AI review label:
+## Common Failure Modes
 
-- **Question**: "Would you like to add an AI review label to this PR?"
-- **Options**: `ai-review-vnext`, `ai-review`, `No label`
+These are what the Step 5 preview is built to prevent. Recognizing them helps when adjusting the draft mid-workflow:
 
-If the user selects a label, include it via the `--label` flag:
+- **Title with no type prefix** → `[PM-12345] Add autofill for passkeys` ships with no `t:` label. Include `feat:`, `fix:`, etc.
+- **Generic body replacing the template** → reviewers expect the template's sections. Read the template even when the body feels obvious.
+- **Label answer dropped between Step 4 and Step 6** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
+- **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 5.
 
-```bash
-gh pr create --draft --label "ai-review-vnext" --title "..." --body "..."
-```
+If any of these slip past the preview, recovery is awkward — the title is permanent in the merge commit, and labels feed downstream filtering and automation.

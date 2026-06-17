@@ -11,7 +11,7 @@
     "build": "tsc && chmod +x build/index.js",
     "watch": "tsc --watch",
     "dev": "tsc && node build/index.js",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "inspector": "pnpm dlx @modelcontextprotocol/inspector@0.22.0 build/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -26,16 +26,24 @@
   "author": "Bitwarden",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.27.1",
-    "axios": "1.15.2",
-    "zod": "3.24.2"
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "axios": "1.16.1",
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/node": "20.19.35",
-    "typescript": "5.8.3",
-    "vitest": "3.1.1"
+    "@types/node": "24.12.4",
+    "typescript": "6.0.3",
+    "vitest": "4.1.7"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.5.2",
+      "onFail": "error"
+    }
   }
 }

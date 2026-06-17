@@ -1,10 +1,36 @@
-# Bitwarden Design Tools
+# Bitwarden Design Tools Plugin
 
-Apply Bitwarden's brand identity to standalone HTML deliverables — dashboards, recaps, reports, mockups, slide decks, one-pagers — without re-deriving the palette ad-hoc.
+## Overview
 
-## What's in the box
+Design toolkit for Bitwarden — the non-persona half of the design plugin pair. Six skills covering content style, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the `bitwarden-designer` agent and usable standalone (designers, design-adjacent engineers, PMs running a handoff).
 
-A single skill, **`applying-bitwarden-branding`**, plus the assets and reference docs it ships with.
+This plugin ships skills only — no agent. The persona half lives in [`bitwarden-designer`](../bitwarden-designer/), which dispatches into these skills by name.
+
+## Skills
+
+| Skill                               | What It Does                                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `content-style-guide`               | Bitwarden's product content style guide for GUI copy — voice, tone, AP-style-with-exceptions grammar, sentence case in UI, no ampersands, and accessibility-first language at a U.S. 7th-grade reading level. Lean SKILL.md with detailed rules split across `references/grammar-mechanics.md` and `references/accessibility-rules.md`.                  |
+| `using-figma`                       | Read and inspect Figma designs via the Dev Mode MCP server. Per-job-to-be-done tool selection for read tools (`get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `search_design_system`, `get_libraries`), with Code Connect and write tools documented in their own subsections. Foundational — most other skills compose it. |
+| `applying-bitwarden-branding`       | Apply or review Bitwarden brand standards (palette, Inter, official lockup, 36px radius) on standalone deliverables and design-adjacent assets, with bundled canonical assets and tokens. Grounded in [bitwarden.com/brand](https://bitwarden.com/brand/) and the [bitwarden/brand](https://github.com/bitwarden/brand) repository.                                             |
+| `preparing-design-handoff`          | The end-of-In-Design gate / checklist. Confirm the Figma file is Ready-for-Dev (sections aligned to stories, tokens library-bound, strings annotated, edge states covered) and that the Jira state is aligned (Figma linked to the Epic's Design field, sections marked Ready for Dev, EM transitions the Epic).                                         |
+| `evolving-design-system-components` | Propose a new UI pattern or modify an existing Component Library component per Bitwarden's published governance process — design-team alignment, Core vs. Recipe/Snowflake with UI Foundation, Figma branching and property conventions, review gates, merge timing. Figma conventions in `references/figma-conventions.md`.                             |
+| `navigating-design-jira-process`    | Move design work through Bitwarden's Product and Design Jira workflow — final designs attached to tickets, the 30/60/90 critique cadence tracked in Figma, status transitions, and the one-off engineering story flow.                                                                                                                                   |
+
+## Cross-Plugin Integration
+
+| Plugin                      | How It's Used                                                                                                                                                                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-designer`        | Primary consumer. The designer persona dispatches into every skill here by name. Either plugin works standalone, but the pair is the intended shape.                                                                                                       |
+| `bitwarden-atlassian-tools` | Required. The Confluence-grounded skills here (`preparing-design-handoff`, `evolving-design-system-components`, `navigating-design-jira-process`) assume `get_confluence_page` is available to fetch the canonical pages directly when prepping real work. |
+
+All cross-plugin skills are required.
+
+## External Dependency: Figma Dev Mode MCP Server
+
+The `using-figma` skill assumes the user has installed and authenticated Figma's Dev Mode MCP server in their client. This server is **Figma's own product**, not bundled. It comes in two flavors (desktop, which requires a Dev or Full Figma seat on a paid plan, and remote). Setup details live in `skills/using-figma/references/setup.md`.
+
+If the Figma MCP tools aren't available in the session, the `using-figma` skill stops and asks the user to install before continuing. Other skills continue to function — they only compose `using-figma` when a Figma URL is in play.
 
 ## Installation
 
@@ -12,69 +38,50 @@ A single skill, **`applying-bitwarden-branding`**, plus the assets and reference
 /plugin install bitwarden-design-tools@bitwarden-marketplace
 ```
 
-```
-skills/applying-bitwarden-branding/
-├── SKILL.md
-├── references/
-│   ├── color-palette.md
-│   ├── typography.md
-│   └── logo-usage.md
-└── assets/
-    ├── bitwarden-tokens.css
-    ├── bitwarden-lockup-official.svg          (full reference)
-    ├── bitwarden-lockup-horizontal-blue.svg   (light-surface primary)
-    ├── bitwarden-lockup-horizontal-white.svg  (dark-surface primary)
-    ├── bitwarden-lockup-vertical-blue.svg     (light-surface secondary)
-    ├── bitwarden-lockup-vertical-white.svg    (dark-surface secondary)
-    ├── bitwarden-shield-blue.svg              (chip-scale, light)
-    ├── bitwarden-shield-white.svg             (chip-scale, dark)
-    ├── bitwarden-wordmark-blue.svg            (wordmark only, light)
-    └── bitwarden-wordmark-white.svg           (wordmark only, dark)
-examples/
-└── on-brand-one-pager.html
+Most users will also want the persona half and the Atlassian access:
+
+```bash
+/plugin install bitwarden-designer@bitwarden-marketplace
+/plugin install bitwarden-atlassian-tools@bitwarden-marketplace
 ```
 
-## When it fires
+## Usage
 
-Triggers on direct asks — _"make this look like Bitwarden"_, _"Bitwarden-themed dashboard"_, _"apply our branding"_, _"add the Bitwarden logo"_, _"on-brand"_ — and also on any standalone HTML deliverable request inside this marketplace where the user hasn't specified a different brand. Inside Bitwarden, on-brand is the default.
+The skills here activate based on the task at hand — they can be invoked through the `bitwarden-designer` agent or standalone:
 
-It does **not** fire on:
+```
+Review this copy: "Click here to learn more about export."
+```
 
-- Product UI in `bitwarden/clients`, the web vault, or mobile apps — those use `@bitwarden/components`, which is a separate design system.
-- Third-party brand work or partner co-branding.
+```
+Read this Figma frame and list the variables it uses: <figma URL>
+```
 
-## Canonical vs. pragmatic — the dividing line
+```
+Is this banner on-brand? #175DDC headline, green CTA, Inter font.
+```
 
-The skill is explicit about this distinction, and you should be too when reading it.
+```
+Walk me through the end-of-In-Design gate for the new vault filter project — is the Figma ready and the Jira state aligned?
+```
 
-**Canonical** (lifted directly from [`bitwarden.com/brand`](https://bitwarden.com/brand)):
+```
+We keep building variations of this segmented selector — should it become a core component?
+```
 
-- The published color palette (Bitwarden Blue, Deep Blue, Teal, Light Teal, Green, Red, Yellow, and the neutral ramp).
-- **Inter** as the primary typeface.
-- The official logo lockup (horizontal preferred), clear-space rules, and the canonical SVG URL.
-- The **36px rounded-radius foundation** — "buttons are the only exception."
+```
+PM created the epic, designs are at 60%. Walk me through the Jira choreography so engineering sees the right state.
+```
 
-**Pragmatic** (the brand site is silent — the deliverable still has to choose):
+## References
 
-- Dark vs. light surface mode.
-- Specific heading scale, line height, weight choices.
-- Code-font choice.
-- Component shapes (cards, banners, chips, toolbars, badges).
-- Voice/tone.
-- Accessibility/contrast specifics (defer to WCAG AA).
-
-The skill suggests safe defaults for the pragmatic items but never pretends they are brand canon.
-
-## Source of truth
-
-[`bitwarden.com/brand`](https://bitwarden.com/brand) is the only canonical source. If you find a conflict between this plugin and the brand site, the brand site wins — file an issue so the plugin can be corrected.
-
-## See it applied
-
-Open [`examples/on-brand-one-pager.html`](examples/on-brand-one-pager.html) in a browser. It demonstrates the canonical bits applied correctly — palette, Inter, shield, 36px radius — and is intentionally plain so it doesn't telegraph a component vocabulary. **One valid composition, not the prescribed composition.**
-
-## Out of scope
-
-- Product UI styling. Use `@bitwarden/components` in `bitwarden/clients`.
-- A Bitwarden component vocabulary. Not part of brand canon.
-- Voice/tone guide. Not in the brand site yet.
+- [bitwarden.com/brand](https://bitwarden.com/brand/) — brand guidelines hub.
+- [bitwarden/brand](https://github.com/bitwarden/brand) — brand assets repository.
+- [Weekly Design Critique & Etiquette (Quick Guide)](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/2329542659)
+- [Product Design Review Guidelines](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/469925913)
+- [Creating new design patterns](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/665780251)
+- [Modifying an existing Design System component](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/1804206168)
+- [Product and Design Jira Process](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/1828094078)
+- [Component Library](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/293109785)
+- [Figma Dev Mode MCP Server — Guide](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Dev-Mode-MCP-Server)
+- [Figma Dev Mode MCP Server — Tools and Prompts](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/)

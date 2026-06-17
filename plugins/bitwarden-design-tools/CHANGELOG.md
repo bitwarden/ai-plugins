@@ -1,22 +1,36 @@
 # Changelog
 
-All notable changes to the Bitwarden Design Tools Plugin will be documented in this file.
+All notable changes to the `bitwarden-design-tools` plugin will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2026-06-17
+
+### Changed
+
+- `applying-bitwarden-branding` now covers both **building** on-brand standalone deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and **reviewing** whether a deliverable is on-brand. Reviews are calibrated to separate canonical violations from brand-silent pragmatic choices. The canon is now bundled (assets + tokens) for offline, verbatim use rather than referenced externally, and the skill composes with the rest of the design suite (`using-figma`, `content-style-guide`, `preparing-design-handoff`, `evolving-design-system-components`).
+
+### Added
+
+- Bundled brand assets for `applying-bitwarden-branding`: `bitwarden-tokens.css` (palette + 36px radius + Inter on `:root`), the official lockup (`bitwarden-lockup-official.svg`), and derived per-variant SVGs (horizontal and vertical lockups, shield, wordmark, in blue and white), each with path data verbatim from the official lockup.
+- Reference docs `typography.md` and `logo-usage.md`, and `examples/on-brand-one-pager.html` demonstrating light and dark compositions.
+- `scripts/refresh-brand-canon.sh` to verify or refresh the bundled palette against the brand repository's `palette.scss` (drift guard; intended to run in CI and on demand).
+
+### Fixed
+
+- `--bw-yellow` corrected to `#FDC700` to match the brand repository's `$tertiary-yellow` (was `#FFD700`).
 
 ## [0.1.0] - 2026-05-22
 
 ### Added
 
-- New `applying-bitwarden-branding` skill that applies Bitwarden's canonical brand identity (palette, Inter, official logo lockup, 36px radius foundation) to standalone HTML deliverables — recaps, dashboards, mockups, one-pagers, slides. The skill is explicit about the boundary between **canonical** brand guidance (lifted from `bitwarden.com/brand`) and **pragmatic** deliverable choices the brand site is silent on (surface mode, heading scale, code font, component shapes, voice/tone, accessibility specifics).
-- Reference docs: `color-palette.md`, `typography.md`, `logo-usage.md`.
-- Assets:
-  - `bitwarden-tokens.css` — palette + radius + Inter on `:root`. Intentionally lean: no component CSS, no dark-surface vars, no gradients.
-  - `bitwarden-lockup-official.svg` — the full official lockup file, verbatim from `images.ctfassets.net/.../BitwardenLogo.svg`. Contains every variant and color on one canvas; serves as the canonical reference.
-  - Derived per-variant assets, each with its path data extracted verbatim from the official lockup (only the `<svg>` wrapper and `viewBox` crop are local):
-    - `bitwarden-lockup-horizontal-blue.svg`, `bitwarden-lockup-horizontal-white.svg`
-    - `bitwarden-lockup-vertical-blue.svg`, `bitwarden-lockup-vertical-white.svg`
-    - `bitwarden-shield-blue.svg`, `bitwarden-shield-white.svg`
-    - `bitwarden-wordmark-blue.svg`, `bitwarden-wordmark-white.svg`
-- Example: `on-brand-one-pager.html` demonstrating both a **light surface** and a **dark surface** composition. The dark surface is labeled pragmatic and derives the background from `--bw-deep-blue` rather than introducing a new neutral. Explicitly not a prescribed component vocabulary.
+- Initial release. `bitwarden-design-tools` is the toolkit half of the design plugin pair — non-persona skills for the design lifecycle, composed by the `bitwarden-designer` agent and usable standalone.
+- Six skills:
+  - `content-style-guide` — Bitwarden's product content style guide for GUI copy. Ported from the `designer-agent-skills` branch in `bitwarden/clients`, with progressive disclosure into `references/grammar-mechanics.md` and `references/accessibility-rules.md`.
+  - `using-figma` — read and inspect Figma designs via the Dev Mode MCP server. Read-only scope by `allowed-tools`; per-job-to-be-done tool selection across the read surface, with setup notes in `references/setup.md` and per-tool reference deferred to Figma's canonical docs.
+  - `applying-bitwarden-branding` — apply Bitwarden brand standards (logo, color, typography, iconography, capitalization) grounded in [bitwarden.com/brand](https://bitwarden.com/brand/) and the [bitwarden/brand](https://github.com/bitwarden/brand) repository. Full palette and asset inventory in `references/color-palette.md` and `references/brand-assets.md`.
+  - `preparing-design-handoff` — the end-of-In-Design gate / checklist. Confirm the Figma file is Ready-for-Dev (sections aligned to stories, tokens library-bound, strings annotated, edge states covered) and that the Jira state is aligned (Figma linked to the Epic's Design field, sections marked Ready for Dev, EM transitions the Epic).
+  - `evolving-design-system-components` — propose new patterns or modify existing components per the published governance process. Figma conventions in `references/figma-conventions.md`.
+  - `navigating-design-jira-process` — final designs attached to tickets, the 30/60/90 critique cadence tracked in Figma, status transitions on engineering epics and stories, and the one-off engineering story flow (link Figma to the story's Design field, unassign, comment that the design is ready).
+- Required cross-plugin dependency on `bitwarden-atlassian-tools` for Confluence access to the canonical design-team process pages.

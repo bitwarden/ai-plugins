@@ -1,46 +1,68 @@
-# Bitwarden color palette
+# Bitwarden Color Palette — Full Reference
 
-Source of truth: [`bitwarden.com/brand`](https://bitwarden.com/brand). The HEX/RGB/CMYK values below are lifted from the published palette. Use only these colors. Do not invent shades, tints, or alternate steps.
+Source of truth: [bitwarden.com/brand](https://bitwarden.com/brand/) and the
+[bitwarden/brand](https://github.com/bitwarden/brand) repository, specifically
+`/brand-colors/palette.scss`.
 
-## Primary
+## Branding colors
 
-| Name           | HEX       | RGB           | CMYK               |
-| -------------- | --------- | ------------- | ------------------ |
-| Bitwarden Blue | `#175DDC` | 23 / 93 / 220 | 84 / 66 / 0 / 0    |
-| Deep Blue      | `#0C3276` | 12 / 50 / 118 | 100 / 91 / 26 / 12 |
+| Color                | HEX       | RGB             | HSL                      | SCSS variable           |
+| -------------------- | --------- | --------------- | ------------------------ | ----------------------- |
+| Bitwarden Blue       | `#175DDC` | `23, 93, 220`   | `hsla(219, 81%, 48%, 1)` | `$bitwarden-blue`       |
+| Deep Blue            | `#0C3276` | `12, 50, 118`   | `hsla(219, 81%, 25%, 1)` | `$deep-blue`            |
+| Off White            | `#F3F6F9` | `243, 246, 249` | `hsla(210, 33%, 96%, 1)` | `$off-white`            |
+| True White           | `#FFFFFF` | `255, 255, 255` | `hsla(0, 0%, 100%, 1)`   | `$true-white`           |
+| True Black           | `#000000` | `0, 0, 0`       | `hsla(0, 0%, 0%, 1)`     | `$true-black`           |
+| Light Grey           | `#D8E2EB` | `216, 226, 235` | —                        | `$light-grey`           |
+| Medium Grey          | `#99A7B5` | `153, 167, 181` | —                        | —                       |
+| Teal Highlight       | `#2CDDE9` | `44, 221, 233`  | `hsla(184, 81%, 54%, 1)` | `$teal-highlight`       |
+| Light Teal Highlight | `#A2F4FD` | `162, 244, 253` | `hsla(187, 96%, 81%, 1)` | `$light-teal-highlight` |
 
-## Accents
+## Tertiary colors
 
-| Name       | HEX       | RGB             | CMYK            |
-| ---------- | --------- | --------------- | --------------- |
-| Teal       | `#2CDDE9` | 44 / 221 / 233  | 58 / 0 / 15 / 0 |
-| Light Teal | `#A2F4FD` | 162 / 244 / 253 | 30 / 0 / 5 / 0  |
+Per the brand site: "Green, Yellow, and Red should be used sparingly, primarily in product
+graphics and for success/error communications." Treat them as state colors, not headline
+colors.
 
-## Semantic
+| Color           | HEX       | RGB             | HSL                      | SCSS variable      | Typical use                |
+| --------------- | --------- | --------------- | ------------------------ | ------------------ | -------------------------- |
+| Tertiary Green  | `#7BF1A8` | `123, 241, 168` | `hsla(143, 80%, 71%, 1)` | `$tertiary-green`  | Success states             |
+| Tertiary Yellow | `#FDC700` | `253, 199, 0`   | `hsla(47, 100%, 50%, 1)` | `$tertiary-yellow` | Warning states             |
+| Tertiary Red    | `#FF6550` | `255, 101, 80`  | `hsla(5, 100%, 66%, 1)`  | `$tertiary-red`    | Error / destructive states |
 
-Per the brand site: _"The tertiary Green, Yellow, and Red should be used sparingly, primarily in product graphics and for success/error communications."_
+## CMYK (for print)
 
-| Name   | HEX       | RGB             | CMYK             |
-| ------ | --------- | --------------- | ---------------- |
-| Green  | `#7BF1A8` | 123 / 241 / 168 | 49 / 0 / 30 / 5  |
-| Red    | `#FF6550` | 255 / 101 / 80  | 0 / 60 / 69 / 0  |
-| Yellow | `#FDC700` | 253 / 199 / 0   | 0 / 21 / 100 / 1 |
+The brand site lists CMYK alongside HEX/RGB for use in print and produced materials. Pull from
+the brand site directly when print specs are needed — these are not in the SCSS file.
 
-> Note on Yellow: `#FDC700` (RGB 253, 199, 0; HSL 47°, 100%, 50%) is the value published in the brand repository's source of truth, [`brand-colors/palette.scss`](https://github.com/bitwarden/brand/blob/HEAD/brand-colors/palette.scss) (`$tertiary-yellow`). Confirm at any time with `scripts/refresh-brand-canon.sh --verify`.
+| Color           | CMYK            |
+| --------------- | --------------- |
+| Bitwarden Blue  | 84, 66, 0, 0    |
+| Deep Blue       | 100, 91, 26, 12 |
+| Off White       | 3, 1, 1, 0      |
+| True White      | 0, 0, 0, 0      |
+| True Black      | 75, 68, 67, 90  |
+| Light Grey      | 14, 6, 3, 0     |
+| Medium Grey     | 42, 28, 22, 0   |
+| Teal Highlight  | 58, 0, 15, 0    |
+| Light Teal      | 30, 0, 5, 0     |
+| Tertiary Green  | 49, 0, 30, 5    |
+| Tertiary Yellow | 0, 21, 100, 1   |
+| Tertiary Red    | 0, 60, 69, 0    |
 
-## Neutrals
+## Application rules
 
-| Name        | HEX       | RGB             | CMYK              |
-| ----------- | --------- | --------------- | ----------------- |
-| True White  | `#FFFFFF` | 255 / 255 / 255 | 0 / 0 / 0 / 0     |
-| Off White   | `#F3F6F9` | 243 / 246 / 249 | 3 / 1 / 1 / 0     |
-| Light Grey  | `#D8E2EB` | 216 / 226 / 235 | 14 / 6 / 3 / 0    |
-| Medium Grey | `#99A7B5` | 153 / 167 / 181 | 42 / 28 / 22 / 0  |
-| True Black  | `#000000` | 0 / 0 / 0       | 75 / 68 / 67 / 90 |
+- **Primary surfaces** lean on Bitwarden Blue and Deep Blue. Light surfaces use Off White or
+  True White; dark surfaces use Deep Blue or True Black.
+- **Highlights** use Teal Highlight and Light Teal Highlight, paired with the blues.
+- **Greys** (Light Grey, Medium Grey) carry secondary surfaces, dividers, and disabled states.
+- **Tertiary palette is restrained.** Two or three tertiary swatches on one screen is usually
+  too many. State semantics (success/warning/error) are the right use; decorative use is not.
 
 ## Recommended pairings (WCAG AA, body-text scale)
 
-Pairings labeled "AA" hit at least 4.5:1 for normal text. Pairings labeled "AA-large" hit at least 3:1 — use only for ≥18pt or ≥14pt bold.
+Pairings labeled "AA" hit at least 4.5:1 for normal text. Pairings labeled "AA-large" hit at
+least 3:1 — use only for ≥18pt or ≥14pt bold.
 
 | Foreground        | Background        | Status   | Notes                                                      |
 | ----------------- | ----------------- | -------- | ---------------------------------------------------------- |
@@ -52,13 +74,40 @@ Pairings labeled "AA" hit at least 4.5:1 for normal text. Pairings labeled "AA-l
 | `--bw-true-white` | `--bw-blue`       | AA-large | Headings or CTAs, not body.                                |
 | `--bw-deep-blue`  | `--bw-light-teal` | AA       | Accent panel with readable body.                           |
 
-> The brand site does not publish a contrast matrix. The pairings above are pragmatic — verify against the actual size, weight, and rendering of your deliverable using a contrast checker (e.g. WebAIM).
+> The brand site does not publish a contrast matrix. The pairings above are pragmatic — verify
+> against the actual size, weight, and rendering of the deliverable using a contrast checker
+> (e.g. WebAIM).
 
 ## Surface choices (pragmatic — the brand site is silent)
 
 The brand site does not prescribe a surface mode for deliverables. Two safe defaults:
 
-- **Light surface** — use `--bw-off-white` or `--bw-true-white` as the page background, `--bw-deep-blue` for text, `--bw-blue` and `--bw-teal` for accents.
-- **Dark surface** — derive the page background from `--bw-deep-blue` (use it directly, or compose a slightly lighter shade on top via a 10–20% opacity `--bw-true-white` layer). **Do not invent a new dark neutral.** Use `--bw-true-white` for body text and `--bw-teal` / `--bw-light-teal` for accents.
+- **Light surface** — use `--bw-off-white` or `--bw-true-white` as the page background,
+  `--bw-deep-blue` for text, `--bw-blue` and `--bw-teal` for accents.
+- **Dark surface** — derive the page background from `--bw-deep-blue` (use it directly, or
+  compose a slightly lighter shade on top via a 10-20% opacity `--bw-true-white` layer). **Do
+  not invent a new dark neutral.** Use `--bw-true-white` for body text and `--bw-teal` /
+  `--bw-light-teal` for accents.
 
-Whichever you pick, document the choice in the deliverable's own README — it isn't brand canon and shouldn't be presented as such.
+Whichever surface is chosen, document the decision in the deliverable so a reader knows it is a
+deliverable-level call, not brand canon.
+
+## Common off-brand patterns to catch
+
+- **Off-system blues.** Anything that isn't `#175DDC` or `#0C3276` claiming to be "the
+  Bitwarden blue."
+- **Tertiary green or yellow used as a headline color.** Reserved for state communication.
+- **Pure black (`#000000`) on pure white (`#FFFFFF`) at scale** — usable for text, but Off
+  White (`#F3F6F9`) is the default light surface; not the sole option but more often correct.
+- **Raw hex values in Figma instead of library-bound variables.** Compose
+  `Skill(using-figma)` with `get_variable_defs` to confirm library binding before claiming a
+  design is on-brand.
+
+## When this reference is outdated
+
+Treat the brand site and brand repo as authoritative. If a color appears in product code but
+not on this page, check `brand-colors/palette.scss` in the repo first — that file is the
+canonical SCSS source and is what this reference mirrors. Run
+`scripts/refresh-brand-canon.sh --verify` to compare the bundled tokens against that source at
+any time. If the palette has drifted, update this file (and `assets/bitwarden-tokens.css`) in a
+separate PR.

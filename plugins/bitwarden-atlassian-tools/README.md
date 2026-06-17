@@ -104,3 +104,4 @@ Features:
 
 - Claude Code with MCP support
 - Atlassian API credentials (see Installation)
+- Node.js 22+ with [Corepack](https://nodejs.org/api/corepack.html) enabled — on first run the bundled MCP server installs and builds itself with [pnpm](https://pnpm.io/installation) via Corepack
