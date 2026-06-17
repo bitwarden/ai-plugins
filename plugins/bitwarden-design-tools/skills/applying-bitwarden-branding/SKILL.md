@@ -1,7 +1,7 @@
 ---
 name: applying-bitwarden-branding
 description: Apply or review Bitwarden branding on standalone shareable deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and design-adjacent assets. Use when building or auditing a Bitwarden-audience deliverable, on explicit asks like "make this look like Bitwarden", "Bitwarden-themed deck", "is this on-brand?", or "brand-check this", and proactively when producing a shareable Bitwarden deliverable with no other brand specified. Not for product UI in bitwarden/clients, the web vault, or mobile apps (use @bitwarden/components), third-party work, or partner co-branding.
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh:*), Read(${CLAUDE_SKILL_DIR}/references/*), Read(${CLAUDE_SKILL_DIR}/assets/*)
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh:*)
 ---
 
 # Applying Bitwarden branding
@@ -12,7 +12,7 @@ First, confirm the surface. If the target is product UI (`bitwarden/clients`, th
 
 [`bitwarden.com/brand`](https://bitwarden.com/brand) and its backing repository [`github.com/bitwarden/brand`](https://github.com/bitwarden/brand). Everything canonical here mirrors those; on any conflict, the brand repository's published values win.
 
-The canon is bundled in this skill (`assets/`, `references/`) so it is available offline and the logo can be embedded verbatim with no network round-trip. The bundle is the reliable default.
+The canon is bundled in this skill (`assets/`, `references/`) so it is available offline and the logo can be embedded verbatim with no network round-trip. The bundle is the reliable default. Every file named in this skill (under `assets/`, `references/`, `examples/`, and `scripts/`) is present exactly as written, so reference it directly; there is no need to list a directory to confirm a file exists.
 
 Staying current is optional. Bundled values can fall behind the source over time. When network access is available, run the drift check first:
 
