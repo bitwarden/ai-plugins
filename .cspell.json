@@ -152,7 +152,10 @@
     "xoxb",
     "Zeroize",
     "zeroization",
-    "zeroized"
+    "zeroized",
+    "offbrand",
+    "onbrand",
+    "scriptable"
   ],
   "flagWords": [],
   "ignorePaths": [

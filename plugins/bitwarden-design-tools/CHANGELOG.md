@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bundled brand assets for `applying-bitwarden-branding`: `bitwarden-tokens.css` (palette + 36px radius + Inter on `:root`), the official lockup (`bitwarden-lockup-official.svg`), and derived per-variant SVGs (horizontal and vertical lockups, shield, wordmark, in blue and white), each with path data verbatim from the official lockup.
 - Reference docs `typography.md` and `logo-usage.md`, and `examples/on-brand-one-pager.html` demonstrating light and dark compositions.
 - `scripts/verify-brand-canon.sh` to detect drift between the bundled palette and the brand repository's `palette.scss` and report the correct values to use (drift detector; runs on demand). It never modifies the bundle.
+- `evals/` regression harness for `applying-bitwarden-branding`: mock-only off-brand and on-brand fixtures, a pre-registered objective rubric, and a deterministic grader (`grade.py`) that reads the canonical palette and the official-logo signatures from the live bundled assets so it tracks canon changes. The grader covers the context-free checks (Inter, primary palette, verbatim lockup, 36px radius, off-brand-font and off-palette detection); the calibration dimensions (review specificity, false-positive/over-flagging) are left to a blind LLM grader.
 
 ### Fixed
 

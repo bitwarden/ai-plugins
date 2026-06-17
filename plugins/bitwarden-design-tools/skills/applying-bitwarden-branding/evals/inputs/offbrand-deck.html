@@ -1,0 +1,178 @@
+<!doctype html>
+<!--
+  MOCK FIXTURE — fictional content, no real data.
+  Deliberately OFF-BRAND: non-Inter display/mono fonts, an invented slate/green
+  palette (no canonical Bitwarden hexes), no official lockup, small radii well
+  below the brand foundation. Used by the apply and review-true-positive evals.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project Atlas — Service Reliability Review</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #0f172a;
+        --panel: #1e293b;
+        --panel-2: #243244;
+        --muted: #7a8a9c;
+        --line: #2d3b4f;
+        --green: #46e08a;
+        --green-dim: #2a8f58;
+        --amber: #f5b942;
+        --coral: #f06a5d;
+        --cyan: #5ec8e5;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ink);
+        color: #e8eef5;
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+      }
+      h1,
+      h2,
+      .kicker {
+        font-family: "Big Shoulders Display", Impact, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      code,
+      .metric {
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .slide {
+        min-height: 88vh;
+        padding: 64px 80px;
+        border-bottom: 1px solid var(--line);
+      }
+      .kicker {
+        color: var(--green);
+        font-size: 0.9rem;
+      }
+      h1 {
+        font-size: 3.4rem;
+        margin: 8px 0 16px;
+      }
+      h2 {
+        font-size: 2rem;
+        margin: 0 0 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 24px;
+      }
+      .card.alt {
+        background: var(--panel-2);
+        border-radius: 4px;
+      }
+      .metric {
+        font-size: 2.6rem;
+        color: var(--cyan);
+      }
+      .delta-up {
+        color: var(--green);
+      }
+      .delta-down {
+        color: var(--coral);
+      }
+      .pill {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 3px;
+        background: var(--amber);
+        color: #1a1407;
+        font-weight: 600;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .logo {
+        font-family: "Big Shoulders Display", sans-serif;
+        font-size: 1.4rem;
+        color: #fff;
+      }
+      .logo span {
+        color: var(--green);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide">
+      <div class="logo">ATLAS<span>/</span>OPS</div>
+      <p class="kicker">Internal Decision Deck · Q3</p>
+      <h1>Project Atlas: Service Reliability Review</h1>
+      <p class="muted">
+        A fictional internal deck used as an off-brand fixture. None of these
+        numbers are real.
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">Where we are</p>
+      <h2>Reliability at a glance</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="metric">99.2<span style="font-size: 1rem">%</span></div>
+          <p class="muted">Availability (30d)</p>
+          <p class="delta-down">▼ 0.4 pts vs target</p>
+        </div>
+        <div class="card alt">
+          <div class="metric">412<span style="font-size: 1rem">ms</span></div>
+          <p class="muted">p95 latency</p>
+          <p class="delta-up">▲ improved 8%</p>
+        </div>
+        <div class="card">
+          <div class="metric">7</div>
+          <p class="muted">Sev-2 incidents</p>
+          <span class="pill">needs attention</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">What broke</p>
+      <h2>Top incident themes</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Connection pool exhaustion</h3>
+          <p class="muted">Recurred across three services this quarter.</p>
+          <code>pool.max = 20 // too low</code>
+        </div>
+        <div class="card">
+          <h3>Cache stampede</h3>
+          <p class="muted">Thundering herd after a deploy-time flush.</p>
+        </div>
+        <div class="card">
+          <h3>Retry storms</h3>
+          <p class="muted">Unbounded client retries amplified a brownout.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">The ask</p>
+      <h2>Proposed investments</h2>
+      <ul>
+        <li>Adopt adaptive connection pooling across the platform.</li>
+        <li>Standardize a retry budget with jittered backoff.</li>
+        <li>Fund an on-call ergonomics pass for the reliability rotation.</li>
+      </ul>
+      <p class="muted">Decision requested by end of quarter.</p>
+    </section>
+  </body>
+</html>

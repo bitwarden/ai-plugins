@@ -1,0 +1,49 @@
+{
+  "skill_name": "applying-bitwarden-branding",
+  "purpose": "Regression evals for the branding skill across both jobs it does: applying brand to a deliverable, and reviewing a deliverable for brand compliance. Run the skill (with-skill) against these subjects and grade the outputs; compare to a no-skill baseline when measuring the skill's contribution.",
+  "subjects": {
+    "offbrand_deck": "inputs/offbrand-deck.html — MOCK fictional decision deck, deliberately off-brand (Big Shoulders / IBM Plex fonts, invented slate/green palette, no official lockup, sub-36px radii). Contains no real data.",
+    "onbrand_control": "inputs/onbrand-control.html — MOCK fictional recap page, substantially on-brand (Inter, Bitwarden palette, 36px radius, official shield embedded) with brand-silent defensible choices (a Deep-Blue-derived dark surface, data-viz series) and one genuine minor fault (an off-palette orange accent). Contains no real data."
+  },
+  "evals": [
+    {
+      "id": 1,
+      "name": "apply-offbrand-deck",
+      "task": "apply",
+      "prompt": "This is an internal decision deck (offbrand-deck.html). I want to share it more widely at Bitwarden — make it look like a polished, on-brand Bitwarden deliverable. Update the file in place or save a branded copy.",
+      "files": ["inputs/offbrand-deck.html"],
+      "expected_output": "A branded HTML deck: Inter typeface, Bitwarden palette (#175DDC primary, Deep Blue surfaces, Teal accent), the OFFICIAL Bitwarden lockup (not redrawn), 36px radius on container surfaces, no invented off-palette hexes. Slide structure preserved.",
+      "grades": ["grade.py:grade_apply"]
+    },
+    {
+      "id": 2,
+      "name": "apply-from-scratch",
+      "task": "apply",
+      "prompt": "Generate a Bitwarden-themed HTML one-pager announcing a new engineering initiative to the wider company. Make it on-brand and shareable.",
+      "files": [],
+      "expected_output": "A from-scratch on-brand one-pager. Tests whether the skill fires, self-supplies canonical brand (palette / Inter / official lockup / 36px radius) rather than improvising, and references bundled assets rather than redrawing them.",
+      "grades": ["grade.py:grade_apply"]
+    },
+    {
+      "id": 3,
+      "name": "review-tp-offbrand-deck",
+      "task": "review",
+      "prompt": "Is this deck (offbrand-deck.html) on-brand for Bitwarden? Walk me through exactly what's off and how to fix each thing.",
+      "files": ["inputs/offbrand-deck.html"],
+      "expected_output": "A structured review detecting the real brand gaps: non-Inter fonts (Big Shoulders / IBM Plex), non-brand palette (slate/green, not Bitwarden blue/teal), missing official lockup, non-36px radii. Each finding tied to a specific brand rule, with concrete corrections.",
+      "grades": ["grade.py:grade_review_tp", "blind-llm:cites_specific_values"]
+    },
+    {
+      "id": 4,
+      "name": "review-fp-onbrand-control",
+      "task": "review",
+      "prompt": "Is this page (onbrand-control.html) on-brand for Bitwarden? Flag anything that's off.",
+      "files": ["inputs/onbrand-control.html"],
+      "expected_output": "A review of an already-on-brand page. Should confirm the palette / Inter / lockup are correct, treat the Deep-Blue-derived dark surface and the data-viz series as brand-silent judgment calls (not failures), and flag the one genuine fault (the off-palette orange hover). Measures false-positive rate and over-flagging.",
+      "grades": [
+        "blind-llm:affirms_correct_core",
+        "blind-llm:false_positive_count"
+      ]
+    }
+  ]
+}
