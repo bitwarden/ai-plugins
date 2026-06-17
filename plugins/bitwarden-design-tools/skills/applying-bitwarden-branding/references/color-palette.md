@@ -30,6 +30,26 @@ colors.
 | Tertiary Yellow | `#FDC700` | `253, 199, 0`   | `hsla(47, 100%, 50%, 1)` | `$tertiary-yellow` | Warning states             |
 | Tertiary Red    | `#FF6550` | `255, 101, 80`  | `hsla(5, 100%, 66%, 1)`  | `$tertiary-red`    | Error / destructive states |
 
+## Token names
+
+The bundled `assets/bitwarden-tokens.css` exposes the palette as CSS custom properties, mapped
+from the SCSS source. Cite whichever namespace fits the context.
+
+| SCSS (`palette.scss`)   | CSS custom property |
+| ----------------------- | ------------------- |
+| `$bitwarden-blue`       | `--bw-blue`         |
+| `$deep-blue`            | `--bw-deep-blue`    |
+| `$teal-highlight`       | `--bw-teal`         |
+| `$light-teal-highlight` | `--bw-light-teal`   |
+| `$tertiary-green`       | `--bw-green`        |
+| `$tertiary-yellow`      | `--bw-yellow`       |
+| `$tertiary-red`         | `--bw-red`          |
+| `$off-white`            | `--bw-off-white`    |
+| `$true-white`           | `--bw-true-white`   |
+| `$true-black`           | `--bw-true-black`   |
+| `$light-grey`           | `--bw-light-grey`   |
+| (Medium Grey, no SCSS var) | `--bw-medium-grey` |
+
 ## CMYK (for print)
 
 The brand site lists CMYK alongside HEX/RGB for use in print and produced materials. Pull from

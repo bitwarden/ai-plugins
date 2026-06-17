@@ -1,6 +1,6 @@
 ---
 name: applying-bitwarden-branding
-description: Apply or review Bitwarden branding on standalone shareable deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and design-adjacent assets. Use when building or auditing a Bitwarden-audience deliverable, on explicit asks like "make this look like Bitwarden", "Bitwarden-themed deck", "is this on-brand?", or "brand-check this", and proactively when producing a shareable deliverable with no other brand specified. Not for product UI in bitwarden/clients, the web vault, or mobile apps (use @bitwarden/components), third-party work, or partner co-branding.
+description: Apply or review Bitwarden branding on standalone shareable deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and design-adjacent assets. Use when building or auditing a Bitwarden-audience deliverable, on explicit asks like "make this look like Bitwarden", "Bitwarden-themed deck", "is this on-brand?", or "brand-check this", and proactively when producing a shareable Bitwarden deliverable with no other brand specified. Not for product UI in bitwarden/clients, the web vault, or mobile apps (use @bitwarden/components), third-party work, or partner co-branding.
 ---
 
 # Applying Bitwarden branding
@@ -30,12 +30,13 @@ It fetches the authoritative palette from the brand repository and reports any d
 
 ## The brand-canon checklist
 
-These four are non-negotiable. They come straight from the brand repository.
+These are non-negotiable. They come straight from the brand repository.
 
 1. Use only the published palette: Bitwarden Blue (`#175DDC`), Deep Blue (`#0C3276`), Teal (`#2CDDE9`), Light Teal (`#A2F4FD`), the tertiary Green/Red/Yellow, and the neutral ramp (True White, Off White, Light Grey, Medium Grey, True Black). Invent no shades, tints, or alternate steps. See [`references/color-palette.md`](references/color-palette.md) for HEX/RGB/CMYK.
 2. Use Inter for type, across headlines, copy, and text. See [`references/typography.md`](references/typography.md) for loading and fallback.
 3. Use the official logo lockup. Horizontal is preferred; vertical and product-specific lockups exist for specific cases. Honor clear-space rules. Embed the bundled SVG verbatim; do not recreate the shield from scratch. See [`references/logo-usage.md`](references/logo-usage.md).
 4. Apply the 36px rounded-radius foundation to container surfaces (panels, cards, hero sections, pills, badges). Buttons are the only canonical exception.
+5. Capitalize the B in Bitwarden, never the W. Lowercase "bitwarden" appears only inside the official logo lockup, never in copy, headlines, handles, or URLs.
 
 ## Quick start (build)
 
@@ -78,8 +79,8 @@ When asked whether something is on-brand, structure the answer as:
 
 Calibrate severity — this is where reviews go wrong. Separate canon violations from brand-silent choices:
 
-- Canon violation (flag it): off-palette color, non-Inter type, a recreated or altered logo, capitalizing the W in Bitwarden. These break the four non-negotiables.
-- Brand-silent choice (note as a judgment-call, never a hard failure): the existence of a dark surface mode, the 36px radius on an internal tool, emoji vs. custom icons, a code-font choice, loading Inter from a CDN. The brand does not rule on these. Mention them as optional refinements, but do not mark them as failures or non-negotiable violations. Over-flagging defensible pragmatic choices erodes trust in the review.
+- Canon violation (flag it): off-palette color, non-Inter type, a recreated or altered logo, capitalizing the W in Bitwarden. These break the brand canon.
+- Brand-silent choice (note as a judgment-call, never a hard failure): the existence of a dark surface mode, how strictly to apply the 36px radius to dense internal-tool components (the radius is canonical for primary brand surfaces; forcing it onto dense data cards is a judgment call), emoji vs. custom icons, a code-font choice, loading Inter from a CDN. The brand does not rule on these. Mention them as optional refinements, but do not mark them as failures or non-negotiable violations. Over-flagging defensible pragmatic choices erodes trust in the review.
 
 ## Within the design lifecycle
 
