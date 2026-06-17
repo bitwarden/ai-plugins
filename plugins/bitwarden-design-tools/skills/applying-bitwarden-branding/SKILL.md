@@ -13,13 +13,13 @@ First, confirm the surface. If the target is product UI (`bitwarden/clients`, th
 
 The canon is bundled in this skill (`assets/`, `references/`) so it is available offline and the logo can be embedded verbatim with no network round-trip. The bundle is the reliable default.
 
-Staying current is optional. Bundled values can fall behind the source over time. When network access is available, run the drift guard first:
+Staying current is optional. Bundled values can fall behind the source over time. When network access is available, run the drift check first:
 
 ```
-${CLAUDE_PLUGIN_ROOT}/skills/applying-bitwarden-branding/scripts/refresh-brand-canon.sh --verify
+${CLAUDE_PLUGIN_ROOT}/skills/applying-bitwarden-branding/scripts/verify-brand-canon.sh
 ```
 
-It fetches the authoritative palette from the brand repository and reports any drift against the bundle. On a reported mismatch, prefer the live value it prints. On error or no network, fall back to the bundled canon. The same script runs in CI to keep the bundle fresh.
+It fetches the authoritative palette from the brand repository and reports any drift. On a reported mismatch, use the correct value it prints when branding the deliverable; do not edit the bundled tokens in-session (refreshing them is a separate marketplace PR). On error or no network, fall back to the bundled canon. The same check runs in CI.
 
 ## The brand-canon checklist
 

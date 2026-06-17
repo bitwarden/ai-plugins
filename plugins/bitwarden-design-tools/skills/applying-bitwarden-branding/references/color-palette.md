@@ -128,6 +128,6 @@ deliverable-level call, not brand canon.
 Treat the brand site and brand repo as authoritative. If a color appears in product code but
 not on this page, check `brand-colors/palette.scss` in the repo first — that file is the
 canonical SCSS source and is what this reference mirrors. Run
-`scripts/refresh-brand-canon.sh --verify` to compare the bundled tokens against that source at
-any time. If the palette has drifted, update this file (and `assets/bitwarden-tokens.css`) in a
-separate PR.
+`scripts/verify-brand-canon.sh` to compare the bundled tokens against that source at any time;
+on drift it prints the correct values to use in the deliverable. Updating this file (and
+`assets/bitwarden-tokens.css`) to match is a separate PR.

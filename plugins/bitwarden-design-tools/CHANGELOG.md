@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bundled brand assets for `applying-bitwarden-branding`: `bitwarden-tokens.css` (palette + 36px radius + Inter on `:root`), the official lockup (`bitwarden-lockup-official.svg`), and derived per-variant SVGs (horizontal and vertical lockups, shield, wordmark, in blue and white), each with path data verbatim from the official lockup.
 - Reference docs `typography.md` and `logo-usage.md`, and `examples/on-brand-one-pager.html` demonstrating light and dark compositions.
-- `scripts/refresh-brand-canon.sh` to verify or refresh the bundled palette against the brand repository's `palette.scss` (drift guard; intended to run in CI and on demand).
+- `scripts/verify-brand-canon.sh` to detect drift between the bundled palette and the brand repository's `palette.scss` and report the correct values to use (drift detector; runs in CI and on demand). It never modifies the bundle.
 
 ### Fixed
 

@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 #
-# refresh-brand-canon.sh
+# verify-brand-canon.sh
 #
-# Drift guard for the bundled Bitwarden palette tokens. Compares the bundled
+# Drift detector for the bundled Bitwarden palette tokens. Compares the bundled
 # values in assets/bitwarden-tokens.css against the authoritative source,
-# bitwarden/brand (brand-colors/palette.scss), and either reports drift
-# (--verify) or rewrites the bundle to match (--refresh).
+# bitwarden/brand (brand-colors/palette.scss), and reports any drift along with
+# the correct live value to use.
 #
-# The bundle is the reliable runtime default; this script is how it stays fresh.
+# This script never modifies the bundle. If it reports drift, use the printed
+# "correct" values in the deliverable being branded. Refreshing the bundled
+# tokens themselves is a separate change to the bitwarden-design-tools plugin
+# (a marketplace PR), not something to do mid-session.
+#
 # Run it in CI (scheduled and on plugin PRs) and optionally before building a
-# deliverable when you have network access.
+# deliverable when network is available.
 #
-# Usage:
-#   refresh-brand-canon.sh            verify (default): exit 1 if the bundle drifted
-#   refresh-brand-canon.sh --verify   same as above
-#   refresh-brand-canon.sh --refresh  rewrite assets/bitwarden-tokens.css from source
-#
-# Degrades safely: no network or an upstream 404 leaves the bundle untouched and
-# exits non-zero so callers can fall back to the bundle.
+# Exit codes:
+#   0  bundle matches the source
+#   1  drift detected (correct values printed)
+#   2  could not fetch the source (offline / upstream moved); bundle untouched
 #
 # Requires: curl.
 
 set -euo pipefail
 
-MODE="${1:---verify}"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TOKENS="$SKILL_DIR/assets/bitwarden-tokens.css"
 SRC_URL="https://api.github.com/repos/bitwarden/brand/contents/brand-colors/palette.scss"
@@ -44,7 +44,7 @@ if [ ! -f "$TOKENS" ]; then
   exit 2
 fi
 
-echo "Fetching authoritative palette from bitwarden/brand ..."
+echo "Checking bundled brand tokens against bitwarden/brand ..."
 SCSS="$(curl -fsSL -H 'Accept: application/vnd.github.raw' "$SRC_URL")" || {
   echo "ERROR: could not fetch palette.scss (offline or upstream moved). Bundle unchanged." >&2
   exit 2
@@ -59,29 +59,24 @@ while IFS= read -r pair; do
   have="$(grep -iE "^[[:space:]]*${var}[[:space:]]*:" "$TOKENS" | grep -oiE '#[0-9a-f]{6}' | head -1 | tr 'A-F' 'a-f' || true)"
 
   if [ -z "$live" ]; then
-    echo "WARN: '$src_name' not found upstream (palette schema may have changed)"
+    echo "WARN: \$${src_name} not found upstream (palette schema may have changed)"
     drift=1
     continue
   fi
   if [ "$live" != "$have" ]; then
-    echo "DRIFT: $var  bundled=${have:-none}  source=$live  ($src_name)"
+    printf 'DRIFT  %-16s bundled %-9s correct %-9s  ($%s)\n' "$var" "${have:-none}" "$live" "$src_name"
     drift=1
-    if [ "$MODE" = "--refresh" ]; then
-      sed -i.bak -E "s|(${var}[[:space:]]*:[[:space:]]*)#[0-9a-fA-F]{6}|\\1${live}|" "$TOKENS" && rm -f "$TOKENS.bak"
-      echo "  refreshed $var to $live"
-    fi
   fi
 done <<EOF
 $MAP
 EOF
 
-if [ "$MODE" = "--refresh" ]; then
-  echo "Refresh complete. Review the diff and add a CHANGELOG entry before committing."
-  exit 0
-fi
-
 if [ "$drift" -ne 0 ]; then
-  echo "Brand-canon drift detected. Run with --refresh to sync, then review the diff." >&2
+  echo "" >&2
+  echo "Bundled brand tokens are out of date. Use the 'correct' values above in" >&2
+  echo "the deliverable you are branding. Do not edit the bundle here: refreshing" >&2
+  echo "assets/bitwarden-tokens.css is a separate change to the bitwarden-design-tools" >&2
+  echo "plugin (open a marketplace PR)." >&2
   exit 1
 fi
 
