@@ -24,9 +24,9 @@ Per the brand site: _"The tertiary Green, Yellow, and Red should be used sparing
 | ------ | --------- | --------------- | ---------------- |
 | Green  | `#7BF1A8` | 123 / 241 / 168 | 49 / 0 / 30 / 5  |
 | Red    | `#FF6550` | 255 / 101 / 80  | 0 / 60 / 69 / 0  |
-| Yellow | `#FFD700` | 255 / 215 / 0   | 0 / 16 / 100 / 0 |
+| Yellow | `#FDC700` | 253 / 199 / 0   | 0 / 21 / 100 / 1 |
 
-> Note on Yellow: the brand site's HEX field renders with a malformed value, but the published RGB (255, 215, 0) unambiguously resolves to `#FFD700`, which is also consistent with the published CMYK. If the brand site is later corrected, follow it.
+> Note on Yellow: `#FDC700` (RGB 253, 199, 0; HSL 47°, 100%, 50%) is the value published in the brand repository's source of truth, [`brand-colors/palette.scss`](https://github.com/bitwarden/brand/blob/HEAD/brand-colors/palette.scss) (`$tertiary-yellow`). Confirm at any time with `scripts/refresh-brand-canon.sh --verify`.
 
 ## Neutrals
 
