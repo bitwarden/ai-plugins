@@ -137,5 +137,18 @@ When the breakdown is reviewer-ready:
 - Save final state.
 - Surface any remaining `Open` clarifications and their owners.
 - Tell the user the breakdown is ready for a team-internal review and then the move to `Proposed`. This skill does not run that transition; it is a responsibility of the breakdown owner.
+- Offer a prototype draft PR. Use `AskUserQuestion` to ask whether to follow up with a prototype draft PR that includes all proposed changes across the affected repositoriers. If yes, proceed to **Optional: Prototype draft PR** below.
 
 The work is done when a reviewer who has never touched the code could read the breakdown and (a) understand the change, (b) see why it was chosen over the alternatives, and (c) identify what they would need to evaluate from their team's perspective.
+
+## Optional: Prototype draft PR
+
+A pull request that validates the architectural approach against real code. The artifact is a **draft PR**. Its job is to surface unknowns and expose the implications of the changes to the team to review.
+
+Constraints:
+
+- **Include all repos.** If the solution space includes multiple repositories, create a prototype pull request for each, linked to each other in the summary.
+- **Mark it clearly.** Title prefix `[Prototype]`. Body opens with: `Prototype for breakdown <link>. Not for merge. Validates: <one-sentence>. Out of scope: <list>.`
+- **Link back.** Add the PR link into the breakdown's Plan section under a `Prototype` subheading so reviewers see the artifact alongside the design.
+
+Invoke `Skill(creating-pull-request)` for the PR mechanics, and ensure the PR is opened as a **draft**. Surface any findings from prototyping (interface friction, hidden dependencies, larger-than-expected interface change) back into the Plan.
