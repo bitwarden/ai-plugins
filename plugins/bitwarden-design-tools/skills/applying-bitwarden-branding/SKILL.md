@@ -1,7 +1,7 @@
 ---
 name: applying-bitwarden-branding
 description: Apply or review Bitwarden branding on standalone shareable deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and design-adjacent assets. Use when building or auditing a Bitwarden-audience deliverable, on explicit asks like "make this look like Bitwarden", "Bitwarden-themed deck", "is this on-brand?", or "brand-check this", and proactively when producing a shareable Bitwarden deliverable with no other brand specified. Not for product UI in bitwarden/clients, the web vault, or mobile apps (use @bitwarden/components), third-party work, or partner co-branding.
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh:*)
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh:*), Read(${CLAUDE_SKILL_DIR}/references/*), Read(${CLAUDE_SKILL_DIR}/assets/*)
 ---
 
 # Applying Bitwarden branding
