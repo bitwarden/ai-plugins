@@ -5,6 +5,8 @@ description: Apply or review Bitwarden branding on standalone shareable delivera
 
 # Applying Bitwarden branding
 
+First, confirm the surface. If the target is product UI (`bitwarden/clients`, the web vault, or mobile apps), third-party work, or partner co-branding, stop: those use `@bitwarden/components` or another brand, not this skill.
+
 ## Single source of truth
 
 [`bitwarden.com/brand`](https://bitwarden.com/brand) and its backing repository [`github.com/bitwarden/brand`](https://github.com/bitwarden/brand). Everything canonical here mirrors those; on any conflict, the brand repository's published values win.
