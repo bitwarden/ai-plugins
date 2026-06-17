@@ -25,7 +25,7 @@ digraph developing_the_breakdown_plan {
   SelfReview     [shape=box,     label="Activity 5:\nSelf-review\n(template coverage,\nspec coverage,\nplaceholders, consistency)"];
   ReviewerReady  [shape=diamond, label="Reviewer-ready?"];
   OfferPrototype [shape=diamond, label="Create prototype\ndraft PR?"];
-  Prototype      [shape=box,     label="Optional:\nPrototype draft PR\n(one layer, one repo,\ndriving team's CODEOWNERS)"];
+  Prototype      [shape=box,     label="Optional:\nPrototype draft PR(s)\n(one draft PR per affected repo,\nlinked back to the breakdown)"];
   Done           [shape=ellipse, label="Done →\nteam-internal review,\nthen move to Proposed"];
 
   Start         -> EntryMode;
