@@ -5,15 +5,6 @@ description: Apply or review Bitwarden branding on standalone shareable delivera
 
 # Applying Bitwarden branding
 
-## What this skill is for
-
-Two jobs, one brand canon:
-
-- **Build** an on-brand standalone deliverable: dashboards, recaps, reports, slide decks, one-pagers, mockups. Things a person opens, screenshots, and shares.
-- **Review** whether an existing deliverable — or a design-adjacent asset — is on-brand, and say precisely what to fix.
-
-Not for product UI. Work inside `bitwarden/clients`, the web vault, or a mobile app uses `@bitwarden/components` — a separate design system with its own tokens and conventions. This skill does not apply there.
-
 ## Single source of truth
 
 [`bitwarden.com/brand`](https://bitwarden.com/brand) and its backing repository [`github.com/bitwarden/brand`](https://github.com/bitwarden/brand). Everything canonical here mirrors those; on any conflict, the brand repository's published values win.
