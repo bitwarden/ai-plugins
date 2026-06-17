@@ -93,4 +93,4 @@ This skill also serves design work, not only standalone deliverables. When it do
 
 ## See it applied
 
-[`examples/on-brand-one-pager.html`](../../examples/on-brand-one-pager.html) applies the canon (palette, Inter, shield, 36px radius) across light and dark compositions. The dark composition is labeled pragmatic — background derived from `--bw-deep-blue`, elevated surfaces lifted with a small `--bw-true-white` overlay, no invented neutral. It is one valid composition, not the prescribed one. Build something richer when appropriate; keep the canon, swap the pragmatics to fit.
+[`examples/on-brand-one-pager.html`](examples/on-brand-one-pager.html) applies the canon (palette, Inter, shield, 36px radius) across light and dark compositions. The dark composition is labeled pragmatic — background derived from `--bw-deep-blue`, elevated surfaces lifted with a small `--bw-true-white` overlay, no invented neutral. It is one valid composition, not the prescribed one. Build something richer when appropriate; keep the canon, swap the pragmatics to fit.
