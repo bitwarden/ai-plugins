@@ -1,6 +1,7 @@
 ---
 name: applying-bitwarden-branding
 description: Apply or review Bitwarden branding on standalone shareable deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and design-adjacent assets. Use when building or auditing a Bitwarden-audience deliverable, on explicit asks like "make this look like Bitwarden", "Bitwarden-themed deck", "is this on-brand?", or "brand-check this", and proactively when producing a shareable Bitwarden deliverable with no other brand specified. Not for product UI in bitwarden/clients, the web vault, or mobile apps (use @bitwarden/components), third-party work, or partner co-branding.
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh:*)
 ---
 
 # Applying Bitwarden branding
@@ -16,7 +17,7 @@ The canon is bundled in this skill (`assets/`, `references/`) so it is available
 Staying current is optional. Bundled values can fall behind the source over time. When network access is available, run the drift check first:
 
 ```
-${CLAUDE_PLUGIN_ROOT}/skills/applying-bitwarden-branding/scripts/verify-brand-canon.sh
+${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh
 ```
 
 It fetches the authoritative palette from the brand repository and reports any drift. On a reported mismatch, use the correct value it prints when branding the deliverable; do not edit the bundled tokens in-session (refreshing them is a separate marketplace PR). On error or no network, fall back to the bundled canon. The same check runs in CI.
