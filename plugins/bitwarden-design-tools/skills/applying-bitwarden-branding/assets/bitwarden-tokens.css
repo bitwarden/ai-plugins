@@ -12,9 +12,12 @@
  *   - A component vocabulary. There are no card/button/banner/chip styles here
  *     because they are not part of the Bitwarden brand. Component shape is a
  *     pragmatic choice the deliverable makes.
- *   - A theme. There is no dark-surface variant here because the brand site
- *     is silent on dark surfaces. If you need dark mode, derive surface colors
- *     from Deep Blue (#0C3276) rather than inventing a new neutral.
+ *   - A theme. This file holds only canonical values, so it has no light/dark
+ *     surface tokens — those are deliverable-level. The skill ships BOTH modes
+ *     by default: drive the initial surface from the device setting
+ *     (@media (prefers-color-scheme: dark)) with a light/dark toggle that
+ *     overrides it, and derive the dark surface from Deep Blue (#0C3276) rather
+ *     than inventing a new neutral. See the skill's example for the pattern.
  *   - A type scale. Heading sizes, weights, and line-heights are pragmatic
  *     choices the deliverable makes.
  *

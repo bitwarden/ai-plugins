@@ -12,8 +12,10 @@
     - Inter from Google Fonts (canonical).
     - Inline shield in the header (canonical when used at chip scale).
     - 36px radius foundation on container surfaces (canonical).
-    - A light/dark surface toggle. The brand site is SILENT on surface
-      mode, so both modes are pragmatic. The dark mode derives its
+    - Both light and dark surfaces, shipped by default. The initial mode
+      follows the device (prefers-color-scheme) and a header toggle
+      overrides it. The brand site is silent on surface mode, so the
+      specific surface values are pragmatic: the dark mode derives its
       background from --bw-deep-blue rather than introducing a new
       neutral, per references/color-palette.md.
 
@@ -111,6 +113,29 @@
         --stat-value: var(--bw-teal);
       }
 
+      /*
+       * Default the surface to the device setting. This applies until the user
+       * makes an explicit choice (the toggle sets [data-theme]); data-theme="light"
+       * opts back out on a dark device. Same dark values as above — duplicated so
+       * no-JS and pre-JS rendering already match the device (no flash of light).
+       */
+      @media (prefers-color-scheme: dark) {
+        body:not([data-theme="light"]) {
+          --surface-page: var(--bw-deep-blue);
+          --surface-card: color-mix(
+            in srgb,
+            var(--bw-true-white) 6%,
+            var(--bw-deep-blue)
+          );
+          --text-primary: var(--bw-true-white);
+          --text-secondary: var(--bw-light-grey);
+          --text-on-card: var(--bw-light-grey);
+          --eyebrow-bg: color-mix(in srgb, var(--bw-teal) 18%, transparent);
+          --eyebrow-fg: var(--bw-light-teal);
+          --stat-value: var(--bw-teal);
+        }
+      }
+
       *,
       *::before,
       *::after {
@@ -192,8 +217,12 @@
         display: inline-block;
       }
 
-      body[data-theme="dark"] .theme-toggle .icon-sun,
-      body:not([data-theme="dark"]) .theme-toggle .icon-moon {
+      /*
+       * Pre-JS default shows the sun. The toggle script swaps the icon, label,
+       * and aria-pressed to match the effective mode (device default or the
+       * explicit override).
+       */
+      .theme-toggle .icon-moon {
         display: none;
       }
 
@@ -372,17 +401,6 @@
           class="theme-toggle"
           aria-label="Toggle light and dark surface"
           aria-pressed="false"
-          onclick="
-            (function (b) {
-              var d = b.dataset.theme === 'dark';
-              b.dataset.theme = d ? '' : 'dark';
-              var t = document.querySelector('.theme-toggle');
-              t.setAttribute('aria-pressed', (!d).toString());
-              t.querySelector('.label').textContent = d
-                ? 'Dark mode'
-                : 'Light mode';
-            })(document.body)
-          "
         >
           <svg
             class="icon icon-moon"
@@ -422,9 +440,9 @@
         <h1>The brand canon, applied.</h1>
         <p>
           Palette, Inter, the official shield, and the 36px radius foundation —
-          assembled into one valid composition. Toggle the surface mode in the
-          header to see the same composition rendered against light and dark
-          surfaces. Both are pragmatic; the canonical pieces are identical.
+          assembled into one valid composition. The surface follows your device
+          by default; use the header toggle to switch light and dark. The
+          canonical pieces are identical in both.
         </p>
       </section>
 
@@ -455,10 +473,12 @@
           of scaling the shield up.
         </p>
         <p>
-          Surface mode is a pragmatic decision the brand site does not
-          prescribe. The dark surface here derives its background from
+          Both surface modes ship by default: the page follows the device's
+          light/dark preference and the header toggle overrides it. The brand
+          site does not prescribe surface mode, so the values are pragmatic —
+          the dark surface derives its background from
           <code>--bw-deep-blue</code> and lifts elevated panels with a 6%
-          <code>--bw-true-white</code> overlay — no new neutral introduced.
+          <code>--bw-true-white</code> overlay, with no new neutral introduced.
         </p>
       </section>
 
@@ -467,5 +487,45 @@
         <a href="https://bitwarden.com/brand">bitwarden.com/brand</a>
       </footer>
     </div>
+
+    <script>
+      /*
+       * Surface mode: follow the device by default, let the toggle override.
+       * The CSS @media rule sets the initial surface from prefers-color-scheme;
+       * clicking the toggle writes [data-theme] to override it. While no
+       * explicit choice has been made, the page keeps following the device.
+       */
+      (function () {
+        var body = document.body;
+        var toggle = document.querySelector(".theme-toggle");
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+        function effectiveMode() {
+          return body.dataset.theme || (mq.matches ? "dark" : "light");
+        }
+
+        function sync() {
+          var dark = effectiveMode() === "dark";
+          toggle.setAttribute("aria-pressed", String(dark));
+          toggle.querySelector(".label").textContent = dark
+            ? "Light mode"
+            : "Dark mode";
+          toggle.querySelector(".icon-moon").style.display = dark ? "" : "none";
+          toggle.querySelector(".icon-sun").style.display = dark ? "none" : "";
+        }
+
+        toggle.addEventListener("click", function () {
+          body.dataset.theme = effectiveMode() === "dark" ? "light" : "dark";
+          sync();
+        });
+
+        // Keep following the device until the user makes an explicit choice.
+        mq.addEventListener("change", function () {
+          if (!body.dataset.theme) sync();
+        });
+
+        sync();
+      })();
+    </script>
   </body>
 </html>

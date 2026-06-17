@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `applying-bitwarden-branding` now covers both **building** on-brand standalone deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and **reviewing** whether a deliverable is on-brand. Reviews are calibrated to separate canonical violations from brand-silent pragmatic choices, and brand-silent choices that visibly shape the deliverable (surface mode, voice and tone) are surfaced to the requester when working interactively rather than silently defaulted. The canon is now bundled (assets + tokens) for offline, verbatim use rather than referenced externally.
+- `applying-bitwarden-branding` now covers both **building** on-brand standalone deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and **reviewing** whether a deliverable is on-brand. Reviews are calibrated to separate canonical violations from brand-silent pragmatic choices, and brand-silent choices that visibly shape the deliverable (voice and tone) are surfaced to the requester when working interactively rather than silently defaulted. The canon is now bundled (assets + tokens) for offline, verbatim use rather than referenced externally.
+- `applying-bitwarden-branding` now ships **both light and dark surfaces by default**. Deliverables follow the device's `prefers-color-scheme` for the initial surface and expose a light/dark toggle that overrides it, with the dark surface derived from Deep Blue. Previously surface mode defaulted to light and was treated as a per-deliverable question.
 
 ### Added
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `--bw-yellow` corrected to `#FDC700` to match the brand repository's `$tertiary-yellow` (was `#FFD700`).
+- Clarified the 36px radius rule: the foundation is for surfaces that float with space around them, and full-bleed headers/footers flush to the page or viewport edge should not be rounded (inset them so all corners float, or leave the flush edges square). Was producing rounded corners against straight page edges on full-bleed headers.
 
 ### Removed
 

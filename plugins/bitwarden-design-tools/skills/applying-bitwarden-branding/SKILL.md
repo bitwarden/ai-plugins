@@ -29,7 +29,7 @@ These are non-negotiable. They come straight from the brand repository.
 1. Use only the published palette: Bitwarden Blue (`#175DDC`), Deep Blue (`#0C3276`), Teal (`#2CDDE9`), Light Teal (`#A2F4FD`), the tertiary Green/Red/Yellow, and the neutral ramp (True White, Off White, Light Grey, Medium Grey, True Black). Invent no shades, tints, or alternate steps. See [`references/color-palette.md`](references/color-palette.md) for HEX/RGB/CMYK.
 2. Use Inter for type, across headlines, copy, and text. See [`references/typography.md`](references/typography.md) for loading and fallback.
 3. Use the official logo lockup. Horizontal is preferred; vertical and product-specific lockups exist for specific cases. Honor clear-space rules. Embed the bundled SVG verbatim; do not recreate the shield from scratch. See [`references/logo-usage.md`](references/logo-usage.md).
-4. Apply the 36px rounded-radius foundation to container surfaces (panels, cards, hero sections, pills, badges). Buttons are the only canonical exception.
+4. Apply the 36px rounded-radius foundation to container surfaces that float with space around them (panels, cards, hero sections, pills, badges). Do not round an edge that bleeds flush to the page or viewport boundary: a full-bleed header or footer should either be inset (given margin so all four corners float) or left square on the flush edges. Rounding only the bottom corners of an edge-to-edge band looks broken. Buttons are the only canonical exception.
 5. Capitalize the B in Bitwarden, never the W. Lowercase "bitwarden" appears only inside the official logo lockup, never in copy, headlines, handles, or URLs.
 
 ## Quick start (build)
@@ -47,13 +47,15 @@ Three steps to put a deliverable on-brand:
 
    See [`references/logo-usage.md`](references/logo-usage.md) for the full catalog and when to use each.
 
-That is the canonical surface. Everything else is a pragmatic choice — see below.
+4. Ship light and dark. Default the surface to the device setting with `@media (prefers-color-scheme: dark)` and add a visible light/dark toggle that overrides it. Derive the dark surface from `--bw-deep-blue`; keep the palette and logo identical across modes. See "Surface mode" below and the bundled example.
+
+Steps 1-3 are the canonical surface; step 4 is the skill's standing default. Everything else is a pragmatic choice — see below.
 
 ## Where the brand site is silent
 
-These decisions still have to be made, but the brand site does not prescribe them; they are pragmatic, not canonical. When working interactively and the choice will visibly shape the deliverable (surface mode and voice/tone most of all), ask the requester rather than assume. Otherwise apply the default below and note the assumption in the deliverable.
+These decisions still have to be made, but the brand site does not prescribe them; they are pragmatic, not canonical. When working interactively and the choice will visibly shape the deliverable (voice and tone most of all), ask the requester rather than assume. Otherwise apply the default below and note the assumption in the deliverable.
 
-- Surface mode (light vs. dark). Pragmatic. Default to a light surface (`--bw-off-white` or `--bw-true-white` with `--bw-deep-blue` text). For a dark surface, derive the background from `--bw-deep-blue` rather than inventing a new neutral.
+- Surface mode (light vs. dark). Ship both by default. Drive the initial surface from the device setting with `@media (prefers-color-scheme: dark)`, and include a visible control to toggle between light and dark that overrides the device default. Build the light surface from `--bw-off-white`/`--bw-true-white` with `--bw-deep-blue` text; derive the dark surface from `--bw-deep-blue` rather than inventing a new neutral. The palette and logo are identical in both modes — only the surface and text invert. The bundled example shows the pattern.
 - Type scale (heading sizes, weights, line-heights). Pragmatic. A safe four-step default: display 2.5rem/700, section 1.5rem/600, body 1rem/400, caption 0.8125rem/500. See [`references/typography.md`](references/typography.md).
 - Code font. Pragmatic. `"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace`. The brand is silent on code typography.
 - Component shapes (cards, banners, chips, toolbars, badges). Pragmatic. The brand defines no component vocabulary. Apply the 36px radius to container surfaces (canonical); choose whatever padding, spacing, and border treatment fits.
