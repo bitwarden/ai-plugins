@@ -35,20 +35,20 @@ colors.
 The bundled `assets/bitwarden-tokens.css` exposes the palette as CSS custom properties, mapped
 from the SCSS source. Cite whichever namespace fits the context.
 
-| SCSS (`palette.scss`)   | CSS custom property |
-| ----------------------- | ------------------- |
-| `$bitwarden-blue`       | `--bw-blue`         |
-| `$deep-blue`            | `--bw-deep-blue`    |
-| `$teal-highlight`       | `--bw-teal`         |
-| `$light-teal-highlight` | `--bw-light-teal`   |
-| `$tertiary-green`       | `--bw-green`        |
-| `$tertiary-yellow`      | `--bw-yellow`       |
-| `$tertiary-red`         | `--bw-red`          |
-| `$off-white`            | `--bw-off-white`    |
-| `$true-white`           | `--bw-true-white`   |
-| `$true-black`           | `--bw-true-black`   |
-| `$light-grey`           | `--bw-light-grey`   |
-| (Medium Grey, no SCSS var) | `--bw-medium-grey` |
+| SCSS (`palette.scss`)      | CSS custom property |
+| -------------------------- | ------------------- |
+| `$bitwarden-blue`          | `--bw-blue`         |
+| `$deep-blue`               | `--bw-deep-blue`    |
+| `$teal-highlight`          | `--bw-teal`         |
+| `$light-teal-highlight`    | `--bw-light-teal`   |
+| `$tertiary-green`          | `--bw-green`        |
+| `$tertiary-yellow`         | `--bw-yellow`       |
+| `$tertiary-red`            | `--bw-red`          |
+| `$off-white`               | `--bw-off-white`    |
+| `$true-white`              | `--bw-true-white`   |
+| `$true-black`              | `--bw-true-black`   |
+| `$light-grey`              | `--bw-light-grey`   |
+| (Medium Grey, no SCSS var) | `--bw-medium-grey`  |
 
 ## CMYK (for print)
 

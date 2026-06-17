@@ -372,7 +372,17 @@
           class="theme-toggle"
           aria-label="Toggle light and dark surface"
           aria-pressed="false"
-          onclick="(function(b){var d=b.dataset.theme==='dark';b.dataset.theme=d?'':'dark';var t=document.querySelector('.theme-toggle');t.setAttribute('aria-pressed',(!d).toString());t.querySelector('.label').textContent=d?'Dark mode':'Light mode';})(document.body)"
+          onclick="
+            (function (b) {
+              var d = b.dataset.theme === 'dark';
+              b.dataset.theme = d ? '' : 'dark';
+              var t = document.querySelector('.theme-toggle');
+              t.setAttribute('aria-pressed', (!d).toString());
+              t.querySelector('.label').textContent = d
+                ? 'Dark mode'
+                : 'Light mode';
+            })(document.body)
+          "
         >
           <svg
             class="icon icon-moon"
