@@ -1,6 +1,8 @@
 ---
 name: starting-breakdown
 description: Sets up a new Bitwarden Tech Breakdown in the bitwarden/tech-breakdowns repo. Creates a per-breakdown folder (`<team>/<JIRA-KEY>-<short-slug>/`) containing `breakdown.md` from the template, so the future `tasks.md` and any specification artifacts can live alongside it. Use when a team is creating a new breakdown — triggered by phrasings such as "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown".
+argument-hint: "[<jira-key>]"
+arguments: jira
 allowed-tools: Read, Edit, Glob, Skill, AskUserQuestion, Bash(git clone:*), Bash(git pull:*), Bash(git status:*), Bash(cp:*), Bash(mkdir:*), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
 ---
 
@@ -33,7 +35,7 @@ Work through each phase in order; do not skip ahead.
 
 Ask the user for each of these. All four are required by the HARD-GATE; if any is missing, prompt for it before continuing.
 
-- **Jira key.** The epic, task, or story this breakdown corresponds to.
+- **Jira key.** The epic, task, or story this breakdown corresponds to. If `$jira` was provided at invocation, use it and confirm with the user; otherwise prompt for it.
 - **Summary.** One-line description of the work being broken down.
 - **Team.** What team is the breakdown owner a part of?
 - **Active owner / contact.** Who is performing this breakdown?

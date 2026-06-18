@@ -1,7 +1,9 @@
 ---
 name: developing-breakdown-plan
 description: Develop the Plan section of a Bitwarden Tech Breakdown after the Specification is filled — technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption against a partly-developed Plan. Triggers: "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts", "continue planning", "plan the breakdown".
-allowed-tools: Skill, Read, Edit, Write, Bash, Glob, Grep, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
+argument-hint: "[<breakdown-path | jira-key | slug>]"
+arguments: breakdown
+allowed-tools: Skill(architecting-solutions), Skill(bitwarden-security-context), Skill(creating-pull-request), Read, Edit, Write, Bash, Glob, Grep, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Developing the Plan
@@ -13,7 +15,7 @@ Assist a Bitwarden engineer in developing the HOW a change will be built, anchor
 <HARD-GATE>
 Prompt the user to switch to their workspace root: the folder containing their local clone of `tech-breakdowns/` alongside the other Bitwarden repos (`server/`, `clients/`, `sdk-internal/`, `ios/`, `android/`, etc.). The skill relies on traversing those siblings to scan in-flight work and resolve cross-team impact.
 
-Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
+Orientation within a breakdown is required. If `$breakdown` was provided at invocation, treat it as the breakdown identifier (path, Jira key, or slug) and resolve it via `Glob` under `tech-breakdowns/` to a real `breakdown.md`, then confirm the resolved path with `AskUserQuestion` before proceeding. Otherwise, ask the user which breakdown to work against — they can give a path, a Jira key, or a slug — and resolve the same way. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
 
 Once a breakdown is found, do NOT continue to develop the Plan if either condition holds:
 
