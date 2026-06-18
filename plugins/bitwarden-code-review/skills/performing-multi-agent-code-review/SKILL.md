@@ -29,7 +29,7 @@ If the caller passed a bad path, the write in Step 9 will fail and surface the e
 
 Resolve per-stage models upon invocation before Step 1 begins.
 
-Flag values are the Agent tool's model nicknames, in ascending tier order: `haiku` < `sonnet` < `opus` < `fable`.
+Flag values are the Agent tool's model nicknames, in ascending tier order: `haiku` < `sonnet` < `opus`.
 The **global model** is `--model` if specified, otherwise the session's model.
 
 | Stage          | Agents                              | Flag                 | Default    |
