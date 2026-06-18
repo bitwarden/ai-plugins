@@ -114,7 +114,7 @@ Invoke the skill explicitly with the slash command, or with natural language —
 **3. Changes over a period of time.** Commit-range mode reviews the cumulative diff across a time window, commit count, or explicit ref pair. Run it from inside the target repo; it confirms the resolved range with you before spending tokens:
 
 ```markdown
-Review the last week of commits using /bitwarden-code-review:performing-multi-agent-code-review --model-analysis opus --model-security fable --model-validation opus --model-audit sonnet --output-dir ./code-reviews
+Review the last week of commits using /bitwarden-code-review:performing-multi-agent-code-review --model opus
 ```
 
 **4. Full control, per stage.** Tune each stage independently — opus for analysis and validation, fable for security, sonnet for the audit — and send the report to a specific directory:
