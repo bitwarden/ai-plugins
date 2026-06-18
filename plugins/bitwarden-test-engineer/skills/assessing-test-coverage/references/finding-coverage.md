@@ -28,7 +28,7 @@ Reliably establishing what is **already tested** does not require grepping a who
 two ordered moves, and record anything still unfound as a gap rather than dropping it:
 
 1. **Merged/linked PRs are the backbone.** The PRs hanging off the Jira issue and its epic
-   children (`get_issue_remote_links` → `gh pr view`/`gh pr diff`) are the reliable record of
+   children (`mcp__bitwarden-atlassian__get_issue_remote_links` → `gh pr view`/`gh pr diff`) are the reliable record of
    the tests that shipped with this work, and are already permalink-ready via the PR head SHA.
    Take the tests observed in those PR diffs as primary coverage evidence.
 2. **Targeted repo lookup for pre-existing tests.** Tests written _before_ this ticket won't
@@ -42,6 +42,19 @@ and cite specific files; if it is not available, record E2E coverage as `unverif
 
 A behavior with no PR-observed test and no targeted hit is recorded as a coverage gap /
 `unverified` — never silently assumed covered.
+
+### Establish coverage per behavior, not per test — stop as soon as it's confirmed
+
+The inventory is keyed to the **change's testable behaviors**, not to every test method in the
+repo. For each behavior, find _whether and at what layer_ it is covered, capture **1–3
+representative tests** as evidence plus an approximate **count** at that layer, and then **move
+on** — do not open and enumerate every test in a covered area. A behavior backed by 40 unit
+tests is recorded as `{ count: ~40, representative: [3 permalinks] }`, not 40 records. This is
+the dominant cost control on large repos: exhaustively cataloguing a well-covered area burns
+many tool calls and tokens to produce a record set no recommendation needs, and bloats the
+downstream report into an unreadable dump. Spend the search budget on **resolving each
+behavior's status**, not on completeness of enumeration. Two or three confirming tests prove a
+behavior is covered; the 38 others add cost, not confidence.
 
 ## Citing tests as GitHub permalinks
 
@@ -89,31 +102,47 @@ render these as `<span class="unlinkable">path — unlinkable: &lt;reason&gt;</s
 
 ### Output contract
 
-For every cited test, return a record of the shape:
+Return **one record per behavior** (not per test), carrying its layer, an approximate count,
+1–3 representative tests as evidence, and — when the behavior was extracted from a Jira item —
+the originating `source_issue` (`key` + browse `url`) so the report can link the behavior back to
+its requirement (see `../../../references/input-sources.md` → _Citing Jira issues as links_). The
+`source_issue` is **carried through from intake** with the behavior — it is provenance recorded
+when the behavior was extracted, not something coverage discovery determines; echo it through when
+present. A behavior with no Jira source (e.g. found only in a PR diff) omits `source_issue`.
 
 ```
 {
-  "path": "src/services/Foo/FooService.spec.ts",
-  "start_line": 42,
-  "end_line": 89,
-  "owner_repo": "bitwarden/clients",
-  "sha": "a1b2c3d4e5f6…",
+  "behavior": "per-phase price resolution on schedule activation",
+  "platform": "server",
   "layer": "integration",
-  "permalink": "https://github.com/bitwarden/clients/blob/a1b2c3d4e5f6…/src/services/Foo/FooService.spec.ts#L42-L89"
+  "status": "covered",
+  "count": 21,
+  "source_issue": {
+    "key": "PM-1234",
+    "url": "https://bitwarden.atlassian.net/browse/PM-1234"
+  },
+  "representative": [
+    {
+      "path": "test/Billing/.../ScheduleHandlerTests.cs",
+      "start_line": 42,
+      "end_line": 89,
+      "owner_repo": "bitwarden/server",
+      "sha": "a1b2c3d4e5f6…",
+      "permalink": "https://github.com/bitwarden/server/blob/a1b2c3d4e5f6…/test/Billing/.../ScheduleHandlerTests.cs#L42-L89"
+    }
+  ]
 }
 ```
 
-…or, when unlinkable:
-
-```
-{ "path": "src/services/Foo/FooService.spec.ts", "layer": "integration", "unlinkable_reason": "no remote for local checkout" }
-```
-
-Behaviors/surfaces with no observed test are returned as gaps:
+A representative test that cannot be linked is recorded path-only with a reason inside
+`representative` (`{ "path": "…", "unlinkable_reason": "no remote for local checkout" }`) —
+never fabricate a URL. Behaviors/surfaces with no observed test are returned as gaps:
 
 ```
 { "behavior": "tier downgrade preserves seat count", "platform": "server", "status": "unverified" }
 ```
 
-The `analyzing-test-stack` recommender consumes these records as-is to populate the
-report's Evidence (linked) column and to seed its gap analysis.
+Keep `representative` to at most three permalinks per behavior; the `count` conveys breadth
+without listing every test. The `analyzing-test-stack` recommender consumes these records as-is
+to populate the report's Evidence (linked) column (rendering the representative permalinks) and
+to seed its gap analysis.

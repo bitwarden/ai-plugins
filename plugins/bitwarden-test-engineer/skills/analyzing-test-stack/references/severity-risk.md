@@ -1,7 +1,8 @@
 # Severity as a risk weight
 
-The Testing Trophy tells you the _cheapest layer that buys the confidence a behavior
-requires_. **Severity tells you how much confidence is required.** A defect in vault
+The layer model (`testing-trophy.md`) tells you the _cheapest layer that buys the confidence a
+behavior requires_, landed inside the target repo's shape. **Severity tells you how much
+confidence is required.** A defect in vault
 unlock and a typo on a settings label are not owed the same rigor — severity is the dial
 that turns "cheapest sufficient" from a flat rule into a risk-weighted one.
 
@@ -10,12 +11,11 @@ it gets fixed (that is _priority_). This skill weights coverage by severity, not
 
 ## Source of truth
 
-The canonical classification is Bitwarden's **Defect Severity Classification Guide**,
-Confluence page `2759229512`
-(`https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2759229512/Severity`). The levels
-and criteria below mirror that page so the analysis degrades gracefully when the Atlassian
-MCP is unavailable — but the page is authoritative. When the `bitwarden-atlassian-tools`
-MCP is available, fetch it with `mcp__bitwarden-atlassian__get_confluence_page` (pageId
+The canonical classification is Bitwarden's [**Defect Severity Classification Guide**](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2759229512/Severity),
+Confluence page `2759229512`. The levels
+and criteria below mirror that page so the analysis degrades gracefully when the
+`bitwarden-atlassian-tools` MCP is unavailable — but the page is authoritative. When the
+`bitwarden-atlassian-tools` MCP is available, fetch it with `mcp__bitwarden-atlassian__get_confluence_page` (pageId
 `2759229512`) to pick up revisions before relying on the cached copy here. If the fetch
 fails or the MCP is unavailable, use the mirrored table below and note in the report that
 the severity definitions are from the cached copy (version not re-verified) — degrade

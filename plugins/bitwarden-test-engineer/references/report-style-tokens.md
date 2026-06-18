@@ -1,11 +1,20 @@
 # Report style tokens — data-report visual system for HTML reports
 
-This file is the **single source of styling truth** for every self-contained HTML report the
+This file documents the **visual system** for every self-contained HTML report the
 `bitwarden-test-engineer` plugin emits — the `analyzing-test-stack` test-stack report and the
 `assessing-test-coverage` coverage report alike. The HTML output requirements (single file,
 inline CSS, no external/CDN assets, no web fonts, no JS) mean a report cannot `<link>` to a
-design system at runtime — instead, **inline the stylesheet block at the bottom of this file
-verbatim** into the report's `<style>` element.
+design system at runtime — the stylesheet must be inlined into the report's `<style>` element.
+
+**You do not retype the stylesheet.** The canonical CSS lives as a real file at
+`report-style.css` (alongside this file in the plugin-level `references/` directory) and is
+spliced into the report by the `scripts/build-report.sh` build script — never reproduced as
+model output. Authoring a
+report means writing its **content** (the sections below) into a fragment whose `<style>`
+element holds a single sentinel line, then running the build script, which substitutes
+`report-style.css` for the sentinel verbatim. See _Building the report_ below. This is what
+keeps the two reports on one identical system: they splice the same file, so they cannot drift,
+and the ~400-line stylesheet costs zero output tokens per report.
 
 The look is deliberately **not** a brand skin. It is a quiet, ink-on-paper _data report_
 — the aesthetic of a statistical notebook or a coverage readout, where the data is the
@@ -33,12 +42,12 @@ same instrument. Do not re-pick colors, fonts, or layer tokens per report.
 
 These mappings are **normative**. Do not re-pick colors per report.
 
-### Layer tokens (used wherever a Testing Trophy layer is rendered — chips, distribution bars, table cells)
+### Layer tokens (used wherever a test layer is rendered — chips, distribution bars, table cells)
 
 | Layer       | Token           | HEX       | Role in the ramp                 |
 | ----------- | --------------- | --------- | -------------------------------- |
 | unit        | `--unit`        | `#8FB3D1` | lightest — cheapest / shallowest |
-| integration | `--integration` | `#3F7196` | mid — the trophy's bulge         |
+| integration | `--integration` | `#3F7196` | mid — the confidence layer       |
 | e2e         | `--e2e`         | `#1D3A54` | deepest — most expensive, thin   |
 
 `unit` is light, so layer chips and bar segments at the unit layer use **dark** text
@@ -95,392 +104,84 @@ rendered as a normalized horizontal **stacked bar** (a `<figure>` captioned `Fig
 This replaces any arbitrary fixed-width bar. The chart is the report's signature: keep
 everything around it quiet so it reads.
 
-## Paste-ready stylesheet
+## Combined report — tabs (assembled, not authored)
 
-Paste the entire block below — unchanged — into the report's `<style>` element, as a single
-contiguous block. **Both report templates inline this identically** — the coverage report
+When both reports are produced for the same change, the build script can assemble them into
+**one page with two tabs** — _Current coverage_ (the `assessing-test-coverage` report) and
+_Recommended coverage_ (the `analyzing-test-stack` report). This is purely a **presentation**
+merge: each skill still authors and builds its own standalone report exactly as before; the
+combined page is an _additional_ deliverable stitched from the two finished report files. No
+skill or template knows about tabs — the tab markup and its CSS are owned entirely by
+`build-report.sh` and `report-style.css`, so the per-skill split stays intact.
+
+You never hand-write the tab markup. The build script reuses each report's `<header>`/`<main>`,
+namespaces the normative section ids so the two bodies coexist in one document
+(`#overview` → `#cur-overview` / `#rec-overview`, and likewise for the in-page anchor links),
+and emits the tab chrome. The mechanism is **CSS-only** (no JavaScript): two visually-hidden
+radio inputs (`.tab-input#tab-current` / `#tab-recommended`) drive the active `.tablist label`
+and which `.tabpanel[data-panel]` shows, via general-sibling selectors. On print, the tabs
+collapse and both panels stack, each titled by its `aria-label`, so a shared PDF carries the
+whole analysis. These classes live in the stylesheet's _Tabbed combined report_ block and are
+inert in the standalone reports, which never emit them.
+
+## The stylesheet file (binding contract)
+
+The full stylesheet is `report-style.css` (alongside this file). It is the single source of styling truth —
+**both** report templates resolve to it through the build script, so the coverage report
 (`assessing-test-coverage`'s `coverage-report-template.md`) and the test-stack report
-(`analyzing-test-stack`'s `html-report-template.md`). Do not prune unused selectors, do not
-reorder, and do not let one report carry a trimmed copy; that is exactly how two reports that
-claim the same system drift apart. Component classes (`.layer.*`, `.badge.*`,
-`.dist`/`.seg.*`, `.shapes`, etc.) are part of the binding contract — both templates reference
-them by name.
+(`analyzing-test-stack`'s `html-report-template.md`) carry byte-identical CSS. Component
+classes (`.layer.*`, `.badge.*`, `.dist`/`.seg.*`, `.shapes`, `.unlinkable`, `.toc`, etc.) are
+part of the binding contract — both templates reference them by name; the markup you author must
+use exactly those class names so the spliced stylesheet styles it. Each report opens its
+`<main>` with a `.toc` nav of linked section anchors; in the combined report the build
+script namespaces those anchor links per tab.
 
-```css
-:root {
-  /* Surfaces & ink — flat paper, no cards or shadows */
-  --paper: #ffffff;
-  --panel: #f4f6f8;
-  --ink: #16191d;
-  --ink-soft: #585f68;
-  --ink-faint: #818892;
-  --rule: #e4e7ea;
+You never read, reproduce, prune, or hand-edit `report-style.css` when authoring a report —
+the build script inlines it whole. If the visual system genuinely needs to change, edit
+`report-style.css` once and every future report inherits it.
 
-  /* Layer ramp — SEQUENTIAL: ordered cheap/shallow -> costly/deep */
-  --unit: #8fb3d1;
-  --integration: #3f7196;
-  --e2e: #1d3a54;
-  --on-unit: #16191d; /* --unit is light: use dark text */
-  --on-deep: #ffffff; /* white text on integration/e2e */
+## Building the report
 
-  /* Verdict & state — muted categorical */
-  --ok: #43875a;
-  --warn: #b07d2f;
-  --bad: #bf564a;
-  --on-state: #ffffff;
+The model authors a **content fragment** — a complete HTML document whose `<style>` element
+contains exactly one line, the sentinel:
 
-  --link: #2f6e9e;
-
-  --sans:
-    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono:
-    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono",
-    monospace;
-}
-
-* {
-  box-sizing: border-box;
-}
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 15px/1.6 var(--sans);
-  font-feature-settings: "tnum" 1; /* tabular figures where supported */
-}
-
-a {
-  color: var(--link);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-}
-a:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--link);
-  outline-offset: 2px;
-}
-
-/* Masthead */
-header {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 56px 32px 28px;
-}
-header .eyebrow {
-  margin: 0 0 14px;
-  font: 600 11px/1 var(--mono);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-header h1 {
-  margin: 0 0 12px;
-  font-size: 28px;
-  line-height: 1.2;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-header .meta {
-  font: 12px/1.6 var(--mono);
-  color: var(--ink-soft);
-}
-header .meta a {
-  color: var(--ink-soft);
-}
-
-/* Sections — flat, hairline-separated, auto-numbered */
-main {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 0 32px 96px;
-  counter-reset: sec;
-}
-section {
-  counter-increment: sec;
-  padding: 36px 0;
-  border-top: 1px solid var(--rule);
-}
-section:first-of-type {
-  border-top: 0;
-}
-section > h2 {
-  margin: 0 0 18px;
-  font-size: 19px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-section > h2::before {
-  content: counter(sec, decimal-leading-zero);
-  display: inline-block;
-  margin-right: 12px;
-  font: 600 12px/1 var(--mono);
-  letter-spacing: 0.1em;
-  color: var(--ink-faint);
-  vertical-align: 2px;
-}
-section h3 {
-  margin: 28px 0 10px;
-  font: 600 11px/1.3 var(--mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-/* Prose */
-p {
-  margin: 0 0 14px;
-  max-width: 72ch;
-}
-.lead {
-  font-size: 16px;
-}
-.small {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-ul.tight {
-  margin: 8px 0 16px;
-  padding-left: 20px;
-}
-ul.tight li {
-  margin: 0 0 6px;
-}
-ol {
-  padding-left: 22px;
-}
-ol li {
-  margin: 0 0 10px;
-}
-code {
-  font: 0.86em var(--mono);
-  background: var(--panel);
-  padding: 1px 5px;
-  border-radius: 3px;
-}
-
-/* Tables — heavy header rule, hairline rows */
-.scroll {
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 4px 0 18px;
-  font-size: 13.5px;
-}
-thead th {
-  text-align: left;
-  vertical-align: bottom;
-  padding: 0 12px 8px;
-  font: 600 10.5px/1.3 var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  border-bottom: 1px solid var(--ink);
-}
-tbody td {
-  vertical-align: top;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--rule);
-}
-tbody tr:hover {
-  background: var(--panel);
-}
-th:first-child,
-td:first-child {
-  padding-left: 0;
-}
-th:last-child,
-td:last-child {
-  padding-right: 0;
-}
-
-/* Layer chip */
-.layer {
-  display: inline-block;
-  font: 600 10.5px/1.6 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 2px;
-  white-space: nowrap;
-}
-.layer.unit {
-  background: var(--unit);
-  color: var(--on-unit);
-}
-.layer.integration {
-  background: var(--integration);
-  color: var(--on-deep);
-}
-.layer.e2e {
-  background: var(--e2e);
-  color: var(--on-deep);
-}
-
-/* Layer-distribution chart (the signature graphic) */
-figure {
-  margin: 18px 0;
-}
-figcaption {
-  margin-bottom: 14px;
-  font: 11px/1.4 var(--mono);
-  letter-spacing: 0.04em;
-  color: var(--ink-faint);
-}
-.dist .legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin-bottom: 14px;
-  font: 11px/1 var(--mono);
-  color: var(--ink-soft);
-}
-.dist .legend .key {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.dist .legend .key::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  background: var(--rule);
-}
-.dist .legend .unit::before {
-  background: var(--unit);
-}
-.dist .legend .integration::before {
-  background: var(--integration);
-}
-.dist .legend .e2e::before {
-  background: var(--e2e);
-}
-.dist-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 7px 0;
-}
-.dist-row .dist-label {
-  flex: 0 0 14ch;
-  text-align: right;
-  font: 11px/1.3 var(--mono);
-  color: var(--ink-soft);
-  word-break: break-word;
-}
-.dist-row .bar {
-  flex: 1;
-  display: flex;
-  height: 24px;
-  background: var(--panel);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.bar .seg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  font: 600 11px/1 var(--mono);
-  color: var(--on-deep);
-}
-.bar .seg.unit {
-  background: var(--unit);
-  color: var(--on-unit);
-}
-.bar .seg.integration {
-  background: var(--integration);
-}
-.bar .seg.e2e {
-  background: var(--e2e);
-}
-
-/* Per-platform recommended-shape list (replaces card blocks) */
-ul.shapes {
-  margin: 6px 0 0;
-  padding: 0;
-  list-style: none;
-}
-ul.shapes li {
-  padding: 10px 0;
-  border-top: 1px solid var(--rule);
-}
-ul.shapes li:first-child {
-  border-top: 0;
-}
-ul.shapes .plat {
-  font: 600 13px/1.5 var(--mono);
-}
-
-/* Badges */
-.badge {
-  display: inline-block;
-  font: 600 10px/1.5 var(--mono);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 1px 6px;
-  border-radius: 2px;
-  color: var(--on-state);
-  white-space: nowrap;
-}
-.badge.assumption {
-  background: var(--warn);
-}
-.badge.warn {
-  background: var(--bad);
-}
-.badge.ok {
-  background: var(--ok);
-}
-
-/* Unlinkable evidence */
-.unlinkable {
-  font: italic 12px/1.4 var(--mono);
-  color: var(--ink-faint);
-}
-
-@media (max-width: 720px) {
-  header,
-  main {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-  .dist-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-  }
-  .dist-row .dist-label {
-    flex: none;
-    text-align: left;
-  }
-}
-
-@media print {
-  body {
-    font-size: 11pt;
-  }
-  section {
-    break-inside: avoid;
-    border-top-color: #ccc;
-  }
-  tbody tr:hover {
-    background: none;
-  }
-  a {
-    color: var(--ink);
-  }
-}
+```html
+<style>
+  /* @@BITWARDEN_REPORT_STYLESHEET@@ */
+</style>
 ```
+
+Write that fragment to a temporary path (e.g. `<kind>-report-<slug>.fragment.html`), then run
+the build script from the plugin root:
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/scripts/build-report.sh" \
+  --kind <test-stack|test-coverage> --slug <slug> --date <YYYY-MM-DD> \
+  <fragment-file>
+```
+
+The script replaces the sentinel with `report-style.css` verbatim and writes
+`<kind>-report-<slug>-<date>-<HHMMSS>.html` to the current working directory, printing the
+final filename to stdout. The `<HHMMSS>` suffix is stamped from the wall clock by the script
+(the model cannot read the clock), so **every run gets a fresh filename** — a report is never
+overwritten, and an existing report never has to be read back and regenerated. Delete the
+temporary fragment afterward. If the script errors (missing sentinel, bad `--kind`/`--date`,
+fragment not found) it writes nothing — fix the fragment and re-run rather than falling back to
+pasting CSS by hand.
+
+To assemble the **combined two-tab page** from the two already-built standalone reports, call
+the script with `--kind test-combined` and the two finished report files (no fragment, no
+sentinel — the bodies are reused as-is):
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/scripts/build-report.sh" \
+  --kind test-combined --slug <slug> --date <YYYY-MM-DD> \
+  --current <test-coverage-report-…​.html> \
+  --recommended <test-stack-report-…​.html>
+```
+
+It writes `test-combined-report-<slug>-<date>-<HHMMSS>.html` and prints the filename. The two
+input reports are read, not modified, and their standalone files remain.
 
 ## What not to do
 
@@ -490,7 +191,8 @@ ul.shapes .plat {
   encoding.
 - Do not introduce web fonts, CDN links, or `<link rel="stylesheet">` — the single-file
   constraint is binding.
-- Do not narrow the stylesheet down to "only the classes this report uses." The template
-  ships the full stylesheet so a reader inspecting any report sees the same system.
+- Do not paste, retype, or trim the stylesheet into the fragment — the fragment carries only
+  the sentinel, and the build script supplies the full stylesheet. A report that ships a
+  hand-copied or "only the classes I used" stylesheet is exactly how two reports drift apart.
 - Do not hand-compute the distribution bar widths in pixels or percentages — set
   `flex: <count>` per segment and let the browser normalize.

@@ -26,15 +26,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   never a repo-wide sweep), it discovers each repo's test conventions config-first, buckets
   every observed test by layer, cites it as a stable GitHub permalink (commit SHA, not
   branch), records untested behaviors as `unverified` gaps, and writes its own self-contained
-  HTML **coverage report** (`test-coverage-report-<slug>-<date>.html`) following
+  HTML **coverage report** (`test-coverage-report-<slug>-<date>-<HHMMSS>.html`) following
   `references/coverage-report-template.md`. Usable standalone to audit current coverage, and
   consumed by `analyzing-test-stack`. Owns convention discovery, existing-test finding, and
   the GitHub permalink citation rules (in `references/finding-coverage.md`) — concerns kept
   separate from the trophy recommendation.
 - Plugin-level shared `references/`: `input-sources.md` (evidence-source ingestion, used by
-  both skills and the agent) and `report-style-tokens.md` (the single off-brand data-report
-  styling system both the coverage report and the test-stack report inline verbatim, so the
-  two read as one instrument).
+  both skills and the agent), `report-style.css` (the single off-brand data-report stylesheet
+  both reports use) and `report-style-tokens.md` (its design contract). The
+  `scripts/build-report.sh` build script splices `report-style.css` into each report so the
+  stylesheet is never reproduced as model output and the coverage and test-stack reports
+  cannot drift — they read as one instrument.
+- Combined two-tab report: when the agent runs end to end, the `test-combined` build mode
+  stitches the two standalone reports into one page with _Current coverage_ and
+  _Recommended coverage_ tabs (CSS-only, no JavaScript; stacks both views on print). It is a
+  presentation-only merge assembled from the finished report files — each skill still authors
+  and builds its own standalone report unchanged, so the split between coverage and
+  recommendation stays intact. The tab chrome lives entirely in `report-style.css` and the
+  build script; no skill or template knows about tabs.
 - `analyzing-test-stack` skill: consumes the coverage inventory from `assessing-test-coverage`,
   then maps a change's testable behaviors to the cheapest
   sufficient Testing Trophy layer (static, unit, integration, E2E) per platform and emits
@@ -50,11 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   layer→repo map, evidence-source ingestion, and the HTML report
   template. The Atlassian `search_confluence` / `search_confluence_cql` tools back locating a
   breakdown by feature/team name when only a name (not a page ID) is given.
+- Linked table of contents (`.toc`) at the top of every report's `<main>`, linking to
+  each section; in the combined report the build script namespaces the ToC's anchors per tab so
+  each panel's ToC jumps within its own panel.
 - Top-of-report `#overview` synthesis section, written by the analyst: a 2–4 sentence recap
   of the recommended shape per platform, the top 3 open risks (drawn from
   `#gaps`), and anchor links into the detail sections, so readers see the bottom line without
   scrolling. The overview is additive — per-behavior detail stays in `#recommendations`/`#gaps`.
-- Per-layer model governance to optimize token spend: the agent runs on Opus
-  (its context drives the analysis and the recommendation), while the fan-out
+- Per-layer model governance to optimize token spend: the agent inherits the session model
+  for its own context (which drives the analysis and the recommendation), while the fan-out
   evidence subagents are assigned explicitly — `sonnet` for sources that read a diff, ticket,
-  or repo, `haiku` for pure CSV parsing — rather than inheriting Opus.
+  or repo, `haiku` for pure CSV parsing — rather than inheriting the orchestrator's model.

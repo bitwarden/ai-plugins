@@ -20,6 +20,13 @@ Otherwise use the MCP tools directly:
 Extract: discrete **testable behaviors**, **acceptance criteria**, and the **platforms/
 components** named. If the MCP is unavailable, ask the user to paste the requirements.
 
+Also capture, for every issue you read, its **key and browse URL** (prefer the URL the MCP/skill
+returns; otherwise construct `https://bitwarden.atlassian.net/browse/<KEY>`), and **carry the
+originating issue key with each behavior you extract**. The report links every behavior back to
+the Jira item it came from — see _Citing Jira issues as links_ below — so provenance must survive
+intake. A behavior that traces to no Jira item (e.g. found only in a PR diff) simply carries no
+source issue.
+
 Also capture **severity** — for a bug/defect ticket, read the severity assigned on the issue
 (the severity field, or the QA/reporter's stated severity in the description/comments) and
 carry it with the behaviors; for a feature/story without a defect, leave it to the analyst to
@@ -46,7 +53,9 @@ before extracting:
    not re-derive it.
 3. **Per child, gather behaviors and PRs.**
    - `mcp__bitwarden-atlassian__get_issue` for the child's description and acceptance
-     criteria — these are the testable behaviors for the trophy.
+     criteria — these are the testable behaviors for the trophy. Capture each child's **key and
+     browse URL** and carry it with the behaviors it produces, exactly as for a single-issue
+     intake — a behavior sourced from a child issue links to that child, not the epic.
    - `mcp__bitwarden-atlassian__get_issue_remote_links` for PRs (grouped under "GitHub").
      Each PR URL becomes an input to the **GitHub PR** branch below: hand it off to
      `gh pr view` / `gh pr diff` so the actual change surface and any tests-in-PR feed the
@@ -154,3 +163,33 @@ Map rows to behaviors and bucket each by apparent layer using the `analyzing-tes
 Flag cases that are currently manual but cheaply automatable at a lower layer, and cases
 slated for E2E that would be better as integration. If a column's meaning is ambiguous,
 state the interpretation you used rather than guessing silently.
+
+## Citing Jira issues as links
+
+Every Jira item the report **names** — and every behavior the report shows that was **found from
+a Jira item** — is rendered as a clickable link to that item, never as bare key text. This is the
+Jira counterpart to the GitHub permalink rule for tests (the `assessing-test-coverage` skill's
+`references/finding-coverage.md` → _Citing tests as GitHub permalinks_).
+
+The link form is the issue's browse URL:
+
+```
+https://bitwarden.atlassian.net/browse/<KEY>
+```
+
+where `<KEY>` is the issue key (e.g. `PM-1234`). Prefer the URL the MCP tool or
+`bitwarden-atlassian-tools:researching-jira-issues` skill returns for the issue; fall back to
+constructing the browse URL from the key. The same rule covers epics and their children — link
+each to its own key.
+
+Apply it everywhere the report renders one of these:
+
+- An **issue, epic, or child key** named in the Overview, Summary, or Evidence sections —
+  anchor the key: `<a href="https://bitwarden.atlassian.net/browse/PM-1234">PM-1234</a>`.
+- A **behavior row** (in the recommendations/coverage and gaps sections) whose behavior was
+  extracted from a Jira item — append the linked source key to the behavior cell so a reader can
+  jump to the requirement it came from. A behavior with no Jira source (PR-only) carries no key.
+
+These are informational `<a href>` citations — text, not loaded assets — so they do not violate
+the reports' self-contained / no-remote-resources constraint. Never fabricate a key or URL; if an
+issue's key is unknown, name the source in plain text rather than inventing a link.

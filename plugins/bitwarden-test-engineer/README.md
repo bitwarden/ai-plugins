@@ -80,10 +80,12 @@ automated and at what layer?
 ```
 
 Each run produces two self-contained HTML files in the current working directory: a
-`test-coverage-report-<slug>-<date>.html` (what is already tested — observed tests per layer,
-each cited as a GitHub permalink, plus gaps) and a `test-stack-report-<slug>-<date>.html` (the
-per-platform recommendation and its coverage-gap findings). Both share one off-brand
-data-report visual system so they read as the same instrument.
+`test-coverage-report-<slug>-<date>-<HHMMSS>.html` (what is already tested — observed tests per
+layer, each cited as a GitHub permalink, plus gaps) and a
+`test-stack-report-<slug>-<date>-<HHMMSS>.html` (the per-platform recommendation and its
+coverage-gap findings). The `HHMMSS` time suffix is stamped at build time, so re-running on the
+same day never overwrites a prior report. Both share one off-brand data-report visual system so
+they read as the same instrument.
 
 ## References
 
