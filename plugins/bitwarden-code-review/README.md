@@ -129,7 +129,7 @@ Review the last week of commits using /bitwarden-code-review:performing-multi-ag
   --output-dir ./reviews
 ```
 
-A **security floor** keeps `--model-security` from ever dropping below your global model, so threat-model evaluation never silently degrades. Omit `--output-dir` and the report lands in `${CLAUDE_PLUGIN_DATA}`, organized across projects and never git-tracked.
+A **security floor** keeps `--model-security` from ever dropping below your global model, so threat-model evaluation never silently degrades. Omit `--output-dir` and the report lands in `${CLAUDE_PLUGIN_DATA}/code-reviews/`, organized across projects and never git-tracked.
 
 ### In GitHub Actions
 

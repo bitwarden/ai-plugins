@@ -101,7 +101,7 @@ Feature context — issue descriptions, Jira tickets, PR history, removed-predec
 
 ## Discovery Standards
 
-Read `references/discovery-standards.md`. Referenced by Step 2 (architect doc/code consistency pass) and Step 3 Agent 1 (Hygiene Sweep).
+Read `references/discovery-standards.md`. Referenced by Step 2 (architect — doc/code consistency pass and Hygiene Sweep) and Step 3 Agent 1 (Hygiene Sweep).
 
 ## Evaluation Standards
 
@@ -130,7 +130,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
    - **READ** `references/report-template.md` for formatting the final report in Step 7.
    - **READ** `references/finding-shape.md`.
-   - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt.
+   - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 2 architect and Step 3 Agent 1 prompts.
    - **READ** `references/evaluation-standards.md`.
 
 2. Launch a single architecture & pattern compliance agent using the `general-purpose` subagent type, with the resolved analysis model (see Model Selection). Open the subagent prompt with: "You are a software architect reviewing code changes for architectural and pattern compliance." Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
