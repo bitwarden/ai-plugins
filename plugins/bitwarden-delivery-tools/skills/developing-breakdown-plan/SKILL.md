@@ -121,7 +121,6 @@ Per signoff row:
 - **Owning team**
 - **Interface or change** — one or two sentences describing what gets modified, extended, or built in their domain. Include the domain-overlap depth and owning-team domain churn from (B).
 - **Associated breakdown** if the owning team has one (link).
-- **Model** column left empty for the breakdown owner to assess and assign — model selection is an owner task, informed by the depth + churn this activity captured.
 - **Signoff** column left empty for the owning-team reviewer.
 
 _Captured in **Cross-team engagement** (Consuming other teams' APIs, Changes required in other teams' code, Cross-team sequencing & ordering, plus the signoff table and Coordination notes)._
