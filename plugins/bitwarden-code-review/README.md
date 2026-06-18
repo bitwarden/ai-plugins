@@ -117,13 +117,13 @@ Invoke the skill explicitly with the slash command, or with natural language —
 Review the last week of commits using /bitwarden-code-review:performing-multi-agent-code-review --model opus
 ```
 
-**4. Full control, per stage.** Tune each stage independently — opus for analysis and validation, fable for security, sonnet for the audit — and send the report to a specific directory:
+**4. Full control, per stage.** Tune each stage independently — opus for analysis and validation, opus for security, sonnet for the audit — and send the report to a specific directory:
 
 ```bash
 /bitwarden-code-review:performing-multi-agent-code-review \
   https://github.com/bitwarden/gh-actions/pull/604 \
   --model-analysis opus \
-  --model-security fable \
+  --model-security opus \
   --model-validation opus \
   --model-audit sonnet \
   --output-dir ./reviews

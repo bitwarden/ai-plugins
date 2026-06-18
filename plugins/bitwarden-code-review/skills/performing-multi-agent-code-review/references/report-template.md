@@ -6,7 +6,7 @@
 
 ```
 **Model:** opus                              <!-- all stages at global -->
-**Model:** opus (security: fable, audit: sonnet)   <!-- differing stages listed -->
+**Model:** opus (security: opus, audit: sonnet)   <!-- differing stages listed -->
 ```
 
 ## Severity Icons
