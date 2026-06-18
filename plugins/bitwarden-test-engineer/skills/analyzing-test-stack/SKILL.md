@@ -40,8 +40,6 @@ Alongside the behaviors, carry each behavior's **risk severity** — the impact 
 
 ## Principles
 
-- **Ground every recommendation.** Each behavior→layer call ties to a specific requirement, diff hunk, CSV row, or observed test. Mark anything inferred without evidence as an assumption.
-- **Cheapest sufficient layer wins.** Confidence pushed to a lower layer is cheaper to write, faster to run, and less flaky.
+- **Ground every recommendation.** Each behavior→layer call ties to a specific requirement, diff hunk, CSV row, or observed test; treat only _observed_ coverage from the inventory as verified, and mark anything inferred without evidence as an assumption.
+- **Cheapest sufficient layer, inside the repo's shape.** Push confidence down (unit over integration over E2E) unless a behavior truly needs the higher layer — then land that call inside the target repo's actual shape, not one universal trophy.
 - **Severity sets the bar, not the layer.** Weight each behavior's coverage by the impact a defect in it would have, per `references/severity-risk.md` — severity decides how completely a behavior is covered and how high its gap ranks, never which layer is "cheapest sufficient." It is impact, not priority (urgency).
-- **Per-platform, not one-size.** A feature spanning server, web, and mobile gets a distinct shape per platform — their stacks and risks differ.
-- **Honesty about coverage.** Treat only _observed_ coverage from the inventory as verified; everything unconfirmed feeds the gap analysis, never an assumed-covered call. An un-inspectable repo is a recorded gap, not a silent pass.

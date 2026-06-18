@@ -30,13 +30,11 @@ ToC and section ids, in order: `#overview`, `#summary`, `#evidence`, `#recommend
     `<span class="badge assumption">assumption</span>`.
   - Use the layer → repo map; **E2E rows must name the dedicated `test` repo** as target.
   - **The "Evidence (linked)" column is binding.** For every existing test cited as current
-    coverage, render a GitHub permalink anchored to the captured commit SHA and line range —
-    `<a href="https://github.com/<owner>/<repo>/blob/<SHA>/<path>#L<start>-L<end>">path/to/file.spec.ts</a>`.
-    If a test cannot be linked, use
-    `<span class="unlinkable">path/to/file.spec.ts — unlinkable: &lt;reason&gt;</span>` instead of
-    fabricating a URL. These records come from the coverage inventory; the permalink production
-    rules live in the `assessing-test-coverage` skill's `references/finding-coverage.md` →
-    _Citing tests as GitHub permalinks_.
+    coverage, render the behavior's representative test(s) as GitHub permalinks — or, when a test
+    cannot be linked, the `.unlinkable` span instead of a fabricated URL. These records come from
+    the coverage inventory; the exact link / `.unlinkable` markup and the permalink production
+    rules are owned by the `assessing-test-coverage` skill's `references/finding-coverage.md` →
+    _Citing tests as GitHub permalinks_ and _When a test cannot be linked_ — follow it.
 - **`#gaps`** — heading "Coverage gaps & imbalances": behaviors with no coverage, and any shape
   wrong for its repo (ice-cream-cone, over-unit-tested, trivial tests). **Order by severity**,
   highest first, so a Critical uncovered behavior leads; Informative behaviors are recorded as

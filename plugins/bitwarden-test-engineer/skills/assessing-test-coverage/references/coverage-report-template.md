@@ -27,13 +27,10 @@ ToC and section ids, in order: `#overview`, `#summary`, `#evidence`, `#coverage`
   coverage still gets a row, shown empty.
 - **`#coverage`** — per-platform tables, **one row per behavior** (not per test):
   `Behavior / surface | Layer | Tests (linked) | Count | Source | Notes`.
-  - **Tests (linked)** renders the behavior's 1–3 representative permalinks (binding), anchored to
-    the captured commit SHA and line range —
-    `<a href="https://github.com/<owner>/<repo>/blob/<SHA>/<path>#L<start>-L<end>">path/to/file.spec.ts</a>`.
-    A representative test that cannot be linked uses
-    `<span class="unlinkable">path/to/file.spec.ts — unlinkable: &lt;reason&gt;</span>` — never a
-    fabricated URL. Permalink production rules live in `finding-coverage.md` →
-    _Citing tests as GitHub permalinks_.
+  - **Tests (linked)** renders the behavior's 1–3 representative tests as permalinks (binding), or
+    the `.unlinkable` span when a test cannot be linked — never a fabricated URL. The exact link /
+    `.unlinkable` markup and the permalink production rules are owned by `finding-coverage.md` →
+    _Citing tests as GitHub permalinks_ and _When a test cannot be linked_ — follow it.
   - **Count** is the approximate number of tests covering that behavior at that layer — breadth
     without enumerating every test. Do not expand a well-covered behavior into dozens of rows.
   - **Layer** uses the matching layer chip. **Source** is `PR` (tests shipped in a linked/merged

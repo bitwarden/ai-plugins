@@ -23,16 +23,15 @@ truth); your template only names its `--kind`.
 
 ## Styling — binding
 
-Do **not** paste, retype, or trim any CSS. Inside the fragment's `<style>` element put exactly
-one line — the sentinel `/* @@BITWARDEN_REPORT_STYLESHEET@@ */` — and the build script splices in
-the canonical stylesheet (`report-style.css`) verbatim, identically for both
-reports so they cannot drift. The report uses a deliberately off-brand, low-key _data-report_
-visual system (flat white paper, monospace for data/labels/chrome, sans for prose, a sequential
-layer ramp). Do not re-pick colors, do not invent layer tokens, do not reintroduce a brand skin,
-do not add `<link>`/`@font-face`/CDN imports. The layer → token mapping (unit / integration /
-e2e) and the badge → token mapping (assumption / warn / ok) are normative wherever rendered —
-chips, distribution bars, table cells, and data rows; your markup must use those exact class
-names. See `report-style-tokens.md` for the token → meaning contract.
+Inside the fragment's `<style>` element put exactly one line — the sentinel
+`/* @@BITWARDEN_REPORT_STYLESHEET@@ */` — and nothing else; the build script splices in the
+canonical stylesheet (`report-style.css`) verbatim, identically for both reports so they cannot
+drift. **Do not paste, retype, or trim any CSS, re-pick colors/fonts/layer tokens, reintroduce a
+brand skin, or add external/CDN assets** — the visual system and the full list of prohibitions are
+owned by `report-style-tokens.md` (its _token → meaning_ contract and _What not to do_); read it.
+Your markup must use the exact normative class names it defines: the layer → token mapping (unit /
+integration / e2e) and the badge → token mapping (assumption / warn / ok) apply wherever rendered —
+chips, distribution bars, table cells, and data rows.
 
 Section headings are auto-numbered by CSS (`01 · …`) — write a plain `<h2>` per section and do
 not hand-number. Wrap each wide table in `<div class="scroll">…</div>` so it scrolls rather than
@@ -61,16 +60,14 @@ for the shared ones (e.g. whether the chart shows recommended or observed counts
    per-behavior detail stays in the tables below. (Your template says what the recap and the
    top-3 are _about_.)
 3. **`#summary`** — 2–4 sentences, then the **layer-distribution chart** (the report's signature
-   graphic) and a per-platform one-line shape list. Render the chart as a captioned
-   `<figure class="dist">` (`Fig 1`) containing a `.legend` and one `.dist-row` per platform;
-   each row has a `.dist-label` (the platform) and a `.bar` track holding one `.seg` per layer
-   present, sized by `style="flex: <count>"` — the raw count, which the browser normalizes (never
-   hand-compute widths). Each `.seg` shows its count; the legend maps color → layer. The unit
-   segment carries dark text (`--on-unit`), integration and e2e white (`--on-deep`). Follow with
-   `<ul class="shapes">`, one `<li>` per platform: a `.plat` name plus the one-line shape. No JS.
-   See `report-style-tokens.md` → _Graphics_ for the chart contract. The chart
-   encodes **shape** (counts per layer) only — it is severity-blind. (Your template says whether
-   the counts are _recommended_ or _observed_ and supplies the caption.)
+   graphic) and a per-platform one-line shape list. The chart is a captioned `<figure class="dist">`
+   (`Fig 1`) with a `.legend` and one `.dist-row` per platform; follow it with
+   `<ul class="shapes">`, one `<li>` per platform (a `.plat` name plus the one-line shape). The
+   exact segment markup and the render rules (`flex:<count>`, the `--on-unit`/`--on-deep` text
+   colors, never hand-computing widths, no JS) are the chart contract owned by
+   `report-style-tokens.md` → _Graphics_ — follow it there. The chart encodes **shape** (counts per
+   layer) only — it is severity-blind. (Your template says whether the counts are _recommended_ or
+   _observed_ and supplies the caption.)
 4. **`#evidence`** — a table of which inputs were used and, explicitly, **what was missing or
    unverifiable** (e.g. "`test` repo not checked out — existing E2E coverage unverified"). For PR
    inputs include the captured **head SHA** and **`owner/repo`** so per-test permalinks elsewhere
