@@ -116,6 +116,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 1. Gather context (no subagents). All `references/...` paths below resolve relative to `${CLAUDE_SKILL_DIR}` — do not search elsewhere.
    - **READ** `references/modes.md`. The orchestrator follows it to determine the review mode and the matching diff-source commands.
    - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff HEAD --name-only` (local), `git diff origin/HEAD...HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
+   - **Detect Claude configuration files** in the changed-file list: `CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md` (and skill support files), hook definitions, slash commands, `.claude/` settings, or MCP config. If any are present, the conditional Claude-configuration agent in Step 3 applies.
    - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
    - **READ** `references/report-template.md` for formatting the final report in Step 7.
    - **READ** `references/finding-shape.md`. Its contents are pasted verbatim into every Step 2–5 subagent prompt.
@@ -136,7 +137,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    Apply the Review Rules. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Launch 3 agents as instructed below. Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only. Send all 3 Agent tool calls in a single message (do NOT use run_in_background).
+3. Launch 3 agents as instructed below — plus a conditional 4th (Agent 4) when Claude configuration files were detected in Step 1 and the `claude-config-validator` plugin is installed. Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all of them — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1, 2, and 4 receive diff + Review Rules only. Send all Agent tool calls for this step in a single message (do NOT use run_in_background).
 
    **Agent 1: Code quality agent**
    Use the `general-purpose` subagent type. Read the diff as a senior engineer seeing it for the first time — surface anything that hurts correctness, clarity, or long-term maintainability, including code duplication, missing critical error handling, and inadequate test coverage.
@@ -154,6 +155,9 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **Prompt authenticity** — can the user verify which app is requesting sensitive input?
    - **Consent gates** — are authorization actions clearly labeled with sufficient context?
    - **Output authenticity** — are responses distinguishable from attacker-forged messages?
+
+   **Agent 4 (conditional): Claude configuration agent**
+   Launch this agent ONLY when Claude configuration files were detected in Step 1 AND the `claude-config-validator` plugin is installed; otherwise skip it silently — it is not a prerequisite. Use the `general-purpose` subagent type and instruct it to invoke `Skill(reviewing-claude-config)`, scoped to the detected Claude configuration files, to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Emit findings with `source_agent: "config"` and `id` prefix `cfg` per the Finding Shape schema.
 
 4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3. The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
