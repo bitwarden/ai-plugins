@@ -128,11 +128,10 @@ _Captured in **Cross-team engagement** (Consuming other teams' APIs, Changes req
 
 Final pass before the breakdown is reviewer-ready. Run it yourself against the saved file; no subagent. If you find issues, fix them inline and move on.
 
-1. **Template-section coverage** — open the breakdown template (`tech-breakdowns/templates/tech-breakdown.md`) and confirm every top-level and subsection from the template appears in the breakdown (`breakdown.md`), with either real content or an explicit `N/A — <reason>`. Empty section bodies are a finding; resolve before continuing.
-2. **Spec coverage** — walk the Specification's What and Why items. For each, point to the Plan section that implements it. List any gap as an unaddressed Plan area, then fix.
-3. **Placeholder scan** — verify there are no placeholders (`TBD`, `TODO`, "decide later", "various") in the Plan. Rewrite anything that matches.
-4. **Consistency** — names of interfaces, types, modules, and files used in the Plan match throughout the Plan.
-5. **Cross-team table completeness** — every "Changes required in other teams' code" entry from activity 4 has a row in the signoff table with Owning team, Interface or change, and Associated breakdown (if any) populated. Pure API consumers are listed under "Consuming other teams' APIs" only and **must not** appear in the signoff table. The driving team must not appear in the signoff table either.
+1. **Spec coverage** — walk the Specification's What and Why items. For each, point to the Plan section that implements it. List any gap as an unaddressed Plan area, then fix.
+2. **Placeholder scan** — verify there are no placeholders (`TBD`, `TODO`, "decide later", "various") in the Plan. Rewrite anything that matches.
+3. **Consistency** — names of interfaces, types, modules, and files used in the Plan match throughout the Plan.
+4. **Cross-team table completeness** — every "Changes required in other teams' code" entry from activity 4 has a row in the signoff table with Owning team, Interface or change, and Associated breakdown (if any) populated. Pure API consumers are listed under "Consuming other teams' APIs" only and **must not** appear in the signoff table. The driving team must not appear in the signoff table either.
 
 ## Output
 
