@@ -108,7 +108,7 @@ Invoke the skill explicitly with the slash command, or with natural language —
 **2. A specific pull request.** Pass a PR number or URL; it reviews draft and published PRs alike:
 
 ```markdown
-/bitwarden-code-review:performing-multi-agent-code-review https://github.com/bitwarden/ios/pulls/1234567 --model opus
+/bitwarden-code-review:performing-multi-agent-code-review https://github.com/bitwarden/ios/pull/1234567 --model opus
 ```
 
 **3. Changes over a period of time.** Commit-range mode reviews the cumulative diff across a time window, commit count, or explicit ref pair. Run it from inside the target repo; it confirms the resolved range with you before spending tokens:

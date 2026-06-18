@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `performing-multi-agent-code-review`: updated the architecture subagent to be a general agent type with a stronger prompt. Reduce complexity by not requiring engineers to install plugins they don't need. Also found minimal to zero actual benefit to using the tech-lead agent.
 - `performing-multi-agent-code-review`: `{model}` in file names and report headers is the resolved model nickname; `-mixed` suffix when stage flags differ
 - `performing-multi-agent-code-review`: enhanced the reference documents to provide example shapes of the DTOs that pass data between the subagents and the orchestration agent.
+- `performing-multi-agent-code-review`: removed duplicate and unnecessarily verbose instructions
 - Improved the README.md to better describe the purpose and usage of the multi-agent review.
 
 ## [1.11.0] - 2026-05-12

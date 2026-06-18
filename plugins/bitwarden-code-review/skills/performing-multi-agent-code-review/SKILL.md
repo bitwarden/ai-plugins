@@ -11,27 +11,19 @@ Execute a structured, multi-agent code review on a set of code changes. Follow t
 
 ## Prerequisites
 
-This skill depends on the following sibling plugins. If any are not installed, **abort the review with a clear error message** identifying the missing plugin — do not attempt to proceed with a degraded pipeline.
+This skill depends on the following sibling plugins.
 
-- **`bitwarden-security-engineer`** — provides security context and analysis skills.
+- **`bitwarden-security-engineer`**
 
-Before Step 1, verify each prerequisite is resolvable (verification is heuristic — if a subagent type fails to resolve, treat that as the signal). If a prerequisite is missing, print:
+Before Step 1, verify each prerequisite plugin is installed. The signal is resolvability — a required subagent type or skill that does not appear in your available tooling means the plugin is missing. If any is missing, **abort with the message below** — do not proceed with a degraded pipeline.
 
 > Prerequisite plugin `<name>` is not installed. Install it and retry. Review aborted.
 
-…and stop.
-
-## Mode
-
-Read `references/modes.md`. Loaded in Step 1; the orchestrator determines the mode from the invocation, runs the resolution sequence (commit-range mode only), and uses the matching diff-source commands to populate Step 1's gathered context. Modes are orchestrator-only and not propagated to subagents.
-
 ## Output Location
 
-Resolve immediately upon invocation — before Step 1 begins. The resolved path is used verbatim in Step 9.
-
-If `--output-dir <path>` is present in `$ARGUMENTS`, use that path verbatim — do not test whether it exists, do not prompt the user to confirm, and do not offer alternatives. If the caller passed a bad path, the write in Step 9 will fail and surface the error; that is the intended behavior.
-
-Otherwise, default to `${CLAUDE_PLUGIN_DATA}/code-reviews/` — organized across projects, never git-tracked.
+If `--output-dir <path>` is present in `$ARGUMENTS`, resolve immediately upon invocation and use that path verbatim. Otherwise, default to `${CLAUDE_PLUGIN_DATA}/code-reviews/`.
+Do not test whether it exists, prompt the user to confirm, nor offer alternatives.
+If the caller passed a bad path, the write in Step 9 will fail and surface the error.
 
 ## Model Selection
 
@@ -47,8 +39,7 @@ The **global model** is `--model` if specified, otherwise the session's model.
 | Validation     | Step 4                              | `--model-validation` | global     |
 | Severity audit | Step 5                              | `--model-audit`      | **sonnet** |
 
-Each stage resolves to its flag if present, otherwise its default.
-Exception: an explicit `--model` overrides the audit's sonnet default.
+Each stage resolves to its flag if present, otherwise its default; an explicit `--model` also overrides the audit's sonnet default.
 
 **Security floor.** `--model-security` may only pin at or above the global model. On a lower pin, run security at the global model and note the ignored pin in the announcement. Rationale: P01–P06 evaluation quality must not silently degrade.
 
@@ -62,13 +53,10 @@ Exception: an explicit `--model` overrides the audit's sonnet default.
 
 Applies to all agents and subagents.
 
-- Models: resolved per stage in Model Selection above.
 - Don't write to GitHub. All findings go to a local markdown file.
 - Tool discipline (see Orchestration → Tool Discipline) applies to the main agent and is propagated verbatim to every subagent. Rationale for the WebFetch/WebSearch ban: bypasses `gh` auth, skips audit trails, can return stale cached pages.
 
 ## Orchestration
-
-Applied when launching subagents.
 
 ### Project Preamble Propagation
 
@@ -84,7 +72,7 @@ Subagents do not inherit the main agent's CLAUDE.md context. Every subagent prom
 >
 > **Threat-model directive.** Evaluate every change against P01–P06 and the requirements under VD/EK/AT/SC/TC (loaded via the `bitwarden-security-context` skill per the preceding block). For each finding that touches vault data, keys, auth tokens, or user authenticity, name the principle or category it implicates.
 
-**Conditional — repo-specific forwarding.** A repo's checked-in `CLAUDE.md` may contain a section that explicitly instructs you to forward it to subagents (e.g., _"when spawning subagents, include..."_ or _"propagate this to subagents"_). If so, paste that section verbatim. If not, the two required blocks alone suffice.
+**Conditional — repo-specific forwarding.** A repo's checked-in `CLAUDE.md` may contain a section that explicitly instructs you to forward it to subagents. If so, paste that section verbatim.
 
 ### Tool Discipline
 
@@ -109,15 +97,15 @@ Feature context — issue descriptions, Jira tickets, PR history, removed-predec
 
 - **Context-allowed** (Step 2 architecture agent; Step 3 Agent 3 security & logic): pass full feature context. These agents think adversarially from intent.
 - **Context-forbidden** (Step 3 Agent 1 code quality; Step 3 Agent 2 bug analysis): **ONLY** pass the diff and the Review Rules. **DO NOT** paste issue summaries, Jira tickets, or PR description prose into these prompts.
-- **Style-matching requirement.** The main agent's tone and framing across parallel agents leaks — a rich-context prompt for the security agent alongside a bare prompt for the bug agent still implicitly biases the bug agent through the shared authored reality. When drafting context-forbidden prompts, match the terse style of the diff-only sibling prompts; do not echo the framing of the context-allowed siblings.
+- **Style-matching requirement.** The main agent's tone and framing across parallel agents leaks — a rich-context prompt for the security agent alongside a bare prompt for the bug agent still implicitly frames how the bug agent reads the diff. When drafting context-forbidden prompts, match the terse style of the diff-only sibling prompts; do not echo the framing of the context-allowed siblings.
 
 ## Discovery Standards
 
-Read `references/discovery-standards.md`. Referenced by Step 2 (architect doc/code consistency pass) and Step 3 Agent 1 (Hygiene Sweep). The Line Number Accuracy rule is propagated verbatim into every Step 2–5 subagent prompt.
+Read `references/discovery-standards.md`. Referenced by Step 2 (architect doc/code consistency pass) and Step 3 Agent 1 (Hygiene Sweep).
 
 ## Evaluation Standards
 
-Read `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt; the Finding Shape schema lives in `references/finding-shape.md` and is also propagated verbatim.
+Read `references/evaluation-standards.md`. Defines Severity Levels, Do Not Flag, and Confidence Scoring; the Finding Shape schema lives in `references/finding-shape.md`.
 
 ## Review Rules
 
@@ -141,9 +129,9 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff HEAD --name-only` (local), `git diff origin/HEAD...HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
    - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
    - **READ** `references/report-template.md` for formatting the final report in Step 7.
-   - **READ** `references/finding-shape.md`. Its contents are pasted verbatim into every Step 2–5 subagent prompt.
-   - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt; Line Number Accuracy is propagated verbatim into every Step 2–5 subagent prompt.
-   - **READ** `references/evaluation-standards.md`. Severity Levels, Do Not Flag, and Confidence Scoring are propagated verbatim into every Step 2–5 subagent prompt.
+   - **READ** `references/finding-shape.md`.
+   - **READ** `references/discovery-standards.md`. The Hygiene Sweep is referenced by name in the Step 3 Agent 1 prompt.
+   - **READ** `references/evaluation-standards.md`.
 
 2. Launch a single architecture & pattern compliance agent using the `general-purpose` subagent type, with the resolved analysis model (see Model Selection). Open the subagent prompt with: "You are a software architect reviewing code changes for architectural and pattern compliance." Give it the diff, the list of changed file paths, and — in PR mode only — the PR title and description.
 
@@ -153,13 +141,13 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - Read the full files being modified (not just diff hunks) to understand surrounding context.
    - Read CLAUDE.md, README.md, and other relevant .md files in or near the modified directories; verify each change complies with explicit project rules.
    - Use Glob and Grep to find how similar code is structured elsewhere in the codebase.
-   - **Doc/code consistency pass** — flag contradictions this diff creates between the code and same-repo documentation, configuration, or agent-facing files (e.g., a `CLAUDE.md` entry describing handler behavior the diff now changes; a README example that no longer matches the new signature; `.claude/` agent instructions referencing behavior the PR removes). Only flag divergence this change creates or worsens — do not audit pre-existing drift.
+   - **Doc/code consistency pass** — flag contradictions this diff creates between the code and same-repo documentation, configuration, or agent-facing files — README.md and CLAUDE.md most of all. Only flag divergence this change creates or worsens — do not audit pre-existing drift.
 
    **Scope.** Raise pattern inconsistencies, architectural boundary violations, duplicated abstractions, and new conventions introduced where an established one applies. Do NOT raise correctness bugs, security issues, or code-quality concerns — those belong to Step 3.
 
-   Apply the Review Rules. Also include the **Hygiene Sweep** definition from `references/discovery-standards.md` in the subagent prompt — the Hygiene Sweep's stale-references and cross-site-inconsistency lenses complement the doc/code consistency pass and are within the architect's scope. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
+   Apply the Review Rules. Also include the **Hygiene Sweep** definition from `references/discovery-standards.md` — its lenses are within the architect's scope. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Send all 3 Agent tool calls in a single message (**DO NOT** use run_in_background because the agents must run synchronously to guarantee findings are validated together at Step 4). Launch the 3 agents as instructed below — Agents 1–2 with the resolved analysis model, Agent 3 with the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only.
+3. Send all 3 Agent tool calls in a single message (**DO NOT** use run_in_background because the agents must run synchronously to guarantee findings are validated together at Step 4). Agents 1–2 use the resolved analysis model, Agent 3 uses the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only.
 
    **Agent 1: Code quality agent**
    Use the `general-purpose` subagent type. Read the diff as a senior engineer seeing it for the first time — surface anything that hurts correctness, clarity, or long-term maintainability, including code duplication, missing critical error handling, and inadequate test coverage.
@@ -187,7 +175,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **Bugs**: The problem does not actually exist in the code (e.g., the variable is not truly undefined, the logic error does not actually produce wrong results)
    - It is a nitpick that a senior engineer would not flag in a real code review
    - It would be caught by a linter (**do not run** the linter to verify)
-   - It is a general code quality concern that wouldn't be flagged in a real code review. In other words, do not state generics. All findings **MUST** be specific and actionable.
+   - It is a vague code quality concern — findings **MUST** be specific and actionable.
 
    **Collateral-change check.** When a finding is about to be dismissed as "deliberate divergence from an established pattern" or "documented exception," before dismissing it check whether supporting code was updated _consistent with_ the divergence. Specifically, scan the diff for:
    - Allowlist, registry, or lookup-table entries that assume the old pattern and are now stale or dead.
@@ -205,11 +193,11 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
 6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Before merging Step 5 returns, insert the full Finding object for each Step 4 collateral finding (`source_agent: "validation"`, `id: "val-N"`) into the master map — their creation-time fields come from those Finding objects, not from Step 4's status returns. Creation-time fields are immutable (see `references/finding-shape.md`). For dismissed findings, set `dismissal_stage` to `"Step 4 validation"` or `"Step 5 severity audit"` based on which step set the dismissal status — it renders as `**Dismissed at:**`. Partition by final status: validated (Step 5 `confirmed` or `downgraded`) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
 
-7. Format the report using the template in `references/report-template.md`; `examples/sample-report.md` shows a complete rendered example, including the dismissed-finding stanza. Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Dismissed findings additionally render `**Original severity:**`, `**Original confidence:**`, `**Dismissed at:**`, and `**Dismissed because:**` per the template — past runs have silently dropped these, so do not omit any of them; per-finding traceability requires the full set.
+7. Format the report using the template in `references/report-template.md`; `examples/sample-report.md` shows a complete rendered example, including the dismissed-finding stanza. Cite every validated AND dismissed finding with full file path and line: `file/path.ext:{line}` (or `:{start}-{end}` for ranges). Omit any severity section with zero findings. If zero findings total, replace the Findings section with: "No findings found." For every rendered finding (validated and dismissed), populate the `**Caught by:**` line from the finding's `source_agent` field, translated to the friendly label per the table in `references/report-template.md`. Dismissed findings additionally render `**Original severity:**`, `**Original confidence:**`, `**Dismissed at:**`, and `**Dismissed because:**` per the template — past runs have silently dropped these, so do not omit any of them.
 
 8. Print the full formatted report to the terminal.
 
-9. Write the formatted report to the output directory resolved in **Output Location**. Do not test whether the directory exists, do not create it, and do not prompt the user — write directly. If the write fails because the caller-supplied path is invalid, surface the error as-is. After a successful write, print the full resolved path.
+9. Write the formatted report to the output directory resolved in **Output Location**. Do not test if the directory exists. Do not attempt to create the directory. Write the file directly. If the write fails then surface the error as-is. After a successful write, print the full resolved path.
 
    File name: `code-review-{model}-PR-{number}.md` (PR mode), `code-review-{model}-{YYYY-MM-DD}.md` (local mode), `code-review-{model}-{branch}-{YYYY-MM-DD}.md` (branch comparison mode), or `code-review-{model}-{from-short}..{to-short}.md` (commit-range mode, where `{from-short}`/`{to-short}` are 7-char SHAs or shorter ref names).
 
