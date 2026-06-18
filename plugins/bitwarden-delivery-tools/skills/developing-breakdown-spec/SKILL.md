@@ -3,7 +3,7 @@ name: developing-breakdown-spec
 description: Resolve open design questions, then capture what's being built into the Specification section of a Bitwarden Tech Breakdown. Use after a breakdown document has been created in its empty state or resuming a partly-resolved specification. Triggered by phrasings such as "understand the work", "define breakdown scope", "write the breakdown spec", "develop the specification", "continue the breakdown spec".
 argument-hint: "[<breakdown-path | jira-key | slug>]"
 arguments: breakdown
-allowed-tools: Read, Edit, Glob, Grep, Skill, TaskCreate, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
+allowed-tools: Read, Edit, Glob, Grep, Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 ---
 
 # Developing the Spec
@@ -31,7 +31,7 @@ Verify the folder exists with `breakdown.md` inside it. If there isn't one, ask 
 
 ## Phases
 
-Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. `TaskCreate` is a deferred Claude Code tool; if it is not already available in the session, load it via `ToolSearch` with `select:TaskCreate` before calling it. If resuming, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full phase + decision graph, including the resume entry and the gaps-block stop condition.
+Create a task for each phase as you start it (`TaskCreate`), mark it in progress, and complete it before moving on. If resuming, use `AskUserQuestion` to confirm which phase to enter and re-fetch external sources (Jira, PRD, PoC) before continuing. See `references/process-flow.dot` for the full phase + decision graph.
 
 ### Phase 1: Gather context
 
