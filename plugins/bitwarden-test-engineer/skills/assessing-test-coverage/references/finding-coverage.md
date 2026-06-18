@@ -1,6 +1,6 @@
 # Finding and citing existing test coverage
 
-How to determine what a change is **already** tested by, scoped to the change surface, and how to cite each observed test as a stable link. This is the repo-reading half of test engineering; the trophy-mapping half (which layer a behavior _should_ live at) is in the `analyzing-test-stack` skill.
+How to determine what a change is **already** tested by, scoped to the change surface, and how to cite each observed test as a stable link. This is the repo-reading half of test engineering; the layer-mapping half (which layer a behavior _should_ live at) is in the `analyzing-test-stack` skill.
 
 ## Discovering a repo's test conventions (config-first)
 

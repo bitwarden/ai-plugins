@@ -39,7 +39,7 @@ from the Defect Severity Classification Guide (Confluence page `2759229512`).
 A Jira key may resolve to an Epic (or, in next-gen projects, a Feature) rather than a single
 story. The epic body itself rarely lists testable behaviors — those live on its children
 and on the PRs the children produce. If you analyze only the epic, you will under-scope the
-trophy. So when the `issuetype` on the `get_issue` response is `Epic` or `Feature`, expand
+analysis. So when the `issuetype` on the `get_issue` response is `Epic` or `Feature`, expand
 before extracting:
 
 1. **Discover children.** Read the `subtasks` field first. If empty (common in next-gen
@@ -53,7 +53,7 @@ before extracting:
    not re-derive it.
 3. **Per child, gather behaviors and PRs.**
    - `mcp__bitwarden-atlassian__get_issue` for the child's description and acceptance
-     criteria — these are the testable behaviors for the trophy. Capture each child's **key and
+     criteria — these are the testable behaviors for the analysis. Capture each child's **key and
      browse URL** and carry it with the behaviors it produces, exactly as for a single-issue
      intake — a behavior sourced from a child issue links to that child, not the epic.
    - `mcp__bitwarden-atlassian__get_issue_remote_links` for PRs (grouped under "GitHub").
@@ -125,7 +125,7 @@ Map its structure to testable evidence (the canonical template is page `29203497
   **SDK changes**, **Services touched**, **Hosting** (Self-Hosted vs Cloud paths),
   **Feature flagging** (flag-on/flag-off states to cover), and **Security considerations**
   (crypto, threat-model-relevant behaviors). The **Testing considerations** item is the team's
-  own stated test intent — treat it as a claim to assess against the trophy, not as ground truth
+  own stated test intent — treat it as a claim to assess, not as ground truth
   to copy.
 - **Part 4 — Specification artifacts**: linked child pages defining concrete interfaces (API
   contracts, schemas, component APIs, crypto schemes). Fetch the relevant ones with

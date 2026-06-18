@@ -10,9 +10,13 @@ new testing skills are added over time.
 ### First capability: test-stack analysis
 
 Given a change — a feature, bugfix, refactor, or migration — the agent recommends
-**what to test, at which layer, and why**, shaped as a **Testing Trophy**: a focused
-unit layer, a heavy integration layer where most confidence is bought, and a thin E2E
-layer reserved for critical user journeys.
+**what to test, at which layer, and why**, shaped to **each repo's actual test practice**.
+Two ideas drive it: each behavior is tested at the cheapest layer that buys the confidence it
+needs (unit, integration, or E2E), and how those layers are weighted is decided per repo — a
+unit-heavy pyramid (`server`, `clients`, `sdk-internal`, `android`), an integration/snapshot
+trophy (`ios`), or a wholly all-E2E repo (the dedicated `test` repo,
+`browser-interactions-testing`). E2E is "thin" only _within_ a platform repo; the dedicated
+`test` repo is entirely E2E by design.
 
 It ingests whatever evidence is available — a Jira ticket (via the Atlassian MCP), a GitHub
 PR (via `gh`), an exported test-case CSV, and/or a plain-language description — fans out
@@ -40,7 +44,7 @@ unverified when that repo isn't checked out.
 | Skill                     | What It Does                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `assessing-test-coverage` | The backward-looking inventory. Determines what is **already tested** for a change — scoped to the change surface, PR-first then a targeted lookup — buckets each observed test by layer, cites it as a stable GitHub permalink, flags untested behaviors as gaps, and writes a self-contained HTML coverage report. Feeds `analyzing-test-stack`; usable standalone to audit current coverage. |
-| `analyzing-test-stack`    | The recommender. Consumes the coverage inventory, then maps each testable behavior in a change to the cheapest sufficient Testing Trophy layer per platform, names concrete tooling, surfaces coverage gaps and trophy-wrong shapes (ice-cream-cone, over-testing, missing platform layers), and writes a self-contained HTML report to the current working directory.                          |
+| `analyzing-test-stack`    | The recommender. Consumes the coverage inventory, then maps each testable behavior in a change to the cheapest sufficient test layer per platform, inside each repo's actual shape, names concrete tooling, surfaces coverage gaps and trophy-wrong shapes (ice-cream-cone, over-testing, missing platform layers), and writes a self-contained HTML report to the current working directory.   |
 
 ## Cross-Plugin Integration
 

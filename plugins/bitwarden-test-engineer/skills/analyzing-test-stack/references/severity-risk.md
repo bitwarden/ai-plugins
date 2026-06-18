@@ -55,7 +55,7 @@ and _how hard a missing test counts as a gap_. Concretely:
 - **Critical** — the confidence bar is highest: cover the behavior's material failure modes,
   not just the happy path, at whatever layer each mode is cheapest to pin down. Critical
   behaviors that are genuine end-to-end journeys (login, vault unlock, checkout) are exactly
-  what the trophy reserves the **thin E2E layer** for — the guide's "critical user flows"
+  what the **thin E2E layer** is reserved for — the guide's "critical user flows"
   map 1:1 onto that reservation. A Critical behavior with no observed coverage is a
   **top-priority gap** and belongs at the head of `#overview`'s open risks.
 - **High** — strong integration coverage of the primary path _and_ the documented
