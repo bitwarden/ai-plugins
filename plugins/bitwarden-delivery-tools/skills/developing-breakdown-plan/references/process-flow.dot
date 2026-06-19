@@ -1,0 +1,52 @@
+// Process flow for Skill(developing-breakdown-plan).
+// cspell:ignore Tpng rankdir fontname
+// Render with: dot -Tpng process-flow.dot -o process-flow.png
+//
+// Boxes are activities; diamonds are decision points; ellipses are terminal states.
+// Both fresh and resume entry points run the gates first. On resume, after gates
+// pass, Triage dispatches to the next unfinished activity. Self-review issues are
+// fixed inline (loop back to SelfReview, not back through Activities 1-4). The
+// optional Prototype step runs after the breakdown is reviewer-ready.
+
+digraph developing_the_breakdown_plan {
+  rankdir=TB;
+  node [fontname="Helvetica"];
+  edge [fontname="Helvetica"];
+
+  Start          [shape=ellipse, label="Start"];
+  EntryMode      [shape=diamond, label="Fresh or resume?"];
+  GatesPass      [shape=diamond, label="Spec filled and\nclarifications resolved?"];
+  StopGate       [shape=ellipse, label="Stop:\nreturn to Spec or\nresolve clarifications"];
+  Triage         [shape=box,     label="Triage:\nwhich activities are\ncomplete vs. remaining"];
+  Architecture   [shape=box,     label="Activity 1:\nTechnical architecture\n(invoke architecting-solutions)"];
+  LayerImpact    [shape=box,     label="Activity 2:\nMap per-layer impact"];
+  InFlight       [shape=box,     label="Activity 3:\nScan for in-flight work"];
+  CrossTeam      [shape=box,     label="Activity 4:\nIdentify cross-team impacts"];
+  SelfReview     [shape=box,     label="Activity 5:\nSelf-review\n(template coverage,\nspec coverage,\nplaceholders, consistency)"];
+  ReviewerReady  [shape=diamond, label="Reviewer-ready?"];
+  OfferPrototype [shape=diamond, label="Create prototype\ndraft PR?"];
+  Prototype      [shape=box,     label="Optional:\nPrototype draft PR(s)\n(one draft PR per affected repo,\nlinked back to the breakdown)"];
+  Done           [shape=ellipse, label="Done →\nteam-internal review,\nthen move to Proposed"];
+
+  Start         -> EntryMode;
+  EntryMode     -> GatesPass     [label="fresh"];
+  EntryMode     -> GatesPass     [label="resume\n(re-read breakdown\nto reload context)"];
+  GatesPass     -> StopGate      [label="no"];
+  GatesPass     -> Architecture  [label="yes (fresh)"];
+  GatesPass     -> Triage        [label="yes (resume)"];
+  Triage        -> Architecture  [label="resume at 1 (if unfinished)"];
+  Triage        -> LayerImpact   [label="resume at 2 (if unfinished)"];
+  Triage        -> InFlight      [label="resume at 3 (if unfinished)"];
+  Triage        -> CrossTeam     [label="resume at 4 (if unfinished)"];
+  Triage        -> SelfReview    [label="resume at 5 (if unfinished)"];
+  Architecture  -> LayerImpact;
+  LayerImpact   -> InFlight;
+  InFlight      -> CrossTeam;
+  CrossTeam     -> SelfReview;
+  SelfReview    -> ReviewerReady;
+  ReviewerReady -> SelfReview    [label="no, fix inline"];
+  ReviewerReady -> OfferPrototype [label="yes"];
+  OfferPrototype -> Prototype    [label="yes"];
+  OfferPrototype -> Done         [label="no"];
+  Prototype     -> Done;
+}
