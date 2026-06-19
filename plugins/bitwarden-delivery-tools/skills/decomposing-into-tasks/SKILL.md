@@ -3,7 +3,7 @@ name: decomposing-into-tasks
 description: Decompose a breakdown Plan into a tasks.md document with one entry per future Jira work item. Also handles resumption against a partly-drafted task list. Triggers: "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table", "continue task decomposition".
 argument-hint: "[<breakdown-path | jira-key | slug>]"
 arguments: breakdown
-allowed-tools: Read, Edit, Write, Glob, TaskCreate, AskUserQuestion
+allowed-tools: Read, Edit, Write, Glob
 ---
 
 # Decomposing into Tasks
