@@ -101,7 +101,7 @@ Do not edit the breakdown document. The breakdown and `tasks.md` are siblings: t
 - **Blocked by**: Task M, PM-XXXXX (outside of this breakdown)
 - **Depends on**: Task K (interface only, can run in parallel)
 - **Description**: One or two sentences describing the purpose of this work.
-- **Acceptance Criteria**: In GIVEN/THEN/WHEN format.
+- **Acceptance Criteria**: In GIVEN/WHEN/THEN format.
 - **Tech Breakdown**: Actual code, not prose - whatever the engineer will literally write or modify. Use fenced code blocks tagged with the right language. If the change is purely a rename or a config flip, show the before-and-after. If the particular code change shape or reason is not obvious, include a sentence explaining why. If a prototype is provided in the Plan, **link to relevant code in the prototype instead of duplicating it in the Tech Breakdown**.
 ```
 
