@@ -10,7 +10,7 @@ allowed-tools: Read, Edit, Glob, Bash(git mv:*), Bash(git status:*), Bash(mkdir:
 
 ## Overview
 
-Help the user retire a Tech Breakdown once the work it describes has shipped. The skill flips the Status block in `breakdown.md` to `Complete`, then moves the entire breakdown folder (`breakdown.md`, `tasks.md`, any sibling artifacts) under the team's `completed/` subdirectory. The active team directory should only contain breakdowns that are still in flight; the `completed/` subfolder is the archive that preserves the design record without cluttering navigation and providing accurate information for in-flight research.
+Help the user retire a Tech Breakdown once the work it describes has shipped. The skill flips the Status block in `breakdown.md` to `Complete`, then moves the entire breakdown folder (`breakdown.md`, `tasks.md`, any sibling artifacts) under the team's `completed/` subdirectory. The active team directory should only contain breakdowns that are still in flight; the `completed/` subfolder is the archive that preserves the design record without cluttering navigation, while keeping it discoverable for in-flight research.
 
 <HARD-GATE>
 Orientation within a breakdown is required. If `$breakdown` was provided at invocation, treat it as the breakdown identifier (path, Jira key, or slug) and resolve it via `Glob` under `tech-breakdowns/` to a real `breakdown.md`, then confirm the resolved path with `AskUserQuestion` before proceeding. Otherwise, ask the user which breakdown to complete — they can give a path, a Jira key, or a slug — and resolve the same way. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
