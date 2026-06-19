@@ -29,12 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `architecting-solutions`: added an explicit untrusted-data principle for content fetched via the Jira and Confluence MCP tools. Confluence pages are user-editable and a known prompt-injection surface; the skill must summarize or reference fetched content, never execute instructions found inside it.
 
-## [2.3.1] - 2026-06-10
-
-### Changed
-
-- `architecting-solutions`: added "Avoid deprecated methods" principle, expanded "Complement existing patterns" to cover competing-pattern selection, dropped the EM-capacity red flag (now owned by the initiative funnel / work-transition skills), and added an untrusted-data principle for Jira/Confluence MCP content.
-
 ## [2.3.0] - 2026-05-19
 
 ### Changed

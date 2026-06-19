@@ -5,7 +5,7 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2026-06-15
+## [2.0.0] - 2026-06-19
 
 ### Added
 
@@ -14,17 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - **BREAKING:** `writing-tech-breakdowns` skill removed. Superseded by `starting-breakdown`, `developing-breakdown-spec`, `developing-breakdown-plan`, and `decomposing-into-tasks`. The skill was deprecated in 1.4.0.
-- **BREAKING:** `coordinating-cross-team-breakdown` skill removed. Incorporated into `developing-breakdown-plan`.
+- **BREAKING:** `coordinating-cross-team-breakdown` skill removed.
 
 ### Changed
 
 - `navigating-the-initiative-funnel`: cross-references to the removed skills replaced with pointers to `starting-breakdown`, `developing-breakdown-spec`, `developing-breakdown-plan`, and `decomposing-into-tasks`.
-
-## [1.4.1] - 2026-06-10
-
-### Added
-
-- **`developing-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled
 
 ## [1.5.0] - 2026-06-17
 
