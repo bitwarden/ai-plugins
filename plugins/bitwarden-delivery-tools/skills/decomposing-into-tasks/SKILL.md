@@ -13,7 +13,7 @@ allowed-tools: Read, Edit, Write, Glob
 Assist a Bitwarden engineer in turning a breakdown Plan into a separate `tasks.md` file, containing a numbered list where each entry is a future Jira story.
 
 <HARD-GATE>
-Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `bitwarden/tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
+Orientation within a breakdown is required. Ask the user which breakdown to work against. They can give a path, a Jira key, or a team/slug — use `Glob` under `tech-breakdowns/` to resolve to a real `breakdown.md`. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
 
 Once a breakdown has been found, do NOT write to `tasks.md` unless both hold:
 
@@ -37,7 +37,7 @@ Create a task for each phase as you start it (`TaskCreate`), mark it in progress
 
 Once the breakdown file is known, derive the Tasks file path: `tasks.md` in the same folder as the breakdown. Check whether it exists:
 
-- **`tasks.md` does not exist.** This is a fresh decomposition. Create `tasks.md` from the template at `bitwarden/tech-breakdowns/templates/tasks.md` and continue.
+- **`tasks.md` does not exist.** This is a fresh decomposition. Create `tasks.md` from the template at `tech-breakdowns/templates/tasks.md` and continue.
 - **`tasks.md` exists.** This is a resumption. Continue with the existing `tasks.md`.
 
 Surface the resolved paths to the user once before moving on: _"Working against breakdown `<path>`, Tasks file at `<path>/tasks.md` (<new | resuming>)."_
