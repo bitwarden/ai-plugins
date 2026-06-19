@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`developing-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled
 
+## [1.5.0] - 2026-06-17
+
+### Added
+
+- **`developing-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled, with an optional follow-on step to open a draft prototype PR across affected repos for the team to evaluate alongside the design.
+
 ## [1.4.0] - 2026-06-09
 
 ### Added
