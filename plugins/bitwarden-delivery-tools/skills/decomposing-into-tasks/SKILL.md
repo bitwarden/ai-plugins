@@ -1,7 +1,9 @@
 ---
 name: decomposing-into-tasks
 description: Decompose a breakdown Plan into a tasks.md document with one entry per future Jira work item. Also handles resumption against a partly-drafted task list. Triggers: "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table", "continue task decomposition".
-allowed-tools: Skill, Read, Edit, Write, Grep, Glob, TaskCreate, AskUserQuestion
+argument-hint: "[<breakdown-path | jira-key | slug>]"
+arguments: breakdown
+allowed-tools: Read, Edit, Write, Glob, TaskCreate, AskUserQuestion
 ---
 
 # Decomposing into Tasks
@@ -100,7 +102,7 @@ Do not edit the breakdown document. The breakdown and `tasks.md` are siblings: t
 - **Depends on**: Task K (interface only, can run in parallel)
 - **Description**: One or two sentences describing the purpose of this work.
 - **Acceptance Criteria**: In GIVEN/THEN/WHEN format.
-- **Tech Breakdown**: Actual code, not prose - whatever the engineer will literally write or modify. Use fenced code blocks tagged with the right language. If the change is purely a rename or a config flip, show the before-and-after. If the particular code change shape or reason is not obvious, include a sentence explaining why.
+- **Tech Breakdown**: Actual code, not prose - whatever the engineer will literally write or modify. Use fenced code blocks tagged with the right language. If the change is purely a rename or a config flip, show the before-and-after. If the particular code change shape or reason is not obvious, include a sentence explaining why. If a prototype is provided in the Plan, **link to relevant code in the prototype instead of duplicating it in the Tech Breakdown**.
 ```
 
 `Blocked by` and `Depends on` use `(none)` when there is no dependency.
