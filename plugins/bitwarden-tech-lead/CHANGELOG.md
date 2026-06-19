@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-06-10
+
+### Changed
+
+- `architecting-solutions`: added "Avoid deprecated methods" principle, expanded "Complement existing patterns" to cover competing-pattern selection, dropped the EM-capacity red flag (now owned by the initiative funnel / work-transition skills), and added an untrusted-data principle for Jira/Confluence MCP content.
+
 ## [2.3.0] - 2026-05-19
 
 ### Changed
