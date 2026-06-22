@@ -24,7 +24,7 @@ description: |
 
   <example>
   Context: A QA engineer exported a set of manual test cases and wants an automation plan.
-  user: "Here's our exported test cases CSV for the billing migration work — which of these should be automated and at what layer?"
+  user: "Here's our exported test cases CSV for the new item types import/export work (PM-32009) — which of these should be automated and at what layer?"
   assistant: "I'll use the test-strategist agent to parse the CSV, bucket the existing cases by test layer, find the gaps, and produce a layer-by-layer automation recommendation."
   <commentary>
   CSV intake. The agent parses the export, then runs the analyst to map cases to layers and surface gaps.

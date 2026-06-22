@@ -80,8 +80,8 @@ Does bitwarden/server#5821 have the right tests, or is it leaning too hard on en
 ```
 
 ```
-Here's our exported test cases CSV for the billing migration — which of these should be
-automated and at what layer?
+Here's our exported test cases CSV for the new item types import/export work (PM-32009) —
+which of these should be automated and at what layer?
 ```
 
 Each run produces a per-change directory `test-engineer-report-<slug>-<date>/` holding the

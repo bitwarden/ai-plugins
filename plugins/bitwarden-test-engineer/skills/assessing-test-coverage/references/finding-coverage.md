@@ -109,23 +109,23 @@ present. A behavior with no Jira source (e.g. found only in a PR diff) omits `so
 
 ```
 {
-  "behavior": "per-phase price resolution on schedule activation",
+  "behavior": "bank account item type round-trips through import/export",
   "platform": "server",
   "layer": "integration",
   "status": "covered",
   "count": 21,
   "source_issue": {
-    "key": "PM-1234",
-    "url": "https://bitwarden.atlassian.net/browse/PM-1234"
+    "key": "PM-32009",
+    "url": "https://bitwarden.atlassian.net/browse/PM-32009"
   },
   "representative": [
     {
-      "path": "test/Billing/.../ScheduleHandlerTests.cs",
+      "path": "test/Core.Test/Vault/.../CipherItemTypeTests.cs",
       "start_line": 42,
       "end_line": 89,
       "owner_repo": "bitwarden/server",
       "sha": "a1b2c3d4e5f6…",
-      "permalink": "https://github.com/bitwarden/server/blob/a1b2c3d4e5f6…/test/Billing/.../ScheduleHandlerTests.cs#L42-L89"
+      "permalink": "https://github.com/bitwarden/server/blob/a1b2c3d4e5f6…/test/Core.Test/Vault/.../CipherItemTypeTests.cs#L42-L89"
     }
   ]
 }
@@ -136,7 +136,7 @@ A representative test that cannot be linked is recorded path-only with a reason 
 never fabricate a URL. Behaviors/surfaces with no observed test are returned as gaps:
 
 ```
-{ "behavior": "tier downgrade preserves seat count", "platform": "server", "status": "unverified" }
+{ "behavior": "organization policy can restrict the Driver License item type", "platform": "server", "status": "unverified" }
 ```
 
 Keep `representative` to at most three permalinks per behavior; the `count` conveys breadth
