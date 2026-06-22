@@ -1,13 +1,4 @@
 <!doctype html>
-<!--
-  MOCK FIXTURE — fictional content, no real data.
-  Substantially ON-BRAND: Inter, the Bitwarden palette, 36px radius, the official
-  shield embedded verbatim. Seeded with brand-silent DEFENSIBLE choices (a dark
-  surface derived from Deep Blue; two data-viz series) and exactly ONE genuine
-  minor fault (an off-palette orange accent). Used by the review-false-positive
-  eval to measure over-flagging — a good review affirms the core, notes the
-  defensible choices as judgment calls, and flags only the orange.
--->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -20,7 +11,6 @@
     />
     <style>
       :root {
-        /* Canonical Bitwarden palette */
         --bw-blue: #175ddc;
         --bw-deep-blue: #0c3276;
         --bw-teal: #2cdde9;
@@ -29,7 +19,6 @@
         --bw-off-white: #f3f6f9;
         --bw-true-white: #ffffff;
         --bw-radius: 36px;
-        /* Dark surface DERIVED from Deep Blue (#0c3276) — brand-silent, defensible */
         --surface: #0a1d3a;
         --surface-2: #0c1f3f;
         --surface-3: #102747;
@@ -112,8 +101,6 @@
         height: 10px;
         border-radius: 999px;
       }
-      /* Data-viz series — teal + green from palette (on-brand), plus a third
-         categorical series; chart series are a brand-silent judgment call. */
       .series-a {
         background: var(--bw-teal);
       }
@@ -133,7 +120,6 @@
         text-decoration: none;
         font-weight: 600;
       }
-      /* GENUINE FAULT: off-palette orange accent (not in the canon). */
       .cta:hover {
         background: #ff7a18;
       }

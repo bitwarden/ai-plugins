@@ -11,6 +11,13 @@ deterministically where it can.
 metrics, or internal decks. Keep it that way. If a fixture needs to feel
 realistic, invent the content.
 
+**Keep the fixtures free of eval-meta.** No comment or visible text should mark a
+file as a fixture, call it on- or off-brand, label which choices are faults, or
+point at the rubric. The skill under test reads the input verbatim, so any such
+hint poisons the result — it would measure reading the answer key, not detecting
+brand issues. Ground truth lives in this README and in `rubric.json`, which the
+skill never sees.
+
 - `inputs/offbrand-deck.html` — deliberately off-brand (Big Shoulders / IBM Plex
   fonts, invented slate/green palette, no official lockup, sub-36px radii).
 - `inputs/onbrand-control.html` — substantially on-brand (Inter, Bitwarden
