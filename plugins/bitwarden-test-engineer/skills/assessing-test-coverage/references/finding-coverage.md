@@ -28,7 +28,7 @@ Reliably establishing what is **already tested** does not require grepping a who
 two ordered moves, and record anything still unfound as a gap rather than dropping it:
 
 1. **Merged/linked PRs are the backbone.** The PRs hanging off the Jira issue and its epic
-   children (`mcp__bitwarden-atlassian__get_issue_remote_links` → `gh pr view`/`gh pr diff`) are the reliable record of
+   children (`mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links` → `gh pr view`/`gh pr diff`) are the reliable record of
    the tests that shipped with this work, and are already permalink-ready via the PR head SHA.
    Take the tests observed in those PR diffs as primary coverage evidence.
 2. **Targeted repo lookup for pre-existing tests.** Tests written _before_ this ticket won't

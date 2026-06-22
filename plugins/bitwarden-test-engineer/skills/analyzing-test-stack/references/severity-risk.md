@@ -16,7 +16,7 @@ Confluence page `2759229512`:
 <https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2759229512/Severity>. That page is
 authoritative — read it for the level definitions, criteria, and signals; this file does
 not reproduce them. When the `bitwarden-atlassian-tools` MCP is available, fetch the page
-with `mcp__bitwarden-atlassian__get_confluence_page` (pageId `2759229512`) and classify
+with `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page` (pageId `2759229512`) and classify
 each behavior against its criteria. If the fetch fails or the MCP is unavailable, classify
 against the generally understood meaning of the levels below using your own judgment, and
 note in the report that severities were assessed without the guide (definitions not

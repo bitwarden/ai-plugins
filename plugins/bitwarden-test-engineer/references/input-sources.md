@@ -10,12 +10,12 @@ Preferred: if the `bitwarden-atlassian-tools` plugin is installed, invoke
 
 Otherwise use the MCP tools directly:
 
-- `mcp__bitwarden-atlassian__get_issue` — the issue itself (summary, description,
+- `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue` — the issue itself (summary, description,
   acceptance criteria, custom fields).
-- `mcp__bitwarden-atlassian__get_issue_comments` — clarifications and edge cases raised in
+- `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments` — clarifications and edge cases raised in
   discussion.
-- `mcp__bitwarden-atlassian__get_issue_remote_links` — linked Confluence pages and PRs.
-- `mcp__bitwarden-atlassian__get_confluence_page` — linked requirements/design docs.
+- `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links` — linked Confluence pages and PRs.
+- `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page` — linked requirements/design docs.
 
 Extract: discrete **testable behaviors**, **acceptance criteria**, and the **platforms/
 components** named. If the MCP is unavailable, ask the user to paste the requirements.
@@ -38,7 +38,7 @@ before extracting:
 
 1. **Discover children.** Read the `subtasks` field first. If empty (common in next-gen
    projects, which use `parent` relationships rather than the legacy `subtasks` field), fall
-   back to `mcp__bitwarden-atlassian__search_issues` with JQL `parent = <EPIC-KEY>`. On
+   back to `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues` with JQL `parent = <EPIC-KEY>`. On
    classic projects, also try `"Epic Link" = <EPIC-KEY>`. Together these cover both schemas.
 2. **Bound the fan-out.** If the epic has more than ~10 children, fetch the first 10 in full
    and summarize the rest as a one-line list (key, status, summary) from the search results.
@@ -46,10 +46,10 @@ before extracting:
    `bitwarden-atlassian-tools:researching-jira-issues` (Steps 2–3) — re-use that recipe; do
    not re-derive it.
 3. **Per child, gather behaviors and PRs.**
-   - `mcp__bitwarden-atlassian__get_issue` for the child's description and acceptance criteria —
+   - `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue` for the child's description and acceptance criteria —
      these are the testable behaviors. Carry each child's **key and browse URL** with the behaviors
      it produces — a behavior sourced from a child links to that child, not the epic.
-   - `mcp__bitwarden-atlassian__get_issue_remote_links` for PRs (grouped under "GitHub"). Each PR URL
+   - `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links` for PRs (grouped under "GitHub"). Each PR URL
      feeds the **GitHub PR** branch below (`gh pr view` / `gh pr diff`). **These merged/linked PRs
      are the reliable backbone for existing coverage** — they carry the tests that shipped and the
      PR head SHA makes each permalink-ready (see `finding-coverage.md` → _Finding existing
@@ -89,9 +89,9 @@ scoping you would otherwise reconstruct from a diff or a ticket. Mine it; don't 
 
 Locate and fetch it:
 
-- If given a page ID or URL, fetch directly with `mcp__bitwarden-atlassian__get_confluence_page`.
-- If given only a feature/team name, find the page first with `mcp__bitwarden-atlassian__search_confluence`
-  or `mcp__bitwarden-atlassian__search_confluence_cql` (breakdowns live in a team's "Tech Breakdown"
+- If given a page ID or URL, fetch directly with `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page`.
+- If given only a feature/team name, find the page first with `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence`
+  or `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql` (breakdowns live in a team's "Tech Breakdown"
   folder), then fetch it.
 - The breakdown's **status** matters: `IN PLANNING` / `IN PROGRESS` means the scope may still
   shift — note that the recommendation rests on a draft. `PROPOSED` / `ACCEPTED` is a stable

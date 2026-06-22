@@ -49,9 +49,9 @@ unverified when that repo isn't checked out.
 
 ## Cross-Plugin Integration
 
-| Plugin                      | How It's Used                                                                                                                                                                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bitwarden-atlassian-tools` | Optional but recommended. Provides the `mcp__bitwarden-atlassian__*` server used to read Jira tickets and linked Confluence requirements. If absent, the plugin degrades gracefully — paste requirements or rely on the PR/CSV/description. |
+| Plugin                      | How It's Used                                                                                                                                                                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-atlassian-tools` | Optional but recommended. Provides the `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__*` server used to read Jira tickets and linked Confluence requirements. If absent, the plugin degrades gracefully — paste requirements or rely on the PR/CSV/description. |
 
 ## Installation
 

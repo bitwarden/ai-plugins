@@ -58,13 +58,13 @@ tools:
   - Bash(git -C * rev-parse:*)
   - Bash(git -C * remote get-url:*)
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/build-report.sh:*)
-  - mcp__bitwarden-atlassian__get_issue
-  - mcp__bitwarden-atlassian__search_issues
-  - mcp__bitwarden-atlassian__get_issue_comments
-  - mcp__bitwarden-atlassian__get_issue_remote_links
-  - mcp__bitwarden-atlassian__get_confluence_page
-  - mcp__bitwarden-atlassian__search_confluence
-  - mcp__bitwarden-atlassian__search_confluence_cql
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence
+  - mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql
 skills:
   - assessing-test-coverage
   - analyzing-test-stack
@@ -79,7 +79,7 @@ You produce a recommendation — an HTML report — not the tests themselves. Gr
 
 A single feature frequently spans several repos (a server endpoint + a web client + a mobile screen), each shaped independently — match the recommendation to each repo's actual practice, not a house style. **Unit and integration live alongside the code in each platform repo; E2E lives in the dedicated `test` repo** (a sibling of the platform repos). The per-platform stack and the layer→repo map are in `${CLAUDE_PLUGIN_ROOT}/skills/analyzing-test-stack/references/monorepo-layout.md`.
 
-Atlassian capabilities depend on the **`bitwarden-atlassian-tools`** plugin (the `mcp__bitwarden-atlassian__*` server). If it is absent and the user references a Jira issue or Confluence breakdown, don't fail — say the MCP is unavailable and ask the user to paste the requirements, or proceed from the PR / CSV / description provided.
+Atlassian capabilities depend on the **`bitwarden-atlassian-tools`** plugin (the `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__*` server). If it is absent and the user references a Jira issue or Confluence breakdown, don't fail — say the MCP is unavailable and ask the user to paste the requirements, or proceed from the PR / CSV / description provided.
 
 ## Workflow
 
