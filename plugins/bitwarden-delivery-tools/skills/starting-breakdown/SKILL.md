@@ -1,7 +1,9 @@
 ---
 name: starting-breakdown
 description: Sets up a new Bitwarden Tech Breakdown in the bitwarden/tech-breakdowns repo. Creates a per-breakdown folder (`<team>/<JIRA-KEY>-<short-slug>/`) containing `breakdown.md` from the template, so the future `tasks.md` and any specification artifacts can live alongside it. Use when a team is creating a new breakdown — triggered by phrasings such as "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file", "spin up a breakdown".
-allowed-tools: Read, Edit, Glob, Skill, AskUserQuestion, Bash(git clone:*), Bash(git pull:*), Bash(git status:*), Bash(cp:*), Bash(mkdir:*), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
+argument-hint: "[<jira-key>]"
+arguments: jira
+allowed-tools: Skill(developing-breakdown-spec), Read, Edit, Glob, Bash(git clone:*), Bash(git pull:*), Bash(git status:*), Bash(cp:*), Bash(mkdir:*), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues
 ---
 
 # Starting a Tech Breakdown
@@ -33,7 +35,7 @@ Work through each phase in order; do not skip ahead.
 
 Ask the user for each of these. All four are required by the HARD-GATE; if any is missing, prompt for it before continuing.
 
-- **Jira key.** The epic, task, or story this breakdown corresponds to.
+- **Jira key.** The epic, task, or story this breakdown corresponds to. If `$jira` was provided at invocation, use it and confirm with the user; otherwise prompt for it.
 - **Summary.** One-line description of the work being broken down.
 - **Team.** What team is the breakdown owner a part of?
 - **Active owner / contact.** Who is performing this breakdown?
@@ -46,7 +48,7 @@ Produce a short summary and surface it to the user before continuing:
 ### Phase 2: Create the breakdown folder and file
 
 1. **Locate the `bitwarden/tech-breakdowns` working copy.** Ask the user for the absolute path via `AskUserQuestion` if it is not already established in the conversation. Once the path is known, confirm it is on `main` and up to date with `git status` / `git pull`; if no working copy exists, clone it where the user directs.
-2. **Confirm the slug** with the user before creating anything. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim). The full path will be `<team>/<JIRA-KEY>-<short-slug>/`. Anchor on a short, change-focused phrase: `client-vault-refactor` is good; `clients-team-vault-refactoring-q3` is bad (team prefix, gerund, and unrelated time-window noise).
+2. **Confirm the slug** with the user before creating anything. Slugs are kebab-case, human-readable, derived from the change name (not the Jira summary verbatim). The full path will be `<team>/<JIRA-KEY>-<short-slug>/`. Anchor on a short, change-focused phrase: `client-vault-refactor` is good; `clients-team-vault-refactoring-q3` is bad (team prefix, gerund, and unrelated time-window noise). **Validate before using in shell commands.** Slug must match `^[a-z][a-z0-9-]*$`. Jira key must match `^[A-Z][A-Z0-9]+-[0-9]+$`. If either fails, reject and re-prompt the user — never interpolate an non-validated value into `mkdir`, `cp`, or any other shell command.
 3. **Create the breakdown folder**: `<team>/<JIRA-KEY>-<short-slug>/`. This folder is the single home for everything tied to this breakdown — the breakdown itself, the future `tasks.md`, any sibling specification artifacts, PoC notes. Do not place breakdown files directly under `<team>/`.
 4. **Locate the template.** The canonical template lives at `templates/breakdown.md` inside the `bitwarden/tech-breakdowns` working copy.
 5. **Copy the template into the new folder as `breakdown.md`**: copy `templates/breakdown.md` to `<team>/<JIRA-KEY>-<short-slug>/breakdown.md`. Do not edit the template itself.
