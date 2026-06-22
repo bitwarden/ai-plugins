@@ -2,12 +2,13 @@
 
 ## Overview
 
-A test engineering toolkit for Bitwarden. A generalist test-engineer agent analyzes a
-request and dispatches specialized skills across the testing discipline — test strategy and planning,
-automation, exploratory testing, and quality assessment. The plugin is designed to grow:
-new testing skills are added over time.
+A test engineering toolkit for Bitwarden. It hosts role-specific testing agents. Today it
+ships one — the **test strategist** (`test-strategist`), the test-_planning_ role:
+it recommends what to test, at which layer, and why, and inventories what is already tested.
+It does not author, run, or maintain the tests, nor do exploratory/manual QA. The plugin is
+designed to grow additional roles over time (for example an SDET or a QA engineer).
 
-### First capability: test-stack analysis
+### First role: the test strategist
 
 Given a change — a feature, bugfix, refactor, or migration — the agent recommends
 **what to test, at which layer, and why**, shaped to **each repo's actual test practice**.
@@ -33,18 +34,18 @@ in a dedicated, private `test` repository** — not inside the platform repos �
 recommendations target that separate repo, and existing E2E coverage is treated as
 unverified when that repo isn't checked out.
 
-## Agent
+## Agents
 
-| Agent                     | What It Does                                                                                                                                                                                                                                                                         |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bitwarden-test-engineer` | Classifies the inputs for a change (Jira, PR, CSV, description), fans out subagents to gather evidence, assesses existing coverage (`assessing-test-coverage`), then runs `analyzing-test-stack` — emitting a self-contained coverage report and a self-contained test-stack report. |
+| Agent             | What It Does                                                                                                                                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `test-strategist` | Classifies the inputs for a change (Jira, PR, CSV, description), fans out subagents to gather evidence, assesses existing coverage (`assessing-test-coverage`), then runs `analyzing-test-stack` — emitting a self-contained coverage report and a self-contained test-stack report. |
 
 ## Skills
 
 | Skill                     | What It Does                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `assessing-test-coverage` | The backward-looking inventory. Determines what is **already tested** for a change — scoped to the change surface, PR-first then a targeted lookup — buckets each observed test by layer, cites it as a stable GitHub permalink, flags untested behaviors as gaps, and writes a self-contained HTML coverage report. Feeds `analyzing-test-stack`; usable standalone to audit current coverage. |
-| `analyzing-test-stack`    | The recommender. Consumes the coverage inventory, then maps each testable behavior in a change to the cheapest sufficient test layer per platform, inside each repo's actual shape, names concrete tooling, surfaces coverage gaps and trophy-wrong shapes (ice-cream-cone, over-testing, missing platform layers), and writes a self-contained HTML report to the current working directory.   |
+| `analyzing-test-stack`    | The recommender. Consumes the coverage inventory, then maps each testable behavior in a change to the cheapest sufficient test layer per platform, inside each repo's actual shape, names concrete tooling, surfaces coverage gaps and shape-wrong tests (ice-cream-cone, over-testing, missing platform layers), and writes a self-contained HTML report into a per-change report directory.   |
 
 ## Cross-Plugin Integration
 
@@ -83,13 +84,12 @@ Here's our exported test cases CSV for the billing migration — which of these 
 automated and at what layer?
 ```
 
-Each run produces two self-contained HTML files in the current working directory: a
-`test-coverage-report-<slug>-<date>-<HHMMSS>.html` (what is already tested — observed tests per
-layer, each cited as a GitHub permalink, plus gaps) and a
-`test-stack-report-<slug>-<date>-<HHMMSS>.html` (the per-platform recommendation and its
-coverage-gap findings). The `HHMMSS` time suffix is stamped at build time, so re-running on the
-same day never overwrites a prior report. Both share one off-brand data-report visual system so
-they read as the same instrument.
+Each run produces a per-change directory `test-engineer-report-<slug>-<date>/` holding the
+self-contained HTML reports: `coverage.html` (what is already tested — observed tests per layer,
+each cited as a GitHub permalink, plus gaps), `recommended.html` (the per-platform recommendation
+and its coverage-gap findings), and `combined.html` (the primary deliverable — both on one two-tab
+page). Re-running on the same change and date refreshes the reports in that directory. They share
+one off-brand data-report visual system so they read as the same instrument.
 
 ## References
 

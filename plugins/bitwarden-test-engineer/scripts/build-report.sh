@@ -27,11 +27,16 @@
 # stylesheet in once. The two source reports are read, not modified, and their
 # standalone files remain; the combined page is an additional deliverable.
 #
-# Writes <kind>-report-<slug>-<date>-<HHMMSS>.html to the current working
-# directory and prints the final filename to stdout. The HHMMSS suffix is read
-# from the wall clock here (the model cannot read the clock) and guarantees a
-# fresh filename per run, so a report is never overwritten and an existing file
-# never has to be read back and regenerated.
+# Writes the report into a per-change directory, creating it if needed, and
+# prints the final path to stdout:
+#
+#   test-engineer-report-<slug>-<date>/coverage.html      (--kind test-coverage)
+#   test-engineer-report-<slug>-<date>/recommended.html   (--kind test-stack)
+#   test-engineer-report-<slug>-<date>/combined.html       (--kind test-combined)
+#
+# The directory name derives only from --slug/--date, so all three of a run's
+# reports land in the same folder. Re-running the same change on the same date
+# refreshes the report in place (the prior file is overwritten).
 #
 # Input files are left untouched; delete any temporary fragment yourself.
 
@@ -86,8 +91,14 @@ if [[ ! -f "$CSS_FILE" ]]; then
   exit 1
 fi
 
-TIME="$(date +%H%M%S)"
-OUT="${KIND}-report-${SLUG}-${DATE}-${TIME}.html"
+OUTDIR="test-engineer-report-${SLUG}-${DATE}"
+case "$KIND" in
+  test-coverage) BASENAME="coverage.html" ;;
+  test-stack)    BASENAME="recommended.html" ;;
+  test-combined) BASENAME="combined.html" ;;
+esac
+mkdir -p "$OUTDIR"
+OUT="${OUTDIR}/${BASENAME}"
 
 # Splice the canonical stylesheet in place of the sentinel line. awk reads the
 # CSS file line by line, so no shell escaping ever touches the CSS content.

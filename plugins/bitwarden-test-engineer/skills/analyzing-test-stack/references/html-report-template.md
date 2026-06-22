@@ -29,12 +29,9 @@ ToC and section ids, in order: `#overview`, `#summary`, `#evidence`, `#recommend
     a severity the analyst inferred (rather than read from a bug's Jira field) with
     `<span class="badge assumption">assumption</span>`.
   - Use the layer → repo map; **E2E rows must name the dedicated `test` repo** as target.
-  - **The "Evidence (linked)" column is binding.** For every existing test cited as current
-    coverage, render the behavior's representative test(s) as GitHub permalinks — or, when a test
-    cannot be linked, the `.unlinkable` span instead of a fabricated URL. These records come from
-    the coverage inventory; the exact link / `.unlinkable` markup and the permalink production
-    rules are owned by the `assessing-test-coverage` skill's `references/finding-coverage.md` →
-    _Citing tests as GitHub permalinks_ and _When a test cannot be linked_ — follow it.
+  - **The "Evidence (linked)" column is binding** — render each behavior's representative tests as
+    GitHub permalinks (or the `.unlinkable` span), per `../../../references/report-template-common.md`
+    → _Content rules_. These records come from the coverage inventory.
 - **`#gaps`** — heading "Coverage gaps & imbalances": behaviors with no coverage, and any shape
   wrong for its repo (ice-cream-cone, over-unit-tested, trivial tests). **Order by severity**,
   highest first, so a Critical uncovered behavior leads; Informative behaviors are recorded as

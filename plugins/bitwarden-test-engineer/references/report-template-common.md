@@ -1,106 +1,87 @@
 # Report HTML — shared authoring contract
 
 Both self-contained HTML reports the `bitwarden-test-engineer` plugin emits — the
-`analyzing-test-stack` **test-stack report** and the `assessing-test-coverage` **coverage
-report** — are authored against this shared contract, so the two read as one instrument. Each
-skill's own template (`html-report-template.md` / `coverage-report-template.md`) covers only what
-differs: its section set, its per-platform table columns, and its recommend-vs-inventory framing.
-**Read this file first, then that template.**
+`analyzing-test-stack` **test-stack report** and the `assessing-test-coverage` **coverage report** —
+are authored against this shared contract, so the two read as one instrument. Each skill's own
+template (`html-report-template.md` / `coverage-report-template.md`) covers only what differs: its
+section set, its per-platform table columns, and its recommend-vs-inventory framing. **Read this
+file first, then that template.**
 
 ## Output constraints
 
-Produce a **single self-contained HTML file**: all CSS inline in a `<style>` block, no
-external/CDN _resource_ links (stylesheets, fonts, scripts, images), no required JavaScript, no
-web fonts. Informational `<a href>` citations to public sources are fine and encouraged — they
-are text, not loaded assets (see _Content rules_). It must render correctly opened directly from
-disk and survive being attached to a ticket or PR.
+Produce a **single self-contained HTML file**: all CSS inline in `<style>`, no external/CDN
+_resource_ links (stylesheets, fonts, scripts, images), no required JavaScript, no web fonts. It
+must render correctly opened directly from disk and survive being attached to a ticket or PR.
+Informational `<a href>` citations to public sources are text, not loaded assets — they are fine and
+encouraged (see _Content rules_).
 
-You do not write the final file directly and you do not paste any CSS. Author a **content
-fragment** (the full HTML document below, but with only a stylesheet sentinel inside `<style>`),
-then run the build script. The build mechanics — invocation, output filename, and the `HHMMSS`
-freshness stamp — live in `report-style-tokens.md` → _Building the report_ (the single source of
-truth); your template only names its `--kind`.
+You do not write the final file or paste any CSS: author a **content fragment** (the skeleton below,
+with only the stylesheet sentinel inside `<style>`), then run the build script. The fragment/sentinel
+mechanics, the build invocation, the normative class names (the layer and assumption/warn/ok tokens
+your markup must use), and the visual system are all owned by `report-style-tokens.md` — **read it.**
+Your template only names its `--kind`.
 
-## Styling — binding
-
-Inside the fragment's `<style>` element put exactly one line — the sentinel
-`/* @@BITWARDEN_REPORT_STYLESHEET@@ */` — and nothing else; the build script splices in the
-canonical stylesheet (`report-style.css`) verbatim, identically for both reports so they cannot
-drift. **Do not paste, retype, or trim any CSS, re-pick colors/fonts/layer tokens, reintroduce a
-brand skin, or add external/CDN assets** — the visual system and the full list of prohibitions are
-owned by `report-style-tokens.md` (its _token → meaning_ contract and _What not to do_); read it.
-Your markup must use the exact normative class names it defines: the layer → token mapping (unit /
-integration / e2e) and the badge → token mapping (assumption / warn / ok) apply wherever rendered —
-chips, distribution bars, table cells, and data rows.
-
-Section headings are auto-numbered by CSS (`01 · …`) — write a plain `<h2>` per section and do
-not hand-number. Wrap each wide table in `<div class="scroll">…</div>` so it scrolls rather than
+Section headings are auto-numbered by CSS (`01 · …`) — write a plain `<h2>` per section, do not
+hand-number. Wrap each wide table in `<div class="scroll">…</div>` so it scrolls rather than
 overflows on narrow widths.
 
 ## Table of contents
 
-Directly **inside `<main>`, before `#overview`**, emit a linked table of contents:
-`<nav class="toc" aria-label="Sections">` holding one `<a href="#…">` per section in the report
-(your template lists them), each anchoring its section id. It is a `<nav>`, not a numbered
-section. (In the combined two-tab report the build script namespaces these anchor links per tab,
-so a panel's ToC jumps within its own panel.)
+Directly **inside `<main>`, before `#overview`**, emit `<nav class="toc" aria-label="Sections">`
+holding one `<a href="#…">` per section in the report (your template lists them). It is a `<nav>`,
+not a numbered section. (In the combined two-tab report the build script namespaces these anchors per
+tab so a panel's ToC jumps within its own panel.)
 
 ## Sections common to both reports
 
-Each section uses its **normative `id`** — do not rename, omit, or add top-level sections;
-readers look these up by id. The four below are shared; your template defines the report-specific
-data section (`#recommendations` or `#coverage`) and the `#gaps` contents, and adds framing notes
-for the shared ones (e.g. whether the chart shows recommended or observed counts).
+Each section uses its **normative `id`** — do not rename, omit, or add top-level sections; readers
+look these up by id. The four below are shared; your template defines the report-specific data
+section (`#recommendations` or `#coverage`) and the `#gaps` contents, and adds framing notes for the
+shared ones (e.g. whether the chart shows recommended or observed counts).
 
-1. **Header** (no id; `<header>` element) — report title, the change under analysis
-   (ticket/PR/feature), and the date.
+1. **Header** (no id; `<header>` element) — report title, the change under analysis (ticket/PR/
+   feature), and the date.
 2. **`#overview`** — a short top-of-report synthesis written by the author so a reader sees the
    bottom line without scrolling: a 2–4 sentence recap per platform, the top 3 items the reader
    should resolve (drawn from `#gaps`), and anchor links into the detail sections. Additive — the
-   per-behavior detail stays in the tables below. (Your template says what the recap and the
-   top-3 are _about_.)
+   per-behavior detail stays in the tables below.
 3. **`#summary`** — 2–4 sentences, then the **layer-distribution chart** (the report's signature
-   graphic) and a per-platform one-line shape list. The chart is a captioned `<figure class="dist">`
-   (`Fig 1`) with a `.legend` and one `.dist-row` per platform; follow it with
-   `<ul class="shapes">`, one `<li>` per platform (a `.plat` name plus the one-line shape). The
-   exact segment markup and the render rules (`flex:<count>`, the `--on-unit`/`--on-deep` text
-   colors, never hand-computing widths, no JS) are the chart contract owned by
-   `report-style-tokens.md` → _Graphics_ — follow it there. The chart encodes **shape** (counts per
-   layer) only — it is severity-blind. (Your template says whether the counts are _recommended_ or
-   _observed_ and supplies the caption.)
+   graphic; markup in the skeleton below) and a per-platform one-line shape list (`<ul class="shapes">`).
+   The chart's segment markup and render rules are the contract owned by `report-style-tokens.md` →
+   _Graphics_; it encodes **shape** (counts per layer) only — it is severity-blind. (Your template says
+   whether the counts are _recommended_ or _observed_ and supplies the caption.)
 4. **`#evidence`** — a table of which inputs were used and, explicitly, **what was missing or
    unverifiable** (e.g. "`test` repo not checked out — existing E2E coverage unverified"). For PR
-   inputs include the captured **head SHA** and **`owner/repo`** so per-test permalinks elsewhere
-   in the report can be audited against the same commit.
+   inputs include the captured **head SHA** and **`owner/repo`** so per-test permalinks elsewhere can
+   be audited against the same commit.
 
 `#gaps` is the last section in both reports; its exact contents differ — see your template.
 
 ## Content rules
 
 - Tables over prose for the data sections and evidence — they're meant to be scanned and acted on.
-- Mark every assumption inline with `<span class="badge assumption">assumption</span>` so the
-  reader can tell grounded calls from inferred ones.
-- Flag unverifiable claims with `<span class="badge warn">unverified</span>` (e.g. E2E coverage
-  claimed without the `test` repo checked out).
-- **Hyperlink every GitHub or Atlassian source the report names.** Cited tests are GitHub
-  permalinks (see your template's evidence/coverage rule); any Jira/Confluence/GitHub artifact the
-  report names is anchored to its URL, never plain text. **Jira items and Jira-sourced behaviors
-  follow `input-sources.md` → _Citing Jira issues as links_** — the link form,
-  where to apply it, and the never-fabricate-a-key rule all live there. An informational
-  `<a href>` is text, not a fetched resource — it does not violate the no-remote-resources rule.
-- No tracking, no remote resources, no secrets — the file is shareable as-is. ("Remote resources"
-  means assets the page loads — stylesheets, fonts, scripts, images, CDN imports — not
-  informational `<a href>` citations, which are encouraged per the rule above.)
+- Mark every assumption inline with `<span class="badge assumption">assumption</span>` and every
+  unverifiable claim with `<span class="badge warn">unverified</span>` (e.g. E2E coverage claimed
+  without the `test` repo checked out), so grounded calls are distinguishable from inferred ones.
+- **Hyperlink every GitHub or Atlassian source the report names** — never plain text. The data
+  section's **evidence column** (`Evidence (linked)` in the test-stack report, `Tests (linked)` in
+  the coverage report) is binding: render each behavior's 1–3 representative tests as GitHub
+  permalinks, or the `.unlinkable` span when a test genuinely cannot be linked — never a fabricated
+  URL. Those records come from the coverage inventory; the exact link / `.unlinkable` markup and the
+  permalink-production rules are owned by the `assessing-test-coverage` skill's
+  `references/finding-coverage.md` → _Citing tests as GitHub permalinks_ and _When a test cannot be
+  linked_. **Jira items and Jira-sourced behaviors** follow `input-sources.md` → _Citing Jira issues
+  as links_ (link form, where to apply it, never-fabricate-a-key rule). All of these are
+  informational `<a href>` citations, not fetched resources, so they don't violate the self-contained
+  constraint.
 - Keep the fixed **back-to-top** control from the skeleton — the `<a class="to-top" href="#top">`
-  after `</main>` paired with `id="top"` on `<header>`. It floats with the reader and jumps to the
-  top from anywhere; it is CSS-only (the stylesheet's `.to-top` rule, no JavaScript). Drop either
-  half and the anchor breaks.
+  after `</main>` paired with `id="top"` on `<header>`. It is CSS-only; drop either half and the
+  anchor breaks.
 
 ## Skeleton
 
-The shared document shell. Your template supplies the `<title>`, the eyebrow, the ToC section
-list, the report-specific section(s) between `#evidence` and `#gaps`, and the `#summary`/`#gaps`
-headings:
+The shared document shell. Your template supplies the `<title>`, the eyebrow, the ToC section list,
+the report-specific section(s) between `#evidence` and `#gaps`, and the `#summary`/`#gaps` headings:
 
 ```html
 <!doctype html>

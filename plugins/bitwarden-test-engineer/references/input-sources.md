@@ -20,19 +20,13 @@ Otherwise use the MCP tools directly:
 Extract: discrete **testable behaviors**, **acceptance criteria**, and the **platforms/
 components** named. If the MCP is unavailable, ask the user to paste the requirements.
 
-Also capture, for every issue you read, its **key and browse URL** (prefer the URL the MCP/skill
-returns; otherwise construct `https://bitwarden.atlassian.net/browse/<KEY>`), and **carry the
-originating issue key with each behavior you extract**. The report links every behavior back to
-the Jira item it came from — see _Citing Jira issues as links_ below — so provenance must survive
-intake. A behavior that traces to no Jira item (e.g. found only in a PR diff) simply carries no
-source issue.
+For every issue, also capture its **key and browse URL** and **carry the originating key with each
+behavior you extract**, so the report can link every behavior back to its source — link form and the
+no-Jira-source case are in _Citing Jira issues as links_ below.
 
-Also capture **severity** — for a bug/defect ticket, read the severity assigned on the issue
-(the severity field, or the QA/reporter's stated severity in the description/comments) and
-carry it with the behaviors; for a feature/story without a defect, leave it to the analyst to
-assess each behavior's risk severity. Severity is the impact dial the `analyzing-test-stack`
-skill uses to risk-weight coverage — see that skill's `references/severity-risk.md`, mirrored
-from the Defect Severity Classification Guide (Confluence page `2759229512`).
+Also capture each behavior's **severity** and carry it through with the behavior. Where it comes
+from (a bug's Jira severity field vs. assessed risk for a feature) and how it weights coverage are
+owned by `analyzing-test-stack`'s `references/severity-risk.md`.
 
 ### Epic intake
 
@@ -52,29 +46,21 @@ before extracting:
    `bitwarden-atlassian-tools:researching-jira-issues` (Steps 2–3) — re-use that recipe; do
    not re-derive it.
 3. **Per child, gather behaviors and PRs.**
-   - `mcp__bitwarden-atlassian__get_issue` for the child's description and acceptance
-     criteria — these are the testable behaviors for the analysis. Capture each child's **key and
-     browse URL** and carry it with the behaviors it produces, exactly as for a single-issue
-     intake — a behavior sourced from a child issue links to that child, not the epic.
-   - `mcp__bitwarden-atlassian__get_issue_remote_links` for PRs (grouped under "GitHub").
-     Each PR URL becomes an input to the **GitHub PR** branch below: hand it off to
-     `gh pr view` / `gh pr diff` so the actual change surface and any tests-in-PR feed the
-     recommendation. **These merged/linked PRs are the reliable backbone for existing
-     coverage** — the tests they contain are what shipped with this work, and the PR head SHA
-     makes each one permalink-ready (see the `assessing-test-coverage` skill's
-     `references/finding-coverage.md` → _Finding existing coverage_).
-     If `gh` cannot reach a PR (private fork, not authenticated, repo not accessible), record
-     the URL as evidence-not-inspected in the report rather than silently dropping it.
-4. **Track epic status.** The epic's own status (`In Planning`, `In Progress`, `Done`) tells
-   you how much of the work is shipped: children in `Done` with merged PRs likely already
-   have tests-in-PR you can audit for shape; children still `To Do` are scope-only and your
-   recommendation is necessarily prospective. Surface this distinction in the Evidence
-   section of the report.
-5. **Preferred path when available.** If `bitwarden-atlassian-tools` is installed, invoke
-   `Skill(bitwarden-atlassian-tools:researching-jira-issues)` on the epic key — its Step 2
-   already does the hierarchical-link discovery and Step 3 the depth-controlled traversal,
-   and returns the children + linked Confluence pages + remote links in one synthesized read.
-   Use the direct MCP calls above only when that skill is unavailable.
+   - `mcp__bitwarden-atlassian__get_issue` for the child's description and acceptance criteria —
+     these are the testable behaviors. Carry each child's **key and browse URL** with the behaviors
+     it produces — a behavior sourced from a child links to that child, not the epic.
+   - `mcp__bitwarden-atlassian__get_issue_remote_links` for PRs (grouped under "GitHub"). Each PR URL
+     feeds the **GitHub PR** branch below (`gh pr view` / `gh pr diff`). **These merged/linked PRs
+     are the reliable backbone for existing coverage** — they carry the tests that shipped and the
+     PR head SHA makes each permalink-ready (see `finding-coverage.md` → _Finding existing
+     coverage_). If `gh` cannot reach a PR (private fork, not authenticated, repo inaccessible),
+     record the URL as evidence-not-inspected rather than dropping it.
+4. **Track epic status.** The epic's status (`In Planning`/`In Progress`/`Done`) tells you how much
+   is shipped: `Done` children with merged PRs likely have tests-in-PR to audit; `To Do` children
+   are scope-only and the recommendation is prospective. Surface this in the report's Evidence.
+5. **Preferred path.** The `researching-jira-issues` skill (preferred at the top of this file) does
+   this hierarchical discovery and depth-controlled traversal in one synthesized read — run it on the
+   epic key; the direct MCP calls above are the fallback.
 
 ## GitHub PR
 
@@ -152,7 +138,7 @@ settings — **do not hardcode them**. Read the header row, then map by meaning:
 - A **steps / expected-result** column, often in Given–When–Then form — the behavior.
 - Optional **team / area / tags / preconditions** columns — scope and grouping.
 
-Map rows to behaviors and bucket each by apparent layer using the `analyzing-test-stack` skill's `references/testing-trophy.md`:
+Map rows to behaviors and bucket each by apparent layer using the `analyzing-test-stack` skill's `references/test-layers.md`:
 
 - A case that drives the full UI through a complete journey → likely **E2E** (target the
   dedicated `test` repo).
@@ -166,30 +152,19 @@ state the interpretation you used rather than guessing silently.
 
 ## Citing Jira issues as links
 
-Every Jira item the report **names** — and every behavior the report shows that was **found from
-a Jira item** — is rendered as a clickable link to that item, never as bare key text. This is the
-Jira counterpart to the GitHub permalink rule for tests (the `assessing-test-coverage` skill's
-`references/finding-coverage.md` → _Citing tests as GitHub permalinks_).
+Every Jira item the report **names**, and every behavior **found from a Jira item**, is rendered as
+a clickable link — never bare key text. This is the Jira counterpart to the GitHub permalink rule
+for tests (`finding-coverage.md` → _Citing tests as GitHub permalinks_).
 
-The link form is the issue's browse URL:
+The link form is the issue's browse URL `https://bitwarden.atlassian.net/browse/<KEY>` (e.g.
+`PM-1234`). Prefer the URL the MCP tool or `researching-jira-issues` skill returns; else construct it
+from the key. The same rule covers epics and their children — link each to its own key. Apply it:
 
-```
-https://bitwarden.atlassian.net/browse/<KEY>
-```
+- An **issue, epic, or child key** named in Overview/Summary/Evidence — anchor the key:
+  `<a href="https://bitwarden.atlassian.net/browse/PM-1234">PM-1234</a>`.
+- A **behavior row** (recommendations/coverage/gaps) extracted from a Jira item — append the linked
+  source key to the behavior cell. A behavior with no Jira source (PR-only) carries none.
 
-where `<KEY>` is the issue key (e.g. `PM-1234`). Prefer the URL the MCP tool or
-`bitwarden-atlassian-tools:researching-jira-issues` skill returns for the issue; fall back to
-constructing the browse URL from the key. The same rule covers epics and their children — link
-each to its own key.
-
-Apply it everywhere the report renders one of these:
-
-- An **issue, epic, or child key** named in the Overview, Summary, or Evidence sections —
-  anchor the key: `<a href="https://bitwarden.atlassian.net/browse/PM-1234">PM-1234</a>`.
-- A **behavior row** (in the recommendations/coverage and gaps sections) whose behavior was
-  extracted from a Jira item — append the linked source key to the behavior cell so a reader can
-  jump to the requirement it came from. A behavior with no Jira source (PR-only) carries no key.
-
-These are informational `<a href>` citations — text, not loaded assets — so they do not violate
-the reports' self-contained / no-remote-resources constraint. Never fabricate a key or URL; if an
-issue's key is unknown, name the source in plain text rather than inventing a link.
+These are informational `<a href>` citations (text, not loaded assets), so they don't violate the
+self-contained constraint. Never fabricate a key or URL — if a key is unknown, name the source in
+plain text rather than inventing a link.

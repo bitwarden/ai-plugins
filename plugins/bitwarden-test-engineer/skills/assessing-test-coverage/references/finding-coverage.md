@@ -47,14 +47,11 @@ A behavior with no PR-observed test and no targeted hit is recorded as a coverag
 
 The inventory is keyed to the **change's testable behaviors**, not to every test method in the
 repo. For each behavior, find _whether and at what layer_ it is covered, capture **1–3
-representative tests** as evidence plus an approximate **count** at that layer, and then **move
-on** — do not open and enumerate every test in a covered area. A behavior backed by 40 unit
-tests is recorded as `{ count: ~40, representative: [3 permalinks] }`, not 40 records. This is
-the dominant cost control on large repos: exhaustively cataloguing a well-covered area burns
-many tool calls and tokens to produce a record set no recommendation needs, and bloats the
-downstream report into an unreadable dump. Spend the search budget on **resolving each
-behavior's status**, not on completeness of enumeration. Two or three confirming tests prove a
-behavior is covered; the 38 others add cost, not confidence.
+representative tests** plus an approximate **count** at that layer, then **move on** — do not
+enumerate every test in a covered area. A behavior backed by 40 unit tests is recorded as
+`{ count: ~40, representative: [3 permalinks] }`, not 40 records. This is the dominant cost control
+on large repos: two or three confirming tests prove a behavior is covered; cataloguing the rest
+burns tool calls, bloats the downstream report, and adds cost, not confidence.
 
 ## Citing tests as GitHub permalinks
 

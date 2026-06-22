@@ -27,10 +27,8 @@ ToC and section ids, in order: `#overview`, `#summary`, `#evidence`, `#coverage`
   coverage still gets a row, shown empty.
 - **`#coverage`** — per-platform tables, **one row per behavior** (not per test):
   `Behavior / surface | Layer | Tests (linked) | Count | Source | Notes`.
-  - **Tests (linked)** renders the behavior's 1–3 representative tests as permalinks (binding), or
-    the `.unlinkable` span when a test cannot be linked — never a fabricated URL. The exact link /
-    `.unlinkable` markup and the permalink production rules are owned by `finding-coverage.md` →
-    _Citing tests as GitHub permalinks_ and _When a test cannot be linked_ — follow it.
+  - **Tests (linked)** is binding — render the behavior's 1–3 representative tests as permalinks (or
+    the `.unlinkable` span), per `../../../references/report-template-common.md` → _Content rules_.
   - **Count** is the approximate number of tests covering that behavior at that layer — breadth
     without enumerating every test. Do not expand a well-covered behavior into dozens of rows.
   - **Layer** uses the matching layer chip. **Source** is `PR` (tests shipped in a linked/merged
