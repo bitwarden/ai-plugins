@@ -95,7 +95,7 @@
     ]
   },
   "review_fp_assertions": {
-    "note": "The mock control (inputs/onbrand-control.html) is substantially on-brand. Its only genuine fault is the off-palette orange CTA hover (#ff7a18). The Deep-Blue-derived dark surface and the third data-viz series are brand-silent judgment calls, NOT faults — flagging them as violations is a false positive. 'False positive' is measured against this ground truth, not against raw off-palette-ness.",
+    "note": "The mock control (inputs/engineering-recap.html) is substantially on-brand. Its only genuine fault is the off-palette orange CTA hover (#ff7a18). The Deep-Blue-derived dark surface and the third data-viz series are brand-silent judgment calls, NOT faults — flagging them as violations is a false positive. 'False positive' is measured against this ground truth, not against raw off-palette-ness.",
     "assertions": [
       {
         "id": "affirms_correct_core",

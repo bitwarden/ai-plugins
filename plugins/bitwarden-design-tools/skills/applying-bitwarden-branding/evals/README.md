@@ -18,9 +18,9 @@ hint poisons the result — it would measure reading the answer key, not detecti
 brand issues. Ground truth lives in this README and in `rubric.json`, which the
 skill never sees.
 
-- `inputs/offbrand-deck.html` — deliberately off-brand (Big Shoulders / IBM Plex
+- `inputs/project-atlas-deck.html` — deliberately off-brand (Big Shoulders / IBM Plex
   fonts, invented slate/green palette, no official lockup, sub-36px radii).
-- `inputs/onbrand-control.html` — substantially on-brand (Inter, Bitwarden
+- `inputs/engineering-recap.html` — substantially on-brand (Inter, Bitwarden
   palette, 36px radius, official shield embedded) with brand-silent defensible
   choices (a Deep-Blue-derived dark surface, data-viz series) and exactly one
   genuine fault (an off-palette orange CTA hover).
