@@ -33,6 +33,30 @@ One entry per incoming finding, keyed by `id`:
 
 **Collateral findings** produced during Step 4 (per the collateral-change check) use the full **Finding object** schema above with `source_agent: "validation"` and `id: "val-N"`. They append to Step 5's input.
 
+Extra fields beyond this schema are ignored by the merge — creation-time fields come only from the original Finding object, never from Step 4 or Step 5 returns.
+
+```json
+// Example Step 4 return
+[
+  { "id": "arch-1", "status": "validated" },
+  {
+    "id": "quality-3",
+    "status": "dismissed",
+    "dismissal_reason": "Substantively covered by arch-1 at higher severity."
+  },
+  {
+    "id": "val-1",
+    "file": "plugins/example/.claude-plugin/plugin.json",
+    "line": "4",
+    "severity": "refactor",
+    "confidence": 100,
+    "title": "quality findings cite wrong file line for plugin.json description field",
+    "detail": "Both citations are diff-offset artifacts; the description field is at file line 4.",
+    "source_agent": "validation"
+  }
+]
+```
+
 ## Step 5 return (severity audit)
 
 One entry per incoming finding, keyed by `id`:
@@ -43,6 +67,18 @@ One entry per incoming finding, keyed by `id`:
 | `status`           | string | `"confirmed"` \| `"downgraded"` \| `"dismissed"`. |
 | `final_severity`   | string | Severity value. Omit when `status = "dismissed"`. |
 | `dismissal_reason` | string | Present only when `status = "dismissed"`.         |
+
+```json
+// Example Step 5 return
+[
+  { "id": "arch-1", "status": "confirmed", "final_severity": "important" },
+  {
+    "id": "val-1",
+    "status": "dismissed",
+    "dismissal_reason": "A meta-observation about sibling findings is not a code issue in the change under review."
+  }
+]
+```
 
 ## Orchestrator behavior
 
