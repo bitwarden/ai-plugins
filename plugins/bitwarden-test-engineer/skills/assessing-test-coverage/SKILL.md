@@ -1,6 +1,6 @@
 ---
 name: assessing-test-coverage
-description: Use when determining what test coverage ALREADY exists for a change — inventorying the tests that currently cover a feature, PR, component, or changed paths across Bitwarden's repos, citing each as a stable GitHub permalink bucketed by test layer, and flagging behaviors with no observed test as gaps. Triggers on "what's already tested", "does this PR have tests", "what coverage exists for", or "is this component covered". This is the backward-looking inventory that feeds test-stack analysis — it does NOT recommend new tests or assign cheapest-sufficient test layers; for that, use analyzing-test-stack.
+description: Use when determining what test coverage ALREADY exists for a change — citing each covering test as a GitHub permalink bucketed by test layer, and flagging behaviors with no observed test as gaps. Triggers on "what's already tested", "does this PR have tests", "what coverage exists for", or "is this component covered". This is the backward-looking inventory that feeds test-stack analysis — it does NOT recommend new tests or assign cheapest-sufficient layers; for that, use analyzing-test-stack.
 allowed-tools: "Read, Write, Grep, Glob, AskUserQuestion, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(git remote get-url:*), Bash(git -C * rev-parse:*), Bash(git -C * remote get-url:*), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/build-report.sh:*)"
 ---
 

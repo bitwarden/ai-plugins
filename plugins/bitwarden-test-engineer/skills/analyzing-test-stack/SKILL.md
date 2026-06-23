@@ -1,6 +1,6 @@
 ---
 name: analyzing-test-stack
-description: Use when recommending what test automation a feature, bugfix, or change needs and at which layer — from a Jira ticket, GitHub PR, test-case CSV, technical breakdown, and/or plain-language description — mapping each behavior to the cheapest sufficient layer (unit, integration, E2E) inside each repo's actual test shape, risk-weighted by defect severity. Triggers on "test stack", "test strategy", "test plan for this PR/ticket", "which test layers should this have", or "what tests does this Critical/High bug need". This is the forward-looking recommendation — it does NOT inventory what already exists; for that, use assessing-test-coverage (whose inventory this skill consumes).
+description: Use when recommending what test automation a change needs — mapping each behavior to the cheapest sufficient layer (unit, integration, E2E) inside each repo's test shape, risk-weighted by defect severity. Triggers on "test stack", "test strategy", "test plan for this PR/ticket", "which test layers should this have", or "what tests does this Critical/High bug need". This is the forward-looking recommendation — it does NOT inventory what already exists; for that, use assessing-test-coverage.
 allowed-tools: "Read, Write, Grep, Glob, AskUserQuestion, Skill, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/build-report.sh:*), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql"
 ---
 
@@ -33,3 +33,5 @@ Carry each behavior's **risk severity** (impact, not urgency) alongside it; the 
 ## Principles
 
 - **Ground every recommendation** in a specific requirement, diff hunk, CSV row, or observed test; treat only _observed_ coverage as verified, and mark anything inferred as an assumption.
+- **Cheapest sufficient layer wins** — push each behavior to the lowest layer that buys the needed confidence; climb to a higher layer only for a real browser/device, a cross-service contract, or a full user journey.
+- **Rank gaps by severity** — a Critical behavior with no observed coverage leads the gap list; Informative behaviors are recorded as out-of-scope, not gaps.
