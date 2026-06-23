@@ -85,79 +85,17 @@ If you find issues, fix them inline in `tasks.md` or surface them to the user if
 
 When self-review is complete, notify the user that `tasks.md` is ready for review. Report the path explicitly: _"Tasks file ready at `<breakdown-folder>/tasks.md` — N rows."_
 
-Do not edit the breakdown document. The breakdown and `tasks.md` are siblings: the breakdown owns Spec/Plan/Cross-team/Agent Context; `tasks.md` owns the decomposition. No cross-linking from the breakdown to `tasks.md`.
+Do not edit the breakdown document. The breakdown and `tasks.md` are siblings: the breakdown contains the overall execution plan, and `tasks.md` contains the decomposition.
 
 ## Output Format
 
-`tasks.md` is a flat markdown file. The first line is a top-level heading naming the breakdown it belongs to: `# Tasks for <breakdown-title>`. Beneath that, each row is a numbered block with these fields:
+`tasks.md` is a flat markdown file.
 
-```markdown
-### Task/Story N: <Title>
-
-- **Owner**: <team>
-- **Affected files / crates / modules**:
-  - `path/to/file.ext`
-  - `crates/<crate-name>`
-- **Blocked by**: Task M, PM-XXXXX (outside of this breakdown)
-- **Depends on**: Task K (interface only, can run in parallel)
-- **Description**: One or two sentences describing the purpose of this work.
-- **Acceptance Criteria**: In GIVEN/WHEN/THEN format.
-- **Tech Breakdown**: Actual code, not prose - whatever the engineer will literally write or modify. Use fenced code blocks tagged with the right language. If the change is purely a rename or a config flip, show the before-and-after. If the particular code change shape or reason is not obvious, include a sentence explaining why. If a prototype is provided in the Plan, **link to relevant code in the prototype instead of duplicating it in the Tech Breakdown**.
-```
-
-`Blocked by` and `Depends on` use `(none)` when there is no dependency.
+The template at `tech-breakdowns/templates/tasks.md` contains a sample format. Use that format for all tasks.
 
 ### Tech Breakdown examples
 
-A row touching a C# enum:
-
-````markdown
-- **Tech Breakdown**:
-  ```csharp
-  // server/src/Core/Notifications/PushType.cs
-  public enum PushType {
-      // existing values...
-      LoginApprovalRequest = 24,
-      SecurityKeyRegistered = 25, // new
-  }
-  ```
-````
-
-A row adding a controller dispatch:
-
-````markdown
-- **Tech Breakdown**:
-  ```csharp
-  // server/src/Api/Auth/Controllers/WebAuthnController.cs
-  // Inside PostAttestation, after AttestationVerificationSucceeded:
-  if (_featureService.IsEnabled(FeatureFlagKeys.SecurityKeyRegisteredPush)) {
-      await _pushService.PushAsync(user.Id, PushType.SecurityKeyRegistered, new {
-          friendlyName = request.Name,
-          keyId = credential.Id,
-      });
-      _metrics.Counter("notifications.security_key_registered.sent").Increment();
-  }
-  ```
-````
-
-A row adding a TypeScript handler branch:
-
-````markdown
-- **Tech Breakdown**:
-
-  ```ts
-  // clients/libs/common/src/services/push.service.ts
-  case PushType.SecurityKeyRegistered:
-      this.handleSecurityKeyRegistered(payload as { friendlyName: string; keyId: string });
-      break;
-
-  private handleSecurityKeyRegistered(payload: { friendlyName: string; keyId: string }) {
-      // emit to banner host subject; pattern mirrors handleLoginApprovalRequest
-  }
-  ```
-````
-
-If the task is purely a configuration change with no code, the Tech Breakdown can be a short snippet of the config that's changing (e.g. a feature-flag key being added in `FeatureFlagKeys.cs`). If the change is a new file scaffolded from a precedent, point at the precedent file and write the minimal new-file skeleton; the engineer fills the rest from the pattern.
+See `examples/task-breakdown.md` for worked examples.
 
 ### Titles
 
