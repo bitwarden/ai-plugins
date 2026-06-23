@@ -15,6 +15,8 @@ This skill depends on the following sibling plugins.
 
 - **`bitwarden-security-engineer`**
 
+`claude-config-validator` is an **optional** enhancer, not a prerequisite — when present, it powers the conditional Claude-configuration agent (Agent 4) in Step 3; when absent, that agent is skipped silently and the rest of the pipeline runs unchanged. Do not add it to the abort check below.
+
 Before Step 1, verify each prerequisite plugin is installed. The signal is resolvability — a required subagent type or skill that does not appear in your available tooling means the plugin is missing. If any is missing, **abort with the message below** — do not proceed with a degraded pipeline.
 
 > Prerequisite plugin `<name>` is not installed. Install it and retry. Review aborted.
@@ -168,7 +170,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **Output authenticity** — are responses distinguishable from attacker-forged messages?
 
    **Agent 4 (conditional): Claude configuration agent**
-   Launch this agent ONLY when Claude configuration files were detected in Step 1 AND the `claude-config-validator` plugin is installed; otherwise skip it silently — it is not a prerequisite. Use the `general-purpose` subagent type with the resolved analysis model (see Model Selection) and instruct it to invoke `Skill(reviewing-claude-config)`, scoped to the detected Claude configuration files, to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Emit findings with `source_agent: "config"` and `id` prefix `cfg` per the Finding Shape schema.
+   Launch this agent ONLY when Claude configuration files were detected in Step 1 AND the `claude-config-validator` plugin is installed; otherwise skip it silently — it is not a prerequisite. Use the `general-purpose` subagent type with the resolved analysis model (see Model Selection) and instruct it to invoke `Skill(claude-config-validator:reviewing-claude-config)`, scoped to the detected Claude configuration files, to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Emit findings with `source_agent: "config"` and `id` prefix `cfg` per the Finding Shape schema.
 
 4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3, with the resolved validation model (see Model Selection). The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
