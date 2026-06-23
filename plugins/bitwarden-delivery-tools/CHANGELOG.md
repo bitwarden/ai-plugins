@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`force-multiplier` skill** — applies one intent across many targets at once, fanning a change out into N consistent, idempotent draft PRs across a fleet of enterprise repos or a monorepo's projects, gated by a mandatory pilot and per-target isolation.
+- **`developing-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled, with an optional follow-on step to open a draft prototype PR across affected repos for the team to evaluate alongside the design.
 
 ## [1.4.0] - 2026-06-09
 
