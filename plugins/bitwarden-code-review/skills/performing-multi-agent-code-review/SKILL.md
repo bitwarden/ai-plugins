@@ -15,6 +15,8 @@ This skill depends on the following sibling plugins.
 
 - **`bitwarden-security-engineer`**
 
+`claude-config-validator` is an **optional** enhancer, not a prerequisite — when present, it powers the conditional Claude-configuration agent (Agent 4) in Step 3; when absent, that agent is skipped silently and the rest of the pipeline runs unchanged. Do not add it to the abort check below.
+
 Before Step 1, verify each prerequisite plugin is installed. The signal is resolvability — a required subagent type or skill that does not appear in your available tooling means the plugin is missing. If any is missing, **abort with the message below** — do not proceed with a degraded pipeline.
 
 > Prerequisite plugin `<name>` is not installed. Install it and retry. Review aborted.
@@ -32,12 +34,12 @@ Resolve per-stage models upon invocation before Step 1 begins.
 Flag values are the Agent tool's model nicknames, in ascending tier order: `haiku` < `sonnet` < `opus`.
 The **global model** is `--model` if specified, otherwise the session's model.
 
-| Stage          | Agents                              | Flag                 | Default    |
-| -------------- | ----------------------------------- | -------------------- | ---------- |
-| Analysis       | Step 2 architect; Step 3 Agents 1–2 | `--model-analysis`   | global     |
-| Security       | Step 3 Agent 3 (security & logic)   | `--model-security`   | global     |
-| Validation     | Step 4                              | `--model-validation` | global     |
-| Severity audit | Step 5                              | `--model-audit`      | **sonnet** |
+| Stage          | Agents                                                       | Flag                 | Default    |
+| -------------- | ------------------------------------------------------------ | -------------------- | ---------- |
+| Analysis       | Step 2 architect; Step 3 Agents 1–2, and conditional Agent 4 | `--model-analysis`   | global     |
+| Security       | Step 3 Agent 3 (security & logic)                            | `--model-security`   | global     |
+| Validation     | Step 4                                                       | `--model-validation` | global     |
+| Severity audit | Step 5                                                       | `--model-audit`      | **sonnet** |
 
 Each stage resolves to its flag if present, otherwise its default; an explicit `--model` also overrides the audit's sonnet default.
 
@@ -96,7 +98,7 @@ Include this block verbatim in every Step 2–5 subagent prompt, immediately aft
 Feature context — issue descriptions, Jira tickets, PR history, removed-predecessor rationale, product framing — sharpens adversarial thinking but biases baseline diff reading. Classify each subagent before launch:
 
 - **Context-allowed** (Step 2 architecture agent; Step 3 Agent 3 security & logic): pass full feature context. These agents think adversarially from intent.
-- **Context-forbidden** (Step 3 Agent 1 code quality; Step 3 Agent 2 bug analysis): **ONLY** pass the diff and the Review Rules. **DO NOT** paste issue summaries, Jira tickets, or PR description prose into these prompts.
+- **Context-forbidden** (Step 3 Agent 1 code quality; Step 3 Agent 2 bug analysis; Step 3 Agent 4 Claude configuration, when launched): **ONLY** pass the diff and the Review Rules. **DO NOT** paste issue summaries, Jira tickets, or PR description prose into these prompts.
 - **Style-matching requirement.** The main agent's tone and framing across parallel agents leaks — a rich-context prompt for the security agent alongside a bare prompt for the bug agent still implicitly frames how the bug agent reads the diff. When drafting context-forbidden prompts, match the terse style of the diff-only sibling prompts; do not echo the framing of the context-allowed siblings.
 
 ## Discovery Standards
@@ -127,6 +129,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 1. Gather context (no subagents). All `references/...` paths below resolve relative to `${CLAUDE_SKILL_DIR}` — do not search elsewhere.
    - **READ** `references/modes.md`. The orchestrator follows it to determine the review mode and the matching diff-source commands.
    - Determine the mode per `references/modes.md`. Fetch the list of changed files with the mode's command: `gh pr diff {number} --name-only` (PR), `git diff HEAD --name-only` (local), `git diff origin/HEAD...HEAD --name-only` (branch comparison), or `git diff <from>..<to> --name-only` (commit range). In PR mode, also fetch the title and description with `gh pr view`.
+   - **Detect Claude configuration files** in the changed-file list: `CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md` (and skill support files), hook definitions, slash commands, `.claude/` settings, or MCP config. If any are present, the conditional Claude-configuration agent in Step 3 applies.
    - **READ** CLAUDE.md, README.md, and any other relevant .md files in or near the directories containing modified files.
    - **READ** `references/report-template.md` for formatting the final report in Step 7.
    - **READ** `references/finding-shape.md`.
@@ -147,7 +150,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    Apply the Review Rules. Also include the **Hygiene Sweep** definition from `references/discovery-standards.md` — its lenses are within the architect's scope. Threshold ≥ 80. Emit findings as a JSON array per the Finding Shape schema.
 
-3. Send all 3 Agent tool calls in a single message (**DO NOT** use run_in_background because the agents must run synchronously to guarantee findings are validated together at Step 4). Agents 1–2 use the resolved analysis model, Agent 3 uses the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all three — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1 and 2 receive diff + Review Rules only.
+3. Send all Agent tool calls for this step in a single message (**DO NOT** use run_in_background because the agents must run synchronously to guarantee findings are validated together at Step 4). Launch the 3 agents below — plus a conditional 4th (Agent 4) when Claude configuration files were detected in Step 1 and the `claude-config-validator` plugin is installed. Agents 1–2 and the conditional Agent 4 use the resolved analysis model, Agent 3 uses the resolved security model (see Model Selection). Each receives the diff and the Review Rules; each emits findings as a JSON array per the Finding Shape schema. Confidence Scoring from `references/evaluation-standards.md` applies to all of them — threshold ≥ 80. In PR mode, pass the PR title and description only to Agent 3 per Context Partitioning — Agents 1, 2, and 4 receive diff + Review Rules only.
 
    **Agent 1: Code quality agent**
    Use the `general-purpose` subagent type. Read the diff as a senior engineer seeing it for the first time — surface anything that hurts correctness, clarity, or long-term maintainability, including code duplication, missing critical error handling, and inadequate test coverage.
@@ -165,6 +168,9 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - **Prompt authenticity** — can the user verify which app is requesting sensitive input?
    - **Consent gates** — are authorization actions clearly labeled with sufficient context?
    - **Output authenticity** — are responses distinguishable from attacker-forged messages?
+
+   **Agent 4 (conditional): Claude configuration agent**
+   Launch this agent ONLY when Claude configuration files were detected in Step 1 AND the `claude-config-validator` plugin is installed; otherwise skip it silently — it is not a prerequisite. Use the `general-purpose` subagent type with the resolved analysis model (see Model Selection) and instruct it to invoke `Skill(claude-config-validator:reviewing-claude-config)`, scoped to the detected Claude configuration files, to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Emit findings with `source_agent: "config"` and `id` prefix `cfg` per the Finding Shape schema.
 
 4. Launch a single `general-purpose` validation subagent for all findings from Steps 2 and 3, with the resolved validation model (see Model Selection). The subagent receives the diff fetched with the mode's diff command from Step 1, the full array of finding objects, the Review Rules, and — in PR mode only — the PR title and description. The subagent returns an array of Step 4 objects (one per input finding) per the Finding Shape schema.
 
