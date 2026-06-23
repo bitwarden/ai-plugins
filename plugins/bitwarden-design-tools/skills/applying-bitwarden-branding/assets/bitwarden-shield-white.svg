@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  bitwarden-shield-white.svg
+
+  Shield only, white, for use on dark surfaces. Path is taken verbatim from the largest shield variant in the official lockup; only the <svg> wrapper and viewBox crop are local.
+
+  Source: https://images.ctfassets.net/7rncvj1f8mw7/6RNJEeiUeUvaJFcUXV5R49/e73a356cad20bce2336afcff8829485b/BitwardenLogo.svg
+
+  Do not recolor. For anything bigger than chip scale or anything shareable
+  externally, fetch the official lockup at the URL above and use it directly.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="946 514 154 183"
+  role="img"
+  aria-label="Bitwarden"
+>
+  <title>Bitwarden</title>
+  <path
+    fill="#FFFFFF"
+    fill-rule="evenodd"
+    d="M1072.92,612.54v-71.41h-49.91v126.87c8.84-4.69,16.75-9.78,23.73-15.29,17.45-13.69,26.18-27.08,26.18-40.17ZM1094.31,526.84v85.7c0,6.4-1.24,12.74-3.73,19.02-2.49,6.29-5.57,11.86-9.25,16.74-3.68,4.87-8.06,9.61-13.15,14.23-5.09,4.61-9.78,8.44-14.09,11.49-4.31,3.05-8.8,5.93-13.48,8.65-4.68,2.72-8,4.56-9.97,5.52-1.97.97-3.55,1.71-4.73,2.23-.89.45-1.86.67-2.9.67s-2.01-.22-2.9-.67c-1.19-.52-2.77-1.26-4.73-2.23-1.97-.97-5.29-2.81-9.97-5.52-4.68-2.71-9.17-5.6-13.48-8.65-4.31-3.05-9.01-6.88-14.09-11.49-5.09-4.61-9.47-9.35-13.15-14.23-3.68-4.87-6.76-10.45-9.25-16.74-2.49-6.29-3.73-12.63-3.73-19.02v-85.7c0-1.93.71-3.61,2.12-5.02,1.41-1.41,3.08-2.12,5.01-2.12h128.34c1.93,0,3.6.71,5.01,2.12,1.41,1.41,2.12,3.09,2.12,5.02Z"
+  />
+</svg>

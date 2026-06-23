@@ -30,6 +30,26 @@ colors.
 | Tertiary Yellow | `#FDC700` | `253, 199, 0`   | `hsla(47, 100%, 50%, 1)` | `$tertiary-yellow` | Warning states             |
 | Tertiary Red    | `#FF6550` | `255, 101, 80`  | `hsla(5, 100%, 66%, 1)`  | `$tertiary-red`    | Error / destructive states |
 
+## Token names
+
+The bundled `assets/bitwarden-tokens.css` exposes the palette as CSS custom properties, mapped
+from the SCSS source. Cite whichever namespace fits the context.
+
+| SCSS (`palette.scss`)      | CSS custom property |
+| -------------------------- | ------------------- |
+| `$bitwarden-blue`          | `--bw-blue`         |
+| `$deep-blue`               | `--bw-deep-blue`    |
+| `$teal-highlight`          | `--bw-teal`         |
+| `$light-teal-highlight`    | `--bw-light-teal`   |
+| `$tertiary-green`          | `--bw-green`        |
+| `$tertiary-yellow`         | `--bw-yellow`       |
+| `$tertiary-red`            | `--bw-red`          |
+| `$off-white`               | `--bw-off-white`    |
+| `$true-white`              | `--bw-true-white`   |
+| `$true-black`              | `--bw-true-black`   |
+| `$light-grey`              | `--bw-light-grey`   |
+| (Medium Grey, no SCSS var) | `--bw-medium-grey`  |
+
 ## CMYK (for print)
 
 The brand site lists CMYK alongside HEX/RGB for use in print and produced materials. Pull from
@@ -47,7 +67,7 @@ the brand site directly when print specs are needed — these are not in the SCS
 | Teal Highlight  | 58, 0, 15, 0    |
 | Light Teal      | 30, 0, 5, 0     |
 | Tertiary Green  | 49, 0, 30, 5    |
-| Tertiary Yellow | 0, 16, 100, 0   |
+| Tertiary Yellow | 0, 21, 100, 1   |
 | Tertiary Red    | 0, 60, 69, 0    |
 
 ## Application rules
@@ -58,6 +78,39 @@ the brand site directly when print specs are needed — these are not in the SCS
 - **Greys** (Light Grey, Medium Grey) carry secondary surfaces, dividers, and disabled states.
 - **Tertiary palette is restrained.** Two or three tertiary swatches on one screen is usually
   too many. State semantics (success/warning/error) are the right use; decorative use is not.
+
+## Recommended pairings (WCAG AA, body-text scale)
+
+Pairings labeled "AA" hit at least 4.5:1 for normal text. Pairings labeled "AA-large" hit at
+least 3:1 — use only for ≥18pt or ≥14pt bold.
+
+| Foreground        | Background        | Status   | Notes                                                      |
+| ----------------- | ----------------- | -------- | ---------------------------------------------------------- |
+| `--bw-true-black` | `--bw-true-white` | AA       | Default body text on light surfaces.                       |
+| `--bw-deep-blue`  | `--bw-true-white` | AA       | Body or heading text on light surfaces.                    |
+| `--bw-deep-blue`  | `--bw-off-white`  | AA       | Body text on a slightly softened light surface.            |
+| `--bw-blue`       | `--bw-true-white` | AA-large | Headings or CTAs, not body. Body Blue-on-white is too low. |
+| `--bw-true-white` | `--bw-deep-blue`  | AA       | Default body text on dark surfaces.                        |
+| `--bw-true-white` | `--bw-blue`       | AA-large | Headings or CTAs, not body.                                |
+| `--bw-deep-blue`  | `--bw-light-teal` | AA       | Accent panel with readable body.                           |
+
+> The brand site does not publish a contrast matrix. The pairings above are pragmatic — verify
+> against the actual size, weight, and rendering of the deliverable using a contrast checker
+> (e.g. WebAIM).
+
+## Surface choices (pragmatic — the brand site is silent)
+
+The brand site does not prescribe a surface mode for deliverables. Two safe defaults:
+
+- **Light surface** — use `--bw-off-white` or `--bw-true-white` as the page background,
+  `--bw-deep-blue` for text, `--bw-blue` and `--bw-teal` for accents.
+- **Dark surface** — derive the page background from `--bw-deep-blue` (use it directly, or
+  compose a slightly lighter shade on top via a 10-20% opacity `--bw-true-white` layer). **Do
+  not invent a new dark neutral.** Use `--bw-true-white` for body text and `--bw-teal` /
+  `--bw-light-teal` for accents.
+
+Whichever surface is chosen, document the decision in the deliverable so a reader knows it is a
+deliverable-level call, not brand canon.
 
 ## Common off-brand patterns to catch
 
@@ -74,5 +127,7 @@ the brand site directly when print specs are needed — these are not in the SCS
 
 Treat the brand site and brand repo as authoritative. If a color appears in product code but
 not on this page, check `brand-colors/palette.scss` in the repo first — that file is the
-canonical SCSS source and is what this reference mirrors. If the palette has drifted, update
-this file in a separate PR.
+canonical SCSS source and is what this reference mirrors. Run
+`scripts/verify-brand-canon.sh` to compare the bundled tokens against that source at any time;
+on drift it prints the correct values to use in the deliverable. Updating this file (and
+`assets/bitwarden-tokens.css`) to match is a separate PR.

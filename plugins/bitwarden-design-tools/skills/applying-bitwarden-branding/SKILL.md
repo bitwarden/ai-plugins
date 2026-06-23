@@ -1,137 +1,84 @@
 ---
 name: applying-bitwarden-branding
-description: Apply Bitwarden brand standards — logo usage, color palette, typography, iconography, and capitalization rules — grounded in bitwarden.com/brand and the bitwarden/brand repository.
-when_to_use: Use when a task touches Bitwarden's visual brand surface in design work or design-adjacent assets. Triggers — "check the brand", "apply Bitwarden branding", "use the brand colors", "is this on-brand", "what color is Bitwarden blue", "what font does Bitwarden use", "logo usage", "brand guidelines", "brand assets", "shield". Not for product content voice or grammar (use `content-style-guide`).
-allowed-tools: Skill
+description: Apply or review Bitwarden branding on standalone shareable deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and design-adjacent assets. Use when building or auditing a Bitwarden-audience deliverable, on explicit asks like "make this look like Bitwarden", "Bitwarden-themed deck", "is this on-brand?", or "brand-check this", and proactively when producing a shareable Bitwarden deliverable with no other brand specified. Not for product UI in bitwarden/clients, the web vault, or mobile apps (use @bitwarden/components), third-party work, or partner co-branding.
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh:*)
 ---
 
-# Applying Bitwarden Branding
+# Applying Bitwarden branding
 
-This skill grounds brand-application decisions in Bitwarden's two canonical sources:
+First, confirm the surface. If the target is product UI (`bitwarden/clients`, the web vault, or mobile apps), third-party work, or partner co-branding, stop: those use `@bitwarden/components` or another brand, not this skill.
 
-- **[bitwarden.com/brand](https://bitwarden.com/brand/)** — the brand guidelines hub, including
-  logo lockups, the radius system, social-post framing, product images, and B-roll.
-- **[github.com/bitwarden/brand](https://github.com/bitwarden/brand)** — the source-of-truth
-  repository for SVG logos, PNG product icons (multiple sizes), the shield mark, color palette
-  in multiple formats (HEX, HSL, SCSS), screenshots, and media assets.
+## Single source of truth
 
-When applying brand in real work, treat the repo as canonical for assets and the brand site as
-canonical for usage rules. Detailed reference material lives in `references/brand-assets.md`
-(asset inventory and file paths) and `references/color-palette.md` (full palette with usage
-notes and SCSS variable names).
+[`bitwarden.com/brand`](https://bitwarden.com/brand) and its backing repository [`github.com/bitwarden/brand`](https://github.com/bitwarden/brand). Everything canonical here mirrors those; on any conflict, the brand repository's published values win.
 
-## The five rules that catch the most mistakes
+The canon is bundled in this skill (`assets/`, `references/`) so it is available offline and the logo can be embedded verbatim with no network round-trip. The bundle is the reliable default. Every file named in this skill (under `assets/`, `references/`, `examples/`, and `scripts/`) is present exactly as written, so reference it directly; there is no need to list a directory to confirm a file exists.
 
-1. **Capitalize the B in Bitwarden.** Always. The W is never capitalized. The only place
-   "bitwarden" appears lowercase is inside the official logo lockup — not in body copy, not in
-   headlines, not in handles or URLs.
-2. **Primary palette before tertiary palette.** Green, Yellow, and Red are tertiary — use them
-   sparingly, primarily in product graphics and for success / warning / error communications.
-   They are not headline colors.
-3. **Inter for everything.** Product and website. The available weights are 300 (light), 400
-   (regular), 500 (medium), 600 (semi-bold), and 700 (bold).
-4. **Logo safe-area is non-negotiable.** Horizontal lockup needs one Bitwarden-shield width of
-   clear space on every side. Vertical lockup uses the height of the "X" in the logotype.
-   Cramped logos break the lockup.
-5. **36px radius system, but buttons are the exception.** Rounded corners follow a 36px radius
-   across primary brand surfaces. Buttons sit outside that system — don't apply 36px to
-   buttons.
+Staying current is optional. Bundled values can fall behind the source over time. When network access is available, run the drift check first:
 
-## Logo usage
+```
+${CLAUDE_SKILL_DIR}/scripts/verify-brand-canon.sh
+```
 
-- **Default mark.** `/logos/logo-horizontal-blue.svg` from the brand repo. Horizontal is the
-  primary/preferred lockup.
-- **Inverse (for dark backgrounds).** `/logos/logo-horizontal-white.svg`.
-- **Vertical lockup.** Available for use cases where horizontal doesn't fit; the safe area uses
-  the height of the "X" in the logotype.
-- **Product icon (the shield).** Available rounded and square, at 16/32/64/128/256 px PNG plus
-  SVG (`/logos/icon.svg`, `/logos/icon-inverse.svg`, `/icons/*.png`). The shield itself lives
-  at `/shield/`.
-- **Product logos.** Unique lockups exist for individual Bitwarden products (Password Manager,
-  Secrets Manager, etc.). Use these "primarily for use in-product."
+It fetches the authoritative palette from the brand repository and reports any drift. On a reported mismatch, use the correct value it prints when branding the deliverable; do not edit the bundled tokens in-session (refreshing them is a separate marketplace PR). On error or no network, fall back to the bundled canon.
 
-Don't recolor, distort, rotate, or recompose the logo. If the supplied SVG doesn't fit the
-need, reach out to the brand owners rather than improvising a variant.
+## The brand-canon checklist
 
-## Color palette quick reference
+These are non-negotiable. They come straight from the brand repository.
 
-Full palette with all variable names is in `references/color-palette.md`. Five colors carry
-most of the work:
+1. Use only the published palette: Bitwarden Blue (`#175DDC`), Deep Blue (`#0C3276`), Teal (`#2CDDE9`), Light Teal (`#A2F4FD`), the tertiary Green/Red/Yellow, and the neutral ramp (True White, Off White, Light Grey, Medium Grey, True Black). Invent no shades, tints, or alternate steps. See [`references/color-palette.md`](references/color-palette.md) for HEX/RGB/CMYK.
+2. Use Inter for type, across headlines, copy, and text. See [`references/typography.md`](references/typography.md) for loading and fallback.
+3. Use the official logo lockup. Horizontal is preferred; vertical and product-specific lockups exist for specific cases. Honor clear-space rules. Embed the bundled SVG verbatim; do not recreate the shield from scratch. See [`references/logo-usage.md`](references/logo-usage.md).
+4. Apply the 36px rounded-radius foundation to container surfaces that float with space around them (panels, cards, hero sections, pills, badges). Do not round an edge that bleeds flush to the page or viewport boundary: a full-bleed header or footer should either be inset (given margin so all four corners float) or left square on the flush edges. Rounding only the bottom corners of an edge-to-edge band looks broken. Buttons are the only canonical exception.
+5. Capitalize the B in Bitwarden, never the W. Lowercase "bitwarden" appears only inside the official logo lockup, never in copy, headlines, handles, or URLs.
 
-| Color          | HEX       | Use                                                    |
-| -------------- | --------- | ------------------------------------------------------ |
-| Bitwarden Blue | `#175DDC` | Primary brand color. Headlines, primary CTAs, accents. |
-| Deep Blue      | `#0C3276` | Secondary brand color. Dense surfaces, headers.        |
-| Off White      | `#F3F6F9` | Default light surface.                                 |
-| True Black     | `#000000` | Default text on light surfaces.                        |
-| Teal Highlight | `#2CDDE9` | Accent and highlight — pair with the blues.            |
+## Quick start (build)
 
-Tertiary palette (Green `#7BF1A8`, Yellow `#FDC700`, Red `#FF6550`) is **sparingly** applied
-for product graphics and success/warning/error states. The brand site is explicit on this.
+Three steps to put a deliverable on-brand:
 
-SCSS variable names (from the brand repo's `brand-colors/palette.scss`):
+1. Link Inter. Add the Google Fonts preconnect and stylesheet to the document head. See [`references/typography.md`](references/typography.md) for the exact snippet.
+2. Drop in the tokens. Paste the contents of [`assets/bitwarden-tokens.css`](assets/bitwarden-tokens.css) into a style block, or link to it. This provides the full palette as CSS custom properties (`--bw-blue`, `--bw-deep-blue`, and so on), the 36px radius, and Inter on `:root`.
+3. Add the lockup. Pick the variant that matches the surface and available space; horizontal is preferred. Every variant ships verbatim from the official source under [`assets/`](assets/):
+   - Horizontal: `bitwarden-lockup-horizontal-blue.svg` (light) / `bitwarden-lockup-horizontal-white.svg` (dark)
+   - Vertical: `bitwarden-lockup-vertical-blue.svg` / `bitwarden-lockup-vertical-white.svg`
+   - Shield only (chip-scale): `bitwarden-shield-blue.svg` / `bitwarden-shield-white.svg`
+   - Wordmark only: `bitwarden-wordmark-blue.svg` / `bitwarden-wordmark-white.svg`
+   - Full official source: `bitwarden-lockup-official.svg`
 
-- `$bitwarden-blue`, `$deep-blue`, `$off-white`, `$true-white`, `$true-black`, `$light-grey`,
-  `$teal-highlight`, `$light-teal-highlight`, `$tertiary-green`, `$tertiary-yellow`,
-  `$tertiary-red`.
+   See [`references/logo-usage.md`](references/logo-usage.md) for the full catalog and when to use each.
 
-## Typography
+4. Ship light and dark. Default the surface to the device setting with `@media (prefers-color-scheme: dark)` and add a visible light/dark toggle that overrides it. Derive the dark surface from `--bw-deep-blue`; keep the palette and logo identical across modes. See "Surface mode" below and the bundled example.
 
-- **Typeface:** Inter (open-source, Google Fonts).
-- **Weights available:** 300 (light), 400 (regular), 500 (medium), 600 (semi-bold), 700 (bold).
-- **Use:** product UI and website body / headline copy. The brand site doesn't enumerate
-  weight-per-context rules; defer to product or marketing leads when an unusual case comes up.
+Steps 1-3 are the canonical surface; step 4 is the skill's standing default. Everything else is a pragmatic choice — see below.
 
-## Iconography
+## Where the brand site is silent
 
-- **Web icons.** Designed for a wide range of uses with more detail than the product icon.
-- **Product icon (shield).** Available rounded and square at multiple sizes from the brand
-  repo's `/icons/` directory.
+These decisions still have to be made, but the brand site does not prescribe them; they are pragmatic, not canonical. When working interactively and the choice will visibly shape the deliverable (voice and tone most of all), ask the requester rather than assume. Otherwise apply the default below and note the assumption in the deliverable.
 
-Asset paths and full sizing tables are in `references/brand-assets.md`.
+- Surface mode (light vs. dark). Ship both by default. Drive the initial surface from the device setting with `@media (prefers-color-scheme: dark)`, and include a visible control to toggle between light and dark that overrides the device default. Build the light surface from `--bw-off-white`/`--bw-true-white` with `--bw-deep-blue` text; derive the dark surface from `--bw-deep-blue` rather than inventing a new neutral. The palette and logo are identical in both modes — only the surface and text invert. The bundled example shows the pattern.
+- Type scale (heading sizes, weights, line-heights). Pragmatic. A safe four-step default: display 2.5rem/700, section 1.5rem/600, body 1rem/400, caption 0.8125rem/500. See [`references/typography.md`](references/typography.md).
+- Code font. Pragmatic. `"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace`. The brand is silent on code typography.
+- Component shapes (cards, banners, chips, toolbars, badges). Pragmatic. The brand defines no component vocabulary. Apply the 36px radius to container surfaces (canonical); choose whatever padding, spacing, and border treatment fits.
+- Voice and tone. Pragmatic. Not in the brand site. Match the audience and channel.
+- Accessibility and contrast specifics. Pragmatic. No published contrast matrix, so defer to WCAG AA. See the recommended pairings in [`references/color-palette.md`](references/color-palette.md).
 
-## Capitalization and trademark
+## Reviewing for brand compliance
 
-- The "B" in **Bitwarden** is capitalized in all copy text.
-- The "W" is never capitalized — neither `BITWARDEN` (in body copy) nor `bitWarden`.
-- The only place "bitwarden" appears in lowercase is inside the official logo lockup itself.
-- "Bitwarden" is a registered trademark of Bitwarden Inc. — surface this when content is
-  external-facing and trademark attribution is appropriate.
+When asked whether something is on-brand, structure the answer as:
 
-## Composing with other skills
+1. What is checked: which brand surfaces the work touches (palette, typography, logo, radius, capitalization).
+2. What is on-brand: what works and should stay. Affirm the correct things explicitly; do not only list problems.
+3. What is off-brand: each finding tied to the specific canon rule it breaks, citing the actual value. "The headline uses `#46E08A` (off-palette green) where Bitwarden Blue `#175DDC` is the brand primary" beats "the color is wrong".
+4. Proposed corrections: concrete swaps sourced from the canonical palette or bundled asset.
 
-- **`content-style-guide`.** Brand sits alongside content style. When reviewing user-visible
-  surfaces, walk both: this skill catches color, logo, and capitalization issues; the content
-  style guide catches voice, tone, sentence case, and accessibility.
-- **`using-figma`.** Use `get_variable_defs` to check whether a design's colors are
-  library-bound and aligned to the brand palette; use `get_libraries` to confirm the right
-  design library is loaded before claiming a design is on-brand.
-- **`preparing-design-handoff`.** Surface brand findings as part of the handoff gate — flag
-  them as Figma annotations or as open questions in the Epic when something is off-brand at
-  handoff time. Don't quietly fix.
-- **`evolving-design-system-components`.** New patterns must respect the brand palette and the
-  36px radius system (with the button exception). The Component Library governance review
-  catches obvious violations, but raise them explicitly when sponsoring a pattern.
+Calibrate severity — this is where reviews go wrong. Separate canon violations from brand-silent choices:
 
-## Output format for brand checks
+- Canon violation (flag it): off-palette color, non-Inter type, a recreated or altered logo, capitalizing the W in Bitwarden. These break the brand canon.
+- Brand-silent choice (note as a judgment-call, never a hard failure): the existence of a dark surface mode, how strictly to apply the 36px radius to dense internal-tool components (the radius is canonical for primary brand surfaces; forcing it onto dense data cards is a judgment call), emoji vs. custom icons, a code-font choice, loading Inter from a CDN. The brand does not rule on these. Mention them as optional refinements, but do not mark them as failures or non-negotiable violations. Over-flagging defensible pragmatic choices erodes trust in the review.
 
-When asked "is this on-brand?", structure the response as:
+## References
 
-1. **What's checked** — which brand surfaces this design touches (logo, color, typography,
-   iconography, capitalization).
-2. **What's on-brand** — what's working and should stay.
-3. **What's off-brand** — each finding tied to the specific brand rule it violates (cite the
-   section, e.g., "Tertiary palette overused — Green appears in three non-state surfaces, per
-   the bitwarden.com/brand tertiary-usage rule").
-4. **Proposed corrections** — concrete swaps the designer can apply, sourced from the canonical
-   palette or asset.
-
-Keep findings specific. "The headline uses `#7BF1A8` (tertiary green) where Bitwarden Blue
-(`#175DDC`) is the brand-primary color" beats "the color is wrong."
-
-## Additional resources
-
-- **`references/brand-assets.md`** — full inventory of brand repo assets with file paths
-  (logos, icons, shield, screenshots, media assets).
-- **`references/color-palette.md`** — full palette with HEX, HSL, SCSS variable names, and
-  per-color usage notes.
+- [`references/color-palette.md`](references/color-palette.md): full palette (HEX/RGB/CMYK), WCAG-AA pairings, pragmatic surface guidance.
+- [`references/typography.md`](references/typography.md): Inter loading and fallback, a pragmatic type scale, a pragmatic code-font stack.
+- [`references/logo-usage.md`](references/logo-usage.md): lockup choice, clear-space rules, the official SVG URL, the do-not list.
+- [`examples/on-brand-one-pager.html`](examples/on-brand-one-pager.html): a worked template to read and adapt — the canon (palette, Inter, shield, 36px radius) assembled in real markup across a light and a dark composition. The dark composition is one pragmatic option (background derived from `--bw-deep-blue`, surfaces lifted with a small `--bw-true-white` overlay, no invented neutral), not the prescribed one. Copy the structure, keep the canon, swap the pragmatics to fit.

@@ -1,0 +1,66 @@
+/*
+ * Bitwarden brand tokens — canonical values only.
+ *
+ * Source of truth: https://bitwarden.com/brand
+ *
+ * What this file is:
+ *   - The full published palette (HEX) as CSS custom properties.
+ *   - The 36px rounded-radius foundation.
+ *   - Inter as the primary font-family on :root.
+ *
+ * What this file is NOT:
+ *   - A component vocabulary. There are no card/button/banner/chip styles here
+ *     because they are not part of the Bitwarden brand. Component shape is a
+ *     pragmatic choice the deliverable makes.
+ *   - A theme. This file holds only canonical values, so it has no light/dark
+ *     surface tokens — those are deliverable-level. The skill ships BOTH modes
+ *     by default: drive the initial surface from the device setting
+ *     (@media (prefers-color-scheme: dark)) with a light/dark toggle that
+ *     overrides it, and derive the dark surface from Deep Blue (#0C3276) rather
+ *     than inventing a new neutral. See the skill's example for the pattern.
+ *   - A type scale. Heading sizes, weights, and line-heights are pragmatic
+ *     choices the deliverable makes.
+ *
+ * The 36px radius applies to container surfaces (panels, cards, hero sections,
+ * pills, badges). Per brand canon, the ONLY exception is buttons.
+ */
+
+:root {
+  /* Primary */
+  --bw-blue: #175ddc;
+  --bw-deep-blue: #0c3276;
+
+  /* Accents */
+  --bw-teal: #2cdde9;
+  --bw-light-teal: #a2f4fd;
+
+  /* Semantic — use sparingly, primarily for success/error communication */
+  --bw-green: #7bf1a8;
+  --bw-red: #ff6550;
+  --bw-yellow: #fdc700;
+
+  /* Neutrals */
+  --bw-true-white: #ffffff;
+  --bw-off-white: #f3f6f9;
+  --bw-light-grey: #d8e2eb;
+  --bw-medium-grey: #99a7b5;
+  --bw-true-black: #000000;
+
+  /* Radius foundation — 36px. Buttons are the only canonical exception. */
+  --bw-radius: 36px;
+  --bw-radius-pill: 999px;
+
+  /* Typography — Inter is the primary typeface per brand. */
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}

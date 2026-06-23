@@ -1,0 +1,531 @@
+<!doctype html>
+<!--
+  on-brand-one-pager.html
+
+  ONE VALID COMPOSITION demonstrating Bitwarden brand basics. NOT the
+  prescribed Bitwarden component vocabulary. The brand does not define a
+  component vocabulary, so the cards, hero, and stat tiles below are
+  pragmatic decisions — not canon.
+
+  What this page demonstrates:
+    - Palette via CSS custom properties (canonical).
+    - Inter from Google Fonts (canonical).
+    - Inline shield in the header (canonical when used at chip scale).
+    - 36px radius foundation on container surfaces (canonical).
+    - Both light and dark surfaces, shipped by default. The initial mode
+      follows the device (prefers-color-scheme) and a header toggle
+      overrides it. The brand site is silent on surface mode, so the
+      specific surface values are pragmatic: the dark mode derives its
+      background from --bw-deep-blue rather than introducing a new
+      neutral, per references/color-palette.md.
+
+  Pragmatic choices made here:
+    - Surface-level CSS variables (--surface-page, --surface-card,
+      --text-primary, etc.) that remap when [data-theme="dark"] is set
+      on <body>. These intermediate tokens are NOT part of brand canon —
+      they're a deliverable-level convenience.
+    - Four-step type scale.
+    - One-column layout.
+
+  Replace those pragmatic choices to fit your deliverable. Keep the
+  canonical pieces intact.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>On-brand one-pager — Bitwarden</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /*
+       * Canonical tokens — inlined from
+       * plugins/bitwarden-design-tools/skills/applying-bitwarden-branding/assets/bitwarden-tokens.css
+       * so this file is self-contained when copied out of the repo.
+       * Source of truth: https://bitwarden.com/brand
+       */
+      :root {
+        --bw-blue: #175ddc;
+        --bw-deep-blue: #0c3276;
+        --bw-teal: #2cdde9;
+        --bw-light-teal: #a2f4fd;
+        --bw-green: #7bf1a8;
+        --bw-red: #ff6550;
+        --bw-yellow: #fdc700;
+        --bw-true-white: #ffffff;
+        --bw-off-white: #f3f6f9;
+        --bw-light-grey: #d8e2eb;
+        --bw-medium-grey: #99a7b5;
+        --bw-true-black: #000000;
+        --bw-radius: 36px;
+        --bw-radius-pill: 999px;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+      }
+
+      /*
+       * Surface tokens — PRAGMATIC.
+       *
+       * The brand site is silent on surface mode. The variables below remap
+       * the canonical palette into per-surface roles. Switching the theme
+       * is a single attribute flip on <body>; every component reads from
+       * these tokens so nothing has to be re-themed manually.
+       */
+      body {
+        --surface-page: var(--bw-off-white);
+        --surface-card: var(--bw-true-white);
+        --text-primary: var(--bw-deep-blue);
+        --text-secondary: var(--bw-medium-grey);
+        --text-on-card: var(--bw-deep-blue);
+        --eyebrow-bg: var(--bw-light-teal);
+        --eyebrow-fg: var(--bw-deep-blue);
+        --stat-value: var(--bw-blue);
+      }
+
+      body[data-theme="dark"] {
+        --surface-page: var(--bw-deep-blue);
+        --surface-card: color-mix(
+          in srgb,
+          var(--bw-true-white) 6%,
+          var(--bw-deep-blue)
+        );
+        --text-primary: var(--bw-true-white);
+        --text-secondary: var(--bw-light-grey);
+        --text-on-card: var(--bw-light-grey);
+        --eyebrow-bg: color-mix(in srgb, var(--bw-teal) 18%, transparent);
+        --eyebrow-fg: var(--bw-light-teal);
+        --stat-value: var(--bw-teal);
+      }
+
+      /*
+       * Default the surface to the device setting. This applies until the user
+       * makes an explicit choice (the toggle sets [data-theme]); data-theme="light"
+       * opts back out on a dark device. Same dark values as above — duplicated so
+       * no-JS and pre-JS rendering already match the device (no flash of light).
+       */
+      @media (prefers-color-scheme: dark) {
+        body:not([data-theme="light"]) {
+          --surface-page: var(--bw-deep-blue);
+          --surface-card: color-mix(
+            in srgb,
+            var(--bw-true-white) 6%,
+            var(--bw-deep-blue)
+          );
+          --text-primary: var(--bw-true-white);
+          --text-secondary: var(--bw-light-grey);
+          --text-on-card: var(--bw-light-grey);
+          --eyebrow-bg: color-mix(in srgb, var(--bw-teal) 18%, transparent);
+          --eyebrow-fg: var(--bw-light-teal);
+          --stat-value: var(--bw-teal);
+        }
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--surface-page);
+        color: var(--text-primary);
+        line-height: 1.55;
+        transition:
+          background-color 240ms ease,
+          color 240ms ease;
+      }
+
+      .page {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 48px;
+      }
+
+      header .shield {
+        width: 32px;
+        height: auto;
+        display: block;
+        color: var(--bw-blue);
+      }
+
+      body[data-theme="dark"] header .shield {
+        color: var(--bw-true-white);
+      }
+
+      header .wordmark {
+        font-weight: 600;
+        font-size: 1.125rem;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+      }
+
+      .theme-toggle {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font: inherit;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background: var(--surface-card);
+        border: 1px solid
+          color-mix(in srgb, var(--text-primary) 14%, transparent);
+        border-radius: var(--bw-radius-pill);
+        padding: 8px 16px;
+        cursor: pointer;
+        transition:
+          background-color 240ms ease,
+          color 240ms ease,
+          border-color 240ms ease;
+      }
+
+      .theme-toggle:hover,
+      .theme-toggle:focus-visible {
+        border-color: var(--bw-blue);
+        outline: none;
+      }
+
+      .theme-toggle .icon {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+      }
+
+      /*
+       * Pre-JS default shows the sun. The toggle script swaps the icon, label,
+       * and aria-pressed to match the effective mode (device default or the
+       * explicit override).
+       */
+      .theme-toggle .icon-moon {
+        display: none;
+      }
+
+      .hero {
+        background: var(--surface-card);
+        border-radius: var(--bw-radius);
+        padding: 56px 48px;
+        margin-bottom: 32px;
+        color: var(--text-on-card);
+        transition:
+          background-color 240ms ease,
+          color 240ms ease;
+      }
+
+      .hero .eyebrow {
+        display: inline-block;
+        background: var(--eyebrow-bg);
+        color: var(--eyebrow-fg);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        padding: 6px 16px;
+        border-radius: var(--bw-radius-pill);
+        margin-bottom: 24px;
+      }
+
+      .hero h1 {
+        margin: 0 0 16px;
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+      }
+
+      .hero p {
+        margin: 0;
+        font-size: 1.125rem;
+        color: var(--text-on-card);
+        max-width: 60ch;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .stat {
+        background: var(--surface-card);
+        border-radius: var(--bw-radius);
+        padding: 32px;
+        transition: background-color 240ms ease;
+      }
+
+      .stat .label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 8px;
+      }
+
+      .stat .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--stat-value);
+        line-height: 1.1;
+      }
+
+      .body-card {
+        background: var(--surface-card);
+        border-radius: var(--bw-radius);
+        padding: 40px 48px;
+        color: var(--text-on-card);
+        transition:
+          background-color 240ms ease,
+          color 240ms ease;
+      }
+
+      .body-card h2 {
+        margin: 0 0 16px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+        color: var(--text-primary);
+      }
+
+      .body-card p {
+        margin: 0 0 16px;
+        font-size: 1rem;
+      }
+
+      .body-card p:last-child {
+        margin-bottom: 0;
+      }
+
+      footer {
+        margin-top: 64px;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+
+      footer a {
+        color: var(--bw-blue);
+      }
+
+      body[data-theme="dark"] footer a {
+        color: var(--bw-teal);
+      }
+
+      @media (max-width: 600px) {
+        .page {
+          padding: 32px 16px 64px;
+        }
+
+        header {
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .theme-toggle {
+          margin-left: 0;
+        }
+
+        .hero {
+          padding: 40px 28px;
+        }
+
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+
+        .body-card {
+          padding: 32px 28px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <header>
+        <!--
+          Inlined copy of assets/bitwarden-shield-blue.svg, with the fill
+          swapped to currentColor so the same path renders in either the
+          blue (light surface) or white (dark surface) canonical variant.
+          Switching between the two is NOT a recolor — both colors ship
+          in the official lockup.
+        -->
+        <svg
+          class="shield"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="248 514 154 183"
+          role="img"
+          aria-label="Bitwarden"
+        >
+          <title>Bitwarden</title>
+          <path
+            fill="currentColor"
+            fill-rule="evenodd"
+            d="M374.83,612.54v-71.41h-49.91v126.87c8.84-4.69,16.75-9.78,23.73-15.29,17.45-13.69,26.18-27.08,26.18-40.17ZM396.22,526.84v85.7c0,6.4-1.24,12.74-3.73,19.02-2.49,6.29-5.57,11.86-9.25,16.74-3.68,4.87-8.06,9.61-13.15,14.23-5.09,4.61-9.78,8.44-14.09,11.49-4.31,3.05-8.8,5.93-13.48,8.65-4.68,2.72-8,4.56-9.97,5.52-1.97.97-3.55,1.71-4.73,2.23-.89.45-1.86.67-2.9.67s-2.01-.22-2.9-.67c-1.19-.52-2.77-1.26-4.73-2.23-1.97-.97-5.29-2.81-9.97-5.52-4.68-2.71-9.17-5.6-13.48-8.65-4.31-3.05-9.01-6.88-14.09-11.49-5.09-4.61-9.47-9.35-13.15-14.23-3.68-4.87-6.76-10.45-9.25-16.74-2.49-6.29-3.73-12.63-3.73-19.02v-85.7c0-1.93.71-3.61,2.12-5.02,1.41-1.41,3.08-2.12,5.01-2.12h128.34c1.93,0,3.6.71,5.01,2.12,1.41,1.41,2.12,3.09,2.12,5.02Z"
+          />
+        </svg>
+        <span class="wordmark">Bitwarden</span>
+
+        <button
+          type="button"
+          class="theme-toggle"
+          aria-label="Toggle light and dark surface"
+          aria-pressed="false"
+        >
+          <svg
+            class="icon icon-moon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+          </svg>
+          <svg
+            class="icon icon-sun"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+            />
+          </svg>
+          <span class="label">Dark mode</span>
+        </button>
+      </header>
+
+      <section class="hero">
+        <span class="eyebrow">On-brand example</span>
+        <h1>The brand canon, applied.</h1>
+        <p>
+          Palette, Inter, the official shield, and the 36px radius foundation —
+          assembled into one valid composition. The surface follows your device
+          by default; use the header toggle to switch light and dark. The
+          canonical pieces are identical in both.
+        </p>
+      </section>
+
+      <section class="stats" aria-label="Brand-canon checklist">
+        <div class="stat">
+          <div class="label">Canonical pieces applied</div>
+          <div class="value">4</div>
+        </div>
+        <div class="stat">
+          <div class="label">Pragmatic choices made</div>
+          <div class="value">3</div>
+        </div>
+      </section>
+
+      <section class="body-card">
+        <h2>What this page demonstrates</h2>
+        <p>
+          The hero, stat tiles, and body card all carry the 36px radius
+          foundation. The eyebrow chip and the theme toggle use the radius-pill
+          token. Buttons (the toggle is one) are the only canonical exception to
+          the 36px system — here, the toggle uses the pill radius rather than
+          the foundation radius.
+        </p>
+        <p>
+          The shield in the header is the bundled inline asset, sized for
+          chip-scale use. For a larger lockup or anything shareable externally,
+          fetch the official horizontal lockup from bitwarden.com/brand instead
+          of scaling the shield up.
+        </p>
+        <p>
+          Both surface modes ship by default: the page follows the device's
+          light/dark preference and the header toggle overrides it. The brand
+          site does not prescribe surface mode, so the values are pragmatic —
+          the dark surface derives its background from
+          <code>--bw-deep-blue</code> and lifts elevated panels with a 6%
+          <code>--bw-true-white</code> overlay, with no new neutral introduced.
+        </p>
+      </section>
+
+      <footer>
+        Brand source of truth:
+        <a href="https://bitwarden.com/brand">bitwarden.com/brand</a>
+      </footer>
+    </div>
+
+    <script>
+      /*
+       * Surface mode: follow the device by default, let the toggle override.
+       * The CSS @media rule sets the initial surface from prefers-color-scheme;
+       * clicking the toggle writes [data-theme] to override it. While no
+       * explicit choice has been made, the page keeps following the device.
+       */
+      (function () {
+        var body = document.body;
+        var toggle = document.querySelector(".theme-toggle");
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+        function effectiveMode() {
+          return body.dataset.theme || (mq.matches ? "dark" : "light");
+        }
+
+        function sync() {
+          var dark = effectiveMode() === "dark";
+          toggle.setAttribute("aria-pressed", String(dark));
+          toggle.querySelector(".label").textContent = dark
+            ? "Light mode"
+            : "Dark mode";
+          toggle.querySelector(".icon-moon").style.display = dark ? "" : "none";
+          toggle.querySelector(".icon-sun").style.display = dark ? "none" : "";
+        }
+
+        toggle.addEventListener("click", function () {
+          body.dataset.theme = effectiveMode() === "dark" ? "light" : "dark";
+          sync();
+        });
+
+        // Keep following the device until the user makes an explicit choice.
+        mq.addEventListener("change", function () {
+          if (!body.dataset.theme) sync();
+        });
+
+        sync();
+      })();
+    </script>
+  </body>
+</html>

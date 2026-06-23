@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Engineering Weekly Recap — Sample</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bw-blue: #175ddc;
+        --bw-deep-blue: #0c3276;
+        --bw-teal: #2cdde9;
+        --bw-light-teal: #a2f4fd;
+        --bw-green: #7bf1a8;
+        --bw-off-white: #f3f6f9;
+        --bw-true-white: #ffffff;
+        --bw-radius: 36px;
+        --surface: #0a1d3a;
+        --surface-2: #0c1f3f;
+        --surface-3: #102747;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--surface);
+        color: var(--bw-off-white);
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 28px 48px;
+        background: var(--bw-deep-blue);
+      }
+      header svg {
+        width: 28px;
+        height: 33px;
+      }
+      header .wordmark {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--bw-true-white);
+      }
+      main {
+        padding: 48px;
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      .sub {
+        color: var(--bw-light-teal);
+        margin: 0 0 32px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .card {
+        background: var(--surface-2);
+        border: 1px solid var(--surface-3);
+        border-radius: var(--bw-radius);
+        padding: 28px;
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        color: var(--bw-teal);
+        font-weight: 600;
+      }
+      .stat {
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: var(--bw-true-white);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 16px;
+        font-size: 0.85rem;
+      }
+      .swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+      }
+      .series-a {
+        background: var(--bw-teal);
+      }
+      .series-b {
+        background: var(--bw-green);
+      }
+      .series-c {
+        background: #8a63d2;
+      }
+      .cta {
+        display: inline-block;
+        margin-top: 28px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: var(--bw-blue);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .cta:hover {
+        background: #ff7a18;
+      }
+      footer {
+        padding: 24px 48px;
+        color: var(--bw-light-teal);
+        font-size: 0.85rem;
+      }
+      footer a {
+        color: var(--bw-teal);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <svg viewBox="248 514 154 183" role="img" aria-label="Bitwarden">
+        <title>Bitwarden</title>
+        <path
+          fill="#175DDC"
+          fill-rule="evenodd"
+          d="M374.83,612.54v-71.41h-49.91v126.87c8.84-4.69,16.75-9.78,23.73-15.29,17.45-13.69,26.18-27.08,26.18-40.17ZM396.22,526.84v85.7c0,6.4-1.24,12.74-3.73,19.02-2.49,6.29-5.57,11.86-9.25,16.74-3.68,4.87-8.06,9.61-13.15,14.23-5.09,4.61-9.78,8.44-14.09,11.49-4.31,3.05-8.8,5.93-13.48,8.65-4.68,2.72-8,4.56-9.97,5.52-1.97.97-3.55,1.71-4.73,2.23-.89.45-1.86.67-2.9.67s-2.01-.22-2.9-.67c-1.19-.52-2.77-1.26-4.73-2.23-1.97-.97-5.29-2.81-9.97-5.52-4.68-2.71-9.17-5.6-13.48-8.65-4.31-3.05-9.01-6.88-14.09-11.49-5.09-4.61-9.47-9.35-13.15-14.23-3.68-4.87-6.76-10.45-9.25-16.74-2.49-6.29-3.73-12.63-3.73-19.02v-85.7c0-1.93.71-3.61,2.12-5.02,1.41-1.41,3.08-2.12,5.01-2.12h128.34c1.93,0,3.6.71,5.01,2.12,1.41,1.41,2.12,3.09,2.12,5.02Z"
+        />
+      </svg>
+      <span class="wordmark">Bitwarden</span>
+    </header>
+    <main>
+      <h1>Engineering Weekly Recap</h1>
+      <p class="sub">
+        A fictional sample page. None of these numbers are real.
+      </p>
+      <section class="cards">
+        <div class="card">
+          <h3>Merged PRs</h3>
+          <div class="stat">128</div>
+        </div>
+        <div class="card">
+          <h3>Median review time</h3>
+          <div class="stat">6.4h</div>
+        </div>
+        <div class="card">
+          <h3>Deploys</h3>
+          <div class="stat">42</div>
+        </div>
+      </section>
+      <p class="legend" style="margin-top: 28px">
+        <span><span class="swatch series-a"></span>Backend</span>
+        <span><span class="swatch series-b"></span>Clients</span>
+        <span><span class="swatch series-c"></span>Platform</span>
+      </p>
+      <a class="cta" href="https://bitwarden.com/brand">View the brand guide</a>
+    </main>
+    <footer>
+      Built for the wider team · Source:
+      <a href="https://bitwarden.com/brand">bitwarden.com/brand</a>
+    </footer>
+  </body>
+</html>

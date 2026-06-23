@@ -1,0 +1,112 @@
+{
+  "note": "Pre-registered BEFORE any blinded run exists. Assertions are objective and scriptable so grading is deterministic and bias-free. Provenance/drift is measured by OUTPUT INSPECTION, never by agent self-report (self-report changes behavior).",
+  "canonical_palette_lowercase": {
+    "blue": "#175ddc",
+    "deep_blue": "#0c3276",
+    "teal": "#2cdde9",
+    "light_teal": "#a2f4fd",
+    "green": "#7bf1a8",
+    "yellow": "#fdc700",
+    "red": "#ff6550",
+    "off_white": "#f3f6f9",
+    "true_white": "#ffffff",
+    "true_black": "#000000"
+  },
+  "drift_watch": [
+    "Yellow value disputed across sources (#fdc700 vs #ffd700). Resolve ground truth from bitwarden.com/brand at analysis time — this is a Phase-2 drift signal, not a gradable assertion yet."
+  ],
+  "official_lockup_signature": "Path-data substrings are extracted at grade time from the skill's live bundled assets (../assets/*.svg) by grade.py:load_lockup_sigs. Presence of any in an output distinguishes verbatim use of an OFFICIAL asset from a redrawn/improvised shield.",
+  "apply_assertions": [
+    {
+      "id": "loads_inter",
+      "desc": "Output loads/uses Inter as the primary typeface",
+      "type": "scriptable"
+    },
+    {
+      "id": "no_offbrand_fonts",
+      "desc": "No off-brand display/mono fonts (Big Shoulders, IBM Plex) remain as primary type",
+      "type": "scriptable",
+      "applies_to": ["eval1_deck"]
+    },
+    {
+      "id": "uses_blue_primary",
+      "desc": "Bitwarden Blue #175ddc present and used as a primary accent",
+      "type": "scriptable"
+    },
+    {
+      "id": "uses_deep_blue",
+      "desc": "Deep Blue #0c3276 present",
+      "type": "scriptable"
+    },
+    {
+      "id": "palette_purity",
+      "desc": "Count of distinct hex colors OUTSIDE the canonical palette (lower is better); report count, not just pass/fail",
+      "type": "scriptable_metric"
+    },
+    {
+      "id": "official_lockup_not_redrawn",
+      "desc": "Output embeds the official lockup path signature rather than a hand-drawn shield",
+      "type": "scriptable"
+    },
+    {
+      "id": "radius_36",
+      "desc": "border-radius:36px applied to at least one container surface",
+      "type": "scriptable"
+    },
+    {
+      "id": "valid_self_contained_html",
+      "desc": "Parses as a complete standalone HTML document",
+      "type": "scriptable"
+    }
+  ],
+  "review_tp_assertions": {
+    "ground_truth_faults_in_deck": [
+      "non-Inter fonts (Big Shoulders Display, IBM Plex Sans/Mono)",
+      "off-brand palette (slate/green/amber; none of the canonical hexes present)",
+      "missing official Bitwarden lockup",
+      "container radii far below 36px"
+    ],
+    "assertions": [
+      {
+        "id": "detect_fonts",
+        "desc": "Flags the non-Inter typography",
+        "type": "scriptable_keyword"
+      },
+      {
+        "id": "detect_palette",
+        "desc": "Flags the off-brand palette / absence of canonical hexes",
+        "type": "scriptable_keyword"
+      },
+      {
+        "id": "detect_missing_logo",
+        "desc": "Flags the missing official lockup",
+        "type": "scriptable_keyword"
+      },
+      {
+        "id": "detect_radius",
+        "desc": "Flags the non-36px radii",
+        "type": "scriptable_keyword"
+      },
+      {
+        "id": "cites_specific_values",
+        "desc": "Cites actual values/line refs from the file (not generic advice)",
+        "type": "blind_llm"
+      }
+    ]
+  },
+  "review_fp_assertions": {
+    "note": "The mock control (inputs/engineering-recap.html) is substantially on-brand. Its only genuine fault is the off-palette orange CTA hover (#ff7a18). The Deep-Blue-derived dark surface and the third data-viz series are brand-silent judgment calls, NOT faults — flagging them as violations is a false positive. 'False positive' is measured against this ground truth, not against raw off-palette-ness.",
+    "assertions": [
+      {
+        "id": "affirms_correct_core",
+        "desc": "Confirms Inter + core palette are correct rather than flagging them",
+        "type": "blind_llm"
+      },
+      {
+        "id": "false_positive_count",
+        "desc": "Count of findings that are NOT genuine faults (lower is better)",
+        "type": "blind_llm_metric"
+      }
+    ]
+  }
+}

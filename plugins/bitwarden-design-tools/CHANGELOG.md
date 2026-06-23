@@ -5,6 +5,29 @@ All notable changes to the `bitwarden-design-tools` plugin will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-17
+
+### Changed
+
+- `applying-bitwarden-branding` now covers both **building** on-brand standalone deliverables (dashboards, recaps, reports, slide decks, one-pagers, mockups) and **reviewing** whether a deliverable is on-brand. Reviews are calibrated to separate canonical violations from brand-silent pragmatic choices, and brand-silent choices that visibly shape the deliverable (voice and tone) are surfaced to the requester when working interactively rather than silently defaulted. The canon is now bundled (assets + tokens) for offline, verbatim use rather than referenced externally.
+- `applying-bitwarden-branding` now ships **both light and dark surfaces by default**. Deliverables follow the device's `prefers-color-scheme` for the initial surface and expose a light/dark toggle that overrides it, with the dark surface derived from Deep Blue. Previously surface mode defaulted to light and was treated as a per-deliverable question.
+
+### Added
+
+- Bundled brand assets for `applying-bitwarden-branding`: `bitwarden-tokens.css` (palette + 36px radius + Inter on `:root`), the official lockup (`bitwarden-lockup-official.svg`), and derived per-variant SVGs (horizontal and vertical lockups, shield, wordmark, in blue and white), each with path data verbatim from the official lockup.
+- Reference docs `typography.md` and `logo-usage.md`, and `examples/on-brand-one-pager.html` demonstrating light and dark compositions.
+- `scripts/verify-brand-canon.sh` to detect drift between the bundled palette and the brand repository's `palette.scss` and report the correct values to use (drift detector; runs on demand). It never modifies the bundle.
+- `evals/` regression harness for `applying-bitwarden-branding`: mock-only off-brand and on-brand fixtures, a pre-registered objective rubric, and a deterministic grader (`grade.py`) that reads the canonical palette and the official-logo signatures from the live bundled assets so it tracks canon changes. The grader covers the context-free checks (Inter, primary palette, verbatim lockup, 36px radius, off-brand-font and off-palette detection); the calibration dimensions (review specificity, false-positive/over-flagging) are left to a blind LLM grader.
+
+### Fixed
+
+- `--bw-yellow` corrected to `#FDC700` to match the brand repository's `$tertiary-yellow` (was `#FFD700`).
+- Clarified the 36px radius rule: the foundation is for surfaces that float with space around them, and full-bleed headers/footers flush to the page or viewport edge should not be rounded (inset them so all corners float, or leave the flush edges square). Was producing rounded corners against straight page edges on full-bleed headers.
+
+### Removed
+
+- `references/brand-assets.md` — its repo-path asset inventory and trademark note are folded into `references/logo-usage.md`.
+
 ## [0.1.0] - 2026-05-22
 
 ### Added

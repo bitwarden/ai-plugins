@@ -90,7 +90,7 @@
     {
       "name": "bitwarden-design-tools",
       "source": "./plugins/bitwarden-design-tools",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Design toolkit for Bitwarden — non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
     }
   ]
