@@ -19,9 +19,17 @@
         --bw-off-white: #f3f6f9;
         --bw-true-white: #ffffff;
         --bw-radius: 36px;
-        --surface: #0a1d3a;
-        --surface-2: #0c1f3f;
-        --surface-3: #102747;
+        --surface: var(--bw-deep-blue);
+        --surface-2: color-mix(
+          in srgb,
+          var(--bw-true-white) 6%,
+          var(--bw-deep-blue)
+        );
+        --surface-3: color-mix(
+          in srgb,
+          var(--bw-true-white) 16%,
+          var(--bw-deep-blue)
+        );
         font-family:
           "Inter",
           -apple-system,
@@ -105,10 +113,10 @@
         background: var(--bw-teal);
       }
       .series-b {
-        background: var(--bw-green);
+        background: var(--bw-light-teal);
       }
       .series-c {
-        background: #8a63d2;
+        background: var(--bw-blue);
       }
       .cta {
         display: inline-block;

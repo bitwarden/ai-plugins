@@ -20,10 +20,11 @@ skill never sees.
 
 - `inputs/project-atlas-deck.html` — deliberately off-brand (Big Shoulders / IBM Plex
   fonts, invented slate/green palette, no official lockup, sub-36px radii).
-- `inputs/engineering-recap.html` — substantially on-brand (Inter, Bitwarden
-  palette, 36px radius, official shield embedded) with brand-silent defensible
-  choices (a Deep-Blue-derived dark surface, data-viz series) and exactly one
-  genuine fault (an off-palette orange CTA hover).
+- `inputs/engineering-recap.html` — on-brand (Inter, Bitwarden palette, 36px
+  radius, official shield embedded, dark surface derived from Deep Blue via
+  `color-mix`, on-palette blue/teal chart series) with exactly one planted fault:
+  an off-palette orange CTA hover. The dark-mode choice itself is a brand-silent
+  judgment call a good review should accept, not flag.
 
 ## Files
 

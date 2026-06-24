@@ -95,7 +95,7 @@
     ]
   },
   "review_fp_assertions": {
-    "note": "The mock control (inputs/engineering-recap.html) is substantially on-brand. Its only genuine fault is the off-palette orange CTA hover (#ff7a18). The Deep-Blue-derived dark surface and the third data-viz series are brand-silent judgment calls, NOT faults — flagging them as violations is a false positive. 'False positive' is measured against this ground truth, not against raw off-palette-ness.",
+    "note": "The mock control (inputs/engineering-recap.html) is on-brand except for one planted fault: the off-palette orange CTA hover (#ff7a18). Everything else is canon-compliant — the dark surface is derived from Deep Blue via color-mix (not an invented neutral) and the chart series use only on-palette blue/teal tokens. The one brand-silent judgment call is the dark surface MODE itself, which a good review should accept rather than flag. A false positive is any hard finding other than the orange (for example flagging the dark mode, the Deep-Blue-derived surface, or the on-palette series).",
     "assertions": [
       {
         "id": "affirms_correct_core",
