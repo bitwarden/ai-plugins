@@ -24,10 +24,6 @@ For every issue, also capture its **key and browse URL** and **carry the origina
 behavior you extract**, so the report can link every behavior back to its source — link form and the
 no-Jira-source case are in _Citing Jira issues as links_ below.
 
-Also capture each behavior's **severity** and carry it through with the behavior. Where it comes
-from (a bug's Jira severity field vs. assessed risk for a feature) and how it weights coverage are
-owned by `analyzing-test-stack`'s `references/severity-risk.md`.
-
 ### Epic intake
 
 A Jira key may resolve to an Epic (or, in next-gen projects, a Feature) rather than a single
@@ -57,7 +53,7 @@ before extracting:
      record the URL as evidence-not-inspected rather than dropping it.
 4. **Track epic status.** The epic's status (`In Planning`/`In Progress`/`Done`) tells you how much
    is shipped: `Done` children with merged PRs likely have tests-in-PR to audit; `To Do` children
-   are scope-only and the recommendation is prospective. Surface this in the report's Evidence.
+   are scope-only and any coverage is prospective. Surface this in the report's Evidence.
 5. **Preferred path.** The `researching-jira-issues` skill (preferred at the top of this file) does
    this hierarchical discovery and depth-controlled traversal in one synthesized read — run it on the
    epic key; the direct MCP calls above are the fallback.
@@ -75,10 +71,9 @@ gaps), and the captured **`headRefOid`** + **`owner/repo`** (parsed from the PR 
 The SHA and `owner/repo` are required — they are what makes every test cited as
 existing coverage clickable in the report. Tests observed in the PR diff are primary
 coverage evidence; for _pre-existing_ tests not in the diff, do a targeted lookup scoped
-to the changed paths/symbols rather than a repo-wide sweep. See the
-`assessing-test-coverage` skill's `references/finding-coverage.md` → _Finding existing
-coverage_ and _Citing tests as GitHub permalinks_ for the link form and the fallback when
-ingredients are missing.
+to the changed paths/symbols rather than a repo-wide sweep. See `finding-coverage.md` →
+_Finding existing coverage_ and _Citing tests as GitHub permalinks_ for the link form and the
+fallback when ingredients are missing.
 
 ## Technical breakdown document
 
@@ -94,7 +89,7 @@ Locate and fetch it:
   or `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql` (breakdowns live in a team's "Tech Breakdown"
   folder), then fetch it.
 - The breakdown's **status** matters: `IN PLANNING` / `IN PROGRESS` means the scope may still
-  shift — note that the recommendation rests on a draft. `PROPOSED` / `ACCEPTED` is a stable
+  shift — note that the inventory rests on a draft. `PROPOSED` / `ACCEPTED` is a stable
   basis. Record the status as part of the evidence.
 
 Map its structure to testable evidence (the canonical template is page `2920349776`):
@@ -105,14 +100,13 @@ Map its structure to testable evidence (the canonical template is page `29203497
   links per the _Epic intake_ recipe above. A breakdown plus its epic together usually surface
   more testable behavior than either alone.
 - **Part 2 — Breakdown scope checklist**: the core of the mining. Each answered item names a
-  surface the change touches and therefore a place tests are needed — **Database changes**
+  surface the change touches and therefore a place tests may exist — **Database changes**
   (migration/backwards-compat behaviors, EDD phasing), **API changes** (endpoint contracts,
   V±2 compatibility, any unauthenticated endpoint), **UI components** (shared/base components),
   **SDK changes**, **Services touched**, **Hosting** (Self-Hosted vs Cloud paths),
   **Feature flagging** (flag-on/flag-off states to cover), and **Security considerations**
   (crypto, threat-model-relevant behaviors). The **Testing considerations** item is the team's
-  own stated test intent — treat it as a claim to assess, not as ground truth
-  to copy.
+  own stated test intent — treat it as a claim to assess, not as ground truth to copy.
 - **Part 4 — Specification artifacts**: linked child pages defining concrete interfaces (API
   contracts, schemas, component APIs, crypto schemes). Fetch the relevant ones with
   `get_confluence_page`; their public interfaces and edge cases are exactly what integration and
@@ -121,9 +115,8 @@ Map its structure to testable evidence (the canonical template is page `29203497
   can't be reliably tested until its question is answered. Surface them in the report's gaps.
 
 Extract: discrete **testable behaviors** per platform, the **surfaces** each touches (→ repos via
-the `analyzing-test-stack` skill's `references/monorepo-layout.md`), and the team's **stated testing
-intent** (to evaluate, not echo). Where the
-breakdown's scope checklist disagrees with a diff or ticket you were also given, treat the
+`test-layers-and-repos.md`), and the team's **stated testing intent** (to evaluate, not echo).
+Where the breakdown's scope checklist disagrees with a diff or ticket you were also given, treat the
 divergence as a finding rather than silently picking one.
 
 ## Test-case CSV export
@@ -138,17 +131,15 @@ settings — **do not hardcode them**. Read the header row, then map by meaning:
 - A **steps / expected-result** column, often in Given–When–Then form — the behavior.
 - Optional **team / area / tags / preconditions** columns — scope and grouping.
 
-Map rows to behaviors and bucket each by apparent layer using the `analyzing-test-stack` skill's `references/test-layers.md`:
+Map rows to behaviors and bucket each by apparent layer using `test-layers-and-repos.md`:
 
-- A case that drives the full UI through a complete journey → likely **E2E** (target the
-  dedicated `test` repo).
+- A case that drives the full UI through a complete journey → likely **E2E** (the dedicated
+  `test` repo).
 - A case asserting one service/component's behavior through its collaborators →
   **integration**.
 - A case pinning a single function's logic or an edge case → **unit**.
 
-Flag cases that are currently manual but cheaply automatable at a lower layer, and cases
-slated for E2E that would be better as integration. If a column's meaning is ambiguous,
-state the interpretation you used rather than guessing silently.
+If a column's meaning is ambiguous, state the interpretation you used rather than guessing silently.
 
 ## Citing Jira issues as links
 
@@ -160,11 +151,10 @@ The link form is the issue's browse URL `https://bitwarden.atlassian.net/browse/
 `PM-1234`). Prefer the URL the MCP tool or `researching-jira-issues` skill returns; else construct it
 from the key. The same rule covers epics and their children — link each to its own key. Apply it:
 
-- An **issue, epic, or child key** named in Overview/Summary/Evidence — anchor the key:
-  `<a href="https://bitwarden.atlassian.net/browse/PM-1234">PM-1234</a>`.
-- A **behavior row** (recommendations/coverage/gaps) extracted from a Jira item — append the linked
-  source key to the behavior cell. A behavior with no Jira source (PR-only) carries none.
+- An **issue, epic, or child key** named in Overview/Summary/Evidence — anchor the key as a markdown
+  link: `[PM-1234](https://bitwarden.atlassian.net/browse/PM-1234)`.
+- A **behavior row** (coverage/gaps) extracted from a Jira item — append the linked source key to the
+  behavior cell. A behavior with no Jira source (PR-only) carries none.
 
-These are informational `<a href>` citations (text, not loaded assets), so they don't violate the
-self-contained constraint. Never fabricate a key or URL — if a key is unknown, name the source in
-plain text rather than inventing a link.
+Never fabricate a key or URL — if a key is unknown, name the source in plain text rather than
+inventing a link.

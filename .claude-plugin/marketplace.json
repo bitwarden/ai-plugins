@@ -97,7 +97,7 @@
       "name": "bitwarden-test-engineer",
       "source": "./plugins/bitwarden-test-engineer",
       "version": "1.0.0",
-      "description": "Test engineering toolkit for Bitwarden. Hosts role-specific testing agents — currently a test strategist that recommends what to test, at which layer, and why (risk-weighted, shaped to each repo) and inventories existing coverage. Designed to grow additional roles such as an SDET or a QA engineer."
+      "description": "Test engineering toolkit for Bitwarden. Inventories the test coverage a change already has — finding existing tests across the server, client, and mobile repos, bucketing each by layer (unit, integration, E2E), citing it as a stable GitHub permalink, and flagging untested behaviors as gaps in a markdown report. Designed to grow additional testing capabilities over time."
     }
   ]
 }

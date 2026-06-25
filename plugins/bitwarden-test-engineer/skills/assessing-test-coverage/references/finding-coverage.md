@@ -1,6 +1,6 @@
 # Finding and citing existing test coverage
 
-How to determine what a change is **already** tested by, scoped to the change surface, and how to cite each observed test as a stable link. This is the repo-reading half of test engineering; the layer-mapping half (which layer a behavior _should_ live at) is in the `analyzing-test-stack` skill.
+How to determine what a change is **already** tested by, scoped to the change surface, and how to cite each observed test as a stable link. This is the repo-reading half of test engineering — inventorying what exists. It does not recommend which layer a behavior _should_ live at.
 
 ## Discovering a repo's test conventions (config-first)
 
@@ -16,8 +16,8 @@ question. This keeps token spend low on large repos. Work the tiers in order:
    convention you need, read a _few representative_ test files near the change surface to
    confirm it. Do **not** sweep the repo.
 3. **Generic stack table as last resort.** When neither config nor local tests answer, fall
-   back to the per-repo stack/tooling table in the `analyzing-test-stack` skill's
-   `references/monorepo-layout.md` and **state the assumption** in the result.
+   back to the per-repo stack/tooling table in `test-layers-and-repos.md` and **state the
+   assumption** in the result.
 
 This tier governs _conventions_ — what the tooling is and where tests live. Finding which
 behaviors are _already covered_ is the next job, below.
@@ -37,8 +37,8 @@ two ordered moves, and record anything still unfound as a gap rather than droppi
    sweep. Confirm conventions from config (above) so the lookup targets the right paths.
 
 For end-to-end coverage, inspect the dedicated sibling `test` repo if it is checked out (see
-the `analyzing-test-stack` skill's `references/monorepo-layout.md` → _Where each layer lives_)
-and cite specific files; if it is not available, record E2E coverage as `unverified`.
+`test-layers-and-repos.md` → _Where each layer lives_) and cite specific files; if it is not
+available, record E2E coverage as `unverified`.
 
 A behavior with no PR-observed test and no targeted hit is recorded as a coverage gap /
 `unverified` — never silently assumed covered.
@@ -93,16 +93,16 @@ force-push; SHA links are stable.
 If any of the four ingredients is missing — no remote (`git remote get-url origin`
 returns empty), detached HEAD with no remote, private fork the session cannot reach,
 or the file exists only in a local working tree never pushed — record the test as
-**unlinkable** with the reason. Never fabricate a URL. Both this skill's coverage report
-(`coverage-report-template.md`) and the downstream `analyzing-test-stack` test-stack report
-render these as `<span class="unlinkable">path — unlinkable: &lt;reason&gt;</span>`.
+**unlinkable** with the reason. Never fabricate a URL. The coverage report
+(`coverage-report-template.md`) renders these in the **Tests (linked)** column as plain text:
+`path — unlinkable: <reason>`.
 
 ### Output contract
 
 Return **one record per behavior** (not per test), carrying its layer, an approximate count,
 1–3 representative tests as evidence, and — when the behavior was extracted from a Jira item —
 the originating `source_issue` (`key` + browse `url`) so the report can link the behavior back to
-its requirement (see `../../../references/input-sources.md` → _Citing Jira issues as links_). The
+its requirement (see `input-sources.md` → _Citing Jira issues as links_). The
 `source_issue` is **carried through from intake** with the behavior — it is provenance recorded
 when the behavior was extracted, not something coverage discovery determines; echo it through when
 present. A behavior with no Jira source (e.g. found only in a PR diff) omits `source_issue`.
@@ -140,6 +140,5 @@ never fabricate a URL. Behaviors/surfaces with no observed test are returned as 
 ```
 
 Keep `representative` to at most three permalinks per behavior; the `count` conveys breadth
-without listing every test. The `analyzing-test-stack` recommender consumes these records as-is
-to populate the report's Evidence (linked) column (rendering the representative permalinks) and
-to seed its gap analysis.
+without listing every test. These records populate the report's **Tests (linked)** column
+(rendering the representative permalinks) and the _Coverage gaps_ section.

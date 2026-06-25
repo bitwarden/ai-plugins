@@ -2,50 +2,104 @@
 
 ## Overview
 
-A test engineering toolkit for Bitwarden. It hosts role-specific testing agents. Today it
-ships one — the **test strategist** (`test-strategist`), the test-_planning_ role:
-it recommends what to test, at which layer, and why, and inventories what is already tested.
-It does not author, run, or maintain the tests, nor do exploratory/manual QA. The plugin is
-designed to grow additional roles over time (for example an SDET or a QA engineer).
+A test engineering toolkit for Bitwarden. Today it ships one capability — the
+**`assessing-test-coverage`** skill, which inventories what a change is **already tested by**.
+Given a change, it finds the existing tests, buckets each by layer, cites it as a stable GitHub
+permalink, and flags untested behaviors as gaps — writing it all to a markdown coverage report.
+It does not recommend new tests, assign layers, or judge test shape; that is deliberately out of
+scope. The plugin is designed to grow additional testing capabilities over time.
 
-### First role: the test strategist
+### What it does
 
-Given a change — a feature, bugfix, refactor, or migration — the agent recommends
-**what to test, at which layer, and why**, shaped to **each repo's actual test practice**.
-Two ideas drive it: each behavior is tested at the cheapest layer that buys the confidence it
-needs (unit, integration, or E2E), and how those layers are weighted is decided per repo — a
-unit-heavy pyramid (`server`, `clients`, `sdk-internal`, `android`), an integration/snapshot
-trophy (`ios`), or a wholly all-E2E repo (the dedicated `test` repo,
-`browser-interactions-testing`). E2E is "thin" only _within_ a platform repo; the dedicated
-`test` repo is entirely E2E by design.
+The skill produces an **evidence-grounded inventory of existing coverage**, scoped to the change
+surface. It ingests whatever evidence is available — a GitHub PR (via `gh`), a Jira ticket (via the
+Atlassian MCP), an exported test-case CSV, and/or a plain-language description — then:
 
-It ingests whatever evidence is available — a Jira ticket (via the Atlassian MCP), a GitHub
-PR (via `gh`), an exported test-case CSV, and/or a plain-language description — fans out
-subagents to gather it, assesses what is **already tested** (the `assessing-test-coverage`
-skill, which inventories existing tests, cites each as a GitHub permalink, and writes a
-coverage report), then runs the analyst skill (`analyzing-test-stack`), which produces the
-test-stack recommendation. Both skills emit a self-contained HTML report.
+- learns each repo's test conventions from its Claude config (config-first, to keep token spend low),
+- finds existing coverage **PRs-first** (the merged/linked PRs are the permalink-ready backbone),
+  then a targeted lookup scoped to the change surface for pre-existing tests,
+- buckets each observed test by layer (unit / integration / E2E) per repo,
+- cites 1–3 representative tests per behavior as stable GitHub permalinks (commit-SHA links, not
+  branch links), plus an approximate count, and
+- records any behavior with no observed test as a **gap** (`unverified`) — never assumed covered.
+
+## How it works
+
+```mermaid
+flowchart TD
+    Start([User asks: what's already tested for &lt;change&gt;?]) --> Intake
+
+    subgraph Intake["1 · Intake & scope"]
+        direction TB
+        Inputs["Inputs (additive):<br/>• GitHub PR<br/>• Jira key / Epic<br/>• Tech breakdown<br/>• Test-case CSV<br/>• Plain description"]
+        Resolve{"Change surface<br/>supplied?"}
+        Inputs --> Resolve
+        Resolve -- no --> Derive["Derive surface from<br/>gh pr diff / intake<br/>(references/input-sources.md)"]
+        Resolve -- yes --> Surface
+        Derive --> Surface["Change surface:<br/>changed paths/symbols,<br/>affected repos, linked PRs"]
+    end
+
+    Intake --> Conventions
+
+    Conventions["2 · Learn each repo's conventions<br/>(config-first: CLAUDE.md, .claude/)<br/>stop as soon as answered"]
+
+    Conventions --> Find
+
+    subgraph Find["3 · Find existing coverage"]
+        direction TB
+        PRs["PRs first — tests in<br/>linked/merged PR diffs<br/>(permalink-ready via head SHA)"]
+        Targeted["Then targeted lookup<br/>scoped to change surface<br/>(no repo-wide sweep)"]
+        E2E["E2E: inspect sibling<br/>test repo if checked out"]
+        PRs --> Targeted --> E2E
+    end
+
+    Find --> PerBehavior
+
+    PerBehavior{"For each behavior:<br/>coverage confirmed?"}
+    PerBehavior -- "yes (stop at 1–3<br/>representative tests + count)" --> Cite
+    PerBehavior -- no --> Gap
+
+    Cite["4a · Cite & bucket<br/>render tests as GitHub permalinks,<br/>bucket by layer (unit/integration/E2E)"]
+    Gap["4b · Record gap<br/>mark unverified<br/>(never assumed covered)"]
+
+    Cite --> Inventory
+    Gap --> Inventory
+
+    Inventory[("Coverage inventory<br/>one record per behavior<br/>+ unverified gaps")]
+
+    Inventory --> Render
+
+    Render["5 · Render markdown report<br/>(references/coverage-report-template.md)<br/>Overview · Summary · Evidence · Coverage · Gaps"]
+
+    Render --> Output
+
+    subgraph Output["Output"]
+        direction TB
+        File["Write coverage.md to<br/>test-engineer-report-&lt;slug&gt;-&lt;date&gt;/"]
+        Chat["Mirror ## Overview in chat:<br/>observed shape per platform + top gaps"]
+        File --> Chat
+    end
+
+    Output --> Done([Done])
+
+    classDef store fill:#e8f0fe,stroke:#4285f4,color:#000
+    classDef gap fill:#fdecea,stroke:#d93025,color:#000
+    class Inventory store
+    class Gap gap
+```
 
 ## Where each layer lives
 
-Unit and integration tests live alongside the code inside each platform repo
-(e.g. `bitwarden/server`, `bitwarden/clients`, `bitwarden/ios`). **End-to-end tests live
-in a dedicated, private `test` repository** — not inside the platform repos — so E2E
-recommendations target that separate repo, and existing E2E coverage is treated as
-unverified when that repo isn't checked out.
-
-## Agents
-
-| Agent             | What It Does                                                                                                                                                                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `test-strategist` | Classifies the inputs for a change (Jira, PR, CSV, description), fans out subagents to gather evidence, assesses existing coverage (`assessing-test-coverage`), then runs `analyzing-test-stack` — emitting a self-contained coverage report and a self-contained test-stack report. |
+Unit and integration tests live alongside the code inside each platform repo (e.g.
+`bitwarden/server`, `bitwarden/clients`, `bitwarden/ios`). **End-to-end tests live in a dedicated
+`test` repository** — a sibling of the platform repos, not inside them — so existing E2E coverage is
+recorded as `unverified` when that repo isn't checked out.
 
 ## Skills
 
-| Skill                     | What It Does                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `assessing-test-coverage` | The backward-looking inventory. Determines what is **already tested** for a change — scoped to the change surface, PR-first then a targeted lookup — buckets each observed test by layer, cites it as a stable GitHub permalink, flags untested behaviors as gaps, and writes a self-contained HTML coverage report. Feeds `analyzing-test-stack`; usable standalone to audit current coverage. |
-| `analyzing-test-stack`    | The recommender. Consumes the coverage inventory, then maps each testable behavior in a change to the cheapest sufficient test layer per platform, inside each repo's actual shape, names concrete tooling, surfaces coverage gaps and shape-wrong tests (ice-cream-cone, over-testing, missing platform layers), and writes a self-contained HTML report into a per-change report directory.   |
+| Skill                     | What It Does                                                                                                                                                                                                                                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assessing-test-coverage` | The backward-looking inventory. Determines what is **already tested** for a change — scoped to the change surface, PR-first then a targeted lookup — buckets each observed test by layer, cites it as a stable GitHub permalink, flags untested behaviors as gaps, and writes a self-contained markdown report. |
 
 ## Cross-Plugin Integration
 
@@ -67,33 +121,27 @@ For Jira-backed analysis, install the Atlassian tools alongside it:
 
 ## Usage
 
-The agent activates when you ask what test coverage a change needs, which
-automation layers to add, how to shape a test plan, or whether existing tests are at the
-right level:
+The skill activates when you ask what a change is already tested by:
 
 ```
-I'm picking up PM-12345 next sprint. What test coverage should this feature have?
-```
-
-```
-Does bitwarden/server#5821 have the right tests, or is it leaning too hard on end-to-end?
+What's already tested for bitwarden/server#5821?
 ```
 
 ```
-Here's our exported test cases CSV for the new item types import/export work (PM-32009) —
-which of these should be automated and at what layer?
+Does this PR have tests, and what layers do they cover?
 ```
 
-Each run produces a per-change directory `test-engineer-report-<slug>-<date>/` holding the
-self-contained HTML reports: `coverage.html` (what is already tested — observed tests per layer,
-each cited as a GitHub permalink, plus gaps), `recommended.html` (the per-platform recommendation
-and its coverage-gap findings), and `combined.html` (the primary deliverable — both on one two-tab
-page). Re-running on the same change and date refreshes the reports in that directory. They share
-one off-brand data-report visual system so they read as the same instrument.
+```
+What coverage exists for the item-types import/export work in PM-32009?
+```
+
+Each run produces a per-change directory `test-engineer-report-<slug>-<date>/` holding a
+self-contained markdown report, `coverage.md`: the observed tests per layer (each cited as a GitHub
+permalink), a per-platform coverage shape, and the gaps. Re-running on the same change and date
+refreshes the report in that directory.
 
 ## References
 
-- [Claude Code Agents](https://code.claude.com/docs/en/agents)
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
 - [The Testing Trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
 - [Bitwarden Contributing Guidelines](https://contributing.bitwarden.com/contributing/)
