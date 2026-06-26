@@ -7,19 +7,17 @@ allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Skill(perform-preflight), S
 
 # Force Multiplier
 
-Bulk change is hard not because the edit is hard, but because dozens of edits must be _provably_ correct, consistent, and reversible. So this skill is a generic engine built around proof gates and reality checks — it compiles any intent into a structured, safe fan-out rather than carrying a catalogue of canned changes. Discovery patterns live in `references/finding-targets.md`; worked campaigns live in `examples/` — read the closest for shape, then generalize.
-
-The argument-hint flags are natural-language modifiers, not a literal CLI — "do a dry run" or "skip the pilot" in plain words works.
+Bulk change is hard because dozens of edits must be _provably_ correct, consistent, and reversible — this skill compiles any intent into a structured, safe fan-out rather than a catalogue of canned changes. Discovery patterns live in `references/finding-targets.md`; worked campaigns live in `examples/` — read the closest for shape, then generalize.
 
 ## Core concept: the campaign
 
-A single fan-out is a **campaign**. The skill never freestyles across the fleet. It compiles the user's generic prompt into a structured **campaign spec**, echoes it back for confirmation, then executes it deterministically. The generic prompt is the front door; the structured spec is the safety substrate — it is what makes the pilot, idempotency, and reporting possible.
+A single fan-out is a **campaign**. The skill never freestyles across the fleet. It compiles the user's generic prompt into a structured **campaign spec**, echoes it back for confirmation, then executes it deterministically.
 
 A campaign = **intent + target selector + recipe + validation + PR spec + safety policy**. See `references/campaign-spec.md` for the field-by-field schema.
 
-## The pipeline - always execute in this order
+## The pipeline — always execute in this order
 
-1. **SELECT** — enumerate candidate targets in the Bitwarden enterprise, then apply an _applicability filter_ so only targets where the change is actually relevant survive (the signal the change keys on is present). Patterns for both are in `references/finding-targets.md`. Present the exact resolved list.
+1. **SELECT** — enumerate candidate targets in the enterprise, then apply an _applicability filter_ so only targets where the change is actually relevant survive (the signal the change keys on is present). Patterns for both are in `references/finding-targets.md`. Present the exact resolved list.
 2. **CHECK YOURSELF** _(reality-check #1 — before anything is touched)_ — see the section below. This gate stands between SELECT and PILOT and is the most important step in the skill.
 3. **PILOT** _(reality-check #2 — prove on ONE)_ — run the recipe on one representative target and surface the **full** diff. Read every line. Validate it (build/lint/test as the repo defines). "Here is exactly what I will do, ×N." If the pilot diverges from intent or fails validation, **STOP — do not fan out.** Mandatory for agentic recipes; default-on for deterministic ones. `--no-pilot` is an explicit opt-out, noted in the report.
 4. **FAN-OUT** — apply to each confirmed target _in isolation_: fresh branch (deterministic name) cut from the target's default branch, apply recipe, run the per-target second pass, compare the target's diff shape against the pilot and flag divergence, secrets-scan the staged diff, then commit and open a **draft PR** following the conventions confirmed at pilot. One target failing never aborts the rest.
@@ -30,7 +28,7 @@ Full per-stage mechanics — enumeration commands, isolation model, validation, 
 
 ## Check yourself, Claude
 
-Before fanning anything out, prove the campaign to yourself. You are about to repeat one decision ×N, so an error here multiplies. Answer every question honestly:
+Before fanning anything out, prove the campaign to yourself. You are about to repeat one decision ×N, so an error here multiplies.
 
 - **Did I understand the intent, or pattern-match?** Restate it in your own words and get the user's confirmation. What you replicate ×N must be what they asked for.
 - **Is the target list right, both ways?** Open two or three _included_ targets and confirm the signal is really there (no false positives); reason about what is _missing_ — a target that uses the thing under a different name or path (no false negatives).
@@ -51,7 +49,7 @@ Fan out agentic recipes with the **Agent tool**: send one chunk's per-target cal
 
 ## Teaming — top-to-bottom per target
 
-Force Multiplier is the **cross-target** layer. Per-target intelligence lives in the sibling delivery skills, and the per-target flow reuses their conventions rather than reinventing them:
+Force Multiplier is the **cross-target** layer. Per-target intelligence lives in the sibling delivery skills, reusing their conventions:
 
 - `Skill(perform-preflight)` — the quality gate before any commit.
 - `Skill(committing-changes)` — the commit message format.
@@ -67,6 +65,7 @@ Of these, `creating-pull-request` is **interactive** — it prompts per PR, whic
 - Respect `max_targets_per_run` (default 10); larger fan-outs chunk or require confirmation.
 - Destructive recipes require a reference-check pre-step before they run.
 - Secrets-scan the staged diff before every commit.
+- Reuse the existing `gh` auth; never inject credentials or commit secrets.
 - `--dry-run` does everything except push and open PRs.
 
-The full checks-and-balances model — the expanded self-check, the pilot gate, the per-target skeptical second pass, post-run reconciliation, the reference-check, secrets handling, and credential posture (reuse the existing `gh` auth; never invent secret-injection; never commit secrets) — is in `references/safety-and-self-checks.md`.
+Full detail is in `references/safety-and-self-checks.md`.

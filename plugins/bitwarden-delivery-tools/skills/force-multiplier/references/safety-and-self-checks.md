@@ -7,10 +7,10 @@ Force Multiplier's whole risk is leverage: one mistake becomes _N_. The defense 
 Expanded from the SKILL.md gate. Answer all of it honestly; "probably fine" is not an answer.
 
 - **Intent.** Restate it in your own words and get confirmation. The thing you are about to repeat ×N must be the thing that was asked for — not the more interesting thing you would rather do, not the adjacent thing you noticed.
-- **Target list, both directions.** Open two or three _included_ targets and confirm the signal is really there — no false positives. Then reason about _exclusions_: what uses the thing under a different name, path, or version and would be silently missed — no false negatives. A wrong target list poisons the whole run.
+- **Target list, both directions.** Open two or three _included_ targets and confirm the signal is really there — no false positives. Then reason about _exclusions_: what uses the thing under a different name, path, or version — no false negatives. A wrong target list poisons the whole run.
 - **Idempotency.** Re-running the recipe on an already-done target must be a clean no-op. If it is not, you cannot safely remediate, and a partial run becomes unrecoverable. Fix this first.
 - **Reversibility.** If the recipe deletes or rewrites, treat it as destructive and run the reference-check below before anything else.
-- **Blast radius.** Confirm `max_targets_per_run`. A large fleet chunks; it never fans out unbounded in one shot. The cap is a circuit breaker.
+- **Blast radius.** Confirm `max_targets_per_run`. Large fleets run in chunks — never unbounded in one shot. The cap is a circuit breaker.
 - **Sub-agent scope.** Each per-target agent gets the minimum toolset and only its single target. Forbid `WebFetch`/`WebSearch` unless the recipe truly needs them — they bypass `gh` auth and audit.
 
 If any answer is missing, you are not ready to pilot. Name what is unresolved.
@@ -30,7 +30,7 @@ You do not get to declare the recipe correct. You get to prove it — once, in f
 
 ## Reality-check #2b — The per-target second pass
 
-Each fan-out target gets its own quick skeptical pass before its commit, because targets differ and a recipe that was clean on the pilot can misfire on an outlier:
+Each fan-out target gets its own quick skeptical pass before commit — a clean pilot recipe can still misfire on an outlier:
 
 - Did this target's recipe do only what was asked on _this_ target?
 - Does its diff shape match the pilot's? A target with far more files changed, or changes in unexpected paths, is a signal the recipe hit something unanticipated — flag it, do not ship it silently.
@@ -46,10 +46,10 @@ A finished run is not a successful run until the numbers close and the claims ar
 
 ## Reference-check (required before destructive recipes)
 
-Before a recipe deletes or rewrites something, prove the thing is not depended on:
+Before a recipe deletes or rewrites something, prove nothing depends on it:
 
-- Is the file/workflow/symbol referenced elsewhere — a required status check, a `uses:` reference, an import, a documented entry point? Removing a depended-on thing breaks the target even when the local edit looks clean.
-- Run this as a read-only pre-step across the affected targets and report what it finds. If anything depends on the target of deletion, the campaign pauses for a human decision.
+- Is the file/workflow/symbol referenced elsewhere — a required status check, a `uses:` reference, an import, a documented entry point? Removing something with dependents breaks the target even when the local edit looks clean.
+- Run this as a read-only pre-step across the affected targets and report what it finds. If anything depends on what's being deleted, the campaign pauses for a human decision.
 
 ## Secrets handling
 
@@ -63,4 +63,4 @@ Before a recipe deletes or rewrites something, prove the thing is not depended o
 
 ## Dry-run
 
-`--dry-run` performs everything through validation and the secrets-scan, then stops before commit, push, and PR. It reports what _would_ have shipped per target. Use it as the zero-risk rehearsal of a campaign before committing to the real fan-out.
+`--dry-run` performs everything through validation and the secrets-scan, then stops before commit, push, and PR. It reports what _would_ have shipped per target. Use it as the zero-risk rehearsal before the real fan-out.
