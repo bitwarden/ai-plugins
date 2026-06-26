@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.12.0
+version: 1.13.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
@@ -39,6 +39,8 @@ Then gather the remaining data:
 - Whether the PR author is an automated bot (Renovate, Dependabot)
 - Whether the PR description references AppSec approval (VULN task, explicit mention of the dependency review process)
 
+**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config), note them for the Claude-configuration review in Step 2.
+
 **Tailor your review approach based on what you observe:**
 
 - Consider which risks are most relevant to this specific change
@@ -75,6 +77,10 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 - **C#/.NET server changes** → invoke `Skill(writing-server-code)` to verify CQS patterns, `TryAdd*` DI, nullable reference types, `Async` suffix conventions
 - **Angular/TypeScript client changes** → invoke `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
 - **Database changes** → invoke `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
+
+**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config):
+
+- invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Fold its findings into your own classification and validation in Steps 3–4.
 
 These skills are optional. If unavailable, apply existing review knowledge.
 

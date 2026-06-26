@@ -6,20 +6,20 @@ Every finding and every Step 4/5 return object follows the JSON schema below. Su
 
 Emit as a JSON array. Each finding:
 
-| field          | type    | notes                                                                            |
-| -------------- | ------- | -------------------------------------------------------------------------------- |
-| `id`           | string  | `{source}-{n}`, e.g. `"bug-3"`. Source ∈ `arch`, `quality`, `bug`, `sec`, `val`. |
-| `file`         | string  | Repo-relative path.                                                              |
-| `line`         | string  | `"42"` or `"42-50"`. Derived per Line Number Accuracy.                           |
-| `severity`     | string  | `"blocker"` \| `"important"` \| `"refactor"`.                                    |
-| `confidence`   | integer | 0–100. Only findings ≥ 80 are emitted.                                           |
-| `title`        | string  | < 100 chars. Renders as the section header in the final report.                  |
-| `detail`       | string  | Markdown. Explanation, why it matters, suggested fix.                            |
-| `source_agent` | string  | `"architect"` \| `"quality"` \| `"bug"` \| `"security"` \| `"validation"`.       |
+| field          | type    | notes                                                                                    |
+| -------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `id`           | string  | `{source}-{n}`, e.g. `"bug-3"`. Source ∈ `arch`, `quality`, `bug`, `sec`, `cfg`, `val`.  |
+| `file`         | string  | Repo-relative path.                                                                      |
+| `line`         | string  | `"42"` or `"42-50"`. Derived per Line Number Accuracy.                                   |
+| `severity`     | string  | `"blocker"` \| `"important"` \| `"refactor"`.                                            |
+| `confidence`   | integer | 0–100. Only findings ≥ 80 are emitted.                                                   |
+| `title`        | string  | < 100 chars. Renders as the section header in the final report.                          |
+| `detail`       | string  | Markdown. Explanation, why it matters, suggested fix.                                    |
+| `source_agent` | string  | `"architect"` \| `"quality"` \| `"bug"` \| `"security"` \| `"config"` \| `"validation"`. |
 
 If an agent produces no findings, return `[]`.
 
-The orchestrator renders `source_agent` on every finding in the final report — set it accurately. The id-prefix → source_agent mapping is fixed: `arch → architect`, `quality → quality`, `bug → bug`, `sec → security`, `val → validation`.
+The orchestrator renders `source_agent` on every finding in the final report — set it accurately. The id-prefix → source_agent mapping is fixed: `arch → architect`, `quality → quality`, `bug → bug`, `sec → security`, `cfg → config`, `val → validation`.
 
 ## Step 4 return (validation)
 
