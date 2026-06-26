@@ -84,7 +84,7 @@ After all fixes are applied:
 
 1. Show a `git diff` of all changes made.
 2. Ask the user to confirm they want to proceed with a PR.
-3. Ask the user to stage, commit, and push manually:
+3. Do not run the staging, commit, or push commands yourself. Present the block below for the user to run manually as a suggestion:
 
 ```bash
 git add .github/workflows/

@@ -61,7 +61,7 @@ For each selected repo:
 
 ## Step 3: Commit, Push, and Create PRs
 
-For each repo, ask the user to stage, commit, and push manually:
+Do not run the staging, commit, or push commands yourself. For each repo, present the block below for the user to run manually as a suggestion:
 
 ```bash
 git add .github/
