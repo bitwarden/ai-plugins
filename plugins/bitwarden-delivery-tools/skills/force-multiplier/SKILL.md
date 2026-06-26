@@ -1,6 +1,6 @@
 ---
 name: force-multiplier
-description: Apply one intent across many targets at once — a fleet of GitHub repositories in the Bitwarden enterprise, or many projects inside a monorepo — as N consistent, idempotent, reviewable draft PRs. Use when the user wants the same change made everywhere — phrasings like "across all repos", "every repo", "for every project", "fleet-wide", "org-wide", "enterprise-wide", "company-wide", "in bulk", "mass update", or "roll this out everywhere". Pilot one change, then replicate it across the fleet with per-target isolation and aggregate reporting. DO NOT use for a change to a single repository or a single project — invoke the specific per-repo skill directly for that.
+description: Apply one intent across many targets at once — a fleet of GitHub repositories in the Bitwarden enterprise, or many projects inside a monorepo — as N consistent, idempotent, reviewable draft PRs. Use when the user wants the same change made everywhere — phrasings like "across all repos", "every repo", "for every project", "fleet-wide", "org-wide", "enterprise-wide", "company-wide", "in bulk", "mass update", or "roll this out everywhere". Pilot one change, then replicate it across the fleet with per-target isolation and aggregate reporting.
 argument-hint: "<natural-language intent> [--scope multi-repo|monorepo] [--dry-run] [--no-pilot]"
 allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Skill(perform-preflight), Skill(committing-changes), Skill(labeling-changes), Skill(creating-pull-request)"
 ---
