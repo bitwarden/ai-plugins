@@ -1,15 +1,29 @@
 # Bitwarden Test Engineer Plugin
 
+A test engineering toolkit for Bitwarden — starting with an evidence-grounded inventory of what a change is _already tested by_.
+
 ## Overview
 
-A test engineering toolkit for Bitwarden. Today it ships one capability — the
-**`assessing-test-coverage`** skill, which inventories what a change is **already tested by**.
-Given a change, it finds the existing tests, buckets each by layer, cites it as a stable GitHub
-permalink, and flags untested behaviors as gaps — writing it all to a markdown coverage report.
-It does not recommend new tests, assign layers, or judge test shape; that is deliberately out of
-scope. The plugin is designed to grow additional testing capabilities over time.
+This plugin helps you answer one question with evidence, not guesswork: what is a given change **already tested by**? Today it ships one capability — the **`assessing-test-coverage`** skill — and is designed to grow additional testing capabilities over time.
 
-### What it does
+Given a change, the skill finds the existing tests, buckets each by layer, cites it as a stable GitHub permalink, and flags untested behaviors as honest gaps — writing it all to a self-contained markdown coverage report. It is deliberately **backward-looking**: it does not recommend new tests, assign layers, or judge test shape.
+
+## Features
+
+- **Evidence-grounded inventory**: Reports only coverage it can observe and cite — a behavior with no observed test is recorded as a gap, never assumed covered.
+- **PRs-first discovery**: Takes tests in linked/merged PR diffs as the primary, permalink-ready evidence, then a targeted lookup scoped to the change surface — never a repo-wide sweep.
+- **Layer bucketing**: Sorts each observed test into unit / integration / E2E per repo, using each repo's own conventions.
+- **Stable permalink citations**: Cites 1–3 representative tests per behavior as commit-SHA GitHub permalinks (not branch links), plus an approximate count.
+- **Config-first, low token spend**: Learns each repo's test tooling from its Claude config before opening any test files, and stops as soon as coverage is confirmed.
+- **Self-contained report**: Writes a markdown coverage report — Overview, Summary, Evidence, Coverage, and Gaps — to a per-change directory.
+
+## Skills
+
+| Skill                     | What It Does                                                                                                                                                                                                                                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assessing-test-coverage` | The backward-looking inventory. Determines what is **already tested** for a change — scoped to the change surface, PR-first then a targeted lookup — buckets each observed test by layer, cites it as a stable GitHub permalink, flags untested behaviors as gaps, and writes a self-contained markdown report. |
+
+## How it works
 
 The skill produces an **evidence-grounded inventory of existing coverage**, scoped to the change
 surface. It ingests whatever evidence is available — a GitHub PR (via `gh`), a Jira ticket (via the
@@ -23,7 +37,8 @@ Atlassian MCP), an exported test-case CSV, and/or a plain-language description �
   branch links), plus an approximate count, and
 - records any behavior with no observed test as a **gap** (`unverified`) — never assumed covered.
 
-## How it works
+<details>
+<summary>Workflow diagram</summary>
 
 ```mermaid
 flowchart TD
@@ -88,24 +103,20 @@ flowchart TD
     class Gap gap
 ```
 
-## Where each layer lives
+</details>
+
+### Where each layer lives
 
 Unit and integration tests live alongside the code inside each platform repo (e.g.
 `bitwarden/server`, `bitwarden/clients`, `bitwarden/ios`). **End-to-end tests live in a dedicated
 `test` repository** — a sibling of the platform repos, not inside them — so existing E2E coverage is
 recorded as `unverified` when that repo isn't checked out.
 
-## Skills
-
-| Skill                     | What It Does                                                                                                                                                                                                                                                                                                    |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `assessing-test-coverage` | The backward-looking inventory. Determines what is **already tested** for a change — scoped to the change surface, PR-first then a targeted lookup — buckets each observed test by layer, cites it as a stable GitHub permalink, flags untested behaviors as gaps, and writes a self-contained markdown report. |
-
 ## Cross-Plugin Integration
 
-| Plugin                      | How It's Used                                                                                                                                                                                                                                                                |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bitwarden-atlassian-tools` | Optional but recommended. Provides the `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__*` server used to read Jira tickets and linked Confluence requirements. If absent, the plugin degrades gracefully — paste requirements or rely on the PR/CSV/description. |
+| Plugin                      | How It's Used                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-atlassian-tools` | **Recommended** — the primary way to drive analysis from Jira tickets and linked Confluence requirements, via the `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__*` server. Optional by design: if absent, the plugin degrades gracefully — paste the requirements or rely on the PR / CSV / description. |
 
 ## Installation
 
