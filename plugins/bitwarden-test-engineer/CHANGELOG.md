@@ -9,4 +9,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial release of the `bitwarden-test-engineer` plugin.
-- `assessing-test-coverage` skill: inventories what a change is already tested by — scoped to the change surface, PRs-first then a targeted lookup — buckets each observed test by layer (unit / integration / E2E), cites 1–3 representative tests per behavior as stable GitHub permalinks, flags untested behaviors as gaps, and writes a self-contained markdown coverage report to `test-engineer-report-<slug>-<date>/coverage.md`.
+- `assessing-test-coverage` skill: an evidence-grounded inventory of what a change is already tested by. See the plugin README for details.

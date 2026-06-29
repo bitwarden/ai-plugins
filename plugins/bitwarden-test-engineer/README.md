@@ -154,5 +154,4 @@ refreshes the report in that directory.
 ## References
 
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
-- [The Testing Trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
 - [Bitwarden Contributing Guidelines](https://contributing.bitwarden.com/contributing/)

@@ -83,47 +83,58 @@ fallback when ingredients are missing.
 
 ## Technical breakdown document
 
-A Bitwarden **Tech Breakdown** — the Confluence artifact a team produces before implementation,
-authored with the `bitwarden-delivery-tools:writing-tech-breakdowns` skill. It is the richest
-single input for this analysis, because a good breakdown has already done the cross-platform
-scoping you would otherwise reconstruct from a diff or a ticket. Mine it; don't re-derive it.
+A Bitwarden **Tech Breakdown** — the Markdown artifact a team produces before implementation,
+living in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) GitHub
+repo. It is the richest single input for this analysis, because a good breakdown has already done
+the cross-platform scoping you would otherwise reconstruct from a diff or a ticket. Mine it; don't
+re-derive it.
 
-Locate and fetch it:
+The repo is organized by team: each team folder (e.g. `platform/`) holds one breakdown per work
+item, named `<JIRA-KEY>-<slug>.md` (e.g. `platform/PM-30935-flight-recorder-phase-2.md`). The
+canonical structure is `templates/breakdown.md`. **Completed breakdowns** — where the code has
+shipped and the implementation, not the document, is now the source of truth — move to a
+`<team>/complete/` subfolder; treat those as historical context, not current scope.
 
-- If given a page ID or URL, fetch directly with `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page`.
-- If given only a feature/team name, find the page first with `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence`
-  or `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql` (breakdowns live in a team's "Tech Breakdown"
-  folder), then fetch it.
-- The breakdown's **status** matters: `IN PLANNING` / `IN PROGRESS` means the scope may still
-  shift — note that the inventory rests on a draft. `PROPOSED` / `ACCEPTED` is a stable
-  basis. Record the status as part of the evidence.
+Locate and fetch it (GitHub-only, via `gh`):
 
-Map its structure to testable evidence (the canonical template is page `2920349776`):
+- Given a path or GitHub URL, read it with
+  `gh api repos/bitwarden/tech-breakdowns/contents/<path>` (decode the base64 `content`).
+- Given only a feature or team name, find it with
+  `gh search code --repo bitwarden/tech-breakdowns <terms>`, or list the team folder with
+  `gh api repos/bitwarden/tech-breakdowns/contents/<team>` and match by `<JIRA-KEY>-<slug>`.
+- A breakdown not in the repo is simply a missing input — record it as not-inspected and move on;
+  never block on it.
 
-- **Part 1 — Problem overview**: the feature framing and linked Jira epic. Use it for scope and
-  to cross-link any Jira/PR inputs, not as a behavior source on its own. **When Part 1 names an
-  Epic**, treat it the same as an Epic-key intake — drill into its children and their PR remote
-  links per the _Epic intake_ recipe above. A breakdown plus its epic together usually surface
-  more testable behavior than either alone.
-- **Part 2 — Breakdown scope checklist**: the core of the mining. Each answered item names a
-  surface the change touches and therefore a place tests may exist — **Database changes**
-  (migration/backwards-compat behaviors, EDD phasing), **API changes** (endpoint contracts,
-  V±2 compatibility, any unauthenticated endpoint), **UI components** (shared/base components),
-  **SDK changes**, **Services touched**, **Hosting** (Self-Hosted vs Cloud paths),
-  **Feature flagging** (flag-on/flag-off states to cover), and **Security considerations**
-  (crypto, threat-model-relevant behaviors). The **Testing considerations** item is the team's
-  own stated test intent — treat it as a claim to assess, not as ground truth to copy.
-- **Part 4 — Specification artifacts**: linked child pages defining concrete interfaces (API
-  contracts, schemas, component APIs, crypto schemes). Fetch the relevant ones with
-  `get_confluence_page`; their public interfaces and edge cases are exactly what integration and
-  unit tests pin down.
-- **Part 5 — Open questions**: unresolved questions are untestable-requirement risk — a behavior
-  can't be reliably tested until its question is answered. Surface them in the report's gaps.
+Map its structure to testable evidence (sections per `templates/breakdown.md`):
+
+- **`## Status`**: the maturity gate. `In Planning` / `In Progress` means scope may still shift —
+  note the inventory rests on a draft. `Proposed` / `Accepted` is a stable basis. `Complete` means
+  the implementation supersedes the doc. Record the status as part of the evidence.
+- **`# Specification`** (Functional Requirements, Success Criteria): the discrete **testable
+  behaviors** and acceptance criteria. The linked Jira epic named here is an Epic-key intake —
+  drill into its children and their PR remote links per the _Epic intake_ recipe above. A breakdown
+  plus its epic together usually surface more testable behavior than either alone.
+- **`# Plan`** per-surface subsections: each names a surface the change touches and therefore a
+  place tests may exist — **Data model changes** (migration/backwards-compat behaviors),
+  **Server API surface changes** (endpoint contracts, version compatibility, unauthenticated
+  endpoints), **Client / UI behavior changes**, **`sdk-internal` changes**, **Client services
+  changes**, **Background jobs**, **Security & cryptography** (crypto, threat-model-relevant
+  behaviors), and **Deployment & environments** (Self-Hosted vs Cloud, feature-flag on/off
+  states). The **Testing strategy** subsection is the team's own stated test intent — treat it as
+  a claim to assess, not ground truth to copy.
+- **`# Agent Context`** (Repos affected, Existing patterns to follow, External references): maps
+  surfaces to the repos/platforms touched (→ `test-layers-and-repos.md`) and points at the concrete
+  code and PRs where tests live.
+- **`# Tasks`** (and the sibling `tasks.md` in the same folder): the work items carved from the
+  breakdown; follow their linked PRs into the **GitHub PR** branch above.
 
 Extract: discrete **testable behaviors** per platform, the **surfaces** each touches (→ repos via
 `test-layers-and-repos.md`), and the team's **stated testing intent** (to evaluate, not echo).
-Where the breakdown's scope checklist disagrees with a diff or ticket you were also given, treat the
-divergence as a finding rather than silently picking one.
+**Prefer the implementation over the breakdown when they conflict** — the shipped code and merged
+PRs are the current source of truth; a breakdown (especially one not yet `Complete`) describes
+intent that may have drifted. Where the breakdown disagrees with a diff or ticket you were also
+given, prefer the implementation and record the divergence as a finding rather than silently
+picking one.
 
 ## Test-case CSV export
 
