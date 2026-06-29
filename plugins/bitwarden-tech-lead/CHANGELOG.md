@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-06-29
+
+### Added
+
+- `architecting-solutions`: optional "Behavioral Specifications (Allium)" section. For features with a rich behavioral contract or cross-client invariants, a persistent [Allium](https://github.com/juxt/allium) `.allium` spec can keep intent legible across sessions and flag spec↔code drift (`/weed`). Explicitly scoped as narrower at the architecture-judgment layer than at requirements or implementation time. External and optional — third-party, MIT-licensed, not a Bitwarden plugin.
+
 ## [2.3.2] - 2026-06-15
 
 ### Changed

@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Product Analyst plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-29
+
+### Added
+
+- `requirements-elicitation`: optional "Capture a Behavioral Specification (Allium)" section. When the working product repo maintains an [Allium](https://github.com/juxt/allium) `.allium` behavioral spec, extracted functional requirements and P01–P06 security requirements can be carried into it as `when / requires / ensures` rules via `/elicit` and `/distill`. External and optional — Allium is a third-party, MIT-licensed tool, not a Bitwarden plugin; this document remains the source of truth.
+
 ## [0.1.5] - 2026-04-03
 
 ### Changed

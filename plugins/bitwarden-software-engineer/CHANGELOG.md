@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-software-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-06-29
+
+### Added
+
+- `AGENT.md`: optional "External Spec Tooling" section. When implementing against an [Allium](https://github.com/juxt/allium) `.allium` behavioral spec, the agent can `/distill` the spec implied by existing code before changing it, `/propagate` tests from the rules, `/weed` to surface spec↔code divergence before declaring done, and `/tend` for targeted spec edits. External and optional — Allium is a third-party, MIT-licensed tool, not a Bitwarden plugin; skipped entirely absent a `.allium` file.
+
 ## [1.0.0] - 2026-05-19
 
 ### Changed

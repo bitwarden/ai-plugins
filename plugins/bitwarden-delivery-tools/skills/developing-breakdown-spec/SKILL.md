@@ -76,6 +76,8 @@ Capture in the Specification section:
 - **Why** — the problem being solved; cite the source (PRD section, Jira issue, Clarifications Log entry).
 - **Link the PRD or Architecture Plan; do not paste.** Pasted content drifts the moment the source moves.
 
+**Optional — seed a behavioral spec.** If the affected product repo maintains (or the team wants to adopt) an [Allium](https://github.com/juxt/allium) `.allium` specification — a third-party, MIT-licensed behavioral spec language — the WHAT captured here can be carried into it as `when / requires / ensures` rules so intent survives into implementation and test generation. This is external and optional; the Specification section stays the source of truth. The `.allium` spec is authored in the product repo, not in `tech-breakdowns` — note the intent here and leave the authoring to implementation time.
+
 ### Phase 4: Spec Alternatives
 
 Surface the question explicitly: is there a smaller change that delivers most of the value? The point isn't to find a smaller version; it's to make the scope decision visible. Capture each alternative considered with its rejection reason.

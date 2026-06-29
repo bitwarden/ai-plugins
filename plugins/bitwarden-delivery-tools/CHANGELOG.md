@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-06-29
+
+### Added
+
+- `developing-breakdown-spec`: optional "seed a behavioral spec" note in Phase 3. When the affected product repo maintains (or the team wants to adopt) an [Allium](https://github.com/juxt/allium) `.allium` specification, the WHAT captured in the Specification can be carried into it as `when / requires / ensures` rules. External and optional; the Specification section stays the source of truth, and the `.allium` spec is authored in the product repo, not in `tech-breakdowns`.
+
 ## [2.0.0] - 2026-06-19
 
 ### Added
