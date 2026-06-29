@@ -1,6 +1,7 @@
 # Bitwarden Delivery Tools
 
 Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and decomposing them into tasks, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and decomposing them into tasks, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
 
 ## Overview
 
@@ -9,6 +10,7 @@ These skills define delivery **process** — initiative phases, transition playb
 The plugin spans three concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
+- **Technical design** — how teams draft Tech Breakdowns under Bitwarden's standard template and decompose them into tasks.
 - **Technical design** — how teams draft Tech Breakdowns under Bitwarden's standard template and decompose them into tasks.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
 

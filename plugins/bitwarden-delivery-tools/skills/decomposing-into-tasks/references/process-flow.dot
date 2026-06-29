@@ -19,7 +19,7 @@ digraph decomposing_into_tasks {
   StopGate           [shape=ellipse, label="Stop:\nsurface gaps;\nawait user permission"];
   LocateTasks        [shape=box,     label="Phase 1: Derive tasks.md path\n(sibling of breakdown.md)"];
   TasksExist         [shape=diamond, label="tasks.md exists?"];
-  CreateFromTemplate [shape=box,     label="Create tasks.md from\nbitwarden/tech-breakdowns/templates/tasks.md"];
+  CreateFromTemplate [shape=box,     label="Create tasks.md from\ntech-breakdowns/templates/tasks.md"];
   SurfacePaths       [shape=box,     label="Surface resolved paths\n(breakdown + tasks.md,\nnew | resuming)"];
   Decompose          [shape=box,     label="Phase 2: Decompose Plan into tasks\n(walk Architecture, per-layer,\nsecurity/deploy/testing inputs,\nPoCs, existing rows;\nidentify MECE units of change)"];
   Ambiguity          [shape=diamond, label="Scope or boundary\nambiguity?"];
