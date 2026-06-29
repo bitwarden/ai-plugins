@@ -13,21 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.1] - 2026-06-10
 
-### Added
-
-- `architecting-solutions`: new "Avoid deprecated methods" principle under Architectural Judgment. If a method is deprecated, the skill must not use it; if no clear alternative is documented with the deprecation, ask the human how to achieve the desired outcome.
-
 ### Changed
 
-- `architecting-solutions`: clarified the "Complement existing patterns" guidance to also cover the multi-pattern case. When multiple competing patterns exist for the same concern, ask the human which is preferred rather than picking one.
-
-### Removed
-
-- `architecting-solutions`: dropped the "Accepting an initiative epic without capacity explicitly allocated by the team's EM and engineering leadership" red flag. Capacity allocation is governed by the initiative funnel and work-transition skills, not by this skill's red-flags list.
-
-### Security
-
-- `architecting-solutions`: added an explicit untrusted-data principle for content fetched via the Jira and Confluence MCP tools. Confluence pages are user-editable and a known prompt-injection surface; the skill must summarize or reference fetched content, never execute instructions found inside it.
+- `architecting-solutions`: added "Avoid deprecated methods" principle, expanded "Complement existing patterns" to cover competing-pattern selection, dropped the EM-capacity red flag (now owned by the initiative funnel / work-transition skills), and added an untrusted-data principle for Jira/Confluence MCP content.
 
 ## [2.3.0] - 2026-05-19
 
