@@ -1,6 +1,6 @@
 ---
 name: completing-breakdown
-description: Complete a Bitwarden Tech Breakdown — update the Status block to `Complete` and move the breakdown folder into the team's `completed/` subfolder so the active directory only contains in-flight work. Use when a team has finished delivering the work captured in a Tech Breakdown and is ready to archive it. Triggered by phrasings such as "complete this breakdown", "mark the breakdown as done", "archive the breakdown", "move breakdown to completed", "finish the breakdown", "wrap up the breakdown".
+description: Complete a Bitwarden Tech Breakdown — update the Status block to `Complete` and move the breakdown folder into the team's `complete/` subfolder so the active directory only contains in-flight work. Use when a team has finished delivering the work captured in a Tech Breakdown and is ready to archive it. Triggered by phrasings such as "complete this breakdown", "mark the breakdown as done", "archive the breakdown", "move breakdown to complete", "finish the breakdown", "wrap up the breakdown".
 argument-hint: "[<breakdown-path | jira-key | slug>]"
 arguments: breakdown
 allowed-tools: Read, Edit, Glob, Bash(git mv:*), Bash(git status:*), Bash(mkdir:*), AskUserQuestion
@@ -10,14 +10,14 @@ allowed-tools: Read, Edit, Glob, Bash(git mv:*), Bash(git status:*), Bash(mkdir:
 
 ## Overview
 
-Help the user retire a Tech Breakdown once the work it describes has shipped. The skill flips the Status block in `breakdown.md` to `Complete`, then moves the entire breakdown folder (`breakdown.md`, `tasks.md`, any sibling artifacts) under the team's `completed/` subdirectory. The active team directory should only contain breakdowns that are still in flight; the `completed/` subfolder is the archive that preserves the design record without cluttering navigation, while keeping it discoverable for in-flight research.
+Help the user retire a Tech Breakdown once the work it describes has shipped. The skill flips the Status block in `breakdown.md` to `Complete`, then moves the entire breakdown folder (`breakdown.md`, `tasks.md`, any sibling artifacts) under the team's `complete/` subdirectory. The active team directory should only contain breakdowns that are still in flight; the `complete/` subfolder is the archive that preserves the design record without cluttering navigation, while keeping it discoverable for in-flight research.
 
 <HARD-GATE>
 Orientation within a breakdown is required. If `$breakdown` was provided at invocation, treat it as the breakdown identifier (path, Jira key, or slug) and resolve it via `Glob` under `tech-breakdowns/` to a real `breakdown.md`, then confirm the resolved path with `AskUserQuestion` before proceeding. Otherwise, ask the user which breakdown to complete — they can give a path, a Jira key, or a slug — and resolve the same way. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
 
 Once the breakdown is found, do NOT update the Status or move the folder until both hold:
 
-- The resolved folder is not already inside a `completed/` directory. If it is, surface that and stop — the breakdown is already archived.
+- The resolved folder is not already inside a `complete/` directory. If it is, surface that and stop — the breakdown is already archived.
 - The working tree is clean (`git status` in the `tech-breakdowns` checkout shows no uncommitted changes that would be entangled with the move). If it is not clean, surface the dirty files and ask the user whether to proceed or stash first.
 
 </HARD-GATE>
@@ -38,7 +38,7 @@ Use the orientation rules from the HARD-GATE to locate `<team>/<JIRA-KEY>-<short
 - `BREAKDOWN_PATH` — absolute path to `breakdown.md`.
 - `BREAKDOWN_FOLDER` — the parent folder.
 - `TEAM_DIR` — the team directory (`BREAKDOWN_FOLDER`'s parent).
-- `DEST_FOLDER` — `<TEAM_DIR>/completed/<JIRA-KEY>-<short-slug>/`.
+- `DEST_FOLDER` — `<TEAM_DIR>/complete/<JIRA-KEY>-<short-slug>/`.
 
 Read `breakdown.md` and surface the current Status block to the user before proceeding.
 
@@ -55,11 +55,11 @@ Do not edit the Spec, Plan, Tasks, or any other section. The breakdown's content
 
 ### Phase 3: Move the folder
 
-1. Ensure the `completed/` directory exists under `TEAM_DIR`. `git mv` does not create missing parent directories — if `<TEAM_DIR>/completed/` does not exist yet, run `mkdir -p <TEAM_DIR>/completed/` first. The first breakdown a team completes will hit this case.
+1. Ensure the `complete/` directory exists under `TEAM_DIR`. `git mv` does not create missing parent directories — if `<TEAM_DIR>/complete/` does not exist yet, run `mkdir -p <TEAM_DIR>/complete/` first. The first breakdown a team completes will hit this case.
 2. Run `git mv <BREAKDOWN_FOLDER> <DEST_FOLDER>` from inside the `tech-breakdowns` working copy. This moves `breakdown.md`, `tasks.md`, and any sibling artifacts in one operation while preserving history.
 3. Surface the result to the user:
    - Old path: `<team>/<JIRA-KEY>-<short-slug>/`
-   - New path: `<team>/completed/<JIRA-KEY>-<short-slug>/`
+   - New path: `<team>/complete/<JIRA-KEY>-<short-slug>/`
    - Files moved: list from `git status`.
 
 Leave the commit to the user — they may want to bundle the status flip + move with a referencing message (`PM-XXXXX: complete breakdown`) and push at their own cadence.
@@ -68,6 +68,6 @@ Leave the commit to the user — they may want to bundle the status flip + move 
 
 When all phases are complete, tell the user:
 
-1. The new path of `breakdown.md` under the `completed/` subfolder.
+1. The new path of `breakdown.md` under the `complete/` subfolder.
 2. That the Status block now reads `Complete`.
 3. That the move is staged in git and waiting for them to commit.

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`completing-breakdown` skill** — marks a breakdown `Complete` and moves the breakdown folder into the team's `completed/` subfolder.
+- **`completing-breakdown` skill** — marks a breakdown `Complete` and moves the breakdown folder into the team's `complete/` subfolder.
 
 ## [2.0.0] - 2026-06-19
 
