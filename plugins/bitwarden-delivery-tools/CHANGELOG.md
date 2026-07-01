@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-06-26
+
+### Added
+
+- **`force-multiplier` skill** — applies one intent across many targets at once, fanning a change out into N consistent, idempotent draft PRs across a fleet of enterprise repos or a monorepo's projects, gated by a mandatory pilot and per-target isolation.
+
 ## [2.0.0] - 2026-06-19
 
 ### Added

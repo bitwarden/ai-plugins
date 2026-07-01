@@ -34,12 +34,13 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Mechanics
 
-| Skill                   | Triggers                   | Purpose                                                |
-| ----------------------- | -------------------------- | ------------------------------------------------------ |
-| `committing-changes`    | "commit", "stage changes"  | Commit message format, staging best practices          |
-| `creating-pull-request` | "create PR", "open PR"     | PR title/body format, draft workflow, AI review labels |
-| `labeling-changes`      | "label", "change type"     | Conventional commit type keywords, CI label mapping    |
-| `perform-preflight`     | "preflight", "self review" | Pre-commit quality gate checklist                      |
+| Skill                   | Triggers                      | Purpose                                                                              |
+| ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| `committing-changes`    | "commit", "stage changes"     | Commit message format, staging best practices                                        |
+| `creating-pull-request` | "create PR", "open PR"        | PR title/body format, draft workflow, AI review labels                               |
+| `labeling-changes`      | "label", "change type"        | Conventional commit type keywords, CI label mapping                                  |
+| `perform-preflight`     | "preflight", "self review"    | Pre-commit quality gate checklist                                                    |
+| `force-multiplier`      | "across all repos", "in bulk" | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs |
 
 ## Design Principle
 
