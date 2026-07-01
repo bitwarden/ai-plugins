@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1] - 2026-07-01
+
+### Changed
+
+- `reviewing-dependency-changes`: findings that reference the Dependency Review and Approval process now link the process name to the canonical Confluence page (`https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657/Dependency+Review+and+Approval`), so posted review comments point reviewers to the documentation.
+
 ## [1.13.0] - 2026-06-23
 
 ### Added
