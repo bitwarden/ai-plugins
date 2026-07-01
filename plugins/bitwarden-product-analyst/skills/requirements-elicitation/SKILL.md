@@ -72,6 +72,15 @@ Always consider and document:
 - **Cross-platform** — Works on all Bitwarden clients?
 - **Backwards compatibility** — Maintains existing behavior?
 
+## Optional: Capture a Behavioral Specification (Allium)
+
+When you are working in a product repo that maintains a behavioral specification with [Allium](https://github.com/juxt/allium) — a third-party, MIT-licensed spec language that keeps a `.allium` file beside the code — the requirements you extract here have a natural downstream home:
+
+- Functional requirements and their acceptance criteria map onto Allium rules: `when` an event occurs, `requires` these preconditions hold, `ensures` these outcomes follow. Use `/elicit` to carry an agreed requirement into the spec through conversation; use `/distill` to recover the spec already implied by existing code.
+- Security requirements grounded in P01–P06 — zero-knowledge, data-state, and access-control guarantees — can be expressed as Allium invariants, so they persist across sessions instead of living only in this document.
+
+This is external and optional: Allium is not a Bitwarden tool, and it applies only when the working repo has adopted it. This document stays the source of truth for the WHAT and WHY; a `.allium` spec is a complementary, machine-checkable artifact.
+
 ## Example
 
 See `examples/export-functionality.md` for a complete worked example.

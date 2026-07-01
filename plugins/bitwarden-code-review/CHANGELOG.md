@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-06-29
+
+### Added
+
+- `performing-multi-agent-code-review`: optional "Behavioral-Spec Drift (Allium)" section. When the repo under review carries an [Allium](https://github.com/juxt/allium) `.allium` spec and the Allium plugin is installed, the reviewer may invoke its `/weed` drift check before Step 2 and pass surfaced divergence to the architecture & pattern-compliance agent as additional context. Additive and optional — it does not alter the numbered pipeline, and is skipped entirely when no `.allium` spec is present. Allium is a third-party, MIT-licensed tool, not a Bitwarden plugin.
+
 ## [1.13.0] - 2026-06-23
 
 ### Added

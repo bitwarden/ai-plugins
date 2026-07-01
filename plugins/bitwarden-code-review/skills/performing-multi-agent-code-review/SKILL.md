@@ -58,6 +58,10 @@ Applies to all agents and subagents.
 - Don't write to GitHub. All findings go to a local markdown file.
 - Tool discipline (see Orchestration → Tool Discipline) applies to the main agent and is propagated verbatim to every subagent. Rationale for the WebFetch/WebSearch ban: bypasses `gh` auth, skips audit trails, can return stale cached pages.
 
+## Optional: Behavioral-Spec Drift (Allium)
+
+When the repo under review carries an [Allium](https://github.com/juxt/allium) `.allium` specification — a third-party, MIT-licensed behavioral spec language — spec↔code divergence is a useful review input. This is optional and additive; it does **not** alter the numbered pipeline below. When a spec is present and the Allium plugin is installed, you may invoke its `/weed` drift check before Step 2 and pass any surfaced divergence to the architecture & pattern-compliance agent as additional context — a diff that violates a stated `ensures` rule is an architectural finding. Absent a `.allium` spec, skip this entirely; it is not a prerequisite and the pipeline runs unchanged.
+
 ## Orchestration
 
 ### Project Preamble Propagation

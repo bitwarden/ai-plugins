@@ -71,3 +71,16 @@ These skills are available across plugins and agent-neutral by design — invoke
   - `Skill(analyzing-code-security)` when handling user input that reaches SQL, HTML, the file system, or URLs.
   - `Skill(reviewing-dependencies)` when adding or updating dependencies.
   - `Skill(detecting-secrets)` when working with secrets or configuration.
+
+## External Spec Tooling (Optional)
+
+Some repos maintain a behavioral specification with [Allium](https://github.com/juxt/allium) — a third-party, MIT-licensed spec language that keeps a `.allium` file beside the code describing intent as `when` an event occurs, `requires` preconditions, `ensures` outcomes. It is **not** a Bitwarden plugin; use it only where your team has adopted it and the repo actually carries a `.allium` file.
+
+When implementing against an Allium spec:
+
+- `/distill` — recover the spec implied by existing code before you change it, so you implement against intent rather than guessing it.
+- `/propagate` — generate tests from the behavioral rules, complementing (not replacing) the repo's own testing discipline.
+- `/weed` — surface divergence between the spec and your changes before you declare done.
+- `/tend` — make a targeted spec edit when intent legitimately changes (surface that as scope drift first, per the working approach above).
+
+Absent a `.allium` file, skip this — it is not a prerequisite for any work.

@@ -74,6 +74,12 @@ Two failure modes to avoid:
 
 `Skill(navigating-the-initiative-funnel)` covers the phase-by-phase mechanics in depth. This section is the working principle.
 
+## Optional: Behavioral Specifications (Allium)
+
+For a feature with a rich behavioral contract — many state transitions, or invariants that must hold identically across web, browser, desktop, CLI, and self-hosted — a persistent specification keeps intent legible across sessions better than prose. [Allium](https://github.com/juxt/allium) (third-party, MIT-licensed) maintains a `.allium` spec beside the code in `when / requires / ensures` form and can flag spec↔code drift (`/weed`).
+
+Applicability is narrower at the architecture-judgment layer than at requirements or implementation time — reach for it when the behavioral surface is genuinely complex, not for routine changes. External and optional; relevant only when the repo has adopted it.
+
 ## Red Flags to Surface
 
 - Over-engineering for hypothetical requirements (YAGNI)

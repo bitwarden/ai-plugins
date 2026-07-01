@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-tech-lead",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "Tech lead agent for a Bitwarden product team. The team's primary technical resource — architects solutions in the team's domain, partners with the EM on scoping and backlog, partners with peer tech leads on cross-team architecture, and serves as the team's conduit for cross-team technical decisions.",
   "author": {
     "name": "Bitwarden",
