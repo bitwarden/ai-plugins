@@ -92,6 +92,12 @@
       "source": "./plugins/bitwarden-design-tools",
       "version": "0.1.0",
       "description": "Design toolkit for Bitwarden — non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
+    },
+    {
+      "name": "bitwarden-test-engineer",
+      "source": "./plugins/bitwarden-test-engineer",
+      "version": "1.0.0",
+      "description": "Test engineering toolkit for Bitwarden. Inventories the test coverage a change already has — finding existing tests across the server, client, and mobile repos, bucketing each by layer (unit, integration, E2E), citing it as a stable GitHub permalink, and flagging untested behaviors as gaps in a markdown report. Designed to grow additional testing capabilities over time."
     }
   ]
 }

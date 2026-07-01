@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-test-engineer",
+  "version": "1.0.0",
+  "description": "Test engineering toolkit for Bitwarden. Inventories the test coverage a change already has — finding existing tests across the server, client, and mobile repos, bucketing each by layer (unit, integration, E2E), citing it as a stable GitHub permalink, and flagging untested behaviors as gaps in a markdown report. Designed to grow additional testing capabilities over time.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-test-engineer",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "testing",
+    "test-engineering",
+    "quality-engineering",
+    "test-coverage",
+    "test-layers",
+    "qa"
+  ]
+}
