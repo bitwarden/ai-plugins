@@ -18,7 +18,9 @@ Flag this skill when any of these files appear in the diff:
 
 ## Area 1: New Dependencies
 
-When a PR adds a dependency that was not previously in the codebase, Bitwarden's Dependency Review and Approval process requires AppSec review and approval before integration. This applies to **all** new dependencies — production, dev, and test.
+When a PR adds a dependency that was not previously in the codebase, Bitwarden's [Dependency Review and Approval](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657/Dependency+Review+and+Approval) process requires AppSec review and approval before integration. This applies to **all** new dependencies — production, dev, and test.
+
+When emitting a finding that references the Dependency Review and Approval process, always link the process name to `https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657/Dependency+Review+and+Approval` so the posted review comment points reviewers to the canonical documentation.
 
 The submitter must provide the package name/version, ecosystem, justification, scope, affected products, and what it replaces. A security engineer creates a VULN task in Jira and evaluates the dependency across security (known CVEs, exploitability), license compatibility (permissive licenses like MIT/Apache-2.0 are acceptable; copyleft licenses like GPL/AGPL are flagged), maintenance health (active maintainers, recent releases, security policy), supply chain risk (typosquatting, ownership changes, obfuscated install scripts), and transitive dependencies before rendering an approval decision.
 
@@ -36,7 +38,7 @@ Evidence that the dependency approval process was followed:
 
 ### Severity
 
-- **No approval signal found** → ⚠️ **IMPORTANT**: New dependency `<package>` added. Bitwarden requires AppSec approval before introducing new dependencies. The submitter should reach out to the AppSec team to initiate the dependency review and approval process.
+- **No approval signal found** → ⚠️ **IMPORTANT**: New dependency `<package>` added. Bitwarden requires AppSec approval before introducing new dependencies. The submitter should reach out to the AppSec team to initiate the [Dependency Review and Approval](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657/Dependency+Review+and+Approval) process.
 - **Unclear whether approval was obtained** → ❓ **QUESTION**: Was AppSec approval obtained for the new `<package>` dependency?
 
 ### What NOT to Flag
