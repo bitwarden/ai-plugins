@@ -4,22 +4,22 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 
 ## Available Plugins
 
-| Plugin                                                              | Version | Description                                                                                                                                                 |
-| ------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.3.2   | Tech lead for technical planning, architecture coherence, and surfacing patterns to Technical Strategy Ideas                                                |
-| [bitwarden-shepherd](plugins/bitwarden-shepherd/)                   | 1.0.0   | Champion of a technical strategy — shepherds a TSI through evaluation into the funnel, then through to adoption                                             |
-| [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.2.7   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                                                               |
-| [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.13.0  | Autonomous code review agent following Bitwarden engineering standards with GitHub integration                                                              |
-| [bitwarden-delivery-tools](plugins/bitwarden-delivery-tools/)       | 2.0.0   | Delivery lifecycle skills: initiative funnel navigation, work transitions, tech breakdowns and task decomposition, commits, PRs, preflight, labeling        |
-| [bitwarden-designer](plugins/bitwarden-designer/)                   | 0.1.0   | Product designer persona: Code of Conduct and 30/60/90 critique, critique facilitation; dispatches into bitwarden-design-tools                              |
-| [bitwarden-design-tools](plugins/bitwarden-design-tools/)           | 0.1.0   | Design toolkit: content style guide, Figma Dev Mode MCP, Bitwarden brand application, handoff prep, Design System governance, Product and Design Jira       |
-| [bitwarden-devops-engineer](plugins/bitwarden-devops-engineer/)     | 0.1.3   | DevOps engineering assistant: workflow compliance linting, action security auditing, and org-wide CI/CD remediation                                         |
-| [bitwarden-init](plugins/bitwarden-init/)                           | 1.2.0   | Initialize and enhance CLAUDE.md files with Bitwarden's standardized template format                                                                        |
-| [bitwarden-product-analyst](plugins/bitwarden-product-analyst/)     | 0.1.5   | Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources                                                     |
-| [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 1.2.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis                                                           |
-| [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 1.0.0   | Software engineer agent for a Bitwarden product team. Implements stories, tasks, and bugs with code quality, performance, security, and team comms in mind. |
-| [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
-| [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                  |
+| Plugin                                                              | Version | Description                                                                                                                                           |
+| ------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.3.2   | Tech lead for technical planning, architecture coherence, and surfacing patterns to Technical Strategy Ideas                                          |
+| [bitwarden-shepherd](plugins/bitwarden-shepherd/)                   | 1.0.0   | Champion of a technical strategy — shepherds a TSI through evaluation into the funnel, then through to adoption                                       |
+| [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.2.7   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                                                         |
+| [bitwarden-code-review](plugins/bitwarden-code-review/)             | 1.13.0  | Autonomous code review agent following Bitwarden engineering standards with GitHub integration                                                        |
+| [bitwarden-delivery-tools](plugins/bitwarden-delivery-tools/)       | 2.0.0   | Delivery lifecycle skills: initiative funnel navigation, work transitions, tech breakdowns and task decomposition, commits, PRs, preflight, labeling  |
+| [bitwarden-designer](plugins/bitwarden-designer/)                   | 0.1.0   | Product designer persona: Code of Conduct and 30/60/90 critique, critique facilitation; dispatches into bitwarden-design-tools                        |
+| [bitwarden-design-tools](plugins/bitwarden-design-tools/)           | 0.1.0   | Design toolkit: content style guide, Figma Dev Mode MCP, Bitwarden brand application, handoff prep, Design System governance, Product and Design Jira |
+| [bitwarden-devops-engineer](plugins/bitwarden-devops-engineer/)     | 0.1.3   | DevOps engineering assistant: workflow compliance linting, action security auditing, and org-wide CI/CD remediation                                   |
+| [bitwarden-init](plugins/bitwarden-init/)                           | 1.2.0   | Initialize and enhance CLAUDE.md files with Bitwarden's standardized template format                                                                  |
+| [bitwarden-product-analyst](plugins/bitwarden-product-analyst/)     | 0.1.5   | Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources                                               |
+| [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 1.2.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis                                                     |
+| [bitwarden-implementer](plugins/bitwarden-implementer/)             | 2.0.0   | Drives a single Jira task or story through plan → implement → validate → self-review → ship, ending at PR open.                                       |
+| [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                                                                        |
+| [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                            |
 
 ## Usage
 

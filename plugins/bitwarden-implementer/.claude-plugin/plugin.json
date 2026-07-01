@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-implementer",
+  "version": "2.0.0",
+  "description": "Drives a single task or story through the plan → implement → validate → self-review → ship loop inside a Bitwarden team's codebase, ending at PR open. Composes existing delivery-tools skills at each phase. Input is a task from Jira, typically originating from a tech breakdown but standalone tickets are also in scope.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-implementer",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "implementation",
+    "breakdown",
+    "pull-request",
+    "loop",
+    "self-review"
+  ],
+  "agents": "./agents/AGENT.md"
+}

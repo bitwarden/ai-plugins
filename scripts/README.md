@@ -228,7 +228,7 @@ Validates that changed plugins include a version bump and changelog update.
 ./scripts/validate-version-bump.sh origin/main plugin-name
 
 # Check multiple plugins
-./scripts/validate-version-bump.sh origin/main bitwarden-code-review bitwarden-software-engineer
+./scripts/validate-version-bump.sh origin/main bitwarden-code-review bitwarden-implementer
 
 # Accept plugins/ path prefix
 ./scripts/validate-version-bump.sh origin/main plugins/bitwarden-code-review
@@ -249,9 +249,9 @@ Validates that changed plugins include a version bump and changelog update.
 ```
 🔍 Validating version bumps for changed plugins...
 
-📦 Checking bitwarden-software-engineer...
-  ❌ bitwarden-software-engineer: Version not bumped (still 0.3.0). Plugin component files were changed — run ./scripts/bump-plugin-version.sh bitwarden-software-engineer <new-version>
-  ❌ bitwarden-software-engineer: CHANGELOG.md not updated. Add an entry describing what changed.
+📦 Checking bitwarden-implementer...
+  ❌ bitwarden-implementer: Version not bumped (still 0.3.0). Plugin component files were changed — run ./scripts/bump-plugin-version.sh bitwarden-implementer <new-version>
+  ❌ bitwarden-implementer: CHANGELOG.md not updated. Add an entry describing what changed.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 Version Bump Validation Summary

@@ -64,10 +64,4 @@ After completing security work, verify before declaring done:
 
 ## Development-Aware Recommendations
 
-When the `bitwarden-software-engineer` plugin is installed, development context skills are available. Use them to ground security recommendations in Bitwarden's actual patterns:
-
-- **When recommending server-side fixes** → activate `Skill(writing-server-code)` to ensure recommendations use CQS pattern, `TryAdd*` DI, file-scoped namespaces, and `BitAutoData` for tests
-- **When recommending database fixes** → activate `Skill(writing-database-queries)` then `Skill(implementing-dapper-queries)` or `Skill(implementing-ef-core)` as appropriate, to ensure remediation follows Bitwarden's dual-ORM conventions
-- **When recommending client-side fixes** → activate `Skill(writing-client-code)` to ensure fixes use Angular conventions (no `innerHTML`, `tw-` prefix for Tailwind, proper `inject()` usage)
-
-These skills are optional — if unavailable, provide standard security recommendations.
+Repo-specific implementation skills (`writing-server-code`, `writing-database-queries`, `implementing-dapper-queries`, `implementing-ef-core`, `writing-client-code`, and similar) live in the relevant Bitwarden repos and load automatically via Claude Code's progressive disclosure. When a diff hits code they cover, they trigger — ground security recommendations in the patterns they surface. If none trigger, provide standard security recommendations.
