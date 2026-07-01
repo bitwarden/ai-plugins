@@ -1,6 +1,6 @@
 ---
 name: completing-breakdown
-description: Complete a Bitwarden Tech Breakdown — update the Status block to `Complete` and move the breakdown folder into the team's `complete/` subfolder so the active directory only contains in-flight work. Use when a team has finished delivering the work captured in a Tech Breakdown and is ready to archive it. Triggered by phrasings such as "complete this breakdown", "mark the breakdown as done", "archive the breakdown", "move breakdown to complete", "finish the breakdown", "wrap up the breakdown".
+description: Complete a Bitwarden Tech Breakdown. Use when a team has completed delivering the work captured in a Tech Breakdown. Triggered by phrasings such as "complete this breakdown", "mark the breakdown as done", "archive the breakdown", "move breakdown to complete", "finish the breakdown", "wrap up the breakdown".
 argument-hint: "[<breakdown-path | jira-key | slug>]"
 arguments: breakdown
 allowed-tools: Read, Edit, Glob, Bash(git mv:*), Bash(git status:*), Bash(mkdir:*), AskUserQuestion
@@ -10,7 +10,7 @@ allowed-tools: Read, Edit, Glob, Bash(git mv:*), Bash(git status:*), Bash(mkdir:
 
 ## Overview
 
-Help the user retire a Tech Breakdown once the work it describes has shipped. The skill flips the Status block in `breakdown.md` to `Complete`, then moves the entire breakdown folder (`breakdown.md`, `tasks.md`, any sibling artifacts) under the team's `complete/` subdirectory. The active team directory should only contain breakdowns that are still in flight; the `complete/` subfolder is the archive that preserves the design record without cluttering navigation, while keeping it discoverable for in-flight research.
+Help the user retire a Tech Breakdown once the work it describes has shipped.
 
 <HARD-GATE>
 Orientation within a breakdown is required. If `$breakdown` was provided at invocation, treat it as the breakdown identifier (path, Jira key, or slug) and resolve it via `Glob` under `tech-breakdowns/` to a real `breakdown.md`, then confirm the resolved path with `AskUserQuestion` before proceeding. Otherwise, ask the user which breakdown to complete — they can give a path, a Jira key, or a slug — and resolve the same way. If the user already named it earlier in the conversation, confirm the resolved path with `AskUserQuestion` before proceeding.
@@ -26,8 +26,8 @@ Once the breakdown is found, do NOT update the Status or move the folder until b
 
 - **Status flip then move.** Update `breakdown.md` first so the commit that moves the folder also carries the terminal-state edit. Reversing the order leaves a window where the file is at its new path with stale status.
 - **Preserve history.** Use `git mv` rather than `mv`. The breakdown folder's history is the design record; moving outside git rewrites it as a delete + add and breaks blame.
-- **Confirm before destructive operations.** The folder move is reversible but disruptive — links to the old path break. Surface the source path, destination path, and the affected files once before doing the move.
 - **Don't touch sibling artifacts.** `tasks.md` and other files in the folder move with the folder unchanged.
+- **Inform the use after move is complete.** The folder move is reversible but disruptive — links to the old path break. Surface the source path, destination path, and the affected files after doing the move so the user can revert if they did not intend to do so.
 
 ## Phases
 
@@ -39,6 +39,8 @@ Use the orientation rules from the HARD-GATE to locate `<team>/<JIRA-KEY>-<short
 - `BREAKDOWN_FOLDER` — the parent folder.
 - `TEAM_DIR` — the team directory (`BREAKDOWN_FOLDER`'s parent).
 - `DEST_FOLDER` — `<TEAM_DIR>/complete/<JIRA-KEY>-<short-slug>/`.
+
+**Validate before using in shell commands.** Slug must match `^[a-z][a-z0-9-]*$`. Jira key must match `^[A-Z][A-Z0-9]+-[0-9]+$`. Reject any resolved path that contains `..` or characters outside `[A-Za-z0-9._/-]`, and confirm `BREAKDOWN_FOLDER` and `DEST_FOLDER` resolve inside the `tech-breakdowns` working copy. If any check fails, stop and surface the mismatch — never interpolate a non-validated value into `mkdir`, `git mv`, or any other shell command.
 
 Read `breakdown.md` and surface the current Status block to the user before proceeding.
 
@@ -55,8 +57,8 @@ Do not edit the Spec, Plan, Tasks, or any other section. The breakdown's content
 
 ### Phase 3: Move the folder
 
-1. Ensure the `complete/` directory exists under `TEAM_DIR`. `git mv` does not create missing parent directories — if `<TEAM_DIR>/complete/` does not exist yet, run `mkdir -p <TEAM_DIR>/complete/` first. The first breakdown a team completes will hit this case.
-2. Run `git mv <BREAKDOWN_FOLDER> <DEST_FOLDER>` from inside the `tech-breakdowns` working copy. This moves `breakdown.md`, `tasks.md`, and any sibling artifacts in one operation while preserving history.
+1. Ensure the `complete/` directory exists under `TEAM_DIR`. `git mv` does not create missing parent directories — if `<TEAM_DIR>/complete/` does not exist yet, run `mkdir -p '<TEAM_DIR>/complete/'` first (single-quote the interpolated path). The first breakdown a team completes will hit this case.
+2. Run `git mv '<BREAKDOWN_FOLDER>' '<DEST_FOLDER>'` from inside the `tech-breakdowns` working copy — single-quote both operands so a path containing whitespace or shell metacharacters cannot word-split. This moves `breakdown.md`, `tasks.md`, and any sibling artifacts in one operation while preserving history.
 3. Surface the result to the user:
    - Old path: `<team>/<JIRA-KEY>-<short-slug>/`
    - New path: `<team>/complete/<JIRA-KEY>-<short-slug>/`
