@@ -14,7 +14,7 @@ One sentence, in the user's words, restated and confirmed. This is the single so
 
 `multi-repo` or `monorepo`.
 
-- `multi-repo` — targets are repositories in the Bitwarden enterprise. Each target is cloned and changed in isolation; each yields its own branch and PR.
+- `multi-repo` — targets are repositories across the Bitwarden ecosystem. Each target is cloned and changed in isolation; each yields its own branch and PR.
 - `monorepo` — targets are projects/packages/workspaces inside one repository. The fan-out happens across paths in a single clone; the campaign yields one branch and PR per project, or one grouped PR, as the PR spec dictates.
 
 ### `target_selector`
@@ -31,7 +31,7 @@ Both are built from the patterns in `finding-targets.md`. The selector resolves 
 The per-target unit of work. Has a `type` and the work itself:
 
 - `type` — `deterministic` | `agentic` (see SKILL.md → Recipe types).
-- `body` — for deterministic: the exact edit/script and its parameters. For agentic: the scoped sub-agent prompt and its tool allowlist.
+- `body` — for deterministic: the exact edit/script and its parameters. For agentic: the scoped sub-agent prompt, which names inline the minimal set of tools the sub-agent may use (expressed as prose within the prompt — there is no separate allowlist field).
 - `idempotency` — the condition under which the recipe is already satisfied and must no-op. Required. Without it the campaign cannot be safely remediated or re-run.
 
 ### `validation`
@@ -43,7 +43,7 @@ The per-target gate that must pass before a commit is made. Defined by what the 
 The shape of the change as it is delivered. Confirmed once on the pilot, then replicated:
 
 - `branch` — a deterministic branch name template (same input → same branch, so re-runs are no-ops).
-- `title` — follows `Skill(committing-changes)` / `Skill(labeling-changes)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label.
+- `title` — follows `Skill(committing-changes)` / `Skill(labeling-changes)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label. `[TICKET]` is a placeholder — substitute a real tracking-issue key, never the literal word.
 - `body` — fills the target repo's `.github/PULL_REQUEST_TEMPLATE.md` per `Skill(creating-pull-request)`.
 - `labels` — the `ai-review` choice and any others, confirmed at pilot.
 - `draft` — `true` by default.
@@ -52,10 +52,10 @@ The shape of the change as it is delivered. Confirmed once on the pilot, then re
 
 The guardrails for this campaign. Defaults live in `safety-and-self-checks.md`; the spec records any deviations explicitly:
 
-- `max_targets_per_run` — default 10.
+- `max_targets_per_run` — default 10. Caps concurrency **per chunk**, not the whole campaign; the total fan-out (count + scope) is confirmed with the user before the first chunk (see `safety-and-self-checks.md`).
 - `destructive` — whether the recipe removes/rewrites; if true, a reference-check pre-step is required.
-- `dry_run` — if true, do everything except push and open PRs.
-- `pilot` — `required` by default; `--no-pilot` flips it and is logged.
+- `dry_run` — if true, do everything through validation and the secrets-scan, then stop before commit, push, and PR.
+- `pilot` — `required` by default. `--no-pilot` may downgrade it only for deterministic, fully-reviewable recipes; for agentic recipes `--no-pilot` is refused. Any downgrade is logged.
 
 ## Abstract instance
 

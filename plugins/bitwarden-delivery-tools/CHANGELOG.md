@@ -5,11 +5,12 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - 2026-06-26
+## [2.1.0] - 2026-07-01
 
 ### Added
 
-- **`force-multiplier` skill** — applies one intent across many targets at once, fanning a change out into N consistent, idempotent draft PRs across a fleet of enterprise repos or a monorepo's projects, gated by a mandatory pilot and per-target isolation.
+- **`force-multiplier` skill** — fans one intent across a repo fleet or monorepo into N consistent, idempotent draft PRs, gated by a mandatory pilot and per-target isolation. Repo content is untrusted data (CWE-1427); destructive recipes require a reference-check with a `held-back` reconciliation disposition; the secrets-scan has a no-scanner fallback.
+- **`force-multiplier` behavior eval set** (`skills/force-multiplier/evals/`) — seven `skill-creator`-schema cases guarding its load-bearing decisions, plus a deferred-scope ledger (`references/deferred.md`), per the Bitwarden AI Review Guidelines.
 
 ## [2.0.0] - 2026-06-19
 

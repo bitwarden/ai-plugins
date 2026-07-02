@@ -2,7 +2,7 @@
 
 The engine stays generic; _this_ is where it learns to find things. Discovery is keyed by **signal type** — the shape of evidence that marks a target as relevant — not by any specific change. Pick the technique that matches the signal, fill in the specifics, and you have an applicability filter.
 
-The operating environment is always the **Bitwarden GitHub enterprise**, so enumeration is grounded in `gh ... --owner bitwarden`. Authentication is the already-configured `gh` session; never inject tokens.
+The engine is target-system-agnostic — a target is any software system in the Bitwarden ecosystem that Claude can reach. The connection point available today is GitHub, so the enumeration and signal techniques below are grounded in `gh ... --owner bitwarden`; authentication is the already-configured `gh` session — never inject tokens. As other connection points become available to Claude, the same signal-type approach extends to them; discovery for other target systems (e.g. Atlassian) is parked in `deferred.md`.
 
 ## Enumerate first
 
@@ -75,4 +75,4 @@ These are one-line illustrations, not a menu — each is just a signal plugged i
 
 ## Trust, but re-verify
 
-`gh search code` is the fast first pass, but it is **not authoritative**: it indexes only default branches, skips some repos, lags behind recent pushes, and is rate-limited. Treat its output as a _candidate_ list. The applicability filter is only confirmed when the recipe re-checks the signal in the freshly cloned target at execution time. A candidate whose signal is absent on clone is `skipped-not-applicable` — this is expected, not an error. This re-verification is the same instinct as the "spot-check the target list both ways" step in the SKILL.md self-check.
+`gh search code` is the fast first pass, but it is **not authoritative**: it indexes only default branches, skips some repos, lags behind recent pushes, and is rate-limited. Treat its output as a _candidate_ list. The same caution applies to `gh search repos` (signal-type 4): it is a rate-limited search endpoint that can miss repos relative to the authoritative `gh repo list` — prefer filtering the `primaryLanguage` / `repositoryTopics` fields of the enumeration listing, and treat any `gh search repos` result as a candidate to re-verify. The applicability filter is only confirmed when the recipe re-checks the signal in the freshly cloned target at execution time. A candidate whose signal is absent on clone is `skipped-not-applicable` — this is expected, not an error. This re-verification is the same instinct as the "spot-check the target list both ways" step in the SKILL.md self-check.

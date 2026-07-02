@@ -6,7 +6,7 @@ Per-stage detail for the fixed pipeline `SELECT → CHECK YOURSELF → PILOT →
 
 Enumerate, then filter, using `finding-targets.md`. The output is an **explicit, finite list** of resolved targets — names for multi-repo, paths for monorepo — each annotated with the matched signal. Show the list to the user. A campaign that cannot name its targets is not ready to run.
 
-Record the count. It anchors the reconciliation in REPORT: `selected = applied + already-compliant + skipped-not-applicable + failed`.
+Record the count. It anchors the reconciliation in REPORT: `selected = applied + already-compliant + skipped-not-applicable + held-back + failed`.
 
 ## Pilot
 
@@ -14,7 +14,7 @@ Pick one representative target — not the easiest one; one whose shape is typic
 
 ## Fan-out
 
-Process confirmed targets in chunks of at most `max_targets_per_run`. For agentic recipes, send one chunk's Agent calls in a single message so they run concurrently. Each target is handled **in isolation** — its failure is recorded and the rest continue.
+Process confirmed targets in chunks of at most `max_targets_per_run` — a per-chunk concurrency cap, not a campaign ceiling. The **total** fan-out (count + scope) must be confirmed with the user before the first chunk (see `safety-and-self-checks.md`); the cap then bounds each chunk. For agentic recipes, send one chunk's Agent calls in a single message so they run concurrently. Each target is handled **in isolation** — its failure is recorded and the rest continue.
 
 Per target, in order:
 
@@ -30,17 +30,17 @@ Per target, in order:
 10. **Commit** per `Skill(committing-changes)`, using the locked title/type.
 11. **Push and open a draft PR** per the locked `pr_spec` — never to a default branch, never force-pushed. Capture the PR URL.
 
-If `dry_run` is set, perform steps 1–9 and stop before commit/push; record what _would_ have shipped.
+If `dry_run` is set, perform steps 1–9 and stop before commit, push, and open-PR (steps 10–11); record what _would_ have shipped. It mutates no git state, local or remote.
 
 ## Report
 
 Aggregate one row per target:
 
-| Target   | Status                                                        | PR           | Notes                                |
-| -------- | ------------------------------------------------------------- | ------------ | ------------------------------------ |
-| `<name>` | applied / already-compliant / skipped-not-applicable / failed | `<url or —>` | `<divergence, failure reason, or —>` |
+| Target   | Status                                                                    | PR           | Notes                                |
+| -------- | ------------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| `<name>` | applied / already-compliant / skipped-not-applicable / held-back / failed | `<url or —>` | `<divergence, failure reason, or —>` |
 
-Then state the reconciliation explicitly: `selected = applied + already-compliant + skipped-not-applicable + failed`. If the arithmetic does not close, a target was dropped silently — find it before declaring done. Surface divergence flags and failure reasons in full; do not bury them under a success headline. See the prove-don't-declare discipline in `safety-and-self-checks.md`.
+Then state the reconciliation explicitly: `selected = applied + already-compliant + skipped-not-applicable + held-back + failed`. If the arithmetic does not close, a target was dropped silently — find it before declaring done. Surface divergence flags and failure reasons in full; do not bury them under a success headline. See the prove-don't-declare discipline in `safety-and-self-checks.md`.
 
 ## Remediate
 

@@ -38,9 +38,9 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
 | `committing-changes`    | "commit", "stage changes"     | Commit message format, staging best practices                                        |
 | `creating-pull-request` | "create PR", "open PR"        | PR title/body format, draft workflow, AI review labels                               |
+| `force-multiplier`      | "across all repos", "in bulk" | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs |
 | `labeling-changes`      | "label", "change type"        | Conventional commit type keywords, CI label mapping                                  |
 | `perform-preflight`     | "preflight", "self review"    | Pre-commit quality gate checklist                                                    |
-| `force-multiplier`      | "across all repos", "in bulk" | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs |
 
 ## Design Principle
 

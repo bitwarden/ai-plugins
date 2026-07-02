@@ -2,6 +2,10 @@
 
 A worked campaign showing an **agentic** recipe applied to a non-trivial per-repo migration. Read it for shape, then generalize.
 
+> This example shows campaign _shape_ only. The production npm→pnpm migration lives in [PM-35701] — Corepack pinning, integrity-hash format, and the VULN-545 acceptance conditions stay in the ticket, not in the skill.
+
+[PM-35701]: https://bitwarden.atlassian.net/browse/PM-35701
+
 **Recipe type:** agentic (a scoped sub-agent runs the migration; the `validation` gate proves the result). **Signal type:** file-existence (`package-lock.json` present).
 
 ## Campaign spec
