@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-06
+
+### Added
+
+- `architecting-solutions`: "Feature-flag new work by default" principle (per the Bitwarden feature flags guidance) — flag new work, decide server-side vs client-side placement up front, one flag per independently-releasable feature, default off, gradual rollout over a binary flip, and release-vs-operational flags (kill switches may be permanent). Added a matching Red Flag for feature work landing without a warranted flag.
+- Cross-Plugin Integration guidance for the optional `launchdarkly` plugin — the tech-lead's release-strategy side: `launchdarkly-guarded-rollout` and `launchdarkly-experiment-setup` / `launchdarkly-metric-choose` / `launchdarkly-metric-create`, with an MCP install link. Carved out as an explicit optional exception to the "all cross-plugin skills required" contract, so the agent degrades gracefully when it is absent.
+
 ## [2.3.2] - 2026-06-15
 
 ### Changed
