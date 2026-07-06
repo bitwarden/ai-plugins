@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Feature-flag guidance in `AGENT.md` and README, per the [Bitwarden feature flags guidance](https://contributing.bitwarden.com/contributing/feature-flags): server-side .NET evaluates through `Bitwarden.Server.Sdk.Features` (`IFeatureService`, `FeatureFlagKeys`, `[RequireFeature]`), not a hand-rolled abstraction or the raw LaunchDarkly SDK; clients read flag state from the server's `/config` endpoint. Includes two discipline rules: one flag per independently-releasable feature, and release-vs-operational (kill switches may be permanent, not cleanup candidates).
+- Feature-flag guidance in `AGENT.md`, per the [Bitwarden feature flags guidance](https://contributing.bitwarden.com/contributing/feature-flags): server-side .NET evaluates through `Bitwarden.Server.Sdk.Features` (`IFeatureService`, `FeatureFlagKeys`, `[RequireFeature]`), not a hand-rolled abstraction or the raw LaunchDarkly SDK; clients read flag state from the server's `/config` endpoint. Includes two discipline rules: one flag per independently-releasable feature, and release-vs-operational (kill switches may be permanent, not cleanup candidates).
 - Cross-Plugin Integration guidance for the optional `launchdarkly` plugin (requires the plugin and its hosted MCP server): `launchdarkly-flag-discovery` / `launchdarkly-flag-command` to find flags, `launchdarkly-flag-create` to gate code, `launchdarkly-flag-targeting` to toggle locally, `launchdarkly-flag-cleanup` to remove launched flags. Production rollout decisions defer to the tech lead.
 
 ## [1.0.0] - 2026-05-19
