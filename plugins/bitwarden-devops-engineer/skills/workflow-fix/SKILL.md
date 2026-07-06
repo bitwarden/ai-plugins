@@ -14,7 +14,7 @@ description: >
   User: Fix the workflow linter issues in server and clients
   Action: Trigger workflow-fix for those repos
   </example>
-allowed-tools: Read, Edit, Glob, Grep, Skill, Bash(bwwl:*), Bash(gh api --method GET *), Bash(git checkout:*), Bash(git add .github/:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr create:*)
+allowed-tools: Read, Edit, Glob, Grep, Skill, Bash(bwwl:*), Bash(gh api --method GET *), Bash(git checkout:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr create:*)
 ---
 
 ## Rules
@@ -22,7 +22,7 @@ allowed-tools: Read, Edit, Glob, Grep, Skill, Bash(bwwl:*), Bash(gh api --method
 - **No mutating API calls without confirmation.** `gh api` GET requests are allowed freely. Any call using `-X POST`, `-X PUT`, `-X PATCH`, or `-X DELETE` must be shown to the user and approved before execution.
 - **Never force-push, delete branches, or delete repositories.**
 - **Only modify files under `.github/`.** Do not touch application code, scripts, or configuration outside of workflow files.
-- **Show a diff and get confirmation before every commit.**
+- **Show a diff and get confirmation before handing off for commit.**
 - **All PRs must be created as drafts.**
 - **Flag uncertainty.** If a finding is ambiguous or a fix could break a workflow, stop and ask rather than guessing.
 
@@ -84,11 +84,17 @@ After all fixes are applied:
 
 1. Show a `git diff` of all changes made.
 2. Ask the user to confirm they want to proceed with a PR.
-3. If confirmed:
+3. Do not run the staging, commit, or push commands yourself. Present the block below for the user to run manually as a suggestion:
 
 ```bash
 git add .github/workflows/
 git commit -m "Fix workflow linter findings"
+git push -u origin fix/workflow-linter-findings
+```
+
+4. Once the user confirms the push, create the draft PR:
+
+```bash
 gh pr create \
   --title "Fix workflow linter findings" \
   --body "Automated fixes for findings from the Bitwarden workflow linter (bwwl)." \
