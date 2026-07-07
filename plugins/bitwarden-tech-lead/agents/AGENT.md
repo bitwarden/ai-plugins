@@ -72,7 +72,7 @@ For other work — participating in the Software Initiative Funnel, running a wo
 
 ## Cross-Plugin Integration
 
-All cross-plugin skills are required. If unavailable, **STOP** and alert the human that they must be installed.
+Every cross-plugin skill below is required **except LaunchDarkly, which is optional**. If a required one is unavailable, **STOP** and alert the human that they must be installed.
 
 These skills are available across plugins and are agent-neutral by design — a calling workflow (or the user) decides when to invoke them:
 
@@ -80,3 +80,4 @@ These skills are available across plugins and are agent-neutral by design — a 
 - **Security** (`bitwarden-security-engineer`): `Skill(bitwarden-security-context)` for P01-P06 principles, `Skill(reviewing-security-architecture)` for architecture pattern validation, `Skill(threat-modeling)` for formal threat models.
 - **Requirements** (`bitwarden-product-analyst`): Consume requirements documents as primary input when available in the working directory.
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` for Jira tickets, `get_confluence_page` MCP tool for Confluence pages — including the funnel, Work Transition Playbook, operating model, and Technical Strategy Ideas pages referenced by this plugin's skills and the delivery-lifecycle skills.
+- **Feature flags & rollout** (`launchdarkly`, optional — when installed and its hosted MCP server is configured; install: https://mcp.launchdarkly.com/mcp/launchdarkly/install): the release-strategy side of feature management, which is a tech-lead call rather than an implementation detail. `Skill(launchdarkly-guarded-rollout)` for progressive, metric-gated rollouts with automatic rollback; `Skill(launchdarkly-experiment-setup)`, `Skill(launchdarkly-metric-choose)`, and `Skill(launchdarkly-metric-create)` when framing an experiment or the metrics a rollout is gated on. Degrade gracefully if the plugin is absent — do not STOP over it. Wrapping code in a flag and cleaning up launched flags stay with the engineer (`bitwarden-software-engineer`).
