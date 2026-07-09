@@ -11,6 +11,8 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 [PM-XXXXX] <type>: <imperative summary>
 
 <optional body explaining why, not what>
+
+<optional trailers, jira ticket: "Jira-Ticket: PM-XXXXX", github issue: "GitHub-Issue: #1234", etc.>
 ```
 
 ### Rules
@@ -25,6 +27,9 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 
 Users reported confusion about when biometric prompts appear.
 This adds a configurable timeout setting to the security preferences.
+
+Jira-Ticket: PM-12345
+GitHub-Issue: #6789
 ```
 
 Ambiguous cases — choosing between similar types:
