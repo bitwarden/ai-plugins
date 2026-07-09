@@ -47,6 +47,12 @@ Update error handling in login flow
 
 ---
 
+## Structure Commits by Intent
+
+Changes should be structured by intent. If there is more than one intent in the working directory / staged, break down the changes into a set of commits — one intent per commit (a refactor, a new helper, a feature, a bugfix, a test addition, a rename), each independently reviewable.
+
+---
+
 ## Pre-Commit Quality Gate
 
 Before staging, run the `perform-preflight` skill for the full quality gate checklist (tests, lint, security, architecture). Consult the repo's CLAUDE.md for platform-specific build and lint commands.

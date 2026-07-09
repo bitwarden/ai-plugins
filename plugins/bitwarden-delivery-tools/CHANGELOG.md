@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `committing-changes`: added a "Structure Commits by Intent" section instructing that changes be structured by intent, breaking a multi-intent working directory into a set of commits.
+
 ## [2.0.0] - 2026-06-19
 
 ### Added
