@@ -58,6 +58,12 @@ Changes should be structured by intent. If there is more than one intent in the 
 
 ---
 
+## Follow-up Fixes on an Open PR
+
+When committing a follow-up fix on a PR that is not yet merged, consider doing a rebase so that the single intent commit that introduced this change gets replaced, rather than stacking a separate "fix" commit on top. This keeps history structured by intent (see above): the branch reads as one clean commit per intent instead of a change plus a trail of corrections.
+
+---
+
 ## Pre-Commit Quality Gate
 
 Before staging, run the `perform-preflight` skill for the full quality gate checklist (tests, lint, security, architecture). Consult the repo's CLAUDE.md for platform-specific build and lint commands.
