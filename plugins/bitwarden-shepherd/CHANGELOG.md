@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Repointed all `architecting-solutions` cross-plugin references from `bitwarden-tech-lead` to `bitwarden-delivery-tools` following the skill's move in `bitwarden-tech-lead` 3.0.0 / `bitwarden-delivery-tools` 2.1.0.
+- Updated all `architecting-solutions` cross-plugin references from `bitwarden-tech-lead` to `bitwarden-delivery-tools` following the skill's move in `bitwarden-tech-lead` 3.0.0 / `bitwarden-delivery-tools` 2.1.0.
 
 ## [1.0.0] - 2026-05-13
 
