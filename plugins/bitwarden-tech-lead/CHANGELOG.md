@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `AGENT.md`: `skills:` list reduced to `contributing-to-technical-strategy`. Orientation and Cross-Plugin Integration sections now point at `architecting-solutions` in `bitwarden-delivery-tools`.
+- `README.md`: `architecting-solutions` removed from the Skills table; Cross-Plugin Integration row for `bitwarden-delivery-tools` now lists it; upgrade note rewritten to point at the skill's new home.
 
 ## [2.3.2] - 2026-06-15
 

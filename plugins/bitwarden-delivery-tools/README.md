@@ -9,7 +9,7 @@ These skills define delivery **process** — initiative phases, transition playb
 The plugin spans three concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
-- **Technical design** — how teams draft Tech Breakdowns under Bitwarden's standard template and decompose them into tasks.
+- **Technical design** — how teams apply architectural judgment inside their scope, draft Tech Breakdowns under Bitwarden's standard template, and decompose them into tasks.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
 
 Any agent (tech-lead, software-engineer, shepherds, others) can compose these skills as needed.
@@ -27,6 +27,7 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 | Skill                       | Triggers                                                                                                                              | Purpose                                                                                                                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `architecting-solutions`    | "plan the solution", "assess blast radius", "evaluate trade-offs", "should Architecture weigh in"                                     | Architectural judgment framework: security mindset, blast radius, Bitwarden-specific constraints, and the signals that warrant pulling in the Architecture group.                       |
 | `starting-breakdown`        | "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file"                                                 | Set up a new Tech Breakdown file in `bitwarden/tech-breakdowns`: gather context from the user, copy the template, fill the Status block.                                                |
 | `developing-breakdown-spec` | "understand the work", "resolve open questions", "write the breakdown spec", "Spec Alternatives"                                      | Resolve open design questions one at a time with concrete options, then capture what's being built into the Specification section.                                                      |
 | `developing-breakdown-plan` | "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts" | Develop the Plan section after the Spec is filled: technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption. |
@@ -46,6 +47,13 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 Each skill owns the **workflow** (what steps to follow, what format to use). The repo's CLAUDE.md owns the **platform specifics** (which linter to run, which test command to use, which security rules apply). This separation allows the same skills to work across Android, iOS, Server, SDK, and Clients repos.
 
 The lifecycle skills follow the same principle: they describe the funnel and transition mechanics. The canonical references — [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614) and [Work Transition Playbook](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2521038855) — live in Confluence and are fetched on demand.
+
+## Related Plugins
+
+Several skills in this plugin reference tools or skills provided by sibling plugins. Install these alongside `bitwarden-delivery-tools` for full functionality:
+
+- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `architecting-solutions`, `navigating-the-initiative-funnel`, and the breakdown skills.
+- **`bitwarden-security-engineer`** — provides `Skill(threat-modeling)`, referenced from `architecting-solutions` for deep security analysis.
 
 ## Installation
 
