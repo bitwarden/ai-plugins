@@ -30,7 +30,7 @@ How to choose:
 
 Once selected, identify a **point-of-contact on the owning team** (usually a senior engineer, sometimes the tech lead) who will pair with you or review your work. They are not adopting the work — they are your partner in surfacing where it doesn't fit.
 
-This is also a good moment to consult `Skill(architecting-solutions)` in `bitwarden-tech-lead` for the team-scope architectural constraints that will shape your PoC (security mindset, multi-client reality, V+/-2 compatibility, etc.). The PoC ships against those constraints from the start, not retrofitted.
+This is also a good moment to consult `Skill(architecting-solutions)` in `bitwarden-delivery-tools` for the team-scope architectural constraints that will shape your PoC (security mindset, multi-client reality, V+/-2 compatibility, etc.). The PoC ships against those constraints from the start, not retrofitted.
 
 ## Building the PoC
 
@@ -144,4 +144,4 @@ For the leadership review, bring:
 - [Bitwarden ADR template](https://contributing.bitwarden.com/architecture/adr/) — canonical ADR structure, served from the centralized [`bitwarden/contributing-docs`](https://github.com/bitwarden/contributing-docs) repository.
 - [Documentation Patterns](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1774977070) — canonical guidance on close-to-code vs. centralized documentation, tech-stack-specific best practices, and CLAUDE.md conventions.
 - [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779) — how to update the BW Initiative during PoC.
-- Related: `Skill(shepherding-an-initiative)` for the umbrella playbook, `Skill(running-an-architectural-assessment)` for the upstream Research-phase work the PoC validates, `Skill(scoping-and-handing-off-to-teams)` for what the PoC feeds into, `Skill(architecting-solutions)` (in `bitwarden-tech-lead`) for team-scope architectural constraints that shape PoC design.
+- Related: `Skill(shepherding-an-initiative)` for the umbrella playbook, `Skill(running-an-architectural-assessment)` for the upstream Research-phase work the PoC validates, `Skill(scoping-and-handing-off-to-teams)` for what the PoC feeds into, `Skill(architecting-solutions)` (in `bitwarden-delivery-tools`) for team-scope architectural constraints that shape PoC design.
