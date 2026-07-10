@@ -10,7 +10,7 @@ This skill applies architectural judgment during team-level delivery work: scopi
 
 Bitwarden is a password manager — security isn't a feature, it's the product. Every design decision is a security decision.
 
-- **Threat model early.** Before approving an approach, ask: what can an attacker reach from here? `Skill(threat-modeling)` exists for deep analysis — use it for complex features.
+- **Threat model early.** Before approving an approach, ask: what can an attacker reach from here? `Skill(threat-modeling)` in `bitwarden-security-engineer` exists for deep analysis — use it for complex features.
 - **Classify data touch points.** Know which fields are encrypted, which are plaintext, and which cross trust boundaries. Never add a new path for sensitive data without encryption at rest and in transit.
 - **Audit trail by default.** Sensitive operations must be observable after the fact. If it can't be audited, it shouldn't ship.
 - **Fail closed.** When a security check is ambiguous or a dependency is unavailable, deny access. Never default to permissive.
