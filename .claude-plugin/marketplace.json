@@ -66,7 +66,7 @@
     {
       "name": "bitwarden-tech-lead",
       "source": "./plugins/bitwarden-tech-lead",
-      "version": "2.3.2",
+      "version": "3.0.0",
       "description": "Tech lead agent for a Bitwarden product team. The team's primary technical resource — architects solutions in the team's domain, partners with the EM on scoping and backlog, partners with peer tech leads on cross-team architecture, and serves as the team's conduit for cross-team technical decisions."
     },
     {
@@ -78,7 +78,7 @@
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and task decomposition, commits, pull requests, preflight checks, and change labeling."
     },
     {
