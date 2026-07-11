@@ -5,6 +5,18 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-07-11
+
+### Removed
+
+- **BREAKING:** `starting-breakdown`, `developing-breakdown-spec`, `developing-breakdown-plan`, and `decomposing-into-tasks` skills. Tech Breakdown drafting now lives in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository, where the templates and per-team folder conventions are canonical.
+
+### Changed
+
+- `navigating-the-initiative-funnel`: Phase-4 Tech Breakdown paragraph and Related links rewritten to point at the `bitwarden/tech-breakdowns` repository instead of the removed skills.
+- `README.md`: Technical-design section and skills table removed; overview reduced to two concerns (Lifecycle, Mechanics); usage examples for the removed skills dropped; a pointer to `bitwarden/tech-breakdowns` added for discoverability.
+- `plugin.json`: description and keywords stripped of `tech-breakdown` / `task-decomposition`. Marketplace description and README catalog entry follow suit.
+
 ## [2.0.0] - 2026-06-19
 
 ### Added

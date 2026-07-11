@@ -1,16 +1,17 @@
 # Bitwarden Delivery Tools
 
-Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and decomposing them into tasks, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
 
 ## Overview
 
-These skills define delivery **process** — initiative phases, transition playbooks, tech-breakdown drafting, task decomposition, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
+These skills define delivery **process** — initiative phases, transition playbooks, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
 
-The plugin spans three concerns:
+The plugin spans two concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
-- **Technical design** — how teams draft Tech Breakdowns under Bitwarden's standard template and decompose them into tasks.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
+
+Tech Breakdown drafting lives in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository, where the templates and per-team folder conventions are canonical.
 
 Any agent (tech-lead, software-engineer, shepherds, others) can compose these skills as needed.
 
@@ -22,15 +23,6 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | ---------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `navigating-the-initiative-funnel` | "initiative funnel", "scoping & commitment", "shepherd" | Phase-by-phase tech-lead participation across Bitwarden's Software Initiative Funnel                       |
 | `running-work-transitions`         | "work transition", "handoff", "transition playbook"     | Both-sides playbook for receiving or originating ownership transitions (initiatives, frameworks, runbooks) |
-
-### Technical design
-
-| Skill                       | Triggers                                                                                                                              | Purpose                                                                                                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `starting-breakdown`        | "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file"                                                 | Set up a new Tech Breakdown file in `bitwarden/tech-breakdowns`: gather context from the user, copy the template, fill the Status block.                                                |
-| `developing-breakdown-spec` | "understand the work", "resolve open questions", "write the breakdown spec", "Spec Alternatives"                                      | Resolve open design questions one at a time with concrete options, then capture what's being built into the Specification section.                                                      |
-| `developing-breakdown-plan` | "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts" | Develop the Plan section after the Spec is filled: technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption. |
-| `decomposing-into-tasks`    | "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table"    | Decompose a Plan into a `tasks.md` document with one entry per future Jira work item.                                                                                                   |
 
 ### Mechanics
 
@@ -63,14 +55,6 @@ What's my role at the scoping & commitment phase of the funnel?
 
 ```
 We're handing off this framework to another team — walk me through the playbook
-```
-
-```
-Start a Tech Breakdown for this feature — walk me through the scope checklist
-```
-
-```
-Decompose this breakdown's Plan into tasks
 ```
 
 ```
