@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-tech-lead` plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3] - 2026-07-11
+
+### Changed
+
+- `AGENT.md`: workflow-orchestration paragraph and Cross-Plugin Integration section updated to remove references to the retired `starting-breakdown` / `developing-breakdown-spec` / `developing-breakdown-plan` / `decomposing-into-tasks` skills. Tech Breakdown drafting now points at the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository. Follows the skill removal in `bitwarden-delivery-tools` 3.0.0.
+
 ## [2.3.2] - 2026-06-15
 
 ### Changed
