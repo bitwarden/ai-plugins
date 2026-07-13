@@ -11,6 +11,7 @@ allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search
 | 🔴    | **Update VULN Status** | Child item has progressed (In Progress/Review) but VULN is still at a lower status                    |
 | 🟡    | **Mark Remediated**    | Child item is Done — set Remediation Date to merged PR date and move VULN to Remediated               |
 | 🟢    | **Verify & Close**     | Fix is in a release that has already shipped — verify in prod, add Confirmation Date, close HackerOne |
+| 🏁    | **Close Out**          | VULN is already Verified (fix confirmed in prod) — move the Jira ticket to Closed                     |
 | 🔵    | **Monitor**            | Work is actively in progress or in a pending release; no action needed yet                            |
 | ⚪    | **Waiting**            | Child item exists but hasn't started                                                                  |
 | ➖    | **No Child Item**      | VULN is Ready for Resolution but no engineering ticket linked yet                                     |
@@ -32,12 +33,14 @@ allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search
 Use `search_issues` with this JQL:
 
 ```
-project = VULN AND status not in (Done, Verified, Closed, Rejected, Resolved, Canceled) AND "Source" = "HackerOne" ORDER BY priority DESC, updated DESC
+project = VULN AND status not in (Done, Closed, Rejected, Resolved, Canceled) AND "Source" = "HackerOne" ORDER BY priority DESC, updated DESC
 ```
 
 Request fields: `summary`, `status`, `description`, `priority`, `created`, `updated`, `issuelinks`
 
 Paginate if needed (default max 50; use `nextPageToken` to get all).
+
+> **Note**: `Verified` is intentionally **not** excluded. A Verified VULN has had its fix confirmed in production but the Jira ticket has not yet been moved to `Closed`. These surface under the 🏁 Close Out token so the remaining status flip doesn't get forgotten. They need no child-item or GitHub lookups — skip Steps 2–4 for them and route straight to 🏁 in Step 5.
 
 ---
 
@@ -179,6 +182,9 @@ VULN status "Remediated":
   → PR in an upcoming/unreleased version?                      → 🔵 Monitor (release pending)
   → PR in a released, deployed version
     (verified by commit-presence check, not Jira Fix Version)? → 🟢 Verify & Close
+
+VULN status "Verified":
+  → Fix already confirmed in prod; ticket just needs closing   → 🏁 Move to Closed
 ```
 
 The **Remediation Date** should be the date the fix PR was merged to the default branch.
@@ -199,6 +205,7 @@ Use this template. Omit any section (including `<details>` blocks) that has zero
 | 🔴    | Need Status Update       | {n}   |
 | 🟡    | Ready to Mark Remediated | {n}   |
 | 🟢    | Ready to Verify & Close  | {n}   |
+| 🏁    | Ready to Close Out       | {n}   |
 | 🔵    | Monitoring               | {n}   |
 | ⚪    | Waiting                  | {n}   |
 | ➖    | Missing Child Item       | {n}   |
@@ -222,6 +229,12 @@ Use this template. Omit any section (including `<details>` blocks) that has zero
 | VULN            | Priority | Summary                        | HackerOne       | Child Item(s)   | PR / Release                         | Action                                                              |
 | --------------- | -------- | ------------------------------ | --------------- | --------------- | ------------------------------------ | ------------------------------------------------------------------- |
 | [VULN-529](...) | High     | Summary truncated to ~60 chars | [#3673748](...) | [PM-35250](...) | [#1234](...) → v2026.4.0 ✅ deployed | Verify fix in prod, add Confirmation Date, close HackerOne #3673748 |
+
+## 🏁 Close Out
+
+| VULN            | Priority | Summary                        | HackerOne       | VULN Status | Action                                             |
+| --------------- | -------- | ------------------------------ | --------------- | ----------- | -------------------------------------------------- |
+| [VULN-442](...) | Medium   | Summary truncated to ~60 chars | [#3673748](...) | Verified    | Move VULN to Closed (fix already verified in prod) |
 
 <details>
 <summary>🔵 Monitoring ({n} items — no action needed yet)</summary>
