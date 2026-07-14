@@ -20,6 +20,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 1.0.0   | Software engineer agent for a Bitwarden product team. Implements stories, tasks, and bugs with code quality, performance, security, and team comms in mind. |
 | [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                  |
+| [bw-telemetry](plugins/bw-telemetry/)                               | 0.1.0   | Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP                                                           |
 
 ## Usage
 

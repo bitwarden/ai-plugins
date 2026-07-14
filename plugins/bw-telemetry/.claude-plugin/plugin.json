@@ -1,0 +1,12 @@
+{
+  "name": "bw-telemetry",
+  "version": "0.1.0",
+  "description": "Claude Code hooks that emit metadata-only AI-usage telemetry (identity, git-linkage, MCP) as OTLP logs. Fail-open.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bw-telemetry",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["telemetry", "otlp", "hooks", "observability", "usage-metrics"]
+}
