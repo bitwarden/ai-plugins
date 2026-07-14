@@ -96,7 +96,7 @@
     {
       "name": "bitwarden-ai-telemetry",
       "source": "./plugins/bitwarden-ai-telemetry",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP."
     }
   ]
