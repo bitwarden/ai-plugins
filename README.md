@@ -6,6 +6,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 
 | Plugin                                                              | Version | Description                                                                                                                                                 |
 | ------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [bitwarden-ai-telemetry](plugins/bitwarden-ai-telemetry/)           | 0.1.0   | Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP                                                           |
 | [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.3.2   | Tech lead for technical planning, architecture coherence, and surfacing patterns to Technical Strategy Ideas                                                |
 | [bitwarden-shepherd](plugins/bitwarden-shepherd/)                   | 1.0.0   | Champion of a technical strategy — shepherds a TSI through evaluation into the funnel, then through to adoption                                             |
 | [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.2.8   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                                                               |
@@ -20,7 +21,6 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 1.0.0   | Software engineer agent for a Bitwarden product team. Implements stories, tasks, and bugs with code quality, performance, security, and team comms in mind. |
 | [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                  |
-| [bitwarden-ai-telemetry](plugins/bitwarden-ai-telemetry/)           | 0.1.0   | Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP                                                           |
 
 ## Usage
 
