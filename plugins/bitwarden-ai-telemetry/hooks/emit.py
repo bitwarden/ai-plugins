@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared OTLP-JSON log emitter for bw-telemetry hooks.
+"""Shared OTLP-JSON log emitter for bitwarden-ai-telemetry hooks.
 
 Sends one POST per call to the collector configured via BW_TELEMETRY_OTLP
 (normally set via managed-settings.json's `env` block). Never fails the
@@ -23,7 +23,7 @@ def emit(body_name, attrs):
           for k, v in attrs.items() if v]
     payload = {"resourceLogs": [{
         "resource": {"attributes": [
-            {"key": "service.name", "value": {"stringValue": "bw-telemetry"}}]},
+            {"key": "service.name", "value": {"stringValue": "bitwarden-ai-telemetry"}}]},
         "scopeLogs": [{"scope": {"name": "bw.telemetry.hooks"},
                        "logRecords": [{"timeUnixNano": str(time.time_ns()),
                                        "body": {"stringValue": body_name},

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the bw-telemetry plugin will be documented in this file.
+All notable changes to the bitwarden-ai-telemetry plugin will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of the `bw-telemetry` plugin. See the [README](README.md) for what it emits and how to configure it.
+- Initial release of the `bitwarden-ai-telemetry` plugin. See the [README](README.md) for what it emits and how to configure it.
 
 ### Notes
 

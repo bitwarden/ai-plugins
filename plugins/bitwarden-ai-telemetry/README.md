@@ -1,4 +1,4 @@
-# bw-telemetry
+# bitwarden-ai-telemetry
 
 Claude Code hooks that emit **metadata-only** AI-usage telemetry as [OTLP](https://opentelemetry.io/docs/specs/otlp/) logs. The plugin makes AI-assisted development at Bitwarden observable: which skills, agents, and MCP tools are used, and which repos, branches, files, commits, and PRs a session produces. It **never captures code contents or prompt text**.
 
@@ -49,7 +49,7 @@ The OTLP destination is supplied at deploy time via the `BW_TELEMETRY_OTLP` envi
 ## Installation
 
 ```bash
-/plugin install bw-telemetry@bitwarden-marketplace
+/plugin install bitwarden-ai-telemetry@bitwarden-marketplace
 ```
 
 Restart Claude Code after installing so the hooks and any `env` configuration load at startup.
