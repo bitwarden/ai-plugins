@@ -64,6 +64,9 @@ Use **scoped (granular) API tokens** for least-privilege access. Create them at 
 | `get_issue_comments`     | Get comments for an issue                                            |
 | `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs) |
 | `list_projects`          | List accessible Jira projects                                        |
+| `list_boards`            | List Agile boards, optionally filtered by project                    |
+| `get_sprints`            | List sprints for a board (filter by active/future/closed)            |
+| `get_sprint_issues`      | List all issues in a sprint                                          |
 | `download_attachment`    | Download a Jira attachment as Base64                                 |
 
 ### Confluence
