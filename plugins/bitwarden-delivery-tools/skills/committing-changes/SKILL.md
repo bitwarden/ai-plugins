@@ -5,6 +5,10 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 
 # Git Commit Conventions
 
+## Branch Check
+
+Check the current branch. If it's `main`, ask before staging or committing — offer to either take a branch name or generate one from the change (confirm before creating it). Then `git checkout -b <name>`.
+
 ## Commit Message Format
 
 ```

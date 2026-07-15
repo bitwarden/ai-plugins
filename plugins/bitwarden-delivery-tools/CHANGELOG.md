@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-31
+
+### Added
+
+- **`committing-changes` skill** — added a branch check step. If the current branch is `main` when the skill is invoked, the user is now asked to either provide a branch name or have Claude generate one, and the branch is switched before staging or committing.
+
 ## [2.3.0] - 2026-07-30
 
 ### Added
