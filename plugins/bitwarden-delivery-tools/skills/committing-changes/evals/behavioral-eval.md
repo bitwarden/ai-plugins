@@ -14,7 +14,7 @@ Tests the Branch Check step's actual behavior (not triggering — see `trigger-e
 ## Fixture recipe
 
 ```bash
-FIXROOT=/tmp/committing-changes-evals
+FIXTURE_ROOT=/tmp/committing-changes-evals
 make_fixture () {
   local dir="$1" branch="$2"
   mkdir -p "$dir"
@@ -29,8 +29,8 @@ make_fixture () {
   fi
   echo "updated content" >> "$dir/app.txt"
 }
-# on-main cases (A/B/C): make_fixture "$FIXROOT/<case>/repo" main
-# off-main case (D):     make_fixture "$FIXROOT/<case>/repo" feature/timeout-fix
+# on-main cases (A/B/C): make_fixture "$FIXTURE_ROOT/<case>/repo" main
+# off-main case (D):     make_fixture "$FIXTURE_ROOT/<case>/repo" feature/timeout-fix
 ```
 
 ## Cases
