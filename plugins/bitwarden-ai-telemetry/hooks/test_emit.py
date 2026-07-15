@@ -94,6 +94,16 @@ class EmitFailClosedTest(unittest.TestCase):
             emit_module.emit("bw.identity", {"bw.skill": "x"})
             urlopen.assert_not_called()
 
+    def test_module_reload_does_not_raise_on_malformed_collector(self):
+        # Every hook script does an unguarded `from emit import emit`, so
+        # this reload has to succeed even with a value urlsplit chokes on.
+        os.environ["BW_TELEMETRY_OTLP"] = "https://[bad"
+        importlib.reload(emit_module)  # must not raise
+        self.assertIsNone(emit_module.COLLECTOR)
+        with mock.patch("urllib.request.urlopen") as urlopen:
+            emit_module.emit("bw.identity", {"bw.skill": "x"})
+            urlopen.assert_not_called()
+
 
 class IsAllowedCollectorTest(unittest.TestCase):
     def test_bare_domain_is_allowed(self):
@@ -125,6 +135,10 @@ class IsAllowedCollectorTest(unittest.TestCase):
 
     def test_plain_http_is_rejected(self):
         self.assertFalse(emit_module._is_allowed_collector("http://ait.bitwarden.pw/v1/logs"))
+
+    def test_malformed_ipv6_bracket_syntax_is_rejected_not_raised(self):
+        # urlsplit raises ValueError on this bracket syntax.
+        self.assertFalse(emit_module._is_allowed_collector("https://[bad"))
 
 
 if __name__ == "__main__":

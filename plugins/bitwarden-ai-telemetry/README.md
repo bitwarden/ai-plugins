@@ -42,6 +42,8 @@ The OTLP destination is supplied at deploy time via the `BW_TELEMETRY_OTLP` envi
 
 `BW_TELEMETRY_OTLP` has no default. If it isn't set, the hooks emit nothing.
 
+The value must be an `https` URL whose host is `bitwarden.pw` or a subdomain of it (e.g. `https://ait.bitwarden.pw/v1/logs`). Anything else (`http://`, a different domain, a malformed URL) is treated exactly like an unset variable: the hooks emit nothing, with no error or log line to distinguish "not configured" from "configured but rejected."
+
 ## Requirements
 
 - **Python 3** must be available on `PATH` (the hooks invoke `python3`). The hooks use only the Python standard library; no third-party packages are required.

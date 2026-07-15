@@ -20,9 +20,14 @@ def _is_allowed_collector(url):
 
     Checks the parsed hostname, not the raw URL string, so a userinfo trick
     like https://ait.bitwarden.pw@evil.com/ (host is actually evil.com) can't
-    slip past a naive substring check.
+    slip past a naive substring check. urlsplit raises on some malformed
+    input (e.g. bad IPv6 bracket syntax); caught here so a bad value fails
+    the check instead of the exception escaping module import.
     """
-    parts = urlsplit(url)
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return False
     if parts.scheme != "https":
         return False
     host = parts.hostname or ""
