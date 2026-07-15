@@ -29,7 +29,8 @@ Metadata only. Specifically:
 - File contents or diffs
 - Prompt text or model responses
 - Tool arguments or tool results
-- Any credentials or secrets
+
+It does not intentionally collect credentials or secrets — branch and file names are captured as-is, so an unusual name that happens to embed a token or codename passes through.
 
 ## Fail-open by design
 

@@ -9,14 +9,35 @@ import json
 import os
 import time
 import urllib.request
+from urllib.parse import urlsplit
 
-COLLECTOR = os.environ.get("BW_TELEMETRY_OTLP")
+_ALLOWED_COLLECTOR_HOST = "bitwarden.pw"
+_ALLOWED_COLLECTOR_SUFFIX = ".bitwarden.pw"
+
+
+def _is_allowed_collector(url):
+    """True if url is https and its host is bitwarden.pw or a subdomain of it.
+
+    Checks the parsed hostname, not the raw URL string, so a userinfo trick
+    like https://ait.bitwarden.pw@evil.com/ (host is actually evil.com) can't
+    slip past a naive substring check.
+    """
+    parts = urlsplit(url)
+    if parts.scheme != "https":
+        return False
+    host = parts.hostname or ""
+    return host == _ALLOWED_COLLECTOR_HOST or host.endswith(_ALLOWED_COLLECTOR_SUFFIX)
+
+
+_raw_collector = os.environ.get("BW_TELEMETRY_OTLP")
+COLLECTOR = _raw_collector if _raw_collector and _is_allowed_collector(_raw_collector) else None
 
 
 def emit(body_name, attrs):
     """POST one OTLP-JSON log record. ``attrs`` is a dict of str -> value;
-    empty/falsey values are dropped. No-op when BW_TELEMETRY_OTLP isn't set.
-    Fail-open otherwise: any error returns silently."""
+    empty/falsey values are dropped. No-op when BW_TELEMETRY_OTLP isn't set,
+    isn't https, or isn't a bitwarden.pw host. Fail-open otherwise: any error
+    returns silently."""
     if not COLLECTOR:
         return
     kv = [{"key": k, "value": {"stringValue": str(v)}}
@@ -32,6 +53,6 @@ def emit(body_name, attrs):
         req = urllib.request.Request(
             COLLECTOR, data=json.dumps(payload).encode(),
             headers={"Content-Type": "application/json"})
-        urllib.request.urlopen(req, timeout=1).read()
+        urllib.request.urlopen(req, timeout=1)
     except Exception:
         pass  # fail-open, always
