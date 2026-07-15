@@ -53,6 +53,16 @@ Use **scoped (granular) API tokens** for least-privilege access. Create them at 
 | `read:jira-work` | Issues, comments, projects, attachments   |
 | `read:jira-user` | User display names on issues and comments |
 
+The Jira Agile (Software) endpoints behind `list_boards`, `get_sprints`, and `get_sprint_issues` require **granular** scopes — the classic `read:jira-work` scope does **not** grant access to the `/rest/agile/1.0` API. Add these granular scopes to the Jira token if you use the board/sprint tools:
+
+| Granular scope                   | Required for                              |
+| -------------------------------- | ----------------------------------------- |
+| `read:board-scope:jira-software` | `list_boards`                             |
+| `read:project:jira`              | `list_boards` (board project details)     |
+| `read:sprint:jira-software`      | `get_sprints`, `get_sprint_issues`        |
+| `read:issue-details:jira`        | `get_sprint_issues` (issue fields)        |
+| `read:jql:jira`                  | `get_sprint_issues` (sprint issue lookup) |
+
 ## MCP Tools
 
 ### Jira
