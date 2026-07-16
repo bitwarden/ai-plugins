@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `get_sprint_issues` — list all issues in a sprint
 - Documented the granular Jira Software OAuth scopes (`read:board-scope:jira-software`, `read:project:jira`, `read:sprint:jira-software`, `read:issue-details:jira`, `read:jql:jira`) required by the board/sprint tools — the Agile `/rest/agile/1.0` API is not covered by the classic `read:jira-work` scope
 
+### Changed
+
+- Extracted the shared issue formatter into `src/utils/format-issue.ts`, reused by `search_issues` and `get_sprint_issues` instead of duplicating it per tool
+
 ## [2.2.8] - 2026-07-01
 
 ### Security

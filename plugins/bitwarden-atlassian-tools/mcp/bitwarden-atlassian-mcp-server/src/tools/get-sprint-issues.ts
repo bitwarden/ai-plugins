@@ -9,32 +9,7 @@ import {
   GetSprintIssuesSchema,
   ToolDefinition,
 } from "../utils/validation.js";
-import { extractPlainTextTruncated } from "../utils/adf.js";
-
-/**
- * Format issue for display in results.
- * Mirrors the formatter in search-issues.ts (issue formatting is duplicated
- * per-tool in this codebase; there is no shared issue formatter).
- */
-function formatIssue(issue: any): string {
-  const fields = issue.fields;
-  const assignee = fields.assignee?.displayName || "Unassigned";
-  const priority = fields.priority?.name || "None";
-  const labels = fields.labels?.join(", ") || "None";
-
-  return `
-**[${issue.key}]** ${fields.summary || "No summary"}
-- Status: ${fields.status?.name || "Unknown"}
-- Type: ${fields.issuetype?.name || "Unknown"}
-- Priority: ${priority}
-- Assignee: ${assignee}
-- Reporter: ${fields.reporter?.displayName || "Unknown"}
-${fields.created ? `- Created: ${new Date(fields.created).toLocaleDateString()}` : ""}
-${fields.updated ? `- Updated: ${new Date(fields.updated).toLocaleDateString()}` : ""}
-- Labels: ${labels}
-${fields.description ? `- Description: ${extractPlainTextTruncated(fields.description)}` : ""}
-`;
-}
+import { formatIssue } from "../utils/format-issue.js";
 
 /**
  * Handler function for get-sprint-issues tool
