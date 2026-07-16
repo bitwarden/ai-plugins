@@ -6,6 +6,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 
 | Plugin                                                              | Version | Description                                                                                                                                                 |
 | ------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [bitwarden-ai-telemetry](plugins/bitwarden-ai-telemetry/)           | 1.0.0   | Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP                                                           |
 | [bitwarden-tech-lead](plugins/bitwarden-tech-lead/)                 | 2.3.2   | Tech lead for technical planning, architecture coherence, and surfacing patterns to Technical Strategy Ideas                                                |
 | [bitwarden-shepherd](plugins/bitwarden-shepherd/)                   | 1.0.0   | Champion of a technical strategy — shepherds a TSI through evaluation into the funnel, then through to adoption                                             |
 | [bitwarden-atlassian-tools](plugins/bitwarden-atlassian-tools/)     | 2.3.0   | Read-only Atlassian access via MCP server with deep Jira issue research skill                                                                               |
