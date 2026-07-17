@@ -23,6 +23,14 @@ its life:
     in YAML frontmatter, so the model sees the description in its available
     surface, then watches for that temp token. The temp file is always
     cleaned up. This mechanism is ported from skill-creator's `run_eval.py`.
+    Concurrent workers testing the same skill would otherwise write several
+    byte-identical-description clones into that shared directory at once,
+    which the model cannot reliably tell apart, producing false negatives
+    unrelated to the skill's actual description. An flock scoped to the
+    skill's name serializes the write/run/cleanup critical section per
+    skill, so only one clone of a given skill exists at any instant no
+    matter how many `--num-workers` are testing it; concurrent isolated
+    evals of *different* skills are not serialized against each other.
 
 Both modes share one deliberate behavior: they scan **tolerantly** past
 unrelated `Skill` / `Read` tool_use calls rather than giving up on the first
@@ -38,6 +46,7 @@ stays a clean, diffable artifact.
 """
 
 import argparse
+import fcntl
 import json
 import os
 import select
@@ -308,43 +317,57 @@ def run_query_isolated(
     repeated runs never collide on the same temp filename. Scans tolerantly,
     exactly like installed mode (a deliberate divergence from skill-creator's
     stricter first-tool-use gate), then always cleans up the temp file.
+
+    Holds an flock scoped to ``skill_name`` across the write/run/cleanup
+    critical section, so only one clone of this skill exists in the shared
+    commands directory at a time. Without it, concurrent workers testing the
+    same skill write several byte-identical-description clones at once, and
+    the model has no way to tell them apart, producing false negatives
+    unrelated to the skill's actual description.
     """
     unique_id = uuid.uuid4().hex[:8]
     clean_name = f"{skill_name}-skill-{unique_id}"
     commands_dir = Path(project_root) / ".claude" / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
     command_file = commands_dir / f"{clean_name}.md"
+    lock_file = commands_dir / f".trigger_eval_isolated_{skill_name}.lock"
 
+    lock_fd = open(lock_file, "w")
     try:
-        commands_dir.mkdir(parents=True, exist_ok=True)
-        # YAML block scalar avoids breaking on quotes/colons in the description.
-        indented_desc = "\n  ".join(description.split("\n"))
-        command_file.write_text(
-            "---\n"
-            "description: |\n"
-            f"  {indented_desc}\n"
-            "---\n\n"
-            f"# {skill_name}\n\n"
-            f"This skill handles: {description}\n"
-        )
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        try:
+            # YAML block scalar avoids breaking on quotes/colons in the description.
+            indented_desc = "\n  ".join(description.split("\n"))
+            command_file.write_text(
+                "---\n"
+                "description: |\n"
+                f"  {indented_desc}\n"
+                "---\n\n"
+                f"# {skill_name}\n\n"
+                f"This skill handles: {description}\n"
+            )
 
-        cmd = [
-            "claude",
-            "-p", query,
-            "--output-format", "stream-json",
-            "--verbose",
-            "--include-partial-messages",
-            "--model", model,
-        ]
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            cwd=str(project_root),
-            env=_base_env(),
-        )
-        return _scan_process(process, clean_name, exclude_skills, timeout)
+            cmd = [
+                "claude",
+                "-p", query,
+                "--output-format", "stream-json",
+                "--verbose",
+                "--include-partial-messages",
+                "--model", model,
+            ]
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                cwd=str(project_root),
+                env=_base_env(),
+            )
+            return _scan_process(process, clean_name, exclude_skills, timeout)
+        finally:
+            command_file.unlink(missing_ok=True)
     finally:
-        command_file.unlink(missing_ok=True)
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        lock_fd.close()
 
 
 # ---------------------------------------------------------------------------

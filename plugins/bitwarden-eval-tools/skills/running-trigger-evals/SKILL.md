@@ -1,16 +1,7 @@
 ---
 name: running-trigger-evals
-description: Runs and reports reproducible trigger-rate evals for a skill's
-  description/when_to_use text: whether it fires on the real phrasings it's
-  meant to catch, stays silent on near-misses, and doesn't collide with
-  sibling skills. Use when editing a skill's description or when_to_use
-  frontmatter and confirming triggering hasn't regressed, when a net-new
-  skill needs an eval set and baseline, or when asked to "run a trigger
-  eval", "check the trigger rate", "test if my skill still fires",
-  "benchmark triggering", "compare against baseline", or "did my
-  description change break triggering". Standard tool for the Triggering
-  assertion category specifically; use skill-creator for Structure and
-  Behavior evals.
+description: Runs and reports a Bitwarden skill's trigger-rate eval. Use when users want to check a skill's trigger rate, benchmark its triggering against a recorded baseline, verify a description or when_to_use edit didn't regress triggering, or set up a triggering eval and baseline for a net-new Bitwarden skill.
+allowed-tools: "Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/trigger_eval.py:*), Bash(mkdir -p ${CLAUDE_PLUGIN_DATA}/running-trigger-evals/eval-reports:*), Write(${CLAUDE_PLUGIN_DATA}/running-trigger-evals/eval-reports/*)"
 version: 1.0.0
 ---
 
@@ -55,16 +46,27 @@ Before running, collect:
    real phrasings, and near-miss / out-of-scope negatives. Keep the
    true/false split roughly even; the runner warns to stderr when it is
    skewed by more than ~20%, but it never blocks.
-2. **Choose the mode, then run the script via Bash.** Redirect stdout to a
-   JSON file; stderr carries progress and diagnostics:
+2. **Choose the mode, then run the script via Bash.** Run the following as
+   two separate Bash calls, not bundled into one command: each matches its
+   own `allowed-tools` pattern independently, and a bundled command may not
+   match either.
+
+   First, create the report directory if it doesn't exist yet:
 
    ```bash
-   python3 <plugin>/skills/running-trigger-evals/scripts/trigger_eval.py \
+   mkdir -p ${CLAUDE_PLUGIN_DATA}/running-trigger-evals/eval-reports
+   ```
+
+   Then run the eval, redirecting stdout into that directory; stderr carries
+   progress and diagnostics:
+
+   ```bash
+   python3 ${CLAUDE_SKILL_DIR}/scripts/trigger_eval.py \
      --mode installed \
      --eval-set path/to/trigger-eval.json \
      --skill-token my-skill-token \
      --runs-per-query 3 --num-workers 8 --timeout 45 \
-     > /tmp/eval-report.json
+     > ${CLAUDE_PLUGIN_DATA}/running-trigger-evals/eval-reports/my-skill-token.json
    ```
 
    For an isolated skill, swap `--mode isolated --skill-path path/to/skill`
