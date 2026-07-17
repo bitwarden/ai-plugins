@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-07-09
+
+### Changed
+
+- `committing-changes`: added a "Structure Commits by Intent" section instructing that changes be structured by intent, breaking a multi-intent working directory into a set of commits.
+- `committing-changes`: added a "Follow-up Fixes on an Open PR" section recommending a rebase to replace the originating intent commit instead of stacking a separate fix commit.
+
 ## [2.0.0] - 2026-06-19
 
 ### Added

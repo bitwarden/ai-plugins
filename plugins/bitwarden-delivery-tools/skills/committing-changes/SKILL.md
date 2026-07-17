@@ -11,6 +11,8 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 [PM-XXXXX] <type>: <imperative summary>
 
 <optional body explaining why, not what>
+
+<optional trailers, jira ticket: "Jira-Ticket: PM-XXXXX", github issue: "GitHub-Issue: #1234", etc.>
 ```
 
 ### Rules
@@ -25,6 +27,9 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 
 Users reported confusion about when biometric prompts appear.
 This adds a configurable timeout setting to the security preferences.
+
+Jira-Ticket: PM-12345
+GitHub-Issue: #6789
 ```
 
 Ambiguous cases — choosing between similar types:
@@ -44,6 +49,18 @@ Only the first commit on a branch needs the full format (ticket prefix, type key
 ```
 Update error handling in login flow
 ```
+
+---
+
+## Structure Commits by Intent
+
+Changes should be structured by intent. If there is more than one intent in the working directory / staged, break down the changes into a set of commits — one intent per commit (a refactor, a new helper, a feature, a bugfix, a test addition, a rename), each independently reviewable.
+
+---
+
+## Follow-up Fixes on an Open PR
+
+When committing a follow-up fix on a PR that is not yet merged, consider doing a rebase so that the single intent commit that introduced this change gets replaced, rather than stacking a separate "fix" commit on top. This keeps history structured by intent (see above): the branch reads as one clean commit per intent instead of a change plus a trail of corrections.
 
 ---
 
