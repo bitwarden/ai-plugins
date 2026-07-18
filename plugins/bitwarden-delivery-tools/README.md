@@ -52,8 +52,8 @@ The lifecycle skills follow the same principle: they describe the funnel and tra
 
 Several skills in this plugin reference tools or skills provided by sibling plugins. Install these alongside `bitwarden-delivery-tools` for full functionality:
 
-- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `architecting-solutions`, `navigating-the-initiative-funnel`, and the breakdown skills.
-- **`bitwarden-security-engineer`** — provides `Skill(threat-modeling)`, referenced from `architecting-solutions` for deep security analysis.
+- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel` and the breakdown skills.
+- **`bitwarden-security-engineer`** — provides `Skill(bitwarden-security-context)` and `Skill(threat-modeling)`, referenced from `architecting-solutions`.
 
 ## Installation
 
