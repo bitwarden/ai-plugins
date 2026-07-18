@@ -19,6 +19,10 @@ Thumbs.db
 !.vscode/extensions.json
 .history/*
 
+# Python
+__pycache__/
+*.pyc
+
 # Node
 node_modules
 pnpm-debug.log
