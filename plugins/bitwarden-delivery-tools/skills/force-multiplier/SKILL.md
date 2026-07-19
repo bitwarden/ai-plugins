@@ -70,4 +70,4 @@ Of these, `creating-pull-request` is **interactive** — it prompts per PR, whic
 - Reuse the existing `gh` auth; never inject credentials or commit secrets.
 - `--dry-run` performs everything through validation and the secrets-scan, then stops before **commit, push, and PR** — it mutates no git state, local or remote.
 
-Full detail is in `references/safety-and-self-checks.md`. Deliberately deferred scope is tracked in `references/deferred.md`.
+Full detail is in `references/safety-and-self-checks.md`.

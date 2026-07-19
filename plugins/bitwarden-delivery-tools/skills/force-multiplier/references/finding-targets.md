@@ -2,7 +2,7 @@
 
 The engine stays generic; _this_ is where it learns to find things. Discovery is keyed by **signal type** — the shape of evidence that marks a target as relevant — not by any specific change. Pick the technique that matches the signal, fill in the specifics, and you have an applicability filter.
 
-The engine is target-system-agnostic — a target is any software system in the Bitwarden ecosystem that Claude can reach. The connection point available today is GitHub, so the enumeration and signal techniques below are grounded in `gh ... --owner bitwarden`; authentication is the already-configured `gh` session — never inject tokens. As other connection points become available to Claude, the same signal-type approach extends to them; discovery for other target systems (e.g. Atlassian) is parked in `deferred.md`.
+The engine is target-system-agnostic — a target is any software system in the Bitwarden ecosystem that Claude can reach. The connection point available today is GitHub, so the enumeration and signal techniques below are grounded in `gh ... --owner bitwarden`; authentication is the already-configured `gh` session — never inject tokens. As other connection points become available to Claude, the same signal-type approach extends to them; discovery for other target systems (e.g. Atlassian) is not yet implemented.
 
 ## Enumerate first
 
