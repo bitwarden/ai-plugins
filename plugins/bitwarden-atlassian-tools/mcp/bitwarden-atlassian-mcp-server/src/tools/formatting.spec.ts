@@ -13,6 +13,9 @@ const mockGetIssueComments = vi.fn();
 const mockGetRemoteLinks = vi.fn();
 const mockSearchIssues = vi.fn();
 const mockListProjects = vi.fn();
+const mockListBoards = vi.fn();
+const mockGetSprints = vi.fn();
+const mockGetSprintIssues = vi.fn();
 
 vi.mock("../jira/client.js", () => {
   return {
@@ -23,6 +26,9 @@ vi.mock("../jira/client.js", () => {
         getRemoteLinks: mockGetRemoteLinks,
         searchIssues: mockSearchIssues,
         listProjects: mockListProjects,
+        listBoards: mockListBoards,
+        getSprints: mockGetSprints,
+        getSprintIssues: mockGetSprintIssues,
       };
     }),
   };
@@ -32,6 +38,9 @@ import getIssueTool from "./get-issue.js";
 import getIssueCommentsTool from "./get-issue-comments.js";
 import getIssueRemoteLinksTool from "./get-issue-remote-links.js";
 import searchIssuesTool from "./search-issues.js";
+import listBoardsTool from "./list-boards.js";
+import getSprintsTool from "./get-sprints.js";
+import getSprintIssuesTool from "./get-sprint-issues.js";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -616,6 +625,185 @@ describe("get_issue_remote_links formatting", () => {
     });
 
     expect(result).toContain("Error retrieving remote links");
+    expect(result).toContain("JIRA authentication failed");
+  });
+});
+
+describe("list_boards formatting", () => {
+  it("should format boards with type and project location", async () => {
+    mockListBoards.mockResolvedValueOnce({
+      values: [
+        {
+          id: 42,
+          name: "Platform Board",
+          type: "scrum",
+          location: {
+            projectKey: "PM",
+            projectName: "Platform",
+          },
+        },
+      ],
+    });
+
+    const result = await listBoardsTool.handler({});
+
+    expect(result).toContain("# JIRA Boards");
+    expect(result).toContain("**Found:** 1 board(s)");
+    expect(result).toContain("**Platform Board** (ID: 42)");
+    expect(result).toContain("Type: scrum");
+    expect(result).toContain("Project: PM (Platform)");
+  });
+
+  it("should handle boards without a location", async () => {
+    mockListBoards.mockResolvedValueOnce({
+      values: [{ id: 7, name: "Orphan Board", type: "kanban" }],
+    });
+
+    const result = await listBoardsTool.handler({});
+
+    expect(result).toContain("**Orphan Board** (ID: 7)");
+    expect(result).toContain("Type: kanban");
+    expect(result).not.toContain("Project:");
+  });
+
+  it("should handle empty board list", async () => {
+    mockListBoards.mockResolvedValueOnce({ values: [] });
+
+    const result = await listBoardsTool.handler({});
+
+    expect(result).toContain("No boards found");
+  });
+
+  it("should return error message on client failure", async () => {
+    mockListBoards.mockRejectedValueOnce(new Error("JIRA access forbidden"));
+
+    const result = await listBoardsTool.handler({});
+
+    expect(result).toContain("Error listing boards");
+    expect(result).toContain("JIRA access forbidden");
+  });
+});
+
+describe("get_sprints formatting", () => {
+  it("should format sprints with state, dates, and goal", async () => {
+    mockGetSprints.mockResolvedValueOnce({
+      values: [
+        {
+          id: 101,
+          name: "Sprint 1",
+          state: "active",
+          startDate: "2026-01-01T00:00:00.000Z",
+          endDate: "2026-01-14T00:00:00.000Z",
+          goal: "Ship the login flow",
+        },
+      ],
+    });
+
+    const result = await getSprintsTool.handler({ boardId: 42 });
+
+    expect(result).toContain("# Sprints for Board 42");
+    expect(result).toContain("**Sprint 1** (ID: 101)");
+    expect(result).toContain("State: active");
+    expect(result).toContain("Goal: Ship the login flow");
+  });
+
+  it("should omit optional fields when absent", async () => {
+    mockGetSprints.mockResolvedValueOnce({
+      values: [{ id: 102, name: "Sprint 2", state: "future" }],
+    });
+
+    const result = await getSprintsTool.handler({ boardId: 42 });
+
+    expect(result).toContain("**Sprint 2** (ID: 102)");
+    expect(result).toContain("State: future");
+    expect(result).not.toContain("Goal:");
+    expect(result).not.toContain("Start:");
+  });
+
+  it("should handle empty sprint list", async () => {
+    mockGetSprints.mockResolvedValueOnce({ values: [] });
+
+    const result = await getSprintsTool.handler({ boardId: 42 });
+
+    expect(result).toContain("No sprints found");
+  });
+
+  it("should return error message on client failure", async () => {
+    mockGetSprints.mockRejectedValueOnce(new Error("JIRA resource not found"));
+
+    const result = await getSprintsTool.handler({ boardId: 42 });
+
+    expect(result).toContain("Error retrieving sprints");
+    expect(result).toContain("JIRA resource not found");
+  });
+});
+
+describe("get_sprint_issues formatting", () => {
+  it("should format sprint issues", async () => {
+    mockGetSprintIssues.mockResolvedValueOnce({
+      total: 1,
+      issues: [
+        {
+          key: "PM-1",
+          fields: {
+            summary: "Sprint issue",
+            status: { name: "In Progress" },
+            issuetype: { name: "Story" },
+            priority: { name: "High" },
+            assignee: { displayName: "John" },
+            reporter: { displayName: "Jane" },
+            labels: ["sprint-work"],
+          },
+        },
+      ],
+    });
+
+    const result = await getSprintIssuesTool.handler({ sprintId: 101 });
+
+    expect(result).toContain("# Issues in Sprint 101");
+    expect(result).toContain("[PM-1]");
+    expect(result).toContain("Sprint issue");
+    expect(result).toContain("Status: In Progress");
+  });
+
+  it("should return a message for an empty sprint", async () => {
+    mockGetSprintIssues.mockResolvedValueOnce({ total: 0, issues: [] });
+
+    const result = await getSprintIssuesTool.handler({ sprintId: 101 });
+
+    expect(result).toContain("No issues found in sprint 101");
+  });
+
+  it("should show a note when more issues are available", async () => {
+    mockGetSprintIssues.mockResolvedValueOnce({
+      total: 50,
+      issues: [
+        {
+          key: "PM-1",
+          fields: {
+            summary: "Issue",
+            status: { name: "Open" },
+            issuetype: { name: "Task" },
+            priority: { name: "Medium" },
+            labels: [],
+          },
+        },
+      ],
+    });
+
+    const result = await getSprintIssuesTool.handler({ sprintId: 101 });
+
+    expect(result).toContain("More issues available");
+  });
+
+  it("should return error message on client failure", async () => {
+    mockGetSprintIssues.mockRejectedValueOnce(
+      new Error("JIRA authentication failed"),
+    );
+
+    const result = await getSprintIssuesTool.handler({ sprintId: 101 });
+
+    expect(result).toContain("Error retrieving sprint issues");
     expect(result).toContain("JIRA authentication failed");
   });
 });

@@ -48,7 +48,7 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.2.8",
+      "version": "2.3.0",
       "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments"
     },
     {
@@ -92,6 +92,12 @@
       "source": "./plugins/bitwarden-design-tools",
       "version": "0.1.0",
       "description": "Design toolkit for Bitwarden — non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
+    },
+    {
+      "name": "bitwarden-ai-telemetry",
+      "source": "./plugins/bitwarden-ai-telemetry",
+      "version": "1.0.0",
+      "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP."
     }
   ]
 }
