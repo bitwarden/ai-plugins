@@ -130,11 +130,10 @@ At each boundary crossing:
 
 ## Architecture Decision Alignment
 
-Before evaluating a design, check Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/) for existing decisions relevant to the components under review. A security architecture review validates alignment with documented decisions, not just general secure-design patterns:
+Before evaluating a design, check Bitwarden's Architecture Decision Records for existing decisions relevant to the components under review — see `${CLAUDE_PLUGIN_ROOT}/references/adr-alignment.md` for the ground rules (conflict = finding, undocumented significant decision = gap, verify status before citing). Applied to an architecture review specifically:
 
-- **Conflict with an accepted ADR is a finding.** Cite the ADR and state whether the implementation should change or the deviation needs its own ADR justifying the exception.
-- **A significant undocumented decision is a gap.** New trust boundaries, new auth patterns, new data stores, or other consequential choices with no corresponding ADR should be flagged so the decision gets recorded, not just implemented.
-- **Verify status before citing.** Confirm an ADR is still accepted (not superseded or deprecated) before treating it as a current constraint.
+- **Cite it, don't just flag it.** When a design conflicts with an accepted ADR, name the ADR and state whether the implementation should change or the deviation needs its own ADR justifying the exception.
+- **Watch for these gap triggers.** New trust boundaries, new auth patterns, new data stores, or other consequential choices with no corresponding ADR are exactly the kind of significant decision that should be flagged so it gets recorded, not just implemented.
 
 ## Reference Material
 
