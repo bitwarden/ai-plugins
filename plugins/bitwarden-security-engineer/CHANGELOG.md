@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-10
+
+### Changed
+
+- `auditing-hackerone-vulns` skill: stopped excluding `Verified` VULN tickets from the audit query. A Verified VULN has had its fix confirmed in production but the Jira ticket still needs to be moved to `Closed`, and previously these dropped out of the report entirely. They now surface under a new 🏁 Close Out action token so the remaining status flip isn't forgotten. Verified tickets skip the child-item and GitHub release-inclusion steps since the fix is already confirmed.
+
 ## [1.2.0] - 2026-05-08
 
 ### Added
