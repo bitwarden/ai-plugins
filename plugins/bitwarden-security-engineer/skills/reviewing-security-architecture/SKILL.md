@@ -128,6 +128,14 @@ At each boundary crossing:
 - Assume the network is compromised — encrypt all internal communication
 - Validate data from internal services just as rigorously as external input
 
+## Architecture Decision Alignment
+
+Before evaluating a design, check Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/) for existing decisions relevant to the components under review. A security architecture review validates alignment with documented decisions, not just general secure-design patterns:
+
+- **Conflict with an accepted ADR is a finding.** Cite the ADR and state whether the implementation should change or the deviation needs its own ADR justifying the exception.
+- **A significant undocumented decision is a gap.** New trust boundaries, new auth patterns, new data stores, or other consequential choices with no corresponding ADR should be flagged so the decision gets recorded, not just implemented.
+- **Verify status before citing.** Confirm an ADR is still accepted (not superseded or deprecated) before treating it as a current constraint.
+
 ## Reference Material
 
 For detailed lookup tables and code examples, consult:

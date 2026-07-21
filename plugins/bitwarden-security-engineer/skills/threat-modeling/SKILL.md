@@ -9,10 +9,11 @@ Bitwarden follows a 4-phase engagement model for security work. This skill prima
 
 ### Phase 1: Initial Security Assessment (Engineering Team)
 
-1. Create data flow diagrams (Mermaid, Excalidraw, or Structurizr)
-2. Define security requirements separate from product requirements
-3. Propose security definitions (threat model + security goals)
-4. Identify initial threats using STRIDE (see `references/stride-framework.md`)
+1. Check Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/) for existing decisions covering the system or components under review — a threat model should align with already-accepted architecture, not silently re-derive or contradict it
+2. Create data flow diagrams (Mermaid, Excalidraw, or Structurizr)
+3. Define security requirements separate from product requirements
+4. Propose security definitions (threat model + security goals)
+5. Identify initial threats using STRIDE (see `references/stride-framework.md`)
 
 ### Phase 2: AppSec Team Review (AppSec + Engineering)
 
