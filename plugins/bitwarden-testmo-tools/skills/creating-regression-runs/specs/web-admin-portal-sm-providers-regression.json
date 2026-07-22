@@ -1,0 +1,22 @@
+{
+  "project_id": 1,
+  "run_name": "Web Regression — Admin Portal / SM / Providers (<period>)",
+  "run_state_id": 7,
+  "tags": ["regression"],
+  "filters": {
+    "folder_paths": [
+      "Web > Provider Portal",
+      "Web > Secrets Manager",
+      "Web > Reseller Managed Orgs",
+      "Web > Admin Portal",
+      "Web > Shared > Navigation > Provider Portal",
+      "Web > Shared > Navigation > Product Switcher",
+      "Web > Shared > Navigation > Product Nav in Side Bar",
+      "Web > Shared > Navigation > Disable SM Advertisements"
+    ],
+    "include_subfolders": true,
+    "test_type_ids": [19, 20],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 23, 24]
+  }
+}
