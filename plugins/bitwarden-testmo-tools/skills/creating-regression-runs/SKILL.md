@@ -71,6 +71,9 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 Every key under `filters` is optional — omit a key to skip that dimension. A case must match **all**
 provided keys (keys are ANDed; multi-value lists within a key are ORed). Keys:
 
+- `tags` — Testmo tag names or ids, applied **server-side** by the `/cases` API (`?tags=...`), then combined
+  with any other filters. A tag-only spec (e.g. `["oldnew"]`) needs nothing else. Prefer the tag **id** when
+  a name is ambiguous — several tag names in project 1 are duplicated.
 - `folder_paths` — folders by readable path, e.g. `"Web > Password Manager"`. Each expands to that folder
   **and all descendants** (set `include_subfolders: false` for exact-folder-only). Paths are OR'd. The
   script resolves paths against the live folder tree and **fails fast** if any path is unmatched, so specs
