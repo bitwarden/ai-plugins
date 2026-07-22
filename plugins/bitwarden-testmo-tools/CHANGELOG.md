@@ -21,3 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   skill
 - First captured spec `specs/web-password-manager-regression.json` (Web › Password Manager regression,
   202 cases as of 2026-07-22) plus filter-spec template
+- Additional captured specs: Web Admin Console (180), Web Admin Portal/SM/Providers (70), Old Client/New
+  Server (tag `oldnew`, 31), Mobile iOS (step-1 = 203; the Configuration=Android subtraction to ~148 is a
+  documented manual UI step, as Testmo's API cannot filter cases by configuration)

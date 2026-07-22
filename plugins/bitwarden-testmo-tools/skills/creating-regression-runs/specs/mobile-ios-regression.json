@@ -1,0 +1,15 @@
+{
+  "_comment": "Mobile iOS regression. TWO-STEP RUN — the API only reproduces step 1. Step 1 (this spec) = Folder Mobile + Active + Regression/Smoke, excluding automation types Automated(10) and Automated-iOS(24) → 203 cases as of 2026-07-22. STEP 2 IS MANUAL: after creating this run, in the Testmo UI clear the filters, select Configuration = Android, and REMOVE those from the run to reach the net ~148. Reason: Testmo's /cases API cannot filter by configuration and exposes no per-case config assignment, so the -55 Android-config subtraction cannot be automated. config_id 3 = iOS.",
+  "project_id": 1,
+  "run_name": "Mobile — iOS (<period>)",
+  "run_state_id": 7,
+  "config_id": 3,
+  "tags": ["regression"],
+  "filters": {
+    "folder_paths": ["Mobile"],
+    "include_subfolders": true,
+    "test_type_ids": [19, 20],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 24]
+  }
+}
