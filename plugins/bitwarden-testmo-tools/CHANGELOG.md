@@ -28,3 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--milestone-id` and `--period` CLI options to link runs to an existing milestone and fill the
   `<period>` placeholder in a run name. Milestones themselves must be created in the Testmo UI — the API
   has no milestone-create route (verified); linking a run via `milestone_id` is supported and verified.
+- `setup_release_runs.py` orchestrator plus `release-profiles.json`: create every run for a release
+  (`partial`/`full`, where `full` extends `partial`) in one pass, linked to a milestone resolved by name.
+  Dry-run prints a per-run case-count summary; `--create` posts them all. Fetches cases/folders once for
+  the whole set.

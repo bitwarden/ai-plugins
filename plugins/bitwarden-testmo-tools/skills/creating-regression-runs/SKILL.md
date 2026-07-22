@@ -124,16 +124,32 @@ groups releases as a parent `YYYY.M.0 Release` milestone with `… Manual Regres
   the UI), then either put `milestone_id` in each spec or pass `--milestone-id <id>` at run time — verified
   to attach the run to the milestone.
 
-Per-period flow:
+## Setting up a whole release (recommended)
+
+Use `setup_release_runs.py` to create every run for a release in one pass, linked to a milestone.
+Release membership lives in `release-profiles.json` — each profile lists its specs, and a profile may
+`extends` another (`full` is a superset of `partial`).
 
 ```bash
-# 1. Create "2026.8.0 Manual Regression" in the Testmo UI, note its id (say 251).
-# 2. Create each run linked to it, filling the <period> placeholder:
-python3 scripts/testmo_create_run.py --spec specs/web-password-manager-regression.json \
-    --period 2026.8.0 --milestone-id 251 --create
-# ...repeat for each spec.
+# 1. Create the period's milestone in the Testmo UI, e.g. "2026.8.0 Manual Regression".
+# 2. Dry-run the whole release (prints a run/case-count summary; creates nothing):
+python3 scripts/setup_release_runs.py --release full --milestone-name "2026.8.0 Manual Regression"
+# 3. Create them all once the summary looks right:
+python3 scripts/setup_release_runs.py --release full --milestone-name "2026.8.0 Manual Regression" --create
 ```
+
+It resolves the milestone by name (fails if missing/ambiguous — the API can't create milestones), derives
+`--period` from the milestone name (override with `--period`), fetches cases/folders once for the whole
+set, and links every run to the milestone. Default project is 1; override with `--project` (e.g. 2 for
+sandbox testing).
+
+For a single run, `testmo_create_run.py --spec <file> [--milestone-id N] [--period X]` still works.
+
+## Per-run counts drift
+
+Case counts change as the repository evolves — a spec that matched 202 last cycle may match 196 this
+cycle. That is expected; the tooling always reflects live data. Review the dry-run summary each period.
 
 ## Not yet implemented (next steps)
 
-- Optional helper to create all specs' runs in one pass for a period.
+- Seed the `full` profile's additional specs as they are captured.
