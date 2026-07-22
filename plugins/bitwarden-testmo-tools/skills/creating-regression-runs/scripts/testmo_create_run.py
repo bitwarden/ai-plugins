@@ -5,6 +5,8 @@ Reproduces the manual "filter cases -> create run" workflow via the API so it is
 Read-only unless --create is passed. Never prints the API key.
 
 Filter model (all keys under "filters" are optional; a case must match every key present):
+  tags                    list of Testmo tag names or ids. Applied server-side via the /cases API
+                          (?tags=...), then combined with any other filters below. e.g. ["oldnew"].
   folder_paths            list of folder paths, e.g. "Web > Password Manager". Matched against the
                           project folder tree; each expands to that folder AND all descendants
                           (unless include_subfolders is false). Paths are OR'd together.
@@ -38,14 +40,21 @@ def call(method, path, body=None):
         sys.exit(f"curl failed: {out.stderr.strip()}")
     return json.loads(out.stdout)
 
-def fetch_all(project, resource):
+def fetch_all(project, resource, query=""):
     out, page = [], 1
+    sep = "&" if query else ""
     while True:
-        d = call("GET", f"/projects/{project}/{resource}?page={page}")
+        d = call("GET", f"/projects/{project}/{resource}?{query}{sep}page={page}")
         out += d.get("result", [])
         if not d.get("next_page"):
             return out
         page += 1
+
+def fetch_cases(project, filters):
+    """Fetch repository cases, applying any tag filter server-side."""
+    tags = filters.get("tags")
+    query = ("tags=" + ",".join(str(t) for t in tags)) if tags else ""
+    return fetch_all(project, "cases", query)
 
 def build_folder_index(folders):
     by_id = {f["id"]: f for f in folders}
@@ -139,7 +148,7 @@ def main():
             sys.exit(f"\n{len(unmatched)} folder reference(s) did not resolve — fix the spec before continuing.")
         print(f"  => {len(folder_ids)} folders in scope\n")
 
-    cases = fetch_all(project, "cases")
+    cases = fetch_cases(project, filters)
     selected = [c for c in cases if matches(c, filters, folder_ids)]
     ids = [c["id"] for c in selected]
 
