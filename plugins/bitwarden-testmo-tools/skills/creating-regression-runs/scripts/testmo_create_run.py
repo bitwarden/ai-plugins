@@ -78,14 +78,17 @@ def subtree(root, children):
         stack += children.get(n, [])
     return seen
 
-def resolve_folders(spec_filters, project):
-    """Return (folder_id_set, notes). Empty set means 'no folder filter'."""
+def resolve_folders(spec_filters, project, folders=None):
+    """Return (folder_id_set, notes). Empty set means 'no folder filter'.
+
+    Pass a prefetched `folders` list to avoid refetching (e.g. when resolving many specs)."""
     want_paths = spec_filters.get("folder_paths") or []
     want_ids = spec_filters.get("folder_ids") or []
     if not want_paths and not want_ids:
         return None, []
     include_sub = spec_filters.get("include_subfolders", True)
-    folders = fetch_all(project, "folders")
+    if folders is None:
+        folders = fetch_all(project, "folders")
     by_id, children, paths = build_folder_index(folders)
     norm = {p.strip().lower(): fid for fid, p in paths.items()}
     roots, notes = [], []
