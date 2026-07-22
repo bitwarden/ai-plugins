@@ -22,3 +22,7 @@ Thumbs.db
 # Node
 node_modules
 pnpm-debug.log
+
+# Python
+__pycache__/
+*.pyc
