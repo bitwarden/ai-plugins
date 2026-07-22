@@ -111,12 +111,29 @@ The script refuses to create a run matching zero cases.
 - **Committed specs** — prefer a reviewed spec file over ad-hoc arguments.
 - **Never expose the key** — reference `TESTMO_API_KEY` only.
 
+## Milestones
+
+Each period's runs should link to a milestone (e.g. `2026.8.0 Manual Regression`). The Testmo web UI
+groups releases as a parent `YYYY.M.0 Release` milestone with `… Manual Regression` and
+`… Automated Regression` children.
+
+- **Creating the milestone is MANUAL.** The Testmo v1 API has **no** milestone-create route
+  (`POST /projects/{id}/milestones` returns "method not supported" — the endpoint is GET/HEAD only).
+  Create the period's milestone in the Testmo UI first.
+- **Linking runs is automated.** Find the milestone id (`GET /projects/1/milestones`, newest first, or from
+  the UI), then either put `milestone_id` in each spec or pass `--milestone-id <id>` at run time — verified
+  to attach the run to the milestone.
+
+Per-period flow:
+
+```bash
+# 1. Create "2026.8.0 Manual Regression" in the Testmo UI, note its id (say 251).
+# 2. Create each run linked to it, filling the <period> placeholder:
+python3 scripts/testmo_create_run.py --spec specs/web-password-manager-regression.json \
+    --period 2026.8.0 --milestone-id 251 --create
+# ...repeat for each spec.
+```
+
 ## Not yet implemented (next steps)
 
-- **Per-period milestone creation.** Each regression run should link to a *new* milestone created for that
-  period. The intended flow is: `POST /projects/1/milestones` (verify the field schema against
-  `/projects/1/milestones` first — the `note` field did not round-trip on the run object, so confirm
-  milestone fields likewise), then pass the returned id as `milestone_id` on the run. The script currently
-  accepts a pre-existing `milestone_id` in the spec but does not create the milestone.
-- **Capturing each recurring run's exact filter spec** as a committed file under `specs/`, one per run,
-  walked through and reviewed individually.
+- Optional helper to create all specs' runs in one pass for a period.

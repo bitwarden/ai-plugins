@@ -132,8 +132,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", required=True, help="path to JSON filter spec")
     ap.add_argument("--create", action="store_true", help="actually POST the run (omit for dry-run)")
+    ap.add_argument("--milestone-id", type=int, default=None,
+                    help="link the run to this existing milestone id (overrides the spec). "
+                         "Milestones must be created in the Testmo UI first — the API cannot create them.")
+    ap.add_argument("--period", default=None,
+                    help="substitute this string for the literal <period> in run_name, e.g. 2026.8.0")
     args = ap.parse_args()
     spec = json.load(open(args.spec))
+    if args.milestone_id is not None:
+        spec["milestone_id"] = args.milestone_id
+    if args.period is not None:
+        spec["run_name"] = spec["run_name"].replace("<period>", args.period)
 
     project = spec["project_id"]
     filters = spec.get("filters", {})
