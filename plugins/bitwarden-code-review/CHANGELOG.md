@@ -5,6 +5,29 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1] - 2026-07-01
+
+### Changed
+
+- `reviewing-dependency-changes`: findings that reference the Dependency Review and Approval process now link the process name to the canonical Confluence page (`https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/2774466657/Dependency+Review+and+Approval`), so posted review comments point reviewers to the documentation.
+
+## [1.13.0] - 2026-06-23
+
+### Added
+
+- Claude-configuration review enrichment in both review paths. When the diff touches Claude config files (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config), the single-agent reviewer (`bitwarden-code-reviewer`) now invokes `Skill(reviewing-claude-config)` during Cross-Plugin Enrichment, and the `performing-multi-agent-code-review` pipeline launches a conditional Claude-configuration agent (`source_agent: "config"`) in Step 3 whose findings flow through validation, severity audit, and the report. The dependency on the `claude-config-validator` plugin is optional in both paths — if it is not installed, the review falls back to existing review knowledge.
+
+## [1.12.0] - 2026-06-18
+
+### Changed
+
+- `performing-multi-agent-code-review`: per-stage model flags (`--model-analysis`, `--model-security`, `--model-validation`, `--model-audit`) with a security floor rule; subagents inherit the session model instead of forcing Opus; severity audit defaults to Sonnet.
+- `performing-multi-agent-code-review`: updated the architecture subagent to be a general agent type with a stronger prompt. Reduce complexity by not requiring engineers to install plugins they don't need. Also found minimal to zero actual benefit to using the tech-lead agent.
+- `performing-multi-agent-code-review`: `{model}` in file names and report headers is the resolved model nickname; `-mixed` suffix when stage flags differ
+- `performing-multi-agent-code-review`: enhanced the reference documents to provide example shapes of the DTOs that pass data between the subagents and the orchestration agent.
+- `performing-multi-agent-code-review`: removed duplicate and unnecessarily verbose instructions
+- Improved the README.md to better describe the purpose and usage of the multi-agent review.
+
 ## [1.11.0] - 2026-05-12
 
 ### Added

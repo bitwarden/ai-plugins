@@ -4,6 +4,9 @@ import {
   GetIssueCommentsSchema,
   SearchIssuesSchema,
   ListProjectsSchema,
+  ListBoardsSchema,
+  GetSprintsSchema,
+  GetSprintIssuesSchema,
   GetConfluencePageSchema,
   GetConfluencePageCommentsSchema,
   GetChildPagesSchema,
@@ -117,6 +120,79 @@ describe("ListProjectsSchema", () => {
 
   it("should reject maxResults over 100", () => {
     expect(() => ListProjectsSchema.parse({ maxResults: 200 })).toThrow();
+  });
+});
+
+describe("ListBoardsSchema", () => {
+  it("should apply default maxResults", () => {
+    const result = ListBoardsSchema.parse({});
+    expect(result.maxResults).toBe(50);
+  });
+
+  it("should accept an optional projectKeyOrId", () => {
+    const result = ListBoardsSchema.parse({ projectKeyOrId: "PM" });
+    expect(result.projectKeyOrId).toBe("PM");
+  });
+
+  it("should reject maxResults over 100", () => {
+    expect(() => ListBoardsSchema.parse({ maxResults: 101 })).toThrow();
+  });
+});
+
+describe("GetSprintsSchema", () => {
+  it("should apply default maxResults", () => {
+    const result = GetSprintsSchema.parse({ boardId: 1 });
+    expect(result.maxResults).toBe(50);
+  });
+
+  it("should require boardId", () => {
+    expect(() => GetSprintsSchema.parse({})).toThrow();
+  });
+
+  it("should reject zero or negative boardId", () => {
+    expect(() => GetSprintsSchema.parse({ boardId: 0 })).toThrow();
+    expect(() => GetSprintsSchema.parse({ boardId: -5 })).toThrow();
+  });
+
+  it("should reject a non-integer boardId", () => {
+    expect(() => GetSprintsSchema.parse({ boardId: 1.5 })).toThrow();
+  });
+
+  it("should accept valid state values", () => {
+    for (const state of ["active", "future", "closed"]) {
+      const result = GetSprintsSchema.parse({ boardId: 1, state });
+      expect(result.state).toBe(state);
+    }
+  });
+
+  it("should reject an invalid state", () => {
+    expect(() =>
+      GetSprintsSchema.parse({ boardId: 1, state: "paused" }),
+    ).toThrow();
+  });
+});
+
+describe("GetSprintIssuesSchema", () => {
+  it("should apply default maxResults", () => {
+    const result = GetSprintIssuesSchema.parse({ sprintId: 1 });
+    expect(result.maxResults).toBe(50);
+  });
+
+  it("should require sprintId", () => {
+    expect(() => GetSprintIssuesSchema.parse({})).toThrow();
+  });
+
+  it("should reject zero or negative sprintId", () => {
+    expect(() => GetSprintIssuesSchema.parse({ sprintId: 0 })).toThrow();
+    expect(() => GetSprintIssuesSchema.parse({ sprintId: -1 })).toThrow();
+  });
+
+  it("should accept an optional fields array", () => {
+    const result = GetSprintIssuesSchema.parse({
+      sprintId: 1,
+      fields: ["summary", "status"],
+    });
+    expect(result.fields).toEqual(["summary", "status"]);
   });
 });
 

@@ -53,6 +53,16 @@ Use **scoped (granular) API tokens** for least-privilege access. Create them at 
 | `read:jira-work` | Issues, comments, projects, attachments   |
 | `read:jira-user` | User display names on issues and comments |
 
+The Jira Agile (Software) endpoints behind `list_boards`, `get_sprints`, and `get_sprint_issues` require **granular** scopes — the classic `read:jira-work` scope does **not** grant access to the `/rest/agile/1.0` API. Add these granular scopes to the Jira token if you use the board/sprint tools:
+
+| Granular scope                   | Required for                              |
+| -------------------------------- | ----------------------------------------- |
+| `read:board-scope:jira-software` | `list_boards`                             |
+| `read:project:jira`              | `list_boards` (board project details)     |
+| `read:sprint:jira-software`      | `get_sprints`, `get_sprint_issues`        |
+| `read:issue-details:jira`        | `get_sprint_issues` (issue fields)        |
+| `read:jql:jira`                  | `get_sprint_issues` (sprint issue lookup) |
+
 ## MCP Tools
 
 ### Jira
@@ -64,6 +74,9 @@ Use **scoped (granular) API tokens** for least-privilege access. Create them at 
 | `get_issue_comments`     | Get comments for an issue                                            |
 | `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs) |
 | `list_projects`          | List accessible Jira projects                                        |
+| `list_boards`            | List Agile boards, optionally filtered by project                    |
+| `get_sprints`            | List sprints for a board (filter by active/future/closed)            |
+| `get_sprint_issues`      | List all issues in a sprint                                          |
 | `download_attachment`    | Download a Jira attachment as Base64                                 |
 
 ### Confluence

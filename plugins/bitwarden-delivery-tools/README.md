@@ -1,15 +1,15 @@
 # Bitwarden Delivery Tools
 
-Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and chasing cross-team signoffs, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and decomposing them into tasks, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
 
 ## Overview
 
-These skills define delivery **process** — initiative phases, transition playbooks, tech-breakdown drafting and cross-team signoff workflows, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
+These skills define delivery **process** — initiative phases, transition playbooks, tech-breakdown drafting, task decomposition, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
 
 The plugin spans three concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
-- **Technical design** — how teams draft and circulate Tech Breakdowns under Bitwarden's standard template, and how cross-team signoff and completion communication get coordinated.
+- **Technical design** — how teams draft Tech Breakdowns under Bitwarden's standard template and decompose them into tasks.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
 
 Any agent (tech-lead, software-engineer, shepherds, others) can compose these skills as needed.
@@ -25,19 +25,22 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Technical design
 
-| Skill                               | Triggers                                                           | Purpose                                                                                                                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `writing-tech-breakdowns`           | "tech breakdown", "scope checklist", "breakdown status"            | Drafting Parts 1, 2, 4, 5, 6 of Bitwarden's Tech Breakdown Template plus the full status lifecycle (IN PLANNING → IN PROGRESS → PROPOSED → ACCEPTED → COMPLETE / REJECTED) |
-| `coordinating-cross-team-breakdown` | "cross-team signoff", "affected teams", "completion communication" | Part 3 signoff table, cross-team checklist, and the completion-communication workflow that closes a breakdown                                                              |
+| Skill                       | Triggers                                                                                                                              | Purpose                                                                                                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `starting-breakdown`        | "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file"                                                 | Set up a new Tech Breakdown file in `bitwarden/tech-breakdowns`: gather context from the user, copy the template, fill the Status block.                                                |
+| `developing-breakdown-spec` | "understand the work", "resolve open questions", "write the breakdown spec", "Spec Alternatives"                                      | Resolve open design questions one at a time with concrete options, then capture what's being built into the Specification section.                                                      |
+| `developing-breakdown-plan` | "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts" | Develop the Plan section after the Spec is filled: technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption. |
+| `decomposing-into-tasks`    | "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table"    | Decompose a Plan into a `tasks.md` document with one entry per future Jira work item.                                                                                                   |
 
 ### Mechanics
 
-| Skill                   | Triggers                   | Purpose                                                |
-| ----------------------- | -------------------------- | ------------------------------------------------------ |
-| `committing-changes`    | "commit", "stage changes"  | Commit message format, staging best practices          |
-| `creating-pull-request` | "create PR", "open PR"     | PR title/body format, draft workflow, AI review labels |
-| `labeling-changes`      | "label", "change type"     | Conventional commit type keywords, CI label mapping    |
-| `perform-preflight`     | "preflight", "self review" | Pre-commit quality gate checklist                      |
+| Skill                   | Triggers                      | Purpose                                                                              |
+| ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| `committing-changes`    | "commit", "stage changes"     | Commit message format, staging best practices                                        |
+| `creating-pull-request` | "create PR", "open PR"        | PR title/body format, draft workflow, AI review labels                               |
+| `force-multiplier`      | "across all repos", "in bulk" | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs |
+| `labeling-changes`      | "label", "change type"        | Conventional commit type keywords, CI label mapping                                  |
+| `perform-preflight`     | "preflight", "self review"    | Pre-commit quality gate checklist                                                    |
 
 ## Design Principle
 
@@ -68,7 +71,7 @@ Start a Tech Breakdown for this feature — walk me through the scope checklist
 ```
 
 ```
-The breakdown is at PROPOSED — who needs to sign off and how do I chase them?
+Decompose this breakdown's Plan into tasks
 ```
 
 ```

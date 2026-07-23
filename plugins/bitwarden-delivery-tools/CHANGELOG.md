@@ -2,8 +2,47 @@
 
 All notable changes to the `bitwarden-delivery-tools` plugin will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.1.0] - 2026-07-01
+
+### Added
+
+- **`force-multiplier` skill** — fans one intent across a repo fleet or monorepo into N consistent, idempotent draft PRs, gated by a mandatory pilot and per-target isolation. Repo content is untrusted data (CWE-1427); destructive recipes require a reference-check with a `held-back` reconciliation disposition; the secrets-scan has a no-scanner fallback.
+- **`force-multiplier` behavior eval set** (`skills/force-multiplier/evals/`) — seven `skill-creator`-schema cases guarding its load-bearing decisions.
+
+## [2.0.0] - 2026-06-19
+
+### Added
+
+- **`decomposing-into-tasks` skill** — decomposes a breakdown Plan into a `tasks.md` document with one entry per future Jira work item. Supports resumption against a partly-drafted task list.
+
+### Removed
+
+- **BREAKING:** `writing-tech-breakdowns` skill removed. Superseded by `starting-breakdown`, `developing-breakdown-spec`, `developing-breakdown-plan`, and `decomposing-into-tasks`. The skill was deprecated in 1.4.0.
+- **BREAKING:** `coordinating-cross-team-breakdown` skill removed.
+
+### Changed
+
+- `navigating-the-initiative-funnel`: cross-references to the removed skills replaced with pointers to `starting-breakdown`, `developing-breakdown-spec`, `developing-breakdown-plan`, and `decomposing-into-tasks`.
+
+## [1.5.0] - 2026-06-17
+
+### Added
+
+- **`developing-breakdown-plan` skill** — develops the Plan section of a Tech Breakdown after the Specification is filled, with an optional follow-on step to open a draft prototype PR across affected repos for the team to evaluate alongside the design.
+
+## [1.4.0] - 2026-06-09
+
+### Added
+
+- **`starting-breakdown` skill** — sets up a new Tech Breakdown file in `bitwarden/tech-breakdowns`.
+- **`developing-breakdown-spec` skill** — defines the scope and boundaries of a breakdown effort, then captures the change into the Specification section.
+
+### Changed
+
+- `writing-tech-breakdowns` marked **obsolete** in the README and via a deprecation banner at the top of its `SKILL.md` so the deprecation surfaces at activation time. Superseded by `starting-breakdown` and `developing-breakdown-spec`; the skill remains available but future work will fold remaining pieces into successor skills referencing the `bitwarden/tech-breakdowns` document.
 
 ## [1.3.0] - 2026-05-20
 
