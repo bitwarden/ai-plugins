@@ -106,7 +106,7 @@ acli then prints a reversed confirmation like `PM-ZZZZ Blocks PM-YYYY` — ignor
 ### Reading a link back
 
 ```bash
-acli jira workitem link list --key PM-ZZZZ --json
+acli jira workitem link list --key PM-YYYY --json
 ```
 
 Payload — top-level `issueLinks`, type is `typeName`:
@@ -114,12 +114,12 @@ Payload — top-level `issueLinks`, type is `typeName`:
 ```json
 {
   "issueLinks": [
-    { "id": "84678", "outwardIssueKey": "PM-YYYY", "typeName": "Blocks" },
+    { "id": "84678", "outwardIssueKey": "PM-ZZZZ", "typeName": "Blocks" },
     { "id": "84680", "outwardIssueKey": null, "typeName": "Relates" }
   ]
 }
 ```
 
-`outwardIssueKey` non-null = this issue is the blocker/outward side (`PM-ZZZZ blocks PM-YYYY`); `null` = the inward/blocked side. Confirm against the UI panel headings (`blocks` vs `is blocked by`) when in doubt.
+`outwardIssueKey` non-null = the queried issue is the blocker/outward side (here `PM-YYYY blocks PM-ZZZZ`); `null` = the queried issue is the blocked/inward side. Confirm against the UI panel headings (`blocks` vs `is blocked by`) when in doubt.
 
 Available link types: `acli jira workitem link type`.
