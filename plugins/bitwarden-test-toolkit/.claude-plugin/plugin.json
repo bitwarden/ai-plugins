@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-test-toolkit",
+  "version": "1.0.0",
+  "description": "Test engineering toolkit for Bitwarden — tools for analyzing and improving test quality across its repositories.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-test-toolkit",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "testing",
+    "test-engineering",
+    "quality-engineering",
+    "test-coverage",
+    "test-layers",
+    "qa"
+  ]
+}

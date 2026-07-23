@@ -1,0 +1,148 @@
+{
+  "should_trigger_pass_rate": 1.0,
+  "should_not_trigger_pass_rate": 1.0,
+  "should_trigger_pass": "10/10",
+  "should_not_trigger_pass": "10/10",
+  "results": [
+    {
+      "query": "what's already tested for bitwarden/server#5821? trying to figure out if the org-vault export changes are covered before I sign off",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "does this PR have tests, and which layers do they hit? it's the autofill refactor in bitwarden/clients",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "PM-32009 is the item-types import/export work \u2014 what coverage already exists for it across the repos?",
+      "should_trigger": true,
+      "triggers": 2,
+      "runs": 3,
+      "trigger_rate": 0.6666666666666666
+    },
+    {
+      "query": "is the new CipherService.RestoreAsync path covered by any existing tests? not asking for new ones, just what's there",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "before I review this, give me an inventory of the existing test coverage for the changed files in #4412",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "I need to know what behaviors are already verified by tests for the passkey enrollment flow we just merged \u2014 permalinks if you can",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "which behaviors in this diff have no test today? bitwarden/server pr 6001, the billing webhook handler",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "map out what tests already cover the SsoController changes so I can flag gaps for QA",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "the mobile vault unlock screen got reworked \u2014 what existing test coverage do we have on it right now?",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "audit the current test coverage for feat/cipher-key-rotation \u2014 I just want to see what exists, not recommendations",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "write unit tests for the new CipherService.RestoreAsync method",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "what's the best testing strategy for the billing webhook handler \u2014 trophy or pyramid?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "should I add integration tests here or are unit tests enough for the SsoController change?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "generate a test plan for PM-5000 covering the new export flow",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "this sync E2E in bitwarden/test keeps timing out in CI \u2014 help me fix the flaky test",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "run the jest suite for bitwarden/clients and tell me which specs are failing",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "what's the overall code-coverage percentage on bitwarden/server right now?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "refactor these xUnit tests to use the new shared fixture pattern",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "review bitwarden/server #5821 for bugs and security issues before I approve",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "explain how the test pyramid works and which layers bitwarden uses for its repos",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    }
+  ]
+}
