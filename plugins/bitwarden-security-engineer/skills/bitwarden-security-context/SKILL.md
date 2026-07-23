@@ -60,3 +60,7 @@ Full documentation: [Security Definitions](https://contributing.bitwarden.com/ar
 | **TC**   | Trusted Channels      | Secure channel properties plus receiver identity verification                                                                                       |
 
 Full documentation: [Security Requirements](https://contributing.bitwarden.com/architecture/security/requirements)
+
+## Architecture Decision Records (ADRs)
+
+Bitwarden's accepted architecture decisions are catalogued separately from the security principles above. See `${CLAUDE_PLUGIN_ROOT}/references/adr-alignment.md` for how security assessments should check alignment against them.
