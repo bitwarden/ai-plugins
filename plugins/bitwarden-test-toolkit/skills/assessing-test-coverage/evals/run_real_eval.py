@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
-"""Trigger-rate evaluator that checks for the real plugin-registered skill.
+"""Trigger-rate evaluator for the installed `assessing-test-coverage` skill.
 
-The skill-creator harness registers a temp copy named
-`assessing-test-coverage-skill-<uuid>` and only counts invocations of that name
-as triggers. When the real `bitwarden-test-toolkit:assessing-test-coverage`
-skill is already installed in the environment running the eval, the model
-invokes the real one and the harness records a false negative.
-
-This script runs `claude -p` for each eval query and counts a "trigger" when
-any Skill or Read tool call references the real skill token, anywhere in the
-response. The scan continues past unrelated Skill invocations (some accounts
-auto-fire session-init skills before the model selects a task skill), so the
-eval is portable across environments rather than tied to any specific set of
-installed plugins.
+Unlike the skill-creator harness (which only counts a temp `*-skill-<uuid>`
+copy), this runs `claude -p` per query and counts a trigger when any Skill or
+Read call references the real skill token — so it works against the real
+installed skill and is portable across environments. It bails on the first
+real-work tool (see EXEC_TOOLS) to avoid the adversarial should-not-trigger
+queries cloning repos and spawning toolchains until they exhaust memory.
 """
 
 import argparse
@@ -20,6 +14,7 @@ import json
 import os
 import select
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -29,8 +24,11 @@ from pathlib import Path
 
 TARGET_SKILL_TOKEN = "assessing-test-coverage"
 
-# Scratch CWD for the spawned `claude -p` subprocesses, kept inside the repo under
-# a git-ignored path (see .gitignore: plugins/**/evals/runs/).
+# Requesting one of these means the model chose real work over the target skill;
+# we bail on it (see run_query) to avoid the heavy child processes it would spawn.
+EXEC_TOOLS = {"Bash", "Task"}
+
+# Scratch CWD for the spawned subprocesses (git-ignored: plugins/**/evals/runs/).
 RUNS_DIR = Path(__file__).resolve().parent / "runs"
 
 
@@ -40,14 +38,11 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         "-p", query,
         "--output-format", "stream-json",
         "--verbose",
-        "--include-partial-messages",
         "--model", model,
     ]
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
-    # Give the subprocess its own fresh empty CWD under evals/runs/ (git-ignored).
-    # An empty CWD keeps the model from reading this runner's own output files, and
-    # — together with the SKILL.md-only Read match below — means a read here is never
-    # miscounted as a trigger. Skills are user-scoped and resolve regardless of CWD.
+    # Give each subprocess a fresh empty CWD so it can't read this runner's own
+    # files; skills are user-scoped and resolve regardless of CWD.
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     scratch_cwd = tempfile.mkdtemp(prefix="trigger-eval-", dir=RUNS_DIR)
     process = subprocess.Popen(
@@ -56,14 +51,14 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         stderr=subprocess.DEVNULL,
         env=env,
         cwd=scratch_cwd,
+        # Own process group so the finally block can tear down nested children too.
+        start_new_session=True,
     )
 
     triggered = False
     first_skill_seen = None
     start = time.time()
     buffer = ""
-    pending = None
-    accum = ""
 
     try:
         while time.time() - start < timeout:
@@ -90,32 +85,7 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                 except json.JSONDecodeError:
                     continue
 
-                if event.get("type") == "stream_event":
-                    se = event.get("event", {})
-                    if se.get("type") == "content_block_start":
-                        cb = se.get("content_block", {})
-                        if cb.get("type") == "tool_use" and cb.get("name") == "Skill":
-                            pending = cb.get("name")
-                            accum = ""
-                        # Only Skill is early-matched on the stream. A Read is
-                        # matched later on the fully-parsed assistant event, where
-                        # the file path can be checked for /SKILL.md — a partial
-                        # path fragment here could false-match a token in a path.
-                    elif se.get("type") == "content_block_delta" and pending:
-                        delta = se.get("delta", {})
-                        if delta.get("type") == "input_json_delta":
-                            accum += delta.get("partial_json", "")
-                            if TARGET_SKILL_TOKEN in accum:
-                                return {"triggered": True, "first_skill": accum}
-                    elif se.get("type") == "content_block_stop" and pending:
-                        if first_skill_seen is None:
-                            first_skill_seen = accum
-                        # Keep scanning past unrelated Skill/Read invocations so
-                        # the eval is portable across accounts that auto-fire
-                        # session-init or workflow skills before the task skill.
-                        pending = None
-                        accum = ""
-                elif event.get("type") == "assistant":
+                if event.get("type") == "assistant":
                     msg = event.get("message", {})
                     for item in msg.get("content", []):
                         if item.get("type") != "tool_use":
@@ -129,11 +99,24 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                         # not any file that merely has the token in its path.
                         if name == "Read" and TARGET_SKILL_TOKEN in fp and fp.rstrip().endswith("SKILL.md"):
                             return {"triggered": True, "first_skill": fp}
+                        # A real-work tool without the target skill first → no
+                        # trigger. Bail so the finally block kills the child before
+                        # its tool_use spawns anything. (Cheap read-only tools are
+                        # scanned past; the model may inspect files first.)
+                        if name in EXEC_TOOLS:
+                            if first_skill_seen is None:
+                                first_skill_seen = f"{name} (bailed: real-work tool)"
+                            return {"triggered": False, "first_skill": first_skill_seen}
                 elif event.get("type") == "result":
                     return {"triggered": triggered, "first_skill": first_skill_seen}
     finally:
         if process.poll() is None:
-            process.kill()
+            # Kill the whole process group so nested children die too; fall back
+            # to the parent PID if the group is already gone.
+            try:
+                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                process.kill()
             process.wait()
         shutil.rmtree(scratch_cwd, ignore_errors=True)
     return {"triggered": triggered, "first_skill": first_skill_seen}
@@ -148,10 +131,8 @@ def runs_for(query, should_trigger, runs, timeout, model):
             triggers += 1
         samples.append(r.get("first_skill"))
     rate = triggers / runs
-    # Surface samples to stderr only when the per-query outcome disagrees with
-    # `should_trigger`, so debugging info is available without baking
-    # environment-specific tool inputs (absolute paths, etc.) into the
-    # persisted result that the README diffs for regression checks.
+    # Print samples to stderr only on unexpected outcomes — keeps env-specific
+    # paths out of the persisted result used for regression diffs.
     if (rate >= 0.5) != should_trigger:
         for s in samples:
             print(f"    sample: {s}", file=sys.stderr)
@@ -168,7 +149,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-set", required=True)
     parser.add_argument("--runs-per-query", type=int, default=3)
-    parser.add_argument("--num-workers", type=int, default=8)
+    parser.add_argument("--num-workers", type=int, default=5)
     parser.add_argument("--timeout", type=int, default=45)
     parser.add_argument("--model", default="claude-opus-4-7")
     args = parser.parse_args()
