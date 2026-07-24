@@ -22,7 +22,7 @@ Extract from the arguments:
 
 **Derive slug** from the input value: lowercase, spaces and underscores replaced with hyphens, truncated to 40 chars. Fallback: `pwt-<timestamp>`.
 
-**Create output directory** and derive the `<artifacts-output-dir>` token: resolve the absolute path `<current working directory>/.playwright-testing-artifacts/<slug>/`, create that directory, and use it for `<artifacts-output-dir>` in every artifact path in the steps below.
+**Create output directory** and derive the `<artifacts-output-dir>` token: resolve the absolute path `<current working directory>/.playwright-testing-artifacts/<slug>/`, create that directory, and use it for `<artifacts-output-dir>` in every artifact path in the steps below. Also ensure a git-ignore guard exists for the whole artifacts tree: if `<current working directory>/.playwright-testing-artifacts/.gitignore` does not exist, create it containing a single line `*` (so run artifacts, which can contain resolved dev values, are never staged in the consumer repo).
 
 ---
 
@@ -103,7 +103,7 @@ Wait for completion. The agent returns the test cases as a markdown response. Th
 
 ---
 
-## Task 5: Compose test plan _(blockedBy: Task 4)_
+## Task 5: Compose test plan _(blockedBy: Tasks 3 and 4)_
 
 This is pure team-lead work — no agent dispatch. Read both planning artifacts and assemble the final test plan.
 
@@ -195,7 +195,7 @@ When the `test-runner` response contains `Need user input:`, it is a pause respo
 1. Extract the partial results chunk and the question.
 2. Write/append the partial results chunk to `<artifacts-output-dir>/checkpoint-<timestamp>.md`:
    - First pause: create the file and write the chunk.
-   - Subsequent pauses: open the file in append mode and add the chunk with a blank-line separator.
+   - Subsequent pauses: append the chunk using Bash (the Write tool overwrites and would drop earlier segments): run `printf '\n%s\n' "<chunk>" >> <artifacts-output-dir>/checkpoint-<timestamp>.md`.
 3. Surface the question to the user and capture the answer.
 4. Re-dispatch `test-runner` with:
 
@@ -222,11 +222,11 @@ Write `<artifacts-output-dir>/test-results-<timestamp>.md`. The file is one bare
 
 **If test pauses occurred** (checkpoint file exists): append the final raw output segment from the test-runner's response to `checkpoint-<timestamp>.md` with a blank-line separator, then assemble one merged raw output block:
 
-_Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN — PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers, all intermediate `SUMMARY:` lines, and all `=== PARTIAL RUN — PAUSED ===` markers._
+_Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN — PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers and the paused-segment markers. Keep the `SUMMARY:` line from the final complete segment for the totals; discard only the `SUMMARY:` lines from segments that end in the paused marker._
 
 1. Read `checkpoint-<timestamp>.md` in full.
 2. Collect every `--- TEST CASE N: <name> --- ... --- END TEST CASE N ---` block across all segments, in order.
-3. Sum the `SUMMARY:` counts across all segments to produce final totals (total, passed, adaptive, failed).
+3. Use the summed per-segment completed counts to produce final totals (total, passed, adaptive, failed).
 4. Write `test-results-<timestamp>.md` as exactly one block, verbatim:
 
    ```
