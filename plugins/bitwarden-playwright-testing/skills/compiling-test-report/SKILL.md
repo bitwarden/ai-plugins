@@ -2,6 +2,7 @@
 name: compiling-test-report
 description: Compile an HTML test report from Playwright agent results for Bitwarden web tests. Use after executing web tests to produce a structured report with per-test-case pass/fail status, screenshot links, and issue summaries. Uses templates/report-template.html. Returns the HTML document as text — the caller persists it.
 ---
+
 Given the Playwright agent results and services-tested list, produce the complete HTML report document as your output. You do not write any files and you do not name the file — the caller persists the content you return.
 
 The test results, screenshot paths, and pass/fail data all come from the `executing-web-tests` skill output — use them directly.
@@ -9,6 +10,8 @@ The test results, screenshot paths, and pass/fail data all come from the `execut
 ## HTML Report
 
 Use the structure in `${CLAUDE_SKILL_DIR}/templates/report-template.html`. Fill in:
+
+Replace the double-brace tokens ({{PLAN_NAME}}, {{DATE}}, {{SLUG}}, {{SERVICES_TESTED}}, {{TEST_CASE_NAME}}) with the corresponding values; add or remove Test Case sections to match the run.
 
 - **Header**: date, plan file path, services tested (with ports), base URL
 - **Summary table**: total / passed / failed / errors counts
@@ -22,7 +25,7 @@ Each screenshot is rendered as a linked thumbnail, placed inline inside its step
 
 ```html
 <a class="screenshot-link" href="screenshots/filename.png" target="_blank">
-  <img src="screenshots/filename.png" alt="description">
+  <img src="screenshots/filename.png" alt="description" />
 </a>
 ```
 
@@ -47,9 +50,14 @@ Each test case block has an optional `Setup Steps:` label and a `Test Steps:` la
 - An indented `  Screenshot: <filename>` line belongs to the step on the line directly above it. Render the thumbnail **inside that step's `<li>`**, after the step text:
 
 ```html
-<li>Click Tools dropdown — PASS
-  <a class="screenshot-link" href="screenshots/test-case-1-step-3-….png" target="_blank">
-    <img src="screenshots/test-case-1-step-3-….png" alt="test-case-1-step-3">
+<li>
+  Click Tools dropdown — PASS
+  <a
+    class="screenshot-link"
+    href="screenshots/test-case-1-step-3-….png"
+    target="_blank"
+  >
+    <img src="screenshots/test-case-1-step-3-….png" alt="test-case-1-step-3" />
   </a>
 </li>
 ```
@@ -71,4 +79,4 @@ When there are no adaptive test cases, omit any mention of them from the Recomme
 
 ## Output
 
-Return a single fenced ```html``` block containing the full HTML document (populated from `${CLAUDE_SKILL_DIR}/templates/report-template.html`). No other text — the entire response is the fenced block.
+Return a single fenced `html` block containing the full HTML document (populated from `${CLAUDE_SKILL_DIR}/templates/report-template.html`). No other text — the entire response is the fenced block.
