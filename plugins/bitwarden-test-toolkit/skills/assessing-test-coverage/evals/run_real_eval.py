@@ -14,7 +14,6 @@ import json
 import os
 import select
 import shutil
-import signal
 import subprocess
 import sys
 import tempfile
@@ -51,8 +50,6 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         stderr=subprocess.DEVNULL,
         env=env,
         cwd=scratch_cwd,
-        # Own process group so the finally block can tear down nested children too.
-        start_new_session=True,
     )
 
     triggered = False
@@ -111,12 +108,7 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                     return {"triggered": triggered, "first_skill": first_skill_seen}
     finally:
         if process.poll() is None:
-            # Kill the whole process group so nested children die too; fall back
-            # to the parent PID if the group is already gone.
-            try:
-                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
-                process.kill()
+            process.kill()
             process.wait()
         shutil.rmtree(scratch_cwd, ignore_errors=True)
     return {"triggered": triggered, "first_skill": first_skill_seen}
