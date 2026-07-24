@@ -28,6 +28,11 @@ LINK_FILTER="verify|confirm|signup|token|trial|login|finish-signup"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    --recipient|--pattern|--link-filter)
+      [ $# -ge 2 ] || { echo "ERROR: $1 requires a value" >&2; exit 2; }
+      ;;
+  esac
+  case "$1" in
     --recipient)   RECIPIENT="$2"; shift 2 ;;
     --pattern)     PATTERN="$2"; shift 2 ;;
     --link-filter) LINK_FILTER="$2"; shift 2 ;;
@@ -72,14 +77,19 @@ print(max(matches, key=lambda m: m['id'])['id'])
 "
 }
 
-# Local dev hosts allowed for extracted URLs (must match external-trigger.sh).
+# Local dev hosts allowed for extracted URLs. Defaults match external-trigger.sh;
+# extend (never replace) via the comma-separated env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS,
+# exactly as external-trigger.sh does, so an operator override applies to both scripts.
 LOCAL_HOSTS="localhost 127.0.0.1 ::1 bitwarden.test"
+if [ -n "${PLAYWRIGHT_TESTING_ALLOWED_HOSTS:-}" ]; then
+  LOCAL_HOSTS="$LOCAL_HOSTS $(printf '%s' "$PLAYWRIGHT_TESTING_ALLOWED_HOSTS" | tr ',' ' ')"
+fi
 
 is_local_url() {
-  URL="$1" python3 -c '
+  URL="$1" LOCAL_HOSTS="$LOCAL_HOSTS" python3 -c '
 import os, sys, urllib.parse
 h = (urllib.parse.urlparse(os.environ["URL"]).hostname or "").lower()
-allowed = set("'"$LOCAL_HOSTS"'".split())
+allowed = set(os.environ["LOCAL_HOSTS"].split())
 sys.exit(0 if h in allowed else 1)
 ' 2>/dev/null
 }
