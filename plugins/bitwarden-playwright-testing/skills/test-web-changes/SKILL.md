@@ -22,7 +22,7 @@ Extract from the arguments:
 
 **Derive slug** from the input value: lowercase, spaces and underscores replaced with hyphens, truncated to 40 chars. Fallback: `pwt-<timestamp>`.
 
-**Create output directory** and derive the `<artifacts-output-dir>` token: resolve the absolute path `<current working directory>/.playwright-testing-artifacts/<slug>/`, create that directory, and use it for `<artifacts-output-dir>` in every artifact path in the steps below. Also ensure a git-ignore guard exists for the whole artifacts tree: if `<current working directory>/.playwright-testing-artifacts/.gitignore` does not exist, create it containing a single line `*` (so run artifacts, which can contain resolved dev values, are never staged in the consumer repo).
+**Create output directory** and derive the `<artifacts-output-dir>` token: resolve the absolute path `<current working directory>/.playwright-testing-artifacts/<slug>/`, create that directory, and use it for `<artifacts-output-dir>` in every artifact path in the steps below.
 
 ---
 

@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced the `test-runner` `Bash(curl:*)` grant with a path-scoped `external-trigger.sh` wrapper that enforces localhost-only destinations and POST-only method, closing an SSRF/exfiltration surface and removing the reachable arbitrary Mailcatcher delete path.
 - Added untrusted-content preambles to the source-ingesting agents to reduce Jira/Confluence prompt-injection risk, including `report-compiler` and `test-runner`.
-- Stopped persisting the resolved dev admin email into run artifacts; it is now resolved at execution time only. The artifacts directory is git-ignored via a generated `.gitignore`.
+- The dev admin email is never embedded in committed plugin content; it is resolved at execution time from the developer's local `server/dev/secrets.json`.
 - Required HTML-escaping of every interpolated report value (test case names, step text, notes, issue descriptions, and template tokens) before insertion into the compiled report, closing an injection surface from untrusted Jira/Confluence and observed page content.
 - Removed the tool-policy clause instructing agents to prefer a plan-supplied external-trigger parameter value over a conflicting code-derived enum value, closing a path for untrusted plan content to override a verified value.
 - Scoped the `test-runner` `ls` grant to `*/screenshots/*` instead of an unrestricted `ls *`.
