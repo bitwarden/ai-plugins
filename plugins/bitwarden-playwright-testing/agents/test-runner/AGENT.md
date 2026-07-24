@@ -6,6 +6,7 @@ model: sonnet
 skills:
   - executing-web-tests
   - playwright-cli
+  - using-stripe-cli
 color: cyan
 user-invocable: false
 tools: Read, Skill, Bash(playwright-cli:*), Bash(*/bitwarden-playwright-testing/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh *), Bash(*/bitwarden-playwright-testing/scripts/external-trigger.sh *), Bash(stripe get:*), Bash(stripe post /v1/test_helpers/test_clocks/*/advance:*), Bash(ls */screenshots/*)
