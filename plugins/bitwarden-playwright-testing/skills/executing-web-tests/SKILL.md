@@ -38,9 +38,9 @@ For the resuming test case (the first test case in your input), before executing
 
 All subsequent test cases run fully and normally from their first step.
 
-If the `[HUMAN]` step was the last step of the resuming test case (no test steps follow it within that case), record the test case result using the user's answer as the outcome of that step, then proceed to subsequent test cases or produce `=== TEST RUN COMPLETE ===` if none remain.
+If the `[HUMAN]` step was the last step of the resuming test case (no test steps follow it within that case), record the test case result using the user's answer as the outcome of that step, then proceed to subsequent test cases or return the complete JSON object if none remain.
 
-This protocol repeats for each `[HUMAN]` step encountered in a run — a second pause in a resumed run uses the same partial-emit and signal format.
+This protocol repeats for each `[HUMAN]` step encountered in a run. A second pause in a resumed run uses the same paused JSON object format.
 
 A `Resume:` block in your inputs looks like:
 
@@ -66,7 +66,7 @@ Any login, magic-link flow, or account/org creation required before the first te
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
 - Record everything done: account email/password, org created, billing performed, email verifications followed, and any step that failed
 
-**If setup or authentication cannot complete before the first test case runs** (for example login or account/org creation fails), the run cannot proceed and no test case has started. Emit exactly one line and stop: `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===`, replacing `<reason>` with a one-line description of the failure. Do not emit any test case blocks and do not emit the `=== TEST RUN COMPLETE ===` marker.
+**If setup or authentication cannot complete before the first test case runs** (for example login or account/org creation fails), the run cannot proceed and no test case has started. Return exactly this JSON object and stop, replacing `<reason>` with a one-line description of the failure: `{ "run_status": "aborted", "abort_reason": "setup failure before test cases (<reason>)" }`. Do not emit any cases.
 
 ## Step 3 — Execute test cases
 
@@ -90,35 +90,48 @@ After all SETUP steps complete, execute the Test Steps.
 - Use `test-case-N-step-M-{timestamp}.png` screenshot names
 - Assert each step's expected outcome and record PASS or FAIL
 
-### Test case block format
+### Test case object format
 
-Every test case block — in the run-complete output (Step 4) and in the partial output emitted at a `[HUMAN]` halt — uses this exact shape:
+Build each test case as a JSON object matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/complete-run.json`:
 
-```
---- TEST CASE N: <name> ---
-Status: <PASS | PASS (adaptive) | FAIL | ERROR>
-Setup Steps:
-Setup Step 1: <description> — <PASS | FAIL>
-  Screenshot: setup-tc-N-step-1-<timestamp>.png
-[HUMAN] Setup Step M: <description> — COMPLETED (User: <answer>)
-Test Steps:
-Step 1: <description> — <PASS | FAIL>
-  Screenshot: test-case-N-step-1-<timestamp>.png
-Step 2: Assert <selector/condition> — <PASS | FAIL> (<what was actually observed>)
-Notes: <notes, if any>
---- END TEST CASE N ---
+```json
+{
+  "number": 1,
+  "name": "<name>",
+  "status": "PASS | PASS (adaptive) | FAIL | ERROR",
+  "url": "<page under test, from the first navigation>",
+  "setup_steps": [<step>, "..."],
+  "test_steps": [<step>, "..."],
+  "notes": "<notes, if any>",
+  "adaptive": { "specified": "<what the plan asserted>", "found": "<what actually rendered>" }
+}
 ```
 
-- `Status:` is the first line of the block.
-- Omit the entire `Setup Steps:` section when the test case has no setup steps.
-- A `  Screenshot: <filename>` line (two-space indent) goes on the line immediately after the step it documents — one line per screenshot, only when that step produced a visual change. Do not collect screenshots into a trailing list.
-- For an assertion step, append what you actually observed in parentheses after the outcome — e.g. `Step 4: Assert ".badge.bg-secondary" visible — PASS (badge text: "Inactive")`.
-- `[HUMAN]` prefixes a human-completed step; its outcome is `COMPLETED (User: <answer>)`.
-- Omit `Notes:` when there is nothing to note.
+Each step object:
+
+```json
+{
+  "text": "<description>",
+  "outcome": "PASS | FAIL | COMPLETED (User: <answer>)",
+  "observed": "<what you observed on an assertion>",
+  "screenshot": "<bare filename>",
+  "human": true
+}
+```
+
+- Omit `setup_steps` (or use `[]`) when the case has no setup steps.
+- Omit `notes` when there is nothing to note.
+- Include `observed` only on assertion steps, holding what you actually saw.
+- Include `screenshot` only for a step that produced a visual change; use the exact filename from the screenshot directory listing.
+- Set `"human": true` and `"outcome": "COMPLETED (User: <answer>)"` for a `[HUMAN]` step.
+- Include `adaptive` only when `status` is `"PASS (adaptive)"`, filled from the adaptive evaluation.
+- Do not emit run totals. The team lead's merge script derives them from the per-case `status` values.
 
 ### Adaptive assertion evaluation
 
 After any assertion step fails, before recording the result, apply the evaluation in `${CLAUDE_SKILL_DIR}/references/adaptive-assertion-evaluation.md` — using only what you already observed during normal execution (no additional browser calls). It can resolve a failed assertion to `PASS (adaptive)`, but never when the feature behavior itself is wrong, the expected content is genuinely absent, the test couldn't run due to environment state, or the failed assertion was a URL/navigation check.
+
+When a case resolves to `PASS (adaptive)`, set the case's `status` to `"PASS (adaptive)"` and fill its `adaptive` object with `specified` (what the plan asserted) and `found` (what actually rendered).
 
 ### Screenshot policy
 
@@ -156,54 +169,40 @@ stdout is the URL — use it as input to the next browser step. The script alrea
 
 When executing any step (Setup or Test) whose text begins with `[HUMAN]`, halt immediately. Do not retry, infer, or skip.
 
-Before returning, emit all completed test-case blocks using the Test case block format defined in Step 3, close the block with the pause marker, then append the signal as the very last line:
+Return a single JSON object with the cases completed so far and the pause signal, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/paused-segment.json`:
 
-```
-=== TEST RUN RESULTS ===
-
-SUMMARY: <N completed in this segment> test cases | N passed | N passed (adaptive) | N failed | N errored
-
---- TEST CASE N: <name> ---
-[emit completed test case block using the Test case block format defined in Step 3]
---- END TEST CASE N ---
-
-[one block per completed test case, in order]
-
-=== PARTIAL RUN PAUSED ===
-
-Need user input: <step text after the [HUMAN] marker, verbatim, with location context — e.g. "Test Case 1, Setup Step 8: Attach a Stripe test clock to the subscription.">
+```json
+{
+  "run_status": "paused",
+  "cases": [<completed test case object>, "..."],
+  "need_user_input": "<step text after the [HUMAN] marker, verbatim, with location context, e.g. \"Test Case 1, Setup Step 8: Attach a Stripe test clock to the subscription.\">"
+}
 ```
 
 Rules:
 
-- `SUMMARY:` reflects only test cases completed in this segment.
-- If zero test cases have completed yet, write `SUMMARY: 0 test cases | 0 passed | 0 passed (adaptive) | 0 failed | 0 errored` and omit the test case blocks.
-- `=== PARTIAL RUN PAUSED ===` is the segment delimiter and replaces `=== TEST RUN COMPLETE ===` on a pause.
-- `Need user input:` is always the very last line of the response.
-- Do not produce `=== TEST RUN COMPLETE ===` on a pause.
+- `cases` holds only the test cases completed before the pause (use `[]` if none).
+- `need_user_input` is required and is the resume question.
+- Do not set `run_status` to `"complete"` on a pause.
 
-## Step 4 — Produce the required output
+## Step 4 - Produce the required output
 
-Do not return until every test case has a complete block — both Setup Steps and Test Steps recorded with PASS or FAIL. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks are complete. This rule applies when the run proceeds into test cases. If setup or authentication failed before any test case ran (see Step 2), the run ends with the `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===` line instead, and no test case blocks or run-complete marker are produced.
+Do not return until every test case object is complete. Before assembling the output, run `ls <screenshot-dir>/*<timestamp>*` to get the ground-truth screenshot filenames, and use them verbatim in each step's `screenshot` field.
 
-Before writing the output block, run:
+Return a single JSON object and nothing else, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/complete-run.json`:
 
-```bash
-ls <screenshot-dir>/*<timestamp>*
+```json
+{
+  "run_status": "complete",
+  "cases": [<test case object>, "..."]
+}
 ```
 
-This gives you the ground-truth list of screenshots this run actually wrote. For each test case N, files whose names contain `test-case-N-` are that case's test-step screenshots and `setup-tc-N-` are its setup-step screenshots. Use these exact filenames in the indented `Screenshot:` lines — place each on the line immediately after the step it documents — and do not reconstruct names from memory.
+If setup or authentication failed before any test case ran (see Step 2), return the aborted object instead, with no cases:
 
-```
-=== TEST RUN RESULTS ===
-
-SUMMARY: N test cases | N passed | N passed (adaptive) | N failed | N errored
-
---- TEST CASE N: <name> ---
-[emit test case block using the Test case block format defined in Step 3]
---- END TEST CASE N ---
-
-[one block per test case, in order]
-
-=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===
+```json
+{
+  "run_status": "aborted",
+  "abort_reason": "setup failure before test cases (<reason>)"
+}
 ```
