@@ -50,7 +50,7 @@ Resume: Paused at <location string>. User's answer: <answer>.
 
 ## Step 1 — Initialize the browser session
 
-Before any navigation, open the browser with the custom config to disable SSL certificate errors. This must be the first `playwright-cli` call — all subsequent interactions inherit this session:
+Before any navigation, open the browser with the custom config to disable SSL certificate errors (`ignoreHTTPSErrors` in playwright.config.json is intentional: Bitwarden dev certs are self-signed and all navigation targets are localhost). This must be the first `playwright-cli` call — all subsequent interactions inherit this session:
 
 ```
 Skill(playwright-cli): open --config=<config-path>

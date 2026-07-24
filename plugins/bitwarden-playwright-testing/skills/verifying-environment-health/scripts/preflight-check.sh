@@ -31,7 +31,7 @@ fi
 # Each row: <human label>|<compose name regex>|<aspire name regex>
 REQUIRED_SERVICES=(
   "MSSQL database|-mssql-|^mssql-"
-  "Mailcatcher email|-mail-|^mailcatcher-"
+  "Mailcatcher email|bitwardenserver-mail-|^mailcatcher-"
   "Azurite storage|-storage-|^azurite-"
 )
 

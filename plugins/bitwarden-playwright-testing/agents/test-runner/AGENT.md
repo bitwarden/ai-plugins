@@ -4,7 +4,7 @@ version: 1.0.0
 description: Execution-phase standing agent for the test-web-changes team. Reads the test plan, runs Playwright tests via executing-web-tests, and returns the raw test-run output block for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
 model: sonnet
 skills:
-  - bitwarden-playwright-testing:executing-web-tests
+  - executing-web-tests
   - playwright-cli
 color: cyan
 user-invocable: false

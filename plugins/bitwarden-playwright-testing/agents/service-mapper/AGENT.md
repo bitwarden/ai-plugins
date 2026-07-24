@@ -4,7 +4,7 @@ version: 1.0.0
 description: Planning-phase agent for the test-web-changes team. Reads the app-context artifact, calls determining-required-services, and returns the service list as a markdown response for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
 model: sonnet
 skills:
-  - bitwarden-playwright-testing:determining-required-services
+  - determining-required-services
 color: blue
 user-invocable: false
 tools: Read, Skill

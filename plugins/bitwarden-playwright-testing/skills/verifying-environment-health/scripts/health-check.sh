@@ -69,6 +69,7 @@ while true; do
     esac
 
     URL=$(get_url "$svc")
+    # -k: Bitwarden dev certs are self-signed; hosts are localhost-only.
     STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" --max-time 3 "$URL" 2>/dev/null)
 
     if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then

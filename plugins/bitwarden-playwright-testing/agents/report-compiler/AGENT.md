@@ -4,7 +4,7 @@ version: 1.0.0
 description: Execution-phase standing agent for the test-web-changes team. Reads the test-results artifact, compiles an HTML report via compiling-test-report, and returns the report HTML as a fenced block for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
 model: sonnet
 skills:
-  - bitwarden-playwright-testing:compiling-test-report
+  - compiling-test-report
 color: green
 user-invocable: false
 tools: Read, Skill

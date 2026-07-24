@@ -4,7 +4,7 @@ version: 1.0.0
 description: Planning-phase agent for the test-web-changes team. Reads context and app-context artifacts, calls build-test-cases, and returns test cases markdown for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
 model: sonnet
 skills:
-  - bitwarden-playwright-testing:build-test-cases
+  - build-test-cases
 color: yellow
 user-invocable: false
 tools: Read, Skill

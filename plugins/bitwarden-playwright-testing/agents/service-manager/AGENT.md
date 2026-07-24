@@ -4,7 +4,7 @@ version: 1.0.0
 description: Execution-phase standing teammate for the test-web-changes team. Reads the test plan, verifies the Bitwarden local dev environment is ready via verifying-environment-health, and signals readiness (or surfaces a failure). Do not invoke directly — dispatched by the test-web-changes skill.
 model: sonnet
 skills:
-  - bitwarden-playwright-testing:verifying-environment-health
+  - verifying-environment-health
 color: purple
 user-invocable: false
 tools: Read, Skill, Bash(*/bitwarden-playwright-testing/skills/verifying-environment-health/scripts/preflight-check.sh), Bash(*/bitwarden-playwright-testing/skills/verifying-environment-health/scripts/health-check.sh *)

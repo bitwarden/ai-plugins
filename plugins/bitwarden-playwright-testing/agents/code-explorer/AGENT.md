@@ -4,7 +4,7 @@ version: 1.0.0
 description: Planning-phase agent for the test-web-changes team. Reads the context markdown from context-gatherer, calls exploring-application-context, and returns the Application Context as a markdown response for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
 model: sonnet
 skills:
-  - bitwarden-playwright-testing:exploring-application-context
+  - exploring-application-context
 color: orange
 user-invocable: false
 tools: Read, Skill, Grep, Glob, Bash(git diff *), Bash(git log *)
