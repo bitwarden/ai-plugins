@@ -17,7 +17,7 @@ If no Application Context is present, return an error asking the caller to run `
 
 ## Tool Policy
 
-Read `${CLAUDE_PLUGIN_ROOT}/references/tool-policy.md` for the complete four-category tool policy. Apply it throughout test case construction — every step you generate must fall into one of the four categories, Category 3 steps must carry the EXTERNAL TRIGGER label defined in the policy, and no step may write to Stripe or query the database directly.
+Read `${CLAUDE_PLUGIN_ROOT}/references/tool-policy.md` for the tool policy. Apply it throughout test case construction — every step you generate must fall into one of its four categories, Category 3 steps must carry the EXTERNAL TRIGGER label defined in the policy, and no step may write to Stripe or query the database directly.
 
 The mailcatcher reader script path is defined in references/tool-policy.md (Canonical script paths). Use that path verbatim in any setup step that reads email.
 
@@ -46,9 +46,9 @@ Before writing any setup steps or test step sequences, read the Application Cont
 
 Make the placement decision at plan-write time based on the test's intent. Do not duplicate recipe steps in both sections.
 
-Repetition is acceptable. If the same multi-step sequence appears in two or more test cases, inline it in each — the test plan is generated, not maintained, so DRY across test cases isn't a goal.
+Repetition is acceptable: inline the same multi-step sequence in every test case that needs it — the test plan is generated, not maintained, so DRY across test cases isn't a goal.
 
-Only write setup steps from scratch when no named entry in `## Flows` covers the required precondition. In that case, use the Application Context's `## States` entries (routes, verification points) to identify the right mechanism and break it into individual atomic actions (navigate, fill, click, wait for response).
+Only write setup steps from scratch when no named entry in `## Flows` covers the required precondition. In that case, use the Application Context's `## States` entries (routes, verification points) to identify the right mechanism and break it into atomic actions (navigate, fill, click, wait for response).
 
 `Setup Steps:` is mandatory whenever the precondition state requires any of:
 
@@ -70,15 +70,9 @@ For each test case, define:
 3. **Pass/fail criteria** — what constitutes a pass vs. a failure
 4. **Descriptive name** — used in the report
 
-Be specific:
+**Exploit the Application Context fully.** Every step and assertion must be grounded in the specific details the Application Context provides — do not paraphrase or generalize when exact information is available. For example, write "fill the Stripe card number iframe (`[title='Secure card number input frame']`) with `4242424242424242`," not "fill in payment details"; write "Assert: `[data-testid='discount-section']` — exactly 2 elements | Fail: 0 elements found (server may not be returning Discounts array)," not "Verify discounts are shown."
 
-- **Good (interaction)**: "Navigate to `https://localhost:8080/#/vault`, click the '+ New Item' button"
-- **Good (assertion)**: "Assert: `[data-testid='discount-section']` — exactly 2 elements | Fail: 0 elements found (server may not be returning Discounts array)"
-- **Bad**: "Verify discounts are shown"
-
-**Exploit the Application Context fully.** Every step and assertion must be grounded in the specific details the Application Context provides — do not paraphrase or generalize when exact information is available:
-
-- **Interaction steps**: Use the exact URL from "UI projection > Route." Name the specific button label, form field, or control. Don't write "fill in payment details" — write "fill the Stripe card number iframe (`[title='Secure card number input frame']`) with `4242424242424242`."
+- **Interaction steps**: Use the exact URL from "UI projection > Route." Name the specific button label, form field, or control.
 
 - **Assertion steps**: Use the exact `Selector value` and `Selector type` from "UI projection > Verification points" — a `data-testid`, CSS selector, element role, or `text`. When the observable is **text content** (a message, a localized or computed term, a relabeled control — anything whose point is that the right text renders), the verification point's `Selector type` is `text`: assert the resolved text substring. When the substring is short or could occur elsewhere on the page, keep `Selector type: text` but scope the read to the nearest stable region named in the point's `Source:` rather than searching the whole page; the region only bounds the search and is never the asserted value (never a container class or `data-testid`). When the observable is **structure/state** (count, visible/hidden, enabled/disabled, element presence), assert via the selector. Each assertion must state:
   1. The selector or text being queried (e.g., `[data-testid="discount-section"]`, or text `"A cohort with this name already exists."`)
@@ -115,15 +109,13 @@ iframe selectors, and discount eligibility details directly into the relevant te
 
 ## Output
 
-Emit a single markdown document with this exact structure. The first non-empty line must be the `## Test Cases` heading — downstream agents anchor on it positionally and shape-validate the response.
+Emit a single markdown document with this exact structure and no preceding narrative or commentary. The first non-empty line must be the `## Test Cases` heading — downstream agents anchor on it positionally and shape-validate the response.
 
 ```
 ## Test Cases
 
 <one block per test case, see Test Cases format below>
 ```
-
-Do not preface this document with any narrative or commentary. The entire output is the artifact, beginning with `## Test Cases`.
 
 **Test Cases format** — one block per test case:
 

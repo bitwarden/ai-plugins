@@ -3,7 +3,7 @@ name: executing-web-tests
 description: Execute Bitwarden web test cases step-by-step using the playwright-cli skill directly. Use after test cases are defined and services are running. Governs tool policy, screenshot naming, toast capture, Setup Steps execution, and the billing blocker policy.
 ---
 
-Given the test cases, artifacts output dir, and the absolute path to `scripts/playwright.config.json`, execute the tests yourself by calling `Skill(playwright-cli)` for each individual browser action.
+Given the test cases, artifacts output dir, and the absolute path to `scripts/playwright.config.json`, execute the tests by calling `Skill(playwright-cli)` for each browser action.
 
 ## Before you start
 
@@ -17,7 +17,7 @@ Given the test cases, artifacts output dir, and the absolute path to `scripts/pl
 
 ### Read the tool policy
 
-Read `${CLAUDE_PLUGIN_ROOT}/references/tool-policy.md`. This governs which tools you may use throughout the run. Follow it without exception.
+Read `${CLAUDE_PLUGIN_ROOT}/references/tool-policy.md` — it governs which tools you may use throughout the run. Follow it without exception.
 
 ### Billing blocker policy
 
@@ -30,9 +30,9 @@ Only when a `Resume:` block is present in your inputs: extract and hold:
 - **Paused at** — the location string identifying the `[HUMAN]` step, e.g. `"Test Case 3, Setup Step 5: Attach a Stripe test clock"`
 - **User's answer** — to apply to subsequent steps that reference the `[HUMAN]` step's result
 
-For the resuming test case (your caller always passes remaining test cases starting with the paused one, so this is the first test case in your input), before executing any of its steps:
+For the resuming test case (the first test case in your input), before executing any of its steps:
 
-1. Open the browser fresh: `playwright-cli open --config=<config-path>` (always first, same as any run)
+1. Open the browser fresh: `playwright-cli open --config=<config-path>` (always first)
 2. Re-establish browser session using credentials from that test case's SETUP steps in the test plan
 3. Start from the step immediately after the `[HUMAN]` step identified by "Paused at", applying the user's answer to any steps that reference it
 
@@ -116,22 +116,7 @@ Notes: <notes, if any>
 
 ### Adaptive assertion evaluation
 
-After any assertion step fails, apply this evaluation before recording the result — using only what you already observed during normal execution:
-
-1. Review page content, visible text, error messages, and element content already in your context and screenshots. Do NOT issue additional browser calls.
-2. Ask: "Is the semantic condition this assertion was checking demonstrably present in what I already observed?" The semantic condition is the underlying behavior or content the test intends to verify, independent of the specific CSS selector or element path the plan specified.
-3. Apply the rule to each failed assertion individually:
-   - If **all** failed assertions resolve adaptively → record the test case as `PASS (adaptive)`
-   - If **any** failed assertion represents a genuine failure → record `FAIL`; document the adaptive assessments for the resolved assertions in Notes
-4. When recording `PASS (adaptive)`, write in Notes:
-   - What the plan's assertion specified
-   - What was actually found
-   - Why the semantic condition is considered met
-5. Do NOT apply adaptive evaluation when:
-   - The feature behavior itself is wrong (e.g., the server accepted input it should have rejected)
-   - The expected content or behavior is genuinely absent from the page
-   - The test could not run due to environment state (dirty database, missing seed data, skipped `[HUMAN]` step)
-   - The failed assertion was a URL/navigation check (wrong URL always means wrong behavior)
+After any assertion step fails, before recording the result, apply the evaluation in `${CLAUDE_SKILL_DIR}/references/adaptive-assertion-evaluation.md` — using only what you already observed during normal execution (no additional browser calls). It can resolve a failed assertion to `PASS (adaptive)`, but never when the feature behavior itself is wrong, the expected content is genuinely absent, the test couldn't run due to environment state, or the failed assertion was a URL/navigation check.
 
 ### Screenshot policy
 
@@ -147,13 +132,11 @@ Always save screenshots in the artifact output directory and pass `--full-page`:
 
 Do NOT screenshot after: `run-code`, `eval`, `console`, `cookie-get`, or any pure-inspection action; or a step where nothing visible changed.
 
-When in doubt, take the screenshot. A redundant screenshot costs nothing; a missing one cannot be recovered.
+When in doubt, take the screenshot.
 
 ### Asserting transient toasts
 
-Toasts can auto-dismiss in well under a second. To capture toast text reliably, read it from the live DOM: use `playwright-cli eval` to read the toast region's text right after the action, or `playwright-cli run-code` to wait for the toast region and return its text (arm the wait together with the triggering action so a short-lived toast is caught as it renders).
-
-When the action causes a full page reload (the server-rendered Admin Portal — ASP.NET MVC), the new page fires the toast from an inline `document.ready` script, so the action's promise resolves before the toast renders and arming a wait alongside the action cannot catch it. For this post-back case, read the toast from the new page instead: assert its text from the inline `toastr.*("...")` call in the page source, or read the toast node on the new page's load.
+Toasts can auto-dismiss in well under a second. Capture the text reliably from the live DOM per `${CLAUDE_SKILL_DIR}/references/asserting-transient-toasts.md`, which covers both the normal case and the Admin Portal's server-rendered post-back case.
 
 ### Continuity rule
 
@@ -197,11 +180,9 @@ Rules:
 - `Need user input:` is always the very last line of the response.
 - Do not produce `=== TEST RUN COMPLETE ===` on a pause.
 
-You are not done with a test case until both SETUP steps and Test Steps are complete with PASS or FAIL recorded. You are not done with the run until all test cases are complete and the `=== TEST RUN COMPLETE ===` marker is produced.
-
 ## Step 4 — Produce the required output
 
-Do not return until every test case has a complete block. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks.
+Do not return until every test case has a complete block — both Setup Steps and Test Steps recorded with PASS or FAIL. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks are complete.
 
 Before writing the output block, run:
 
