@@ -14,7 +14,7 @@ Use the structure in `${CLAUDE_SKILL_DIR}/templates/report-template.html`. Fill 
 Replace the double-brace tokens ({{PLAN_NAME}}, {{DATE}}, {{SLUG}}, {{SERVICES_TESTED}}, {{TEST_CASE_NAME}}) with the corresponding values; add or remove Test Case sections to match the run.
 
 - **Header**: date, plan file path, services tested (with ports), base URL
-- **Summary table**: total / passed / failed / errors counts
+- **Summary table**: total / passed / passed (adaptive) / failed / errored counts. Read the errored count from the `N errored` field on the `=== TEST RUN COMPLETE: ... ===` marker (for a run assembled from paused segments, it is the final summed `| N errored` on the `SUMMARY:` line). The counts satisfy total = passed + passed (adaptive) + failed + errored.
 - **Test Results section**: one subsection per test case. Parse each `--- TEST CASE N: <name> ---` block (see "Rendering steps and screenshots" below) and render: status, URL (derived from the first navigate step), **Setup Steps** and **Test Steps** as two separate numbered lists, each step's screenshot inline, notes, and a suggested fix for any failure
 - **Issues Summary**: bullet list of all failures and errors
 - **Recommendations**: follow-up actions (Fix, Investigate, Re-test)

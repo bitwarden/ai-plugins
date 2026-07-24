@@ -28,11 +28,11 @@ A step is an obstacle to report **only** when it requires a tool your allowlist 
 
 ## Loop invariant — when this agent is done
 
-You are done when your final response is the raw output block returned by executing-web-tests, ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===`. This is identical for fresh and resumed runs. Nothing less counts as completion. A run that cannot start because setup or authentication failed before the first test case ends instead in `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`; that is also a terminal state. Return it verbatim and end your turn.
+You are done when your final response is the raw output block returned by executing-web-tests, ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===`. This is identical for fresh and resumed runs. Nothing less counts as completion. A run that cannot start because setup or authentication failed before the first test case ends instead in `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`; that is also a terminal state. Return it verbatim and end your turn.
 
 Tool results you receive during execution — from `Bash(...)` or `Skill(...)` — are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until the run-complete marker is written.
 
-**One exception — `[HUMAN]` step pause.** When the executing-web-tests skill reaches a `[HUMAN]` step, it emits all completed test-case blocks followed by `Need user input:` as the final line. Return that response verbatim and end your turn — this agent instance is finished. The team lead will persist the partial results, surface the question to the user, and re-dispatch a fresh test-runner agent with the user's answer and a checkpoint path. That resumed instance satisfies the loop invariant when it returns a raw output block ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===`.
+**One exception — `[HUMAN]` step pause.** When the executing-web-tests skill reaches a `[HUMAN]` step, it emits all completed test-case blocks followed by `Need user input:` as the final line. Return that response verbatim and end your turn — this agent instance is finished. The team lead will persist the partial results, surface the question to the user, and re-dispatch a fresh test-runner agent with the user's answer and a checkpoint path. That resumed instance satisfies the loop invariant when it returns a raw output block ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===`.
 
 ## Prerequisites
 
@@ -78,6 +78,6 @@ Wait for the skill to return. The response is either a complete block ending in 
 
 Your final response is the raw output block returned by executing-web-tests, verbatim. Do not add any preface or commentary.
 
-On a complete run, your response begins with `=== TEST RUN RESULTS ===` and ends with `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===` (same shape for fresh and resumed runs). On a pause, your response is the partial block returned verbatim, ending with `Need user input:` — do not wrap it in the complete-run marker.
+On a complete run, your response begins with `=== TEST RUN RESULTS ===` and ends with `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===` (same shape for fresh and resumed runs). On a pause, your response is the partial block returned verbatim, ending with `Need user input:` — do not wrap it in the complete-run marker.
 
 If executing-web-tests instead returned a partial response ending with `Need user input:`, return it verbatim with no wrapping or modification — the team lead will treat it as a pause, append it to the checkpoint, and re-dispatch.

@@ -161,7 +161,7 @@ Before returning, emit all completed test-case blocks using the Test case block 
 ```
 === TEST RUN RESULTS ===
 
-SUMMARY: <N completed in this segment> test cases | N passed | N passed (adaptive) | N failed
+SUMMARY: <N completed in this segment> test cases | N passed | N passed (adaptive) | N failed | N errored
 
 --- TEST CASE N: <name> ---
 [emit completed test case block using the Test case block format defined in Step 3]
@@ -177,7 +177,7 @@ Need user input: <step text after the [HUMAN] marker, verbatim, with location co
 Rules:
 
 - `SUMMARY:` reflects only test cases completed in this segment.
-- If zero test cases have completed yet, write `SUMMARY: 0 test cases | 0 passed | 0 passed (adaptive) | 0 failed` and omit the test case blocks.
+- If zero test cases have completed yet, write `SUMMARY: 0 test cases | 0 passed | 0 passed (adaptive) | 0 failed | 0 errored` and omit the test case blocks.
 - `=== PARTIAL RUN — PAUSED ===` is the segment delimiter and replaces `=== TEST RUN COMPLETE ===` on a pause.
 - `Need user input:` is always the very last line of the response.
 - Do not produce `=== TEST RUN COMPLETE ===` on a pause.
@@ -197,7 +197,7 @@ This gives you the ground-truth list of screenshots this run actually wrote. For
 ```
 === TEST RUN RESULTS ===
 
-SUMMARY: N test cases | N passed | N passed (adaptive) | N failed
+SUMMARY: N test cases | N passed | N passed (adaptive) | N failed | N errored
 
 --- TEST CASE N: <name> ---
 [emit test case block using the Test case block format defined in Step 3]
@@ -205,5 +205,5 @@ SUMMARY: N test cases | N passed | N passed (adaptive) | N failed
 
 [one block per test case, in order]
 
-=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===
+=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===
 ```

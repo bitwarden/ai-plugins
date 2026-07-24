@@ -25,7 +25,7 @@ Your task prompt includes:
 
 ## Step 1 — Read test results
 
-`Read` the test-results file at the provided path. The entire file is a single raw output block beginning with `=== TEST RUN RESULTS ===` and ending with `=== TEST RUN COMPLETE: ... ===`. The run totals are on the `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===` marker.
+`Read` the test-results file at the provided path. The entire file is a single raw output block beginning with `=== TEST RUN RESULTS ===` and ending with `=== TEST RUN COMPLETE: ... ===`. The run totals are on the `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===` marker.
 
 ## Step 2 — Read test plan for services list
 

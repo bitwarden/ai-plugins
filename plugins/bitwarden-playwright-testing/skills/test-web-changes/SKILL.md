@@ -212,7 +212,7 @@ Resume: A prior test-runner agent paused at a [HUMAN] step. The user has now com
 
 ### Handling test-runner complete response
 
-When the test-runner returns a response containing `=== TEST RUN COMPLETE` (the full marker includes totals, e.g. `=== TEST RUN COMPLETE: 3 total, 2 passed, 0 passed (adaptive), 1 failed ===`), proceed to persist the artifact.
+When the test-runner returns a response containing `=== TEST RUN COMPLETE` (the full marker includes totals, e.g. `=== TEST RUN COMPLETE: 3 total, 2 passed, 0 passed (adaptive), 1 failed, 0 errored ===`), proceed to persist the artifact.
 
 ### Handling test-runner abort response
 
@@ -230,17 +230,17 @@ _Note: the checkpoint file contains multiple raw output segments separated by bl
 
 1. Read `checkpoint-<timestamp>.md` in full.
 2. Collect every `--- TEST CASE N: <name> --- ... --- END TEST CASE N ---` block across all segments, in order.
-3. Use the summed per-segment completed counts to produce final totals (total, passed, adaptive, failed).
+3. Use the summed per-segment completed counts to produce final totals (total, passed, adaptive, failed, errored).
 4. Write `test-results-<timestamp>.md` as exactly one block, verbatim:
 
    ```
    === TEST RUN RESULTS ===
 
-   SUMMARY: <summed total> test cases | <summed passed> passed | <summed adaptive> passed (adaptive) | <summed failed> failed
+   SUMMARY: <summed total> test cases | <summed passed> passed | <summed adaptive> passed (adaptive) | <summed failed> failed | <summed errored> errored
 
    <all test case blocks from step 2, in order>
 
-   === TEST RUN COMPLETE: <total> total, <passed> passed, <adaptive> passed (adaptive), <failed> failed ===
+   === TEST RUN COMPLETE: <total> total, <passed> passed, <adaptive> passed (adaptive), <failed> failed, <errored> errored ===
    ```
 
 Capture the final totals from the `=== TEST RUN COMPLETE: ... ===` marker — you will reuse them in the Shutdown summary.
