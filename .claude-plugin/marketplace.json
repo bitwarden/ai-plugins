@@ -108,8 +108,8 @@
     {
       "name": "bitwarden-eval-tools",
       "source": "./plugins/bitwarden-eval-tools",
-      "version": "1.0.0",
-      "description": "Reusable trigger-rate eval runner for Bitwarden skills: installed and isolated modes, reliability-aware reporting, and an opt-in baseline regression check."
+      "version": "1.1.0",
+      "description": "Tools for evaluating Bitwarden skills: trigger-rate evals in installed or isolated mode with reliability-aware reporting and an opt-in baseline regression check, plus behavioral A/B evals on real inputs with blind paired runs, ground-truth grading, and the ablation-accretion recipe for trimming a skill to its load-bearing core."
     }
   ]
 }

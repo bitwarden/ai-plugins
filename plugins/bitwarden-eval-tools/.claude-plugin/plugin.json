@@ -1,17 +1,24 @@
 {
   "name": "bitwarden-eval-tools",
-  "version": "1.0.0",
-  "description": "Reusable trigger-rate eval runner for Bitwarden skills: installed and isolated modes, reliability-aware reporting, and an opt-in baseline regression check. The standard tool for Triggering evals; use skill-creator for Structure and Behavior evals.",
+  "version": "1.1.0",
+  "description": "Tools for evaluating Bitwarden skills. `running-trigger-evals` measures whether a skill fires on the right phrasings, in installed or isolated mode, with reliability-aware reporting and an opt-in baseline regression check. `running-behavioral-evals` measures whether it changes the work product, through blind paired runs graded against verified ground truth, and carries the ablation-accretion recipe for trimming a skill to its load-bearing core.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-marketplace/tree/main/plugins/bitwarden-eval-tools",
-  "repository": "https://github.com/bitwarden/ai-marketplace",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-eval-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": [
     "eval",
     "evals",
+    "evaluation",
     "trigger-eval",
+    "behavioral-eval",
+    "ablation",
+    "accretion",
+    "ab-testing",
+    "blind-eval",
+    "grading",
     "testing",
     "skill-development",
     "quality-assurance",

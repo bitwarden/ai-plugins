@@ -1,0 +1,98 @@
+{
+  "skill_name": "running-trigger-evals",
+  "eval_type": "behavior",
+  "purpose": "Checks the decisions the skill has to get right once triggered. `unmerged-pr-picks-isolated` and `installed-skill-picks-installed` cover mode selection, which is driven by whether the skill under test is registered rather than by what the user asks for. `behavior-request-declined` covers the scope boundary, since a triggering runner cannot answer a question about output quality. `skewed-set-warns-not-blocks` covers the balance rule being advisory. `timeouts-read-as-measurement` and `blended-pass-hides-flaky` cover reading a report correctly, which is where a real reading is most often misinterpreted. `sibling-fire-is-report-only` covers `--exclude-skill` never changing pass/fail. `regression-check-gates-nothing` covers the opt-in nature of the regression check. Every case supplies the environment state and the report contents in the prompt and asks for the plan or the reading, so the graded artifact is the stated decision and no eval is ever run.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "unmerged-pr-picks-isolated",
+      "prompt": "I want to check the trigger rate for a skill called `drafting-release-notes`. It's not on main yet, it only exists on my branch at `plugins/bitwarden-product-management-tools/skills/drafting-release-notes/`, and I haven't installed the plugin. There's a `trigger-eval.json` next to it. What exactly would you run? Don't run anything yet.",
+      "expected_output": "Selects isolated mode because the skill is not registered in the environment, passes `--skill-path` to the skill directory, and plans the report directory creation and the runner invocation as two separate Bash calls.",
+      "expectations": [
+        "Chooses `--mode isolated`",
+        "Passes `--skill-path` rather than `--skill-token`",
+        "Bases the mode choice on the skill not being registered, not on the user's phrasing",
+        "Plans the `mkdir` and the runner invocation as two separate Bash calls rather than one chained command"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "installed-skill-picks-installed",
+      "prompt": "`bitwarden-atlassian-tools` is installed here and I want to see whether `researching-jira-issues` still fires on the right asks after I reworded its description. The reworded description is already committed and installed. Walk me through the command before running it.",
+      "expected_output": "Selects installed mode because the skill is registered, and targets it with `--skill-token` (or `--skill-path` to derive the token from the parsed `name:` field).",
+      "expectations": [
+        "Chooses `--mode installed`",
+        "Targets the skill with `--skill-token`, or `--skill-path` to derive the token",
+        "Does not propose isolated mode or writing a temporary command file"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "behavior-request-declined",
+      "prompt": "Run a trigger eval on `assessing-test-coverage` and tell me whether the reports it produces are actually any good.",
+      "expected_output": "Runs or plans the trigger eval for the triggering half, and states plainly that output quality is outside this skill's scope, pointing at behavioral evaluation instead of answering from the trigger numbers.",
+      "expectations": [
+        "States that report quality is outside a trigger eval's scope",
+        "Does not infer output quality from trigger rates",
+        "Points at behavioral evaluation for the quality question"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "skewed-set-warns-not-blocks",
+      "prompt": "Here's my eval set for `filing-jira-tickets`: 9 cases with `should_trigger: true` and 1 with `should_trigger: false`. Good to go?",
+      "expected_output": "Notes the split is skewed well past the ~20% tolerance and that it biases the blended pass rate toward the dominant class, recommends adding near-miss negatives, and makes clear the runner warns rather than refusing.",
+      "expectations": [
+        "Identifies the true/false split as skewed",
+        "Explains that the skew biases the blended pass rate",
+        "Recommends adding near-miss negatives",
+        "Does not claim the runner will refuse or fail on a skewed set"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "timeouts-read-as-measurement",
+      "prompt": "The reading came back with should-trigger at 3/8. One case looks like this:\n\n```json\n{\n  \"query\": \"what coverage exists for PM-32009?\",\n  \"should_trigger\": true,\n  \"triggers\": 0,\n  \"runs\": 3,\n  \"trigger_rate\": 0.0,\n  \"all_runs_agree\": false,\n  \"timeouts\": 3\n}\n```\n\nSo the description isn't firing. What should I change in it?",
+      "expected_output": "Refuses to treat that case as a description failure, because all three runs timed out and a timeout is scored as a non-trigger. Recommends re-running with a longer `--timeout` before touching the description.",
+      "expectations": [
+        "Identifies the timeouts as the reason the rate is zero for that case",
+        "States that a timeout is scored as a non-trigger",
+        "Recommends re-running with a longer `--timeout` before editing the description",
+        "Does not propose description edits based on that case"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "blended-pass-hides-flaky",
+      "prompt": "This case passed, right? `\"triggers\": 2, \"runs\": 3, \"trigger_rate\": 0.667, \"should_trigger\": true, \"all_runs_agree\": false`",
+      "expected_output": "Confirms it clears the 0.5 blended threshold but flags it as unreliable because the runs disagreed, and treats the reliability signal as the one that matters for production triggering.",
+      "expectations": [
+        "Confirms the case clears the blended threshold",
+        "Flags that the runs disagreed, so it is not reliable",
+        "Treats `all_runs_agree` as the signal that matters for production triggering"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "sibling-fire-is-report-only",
+      "prompt": "I ran with `--exclude-skill labeling-changes` and the report says `\"sibling_fires\": {\"labeling-changes\": 3}` on a case where my skill also triggered 3/3. Does that case fail?",
+      "expected_output": "Says the case does not fail, because sibling fires are reported for visibility into triggering overlap and never affect pass/fail, then notes the overlap is still worth looking at.",
+      "expectations": [
+        "States the case does not fail",
+        "Explains that `--exclude-skill` is report-only and never changes pass/fail",
+        "Still treats the overlap as worth investigating"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "regression-check-gates-nothing",
+      "prompt": "`--check-regression` flagged a hard regression against my baseline and the script exited 1. Does that mean I can't merge?",
+      "expected_output": "Explains that the check is opt-in and gates nothing on its own, that the caller decides what a flagged regression means for the merge, and that the exit code exists so a caller can gate on it if it chooses to.",
+      "expectations": [
+        "States the regression check does not itself block a merge",
+        "Says the caller decides what a flagged regression means",
+        "Does not claim a policy that the repository does not have"
+      ]
+    }
+  ]
+}

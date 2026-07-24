@@ -1,0 +1,102 @@
+{
+  "skill_name": "running-behavioral-evals",
+  "eval_type": "behavior",
+  "purpose": "Checks the disciplines that keep a behavioral comparison honest, each of which is intuitive to skip. `single-diff-not-evidence` and `cross-key-not-regression` cover the two ways a difference gets over-read. `subagents-refused-for-decisive-run` covers the isolation rule. `primed-prompt-caught` and `blanket-no-questions-refused` cover the two priming mistakes. `control-not-treated-as-oracle` covers adjudicating a disagreement at ground truth rather than against the original. `tainted-run-discarded` covers the taint verdict being terminal. `no-skill-arm-required` covers the third arm. Every case supplies the situation in the prompt and asks for a judgment or a plan, so the graded artifact is the stated decision and no run, grading pass, or file write happens.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "single-diff-not-evidence",
+      "prompt": "I ran the stripped variant and the original once each on the same Jira issue. The stripped one missed a reverted test that the original caught. That proves the \"check the revert history\" directive is load-bearing, so I'm adding it back. Sound right?",
+      "expected_output": "Declines to promote the directive on one run. Requires the noise floor from a control-versus-control run and a reproduction of the failure before promoting, on the grounds that a single difference may sit entirely inside the control's own run-to-run variance.",
+      "expectations": [
+        "Declines to promote the directive on the strength of one run",
+        "Requires a control-versus-control run to establish the noise floor",
+        "Requires the failure to reproduce before promotion",
+        "Names run-to-run variance, rather than the directive, as a live explanation for the observed difference"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "subagents-refused-for-decisive-run",
+      "prompt": "To save time on the decisive comparison I'll spawn both variants as subagents from one session, one told to use `-min` and one told to use the original, then diff their outputs. Set that up for me.",
+      "expected_output": "Refuses subagents for the decisive runs and requires each variant in its own fresh top-level session, because skill routing leaks across the subagent boundary and a subagent told to load one variant can load the other, silently.",
+      "expectations": [
+        "Refuses subagents for the decisive comparison",
+        "Requires each variant to run in its own separate top-level session",
+        "Gives skill-routing leakage across the subagent boundary as the reason",
+        "Notes that the failure is silent, so it is not caught until the taint check"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "primed-prompt-caught",
+      "prompt": "Here's the prompt I'll give both variants, identical except the skill name: \"Assess test coverage for PM-32009. Be sure to check whether the terminology tests were reverted off main, and note that the export endpoint is shared rather than per-plan.\" Ready to run?",
+      "expected_output": "Identifies the prompt as priming the subject and rewrites it to state the task only. Explains that naming the revert and the shared endpoint converts the eval from whether the skill finds them into whether the model follows instructions.",
+      "expectations": [
+        "Identifies the prompt as priming the subject",
+        "Removes the specific findings named in the prompt",
+        "Explains that the prompt as written tests instruction-following rather than the skill",
+        "Keeps the two prompts identical except for the skill name"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "blanket-no-questions-refused",
+      "prompt": "Add \"do not ask me any questions, just produce the report\" to both run prompts so the runs finish unattended and stay comparable.",
+      "expected_output": "Declines the blanket ban and substitutes neutral phrasing along the lines of proceeding with sensible defaults and asking only if a decision is genuinely needed, because a ban suppresses ask-or-proceed behavior that may itself be under test.",
+      "expectations": [
+        "Declines the blanket no-questions instruction",
+        "Substitutes neutral phrasing that permits a genuine question",
+        "Explains that the ban suppresses behavior that may be under test",
+        "Does not name the specific decision it expects the run to raise"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "control-not-treated-as-oracle",
+      "prompt": "The two variants disagree on three items. The original is the version we've shipped for months, so I'll take its answers as correct and score the stripped one against them. Go ahead and grade it that way.",
+      "expected_output": "Declines to use the control as ground truth and resolves each disagreement against the live system instead, then records which variant was actually right. Notes that trusting the original can correct the treatment toward a wrong answer.",
+      "expectations": [
+        "Declines to treat the control's output as ground truth",
+        "Resolves each disagreement against the live system or primary source",
+        "Records which variant was correct on each disputed item",
+        "Notes that the original can be confidently wrong"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "tainted-run-discarded",
+      "prompt": "The taint check on my treatment run shows it read one file under `results/` from the previous input, but nothing else, and the report itself looks unaffected. I'd rather not burn another run. Can I keep it and note the caveat?",
+      "expected_output": "Marks the run TAINTED and discards it, requiring a clean re-run rather than reasoning about how much the run probably saw or annotating a caveat.",
+      "expectations": [
+        "Records the run as TAINTED",
+        "Discards the run rather than keeping it with a caveat",
+        "Requires a clean re-run",
+        "Does not reason about how much the run probably absorbed"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "no-skill-arm-required",
+      "prompt": "I only care which of the two skill versions is better, so I'll run the new one and the old one and skip the third arm. Two arms is enough, right?",
+      "expected_output": "Requires the `no-skill` arm as well, because two arms show which version is better without showing whether either earns its tokens, and a case where all arms score alike is not measuring the skill.",
+      "expectations": [
+        "Requires the `no-skill` arm",
+        "Explains that two arms cannot show whether the skill earns its tokens",
+        "Notes that a case where all arms score alike is not measuring the skill"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "cross-key-not-regression",
+      "prompt": "The baseline for this case reads `claude-opus-4-7/default` at `16/16`. I just ran it and got `11/16`, recorded under `claude-sonnet-5/default`. That's a regression, so which directive broke?",
+      "expected_output": "Declines to call it a regression, because the two readings sit under different `<model>/<effort>` keys and a regression is defined only within a single key. Recommends recording the new key on its own and re-running under the baseline's key to compare.",
+      "expectations": [
+        "Declines to call the difference a regression",
+        "Identifies the differing `<model>/<effort>` keys as the reason",
+        "Does not attribute the difference to a directive",
+        "Recommends comparing within a single key, or recording the new key separately"
+      ]
+    }
+  ]
+}
