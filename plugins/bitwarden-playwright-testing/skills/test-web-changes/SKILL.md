@@ -258,7 +258,7 @@ Test results path: <artifacts-output-dir>/test-results-<timestamp>.md
 
 Wait for completion. The agent returns a single fenced `html` block containing the full HTML document.
 
-**Persist artifact**: Extract the HTML body (the content between the `html and ` fences) and write it verbatim to `<artifacts-output-dir>/report-<timestamp>.html` using the `Write` tool.
+**Persist artifact**: Strip the opening ` ```html ` fence and the closing ` ``` ` fence from report-compiler's response, then write the enclosed HTML document verbatim to `<artifacts-output-dir>/report-<timestamp>.html` using the `Write` tool.
 
 ---
 

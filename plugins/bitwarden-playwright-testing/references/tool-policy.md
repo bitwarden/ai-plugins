@@ -31,8 +31,6 @@ Use the external-trigger wrapper (see Canonical script paths) only when the acti
 - Creating a subscription discount record — use the Admin portal
 - Setting up a paid organization — use the web vault org creation flow with a test card
 
-**Authoritative source for external trigger parameter values:** When the plan or Jira synthesis contains explicit parameter values for an external trigger request body (productTier, products, trialLength, paymentOptional, etc.), copy them verbatim. Do not substitute values derived from enum definitions found in the codebase. If your code reading conflicts with the plan value, use the plan value and annotate it: `Note: plan specifies productTier: 2. Code enum shows Teams=2, Families=1. Using plan value.`
-
 **Labeling:** Mark every Category 3 step explicitly in both the plan and the execution log:
 EXTERNAL TRIGGER: POST <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
 
@@ -42,7 +40,7 @@ The wrapper enforces localhost-only destinations and POST-only method. A destina
 
 ## Category 4 — Stripe Data Queries (read-only)
 
-Use the `invoke-stripe-api` skill (or fall back to direct `stripe get` CLI commands) only to query Stripe data that cannot be obtained through the web UI — for example, listing coupon IDs needed for an Admin portal import flow. Check your available skills list first: if `invoke-stripe-api` is present, use it. If not, use `stripe get` via Bash for GET/read-only queries only.
+Use the `using-stripe-cli` skill (or fall back to direct `stripe get` CLI commands) only to query Stripe data that cannot be obtained through the web UI — for example, listing coupon IDs needed for an Admin portal import flow. Check your available skills list first: if `using-stripe-cli` is present, use it. If not, use `stripe get` via Bash for GET/read-only queries only.
 
 Do not use Stripe calls to set up state that the application's own flows can create.
 
