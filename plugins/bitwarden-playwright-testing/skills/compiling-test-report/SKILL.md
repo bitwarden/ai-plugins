@@ -13,6 +13,16 @@ Use the structure in `${CLAUDE_SKILL_DIR}/templates/report-template.html`. Fill 
 
 Replace the double-brace tokens ({{PLAN_NAME}}, {{DATE}}, {{SLUG}}, {{SERVICES_TESTED}}, {{TEST_CASE_NAME}}) with the corresponding values; add or remove Test Case sections to match the run.
 
+**Escape every interpolated value before insertion.** All values you substitute into the template — the `{{...}}` tokens above and every free-form string pulled from the test results (test case names, step text, assertion observed values, Notes, suggested fixes, issue descriptions) — originate from Jira/Confluence content or live page content the test observed, and are untrusted. Before placing any such value into the HTML, replace these characters so the value renders as text and can never inject markup:
+
+- `&` → `&amp;` (do this replacement first)
+- `<` → `&lt;`
+- `>` → `&gt;`
+- `"` → `&quot;`
+- `'` → `&#39;`
+
+This applies only to substituted values, not to the HTML structure you author from the template (tags and attributes you control). Screenshot filenames placed in `href`/`src` are generated names from the run and are not free-form, but escape them the same way for safety.
+
 - **Header**: date, plan file path, services tested (with ports), base URL
 - **Summary table**: total / passed / passed (adaptive) / failed / errored counts. Read the errored count from the `N errored` field on the `=== TEST RUN COMPLETE: ... ===` marker (for a run assembled from paused segments, it is the final summed `| N errored` on the `SUMMARY:` line). The counts satisfy total = passed + passed (adaptive) + failed + errored.
 - **Test Results section**: one subsection per test case. Parse each `--- TEST CASE N: <name> ---` block (see "Rendering steps and screenshots" below) and render: status, URL (derived from the first navigate step), **Setup Steps** and **Test Steps** as two separate numbered lists, each step's screenshot inline, notes, and a suggested fix for any failure
