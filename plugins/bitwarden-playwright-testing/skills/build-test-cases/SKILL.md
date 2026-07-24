@@ -19,7 +19,7 @@ If no Application Context is present, return an error asking the caller to run `
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/tool-policy.md` for the complete four-category tool policy. Apply it throughout test case construction — every step you generate must fall into one of the four categories, Category 3 steps must carry the EXTERNAL TRIGGER label defined in the policy, and no step may write to Stripe or query the database directly.
 
-The mailcatcher reader script is at `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh`. Use this absolute path verbatim in any setup step that reads email.
+The mailcatcher reader script path is defined in references/tool-policy.md (Canonical script paths). Use that path verbatim in any setup step that reads email.
 
 ## Admin Portal
 

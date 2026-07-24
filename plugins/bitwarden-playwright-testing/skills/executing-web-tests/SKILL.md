@@ -155,9 +155,9 @@ When the action causes a full page reload (the server-rendered Admin Portal — 
 
 ### Continuity rule
 
-External trigger results (curl responses), email reads, and URL extractions are intermediate working steps — not stopping points. After each, proceed immediately to the next test step.
+External trigger results (external-trigger.sh responses), email reads, and URL extractions are intermediate working steps — not stopping points. After each, proceed immediately to the next test step.
 
-For email-driven flows (verification, magic-link login, trial activation, OTP), call the mailcatcher reader script directly via Bash:
+For email-driven flows (verification, magic-link login, trial activation, OTP), call the mailcatcher reader script directly via Bash (canonical path in references/tool-policy.md):
 
 ```
 ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh --recipient <email> --pattern <subject-keyword>

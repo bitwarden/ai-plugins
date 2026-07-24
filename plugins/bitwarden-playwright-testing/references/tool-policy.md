@@ -2,6 +2,13 @@
 
 Four categories of steps are permitted during web test planning and execution. Everything else is blocked.
 
+## Canonical script paths
+
+Reference these scripts by these exact paths; do not duplicate the paths elsewhere in prose.
+
+- Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh`
+- External trigger: `${CLAUDE_PLUGIN_ROOT}/scripts/external-trigger.sh`
+
 ## Category 1 — Web UI Interactions (default)
 
 Use the `playwright-cli` skill for all interactions a user would perform in the browser. This is the default for everything, including verifying test results — if the outcome is visible in the UI, assert it via the browser, not via an API call.
@@ -12,11 +19,11 @@ When a test step requires reading an email (verification links, magic links, OTP
 
 ## Category 3 — External Trigger Simulation
 
-Use direct API calls (curl via Bash) only when the action is initiated by a system external to the Bitwarden application — meaning a system that is not the web vault, Admin portal, or any Bitwarden server service (e.g., the bitwarden.com marketing site, a mobile app, a third-party webhook).
+Use the external-trigger wrapper (see Canonical script paths) only when the action is initiated by a system external to the Bitwarden application — meaning a system that is not the web vault, Admin portal, or any Bitwarden server service (e.g., the bitwarden.com marketing site, a mobile app, a third-party webhook).
 
-**The qualifying test:** Could a Bitwarden service (web vault, Admin portal, server API) initiate this action for the user? If yes, use that service instead. If no — because the initiator is truly external — then curl is appropriate.
+**The qualifying test:** Could a Bitwarden service (web vault, Admin portal, server API) initiate this action for the user? If yes, use that service instead. If no — because the initiator is truly external — then the wrapper is appropriate.
 
-**Canonical example:** `POST /accounts/trial/send-verification-email` is called by bitwarden.com's marketing site, not by the web vault — simulating it with curl is legitimate. If the Admin portal or the web vault purchase flow can perform the action, use those instead. Document every curl call in the setup steps output with the rationale for why no Bitwarden service can initiate this step.
+**Canonical example:** `POST /accounts/trial/send-verification-email` is called by bitwarden.com's marketing site, not by the web vault — simulating it with the wrapper is legitimate. If the Admin portal or the web vault purchase flow can perform the action, use those instead. Document every external-trigger call in the setup steps output with the rationale for why no Bitwarden service can initiate this step.
 
 **Examples of what is NOT Category 3:**
 
@@ -27,7 +34,11 @@ Use direct API calls (curl via Bash) only when the action is initiated by a syst
 **Authoritative source for external trigger parameter values:** When the plan or Jira synthesis contains explicit parameter values for an external trigger request body (productTier, products, trialLength, paymentOptional, etc.), copy them verbatim. Do not substitute values derived from enum definitions found in the codebase. If your code reading conflicts with the plan value, use the plan value and annotate it: `Note: plan specifies productTier: 2. Code enum shows Teams=2, Families=1. Using plan value.`
 
 **Labeling:** Mark every Category 3 step explicitly in both the plan and the execution log:
-EXTERNAL TRIGGER: <METHOD> <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
+EXTERNAL TRIGGER: POST <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
+
+**Execution:** Category 3 steps are issued ONLY through the external-trigger wrapper (see Canonical script paths), never via raw curl:
+${CLAUDE_PLUGIN_ROOT}/scripts/external-trigger.sh --url <endpoint> --rationale "<rationale>" --data '<json body>'
+The wrapper enforces localhost-only destinations and POST-only method. A destination that is not a local dev host is rejected by the wrapper; do not attempt to work around it.
 
 ## Category 4 — Stripe Data Queries (read-only)
 
