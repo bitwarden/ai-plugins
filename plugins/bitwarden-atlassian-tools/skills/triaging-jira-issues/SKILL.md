@@ -7,7 +7,7 @@ description: Use when the user provides a single Jira issue key and asks whether
 
 Determine whether a Jira issue still applies to the current codebase. Fetch the ticket, locate the specific code path it describes, compare current behavior against the ticket's description, and return a verdict with evidence.
 
-This skill is distinct from `researching-jira-issues`. That skill synthesizes context to *understand* a ticket. This skill verifies whether the described problem or task still exists in code — the answer should be a clear verdict, not a summary.
+This skill is distinct from `researching-jira-issues`. That skill synthesizes context to _understand_ a ticket. This skill verifies whether the described problem or task still exists in code — the answer should be a clear verdict, not a summary.
 
 ## Workflow
 
@@ -53,9 +53,11 @@ Run searches in the relevant repo(s):
 2. **Read the actual implementation** at each match. The grep result shows where; the file content shows what it currently does. Confirm whether the behavior the ticket describes is still present, partially changed, or gone.
 
 3. **Check git history on affected files** since the ticket was filed:
+
    ```
    git log --oneline --since="<filed-date>" -- <file-path>
    ```
+
    Look for commits that might have silently addressed the issue — refactors, renames, feature flag removals, component rewrites. If a commit looks relevant, read its diff on the affected lines.
 
 4. **Trace refactored paths**: If a named symbol no longer exists, find what replaced it. A deleted method does not mean the bug is fixed — the logic may have moved. Search for the behavior, not just the original name.
@@ -79,16 +81,19 @@ Compare what the ticket describes against what the code does today. Reach a conc
 Use these to determine which repo and directories to search:
 
 **Server repo** (`server/src/`):
+
 - Team field (including but not limited to): Billing, Auth (server-side), Admin Console (server-side)
 - Keywords in description: C#, .NET, API endpoint, stored procedure, Stripe, webhook, IdentityServer, database
 - Key directories: `src/Identity/IdentityServer/` (auth/token flow), `src/Core/Billing/` and `src/Identity/Billing/` (billing), `src/Core/Services/Implementations/` (user/org services), `src/Api/` (REST controllers)
 
 **Clients repo** (`clients/`):
+
 - Team field (including but not limited to): Key Management, Browser, Desktop, Admin Console (frontend), Vault
 - Keywords in description: Angular, TypeScript, browser extension, desktop app, web vault, UI component, form
 - Key directories: `apps/browser/src/` (extension), `apps/desktop/src/` (desktop), `apps/web/src/` (web vault), `libs/key-management-ui/src/lock/` (shared lock/unlock UI), `libs/key-management/src/` and `libs/auth/src/` (shared auth)
 
 **SDK repo** (`sdk-internal/crates/`):
+
 - Team field (including but not limited to): SDK, Platform
 - Keywords in description: Rust, crate, SDK, FFI, bitwarden-crypto, bitwarden-auth, bitwarden-core
 - Key crates: `bitwarden-crypto/` (encryption), `bitwarden-auth/` (authentication), `bitwarden-core/` (core types), `bitwarden-ffi/` (cross-platform bindings)
