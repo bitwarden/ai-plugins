@@ -5,12 +5,5 @@
   "author": {
     "name": "Bitwarden"
   },
-  "keywords": [
-    "atlassian",
-    "jira",
-    "confluence",
-    "mcp",
-    "read-only",
-    "cql"
-  ]
+  "keywords": ["atlassian", "jira", "confluence", "mcp", "read-only", "cql"]
 }
