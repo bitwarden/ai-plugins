@@ -214,6 +214,10 @@ Resume: A prior test-runner agent paused at a [HUMAN] step. The user has now com
 
 When the test-runner returns a response containing `=== TEST RUN COMPLETE` (the full marker includes totals, e.g. `=== TEST RUN COMPLETE: 3 total, 2 passed, 0 passed (adaptive), 1 failed ===`), proceed to persist the artifact.
 
+### Handling test-runner abort response
+
+When the test-runner returns a response ending in `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`, the run never entered test execution. Write the returned block verbatim to `<artifacts-output-dir>/test-results-<timestamp>.md`, surface the `<reason>` to the user as the run outcome, and skip Task 8 (report compilation) — there are no test cases to report. Proceed directly to Shutdown.
+
 ### Persist artifact
 
 Write `<artifacts-output-dir>/test-results-<timestamp>.md`. The file is one bare raw output block — no headers or markdown or any added prose or commentary.

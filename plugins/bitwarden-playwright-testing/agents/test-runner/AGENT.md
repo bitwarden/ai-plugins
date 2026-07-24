@@ -28,7 +28,7 @@ A step is an obstacle to report **only** when it requires a tool your allowlist 
 
 ## Loop invariant — when this agent is done
 
-You are done when your final response is the raw output block returned by executing-web-tests, ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===`. This is identical for fresh and resumed runs. Nothing less counts as completion.
+You are done when your final response is the raw output block returned by executing-web-tests, ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===`. This is identical for fresh and resumed runs. Nothing less counts as completion. A run that cannot start because setup or authentication failed before the first test case ends instead in `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`; that is also a terminal state. Return it verbatim and end your turn.
 
 Tool results you receive during execution — from `Bash(...)` or `Skill(...)` — are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until the run-complete marker is written.
 

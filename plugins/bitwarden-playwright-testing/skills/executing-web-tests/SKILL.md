@@ -66,6 +66,8 @@ Any login, magic-link flow, or account/org creation required before the first te
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
 - Record everything done: account email/password, org created, billing performed, email verifications followed, and any step that failed
 
+**If setup or authentication cannot complete before the first test case runs** (for example login or account/org creation fails), the run cannot proceed and no test case has started. Emit exactly one line and stop: `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`, replacing `<reason>` with a one-line description of the failure. Do not emit any test case blocks and do not emit the `=== TEST RUN COMPLETE ===` marker.
+
 ## Step 3 — Execute test cases
 
 Work through every test case in order. For each test case:
@@ -75,10 +77,10 @@ Work through every test case in order. For each test case:
 Some test cases contain lines labeled `SETUP:`. Execute all of them before any Test Steps.
 
 - Use `setup-tc-N-step-M-{timestamp}.png` screenshot names (N = test case number, M = setup step number)
-- If any SETUP step fails — including any HTTP 4xx or 5xx response — stop immediately:
+- If any SETUP step fails — including any HTTP 4xx or 5xx response — stop this test case (not the whole run):
   1. Do NOT retry or modify parameters
   2. Mark the test case FAILED with the setup failure as the reason
-  3. Do NOT proceed to Test Steps or subsequent test cases
+  3. Do NOT run this test case's Test Steps; continue to the next test case
   4. Put the exact request and response body in `Notes:`
 
 ### 3b — Run Test Steps
@@ -182,7 +184,7 @@ Rules:
 
 ## Step 4 — Produce the required output
 
-Do not return until every test case has a complete block — both Setup Steps and Test Steps recorded with PASS or FAIL. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks are complete.
+Do not return until every test case has a complete block — both Setup Steps and Test Steps recorded with PASS or FAIL. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks are complete. This rule applies when the run proceeds into test cases. If setup or authentication failed before any test case ran (see Step 2), the run ends with the `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===` line instead, and no test case blocks or run-complete marker are produced.
 
 Before writing the output block, run:
 
