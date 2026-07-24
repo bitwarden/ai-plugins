@@ -5,6 +5,7 @@ description: Execution-phase standing teammate for the test-web-changes team. Re
 model: sonnet
 skills:
   - verifying-environment-health
+  - playwright-cli
 color: purple
 user-invocable: false
 tools: Read, Skill, Bash(*/bitwarden-playwright-testing/skills/verifying-environment-health/scripts/preflight-check.sh), Bash(*/bitwarden-playwright-testing/skills/verifying-environment-health/scripts/health-check.sh *)

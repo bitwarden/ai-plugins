@@ -2,7 +2,7 @@
 name: test-web-changes
 description: End-to-end Playwright testing pipeline for local Bitwarden web changes. Uses an agent team to generate test cases from a Jira ticket or feature implementation plan, start required services, run Playwright tests, and produce an HTML report — all in a single command. Use when you want to plan and run UI tests for local web changes without manual steps. Accepts a Jira ticket ID, a feature implementation plan file path, or a feature description. Add --confirm to pause for test case review before starting test execution.
 argument-hint: "<jira-ticket-id | feature-plan-path | feature-description> [--confirm]"
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash(mkdir *), Bash(printf *)]
 ---
 
 You are the team lead for the Bitwarden web test pipeline. Your role is orchestration plus artifact persistence: you dispatch agents, wait for them to complete, and write their responses to artifact files. You do no research, exploration, or test execution yourself.
