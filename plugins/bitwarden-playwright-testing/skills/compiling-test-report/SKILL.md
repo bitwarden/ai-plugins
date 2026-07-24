@@ -1,92 +1,25 @@
 ---
 name: compiling-test-report
-description: Compile an HTML test report from Playwright agent results for Bitwarden web tests. Use after executing web tests to produce a structured report with per-test-case pass/fail status, screenshot links, and issue summaries. Uses templates/report-template.html. Returns the HTML document as text — the caller persists it.
+description: Deterministic HTML report rendering for Bitwarden Playwright web tests. Home of render_report.py (results JSON to HTML) and merge_results.py (runner segments to canonical results JSON), the report templates, the JSON results-schema reference, and their unit tests. The test-web-changes team lead runs these scripts directly; there is no report-compiler agent.
 ---
 
-Given the Playwright agent results and services-tested list, produce the complete HTML report document as your output. You do not write any files and you do not name the file — the caller persists the content you return.
+This skill is the home for the deterministic report pipeline. It contains no LLM assembly instructions; the two scripts do the parsing, escaping, and rendering.
 
-The test results, screenshot paths, and pass/fail data all come from the `executing-web-tests` skill output — use them directly.
+## Contract
 
-## HTML Report
+The results JSON contract is defined in `references/results-schema.md`, with concrete examples in `references/examples/`. Those examples are the producer's reference (see `executing-web-tests`) and the scripts' golden test fixtures.
 
-Use the structure in `${CLAUDE_SKILL_DIR}/templates/report-template.html`. Fill in:
+## Scripts
 
-Replace the double-brace tokens ({{PLAN_NAME}}, {{DATE}}, {{SLUG}}, {{SERVICES_TESTED}}, {{TEST_CASE_NAME}}) with the corresponding values; add or remove Test Case sections to match the run.
+Both are stdlib-only Python, executable, and invoked by absolute path.
 
-**Escape every interpolated value before insertion.** All values you substitute into the template originate from Jira/Confluence content or live page content the test observed, and are untrusted. This includes the `{{...}}` tokens above and every free-form string pulled from the test results (test case names, step text, assertion observed values, Notes, suggested fixes, issue descriptions). Before placing any such value into the HTML, replace these characters so the value renders as text and can never inject markup:
+- `scripts/merge_results.py <segment.json> [<segment.json> ...] --output <path>`: assembles one or more runner segment files into the canonical results JSON, deriving totals from the per-case statuses. `run_status` follows the last segment. A paused result carries `need_user_input`; an aborted last segment yields an aborted run with no cases. Prints a `run_status=... | N total | ...` summary line to stdout.
+- `scripts/render_report.py --results <path> --template-dir <dir> --output <path> --plan-name <str> --date <str> --slug <str> --services-tested <str> --base-url <str>`: renders the canonical results JSON to an HTML report, writing the file directly. Every interpolated value is HTML-escaped by the script; template markup is not. Exits 2 on an aborted run (the caller skips rendering) and 3 on invalid results JSON.
 
-- `&` → `&amp;` (do this replacement first)
-- `<` → `&lt;`
-- `>` → `&gt;`
-- `"` → `&quot;`
-- `'` → `&#39;`
+## Templates
 
-This applies only to substituted values, not to the HTML structure you author from the template (tags and attributes you control). Screenshot filenames placed in `href`/`src` are generated names from the run and are not free-form, but escape them the same way for safety.
+`templates/report.html` is the shell (head, styles, header, summary table, and the `{{TEST_CASES}}`, `{{ISSUES_SUMMARY}}`, `{{RECOMMENDATIONS}}` tokens). `templates/test-case.html` is one case. No HTML lives in the Python.
 
-- **Header**: date, plan file path, services tested (with ports), base URL
-- **Summary table**: total / passed / passed (adaptive) / failed / errored counts. Read the errored count from the `N errored` field on the `=== TEST RUN COMPLETE: ... ===` marker (for a run assembled from paused segments, it is the final summed `| N errored` on the `SUMMARY:` line). The counts satisfy total = passed + passed (adaptive) + failed + errored.
-- **Test Results section**: one subsection per test case. Parse each `--- TEST CASE N: <name> ---` block (see "Rendering steps and screenshots" below) and render: status, URL (derived from the first navigate step), **Setup Steps** and **Test Steps** as two separate numbered lists, each step's screenshot inline, notes, and a suggested fix for any failure
-- **Issues Summary**: bullet list of all failures and errors
-- **Recommendations**: follow-up actions (Fix, Investigate, Re-test)
+## Tests
 
-Screenshot paths in the report use relative paths from the report file location — just `screenshots/filename.png`, not the full absolute path.
-
-Each screenshot is rendered as a linked thumbnail, placed inline inside its step's `<li>` (see "Rendering steps and screenshots" below):
-
-```html
-<a class="screenshot-link" href="screenshots/filename.png" target="_blank">
-  <img src="screenshots/filename.png" alt="description" />
-</a>
-```
-
-The `.screenshot-link img` CSS rule in the template sets `width: 50%` — do not add inline `style` attributes to the `<img>` tags. Thumbnails link to the full-size image in a new tab.
-
-## Rendering steps and screenshots
-
-Each test case block has an optional `Setup Steps:` label and a `Test Steps:` label, each followed by lines like `Step N: <text> — <outcome>`. Render them as two separate numbered lists, each under its own header:
-
-```html
-<p><strong>Setup Steps</strong>:</p>
-<ol>
-  <li>Navigate to … — PASS</li>
-</ol>
-<p><strong>Test Steps</strong>:</p>
-<ol>
-  <li>Click Tools dropdown — PASS</li>
-</ol>
-```
-
-- Omit the Setup Steps header and its list entirely when the block has no `Setup Steps:` section.
-- An indented `  Screenshot: <filename>` line belongs to the step on the line directly above it. Render the thumbnail **inside that step's `<li>`**, after the step text:
-
-```html
-<li>
-  Click Tools dropdown — PASS
-  <a
-    class="screenshot-link"
-    href="screenshots/test-case-1-step-3-….png"
-    target="_blank"
-  >
-    <img src="screenshots/test-case-1-step-3-….png" alt="test-case-1-step-3" />
-  </a>
-</li>
-```
-
-- The URL shown in the test case header comes from the first step whose text begins `Navigate to`.
-- Do not emit a separate Screenshots section.
-- A step line beginning with `[HUMAN]` renders as `<li class="human-step">…</li>`.
-
-## Adaptive status rendering
-
-When a test case has `PASS (adaptive)` status:
-
-- Render its status line as `⚠️ PASS (adaptive)` — use the amber warning symbol, not the green ✅
-- Do NOT include it in the Issues Summary section (it is a pass, not a failure)
-- In the Recommendations section, add a bullet for each adaptive test case:
-  `Update test plan: TC<N> asserted <what was specified> — actual rendering is <what was found>. Update the assertion in the test plan to match.`
-
-When there are no adaptive test cases, omit any mention of them from the Recommendations section.
-
-## Output
-
-Return a single fenced `html` block containing the full HTML document (populated from `${CLAUDE_SKILL_DIR}/templates/report-template.html`). No other text — the entire response is the fenced block.
+`scripts/test_render_report.py` and `scripts/test_merge_results.py` run with `python3 -m unittest` from the scripts directory. They cover rendering fidelity, HTML-escaping of malicious payloads, validation and invariant failures, and segment merge.
