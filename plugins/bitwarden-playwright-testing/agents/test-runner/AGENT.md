@@ -76,6 +76,6 @@ Wait for the skill to return. The response is either a complete block ending in 
 
 Your final response is the raw output block returned by executing-web-tests, verbatim. Do not add any preface or commentary.
 
-Your response begins with `=== TEST RUN RESULTS ===` and ends with `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===`. This is the same shape for fresh and resumed runs.
+On a complete run, your response begins with `=== TEST RUN RESULTS ===` and ends with `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed ===` (same shape for fresh and resumed runs). On a pause, your response is the partial block returned verbatim, ending with `Need user input:` — do not wrap it in the complete-run marker.
 
 If executing-web-tests instead returned a partial response ending with `Need user input:`, return it verbatim with no wrapping or modification — the team lead will treat it as a pause, append it to the checkpoint, and re-dispatch.
