@@ -187,7 +187,7 @@ Do not return until every test case has a complete block — both Setup Steps an
 Before writing the output block, run:
 
 ```bash
-ls <screenshot-dir> | grep '<timestamp>'
+ls <screenshot-dir>/*<timestamp>*
 ```
 
 This gives you the ground-truth list of screenshots this run actually wrote. For each test case N, files whose names contain `test-case-N-` are that case's test-step screenshots and `setup-tc-N-` are its setup-step screenshots. Use these exact filenames in the indented `Screenshot:` lines — place each on the line immediately after the step it documents — and do not reconstruct names from memory.
