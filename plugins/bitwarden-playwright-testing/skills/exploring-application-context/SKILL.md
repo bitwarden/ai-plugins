@@ -11,7 +11,7 @@ Model what a **real user can reach and observe** — not every selector in the b
 
 ## Gathering procedure
 
-Read `${CLAUDE_SKILL_DIR}/references/known-flows.md` once before gathering states and flows. It holds two pre-grounded catalogs — `## Known States` (reusable setup states) and `## Known Flows` (reusable flows) — that both sections below draw from; copy relevant entries verbatim rather than re-deriving them.
+Read all three catalogs under `${CLAUDE_SKILL_DIR}/references/known-flows/` (`auth.md`, `billing.md`, `admin.md`) once before gathering states and flows. Each holds domain-scoped `## Known States` and `## Known Flows` sections; copy relevant entries verbatim rather than re-deriving them.
 
 ### Gather the blast radius
 

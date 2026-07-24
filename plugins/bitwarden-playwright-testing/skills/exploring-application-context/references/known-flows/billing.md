@@ -1,33 +1,10 @@
-# Known Bitwarden States and Flows
+# Known Bitwarden States and Flows — Billing
 
-Curated reference of validated, reusable test states and UI flows for the Bitwarden web application. Both catalogs are consumed by `exploring-application-context` (entries are copied verbatim) and drive `build-test-cases`. State slugs are referenced across both catalogs; consistency is enforced by the `exploring-application-context` skill's self-review checks.
+Curated reference of validated, reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations — consumed verbatim by `exploring-application-context` and `build-test-cases`.
 
 ---
 
 ## Known States
-
-Reusable, pre-grounded setup states, written in the exact `## States` schema the `exploring-application-context` skill emits — so the skill copies an entry **verbatim** into its output (no transform, no re-grounding). Each route and verification point was derived from real source at authoring time (cited in `Source:`). When a cited element moves in the codebase, update the entry here once.
-
----
-
-### state:authenticated-free-user
-
-**State type:** setup
-
-**Produced by:**
-
-- flow:create-new-user-and-login
-
-**Reachable by playwright:** yes
-
-**UI projection:**
-
-- Route: https://localhost:8080/#/vault
-- Verification points:
-  - Selector: heading "All vaults"
-    - Selector type: role
-    - Expectation: visible
-    - Source: clients/apps/web/src/app/vault/individual-vault/vault-header/vault-header.component.ts:187 (default title from the `allVaults` i18n key, rendered as the page `<h1>` via clients/libs/components/src/header/header.component.html:7)
 
 ### state:authenticated-premium-user
 
@@ -67,25 +44,6 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
     - Selector type: role
     - Expectation: visible
     - Source: clients/apps/web/src/app/admin-console/organizations/layouts/organization-layout.component.html:3 (org side-nav logo `<bit-nav-logo [label]="'adminConsole' | i18n">` — an org-name-independent `aria-label` rendered via clients/libs/components/src/navigation/nav-logo.component.html:11)
-
-### state:admin-portal-authenticated
-
-**State type:** setup
-
-**Produced by:**
-
-- flow:authenticate-admin-portal
-
-**Reachable by playwright:** yes
-
-**UI projection:**
-
-- Route: http://localhost:62911
-- Verification points:
-  - Selector: heading "Dashboard"
-    - Selector type: role
-    - Expectation: visible
-    - Source: server/src/Admin/Views/Home/Index.cshtml:55 (static `<h1>Dashboard</h1>` on the authenticated Admin home, served by server/src/Admin/Controllers/HomeController.cs:30)
 
 ### state:trialing-org-with-payment
 
@@ -152,41 +110,6 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 ---
 
 ## Known Flows
-
-Each flow can be used by `build-test-cases` either as a precondition-producing setup flow (referenced by name) or as the action sequence a test exercises (composed inline with assertions).
-
-Entry schema:
-
-- **Use when:** high-level summary of the situations this flow fits
-- **Parameters:** comma-separated placeholder names (e.g., `email`, `password`, `orgName`), or "none"
-- **Precondition state:** `state:<slug>` that must hold before running this flow — or "none"
-- **Steps:** numbered atomic UI actions with selectors and values; each step that produces a visible response carries an inline `- Feedback:` sub-item describing it (toast, redirect, modal, element enters/leaves the DOM)
-- **Post-condition state(s):**
-  - `Default: state:<slug>` — the terminal state the flow produces by default
-  - `When <condition>: state:<slug>` — branch states when the post-condition diverges (e.g., feature-flag-gated behavior)
-
-### flow:create-new-user-and-login
-
-- **Use when:** Any test that requires a fresh authenticated user account with no prior subscription or organization state.
-- **Parameters:** `email`, `password`
-- **Precondition state:** none
-- **Steps:**
-  1. Navigate to `https://localhost:8080/#/signup`
-  2. Fill the Email field with `<email>`
-  3. (Optional) Fill the Name field
-  4. Click Continue
-     - Feedback: "Check your email" confirmation state appears
-  5. Run `read-mailcatcher.sh --recipient <email> --pattern "Verify"` to fetch the verification email; stdout is the magic-link URL
-  6. Navigate to the magic-link URL (it targets `https://localhost:8080/#/finish-signup?...`)
-     - Feedback: finish-signup form appears
-  7. Fill the Master Password field with `<password>` (must be ≥12 characters)
-  8. Fill the Confirm Master Password field with `<password>`
-  9. Click Create Account
-     - Feedback: redirect to the vault
-- **Post-condition state(s):**
-  - Default: state:authenticated-free-user
-
----
 
 ### flow:purchase-premium-subscription
 
@@ -314,22 +237,3 @@ Entry schema:
   - Default: state:authenticated-with-paid-org
 
 **Note:** This flow assumes the user from whose mailbox the verification email was retrieved is already logged in. The trial-existing-user path requires the existing session to persist; the verification URL only works for the logged-in user matching the email.
-
----
-
-### flow:authenticate-admin-portal
-
-- **Use when:** Any test that requires administrative setup (creating discounts, managing users, verifying subscription state).
-- **Parameters:** `bitwarden-portal-admin-email`
-- **Precondition state:** none
-- **Steps:**
-  1. Navigate to `http://localhost:62911`
-     - Feedback: redirect to the Admin portal login page
-  2. Enter `<bitwarden-portal-admin-email>` in the login field
-  3. Submit the form
-     - Feedback: form clears; magic-link email sent
-  4. Run `read-mailcatcher.sh --recipient <bitwarden-portal-admin-email> --pattern "Continue Logging In"` to read the magic link (subject contains "Admin" or "Continue Logging In"); stdout is the URL
-  5. Navigate directly to the extracted magic-link URL
-     - Feedback: Admin portal home loads, authenticated
-- **Post-condition state(s):**
-  - Default: state:admin-portal-authenticated
