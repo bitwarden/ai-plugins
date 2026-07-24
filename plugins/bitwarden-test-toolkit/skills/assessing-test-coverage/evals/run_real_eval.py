@@ -13,10 +13,8 @@ import argparse
 import json
 import os
 import select
-import shutil
 import subprocess
 import sys
-import tempfile
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -26,9 +24,6 @@ TARGET_SKILL_TOKEN = "assessing-test-coverage"
 # Requesting one of these means the model chose real work over the target skill;
 # we bail on it (see run_query) to avoid the heavy child processes it would spawn.
 EXEC_TOOLS = {"Bash", "Task"}
-
-# Scratch CWD for the spawned subprocesses (git-ignored: plugins/**/evals/runs/).
-RUNS_DIR = Path(__file__).resolve().parent / "runs"
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:
@@ -40,16 +35,11 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         "--model", model,
     ]
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
-    # Give each subprocess a fresh empty CWD so it can't read this runner's own
-    # files; skills are user-scoped and resolve regardless of CWD.
-    RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    scratch_cwd = tempfile.mkdtemp(prefix="trigger-eval-", dir=RUNS_DIR)
     process = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         env=env,
-        cwd=scratch_cwd,
     )
 
     triggered = False
@@ -110,7 +100,6 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         if process.poll() is None:
             process.kill()
             process.wait()
-        shutil.rmtree(scratch_cwd, ignore_errors=True)
     return {"triggered": triggered, "first_skill": first_skill_seen}
 
 
