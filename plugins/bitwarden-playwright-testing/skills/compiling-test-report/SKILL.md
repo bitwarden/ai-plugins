@@ -13,7 +13,7 @@ Use the structure in `${CLAUDE_SKILL_DIR}/templates/report-template.html`. Fill 
 
 Replace the double-brace tokens ({{PLAN_NAME}}, {{DATE}}, {{SLUG}}, {{SERVICES_TESTED}}, {{TEST_CASE_NAME}}) with the corresponding values; add or remove Test Case sections to match the run.
 
-**Escape every interpolated value before insertion.** All values you substitute into the template — the `{{...}}` tokens above and every free-form string pulled from the test results (test case names, step text, assertion observed values, Notes, suggested fixes, issue descriptions) — originate from Jira/Confluence content or live page content the test observed, and are untrusted. Before placing any such value into the HTML, replace these characters so the value renders as text and can never inject markup:
+**Escape every interpolated value before insertion.** All values you substitute into the template originate from Jira/Confluence content or live page content the test observed, and are untrusted. This includes the `{{...}}` tokens above and every free-form string pulled from the test results (test case names, step text, assertion observed values, Notes, suggested fixes, issue descriptions). Before placing any such value into the HTML, replace these characters so the value renders as text and can never inject markup:
 
 - `&` → `&amp;` (do this replacement first)
 - `<` → `&lt;`
