@@ -29,6 +29,11 @@ METHOD="POST"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    --url|--rationale|--data|--content-type|--method)
+      [ $# -ge 2 ] || { echo "ERROR: $1 requires a value" >&2; exit 2; }
+      ;;
+  esac
+  case "$1" in
     --url)          URL="$2"; shift 2 ;;
     --rationale)    RATIONALE="$2"; shift 2 ;;
     --data)         DATA="$2"; shift 2 ;;
@@ -66,20 +71,22 @@ case "$SCHEME" in
   *) echo "ERROR: scheme '$SCHEME' not allowed; use http or https" >&2; exit 11 ;;
 esac
 
-# Build the allowlist: defaults plus any env-provided extensions.
-ALLOWED="localhost 127.0.0.1 ::1 bitwarden.test"
+# Build the allowlist: defaults plus any env-provided extensions. Use an array
+# and quoted expansion so a "*" (or other glob metacharacter) in the env var
+# is compared literally, never expanded against the current working directory.
+ALLOWED=(localhost 127.0.0.1 ::1 bitwarden.test)
 if [ -n "${PLAYWRIGHT_TESTING_ALLOWED_HOSTS:-}" ]; then
-  EXTRA="$(printf '%s' "$PLAYWRIGHT_TESTING_ALLOWED_HOSTS" | tr ',' ' ')"
-  ALLOWED="$ALLOWED $EXTRA"
+  IFS=',' read -r -a EXTRA <<< "$PLAYWRIGHT_TESTING_ALLOWED_HOSTS"
+  ALLOWED+=("${EXTRA[@]}")
 fi
 
 HOST_OK=0
-for h in $ALLOWED; do
+for h in "${ALLOWED[@]}"; do
   if [ "$HOST" = "$(printf '%s' "$h" | tr 'A-Z' 'a-z')" ]; then HOST_OK=1; break; fi
 done
 if [ "$HOST_OK" -ne 1 ]; then
   echo "ERROR: host '$HOST' is not an allowed local dev host." >&2
-  echo "       Allowed: $ALLOWED" >&2
+  echo "       Allowed: ${ALLOWED[*]}" >&2
   echo "       For a custom local hostname, set PLAYWRIGHT_TESTING_ALLOWED_HOSTS=<host>[,<host>...]." >&2
   exit 10
 fi
@@ -94,7 +101,7 @@ fi
 # Execute. -k mirrors health-check.sh: Bitwarden dev certs are self-signed and the
 # host is already constrained to the local dev allowlist above.
 if [ -n "$DATA" ]; then
-  curl -k -sS -X POST -H "Content-Type: $CONTENT_TYPE" --data "$DATA" "$URL"
+  curl -k -sS -X POST -H "Content-Type: $CONTENT_TYPE" --data-raw "$DATA" "$URL"
 else
   curl -k -sS -X POST -H "Content-Type: $CONTENT_TYPE" "$URL"
 fi
