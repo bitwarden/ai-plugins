@@ -1,13 +1,12 @@
 ---
-name: triaging-jira-issues
-description: Use when the user provides a single Jira issue key and asks whether it is still relevant, still applicable, still pending, still a bug, has been fixed, or can be closed. Trigger phrases include "Is [TICKET] still relevant?", "Is this still an issue?", "Is PM-123 still pending?", "Has this been fixed?", "Can we close this?", "Is this ticket still valid?", "Is this still applicable?", "Does this bug still exist?". Fetches the ticket and verifies the described problem against the current codebase to return a verdict with evidence. This skill triages a single ticket at a time; invoke it iteratively for multiple tickets.
+name: assessing-jira-issue-relevance
+description: Use when the user provides a single Jira issue key and asks whether it is still relevant, still applicable, still pending, still a bug, has been fixed, or can be closed. Trigger phrases include "Is [TICKET] still relevant?", "Is this still an issue?", "Is PM-123 still pending?", "Has this been fixed?", "Can we close this?", "Is this ticket still valid?", "Is this still applicable?", "Does this bug still exist?". Fetches the ticket and verifies the described problem against the current codebase to return a verdict with evidence. This skill assesses a single ticket at a time; invoke it iteratively for multiple tickets.
+allowed-tools: Read, Grep, Glob, AskUserQuestion, Bash(git log:*), Bash(git -C * log:*), Bash(git -C * rev-parse:*), Bash(git clone:*), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
 ---
 
-# Triaging a Jira Issue for Relevance
+# Assessing a Jira Issue for Relevance
 
 Determine whether a Jira issue still applies to the current codebase. Fetch the ticket, locate the specific code path it describes, compare current behavior against the ticket's description, and return a verdict with evidence.
-
-This skill is distinct from `researching-jira-issues`. That skill synthesizes context to _understand_ a ticket. This skill verifies whether the described problem or task still exists in code — the answer should be a clear verdict, not a summary.
 
 ## Workflow
 
@@ -18,7 +17,9 @@ Use `get_issue` with `expand: ["renderedFields", "names"]`. Extract:
 - **The specific problem or task**: Read beyond the summary. The description, acceptance criteria, and replication steps are more precise. For bugs: what is the actual broken behavior and what is expected? For tasks: what specific code change is required?
 - **Technical identifiers**: Method names, class names, file paths, API endpoint routes, UI strings that appear in source, config keys, feature flag names — anything named in the ticket that can be searched in code. Note these explicitly before moving on.
 - **Filed date**: Used to scope `git log` searches.
-- **Repo scope signal**: Determine whether this applies to `clients`, `server`, `sdk-internal`, or a combination. Use the team field, component labels, and description content (see Scope Notes below).
+- **Repo scope evidence**: Gather what the ticket says about where the code lives, and note how strong that evidence is. Do not settle on a repo here — Step 2 decides.
+  - _Strong_: a literal repo name, a `github.com/bitwarden/<repo>` URL, or a linked PR/commit.
+  - _Weaker_: team field, component labels, language or platform keywords, file paths in the description.
 
 Also note these **staleness signals** from the ticket fields before moving on:
 
@@ -32,7 +33,35 @@ After fetching the ticket, always do both of the following:
 
 **Fetch linked issues** (`get_issue_remote_links` and the `issuelinks` field): Look specifically for blocking relationships — issues this ticket blocks or is blocked by. A ticket blocked by unresolved work may not be actionable yet; a blocker that has since been resolved may mean this ticket is now ready. Fetch (`get_issue`) any directly linked issues to check their current status and extract additional technical context. Do not traverse more than one level deep.
 
-### Step 2: Build Search Targets
+### Step 2: Establish Repo Scope
+
+Settle which repositories are in scope and confirm they are readable **before** searching anything. Do not begin Step 3 until all three checks below pass.
+
+Bitwarden has many repositories — `clients`, `server`, `sdk-internal`, `sdk-sm`, `android`, `ios`, `mcp-server`, and others. Treat the candidate set as open; never assume a ticket must belong to one of the repos you have seen before.
+
+**1. Determine the repos.**
+
+If the ticket carries strong evidence (a literal repo name, a `github.com/bitwarden/<repo>` URL, or a linked PR/commit), use it and move on.
+
+Otherwise, infer the most likely repo(s) from the weaker signals and **present that inference for confirmation** with `AskUserQuestion`. State what you inferred and the signal it rests on, offer the plausible alternatives you considered, and allow multiple selections — tickets legitimately span repos. Never search a repo the user has not confirmed.
+
+**2. Resolve each repo to a path.**
+
+Use the current working directory if it is that repo; otherwise look for a sibling directory of the same name; otherwise ask for the path. Confirm each resolved path is a real checkout:
+
+```
+git -C <path> rev-parse --show-toplevel
+```
+
+**3. Verify the repo is cloned, and stop if it is not.**
+
+If a repo in scope has no checkout on disk, ask whether to clone it. On approval, clone it and continue.
+
+**If the user declines to clone, stop immediately.** Return no verdict. State which repo was unavailable and that the assessment could not be completed. This halt applies even when other repos in scope are present — do not assess the available half and do not downgrade to a weaker verdict. Searching a repo that is not on disk returns no matches, which is indistinguishable from the code having been removed; proceeding would produce a confident "No longer relevant" on a ticket that is still live.
+
+This halt is distinct from the **Cannot determine** verdict in Step 5. "Cannot determine" means the ticket was too vague to trace. This means the evidence was never accessible.
+
+### Step 3: Build Search Targets
 
 From the ticket, identify 2–5 specific identifiers to search for in code. Prioritize:
 
@@ -44,9 +73,13 @@ From the ticket, identify 2–5 specific identifiers to search for in code. Prio
 
 If the ticket names no specific identifiers, derive them from the described behavior: what function would implement this, what component would render this UI, what endpoint would serve this request?
 
-### Step 3: Search the Code
+### Step 4: Search the Code
 
-Run searches in the relevant repo(s):
+Run searches in the repo(s) confirmed in Step 2.
+
+First, **orient yourself in each repo**: read its `CLAUDE.md` and `README` to find the source roots, module layout, and test locations. Do this rather than relying on remembered directory names — layouts differ per repo and change over time.
+
+Then:
 
 1. **Grep for each identifier** in the relevant source directories. Don't stop at confirming existence — read the surrounding code to understand current behavior. A symbol that still exists but now behaves differently may mean the bug is already fixed.
 
@@ -62,7 +95,7 @@ Run searches in the relevant repo(s):
 
 4. **Trace refactored paths**: If a named symbol no longer exists, find what replaced it. A deleted method does not mean the bug is fixed — the logic may have moved. Search for the behavior, not just the original name.
 
-### Step 4: Deliver Verdict
+### Step 5: Deliver Verdict
 
 Compare what the ticket describes against what the code does today. Reach a conclusion.
 
@@ -76,30 +109,6 @@ Compare what the ticket describes against what the code does today. Reach a conc
 
 **Format**: Lead with the verdict and its justification in plain prose. Cite `file:line` references as evidence. If still relevant, state what specifically remains to be done — do not just restate the ticket. If staleness signals are present even for a "Still relevant" verdict, note them at the end: ticket age, epic completion state, priority, and assignee. Keep it tight; a verdict paragraph with supporting evidence is sufficient.
 
-## Scope Notes
-
-Use these to determine which repo and directories to search:
-
-**Server repo** (`server/src/`):
-
-- Team field (including but not limited to): Billing, Auth (server-side), Admin Console (server-side)
-- Keywords in description: C#, .NET, API endpoint, stored procedure, Stripe, webhook, IdentityServer, database
-- Key directories: `src/Identity/IdentityServer/` (auth/token flow), `src/Core/Billing/` and `src/Identity/Billing/` (billing), `src/Core/Services/Implementations/` (user/org services), `src/Api/` (REST controllers)
-
-**Clients repo** (`clients/`):
-
-- Team field (including but not limited to): Key Management, Browser, Desktop, Admin Console (frontend), Vault
-- Keywords in description: Angular, TypeScript, browser extension, desktop app, web vault, UI component, form
-- Key directories: `apps/browser/src/` (extension), `apps/desktop/src/` (desktop), `apps/web/src/` (web vault), `libs/key-management-ui/src/lock/` (shared lock/unlock UI), `libs/key-management/src/` and `libs/auth/src/` (shared auth)
-
-**SDK repo** (`sdk-internal/crates/`):
-
-- Team field (including but not limited to): SDK, Platform
-- Keywords in description: Rust, crate, SDK, FFI, bitwarden-crypto, bitwarden-auth, bitwarden-core
-- Key crates: `bitwarden-crypto/` (encryption), `bitwarden-auth/` (authentication), `bitwarden-core/` (core types), `bitwarden-ffi/` (cross-platform bindings)
-
-**Multiple repos**: Auth and key management tickets often span clients and server. Vault timeout, biometrics, and unlock flow bugs commonly touch both `clients` and `sdk-internal`. Start with the repo the team field suggests, then check the other if the first shows only half the picture.
-
 ## What NOT to Do
 
 - Don't traverse linked issues more than one level — fetch directly linked issues (blocks, is blocked by, parent epic) but do not follow their links further
@@ -111,6 +120,6 @@ Use these to determine which repo and directories to search:
 
 ## Examples
 
-### examples/triage_workflow.md
+### examples/relevance_assessment_workflow.md
 
-Three worked examples: a bug where the described code path was silently refactored away, a task whose implementation gap is confirmed present, and a spike made obsolete by later work.
+Four worked examples: a bug where the described code path was silently refactored away, a task whose implementation gap is confirmed present, a spike made obsolete by later work, and a ticket whose repo is not cloned locally, where the skill halts without a verdict.

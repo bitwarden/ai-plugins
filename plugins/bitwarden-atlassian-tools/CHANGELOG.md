@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `triaging-jira-issues` skill for verifying whether a single Jira issue is still relevant against the current codebase — fetches the ticket, searches for the described code path across clients/server/sdk-internal, checks git history since the filed date, and returns a verdict (still relevant / partially addressed / no longer relevant / cannot determine) with file:line evidence
+- `assessing-jira-issue-relevance` skill for determining whether a single Jira issue still applies to the current codebase. Fetches the ticket along with its comments, linked issues, and parent epic; confirms which repositories are in scope before searching; greps for the code path the ticket describes; checks git history since the filed date; and returns a verdict (still relevant / partially addressed / no longer relevant / technically relevant but worth questioning / cannot determine) with `file:line` evidence. Intended for backlog cleanup — one ticket per invocation.
+  - Works against any Bitwarden repository. Where the ticket does not name one outright, the skill infers the likely repo from the available signals and presents that inference for confirmation before searching anything, then orients itself by reading the confirmed repo's own `CLAUDE.md`/`README`.
+  - Halts without a verdict if a repository in scope is not cloned locally and the user declines to clone it. Searching an absent repo returns no matches, which is indistinguishable from the code having been removed, and would otherwise produce a confident "no longer relevant" on a live ticket.
+  - Ships scoped `allowed-tools` covering the four read-only Atlassian MCP tools the workflow calls, so routine use does not prompt for permission on every fetch.
 
 ## [2.3.0] - 2026-07-15
 
