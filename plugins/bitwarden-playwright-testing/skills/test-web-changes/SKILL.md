@@ -222,7 +222,7 @@ Write `<artifacts-output-dir>/test-results-<timestamp>.md`. The file is one bare
 
 **If test pauses occurred** (checkpoint file exists): append the final raw output segment from the test-runner's response to `checkpoint-<timestamp>.md` with a blank-line separator, then assemble one merged raw output block:
 
-_Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN — PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers and the paused-segment markers. Keep the `SUMMARY:` line from the final complete segment for the totals; discard only the `SUMMARY:` lines from segments that end in the paused marker._
+_Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN — PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers and the paused-segment markers. Each segment's `SUMMARY:` reports only that segment's own completed cases, so sum the per-segment `SUMMARY:` counts to produce the final totals; the individual per-segment `SUMMARY:` lines do not appear in the assembled body, which carries a single final `SUMMARY:` line._
 
 1. Read `checkpoint-<timestamp>.md` in full.
 2. Collect every `--- TEST CASE N: <name> --- ... --- END TEST CASE N ---` block across all segments, in order.
