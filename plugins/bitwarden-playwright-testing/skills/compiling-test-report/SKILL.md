@@ -11,15 +11,15 @@ The results JSON contract is defined in `references/results-schema.md`, with con
 
 ## Scripts
 
-Both are stdlib-only Python, executable, and invoked by absolute path.
+Both are stdlib-only Python, executable, and invoked by absolute path. They share `scripts/results_common.py` (the `fail` and `tally` helpers), which is imported, not invoked directly.
 
 - `scripts/merge_results.py <segment.json> [<segment.json> ...] --output <path>`: assembles one or more runner segment files into the canonical results JSON, deriving totals from the per-case statuses. `run_status` follows the last segment. A paused result carries `need_user_input`; an aborted last segment yields an aborted run with no cases. Prints a `run_status=... | N total | ...` summary line to stdout.
 - `scripts/render_report.py --results <path> --template-dir <dir> --output <path> --plan-name <str> --date <str> --slug <str> --services-tested <str> --base-url <str>`: renders the canonical results JSON to an HTML report, writing the file directly. Every interpolated value is HTML-escaped by the script; template markup is not. Exits 2 on an aborted run (the caller skips rendering) and 3 on invalid results JSON.
 
 ## Templates
 
-`templates/report.html` is the shell (head, styles, header, summary table, and the `{{TEST_CASES}}`, `{{ISSUES_SUMMARY}}`, `{{RECOMMENDATIONS}}` tokens). `templates/test-case.html` is one case. No HTML lives in the Python.
+`templates/report.html` is the shell (head, styles, header, summary table, and the `{{TEST_CASES}}`, `{{ISSUES_SUMMARY}}`, `{{RECOMMENDATIONS}}` tokens). `templates/test-case.html` is one case. The document shell and the per-case structure live in these templates; the script composes the repeating pieces (each step `<li>`, its screenshot thumbnail, and the Issues Summary and Recommendations lists) as small HTML fragments, escaping every interpolated value.
 
 ## Tests
 
-`scripts/test_render_report.py` and `scripts/test_merge_results.py` run with `python3 -m unittest` from the scripts directory. They cover rendering fidelity, HTML-escaping of malicious payloads, validation and invariant failures, and segment merge.
+`scripts/test_results_common.py`, `scripts/test_render_report.py`, and `scripts/test_merge_results.py` run with `python3 -m unittest` from the scripts directory. They cover the shared helpers, rendering fidelity, HTML-escaping of malicious payloads, validation and invariant failures, and segment merge.
