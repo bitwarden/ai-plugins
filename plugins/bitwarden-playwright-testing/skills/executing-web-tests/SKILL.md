@@ -66,7 +66,7 @@ Any login, magic-link flow, or account/org creation required before the first te
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
 - Record everything done: account email/password, org created, billing performed, email verifications followed, and any step that failed
 
-**If setup or authentication cannot complete before the first test case runs** (for example login or account/org creation fails), the run cannot proceed and no test case has started. Emit exactly one line and stop: `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`, replacing `<reason>` with a one-line description of the failure. Do not emit any test case blocks and do not emit the `=== TEST RUN COMPLETE ===` marker.
+**If setup or authentication cannot complete before the first test case runs** (for example login or account/org creation fails), the run cannot proceed and no test case has started. Emit exactly one line and stop: `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===`, replacing `<reason>` with a one-line description of the failure. Do not emit any test case blocks and do not emit the `=== TEST RUN COMPLETE ===` marker.
 
 ## Step 3 — Execute test cases
 
@@ -169,7 +169,7 @@ SUMMARY: <N completed in this segment> test cases | N passed | N passed (adaptiv
 
 [one block per completed test case, in order]
 
-=== PARTIAL RUN — PAUSED ===
+=== PARTIAL RUN PAUSED ===
 
 Need user input: <step text after the [HUMAN] marker, verbatim, with location context — e.g. "Test Case 1, Setup Step 8: Attach a Stripe test clock to the subscription.">
 ```
@@ -178,13 +178,13 @@ Rules:
 
 - `SUMMARY:` reflects only test cases completed in this segment.
 - If zero test cases have completed yet, write `SUMMARY: 0 test cases | 0 passed | 0 passed (adaptive) | 0 failed | 0 errored` and omit the test case blocks.
-- `=== PARTIAL RUN — PAUSED ===` is the segment delimiter and replaces `=== TEST RUN COMPLETE ===` on a pause.
+- `=== PARTIAL RUN PAUSED ===` is the segment delimiter and replaces `=== TEST RUN COMPLETE ===` on a pause.
 - `Need user input:` is always the very last line of the response.
 - Do not produce `=== TEST RUN COMPLETE ===` on a pause.
 
 ## Step 4 — Produce the required output
 
-Do not return until every test case has a complete block — both Setup Steps and Test Steps recorded with PASS or FAIL. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks are complete. This rule applies when the run proceeds into test cases. If setup or authentication failed before any test case ran (see Step 2), the run ends with the `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===` line instead, and no test case blocks or run-complete marker are produced.
+Do not return until every test case has a complete block — both Setup Steps and Test Steps recorded with PASS or FAIL. The `=== TEST RUN COMPLETE ===` line may only appear after all blocks are complete. This rule applies when the run proceeds into test cases. If setup or authentication failed before any test case ran (see Step 2), the run ends with the `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===` line instead, and no test case blocks or run-complete marker are produced.
 
 Before writing the output block, run:
 

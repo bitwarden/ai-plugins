@@ -29,7 +29,7 @@ A step is an obstacle to report **only** when it requires a tool your allowlist 
 
 ## Loop invariant — when this agent is done
 
-You are done when your final response is the raw output block returned by executing-web-tests, ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===`. This is identical for fresh and resumed runs. Nothing less counts as completion. A run that cannot start because setup or authentication failed before the first test case ends instead in `=== TEST RUN ABORTED: setup failure before test cases — <reason> ===`; that is also a terminal state. Return it verbatim and end your turn.
+You are done when your final response is the raw output block returned by executing-web-tests, ending in `=== TEST RUN COMPLETE: N total, N passed, N passed (adaptive), N failed, N errored ===`. This is identical for fresh and resumed runs. Nothing less counts as completion. A run that cannot start because setup or authentication failed before the first test case ends instead in `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===`; that is also a terminal state. Return it verbatim and end your turn.
 
 Tool results you receive during execution — from `Bash(...)` or `Skill(...)` — are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until the run-complete marker is written.
 
@@ -73,7 +73,7 @@ Invoke `Skill(bitwarden-playwright-testing:executing-web-tests)`. Pass:
 - Config path: `${CLAUDE_PLUGIN_ROOT}/scripts/playwright.config.json`
 - **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
 
-Wait for the skill to return. The response is either a complete block ending in `=== TEST RUN COMPLETE ===`, or a partial block ending in `=== PARTIAL RUN — PAUSED ===` followed by `Need user input:`. Return the skill's output verbatim in either case — do not short-circuit while the skill is mid-run, but once it returns (with either terminal marker), return its output immediately.
+Wait for the skill to return. The response is either a complete block ending in `=== TEST RUN COMPLETE ===`, or a partial block ending in `=== PARTIAL RUN PAUSED ===` followed by `Need user input:`. Return the skill's output verbatim in either case — do not short-circuit while the skill is mid-run, but once it returns (with either terminal marker), return its output immediately.
 
 ## Step 3 — Return results
 
