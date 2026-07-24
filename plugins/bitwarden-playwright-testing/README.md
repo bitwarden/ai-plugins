@@ -49,43 +49,43 @@ Invoke the team-lead skill:
 
 `test-web-changes` runs an eight-task pipeline as the team lead. Each agent returns its artifact as a markdown response; the team lead writes those responses verbatim to `.playwright-testing-artifacts/<slug>/` and dispatches the next agent.
 
-| Task | Agent | Artifact |
-|---|---|---|
-| 1 | `context-gatherer` | `context-<timestamp>.md` |
-| 2 | `code-explorer` | `app-context-<timestamp>.md` |
-| 3 | `service-mapper` | `services-<timestamp>.md` |
-| 4 | `test-planner` | `test-cases-<timestamp>.md` |
-| 5 | *(team lead composes)* | `test-plan-<timestamp>.md` |
-| 6 | `service-manager` *(verifies the environment via `verifying-environment-health`)* | *(no artifact; halts the run on failure)* |
-| 7 | `test-runner` | `test-results-<timestamp>.md` |
-| 8 | `report-compiler` | `report-<timestamp>.html` |
+| Task | Agent                                                                             | Artifact                                  |
+| ---- | --------------------------------------------------------------------------------- | ----------------------------------------- |
+| 1    | `context-gatherer`                                                                | `context-<timestamp>.md`                  |
+| 2    | `code-explorer`                                                                   | `app-context-<timestamp>.md`              |
+| 3    | `service-mapper`                                                                  | `services-<timestamp>.md`                 |
+| 4    | `test-planner`                                                                    | `test-cases-<timestamp>.md`               |
+| 5    | _(team lead composes)_                                                            | `test-plan-<timestamp>.md`                |
+| 6    | `service-manager` _(verifies the environment via `verifying-environment-health`)_ | _(no artifact; halts the run on failure)_ |
+| 7    | `test-runner`                                                                     | `test-results-<timestamp>.md`             |
+| 8    | `report-compiler`                                                                 | `report-<timestamp>.html`                 |
 
 ## Agents and skills
 
 ### Agents
 
-| Component | Description |
-|---|---|
-| `context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
-| `code-explorer` | Reads the context, explores the affected codebases, and produces the Application Context (changed files, routes, selectors, verification points). |
-| `service-mapper` | Reads the Application Context and maps changed file paths to the local services that need to be running. |
-| `test-planner` | Reads context and Application Context artifacts and builds grounded test cases via the `build-test-cases` skill. |
-| `service-manager` | Reads the test plan and dispatches `verifying-environment-health` to confirm Docker dev containers, application `/alive` endpoints, and the Angular bootstrap. Halts the run on any failure. Never starts or stops services. |
-| `test-runner` | Launches the `playwright-cli` agent to execute test cases with guardrails and screenshots, and returns structured results. |
-| `report-compiler` | Compiles an HTML report from the test results. |
+| Component          | Description                                                                                                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context.                                                                                                          |
+| `code-explorer`    | Reads the context, explores the affected codebases, and produces the Application Context (changed files, routes, selectors, verification points).                                                                            |
+| `service-mapper`   | Reads the Application Context and maps changed file paths to the local services that need to be running.                                                                                                                     |
+| `test-planner`     | Reads context and Application Context artifacts and builds grounded test cases via the `build-test-cases` skill.                                                                                                             |
+| `service-manager`  | Reads the test plan and dispatches `verifying-environment-health` to confirm Docker dev containers, application `/alive` endpoints, and the Angular bootstrap. Halts the run on any failure. Never starts or stops services. |
+| `test-runner`      | Launches the `playwright-cli` agent to execute test cases with guardrails and screenshots, and returns structured results.                                                                                                   |
+| `report-compiler`  | Compiles an HTML report from the test results.                                                                                                                                                                               |
 
 ### Skills
 
-| Skill | Description |
-|---|---|
-| `test-web-changes` | Team-lead orchestration skill; the only user-facing entry point. |
-| `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories. |
-| `determining-required-services` | Maps changed file paths to the local services that need to be running. |
-| `verifying-environment-health` | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. |
-| `build-test-cases` | Builds Playwright test cases with a web-first policy from plan context. |
-| `executing-web-tests` | Launches the `playwright-cli` agent with guardrails and screenshots. |
-| `reading-mailcatcher-api` | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes. |
-| `compiling-test-report` | Writes an HTML report from agent results. |
+| Skill                           | Description                                                                                                                                                                |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test-web-changes`              | Team-lead orchestration skill; the only user-facing entry point.                                                                                                           |
+| `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories.                                                                            |
+| `determining-required-services` | Maps changed file paths to the local services that need to be running.                                                                                                     |
+| `verifying-environment-health`  | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. |
+| `build-test-cases`              | Builds Playwright test cases with a web-first policy from plan context.                                                                                                    |
+| `executing-web-tests`           | Launches the `playwright-cli` agent with guardrails and screenshots.                                                                                                       |
+| `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes.                                                                    |
+| `compiling-test-report`         | Writes an HTML report from agent results.                                                                                                                                  |
 
 ## Web-first policy
 

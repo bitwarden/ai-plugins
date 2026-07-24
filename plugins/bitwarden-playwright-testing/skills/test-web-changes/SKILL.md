@@ -30,15 +30,15 @@ Extract from the arguments:
 
 Create team named `pwt-<slug>`. Add all seven teammates:
 
-| Teammate | Agent type |
-|---|---|
+| Teammate           | Agent type                                      |
+| ------------------ | ----------------------------------------------- |
 | `context-gatherer` | `bitwarden-playwright-testing:context-gatherer` |
-| `code-explorer` | `bitwarden-playwright-testing:code-explorer` |
-| `service-mapper` | `bitwarden-playwright-testing:service-mapper` |
-| `test-planner` | `bitwarden-playwright-testing:test-planner` |
-| `service-manager` | `bitwarden-playwright-testing:service-manager` |
-| `test-runner` | `bitwarden-playwright-testing:test-runner` |
-| `report-compiler` | `bitwarden-playwright-testing:report-compiler` |
+| `code-explorer`    | `bitwarden-playwright-testing:code-explorer`    |
+| `service-mapper`   | `bitwarden-playwright-testing:service-mapper`   |
+| `test-planner`     | `bitwarden-playwright-testing:test-planner`     |
+| `service-manager`  | `bitwarden-playwright-testing:service-manager`  |
+| `test-runner`      | `bitwarden-playwright-testing:test-runner`      |
+| `report-compiler`  | `bitwarden-playwright-testing:report-compiler`  |
 
 All teammates wait for explicit dispatch. They must not self-activate.
 
@@ -59,7 +59,7 @@ Wait for completion. The agent returns the full context as a markdown response.
 
 ---
 
-## Task 2: Explore codebase *(blockedBy: Task 1)*
+## Task 2: Explore codebase _(blockedBy: Task 1)_
 
 Dispatch `code-explorer` with:
 
@@ -73,7 +73,7 @@ Wait for completion. The agent returns the Application Context as a markdown res
 
 ---
 
-## Task 3: Determine required services *(blockedBy: Task 2)*
+## Task 3: Determine required services _(blockedBy: Task 2)_
 
 Dispatch `service-mapper` with:
 
@@ -88,7 +88,7 @@ Wait for completion. The agent returns the services list as a markdown response.
 
 ---
 
-## Task 4: Build test cases *(blockedBy: Task 2)*
+## Task 4: Build test cases _(blockedBy: Task 2)_
 
 Dispatch `test-planner` with:
 
@@ -103,7 +103,7 @@ Wait for completion. The agent returns the test cases as a markdown response. Th
 
 ---
 
-## Task 5: Compose test plan *(blockedBy: Task 4)*
+## Task 5: Compose test plan _(blockedBy: Task 4)_
 
 This is pure team-lead work — no agent dispatch. Read both planning artifacts and assemble the final test plan.
 
@@ -129,7 +129,7 @@ Shut down `context-gatherer`, `code-explorer`, `service-mapper`, and `test-plann
 
 ---
 
-## Optional review gate *(only if `--confirm` was set)*
+## Optional review gate _(only if `--confirm` was set)_
 
 Read `<artifacts-output-dir>/test-plan-<timestamp>.md`. Count the test cases and extract their names.
 
@@ -138,6 +138,7 @@ Display:
 > "Test plan written to `<artifacts-output-dir>/test-plan-<timestamp>.md`
 >
 > **Test Cases (<N>):**
+>
 > - <test case name 1>
 > - <test case name 2>
 > - ...
@@ -151,7 +152,7 @@ If `--confirm` was not set, print: "Test plan complete — proceeding to test ex
 
 ---
 
-## Task 6: Verify environment health *(blockedBy: Task 5)*
+## Task 6: Verify environment health _(blockedBy: Task 5)_
 
 Dispatch `service-manager` with:
 
@@ -171,7 +172,7 @@ No artifact is written for this task.
 
 ---
 
-## Task 7: Execute tests *(blockedBy: Task 6)*
+## Task 7: Execute tests _(blockedBy: Task 6)_
 
 Dispatch `test-runner` with:
 
@@ -180,7 +181,7 @@ Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
 Artifacts output dir: <artifacts-output-dir>
 ```
 
-Wait for the test-runner to return a response. 
+Wait for the test-runner to return a response.
 
 ### Handling test-runner pause responses
 
@@ -213,7 +214,7 @@ Resume: A prior test-runner agent paused at a [HUMAN] step. The user has now com
 
 When the test-runner returns a response containing `=== TEST RUN COMPLETE` (the full marker includes totals, e.g. `=== TEST RUN COMPLETE: 3 total, 2 passed, 0 passed (adaptive), 1 failed ===`), proceed to persist the artifact.
 
-### Persist artifact 
+### Persist artifact
 
 Write `<artifacts-output-dir>/test-results-<timestamp>.md`. The file is one bare raw output block — no headers or markdown or any added prose or commentary.
 
@@ -221,12 +222,13 @@ Write `<artifacts-output-dir>/test-results-<timestamp>.md`. The file is one bare
 
 **If test pauses occurred** (checkpoint file exists): append the final raw output segment from the test-runner's response to `checkpoint-<timestamp>.md` with a blank-line separator, then assemble one merged raw output block:
 
-*Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN — PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers, all intermediate `SUMMARY:` lines, and all `=== PARTIAL RUN — PAUSED ===` markers.*
+_Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN — PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers, all intermediate `SUMMARY:` lines, and all `=== PARTIAL RUN — PAUSED ===` markers._
 
 1. Read `checkpoint-<timestamp>.md` in full.
 2. Collect every `--- TEST CASE N: <name> --- ... --- END TEST CASE N ---` block across all segments, in order.
 3. Sum the `SUMMARY:` counts across all segments to produce final totals (total, passed, adaptive, failed).
 4. Write `test-results-<timestamp>.md` as exactly one block, verbatim:
+
    ```
    === TEST RUN RESULTS ===
 
@@ -241,7 +243,7 @@ Capture the final totals from the `=== TEST RUN COMPLETE: ... ===` marker — yo
 
 ---
 
-## Task 8: Compile report *(blockedBy: Task 7)*
+## Task 8: Compile report _(blockedBy: Task 7)_
 
 Dispatch `report-compiler` with:
 
@@ -250,9 +252,9 @@ Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
 Test results path: <artifacts-output-dir>/test-results-<timestamp>.md
 ```
 
-Wait for completion. The agent returns a single fenced ```html``` block containing the full HTML document.
+Wait for completion. The agent returns a single fenced `html` block containing the full HTML document.
 
-**Persist artifact**: Extract the HTML body (the content between the ```html and ``` fences) and write it verbatim to `<artifacts-output-dir>/report-<timestamp>.html` using the `Write` tool.
+**Persist artifact**: Extract the HTML body (the content between the `html and ` fences) and write it verbatim to `<artifacts-output-dir>/report-<timestamp>.html` using the `Write` tool.
 
 ---
 

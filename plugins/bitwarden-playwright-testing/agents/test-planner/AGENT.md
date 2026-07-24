@@ -17,12 +17,14 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 ## Inputs
 
 Your task prompt includes:
+
 - **Context artifact path**: path to `context-<timestamp>.md` from context-gatherer
 - **App-context artifact path**: path to `app-context-<timestamp>.md` from code-explorer
 
 ## Step 1 — Read both artifacts
 
 Read the context markdown and the app-context markdown. Extract by header:
+
 - `## Feature Description` and `## Acceptance Criteria` from the context markdown
 - The full app-context markdown content, which begins with the `## Application Context` heading
 
@@ -50,6 +52,7 @@ The skill may emit the document across multiple passes. If the skill output cont
 Return exactly this structure:
 
 ## Test Cases
+
 ...
 
 Self-check before returning: your first non-empty line must be the `## Test Cases` heading, and `## Test Cases` must appear exactly once in your response. If the self-check fails, surface the failure to the team lead instead of returning a malformed artifact.

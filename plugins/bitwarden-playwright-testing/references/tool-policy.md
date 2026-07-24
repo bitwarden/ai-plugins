@@ -19,6 +19,7 @@ Use direct API calls (curl via Bash) only when the action is initiated by a syst
 **Canonical example:** `POST /accounts/trial/send-verification-email` is called by bitwarden.com's marketing site, not by the web vault — simulating it with curl is legitimate. If the Admin portal or the web vault purchase flow can perform the action, use those instead. Document every curl call in the setup steps output with the rationale for why no Bitwarden service can initiate this step.
 
 **Examples of what is NOT Category 3:**
+
 - Applying a coupon to a subscription — use the Admin portal or the web vault purchase flow
 - Creating a subscription discount record — use the Admin portal
 - Setting up a paid organization — use the web vault org creation flow with a test card
@@ -26,7 +27,7 @@ Use direct API calls (curl via Bash) only when the action is initiated by a syst
 **Authoritative source for external trigger parameter values:** When the plan or Jira synthesis contains explicit parameter values for an external trigger request body (productTier, products, trialLength, paymentOptional, etc.), copy them verbatim. Do not substitute values derived from enum definitions found in the codebase. If your code reading conflicts with the plan value, use the plan value and annotate it: `Note: plan specifies productTier: 2. Code enum shows Teams=2, Families=1. Using plan value.`
 
 **Labeling:** Mark every Category 3 step explicitly in both the plan and the execution log:
-  EXTERNAL TRIGGER: <METHOD> <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
+EXTERNAL TRIGGER: <METHOD> <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
 
 ## Category 4 — Stripe Data Queries (read-only)
 

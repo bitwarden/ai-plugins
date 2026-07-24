@@ -17,6 +17,7 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 ## Inputs
 
 Your task prompt includes:
+
 - **Test plan path**: path to the test plan markdown file
 - **Test results path**: path to the test-results file the team lead just wrote
 
@@ -31,6 +32,7 @@ Read the test plan file. Extract the `## Required Services` section to get the l
 ## Step 3 — Compile report
 
 Invoke `Skill(bitwarden-playwright-testing:compiling-test-report)`. Pass:
+
 - Playwright agent results (the full contents of the test-results file)
 - Services tested list (from the Required Services section)
 
@@ -38,7 +40,7 @@ The skill returns the complete HTML document as text.
 
 ## Output
 
-Your final response is the HTML report content itself, wrapped in a single fenced ```html``` block. No preface, no commentary, no filename — the team lead handles persistence and naming.
+Your final response is the HTML report content itself, wrapped in a single fenced `html` block. No preface, no commentary, no filename — the team lead handles persistence and naming.
 
 Exact response shape:
 
@@ -48,4 +50,4 @@ Exact response shape:
     </html>
     ```
 
-Self-check before returning: your entire response must be a single fenced ```html``` block with no preface or trailing commentary.
+Self-check before returning: your entire response must be a single fenced `html` block with no preface or trailing commentary.

@@ -21,12 +21,14 @@ This agent requires the **playwright-cli** skill to be installed. The `verifying
 ## Inputs
 
 Your task prompt includes:
+
 - **Test plan path**: path to the test plan markdown file.
 - **Artifacts output dir**: absolute path to the run's artifacts folder. Render-verify screenshots are written under `<artifacts-output-dir>/screenshots/`.
 
 ## Step 1 — Read the test plan
 
 Read the test plan file and extract:
+
 - **Required service names**: from the `## Required Services` block, pull the bullet's leading name token (e.g., `- Api — http://localhost:4000 (port 4000)` → `Api`). Collect these as a space-separated list — they are the argv for the health-check script.
 - **Primary test URL**: the bullet marked `**(primary test URL)**` in the same block. Used by the render-verify step inside the skill.
 

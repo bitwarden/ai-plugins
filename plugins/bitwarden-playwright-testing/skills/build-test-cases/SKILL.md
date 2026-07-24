@@ -27,6 +27,8 @@ The Bitwarden Admin portal at `http://localhost:62911` is a legitimate applicati
 
 ## Setup Steps
 
+<!-- cspell:ignore testuser -->
+
 Any test case that creates a user account must write the exact email address into the SETUP step. Use the format `testuser-s<N>-<YYYYMMDDHHMMSS>@example.com` where `<N>` is the test case number and `<YYYYMMDDHHMMSS>` is a timestamp generated at plan-writing time. Never use a generic placeholder or reuse the same address across test cases in the same run.
 
 Before writing any setup steps or test step sequences, read the Application Context's `## States` and `## Flows` sections. For each test case:
@@ -37,17 +39,19 @@ Before writing any setup steps or test step sequences, read the Application Cont
 
 **If the required precondition state has `Reachable by playwright: no`:** read its `Reach via:` recipe and inline each recipe line as a step in the test case. Preserve `[HUMAN]` markers verbatim. Expand any nested `Run flow:<slug>` invocations to their atomic steps (with parameter substitution baked in at plan-write time) — the test plan does not contain a shared flow definitions section, so all steps must be self-contained.
 
-  **Step placement.** Place the recipe lines at the point in the test case where the state transition occurs:
-  - **Setup Steps** when the unreachable state is the test's precondition (most common — the recipe drives the application *into* the state before the Test Steps assert it).
-  - **Test Steps** when the unreachable state is produced or driven through as part of the test exercise.
+**Step placement.** Place the recipe lines at the point in the test case where the state transition occurs:
 
-  Make the placement decision at plan-write time based on the test's intent. Do not duplicate recipe steps in both sections.
+- **Setup Steps** when the unreachable state is the test's precondition (most common — the recipe drives the application _into_ the state before the Test Steps assert it).
+- **Test Steps** when the unreachable state is produced or driven through as part of the test exercise.
+
+Make the placement decision at plan-write time based on the test's intent. Do not duplicate recipe steps in both sections.
 
 Repetition is acceptable. If the same multi-step sequence appears in two or more test cases, inline it in each — the test plan is generated, not maintained, so DRY across test cases isn't a goal.
 
 Only write setup steps from scratch when no named entry in `## Flows` covers the required precondition. In that case, use the Application Context's `## States` entries (routes, verification points) to identify the right mechanism and break it into individual atomic actions (navigate, fill, click, wait for response).
 
 `Setup Steps:` is mandatory whenever the precondition state requires any of:
+
 - Navigating the Admin portal to create/import records (e.g., subscription discounts, organization seats) — typically uses `flow:authenticate-admin-portal` plus inline admin actions
 - Querying Stripe for coupon/discount IDs (Category 4 read-only calls)
 - Creating a user account or registering a new organization — typically `flow:create-new-user-and-login`, optionally followed by `flow:purchase-premium-subscription` or `flow:create-paid-org`
@@ -60,12 +64,14 @@ If no precondition requires active setup (e.g., the test case tests a page that 
 ## Test Case Construction
 
 For each test case, define:
+
 1. **Starting URL** — from Application Context
 2. **Sequence of interactions** (click, fill, navigate, assert)
 3. **Pass/fail criteria** — what constitutes a pass vs. a failure
 4. **Descriptive name** — used in the report
 
 Be specific:
+
 - **Good (interaction)**: "Navigate to `https://localhost:8080/#/vault`, click the '+ New Item' button"
 - **Good (assertion)**: "Assert: `[data-testid='discount-section']` — exactly 2 elements | Fail: 0 elements found (server may not be returning Discounts array)"
 - **Bad**: "Verify discounts are shown"
@@ -82,8 +88,9 @@ Be specific:
 - **All verification points must appear**: Every item under "UI projection > Verification points" in the Application Context must map to at least one explicit assertion step. If a verification point has no corresponding assertion, the test case is incomplete.
 
 **Interactive elements must be exercised.** When the plan describes collapsible sections, accordions, tabs, expandable cards, or modal triggers, each must have a dedicated step that:
+
 1. Performs the interaction (click to expand, open tab, trigger modal)
-2. Asserts the content *inside* is correct
+2. Asserts the content _inside_ is correct
 
 Verifying that a header or trigger is visible is not sufficient — the hidden content must also be verified.
 
@@ -96,6 +103,7 @@ Verifying that a header or trigger is visible is not sufficient — the hidden c
 ## Billing Prerequisites Check
 
 Scan the plan's features, acceptance criteria, and file paths for billing signals:
+
 - Billing operations: subscriptions, Secrets Manager add-on, plan upgrades, payment methods
 - API endpoints containing `subscribe`, `billing`, `payment`, `upgrade`, or `secrets-manager`
 - UI flows navigating to billing settings, subscription pages, or Secrets Manager enablement

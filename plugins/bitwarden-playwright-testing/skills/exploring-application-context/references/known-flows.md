@@ -15,11 +15,13 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:create-new-user-and-login
 
 **Reachable by playwright:** yes
 
 **UI projection:**
+
 - Route: https://localhost:8080/#/vault
 - Verification points:
   - Selector: heading "All vaults"
@@ -32,11 +34,13 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:purchase-premium-subscription
 
 **Reachable by playwright:** yes
 
 **UI projection:**
+
 - Route: https://localhost:8080/#/settings/subscription/user-subscription
 - Verification points:
   - Selector: heading "You have Premium"
@@ -49,13 +53,15 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:create-paid-org
 - flow:complete-trial-signup-existing-user
 
 **Reachable by playwright:** yes
 
 **UI projection:**
-- Route: https://localhost:8080/#/organizations/:organizationId/vault  (org-scoped dynamic URL; `/organizations/:organizationId` redirects to the `vault` child — clients/apps/web/src/app/admin-console/organizations/organization-routing.module.ts:79-81)
+
+- Route: https://localhost:8080/#/organizations/:organizationId/vault (org-scoped dynamic URL; `/organizations/:organizationId` redirects to the `vault` child — clients/apps/web/src/app/admin-console/organizations/organization-routing.module.ts:79-81)
 - Verification points:
   - Selector: link "Admin Console"
     - Selector type: role
@@ -67,11 +73,13 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:authenticate-admin-portal
 
 **Reachable by playwright:** yes
 
 **UI projection:**
+
 - Route: http://localhost:62911
 - Verification points:
   - Selector: heading "Dashboard"
@@ -84,12 +92,14 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:complete-trial-signup-with-payment
 
 **Reachable by playwright:** yes
 
 **UI projection:**
-- Route: https://localhost:8080/#/organizations/:organizationId/vault  (the producer flow ends on the `/#/trial-initiation` "Confirmation Details" step — clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html:55 — whose "Get started" button routes to the org vault — same file:67-70)
+
+- Route: https://localhost:8080/#/organizations/:organizationId/vault (the producer flow ends on the `/#/trial-initiation` "Confirmation Details" step — clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html:55 — whose "Get started" button routes to the org vault — same file:67-70)
 - Verification points:
   - Selector: link "Admin Console"
     - Selector type: role
@@ -101,12 +111,14 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:complete-trial-signup-without-payment
 
 **Reachable by playwright:** yes
 
 **UI projection:**
-- Route: https://localhost:8080/#/organizations/:organizationId/vault  (same landing as the with-payment variant — only the billing step is skipped; the "Confirmation Details" step's "Get started" button routes to the org vault — clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html:67-70)
+
+- Route: https://localhost:8080/#/organizations/:organizationId/vault (same landing as the with-payment variant — only the billing step is skipped; the "Confirmation Details" step's "Get started" button routes to the org vault — clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html:67-70)
 - Verification points:
   - Selector: link "Admin Console"
     - Selector type: role
@@ -118,15 +130,18 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **State type:** setup
 
 **Produced by:**
+
 - flow:trigger-trial-verification-email
 
 **Reachable by playwright:** no
 **If no — why:** non-UI intermediate state — verified by reading the trial-initiation email from Mailcatcher, not by a rendered page. The check is automated (a script), not a human step.
 **Reach via:**
+
 - Run flow:trigger-trial-verification-email (its external-trigger curl sends the verification email).
 - Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh --recipient <email> --pattern "Verify"`; a trial-initiation URL printed on stdout confirms the state (exit 1 / `NO_MATCH` means the email has not arrived yet).
 
 **UI projection:**
+
 - Route: n/a
 - Verification points:
   - Selector: trial-initiation URL on stdout from `read-mailcatcher.sh --recipient <email> --pattern "Verify"`

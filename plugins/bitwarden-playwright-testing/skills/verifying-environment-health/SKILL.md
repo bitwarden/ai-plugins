@@ -44,6 +44,7 @@ screenshot --filename=<artifacts-output-dir>/screenshots/render-verify-<timestam
 ```
 
 **Web vault (`https://localhost:8080`)**: inspect for any of:
+
 - A webpack compilation error overlay (text `Compiled with problems:`).
 - A blank or all-white page (Angular failed to bootstrap).
 - Any other full-page error state that prevents normal UI interaction.

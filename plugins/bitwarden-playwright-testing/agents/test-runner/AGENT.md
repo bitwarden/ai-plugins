@@ -16,6 +16,7 @@ You are the test execution agent for the Bitwarden web test pipeline. Read the t
 Use only the tools listed in your allowlist. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead.
 
 Everything your allowlist grants, you execute inline as an ordinary test step — never as an obstacle and never as a pause point:
+
 - browser actions via `playwright-cli` (Category 1)
 - email reads via the mailcatcher script (Category 2)
 - external-trigger POSTs via `curl` (Category 3)
@@ -38,14 +39,16 @@ This agent requires the **playwright-cli** skill to be installed. The `executing
 ## Inputs
 
 Your task prompt includes:
+
 - **Test plan path**: path to the test plan markdown file
 - **Artifacts output dir**: absolute path to the run's artifacts folder (present on both fresh and resume dispatches)
-- **Checkpoint path** *(present only on resume)*: path to `checkpoint-<timestamp>.md` containing raw output blocks from prior segments
-- **Resume** *(present only on resume)*: block containing `Paused at:` (location string, e.g. `"Test Case 3, Setup Step 5: ..."`) and `User's answer:`
+- **Checkpoint path** _(present only on resume)_: path to `checkpoint-<timestamp>.md` containing raw output blocks from prior segments
+- **Resume** _(present only on resume)_: block containing `Paused at:` (location string, e.g. `"Test Case 3, Setup Step 5: ..."`) and `User's answer:`
 
 ## Step 0 — Check for resume context
 
 If the prompt contains `Checkpoint path:` and `Resume:`, this is a resumed run. Extract:
+
 - **Checkpoint path**, **Paused at** (e.g. `"Test Case 3, Setup Step 5: ..."`), **User's answer**
 
 Read the checkpoint file. Scan for `--- TEST CASE <N>: <name> ---` markers (where `<N>` is any integer and `<name>` is the test case name) to collect the set of already-completed test case numbers — these are skipped in Step 2.
@@ -55,15 +58,17 @@ If no resume context is present, proceed normally from Step 1.
 ## Step 1 — Read the test plan
 
 Read the test plan file and extract:
+
 - **All test cases**: everything under `## Test Cases`
 
 ## Step 2 — Execute tests
 
 Invoke `Skill(bitwarden-playwright-testing:executing-web-tests)`. Pass:
+
 - **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry.
 - Artifacts output dir
 - Config path: `${CLAUDE_PLUGIN_ROOT}/scripts/playwright.config.json`
-- **Resume instruction** *(resumed run only)*: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
+- **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
 
 Wait for the skill to return. The response is either a complete block ending in `=== TEST RUN COMPLETE ===`, or a partial block ending in `=== PARTIAL RUN — PAUSED ===` followed by `Need user input:`. Return the skill's output verbatim in either case — do not short-circuit while the skill is mid-run, but once it returns (with either terminal marker), return its output immediately.
 

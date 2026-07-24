@@ -17,6 +17,7 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 ## Inputs
 
 Your task prompt includes:
+
 - **Input type**: `jira-ticket`, `plan-file`, or `description`
 - **Input value**: the ticket ID, file path, or description text
 
@@ -47,17 +48,21 @@ Return exactly this structure, with every section populated. Do not preface or f
 **Input Value:** <original value>
 
 ## Feature Description
+
 <1–3 sentences describing what the feature does and why>
 
 ## Affected Repositories
+
 - <repo>
 - <repo>
 
 ## Acceptance Criteria
+
 - <criterion>
 - <criterion>
 
 ## Source Summary
+
 <full Jira synthesis text, file contents, or description — this must be the complete raw source content gathered in step 1.>
 ```
 

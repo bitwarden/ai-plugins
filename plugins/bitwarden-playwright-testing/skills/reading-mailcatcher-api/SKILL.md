@@ -31,6 +31,7 @@ Example:
 ## When to Use
 
 Invoke this skill whenever a workflow needs to:
+
 - Click a verification link sent to a new account's email
 - Log into the Admin Portal via magic link
 - Activate a trial or invite via a link in a welcome/trial email
@@ -94,10 +95,12 @@ print(best['id'])
 ```
 
 **Handle both outcomes before proceeding:**
+
 - `NO_MATCH` — no matching email yet; wait 3–5 seconds and retry (up to ~30 s total before giving up)
 - A numeric ID — proceed to Step 3
 
 **When filtering:**
+
 - Match on recipient email when the test account address is known (preferred)
 - Match on subject keyword when recipient is generic/unknown
 - Always take `max(id)` — higher ID = more recent message

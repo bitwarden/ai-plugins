@@ -12,10 +12,10 @@ The local dev environment is configured with a **Stripe test mode API key** (`se
 
 ### Stripe Test Card Numbers
 
-| Card Number | Brand | Use |
-|---|---|---|
-| `4242 4242 4242 4242` | Visa | **Default — always succeeds** |
-| `5555 5555 5555 4444` | Mastercard | Alternative success |
+| Card Number           | Brand      | Use                           |
+| --------------------- | ---------- | ----------------------------- |
+| `4242 4242 4242 4242` | Visa       | **Default — always succeeds** |
+| `5555 5555 5555 4444` | Mastercard | Alternative success           |
 
 For all test cards: any future expiry (e.g., `12/29`), any 3-digit CVC (e.g., `123`), postal code `12345`.
 
@@ -40,6 +40,7 @@ Personal subscription discounts are **Stripe coupons** that have been imported i
 Discounts apply to Premium personal subscriptions and Families organization plans only (not Teams, Enterprise, or other org tiers).
 
 **Critical:** Discounts are never added to a Stripe customer or subscription directly via the Stripe API, the Admin portal, or any other mechanism. The only supported path is:
+
 1. A coupon exists in Stripe (created there)
 2. The coupon is imported into the Admin application for use in the Bitwarden discounts system
 3. The user is eligible for that discount

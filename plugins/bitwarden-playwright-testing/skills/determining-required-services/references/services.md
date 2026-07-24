@@ -7,6 +7,7 @@
 ## Service Map
 
 ### Web Vault Frontend
+
 - **Port**: 8080
 - **URL**: `https://localhost:8080`
 - **Technology**: Angular (NX/Webpack)
@@ -15,6 +16,7 @@
 - **Required by**: any change to `clients/apps/web/**` or `clients/libs/**`, and any server-side API change that surfaces in the web UI
 
 ### Api Service
+
 - **Port**: 4000
 - **URL**: `http://localhost:4000`
 - **Technology**: .NET
@@ -23,6 +25,7 @@
 - **Required by**: web vault testing (handles vault data), any `server/src/Api/**` change
 
 ### Identity Service
+
 - **Port**: 33656
 - **URL**: `http://localhost:33656`
 - **Technology**: .NET
@@ -31,6 +34,7 @@
 - **Required by**: any flow involving login/authentication, always required alongside Api for web vault
 
 ### Bitwarden Portal
+
 - **Port**: 62911
 - **URL**: `http://localhost:62911`
 - **Technology**: .NET Razor views (NOT Angular)
@@ -40,6 +44,7 @@
 - **Note**: The Bitwarden Portal is a standalone .NET web app. No frontend build is needed. Playwright navigates directly to port 62911.
 
 ### Billing Service
+
 - **Port**: 44519
 - **URL**: `http://localhost:44519`
 - **Technology**: .NET
@@ -48,6 +53,7 @@
 - **Required by**: `server/src/Billing/**` changes, billing UI flows
 
 ### billing-pricing Service
+
 - **Port**: 7088 (HTTPS), 5082 (HTTP)
 - **URL**: `https://localhost:7088`
 - **Technology**: .NET
@@ -63,6 +69,7 @@
 These services are **not required to start upfront** but may be needed if tests fail with errors suggesting a dependent service is unavailable. Start them on demand when you observe that failure.
 
 ### Notifications Service
+
 - **Port**: 61840
 - **URL**: `http://localhost:61840`
 - **Technology**: .NET
@@ -71,6 +78,7 @@ These services are **not required to start upfront** but may be needed if tests 
 - **Start if**: tests fail with real-time sync errors, push notification failures, or vault sync not reflecting changes
 
 ### Events Service
+
 - **Port**: 46273
 - **URL**: `http://localhost:46273`
 - **Technology**: .NET
@@ -79,6 +87,7 @@ These services are **not required to start upfront** but may be needed if tests 
 - **Start if**: tests fail involving audit logs, organization event history, or event recording flows
 
 ### Icons Service
+
 - **Port**: 50024
 - **URL**: `http://localhost:50024`
 - **Technology**: .NET

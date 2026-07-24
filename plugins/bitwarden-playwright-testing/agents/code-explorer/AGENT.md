@@ -17,11 +17,13 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 ## Inputs
 
 Your task prompt includes:
+
 - **Context artifact path**: path to `context-<timestamp>.md` from context-gatherer
 
 ## Step 1 — Read context artifact
 
 Read the context markdown file. Extract these sections by their headers:
+
 - `## Affected Repositories` — list items
 - `## Feature Description` — paragraph text
 - `## Acceptance Criteria` — list items

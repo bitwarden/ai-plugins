@@ -9,11 +9,11 @@ Given the test cases, artifacts output dir, and the absolute path to `scripts/pl
 
 ### Resolve these values from your inputs
 
-| Value                | Source                                                                        |
-| -------------------- | ----------------------------------------------------------------------------- |
-| Screenshot directory | `<artifacts-output-dir>/screenshots/` |
-| Config path          | The absolute path to `scripts/playwright.config.json` you received as input   |
-| Timestamp            | Generate once now as `YYYYMMDD-HHmm` and reuse across all screenshots         |
+| Value                | Source                                                                      |
+| -------------------- | --------------------------------------------------------------------------- |
+| Screenshot directory | `<artifacts-output-dir>/screenshots/`                                       |
+| Config path          | The absolute path to `scripts/playwright.config.json` you received as input |
+| Timestamp            | Generate once now as `YYYYMMDD-HHmm` and reuse across all screenshots       |
 
 ### Read the tool policy
 
@@ -26,10 +26,12 @@ If any billing-related 400 error is encountered during setup or test-case execut
 ### Resume context (conditional)
 
 Only when a `Resume:` block is present in your inputs: extract and hold:
+
 - **Paused at** — the location string identifying the `[HUMAN]` step, e.g. `"Test Case 3, Setup Step 5: Attach a Stripe test clock"`
 - **User's answer** — to apply to subsequent steps that reference the `[HUMAN]` step's result
 
 For the resuming test case (your caller always passes remaining test cases starting with the paused one, so this is the first test case in your input), before executing any of its steps:
+
 1. Open the browser fresh: `playwright-cli open --config=<config-path>` (always first, same as any run)
 2. Re-establish browser session using credentials from that test case's SETUP steps in the test plan
 3. Start from the step immediately after the `[HUMAN]` step identified by "Paused at", applying the user's answer to any steps that reference it
@@ -41,6 +43,7 @@ If the `[HUMAN]` step was the last step of the resuming test case (no test steps
 This protocol repeats for each `[HUMAN]` step encountered in a run — a second pause in a resumed run uses the same partial-emit and signal format.
 
 A `Resume:` block in your inputs looks like:
+
 ```
 Resume: Paused at <location string>. User's answer: <answer>.
 ```
@@ -185,6 +188,7 @@ Need user input: <step text after the [HUMAN] marker, verbatim, with location co
 ```
 
 Rules:
+
 - `SUMMARY:` reflects only test cases completed in this segment.
 - If zero test cases have completed yet, write `SUMMARY: 0 test cases | 0 passed | 0 passed (adaptive) | 0 failed` and omit the test case blocks.
 - `=== PARTIAL RUN — PAUSED ===` is the segment delimiter and replaces `=== TEST RUN COMPLETE ===` on a pause.

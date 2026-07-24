@@ -17,6 +17,7 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 ## Inputs
 
 Your task prompt includes:
+
 - **Context artifact path**: path to `context-<timestamp>.md` from context-gatherer
 - **App-context artifact path**: path to `app-context-<timestamp>.md` from code-explorer
 

@@ -2,6 +2,7 @@
 name: determining-required-services
 description: Determine which Bitwarden local development services are required for a given set of routes and the current branch diff. Use this skill when given the routes the tests will navigate to (extracted from an Application Context's ## States section). The skill runs its own `git diff --name-only`, consults references/services.md, and returns the union of services required by route-based dependencies and file-path-based dependencies. Returns service names with their URLs and ports.
 ---
+
 Given the routes the tests will navigate to AND the affected repos, determine which local services are required to run web tests. The skill runs its own `git diff --name-only origin/main...HEAD -- <repo-path>` against each affected repo to obtain the changed file list, then consults `${CLAUDE_SKILL_DIR}/references/services.md` for the dependency map.
 
 ## Inputs
