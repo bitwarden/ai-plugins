@@ -137,7 +137,7 @@ Reusable, pre-grounded setup states, written in the exact `## States` schema the
 **If no — why:** non-UI intermediate state — verified by reading the trial-initiation email from Mailcatcher, not by a rendered page. The check is automated (a script), not a human step.
 **Reach via:**
 
-- Run flow:trigger-trial-verification-email (its external-trigger curl sends the verification email).
+- Run flow:trigger-trial-verification-email (its external-trigger step sends the verification email).
 - Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh --recipient <email> --pattern "Verify"`; a trial-initiation URL printed on stdout confirms the state (exit 1 / `NO_MATCH` means the email has not arrived yet).
 
 **UI projection:**
@@ -235,11 +235,12 @@ Entry schema:
 - **Parameters:** `email`, `productTier`, `products`, `trialLength`, `paymentOptional`
 - **Precondition state:** none
 - **Steps:**
-  1. **EXTERNAL TRIGGER** — simulate the marketing site call with curl:
+  1. **EXTERNAL TRIGGER** — simulate the marketing site call via the external-trigger wrapper (canonical path in references/tool-policy.md):
      ```bash
-     curl -s -X POST http://localhost:33656/accounts/trial/send-verification-email \
-       -H "Content-Type: application/json" \
-       -d '{
+     ${CLAUDE_PLUGIN_ROOT}/scripts/external-trigger.sh \
+       --url http://localhost:33656/accounts/trial/send-verification-email \
+       --rationale "marketing-site trial verification email; no Bitwarden service initiates this" \
+       --data '{
          "email": "<email>",
          "name": "Test User",
          "receiveMarketingEmails": false,
