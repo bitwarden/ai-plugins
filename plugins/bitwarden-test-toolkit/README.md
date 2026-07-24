@@ -49,7 +49,7 @@ flowchart TD
         Inputs["Inputs (additive):<br/>• GitHub PR<br/>• Jira key / Epic<br/>• Tech breakdown<br/>• Test-case CSV<br/>• Plain description"]
         Resolve{"Change surface<br/>supplied?"}
         Inputs --> Resolve
-        Resolve -- no --> Derive["Derive surface from<br/>gh pr diff / intake<br/>(references/input-sources.md)"]
+        Resolve -- no --> Derive["Derive surface from<br/>gh pr diff / intake"]
         Resolve -- yes --> Surface
         Derive --> Surface["Change surface:<br/>changed paths/symbols,<br/>affected repos, linked PRs"]
     end
@@ -84,7 +84,7 @@ flowchart TD
 
     Inventory --> Render
 
-    Render["5 · Render markdown report<br/>(references/coverage-report-template.md)<br/>Overview · Summary · Evidence · Coverage · Gaps"]
+    Render["5 · Render markdown report<br/>Overview · Summary · Evidence · Coverage · Gaps"]
 
     Render --> Output
 
