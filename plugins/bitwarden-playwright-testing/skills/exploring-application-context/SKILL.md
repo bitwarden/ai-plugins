@@ -66,7 +66,7 @@ For states with `Reachable by playwright: no`, the `Reach via:` recipe documents
 ### Gather `## Flows`
 
 1. From the catalog's `## Known Flows` section, copy relevant entries through verbatim if their post-condition state matches a state in `## States`, OR their precondition/steps exercise UI affected by the change. (Setup states their preconditions reference are minted in `## States` via catalog copy or route-only, per Gather `## States` above.)
-2. **Token preservation:** When copying any flow whose Steps contain `<bitwarden-portal-admin-email>`, leave the placeholder token in place verbatim. Do NOT read `server/dev/secrets.json` or substitute a real address here. The executor resolves it at run time so no dev credential is written into a persisted artifact.
+2. **Token preservation:** When copying any flow whose Steps contain `<bitwarden-portal-admin-email>`, leave the placeholder token in place verbatim. Do NOT read `server/dev/secrets.json` or substitute a real address here. The executor resolves it at run time.
 3. For change-driven flows not in the catalog: trace the click handler or form submission through the server controller, command, and integration calls. Enumerate atomic steps, inline per-step feedback (a `- Feedback:` sub-item on each step that produces a visible response), post-condition state, and any branch conditions. Every step must be a real user interaction.
 4. After flows are populated, return to `## States` and fill in each state's `**Produced by:**` line with the slug(s) of the flow(s) whose post-condition is that state.
 
