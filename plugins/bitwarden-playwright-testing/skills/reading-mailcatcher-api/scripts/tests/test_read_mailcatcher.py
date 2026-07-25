@@ -242,11 +242,17 @@ class NoRedirectIntegrationTest(unittest.TestCase):
     target server on a different port. If _http_get ever followed that
     redirect, the target server would be hit. It must never be hit: this is
     what catches a future regression that removes the no-redirect handler.
+
+    An error server rounds out the curl -f parity check: a halted 3xx must
+    return its own body as a success, while a status >= 400 must still raise
+    Unreachable.
     """
 
     def setUp(self):
         target_hit = threading.Event()
         self.target_hit = target_hit
+        redirect_body = b"redirect body, never the target's"
+        self.redirect_body = redirect_body
 
         class TargetHandler(_QuietHandler):
             def do_GET(self):
@@ -266,15 +272,27 @@ class NoRedirectIntegrationTest(unittest.TestCase):
                 self.send_header(
                     "Location", f"http://127.0.0.1:{target_port}/elsewhere"
                 )
-                self.send_header("Content-Length", "0")
+                self.send_header("Content-Length", str(len(redirect_body)))
                 self.end_headers()
+                self.wfile.write(redirect_body)
 
         self.redirect_server = http.server.HTTPServer(("127.0.0.1", 0), RedirectHandler)
         self.redirect_port = self.redirect_server.server_address[1]
 
+        class ErrorHandler(_QuietHandler):
+            def do_GET(self):
+                body = b"server error"
+                self.send_response(500)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        self.error_server = http.server.HTTPServer(("127.0.0.1", 0), ErrorHandler)
+        self.error_port = self.error_server.server_address[1]
+
         self.threads = [
             threading.Thread(target=server.serve_forever, daemon=True)
-            for server in (self.target_server, self.redirect_server)
+            for server in (self.target_server, self.redirect_server, self.error_server)
         ]
         for thread in self.threads:
             thread.start()
@@ -284,16 +302,52 @@ class NoRedirectIntegrationTest(unittest.TestCase):
     def _shutdown(self):
         self.target_server.shutdown()
         self.redirect_server.shutdown()
+        self.error_server.shutdown()
         self.target_server.server_close()
         self.redirect_server.server_close()
+        self.error_server.server_close()
         for thread in self.threads:
             thread.join(timeout=5)
 
     def test_redirect_is_not_followed(self):
+        """A halted 3xx is a success: it returns the redirect response's own
+        body, and the Location target is never requested."""
         url = f"http://127.0.0.1:{self.redirect_port}/start"
+        body = read_mailcatcher._http_get(url)
+        self.assertEqual(body, self.redirect_body.decode("utf-8"))
+        self.assertFalse(self.target_hit.is_set())
+
+    def test_status_500_raises_unreachable(self):
+        url = f"http://127.0.0.1:{self.error_port}/fail"
         with self.assertRaises(read_mailcatcher.Unreachable):
             read_mailcatcher._http_get(url)
-        self.assertFalse(self.target_hit.is_set())
+
+    def test_fetch_messages_treats_halted_redirect_body_as_the_response(self):
+        """The concrete parity break the review identified: bash's curl -fsS
+        with no -L treats a 3xx as success and reads its body, so a redirect
+        whose body happens to be valid JSON must flow through fetch_messages
+        normally instead of becoming exit 3."""
+        body = b"[]"
+
+        class MessagesHandler(_QuietHandler):
+            def do_GET(self):
+                self.send_response(302)
+                self.send_header("Location", "http://127.0.0.1:1/unused")
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        server = http.server.HTTPServer(("127.0.0.1", 0), MessagesHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            base = f"http://127.0.0.1:{server.server_address[1]}"
+            self.assertEqual(read_mailcatcher.fetch_messages(base), [])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
 
 
 if __name__ == "__main__":

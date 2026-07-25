@@ -62,9 +62,10 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
     redirect return content from a host that was never validated. Returning
     None from redirect_request tells the base handler not to redirect; it
     then falls through to HTTPDefaultErrorHandler, which raises HTTPError for
-    the 3xx status. HTTPError is a URLError subclass, so _http_get's except
-    clause below turns it into Unreachable, the same outcome curl -fsS with no
-    -L produces when it cannot reach the intended resource.
+    the halted 3xx status. _http_get catches that HTTPError and returns the
+    3xx response's own body without ever requesting the Location target,
+    matching curl -fsS with no -L: -f only fails on status >= 400, so a
+    halted redirect is a success that yields the redirect response's body.
     """
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -81,11 +82,13 @@ def allowed_hosts(env):
 
 
 def _http_get(url):
-    """GET url and return the body as text. Raises Unreachable on any failure.
+    """GET url and return the body as text. Raises Unreachable on failure.
 
-    Mirrors curl -fsS: an HTTP error status is a failure, not a body to parse.
-    Redirects are never followed (see _NoRedirectHandler), mirroring curl's
-    default of no -L.
+    Mirrors curl -fsS with no -L: -f fails only on an HTTP status >= 400.
+    A halted 3xx (see _NoRedirectHandler) is not a failure under -f, so it
+    is treated the same as any other success and its own body is returned;
+    the Location target is never requested. Status >= 400 raises
+    Unreachable, as does any transport failure.
     """
     handlers = [_NoRedirectHandler]
     if urllib.parse.urlparse(url).scheme == "https":
@@ -97,6 +100,10 @@ def _http_get(url):
     try:
         with opener.open(url, timeout=REQUEST_TIMEOUT) as response:
             return response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as err:
+        if 300 <= err.code < 400:
+            return err.read().decode("utf-8", errors="replace")
+        raise Unreachable(str(err))
     except (urllib.error.URLError, OSError) as err:
         raise Unreachable(str(err))
 
