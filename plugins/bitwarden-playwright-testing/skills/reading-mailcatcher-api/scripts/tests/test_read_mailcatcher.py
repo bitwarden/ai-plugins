@@ -107,6 +107,14 @@ class ExtractUrlTest(unittest.TestCase):
         body = "https://localhost:8080/#/sso-landing"
         self.assertEqual(read_mailcatcher.extract_url(body, "sso"), body)
 
+    def test_invalid_regex_returns_none_instead_of_raising(self):
+        # An unbalanced group is a malformed ERE. grep -iE would error out
+        # and yield no match rather than a match; extract_url must fall
+        # through to None (and thus the caller's NO_MATCH branch) the same
+        # way, instead of letting re.error propagate as a traceback.
+        body = "https://localhost:8080/#/verify?t=1"
+        self.assertIsNone(read_mailcatcher.extract_url(body, "("))
+
 
 class IsLocalTest(unittest.TestCase):
     def setUp(self):
@@ -167,7 +175,7 @@ class MainTest(unittest.TestCase):
         self.assertIn("NO_MATCH", err)
         self.assertIn("with subject containing 'verify'", err)
 
-    def test_no_message_without_pattern_uses_the_other_message(self):
+    def test_no_message_without_pattern_omits_subject_clause(self):
         code, _out, err, _fake, _sleep = self._run(
             {f"{BASE}/messages": messages_json()},
             argv=["--recipient", "user@bitwarden.test"],
@@ -184,6 +192,26 @@ class MainTest(unittest.TestCase):
             }
         )
         self.assertEqual(code, 1)
+        self.assertIn("contained no URL", err)
+        sleeper.assert_not_called()
+
+    def test_invalid_link_filter_regex_emits_no_match_not_a_traceback(self):
+        code, _out, err, _fake, sleeper = self._run(
+            {
+                f"{BASE}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
+                f"{BASE}/messages/1.plain": "Click https://localhost:8080/#/verify?t=abc",
+            },
+            argv=[
+                "--recipient",
+                "user@bitwarden.test",
+                "--pattern",
+                "verify",
+                "--link-filter",
+                "(",
+            ],
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("NO_MATCH", err)
         self.assertIn("contained no URL", err)
         sleeper.assert_not_called()
 
@@ -224,6 +252,17 @@ class MainTest(unittest.TestCase):
     def test_missing_recipient_exits_2(self):
         with mock.patch("sys.stderr", new_callable=io.StringIO):
             self.assertEqual(read_mailcatcher.main([], {}), 2)
+
+    def test_empty_recipient_exits_2(self):
+        # required=True only enforces presence, not a non-empty value. An
+        # empty --recipient is a substring of every recipient string, so
+        # without this guard select_message would return the newest message
+        # in the entire inbox regardless of addressee.
+        err = io.StringIO()
+        with mock.patch("sys.stderr", err):
+            code = read_mailcatcher.main(["--recipient", ""], {})
+        self.assertEqual(code, 2)
+        self.assertIn("ERROR: --recipient is required", err.getvalue())
 
 
 class _QuietHandler(http.server.BaseHTTPRequestHandler):

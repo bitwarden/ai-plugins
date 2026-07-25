@@ -166,6 +166,20 @@ def main(argv, env):
         # into a returned code so main always returns an int.
         return exc.code if isinstance(exc.code, int) else EXIT_USAGE
 
+    # Matches the bash original's check ordering: --url, then --rationale,
+    # both before any URL parsing or policy check, so an empty value is
+    # always exit 2, not whatever exit the later checks would produce.
+    if not args.url.strip():
+        print("ERROR: --url is required", file=sys.stderr)
+        return EXIT_USAGE
+    if not args.rationale.strip():
+        print(
+            "ERROR: --rationale is required (document why no Bitwarden "
+            "service can initiate this)",
+            file=sys.stderr,
+        )
+        return EXIT_USAGE
+
     try:
         scheme, _host = check_request(args.url, args.method, allowed_hosts(env))
     except GuardError as err:

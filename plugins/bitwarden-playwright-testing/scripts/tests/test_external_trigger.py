@@ -131,6 +131,33 @@ class MainGuardTest(unittest.TestCase):
             )
         self.assertEqual(code, 2)
 
+    def test_empty_url_exits_2(self):
+        # required=True only enforces presence, not a non-empty value. The
+        # bash original rejected an empty --url before it ever reached URL
+        # parsing (which would otherwise raise the malformed-URL exit 13).
+        err = io.StringIO()
+        with mock.patch.object(external_trigger, "send") as sender, mock.patch(
+            "sys.stderr", err
+        ):
+            code = external_trigger.main(["--url", "", "--rationale", "why"], {})
+        self.assertEqual(code, 2)
+        self.assertIn("ERROR: --url is required", err.getvalue())
+        sender.assert_not_called()
+
+    def test_empty_rationale_exits_2_and_never_sends(self):
+        # An empty rationale is a blank audit trail for the only sanctioned
+        # outbound-request path; it must be refused before anything is sent.
+        err = io.StringIO()
+        with mock.patch.object(external_trigger, "send") as sender, mock.patch(
+            "sys.stderr", err
+        ):
+            code = external_trigger.main(
+                ["--url", "http://localhost/x", "--rationale", "  "], {}
+            )
+        self.assertEqual(code, 2)
+        self.assertIn("ERROR: --rationale is required", err.getvalue())
+        sender.assert_not_called()
+
 
 class MainResponseTest(unittest.TestCase):
     def _run(self, side_effect=None, return_value="ok"):
@@ -216,6 +243,8 @@ class NoRedirectIntegrationTest(unittest.TestCase):
     def setUp(self):
         target_hit = threading.Event()
         self.target_hit = target_hit
+        redirect_body = b"redirect body, never the target's"
+        self.redirect_body = redirect_body
 
         class TargetHandler(_QuietHandler):
             def do_POST(self):
@@ -235,8 +264,9 @@ class NoRedirectIntegrationTest(unittest.TestCase):
                 self.send_header(
                     "Location", f"http://127.0.0.1:{target_port}/elsewhere"
                 )
-                self.send_header("Content-Length", "0")
+                self.send_header("Content-Length", str(len(redirect_body)))
                 self.end_headers()
+                self.wfile.write(redirect_body)
 
         self.redirect_server = http.server.HTTPServer(("127.0.0.1", 0), RedirectHandler)
         self.redirect_port = self.redirect_server.server_address[1]
@@ -270,10 +300,10 @@ class NoRedirectIntegrationTest(unittest.TestCase):
                 ],
                 {},
             )
-        # curl -sS without -L prints the (empty) 3xx body and exits 0; the
+        # curl -sS without -L prints the 3xx body and exits 0; the
         # HTTPError path in main() reproduces that.
         self.assertEqual(code, 0)
-        self.assertEqual(buf.getvalue(), "")
+        self.assertEqual(buf.getvalue(), self.redirect_body.decode("utf-8"))
         self.assertFalse(self.target_hit.is_set())
 
 

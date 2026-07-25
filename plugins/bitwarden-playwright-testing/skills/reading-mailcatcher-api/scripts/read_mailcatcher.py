@@ -24,7 +24,6 @@ import argparse
 import json
 import os
 import re
-import ssl
 import sys
 import time
 import urllib.error
@@ -89,14 +88,13 @@ def _http_get(url):
     is treated the same as any other success and its own body is returned;
     the Location target is never requested. Status >= 400 raises
     Unreachable, as does any transport failure.
+
+    No TLS bypass here: the bash original used plain `curl -fsS` with no
+    `-k`, and MAILCATCHER_URL is never allowlist-checked the way the
+    external-trigger URL is, so an https base gets normal certificate
+    verification.
     """
-    handlers = [_NoRedirectHandler]
-    if urllib.parse.urlparse(url).scheme == "https":
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-        handlers.append(urllib.request.HTTPSHandler(context=context))
-    opener = urllib.request.build_opener(*handlers)
+    opener = urllib.request.build_opener(_NoRedirectHandler)
     try:
         with opener.open(url, timeout=REQUEST_TIMEOUT) as response:
             return response.read().decode("utf-8", errors="replace")
@@ -156,8 +154,14 @@ def fetch_body(base, message_id):
 
 def extract_url(body, link_filter):
     for candidate in URL_PATTERN.findall(body or ""):
-        if re.search(link_filter, candidate, re.IGNORECASE):
-            return candidate
+        try:
+            if re.search(link_filter, candidate, re.IGNORECASE):
+                return candidate
+        except re.error:
+            # Mirrors grep -iE with a malformed ERE: it errors out and
+            # yields no match rather than a stack trace, so this falls
+            # through to the caller's existing no-URL-found NO_MATCH branch.
+            return None
     return None
 
 
@@ -210,6 +214,10 @@ def main(argv, env):
         args = parser.parse_args(argv)
     except SystemExit as exc:
         return exc.code if isinstance(exc.code, int) else EXIT_USAGE
+
+    if not args.recipient.strip():
+        print("ERROR: --recipient is required", file=sys.stderr)
+        return EXIT_USAGE
 
     base = (env.get("MAILCATCHER_URL") or DEFAULT_MAILCATCHER_URL).rstrip("/")
     allowed = allowed_hosts(env)
