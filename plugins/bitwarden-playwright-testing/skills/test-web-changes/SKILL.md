@@ -263,5 +263,5 @@ Test run complete for <input value>
 Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
 Report (HTML): <artifacts-output-dir>/report-<timestamp>.html
 
-Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed
+Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed | <N> errored
 ```

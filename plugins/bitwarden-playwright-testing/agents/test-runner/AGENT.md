@@ -45,7 +45,7 @@ Your task prompt includes:
 
 - **Test plan path**: path to the test plan markdown file
 - **Artifacts output dir**: absolute path to the run's artifacts folder (present on both fresh and resume dispatches)
-- **Checkpoint path** _(present only on resume)_: path to `checkpoint-<timestamp>.md` containing the test-run results JSON from prior segments
+- **Checkpoint path** _(present only on resume)_: path to the merged partial results JSON (`test-results-<timestamp>.json`) containing the cases completed so far
 - **Resume** _(present only on resume)_: block containing `Paused at:` (location string, e.g. `"Test Case 3, Setup Step 5: ..."`) and `User's answer:`
 
 ## Step 0 — Check for resume context
