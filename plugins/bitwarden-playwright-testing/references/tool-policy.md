@@ -6,8 +6,8 @@ Four categories of steps are permitted during web test planning and execution. E
 
 Reference these scripts by these exact paths; do not duplicate the paths elsewhere in prose.
 
-- Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh`
-- External trigger: `${CLAUDE_PLUGIN_ROOT}/scripts/external-trigger.sh`
+- Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py`
+- External trigger: `${CLAUDE_PLUGIN_ROOT}/scripts/external_trigger.py`
 
 ## Category 1 — Web UI Interactions (default)
 
@@ -35,7 +35,7 @@ Use the external-trigger wrapper (see Canonical script paths) only when the acti
 EXTERNAL TRIGGER: POST <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
 
 **Execution:** Category 3 steps are issued ONLY through the external-trigger wrapper (see Canonical script paths), never via raw curl:
-${CLAUDE_PLUGIN_ROOT}/scripts/external-trigger.sh --url <endpoint> --rationale "<rationale>" --data '<json body>'
+${CLAUDE_PLUGIN_ROOT}/scripts/external_trigger.py --url <endpoint> --rationale "<rationale>" --data '<json body>'
 The wrapper enforces localhost-only destinations and POST-only method. A destination that is not a local dev host is rejected by the wrapper; do not attempt to work around it.
 
 ## Category 4 — Stripe Data Queries (read-only)

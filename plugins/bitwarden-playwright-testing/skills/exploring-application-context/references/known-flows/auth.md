@@ -40,7 +40,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
   3. (Optional) Fill the Name field
   4. Click Continue
      - Feedback: "Check your email" confirmation state appears
-  5. Run `read-mailcatcher.sh --recipient <email> --pattern "Verify"` to fetch the verification email; stdout is the magic-link URL
+  5. Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"` to fetch the verification email; stdout is the magic-link URL
   6. Navigate to the magic-link URL (it targets `https://localhost:8080/#/finish-signup?...`)
      - Feedback: finish-signup form appears
   7. Fill the Master Password field with `<password>` (must be ≥12 characters)

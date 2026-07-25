@@ -10,7 +10,7 @@ allowed-tools: [Bash, Read]
 For all programmatic uses (test runs, ad-hoc fetches, debugging), call the co-located script directly:
 
 ```
-bash ${CLAUDE_SKILL_DIR}/scripts/read-mailcatcher.sh --recipient <email> --pattern <subject-keyword> [--link-filter <regex>]
+${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern <subject-keyword> [--link-filter <regex>]
 ```
 
 - **stdout** (on success): the extracted URL, ready to navigate to or paste into a form field

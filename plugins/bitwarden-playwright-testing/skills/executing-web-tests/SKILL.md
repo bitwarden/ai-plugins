@@ -155,12 +155,12 @@ Toasts can auto-dismiss in well under a second. Capture the text reliably from t
 
 ### Continuity rule
 
-External trigger results (external-trigger.sh responses), email reads, and URL extractions are intermediate working steps — not stopping points. After each, proceed immediately to the next test step.
+External trigger results (external_trigger.py responses), email reads, and URL extractions are intermediate working steps, not stopping points. After each, proceed immediately to the next test step.
 
 For email-driven flows (verification, magic-link login, trial activation, OTP), call the mailcatcher reader script directly via Bash (canonical path in references/tool-policy.md):
 
 ```
-${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read-mailcatcher.sh --recipient <email> --pattern <subject-keyword>
+${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern <subject-keyword>
 ```
 
 stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`; a non-zero exit after the retry is a hard failure — mark the test case FAIL immediately with the `NO_MATCH` diagnostic in Notes. Do not attempt to read Mailcatcher via any other means (curl, direct API calls, or sub-agent). Do not invoke `Skill(reading-mailcatcher-api)` (it is documentation for the underlying API; the co-located script is the only sanctioned transport).

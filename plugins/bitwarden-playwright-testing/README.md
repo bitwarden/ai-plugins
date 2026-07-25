@@ -118,7 +118,10 @@ bitwarden-playwright-testing/
 │   ├── service-manager/AGENT.md
 │   └── test-runner/AGENT.md
 ├── scripts/
-│   └── playwright.config.json           # Sets ignoreHTTPSErrors for dev certs
+│   ├── playwright.config.json           # Sets ignoreHTTPSErrors for dev certs
+│   ├── external_trigger.py              # Policy-guarded Category 3 POST wrapper
+│   └── tests/
+│       └── test_external_trigger.py
 └── skills/
     ├── test-web-changes/SKILL.md        # Team-lead entry point
     ├── exploring-application-context/
@@ -139,7 +142,11 @@ bitwarden-playwright-testing/
     │   └── SKILL.md
     ├── reading-mailcatcher-api/
     │   ├── SKILL.md
-    │   └── references/email-patterns.md
+    │   ├── references/email-patterns.md
+    │   └── scripts/
+    │       ├── read_mailcatcher.py      # Fetches an email, prints its first local URL
+    │       └── tests/
+    │           └── test_read_mailcatcher.py
     └── compiling-test-report/
         ├── SKILL.md
         ├── references/
@@ -149,9 +156,10 @@ bitwarden-playwright-testing/
         │   ├── results_common.py           # Shared helpers (fail, tally)
         │   ├── render_report.py            # Results JSON to HTML
         │   ├── merge_results.py            # Runner segments to results JSON
-        │   ├── test_results_common.py
-        │   ├── test_render_report.py
-        │   └── test_merge_results.py
+        │   └── tests/
+        │       ├── test_results_common.py
+        │       ├── test_render_report.py
+        │       └── test_merge_results.py
         └── templates/
             ├── report.html
             └── test-case.html
