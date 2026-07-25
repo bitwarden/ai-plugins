@@ -4,7 +4,7 @@ Automated end-to-end UI testing for Bitwarden web changes using Playwright.
 
 ## Overview
 
-This plugin provides a single user-facing skill, `test-web-changes`, that orchestrates a seven-agent team to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run. The team gathers context, explores the affected codebases, builds grounded test cases, verifies the local dev environment is ready, executes the tests, and compiles an HTML report with full-page screenshots.
+This plugin provides a single user-facing skill, `test-web-changes`, that orchestrates a six-agent team to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run. The team gathers context, explores the affected codebases, builds grounded test cases, verifies the local dev environment is ready, executes the tests, and renders an HTML report with full-page screenshots.
 
 ## Prerequisites
 
@@ -57,8 +57,8 @@ Invoke the team-lead skill:
 | 4    | `test-planner`                                                                    | `test-cases-<timestamp>.md`               |
 | 5    | _(team lead composes)_                                                            | `test-plan-<timestamp>.md`                |
 | 6    | `service-manager` _(verifies the environment via `verifying-environment-health`)_ | _(no artifact; halts the run on failure)_ |
-| 7    | `test-runner`                                                                     | `test-results-<timestamp>.md`             |
-| 8    | `report-compiler`                                                                 | `report-<timestamp>.html`                 |
+| 7    | `test-runner`                                                                     | `test-results-<timestamp>.json`           |
+| 8    | _(team lead renders via `render_report.py`)_                                      | `report-<timestamp>.html`                 |
 
 ## Agents and skills
 
@@ -72,7 +72,6 @@ Invoke the team-lead skill:
 | `test-planner`     | Reads context and Application Context artifacts and builds grounded test cases via the `build-test-cases` skill.                                                                                                             |
 | `service-manager`  | Reads the test plan and dispatches `verifying-environment-health` to confirm Docker dev containers, application `/alive` endpoints, and the Angular bootstrap. Halts the run on any failure. Never starts or stops services. |
 | `test-runner`      | Launches the `playwright-cli` agent to execute test cases with guardrails and screenshots, and returns structured results.                                                                                                   |
-| `report-compiler`  | Compiles an HTML report from the test results.                                                                                                                                                                               |
 
 ### Skills
 
@@ -85,7 +84,7 @@ Invoke the team-lead skill:
 | `build-test-cases`              | Builds Playwright test cases with a web-first policy from plan context.                                                                                                    |
 | `executing-web-tests`           | Launches the `playwright-cli` agent with guardrails and screenshots.                                                                                                       |
 | `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes.                                                                    |
-| `compiling-test-report`         | Writes an HTML report from agent results.                                                                                                                                  |
+| `compiling-test-report`         | Home of the deterministic report scripts (render_report.py, merge_results.py), templates, and the results-schema reference.                                                |
 
 ## Web-first policy
 
@@ -117,8 +116,7 @@ bitwarden-playwright-testing/
 │   ├── service-mapper/AGENT.md
 │   ├── test-planner/AGENT.md
 │   ├── service-manager/AGENT.md
-│   ├── test-runner/AGENT.md
-│   └── report-compiler/AGENT.md
+│   └── test-runner/AGENT.md
 ├── scripts/
 │   └── playwright.config.json           # Sets ignoreHTTPSErrors for dev certs
 └── skills/
@@ -144,8 +142,19 @@ bitwarden-playwright-testing/
     │   └── references/email-patterns.md
     └── compiling-test-report/
         ├── SKILL.md
+        ├── references/
+        │   ├── results-schema.md
+        │   └── examples/
+        ├── scripts/
+        │   ├── results_common.py           # Shared helpers (fail, tally)
+        │   ├── render_report.py            # Results JSON to HTML
+        │   ├── merge_results.py            # Runner segments to results JSON
+        │   ├── test_results_common.py
+        │   ├── test_render_report.py
+        │   └── test_merge_results.py
         └── templates/
-            └── report-template.html
+            ├── report.html
+            └── test-case.html
 ```
 
 ## Contributing
