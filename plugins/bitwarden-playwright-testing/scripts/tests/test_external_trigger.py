@@ -4,10 +4,13 @@
 Run with:  python3 -m unittest discover -s scripts/tests   (from the plugin root)
 """
 import contextlib
+import http.server
 import io
 import os
+import shutil
 import sys
 import tempfile
+import threading
 import unittest
 import urllib.error
 from unittest import mock
@@ -98,6 +101,12 @@ class CheckRequestTest(unittest.TestCase):
         # so this is 13 rather than 11 in both implementations.
         self.assertEqual(self._reject("file:///etc/passwd"), 13)
 
+    def test_urlparse_raising_valueerror_is_malformed(self):
+        # urlparse itself raises ValueError (rather than just yielding an
+        # empty scheme/host) for a malformed IPv6 literal. Exercises the
+        # except ValueError branch in check_request directly.
+        self.assertEqual(self._reject("http://[::1/x"), 13)
+
 
 class MainGuardTest(unittest.TestCase):
     def test_guard_failure_never_sends(self):
@@ -159,28 +168,113 @@ class MainResponseTest(unittest.TestCase):
 
 
 class LogCallTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.directory, ignore_errors=True)
+
     def test_appends_when_artifacts_dir_exists(self):
-        directory = tempfile.mkdtemp()
         with mock.patch("sys.stderr", new_callable=io.StringIO):
             external_trigger.log_call(
-                "http://localhost/x", "because", {"PLAYWRIGHT_TESTING_ARTIFACTS_DIR": directory}
+                "http://localhost/x",
+                "because",
+                {"PLAYWRIGHT_TESTING_ARTIFACTS_DIR": self.directory},
             )
-        with open(os.path.join(directory, "external-trigger.log"), encoding="utf-8") as handle:
+        with open(os.path.join(self.directory, "external-trigger.log"), encoding="utf-8") as handle:
             self.assertEqual(
                 handle.read().strip(),
                 "external-trigger POST http://localhost/x: because",
             )
 
     def test_no_file_when_dir_unset_or_missing(self):
-        directory = tempfile.mkdtemp()
-        missing = os.path.join(directory, "nope")
+        missing = os.path.join(self.directory, "nope")
         with mock.patch("sys.stderr", new_callable=io.StringIO):
             external_trigger.log_call("http://localhost/x", "because", {})
             external_trigger.log_call(
                 "http://localhost/x", "because", {"PLAYWRIGHT_TESTING_ARTIFACTS_DIR": missing}
             )
         self.assertFalse(os.path.exists(missing))
-        self.assertEqual(os.listdir(directory), [])
+        self.assertEqual(os.listdir(self.directory), [])
+
+
+class _QuietHandler(http.server.BaseHTTPRequestHandler):
+    """BaseHTTPRequestHandler that stays silent on stderr during tests."""
+
+    def log_message(self, *args, **kwargs):  # noqa: D401 - silence per-request logging
+        pass
+
+
+class NoRedirectIntegrationTest(unittest.TestCase):
+    """Exercises the real send()/urlopen path against local HTTP servers.
+
+    A first server (on 127.0.0.1, an allowlisted host) answers with a 302
+    pointing at a second server on a different port. If external_trigger
+    ever followed that redirect, the second server would be hit. It must
+    never be hit: check_request only ran once, against the first URL, and a
+    followed redirect would bypass the host guard entirely.
+    """
+
+    def setUp(self):
+        target_hit = threading.Event()
+        self.target_hit = target_hit
+
+        class TargetHandler(_QuietHandler):
+            def do_POST(self):
+                target_hit.set()
+                body = b"should never be reached"
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        self.target_server = http.server.HTTPServer(("127.0.0.1", 0), TargetHandler)
+        target_port = self.target_server.server_address[1]
+
+        class RedirectHandler(_QuietHandler):
+            def do_POST(self):
+                self.send_response(302)
+                self.send_header(
+                    "Location", f"http://127.0.0.1:{target_port}/elsewhere"
+                )
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+
+        self.redirect_server = http.server.HTTPServer(("127.0.0.1", 0), RedirectHandler)
+        self.redirect_port = self.redirect_server.server_address[1]
+
+        self.threads = [
+            threading.Thread(target=server.serve_forever, daemon=True)
+            for server in (self.target_server, self.redirect_server)
+        ]
+        for thread in self.threads:
+            thread.start()
+
+        self.addCleanup(self._shutdown)
+
+    def _shutdown(self):
+        self.target_server.shutdown()
+        self.redirect_server.shutdown()
+        self.target_server.server_close()
+        self.redirect_server.server_close()
+        for thread in self.threads:
+            thread.join(timeout=5)
+
+    def test_redirect_is_not_followed(self):
+        buf = io.StringIO()
+        with mock.patch("sys.stderr", new_callable=io.StringIO), contextlib.redirect_stdout(buf):
+            code = external_trigger.main(
+                [
+                    "--url",
+                    f"http://127.0.0.1:{self.redirect_port}/start",
+                    "--rationale",
+                    "why",
+                ],
+                {},
+            )
+        # curl -sS without -L prints the (empty) 3xx body and exits 0; the
+        # HTTPError path in main() reproduces that.
+        self.assertEqual(code, 0)
+        self.assertEqual(buf.getvalue(), "")
+        self.assertFalse(self.target_hit.is_set())
 
 
 if __name__ == "__main__":

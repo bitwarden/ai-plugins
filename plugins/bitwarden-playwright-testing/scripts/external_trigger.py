@@ -50,6 +50,24 @@ class GuardError(Exception):
         self.message = message
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Never follow 3xx redirects, matching curl's default (no -L).
+
+    check_request runs exactly once, against the original --url, before
+    send() is ever called. The stdlib's default opener installs a
+    HTTPRedirectHandler that follows a 301/302/303/307 Location header with
+    no second policy check, which would let a redirect drive a request past
+    the host guard. Returning None from redirect_request tells the base
+    handler not to redirect; it then falls through to
+    HTTPDefaultErrorHandler, which raises HTTPError for the 3xx status. main()
+    already catches HTTPError, prints the body, and returns exit 0, so a
+    surfaced 3xx lands on the same path curl took.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def allowed_hosts(env):
     """Default local dev hosts, extended (never replaced) by the env var."""
     hosts = [host.lower() for host in DEFAULT_ALLOWED_HOSTS]
@@ -109,18 +127,21 @@ def send(url, data, content_type, scheme):
     TLS verification is disabled for https because Bitwarden dev certs are
     self-signed. This is only reached after check_request has constrained the
     host to the local dev allowlist, and mirrors the curl -k the bash version
-    used.
+    used. Redirects are never followed (see _NoRedirectHandler), mirroring
+    curl's default of no -L.
     """
     body = data.encode("utf-8") if data else b""
     request = urllib.request.Request(
         url, data=body, method="POST", headers={"Content-Type": content_type}
     )
-    context = None
+    handlers = [_NoRedirectHandler]
     if scheme == "https":
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-    with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT, context=context) as response:
+        handlers.append(urllib.request.HTTPSHandler(context=context))
+    opener = urllib.request.build_opener(*handlers)
+    with opener.open(request, timeout=REQUEST_TIMEOUT) as response:
         return response.read().decode("utf-8", errors="replace")
 
 
