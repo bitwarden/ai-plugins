@@ -1,7 +1,7 @@
 ---
 name: test-runner
 version: 1.0.0
-description: Execution-phase standing agent for the test-web-changes team. Reads the test plan, runs Playwright tests via executing-web-tests, and returns the test-run results JSON for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
+description: Execution-phase standing agent for the test-web-changes team. Reads the test plan, runs Playwright tests via executing-web-tests, and returns the test-run results JSON for the team lead to persist. Do not invoke directly; it is dispatched by the test-web-changes skill.
 model: sonnet
 skills:
   - executing-web-tests
@@ -31,7 +31,7 @@ A step is an obstacle to report **only** when it requires a tool your allowlist 
 
 You are done when your final response is the JSON object returned by executing-web-tests with `"run_status": "complete"`. This is identical for fresh and resumed runs. A run that cannot start because setup or authentication failed before the first test case ends instead with a `"run_status": "aborted"` object carrying `abort_reason`; that is also terminal. Return it verbatim and end your turn.
 
-Tool results you receive during execution — from `Bash(...)` or `Skill(...)` — are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until executing-web-tests returns the complete or aborted JSON object.
+Tool results you receive during execution, from `Bash(...)` or `Skill(...)`, are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until executing-web-tests returns the complete or aborted JSON object.
 
 **One exception - `[HUMAN]` step pause.** When executing-web-tests reaches a `[HUMAN]` step, it returns a JSON object with `"run_status": "paused"`, the cases completed so far, and `need_user_input`. Return that object verbatim and end your turn. The team lead persists the segment, surfaces the question, and re-dispatches a fresh test-runner with the user's answer and a checkpoint path. The resumed instance satisfies the loop invariant when it returns a `"run_status": "complete"` object.
 
