@@ -2,7 +2,14 @@
 name: test-web-changes
 description: End-to-end Playwright testing pipeline for local Bitwarden web changes. Uses an agent team to generate test cases from a Jira ticket or feature implementation plan, start required services, run Playwright tests, and produce an HTML report — all in a single command. Use when you want to plan and run UI tests for local web changes without manual steps. Accepts a Jira ticket ID, a feature implementation plan file path, or a feature description. Add --confirm to pause for test case review before starting test execution.
 argument-hint: "<jira-ticket-id | feature-plan-path | feature-description> [--confirm]"
-allowed-tools: [Read, Write, Bash(mkdir *), Bash(printf *)]
+allowed-tools:
+  [
+    Read,
+    Write,
+    Bash(mkdir *),
+    Bash(*/bitwarden-playwright-testing/skills/compiling-test-report/scripts/merge_results.py *),
+    Bash(*/bitwarden-playwright-testing/skills/compiling-test-report/scripts/render_report.py *),
+  ]
 ---
 
 You are the team lead for the Bitwarden web test pipeline. Your role is orchestration plus artifact persistence: you dispatch agents, wait for them to complete, and write their responses to artifact files. You do no research, exploration, or test execution yourself.
@@ -28,7 +35,7 @@ Extract from the arguments:
 
 ## Step 1 — Create team and add teammates
 
-Create team named `pwt-<slug>`. Add all seven teammates:
+Create team named `pwt-<slug>`. Add all six teammates:
 
 | Teammate           | Agent type                                      |
 | ------------------ | ----------------------------------------------- |
@@ -38,7 +45,6 @@ Create team named `pwt-<slug>`. Add all seven teammates:
 | `test-planner`     | `bitwarden-playwright-testing:test-planner`     |
 | `service-manager`  | `bitwarden-playwright-testing:service-manager`  |
 | `test-runner`      | `bitwarden-playwright-testing:test-runner`      |
-| `report-compiler`  | `bitwarden-playwright-testing:report-compiler`  |
 
 All teammates wait for explicit dispatch. They must not self-activate.
 
@@ -125,7 +131,7 @@ This is pure team-lead work — no agent dispatch. Read both planning artifacts 
 
 ## Shut down planning teammates
 
-Shut down `context-gatherer`, `code-explorer`, `service-mapper`, and `test-planner`. Standing teammates (`service-manager`, `test-runner`, `report-compiler`) remain.
+Shut down `context-gatherer`, `code-explorer`, `service-mapper`, and `test-planner`. Standing teammates (`service-manager`, `test-runner`) remain.
 
 ---
 
@@ -174,6 +180,8 @@ No artifact is written for this task.
 
 ## Task 7: Execute tests _(blockedBy: Task 6)_
 
+Track a segment counter `K`, starting at 1.
+
 Dispatch `test-runner` with:
 
 ```
@@ -181,90 +189,71 @@ Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
 Artifacts output dir: <artifacts-output-dir>
 ```
 
-Wait for the test-runner to return a response.
+Wait for the test-runner to return a JSON object. Then, on every response:
 
-### Handling test-runner pause responses
+1. Write the response verbatim to `<artifacts-output-dir>/segment-<K>-<timestamp>.json` using the `Write` tool.
+2. Run the merge script over all segment files so far, writing the canonical results file:
 
-When the `test-runner` response contains `Need user input:`, it is a pause response with two parts:
+   ```
+   <plugin>/skills/compiling-test-report/scripts/merge_results.py \
+     <artifacts-output-dir>/segment-1-<timestamp>.json \
+     ... \
+     <artifacts-output-dir>/segment-<K>-<timestamp>.json \
+     --output <artifacts-output-dir>/test-results-<timestamp>.json
+   ```
 
-1. **Partial results chunk**: everything up to and including `=== PARTIAL RUN PAUSED ===`
-2. **Question**: the `Need user input:` line (always last)
+   where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. Read the `run_status=<status>` value from the script's stdout line.
 
-**On each pause:**
+3. Branch on `<status>`:
 
-1. Extract the partial results chunk and the question.
-2. Write/append the partial results chunk to `<artifacts-output-dir>/checkpoint-<timestamp>.md`:
-   - First pause: create the file and write the chunk.
-   - Subsequent pauses: append the chunk using Bash (the Write tool overwrites and would drop earlier segments): run `printf '\n%s\n' "<chunk>" >> <artifacts-output-dir>/checkpoint-<timestamp>.md`.
-3. Surface the question to the user and capture the answer.
-4. Re-dispatch `test-runner` with:
+### paused
+
+Read `need_user_input` from `<artifacts-output-dir>/test-results-<timestamp>.json`. Surface it to the user and capture the answer. Increment `K`, then re-dispatch `test-runner` with:
 
 ```
 Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
-Checkpoint path: <artifacts-output-dir>/checkpoint-<timestamp>.md
+Checkpoint path: <artifacts-output-dir>/test-results-<timestamp>.json
 Artifacts output dir: <artifacts-output-dir>
 Resume: A prior test-runner agent paused at a [HUMAN] step. The user has now completed that action.
-  Paused at: <verbatim text after "Need user input: ">
+  Paused at: <the need_user_input text>
   User's answer: <user's answer>
 ```
 
-5. Repeat from step 1 if the new agent also pauses.
+Return to step 1 with the new response.
 
-### Handling test-runner complete response
+### aborted
 
-When the test-runner returns a response containing `=== TEST RUN COMPLETE` (the full marker includes totals, e.g. `=== TEST RUN COMPLETE: 3 total, 2 passed, 0 passed (adaptive), 1 failed, 0 errored ===`), proceed to persist the artifact.
+Read `abort_reason` from `<artifacts-output-dir>/test-results-<timestamp>.json`, surface it to the user as the run outcome, and skip Task 8 (there are no cases to report). Proceed directly to Shutdown.
 
-### Handling test-runner abort response
+### complete
 
-When the test-runner returns a response ending in `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===`, the run never entered test execution. Write the returned block verbatim to `<artifacts-output-dir>/test-results-<timestamp>.md`, surface the `<reason>` to the user as the run outcome, and skip Task 8 (report compilation). There are no test cases to report. Proceed directly to Shutdown.
-
-### Persist artifact
-
-Write `<artifacts-output-dir>/test-results-<timestamp>.md`. The file is one bare raw output block — no headers or markdown or any added prose or commentary.
-
-**If no test pauses occurred** (no `checkpoint-<timestamp>.md` file exists): write the test-runner's response verbatim using the `Write` tool. It is already a single raw output block.
-
-**If test pauses occurred** (checkpoint file exists): append the final raw output segment from the test-runner's response to `checkpoint-<timestamp>.md` with a blank-line separator, then assemble one merged raw output block:
-
-_Note: the checkpoint file contains multiple raw output segments separated by blank lines. Each segment begins with `=== TEST RUN RESULTS ===` and ends with either `=== PARTIAL RUN PAUSED ===` or `=== TEST RUN COMPLETE: ... ===`. Discard all segment headers and the paused-segment markers. Each segment's `SUMMARY:` reports only that segment's own completed cases, so sum the per-segment `SUMMARY:` counts to produce the final totals; the individual per-segment `SUMMARY:` lines do not appear in the assembled body, which carries a single final `SUMMARY:` line._
-
-1. Read `checkpoint-<timestamp>.md` in full.
-2. Collect every `--- TEST CASE N: <name> --- ... --- END TEST CASE N ---` block across all segments, in order.
-3. Use the summed per-segment completed counts to produce final totals (total, passed, adaptive, failed, errored).
-4. Write `test-results-<timestamp>.md` as exactly one block, verbatim:
-
-   ```
-   === TEST RUN RESULTS ===
-
-   SUMMARY: <summed total> test cases | <summed passed> passed | <summed adaptive> passed (adaptive) | <summed failed> failed | <summed errored> errored
-
-   <all test case blocks from step 2, in order>
-
-   === TEST RUN COMPLETE: <total> total, <passed> passed, <adaptive> passed (adaptive), <failed> failed, <errored> errored ===
-   ```
-
-Capture the final totals from the `=== TEST RUN COMPLETE: ... ===` marker — you will reuse them in the Shutdown summary.
+Capture the totals from the merge stdout line for the Shutdown summary, and proceed to Task 8. The canonical `test-results-<timestamp>.json` is already written.
 
 ---
 
 ## Task 8: Compile report _(blockedBy: Task 7)_
 
-Dispatch `report-compiler` with:
+This is pure team-lead work, no agent dispatch. Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
 
 ```
-Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
-Test results path: <artifacts-output-dir>/test-results-<timestamp>.md
+<plugin>/skills/compiling-test-report/scripts/render_report.py \
+  --results <artifacts-output-dir>/test-results-<timestamp>.json \
+  --template-dir <plugin>/skills/compiling-test-report/templates \
+  --output <artifacts-output-dir>/report-<timestamp>.html \
+  --plan-name "<input value>" \
+  --date "<timestamp>" \
+  --slug "<slug>" \
+  --services-tested "<services with ports, e.g. web (8080)>" \
+  --base-url "<primary test URL, e.g. https://localhost:8080>"
 ```
 
-Wait for completion. The agent returns a single fenced `html` block containing the full HTML document.
-
-**Persist artifact**: Strip the opening ` ```html ` fence and the closing ` ``` ` fence from report-compiler's response, then write the enclosed HTML document verbatim to `<artifacts-output-dir>/report-<timestamp>.html` using the `Write` tool.
+where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to Shutdown.
 
 ---
 
 ## Shutdown
 
-Shut down remaining teammates (`service-manager`, `test-runner`, `report-compiler`). Delete team `pwt-<slug>`.
+Shut down remaining teammates (`service-manager`, `test-runner`). Delete team `pwt-<slug>`.
 
 Present final summary:
 
