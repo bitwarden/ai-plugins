@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for merge_results: segment assembly, derived totals, validation.
 
-Run with:  python3 -m unittest test_merge_results   (from the scripts/ dir)
+Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
 """
 import json
 import os
@@ -10,11 +10,13 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+SCRIPTS = os.path.dirname(HERE)
+SKILL = os.path.dirname(SCRIPTS)
+sys.path.insert(0, SCRIPTS)
 
 import merge_results
 
-EXAMPLES = os.path.join(HERE, "..", "references", "examples")
+EXAMPLES = os.path.join(SKILL, "references", "examples")
 
 
 def load_example(name):

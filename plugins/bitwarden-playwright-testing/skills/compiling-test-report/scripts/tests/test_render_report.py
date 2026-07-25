@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for render_report: rendering fidelity, escaping, and validation.
 
-Run with:  python3 -m unittest test_render_report   (from the scripts/ dir)
+Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
 """
 import json
 import os
@@ -10,12 +10,14 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+SCRIPTS = os.path.dirname(HERE)
+SKILL = os.path.dirname(SCRIPTS)
+sys.path.insert(0, SCRIPTS)
 
 import render_report
 
-EXAMPLES = os.path.join(HERE, "..", "references", "examples")
-TEMPLATES = os.path.join(HERE, "..", "templates")
+EXAMPLES = os.path.join(SKILL, "references", "examples")
+TEMPLATES = os.path.join(SKILL, "templates")
 HEADER = {
     "template_dir": TEMPLATES,
     "plan_name": "Billing UI",

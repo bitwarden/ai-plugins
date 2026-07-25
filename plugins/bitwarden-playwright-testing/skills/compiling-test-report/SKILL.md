@@ -22,4 +22,4 @@ Both are stdlib-only Python, executable, and invoked by absolute path. They shar
 
 ## Tests
 
-`scripts/test_results_common.py`, `scripts/test_render_report.py`, and `scripts/test_merge_results.py` run with `python3 -m unittest` from the scripts directory. They cover the shared helpers, rendering fidelity, HTML-escaping of malicious payloads, validation and invariant failures, and segment merge.
+`scripts/tests/test_results_common.py`, `scripts/tests/test_render_report.py`, and `scripts/tests/test_merge_results.py` run with `python3 -m unittest discover -s scripts/tests` from the skill directory. They cover the shared helpers, rendering fidelity, HTML-escaping of malicious payloads, validation and invariant failures, and segment merge.

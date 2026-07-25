@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Unit tests for results_common, the helpers shared by the report scripts.
 
-Run with:  python3 -m unittest test_results_common   (from the scripts/ dir)
+Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
 """
 import os
 import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+SCRIPTS = os.path.dirname(HERE)
+sys.path.insert(0, SCRIPTS)
 
 import results_common
 
