@@ -1,7 +1,7 @@
 ---
 name: test-web-changes
-description: End-to-end Playwright testing pipeline for local Bitwarden web changes. Uses an agent team to generate test cases from a Jira ticket or feature implementation plan, start required services, run Playwright tests, and produce an HTML report — all in a single command. Use when you want to plan and run UI tests for local web changes without manual steps. Accepts a Jira ticket ID, a feature implementation plan file path, or a feature description. Add --confirm to pause for test case review before starting test execution.
-argument-hint: "<jira-ticket-id | feature-plan-path | feature-description> [--confirm]"
+description: End-to-end Playwright testing pipeline for local Bitwarden web changes. Uses an agent team to generate test cases from a Jira ticket or feature implementation plan, start required services, run Playwright tests, and produce an HTML report — all in a single command. Use when you want to plan and run UI tests for local web changes without manual steps. Accepts a Jira ticket ID, a Jira browse URL, a feature implementation plan file path, or a feature description, optionally followed by extra instructions for the team lead. Add --confirm to pause for test case review before starting test execution.
+argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions] [--confirm]"
 allowed-tools:
   [
     Read,
@@ -18,19 +18,21 @@ You are the team lead for the Bitwarden web test pipeline. Your role is orchestr
 
 **`--confirm` flag**: present or absent. If present, strip it from the remaining input. Call what remains the raw input.
 
-**Primary source**: the first whitespace-delimited token of the raw input determines the input type and `<input value>`:
+If the raw input is empty, show the user the usage line from this skill's `argument-hint` and stop.
 
-| First token                                                                                                                                  | Input type    | `<input value>`      |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------- |
-| The whole token matches `^[A-Z]{2,10}-\d+$`, or the token is an `atlassian.net/browse/<KEY>` URL, with or without a query string or fragment | `jira-ticket` | The key, uppercased  |
-| Ends with `.md`, or otherwise reads as a filesystem path                                                                                     | `plan-file`   | The token as given   |
-| Anything else                                                                                                                                | `description` | The entire raw input |
+**Primary source**: the first whitespace-delimited token of the raw input determines the input type and `<input value>`. Evaluate the rows in order and take the first match:
+
+| First token                                                                                                                                                 | Input type    | `<input value>`      |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------- |
+| The whole token matches `^[A-Za-z]{2,10}-\d+$` in any case, or the token is an `atlassian.net/browse/<KEY>` URL, with or without a query string or fragment | `jira-ticket` | The key, uppercased  |
+| Ends with `.md`, or otherwise reads as a filesystem path. A URL is never a plan file.                                                                       | `plan-file`   | The token as given   |
+| Anything else                                                                                                                                               | `description` | The entire raw input |
 
 **Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent. If it references other tickets, research them with the skills available to you.
 
 **Generate timestamp** (`YYYYMMDD-HHmm`) once now. Reuse it for all artifact filenames and <timestamp> placeholders in this run.
 
-**Derive run ID**: the Jira key lowercased, else the plan filename without its extension, else the timestamp. Used only for the team name.
+**Derive run ID**: the Jira key lowercased, else the plan filename without its extension, else the timestamp. Sanitize it with the same rules as the slug in Task 1 below, and if the result is empty use the timestamp. Used only for the team name.
 
 ---
 
@@ -62,7 +64,7 @@ Input value: <input value>
 
 Wait for completion. The agent returns the full context as a markdown response.
 
-**Derive the slug** from that returned context:
+**Derive the slug**:
 
 | Input type    | Slug                                                                                                                                               |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
