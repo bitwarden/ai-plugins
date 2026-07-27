@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- **BREAKING:** `architecting-solutions` skill moved to `bitwarden-delivery-tools` 2.1.0 so it can be invoked independent from a `bitwarden-tech-lead` agent. The skill is still addressable by name (`Skill(architecting-solutions)`) as long as `bitwarden-delivery-tools` 2.1.0+ is installed — which the tech-lead agent already lists as a required cross-plugin dependency.
+- **BREAKING:** `architecting-solutions` skill moved to `bitwarden-delivery-tools` 2.2.0 so it can be invoked independent from a `bitwarden-tech-lead` agent. The skill is still addressable by name (`Skill(architecting-solutions)`) as long as `bitwarden-delivery-tools` 2.2.0+ is installed — which the tech-lead agent already lists as a required cross-plugin dependency.
 
 ### Changed
 
