@@ -33,7 +33,7 @@ Invoke the team-lead skill:
 /test-web-changes <jira-ticket-id | feature-plan-path | feature-description> [--confirm]
 ```
 
-The first argument is the source the test run is built from: a Jira ticket key, a Jira browse URL, a path to an implementation plan, or a plain description of the feature. Anything typed after it reaches the team lead as extra guidance, which it folds into the instructions it gives each agent.
+The first argument is the source the test run is built from: a Jira ticket key, a Jira browse URL, or a path to an implementation plan. When it is one of those, anything typed after it reaches the team lead as extra guidance, which it folds into the instructions it gives each agent. If the first argument is none of those, the whole input is read as a plain description of the feature to test.
 
 **Examples:**
 
