@@ -16,26 +16,27 @@ You are the team lead for the Bitwarden web test pipeline. Your role is orchestr
 
 ## Step 0 — Parse input
 
-Extract from the arguments:
+**`--confirm` flag**: present or absent. If present, strip it from the remaining input. Call what remains the raw input.
 
-- **`--confirm` flag**: present or absent. If present, strip it from the remaining input.
-- **Input value**: the remaining argument text after stripping the flag above.
-- **Input type**: detect from the input value:
-  - Jira ticket: matches `[A-Z]+-\d+` (e.g., `PM-12345`)
-  - Plan file: ends with `.md` and looks like a file path
-  - Free-form description: anything else
+**Primary source**: the first whitespace-delimited token of the raw input determines the input type and `<input value>`:
+
+| First token                                                          | Input type    | `<input value>`      |
+| -------------------------------------------------------------------- | ------------- | -------------------- |
+| Matches `[A-Z]{2,10}-\d+`, or is an `atlassian.net/browse/<KEY>` URL | `jira-ticket` | The key, uppercased  |
+| Ends with `.md`, or otherwise reads as a filesystem path             | `plan-file`   | The token as given   |
+| Anything else                                                        | `description` | The entire raw input |
+
+**Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent. If it references other tickets, research them with the skills available to you.
 
 **Generate timestamp** (`YYYYMMDD-HHmm`) once now. Reuse it for all artifact filenames and <timestamp> placeholders in this run.
 
-**Derive slug** from the input value: lowercase, spaces and underscores replaced with hyphens, truncated to 40 chars. Fallback: `pwt-<timestamp>`.
-
-**Create output directory** and derive the `<artifacts-output-dir>` token: resolve the absolute path `<current working directory>/.playwright-testing-artifacts/<slug>/`, create that directory, and use it for `<artifacts-output-dir>` in every artifact path in the steps below.
+**Derive run ID**: the Jira key lowercased, else the plan filename without its extension, else the timestamp. Used only for the team name.
 
 ---
 
 ## Step 1 — Create team and add teammates
 
-Create team named `pwt-<slug>`. Add all six teammates:
+Create team named `pwt-<run-id>`. Add all six teammates:
 
 | Teammate           | Agent type                                      |
 | ------------------ | ----------------------------------------------- |
@@ -56,10 +57,22 @@ Dispatch `context-gatherer` with:
 
 ```
 Input type: <jira-ticket | plan-file | description>
-Input value: <value>
+Input value: <input value>
 ```
 
 Wait for completion. The agent returns the full context as a markdown response.
+
+**Derive the slug** from that returned context:
+
+| Input type    | Slug                                                                                                                                               |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `jira-ticket` | The key lowercased, then a few words naming the feature, drawn from the response's Feature Description section: `pm-38333-deferred-price-schedule` |
+| `plan-file`   | The filename without its extension                                                                                                                 |
+| `description` | A few words naming the feature, your judgement                                                                                                     |
+
+Then sanitize it. The slug is used as a path segment, as a CLI argument, and in the final summary, so it may contain only `a-z`, `0-9`, and `-`: lowercase it; replace every character that is not `a-z` or `0-9` with a hyphen, deny-by-default with nothing exempt; collapse hyphen runs into one; strip leading and trailing hyphens; cap at 50 characters and strip a resulting trailing hyphen. The result must match `^[a-z0-9][a-z0-9-]*$`, otherwise use `pwt-<timestamp>`. A slug containing `/` is always wrong: it silently creates a nested tree instead of one artifact folder.
+
+**Create output directory** and derive the `<artifacts-output-dir>` token: resolve the absolute path `<current working directory>/.playwright-testing-artifacts/<slug>/`, create that directory, and use it for `<artifacts-output-dir>` in every artifact path in the steps below.
 
 **Persist artifact**: Write the agent's response text verbatim to `<artifacts-output-dir>/context-<timestamp>.md` using the `Write` tool.
 
@@ -253,7 +266,7 @@ where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestam
 
 ## Shutdown
 
-Shut down remaining teammates (`service-manager`, `test-runner`). Delete team `pwt-<slug>`.
+Shut down remaining teammates (`service-manager`, `test-runner`). Delete team `pwt-<run-id>`.
 
 Present final summary:
 
