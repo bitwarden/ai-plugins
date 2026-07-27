@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial release of the `bitwarden-playwright-testing` plugin
-- `test-web-changes` skill orchestrating a full UI test pipeline from Jira ticket or feature description to HTML report
+- `test-web-changes` skill orchestrating a full UI test pipeline to HTML report, accepting a Jira ticket key, a Jira browse URL, an implementation plan path, or a feature description
 - Six-agent team: `context-gatherer`, `code-explorer`, `service-mapper`, `test-planner`, `service-manager`, `test-runner`
 - Skills: `exploring-application-context`, `determining-required-services`, `verifying-environment-health`, `build-test-cases`, `executing-web-tests`, `reading-mailcatcher-api`, `compiling-test-report`
 - Scoped `using-stripe-cli` skill for querying Stripe test-clock and subscription data (read-only), wired into `test-runner`.

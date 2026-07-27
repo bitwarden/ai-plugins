@@ -33,10 +33,14 @@ Invoke the team-lead skill:
 /test-web-changes <jira-ticket-id | feature-plan-path | feature-description> [--confirm]
 ```
 
+The first argument is the source the test run is built from: a Jira ticket key, a Jira browse URL, a path to an implementation plan, or a plain description of the feature. Anything typed after it reaches the team lead as extra guidance, which it folds into the instructions it gives each agent.
+
 **Examples:**
 
 ```bash
 /test-web-changes PM-1234
+/test-web-changes https://bitwarden.atlassian.net/browse/PM-1234
+/test-web-changes PM-1234 focus on the owner role
 /test-web-changes ~/code/bitwarden/server/plans/PM-1234-billing-ui.md
 /test-web-changes "exempt orgs from billing automation when the flag is set" --confirm
 ```
