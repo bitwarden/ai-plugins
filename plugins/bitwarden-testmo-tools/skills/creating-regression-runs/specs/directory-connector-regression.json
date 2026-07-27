@@ -1,6 +1,6 @@
 {
   "project_id": 1,
-  "run_name": "Directory Connector (BWDC) Regression (<period>)",
+  "run_name": "Directory Connector (BWDC)",
   "run_state_id": 7,
   "tags": ["regression"],
   "filters": {

@@ -1,7 +1,7 @@
 {
   "_comment": "Old Client / New Server compatibility run. Defined purely by the Testmo tag 'oldnew' (tag id 152) — no folder/test-type/state/automation filters. Tag filtering is applied server-side by the /cases API.",
   "project_id": 1,
-  "run_name": "Old Client / New Server (<period>)",
+  "run_name": "Old Client / New Server",
   "run_state_id": 7,
   "tags": ["oldnew"],
   "filters": {
