@@ -5,6 +5,19 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-07-27
+
+### Changed
+
+- Simplified regression run names to the bare domain/area. Run names no longer encode the platform, the
+  word "Regression", or the release period, since the release is conveyed by the linked milestone and the
+  platform variant by the run's Testmo Configuration (`config_id`). Examples: `Web Regression — Password
+Manager (<period>)` → `Password Manager`; `Directory Connector (BWDC) Regression (<period>)` →
+  `Directory Connector (BWDC)`. Both mobile specs are now named just `Mobile`, distinguished by
+  configuration (Android=1, iOS=3). Updated all captured specs, the spec template, and the SKILL.md naming
+  guidance accordingly. The `--period`/`<period>` substitution mechanism is unchanged for any spec that
+  still uses the placeholder.
+
 ## [0.1.0] - 2026-07-22
 
 ### Added

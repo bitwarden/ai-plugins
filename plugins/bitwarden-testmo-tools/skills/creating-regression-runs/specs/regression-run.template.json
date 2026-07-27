@@ -1,12 +1,10 @@
 {
   "project_id": 1,
-  "run_name": "<Platform> Regression — <Domain> (<period>)",
+  "run_name": "<Domain>",
   "run_state_id": 7,
   "tags": ["regression"],
   "filters": {
-    "folder_paths": [
-      "Web > <Domain Area>"
-    ],
+    "folder_paths": ["Web > <Domain Area>"],
     "include_subfolders": true,
     "test_type_ids": [19, 20],
     "case_state_ids": [4],

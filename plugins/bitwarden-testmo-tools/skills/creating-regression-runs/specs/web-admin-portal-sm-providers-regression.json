@@ -1,6 +1,6 @@
 {
   "project_id": 1,
-  "run_name": "Web Regression — Admin Portal / SM / Providers (<period>)",
+  "run_name": "Admin Portal / SM / Providers",
   "run_state_id": 7,
   "tags": ["regression"],
   "filters": {

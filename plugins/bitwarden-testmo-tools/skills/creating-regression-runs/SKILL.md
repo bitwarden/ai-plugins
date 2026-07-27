@@ -28,7 +28,7 @@ filter spec, and — only when explicitly told to — creates the run via the Te
   `/projects/{id}/runs`, `/projects/{id}/automation/runs`, and single-run detail at `/runs/{id}`
   (top-level — `/projects/{id}/runs/{id}` 404s).
 - **Create run (POST `/projects/{id}/runs`):** body `{name, state_id, include_all:false, cases:[ids],
-  milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}/states`): 6=New,
+milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}/states`): 6=New,
   7=In progress, 8=Under review, 9=Rejected, 10=Done. Active runs use `7`.
 
 ## Workflow
@@ -54,7 +54,7 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 ```json
 {
   "project_id": 1,
-  "run_name": "Web Regression — Password Manager (2026-07)",
+  "run_name": "Password Manager",
   "run_state_id": 7,
   "milestone_id": 123,
   "tags": ["regression"],
@@ -82,11 +82,23 @@ provided keys (keys are ANDed; multi-value lists within a key are ORed). Keys:
 - `case_state_ids` — the case `state_id` must be in the list (`4` = Active).
 - `automation_type_ids` — include only these automation types (`null` in the list = "no type set").
 - `exclude_automation_type_ids` — drop cases with these automation types. Prefer this for "manual only"
-  (`[10, 23, 24]`) so newly-added *non-automated* types are included by default.
+  (`[10, 23, 24]`) so newly-added _non-automated_ types are included by default.
 - `has_automation` — bool; matches the case flag. NOTE: as of 2026-07 every Regression-typed case in
   project 1 has `has_automation=false`, so this is rarely a useful filter for the manual suite.
 
 The script refuses to create a run matching zero cases.
+
+## Run naming
+
+Keep `run_name` to the bare domain/area — e.g. `"Password Manager"`, `"Admin Console"`,
+`"Directory Connector (BWDC)"`. Do **not** encode the platform, the word "Regression", or the release
+period in the name:
+
+- The **release/period** is conveyed by the parent milestone the run is linked to, so `<period>` no longer
+  belongs in `run_name` (the `--period` substitution remains for any spec that still uses the placeholder).
+- The **platform variant** is conveyed by the run's Testmo **Configuration** (`config_id`), not the name.
+  Both mobile specs are therefore named just `"Mobile"` and distinguished by config
+  (`config_id` 1 = Android, 3 = iOS). Look up config ids via `GET /projects/{id}/configs`.
 
 ## Project 1 field reference (captured 2026-07-22 — re-verify via `/projects/1/fields`)
 
