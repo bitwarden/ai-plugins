@@ -20,11 +20,11 @@ You are the team lead for the Bitwarden web test pipeline. Your role is orchestr
 
 **Primary source**: the first whitespace-delimited token of the raw input determines the input type and `<input value>`:
 
-| First token                                                          | Input type    | `<input value>`      |
-| -------------------------------------------------------------------- | ------------- | -------------------- |
-| Matches `[A-Z]{2,10}-\d+`, or is an `atlassian.net/browse/<KEY>` URL | `jira-ticket` | The key, uppercased  |
-| Ends with `.md`, or otherwise reads as a filesystem path             | `plan-file`   | The token as given   |
-| Anything else                                                        | `description` | The entire raw input |
+| First token                                                                                                                                  | Input type    | `<input value>`      |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------- |
+| The whole token matches `^[A-Z]{2,10}-\d+$`, or the token is an `atlassian.net/browse/<KEY>` URL, with or without a query string or fragment | `jira-ticket` | The key, uppercased  |
+| Ends with `.md`, or otherwise reads as a filesystem path                                                                                     | `plan-file`   | The token as given   |
+| Anything else                                                                                                                                | `description` | The entire raw input |
 
 **Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent. If it references other tickets, research them with the skills available to you.
 
