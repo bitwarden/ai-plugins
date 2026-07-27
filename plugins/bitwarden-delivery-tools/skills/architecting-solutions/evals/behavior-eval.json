@@ -1,7 +1,7 @@
 {
   "skill_name": "architecting-solutions",
   "eval_type": "behavior",
-  "purpose": "Prove that the skill's ADR-consult and Security Mindset behaviors earn their place — i.e., that they change the model's design output versus principle-only reasoning. Cases 1-4 target the four branches of the 'Consult the ADRs first' step. Cases 5-9 target the five Security Mindset bullets as of skill 2.1.0 (security-baseline invocation, data classification, audit trail, fail-closed, untrusted external content).",
+  "purpose": "Prove that the skill's ADR-consult and Security Mindset behaviors earn their place — i.e., that they change the model's design output versus principle-only reasoning. Cases 1-4 target the four branches of the 'Consult the ADRs first' step. Cases 5-9 target the five Security Mindset bullets as of bitwarden-delivery-tools 2.2.0 (security-baseline invocation, data classification, audit trail, fail-closed, untrusted external content).",
   "evals": [
     {
       "id": 1,
