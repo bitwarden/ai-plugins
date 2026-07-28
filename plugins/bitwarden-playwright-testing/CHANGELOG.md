@@ -32,8 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `preflight-check.sh` Mailcatcher detection no longer false-positives on unrelated mail containers.
 - `report-template.html` uses Prettier-parseable brace tokens instead of angle-bracket placeholders.
 - `service-mapper` is granted `Bash(git diff *)`, needed for the diff review it already performs.
-- Split the setup-failure halt in `executing-web-tests`: a setup failure now fails only that test case and `test-runner` continues to the next, while a failure before any test case has started aborts the whole run with a distinct `=== TEST RUN ABORTED: setup failure before test cases (<reason>) ===` marker.
-- Added an errored count to the run-complete marker, the `SUMMARY:` line, and the report summary table (`N total, N passed, N passed (adaptive), N failed, N errored`).
+- Split the setup-failure halt in `executing-web-tests`: a setup failure now fails only that test case and `test-runner` continues to the next, while a failure before any test case has started aborts the whole run with `run_status` set to `aborted` and the cause in `abort_reason`.
+- Added an errored count to the run totals and the report summary table (`N total, N passed, N passed (adaptive), N failed, N errored`).
 - `read_mailcatcher.py` now guards `--recipient`/`--pattern`/`--link-filter` against a missing argument value and extends, rather than replaces, its local-host allowlist via the `PLAYWRIGHT_TESTING_ALLOWED_HOSTS` environment variable.
 - `service-manager` now declares the `playwright-cli` skill it already required.
 - Narrowed the `test-web-changes` orchestrator's pre-approved `Bash` commands from an unrestricted `Bash` to `Bash(mkdir *)` plus the two report scripts, so fewer commands run without a permission prompt. Note that `allowed-tools` pre-approves rather than restricts.
