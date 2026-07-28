@@ -297,19 +297,24 @@ validate_agent_frontmatter() {
         has_errors=1
     fi
 
-    # Validate tools field is present and looks like an array
+    # Validate the tools field grants something.
+    #
+    # Anthropic documents `tools` as a comma-separated scalar and never shows a
+    # YAML list in agent frontmatter (https://code.claude.com/docs/en/sub-agents).
+    # The list form is undocumented but not forbidden, so accept both; reject only
+    # an empty `tools:`, which leaves the agent with nothing and unable to launch.
     if echo "$frontmatter" | grep -q "^tools:"; then
-        # Check if the next line starts with a dash (array item)
-        local tools_line
-        tools_line=$(echo "$frontmatter" | grep -n "^tools:" | cut -d: -f1)
-        if [[ -n "$tools_line" ]]; then
-            local next_line=$((tools_line + 1))
-            local next_content
-            next_content=$(echo "$frontmatter" | sed -n "${next_line}p")
-            if [[ -n "$next_content" ]] && [[ ! "$next_content" =~ ^[[:space:]]*- ]]; then
-                print_error "Agent $plugin_name/$agent_name: 'tools' field must be an array"
-                has_errors=1
-            fi
+        local tools_value
+        tools_value=$(echo "$frontmatter" | sed -n 's/^tools:[[:space:]]*//p' | head -1)
+
+        if [[ -n "$tools_value" ]]; then
+            : # inline form: `tools: Read, Grep` or `tools: ["Read", "Grep"]`
+        elif echo "$frontmatter" | sed -n '/^tools:/,$p' | sed -n '2p' \
+            | grep -qE '^[[:space:]]+- '; then
+            : # block-list form: `tools:` followed by `  - Read`
+        else
+            print_error "Agent $plugin_name/$agent_name: 'tools' is declared but empty (expected a comma-separated list such as 'Read, Grep, Glob', or a YAML list)"
+            has_errors=1
         fi
     fi
 
