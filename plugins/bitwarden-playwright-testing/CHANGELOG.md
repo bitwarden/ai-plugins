@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release of the `bitwarden-playwright-testing` plugin
 - `test-web-changes` skill orchestrating a full UI test pipeline to HTML report, accepting a Jira ticket key, a Jira browse URL, an implementation plan path, or a feature description
-- Six-agent team: `context-gatherer`, `code-explorer`, `service-mapper`, `test-planner`, `service-manager`, `test-runner`
+- Six-agent pipeline: `context-gatherer`, `code-explorer`, `service-mapper`, `test-planner`, `service-manager`, `test-runner`
 - Skills: `exploring-application-context`, `determining-required-services`, `verifying-environment-health`, `build-test-cases`, `executing-web-tests`, `reading-mailcatcher-api`, `compiling-test-report`
 - Scoped `using-stripe-cli` skill for querying Stripe test-clock and subscription data (read-only), wired into `test-runner`.
 
@@ -36,12 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an errored count to the run-complete marker, the `SUMMARY:` line, and the report summary table (`N total, N passed, N passed (adaptive), N failed, N errored`).
 - `read_mailcatcher.py` now guards `--recipient`/`--pattern`/`--link-filter` against a missing argument value and extends, rather than replaces, its local-host allowlist via the `PLAYWRIGHT_TESTING_ALLOWED_HOSTS` environment variable.
 - `service-manager` now declares the `playwright-cli` skill it already required.
-- Scoped the `test-web-changes` team-lead's `Bash` grant to `Bash(mkdir *)` and `Bash(printf *)` instead of an unrestricted `Bash`.
+- Narrowed the `test-web-changes` orchestrator's pre-approved `Bash` commands from an unrestricted `Bash` to `Bash(mkdir *)` plus the two report scripts, so fewer commands run without a permission prompt. Note that `allowed-tools` pre-approves rather than restricts.
 - Corrected the garbled report-persistence fence-stripping instruction in `test-web-changes`.
 - Corrected remaining `invoke-stripe-api` references to `using-stripe-cli` in `references/tool-policy.md` and `exploring-application-context`.
 
 ### Changed
 
 - Centralized script paths in `references/tool-policy.md`; split the `known-flows` catalog into `auth`/`billing`/`admin` references; documented the self-signed-cert TLS bypasses; trimmed `executing-web-tests` and `build-test-cases` for conciseness; aligned agent skill namespaces to convention.
-- The test-run results contract is now JSON end to end. The `test-runner` emits a results object (complete, paused, or aborted); the team lead assembles segments and derives totals with `merge_results.py` (removing the hand-merge and its per-segment SUMMARY summing), then renders `report-<timestamp>.html` with `render_report.py`. The canonical results artifact is now `test-results-<timestamp>.json`.
+- The test-run results contract is now JSON end to end. The `test-runner` emits a results object (complete, paused, or aborted); the orchestrator assembles segments and derives totals with `merge_results.py` (removing the hand-merge and its per-segment SUMMARY summing), then renders `report-<timestamp>.html` with `render_report.py`. The canonical results artifact is now `test-results-<timestamp>.json`.
 - The `external-trigger` wrapper and the Mailcatcher reader are now Python (`external_trigger.py`, `read_mailcatcher.py`) with unit tests covering the host allowlist, the scheme and method guards, and the documented exit codes. Both were already bash wrappers around inline `python3` for URL parsing and JSON. Every documented invocation of all four plugin scripts is now a bare absolute path under `${CLAUDE_PLUGIN_ROOT}`, which is the form the path-scoped `Bash(...)` grants actually match.
