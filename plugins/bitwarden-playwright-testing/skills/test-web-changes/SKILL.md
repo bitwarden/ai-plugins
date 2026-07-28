@@ -1,9 +1,10 @@
 ---
 name: test-web-changes
-description: End-to-end Playwright testing pipeline for local Bitwarden web changes. Uses an agent team to generate test cases from a Jira ticket or feature implementation plan, start required services, run Playwright tests, and produce an HTML report — all in a single command. Use when you want to plan and run UI tests for local web changes without manual steps. Accepts a Jira ticket ID, a Jira browse URL, a feature implementation plan file path, or a feature description, optionally followed by extra instructions for the team lead. Add --confirm to pause for test case review before starting test execution.
+description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services but never starts them. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions. Add --confirm to review the test cases before execution begins.
 argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions] [--confirm]"
 allowed-tools:
   [
+    Agent,
     Read,
     Write,
     Bash(mkdir *),
@@ -12,7 +13,7 @@ allowed-tools:
   ]
 ---
 
-You are the team lead for the Bitwarden web test pipeline. Your role is orchestration plus artifact persistence: you dispatch agents, wait for them to complete, and write their responses to artifact files. You do no research, exploration, or test execution yourself.
+You are the orchestrator for the Bitwarden web test pipeline. Your role is orchestration plus artifact persistence: you dispatch agents with the `Agent` tool, wait for each to return, and write their responses to artifact files. You do no research, exploration, or test execution yourself.
 
 ## Step 0 — Parse input
 
@@ -32,15 +33,13 @@ If the raw input is empty, show the user the usage line from this skill's `argum
 
 **Generate timestamp** (`YYYYMMDD-HHmm`) once now. Reuse it for all artifact filenames and <timestamp> placeholders in this run.
 
-**Derive run ID**: the Jira key lowercased, else the plan filename without its extension, else the timestamp. Sanitize it with the same rules as the slug in Task 1 below, and if the result is empty use the timestamp. Used only for the team name.
-
 ---
 
-## Step 1 — Create team and add teammates
+## The agents in this pipeline
 
-Create team named `pwt-<run-id>`. Add all six teammates:
+Dispatch each with the `Agent` tool, using the agent type in the right column. Each returns its whole artifact as its final response; none of them persist anything themselves.
 
-| Teammate           | Agent type                                      |
+| Agent              | Agent type                                      |
 | ------------------ | ----------------------------------------------- |
 | `context-gatherer` | `bitwarden-playwright-testing:context-gatherer` |
 | `code-explorer`    | `bitwarden-playwright-testing:code-explorer`    |
@@ -48,8 +47,6 @@ Create team named `pwt-<run-id>`. Add all six teammates:
 | `test-planner`     | `bitwarden-playwright-testing:test-planner`     |
 | `service-manager`  | `bitwarden-playwright-testing:service-manager`  |
 | `test-runner`      | `bitwarden-playwright-testing:test-runner`      |
-
-All teammates wait for explicit dispatch. They must not self-activate.
 
 ---
 
@@ -80,7 +77,7 @@ Then sanitize it. The slug is used as a path segment, as a CLI argument, and in 
 
 ---
 
-## Task 2: Explore codebase _(blockedBy: Task 1)_
+## Task 2: Explore codebase
 
 Dispatch `code-explorer` with:
 
@@ -94,7 +91,9 @@ Wait for completion. The agent returns the Application Context as a markdown res
 
 ---
 
-## Task 3: Determine required services _(blockedBy: Task 2)_
+## Task 3: Determine required services
+
+Tasks 3 and 4 both need only the artifacts from Task 2, so dispatch `service-mapper` and `test-planner` in the same message and let them run concurrently. Wait for both before starting Task 5.
 
 Dispatch `service-mapper` with:
 
@@ -109,7 +108,9 @@ Wait for completion. The agent returns the services list as a markdown response.
 
 ---
 
-## Task 4: Build test cases _(blockedBy: Task 2)_
+## Task 4: Build test cases
+
+Dispatched together with Task 3, see above.
 
 Dispatch `test-planner` with:
 
@@ -124,9 +125,9 @@ Wait for completion. The agent returns the test cases as a markdown response. Th
 
 ---
 
-## Task 5: Compose test plan _(blockedBy: Tasks 3 and 4)_
+## Task 5: Compose test plan
 
-This is pure team-lead work — no agent dispatch. Read both planning artifacts and assemble the final test plan.
+This is pure orchestrator work, no agent dispatch. Read both planning artifacts and assemble the final test plan.
 
 1. Read `<artifacts-output-dir>/services-<timestamp>.md` — this is the full services list.
 2. Read `<artifacts-output-dir>/test-cases-<timestamp>.md` — this is the full test-cases list.
@@ -141,12 +142,6 @@ This is pure team-lead work — no agent dispatch. Read both planning artifacts 
 
 <contents of test-cases-<timestamp>.md, verbatim>
 ```
-
----
-
-## Shut down planning teammates
-
-Shut down `context-gatherer`, `code-explorer`, `service-mapper`, and `test-planner`. Standing teammates (`service-manager`, `test-runner`) remain.
 
 ---
 
@@ -166,14 +161,14 @@ Display:
 >
 > Proceed with test execution? (yes/no)"
 
-- **No**: shut down remaining teammates, delete team, tell user the test plan path. Stop.
+- **No**: tell the user the test plan path and stop.
 - **Yes**: continue.
 
 If `--confirm` was not set, print: "Test plan complete — proceeding to test execution." and continue immediately.
 
 ---
 
-## Task 6: Verify environment health _(blockedBy: Task 5)_
+## Task 6: Verify environment health
 
 Dispatch `service-manager` with:
 
@@ -193,7 +188,7 @@ No artifact is written for this task.
 
 ---
 
-## Task 7: Execute tests _(blockedBy: Task 6)_
+## Task 7: Execute tests
 
 Track a segment counter `K`, starting at 1.
 
@@ -238,17 +233,17 @@ Return to step 1 with the new response.
 
 ### aborted
 
-Read `abort_reason` from `<artifacts-output-dir>/test-results-<timestamp>.json`, surface it to the user as the run outcome, and skip Task 8 (there are no cases to report). Proceed directly to Shutdown.
+Read `abort_reason` from `<artifacts-output-dir>/test-results-<timestamp>.json`, surface it to the user as the run outcome, and skip Task 8 (there are no cases to report). Proceed directly to the final summary.
 
 ### complete
 
-Capture the totals from the merge stdout line for the Shutdown summary, and proceed to Task 8. The canonical `test-results-<timestamp>.json` is already written.
+Capture the totals from the merge stdout line for the final summary, and proceed to Task 8. The canonical `test-results-<timestamp>.json` is already written.
 
 ---
 
-## Task 8: Compile report _(blockedBy: Task 7)_
+## Task 8: Compile report
 
-This is pure team-lead work, no agent dispatch. Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
+This is pure orchestrator work, no agent dispatch. Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
 
 ```
 <plugin>/skills/compiling-test-report/scripts/render_report.py \
@@ -262,15 +257,13 @@ This is pure team-lead work, no agent dispatch. Read the `## Required Services` 
   --base-url "<primary test URL, e.g. https://localhost:8080>"
 ```
 
-where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to Shutdown.
+where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to the final summary.
 
 ---
 
-## Shutdown
+## Final summary
 
-Shut down remaining teammates (`service-manager`, `test-runner`). Delete team `pwt-<run-id>`.
-
-Present final summary:
+Present the final summary:
 
 ```
 Test run complete for <input value>
