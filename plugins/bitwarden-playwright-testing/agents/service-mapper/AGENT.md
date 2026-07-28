@@ -1,12 +1,10 @@
 ---
 name: service-mapper
-version: 1.0.0
-description: Planning-phase agent for the test-web-changes team. Reads the app-context artifact, calls determining-required-services, and returns the service list as a markdown response for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
+description: Planning-phase agent for the test-web-changes pipeline. Reads the app-context artifact, calls determining-required-services, and returns the service list as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
 model: sonnet
 skills:
   - determining-required-services
 color: blue
-user-invocable: false
 tools: Read, Skill, Bash(git diff *)
 ---
 
@@ -47,4 +45,4 @@ Return exactly this structure:
 <the final ## Required Services block from the skill output>
 ```
 
-Self-check before returning: your first non-empty line must be `## Required Services`, and that heading must appear exactly once. If the self-check fails, surface the failure to the team lead instead of returning a malformed artifact.
+Self-check before returning: your first non-empty line must be `## Required Services`, and that heading must appear exactly once. If the self-check fails, surface the failure to the orchestrator instead of returning a malformed artifact.

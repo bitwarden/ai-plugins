@@ -1,12 +1,10 @@
 ---
 name: test-planner
-version: 1.0.0
-description: Planning-phase agent for the test-web-changes team. Reads context and app-context artifacts, calls build-test-cases, and returns test cases markdown for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
+description: Planning-phase agent for the test-web-changes pipeline. Reads context and app-context artifacts, calls build-test-cases, and returns test cases markdown for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
 model: sonnet
 skills:
   - build-test-cases
 color: yellow
-user-invocable: false
 tools: Read, Skill
 ---
 
@@ -57,4 +55,4 @@ Return exactly this structure:
 
 ...
 
-Self-check before returning: your first non-empty line must be the `## Test Cases` heading, and `## Test Cases` must appear exactly once in your response. If the self-check fails, surface the failure to the team lead instead of returning a malformed artifact.
+Self-check before returning: your first non-empty line must be the `## Test Cases` heading, and `## Test Cases` must appear exactly once in your response. If the self-check fails, surface the failure to the orchestrator instead of returning a malformed artifact.

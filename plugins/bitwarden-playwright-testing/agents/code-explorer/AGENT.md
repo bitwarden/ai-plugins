@@ -1,12 +1,10 @@
 ---
 name: code-explorer
-version: 1.0.0
-description: Planning-phase agent for the test-web-changes team. Reads the context markdown from context-gatherer, calls exploring-application-context, and returns the Application Context as a markdown response for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
+description: Planning-phase agent for the test-web-changes pipeline. Reads the context markdown from context-gatherer, calls exploring-application-context, and returns the Application Context as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
 model: sonnet
 skills:
   - exploring-application-context
 color: orange
-user-invocable: false
 tools: Read, Skill, Grep, Glob, Bash(git diff *), Bash(git log *)
 ---
 
@@ -63,4 +61,4 @@ Return exactly this structure:
 
 Do not summarize, reformat, or omit any part of the final block. Downstream agents depend on the full content.
 
-Self-check before returning: your first non-empty line must be `## Application Context`, the response must contain exactly one `## States` section and exactly one `## Flows` section, and no other top-level (`##`) sections. If the self-check fails, surface the failure to the team lead instead of returning a malformed artifact.
+Self-check before returning: your first non-empty line must be `## Application Context`, the response must contain exactly one `## States` section and exactly one `## Flows` section, and no other top-level (`##`) sections. If the self-check fails, surface the failure to the orchestrator instead of returning a malformed artifact.

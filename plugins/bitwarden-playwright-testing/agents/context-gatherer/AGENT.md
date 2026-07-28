@@ -1,12 +1,10 @@
 ---
 name: context-gatherer
-version: 1.0.0
-description: Planning-phase agent for the test-web-changes team. Receives a Jira ticket ID, plan file path, or free-form feature description and returns structured context (affected repos, feature description, acceptance criteria) as a markdown response for the team lead to persist. Do not invoke directly — dispatched by the test-web-changes skill.
+description: Planning-phase agent for the test-web-changes pipeline. Receives a Jira ticket ID, plan file path, or free-form feature description and returns structured context (affected repos, feature description, acceptance criteria) as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
 model: sonnet
 skills:
   - bitwarden-atlassian-tools:researching-jira-issues
 color: green
-user-invocable: false
 tools: Read, Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_child_pages, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__download_attachment
 ---
 
