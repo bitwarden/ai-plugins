@@ -4,7 +4,7 @@ Automated end-to-end UI testing for Bitwarden web changes using Playwright.
 
 ## Overview
 
-This plugin provides a single user-facing skill, `test-web-changes`, that orchestrates a six-agent team to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run. The team gathers context, explores the affected codebases, builds grounded test cases, verifies the local dev environment is ready, executes the tests, and renders an HTML report with full-page screenshots.
+This plugin provides a single user-facing skill, `test-web-changes`, that orchestrates a six-agent pipeline to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run. The pipeline gathers context, explores the affected codebases, builds grounded test cases, verifies the local dev environment is ready, executes the tests, and renders an HTML report with full-page screenshots.
 
 ## Prerequisites
 
@@ -27,13 +27,13 @@ Restart Claude Code after installing for the plugin to become active.
 
 ## Usage
 
-Invoke the team-lead skill:
+Invoke the orchestration skill:
 
 ```bash
 /test-web-changes <jira-ticket-id | feature-plan-path | feature-description> [--confirm]
 ```
 
-The first argument is the source the test run is built from: a Jira ticket key, a Jira browse URL, or a path to an implementation plan. When it is one of those, anything typed after it reaches the team lead as extra guidance, which it folds into the instructions it gives each agent. If the first argument is none of those, the whole input is read as a plain description of the feature to test.
+The first argument is the source the test run is built from: a Jira ticket key, a Jira browse URL, or a path to an implementation plan. When it is one of those, anything typed after it reaches the orchestrator as extra guidance, which it folds into the instructions it gives each agent. If the first argument is none of those, the whole input is read as a plain description of the feature to test.
 
 **Examples:**
 
@@ -51,7 +51,7 @@ The first argument is the source the test run is built from: a Jira ticket key, 
 
 ## How it works
 
-`test-web-changes` runs an eight-task pipeline as the team lead. Each agent returns its artifact as a markdown response; the team lead writes those responses verbatim to `.playwright-testing-artifacts/<slug>/` and dispatches the next agent.
+`test-web-changes` runs an eight-task pipeline as the orchestrator. Each agent returns its artifact as a markdown response; the orchestrator writes those responses verbatim to `.playwright-testing-artifacts/<slug>/` and dispatches the next agent.
 
 | Task | Agent                                                                             | Artifact                                  |
 | ---- | --------------------------------------------------------------------------------- | ----------------------------------------- |
@@ -59,10 +59,10 @@ The first argument is the source the test run is built from: a Jira ticket key, 
 | 2    | `code-explorer`                                                                   | `app-context-<timestamp>.md`              |
 | 3    | `service-mapper`                                                                  | `services-<timestamp>.md`                 |
 | 4    | `test-planner`                                                                    | `test-cases-<timestamp>.md`               |
-| 5    | _(team lead composes)_                                                            | `test-plan-<timestamp>.md`                |
+| 5    | _(orchestrator composes)_                                                         | `test-plan-<timestamp>.md`                |
 | 6    | `service-manager` _(verifies the environment via `verifying-environment-health`)_ | _(no artifact; halts the run on failure)_ |
 | 7    | `test-runner`                                                                     | `test-results-<timestamp>.json`           |
-| 8    | _(team lead renders via `render_report.py`)_                                      | `report-<timestamp>.html`                 |
+| 8    | _(orchestrator renders via `render_report.py`)_                                   | `report-<timestamp>.html`                 |
 
 ## Agents and skills
 
@@ -77,11 +77,13 @@ The first argument is the source the test run is built from: a Jira ticket key, 
 | `service-manager`  | Reads the test plan and dispatches `verifying-environment-health` to confirm Docker dev containers, application `/alive` endpoints, and the Angular bootstrap. Halts the run on any failure. Never starts or stops services. |
 | `test-runner`      | Launches the `playwright-cli` agent to execute test cases with guardrails and screenshots, and returns structured results.                                                                                                   |
 
+The six agents are dispatched by `test-web-changes` and are not meant to be invoked directly. That is a convention stated in each agent's description, not an enforced restriction. Claude Code has no agent frontmatter field that hides an agent from direct invocation, and the one documented mechanism, a `permissions.deny` rule of the form `Agent(<name>)`, applies to the whole session, so it would block the pipeline's own dispatch along with direct invocation. Invoking one of these agents on its own is harmless but produces nothing useful, since each expects artifact paths the orchestrator creates.
+
 ### Skills
 
 | Skill                           | Description                                                                                                                                                                |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `test-web-changes`              | Team-lead orchestration skill; the only user-facing entry point.                                                                                                           |
+| `test-web-changes`              | Orchestration skill; the only user-facing entry point.                                                                                                                     |
 | `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories.                                                                            |
 | `determining-required-services` | Maps changed file paths to the local services that need to be running.                                                                                                     |
 | `verifying-environment-health`  | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. |
@@ -127,7 +129,7 @@ bitwarden-playwright-testing/
 │   └── tests/
 │       └── test_external_trigger.py
 └── skills/
-    ├── test-web-changes/SKILL.md        # Team-lead entry point
+    ├── test-web-changes/SKILL.md        # Orchestrator entry point
     ├── exploring-application-context/
     │   ├── SKILL.md
     │   └── references/
