@@ -182,7 +182,7 @@ Wait for completion. The agent will return either:
 - A one-line success of the form `Environment verified: <N> services healthy, render OK.`
 - Or an error block from the verifying-environment-health skill (preflight failure, health-check timeout, or render failure).
 
-If the response is **not** the success confirmation, paste the response to the user and halt the run. Do not dispatch `test-runner`, do not write any artifact, do not run cleanup. If it is the success confirmation, proceed to Task 7.
+If the response is **not** the success confirmation, paste the response to the user and halt the run. Do not dispatch `test-runner` and do not write any artifact. If it is the success confirmation, proceed to Task 7.
 
 No artifact is written for this task.
 

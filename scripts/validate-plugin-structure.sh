@@ -310,7 +310,7 @@ validate_agent_frontmatter() {
         if [[ -n "$tools_value" ]]; then
             : # inline form: `tools: Read, Grep` or `tools: ["Read", "Grep"]`
         elif echo "$frontmatter" | sed -n '/^tools:/,$p' | sed -n '2p' \
-            | grep -qE '^[[:space:]]+- '; then
+            | grep -qE '^[[:space:]]*- '; then
             : # block-list form: `tools:` followed by `  - Read`
         else
             print_error "Agent $plugin_name/$agent_name: 'tools' is declared but empty (expected a comma-separated list such as 'Read, Grep, Glob', or a YAML list)"

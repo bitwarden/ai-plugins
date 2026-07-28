@@ -51,7 +51,7 @@ The first argument is the source the test run is built from: a Jira ticket key, 
 
 ## How it works
 
-`test-web-changes` runs an eight-task pipeline as the orchestrator. Each agent returns its artifact as a markdown response; the orchestrator writes those responses verbatim to `.playwright-testing-artifacts/<slug>/` and dispatches the next agent.
+`test-web-changes` runs an eight-task pipeline as the orchestrator. Each agent returns its artifact as its response; the orchestrator writes those responses verbatim to `.playwright-testing-artifacts/<slug>/` before dispatching what comes next. Tasks 3 and 4 are dispatched together and run concurrently.
 
 | Task | Agent                                                                             | Artifact                                  |
 | ---- | --------------------------------------------------------------------------------- | ----------------------------------------- |
