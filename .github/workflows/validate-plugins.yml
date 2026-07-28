@@ -167,7 +167,7 @@ jobs:
         id: components
         if: steps.changed-files.outputs.has_components == 'true'
         continue-on-error: true
-        uses: anthropics/claude-code-action@d5726de019ec4498aa667642bc3a80fca83aa102 # v1.0.148
+        uses: anthropics/claude-code-action@be7b93b1907a4abad570368f3c74b6fe3807510b # v1.0.183
         with:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-CODE-REVIEW-API-KEY }}
           plugin_marketplaces: |
