@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`architecting-solutions` skill**: moved in from `bitwarden-tech-lead`.
+- **`architecting-solutions` behavior baseline** (`skills/architecting-solutions/evals/behavior-baseline.json`) — per-case pass/fail rate with and without the skill, keyed by model + effort, so future re-runs against modified skill content can quantify the impact of the change.
 
 ## [2.1.0] - 2026-07-01
 
