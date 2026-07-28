@@ -1,0 +1,20 @@
+{
+  "name": "standup",
+  "version": "1.9.0",
+  "description": "Generates a terse Mode A draft standup scaffold from your real GitHub, Jira, and Confluence activity. Output is a structured starting point you rewrite through your own voice. Format and style are fully configurable via a preferences file.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/standup",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "standup",
+    "status-report",
+    "jira",
+    "github",
+    "confluence",
+    "weekly-update",
+    "activity"
+  ]
+}

@@ -1,0 +1,3 @@
+## Output format
+
+[YOUR-PREFERENCE]

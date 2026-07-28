@@ -104,6 +104,12 @@
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.2.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+    },
+    {
+      "name": "standup",
+      "source": "./plugins/standup",
+      "version": "1.9.0",
+      "description": "Generates a terse Mode A draft standup scaffold from your real GitHub, Jira, and Confluence activity. Output is a structured starting point you rewrite through your own voice. Format and style are fully configurable via a preferences file."
     }
   ]
 }

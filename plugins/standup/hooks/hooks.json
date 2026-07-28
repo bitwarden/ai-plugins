@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/preflight-credentials.sh\"",
+            "if": "Bash(python3:*)",
+            "timeout": 15,
+            "statusMessage": "Checking standup credentials..."
+          }
+        ]
+      }
+    ]
+  }
+}
