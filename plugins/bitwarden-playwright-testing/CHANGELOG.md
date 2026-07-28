@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `read_mailcatcher.py` now reports Mailcatcher-unreachable (exit 3), URL-filter/non-local-host misses, and genuine no-message cases distinctly, and no longer retries non-retryable failures.
-- `test-web-changes` Task 5 now correctly depends on Tasks 3 and 4; subsequent-pause checkpoint appends use Bash append instead of the overwriting Write tool; the multi-pause SUMMARY merge instruction is unambiguous.
+- `test-web-changes` Task 5 now correctly depends on Tasks 3 and 4, and a multi-pause run writes each resumed segment to its own numbered file rather than overwriting a single checkpoint.
 - `test-runner` Step 3 no longer contradicts the pause-response shape.
 - `preflight-check.sh` Mailcatcher detection no longer false-positives on unrelated mail containers.
 - `report-template.html` uses Prettier-parseable brace tokens instead of angle-bracket placeholders.
