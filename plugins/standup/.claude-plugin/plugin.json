@@ -1,0 +1,12 @@
+{
+  "name": "standup",
+  "version": "0.1.0",
+  "description": "Generate a terse, honest, RAG-status standup report from your real GitHub and Jira/Confluence activity.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/standup",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["standup", "status-report", "jira", "github", "confluence", "weekly-update", "activity"]
+}
