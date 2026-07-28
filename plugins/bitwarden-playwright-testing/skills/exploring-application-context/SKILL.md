@@ -56,7 +56,7 @@ Before recording any state or verification point, confirm all three. If one fail
 
 #### Reach via conventions
 
-For states with `Reachable by playwright: no`, the `Reach via:` recipe documents how the team-lead or user can drive the application into the state using tools beyond playwright-cli. Free-form prose with these conventions:
+For states with `Reachable by playwright: no`, the `Reach via:` recipe documents how the orchestrator or user can drive the application into the state using tools beyond playwright-cli. Free-form prose with these conventions:
 
 - **Reference flows by slug:** `Run flow:create-paid-org with orgName=…`
 - **Reference skills by name:** `Use the using-stripe-cli skill to advance the test clock by 14 days.`

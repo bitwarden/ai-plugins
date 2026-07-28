@@ -1,6 +1,6 @@
 ---
 name: compiling-test-report
-description: Deterministic HTML report rendering for Bitwarden Playwright web tests. Home of render_report.py (results JSON to HTML) and merge_results.py (runner segments to canonical results JSON), the report templates, the JSON results-schema reference, and their unit tests. The test-web-changes team lead runs these scripts directly; there is no report-compiler agent.
+description: Deterministic HTML report rendering for Bitwarden Playwright web tests. Home of render_report.py (results JSON to HTML) and merge_results.py (runner segments to canonical results JSON), the report templates, the JSON results-schema reference, and their unit tests. The test-web-changes orchestrator runs these scripts directly; there is no report-compiler agent.
 ---
 
 This skill is the home for the deterministic report pipeline. It contains no LLM assembly instructions; the two scripts do the parsing, escaping, and rendering.

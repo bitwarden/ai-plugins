@@ -125,7 +125,7 @@ Each step object:
 - Include `screenshot` only for a step that produced a visual change; use the exact filename from the screenshot directory listing.
 - Set `"human": true` and `"outcome": "COMPLETED (User: <answer>)"` for a `[HUMAN]` step.
 - Include `adaptive` only when `status` is `"PASS (adaptive)"`, filled from the adaptive evaluation.
-- Do not emit run totals. The team lead's merge script derives them from the per-case `status` values.
+- Do not emit run totals. The orchestrator's merge script derives them from the per-case `status` values.
 
 ### Adaptive assertion evaluation
 

@@ -1,6 +1,6 @@
 # Test results JSON contract
 
-The `test-runner` emits run results as JSON. The team lead assembles segments into the canonical `test-results-<timestamp>.json` with `merge_results.py` and renders it with `render_report.py`. Concrete examples live in `examples/`; they are the producer's reference and the scripts' golden test fixtures.
+The `test-runner` emits run results as JSON. The orchestrator assembles segments into the canonical `test-results-<timestamp>.json` with `merge_results.py` and renders it with `render_report.py`. Concrete examples live in `examples/`; they are the producer's reference and the scripts' golden test fixtures.
 
 ## Run object
 
