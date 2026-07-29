@@ -75,22 +75,23 @@ The first argument is the source the test run is built from: a Jira ticket key, 
 | `service-mapper`   | Reads the Application Context and maps changed file paths to the local services that need to be running.                                                                                                                     |
 | `test-planner`     | Reads context and Application Context artifacts and builds grounded test cases via the `build-test-cases` skill.                                                                                                             |
 | `service-manager`  | Reads the test plan and dispatches `verifying-environment-health` to confirm Docker dev containers, application `/alive` endpoints, and the Angular bootstrap. Halts the run on any failure. Never starts or stops services. |
-| `test-runner`      | Launches the `playwright-cli` agent to execute test cases with guardrails and screenshots, and returns structured results.                                                                                                   |
+| `test-runner`      | Calls the `playwright-cli` skill to execute test cases with guardrails and screenshots, and returns structured results.                                                                                                      |
 
 The six agents are dispatched by `test-web-changes` and are not meant to be invoked directly. That is a convention stated in each agent's description, not an enforced restriction. Claude Code has no agent frontmatter field that hides an agent from direct invocation, and the one documented mechanism, a `permissions.deny` rule of the form `Agent(<name>)`, applies to the whole session, so it would block the pipeline's own dispatch along with direct invocation. Invoking one of these agents on its own is harmless but produces nothing useful, since each expects artifact paths the orchestrator creates.
 
 ### Skills
 
-| Skill                           | Description                                                                                                                                                                |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `test-web-changes`              | Orchestration skill; the only user-facing entry point.                                                                                                                     |
-| `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories.                                                                            |
-| `determining-required-services` | Maps changed file paths to the local services that need to be running.                                                                                                     |
-| `verifying-environment-health`  | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. |
-| `build-test-cases`              | Builds Playwright test cases with a web-first policy from plan context.                                                                                                    |
-| `executing-web-tests`           | Launches the `playwright-cli` agent with guardrails and screenshots.                                                                                                       |
-| `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes.                                                                    |
-| `compiling-test-report`         | Home of the deterministic report scripts (render_report.py, merge_results.py), templates, and the results-schema reference.                                                |
+| Skill                           | Description                                                                                                                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test-web-changes`              | Orchestration skill; the only user-facing entry point.                                                                                                                           |
+| `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories.                                                                                  |
+| `determining-required-services` | Maps changed file paths to the local services that need to be running.                                                                                                           |
+| `verifying-environment-health`  | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure.       |
+| `build-test-cases`              | Builds Playwright test cases with a web-first policy from plan context.                                                                                                          |
+| `executing-web-tests`           | Calls the `playwright-cli` skill with guardrails and screenshots.                                                                                                                |
+| `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes.                                                                          |
+| `using-stripe-cli`              | Queries read-only Stripe test data and advances an already-attached test clock via the Stripe CLI wrapper (`stripe_cli.py`), for Category 4 data needs the web UI can't satisfy. |
+| `compiling-test-report`         | Home of the deterministic report scripts (render_report.py, merge_results.py), templates, and the results-schema reference.                                                      |
 
 ## Web-first policy
 
@@ -110,66 +111,7 @@ The following Bitwarden surfaces are not testable via this plugin (no Playwright
 
 ## Plugin structure
 
-```
-bitwarden-playwright-testing/
-├── .claude-plugin/
-│   └── plugin.json
-├── README.md
-├── CHANGELOG.md
-├── agents/
-│   ├── context-gatherer/AGENT.md
-│   ├── code-explorer/AGENT.md
-│   ├── service-mapper/AGENT.md
-│   ├── test-planner/AGENT.md
-│   ├── service-manager/AGENT.md
-│   └── test-runner/AGENT.md
-└── skills/
-    ├── test-web-changes/SKILL.md        # Orchestrator entry point
-    ├── exploring-application-context/
-    │   ├── SKILL.md
-    │   └── references/
-    ├── determining-required-services/
-    │   ├── SKILL.md
-    │   └── references/services.md
-    ├── verifying-environment-health/
-    │   ├── SKILL.md
-    │   └── scripts/
-    │       ├── preflight-check.sh       # Verifies Docker and dev-env preconditions
-    │       └── health-check.sh          # Polls service /alive endpoints
-    ├── build-test-cases/
-    │   ├── SKILL.md
-    │   └── references/billing-test-data.md
-    ├── executing-web-tests/
-    │   ├── SKILL.md
-    │   ├── playwright.config.json       # Sets ignoreHTTPSErrors for dev certs
-    │   └── scripts/
-    │       ├── external_trigger.py      # Policy-guarded Category 3 POST wrapper
-    │       └── tests/
-    │           └── test_external_trigger.py
-    ├── reading-mailcatcher-api/
-    │   ├── SKILL.md
-    │   ├── references/email-patterns.md
-    │   └── scripts/
-    │       ├── read_mailcatcher.py      # Fetches an email, prints its first local URL
-    │       └── tests/
-    │           └── test_read_mailcatcher.py
-    └── compiling-test-report/
-        ├── SKILL.md
-        ├── references/
-        │   ├── results-schema.md
-        │   └── examples/
-        ├── scripts/
-        │   ├── results_common.py           # Shared helpers (fail, tally)
-        │   ├── render_report.py            # Results JSON to HTML
-        │   ├── merge_results.py            # Runner segments to results JSON
-        │   └── tests/
-        │       ├── test_results_common.py
-        │       ├── test_render_report.py
-        │       └── test_merge_results.py
-        └── templates/
-            ├── report.html
-            └── test-case.html
-```
+See [Agents](#agents) and [Skills](#skills) above for the full component list, and each component's own directory for its files. This section intentionally doesn't duplicate that list as a file tree — a hand-maintained tree here fell out of sync with the filesystem in the past and would only do so again.
 
 ## Contributing
 
