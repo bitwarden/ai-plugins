@@ -29,10 +29,12 @@ fi
 
 # 2. Required Bitwarden dev containers.
 # Each row: <human label>|<compose name regex>|<aspire name regex>
+# Both regexes are anchored with ^: an unrelated container whose name merely
+# contains the pattern (foo-bitwardenserver-storage-1) must not satisfy a check.
 REQUIRED_SERVICES=(
-  "MSSQL database|bitwardenserver-mssql-|^mssql-"
-  "Mailcatcher email|bitwardenserver-mail-|^mailcatcher-"
-  "Azurite storage|bitwardenserver-storage-|^azurite-"
+  "MSSQL database|^bitwardenserver-mssql-|^mssql-"
+  "Mailcatcher email|^bitwardenserver-mail-|^mailcatcher-"
+  "Azurite storage|^bitwardenserver-storage-|^azurite-"
 )
 
 RUNNING_NAMES=$(docker ps --format '{{.Names}}')
