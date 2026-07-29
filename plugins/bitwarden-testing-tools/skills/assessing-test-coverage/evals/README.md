@@ -32,11 +32,17 @@ Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the
 
 ## Regression check
 
+Diff each query's PASS/FAIL verdict, not the raw `trigger_rate` values (which are stochastic and flag sampling noise):
+
 ```bash
-diff <(jq -S . baseline.json) <(jq -S . result.json)
+project='{
+  should_trigger_pass, should_not_trigger_pass,
+  results: [.results[] | {query, should_trigger, pass: ((.trigger_rate >= 0.5) == .should_trigger)}]
+}'
+diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
 ```
 
-Empty diff means no regression. If a new failure appears, fix the skill description rather than the eval set — the eval set encodes intent, not implementation. If the change is intentional and the new run is the new desired behavior, replace `baseline.json` with `result.json` and commit alongside the description change.
+Empty diff means no regression; a non-empty diff means a query flipped PASS↔FAIL (the changed `pass` field names it). If a new failure appears, fix the skill description rather than the eval set — the eval set encodes intent, not implementation. If the change is intentional and the new run is the new desired behavior, replace `baseline.json` with `result.json` and commit alongside the description change.
 
 ## Updating the test surface
 
