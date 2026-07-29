@@ -1,6 +1,6 @@
 ---
 name: executing-web-tests
-description: Execute Bitwarden web test cases step-by-step using the playwright-cli skill directly. Use after test cases are defined and services are running. Governs tool policy, screenshot naming, toast capture, Setup Steps execution, and the billing blocker policy.
+description: Execute Bitwarden web test cases step-by-step using the playwright-cli skill directly. Use after test cases are defined and services are running. Governs tool policy, screenshot naming, toast capture, and Setup Steps execution.
 allowed-tools: >
   Bash(${CLAUDE_SKILL_DIR}/scripts/external_trigger.py *),
   Bash(${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py *)
@@ -21,10 +21,6 @@ Given the test cases, artifacts output dir, and the absolute path to `${CLAUDE_S
 ### Read the tool policy
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/tool-policy.md` — it governs which tools you may use throughout the run. Follow it without exception.
-
-### Billing blocker policy
-
-If any billing-related 400 error is encountered during setup or test-case execution, stop immediately, do not continue testing, and report the entire run as FAIL with the exact error before any partial completion is reported.
 
 ### Resume context (conditional)
 
@@ -75,7 +71,11 @@ Use its stdout verbatim as the address. Do NOT `Read` `server/dev/secrets.json`.
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
 - Record everything done: account email/password, org created, billing performed, email verifications followed, and any step that failed
 
-**If setup or authentication cannot complete before the first test case runs** (for example login or account/org creation fails), the run cannot proceed and no test case has started. Return exactly this JSON object and stop, replacing `<reason>` with a one-line description of the failure: `{ "run_status": "aborted", "abort_reason": "setup failure before test cases (<reason>)" }`. Do not emit any cases.
+**If setup or authentication cannot complete before the first test case in your input runs**, the run cannot proceed. This covers both first-dispatch setup (login or account/org creation fails) and a resumed dispatch where re-establishing the browser session from the resuming test case's SETUP steps fails. Return exactly this JSON object and stop, replacing `<reason>` with a one-line description of the failure:
+
+`{ "run_status": "aborted", "abort_reason": "setup failure before test cases (<reason>)" }`
+
+Emit no cases. On a resumed dispatch that is correct and lossless: you only ever emit your own segment, and `merge_results.py` carries forward the cases earlier segments completed, so the run still produces a report showing that work alongside your `abort_reason`.
 
 ## Step 3 — Execute test cases
 
