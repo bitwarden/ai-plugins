@@ -25,6 +25,7 @@ HEADER = {
     "slug": "billing-ui",
     "services_tested": "web (8080)",
     "base_url": "https://localhost:8080",
+    "plan_file": ".playwright-testing-artifacts/billing-ui/test-plan-20260729-1432.md",
 }
 
 
@@ -127,6 +128,7 @@ class RenderValidationTest(unittest.TestCase):
                     "--results", rp, "--template-dir", TEMPLATES, "--output", op,
                     "--plan-name", "p", "--date", "d", "--slug", "s",
                     "--services-tested", "x", "--base-url", "u",
+                    "--plan-file", "/tmp/test-plan.md",
                 ]
             )
         return cm.exception.code
@@ -186,6 +188,7 @@ class RenderAbortedWithCasesTest(unittest.TestCase):
                 "--slug", "billing-ui",
                 "--services-tested", "web (8080)",
                 "--base-url", "https://localhost:8080",
+                "--plan-file", "/tmp/test-plan-20260729-1432.md",
             ]
         )
         self.assertEqual(rc, 0)
@@ -206,6 +209,7 @@ class RenderAbortedWithCasesTest(unittest.TestCase):
                 "--slug", "billing-ui",
                 "--services-tested", "web (8080)",
                 "--base-url", "https://localhost:8080",
+                "--plan-file", "/tmp/test-plan-20260729-1432.md",
             ]
         )
         self.assertEqual(rc, 2)
@@ -226,6 +230,7 @@ class RenderMainTest(unittest.TestCase):
                 "--plan-name", "Billing UI", "--date", "2026-07-24",
                 "--slug", "billing-ui", "--services-tested", "web (8080)",
                 "--base-url", "https://localhost:8080",
+                "--plan-file", ".playwright-testing-artifacts/billing-ui/test-plan-20260724-0930.md",
             ]
         )
         self.assertEqual(rc, 0)
@@ -242,9 +247,20 @@ class RenderMainTest(unittest.TestCase):
                 "--template-dir", TEMPLATES, "--output", out,
                 "--plan-name", "p", "--date", "d", "--slug", "s",
                 "--services-tested", "x", "--base-url", "u",
+                "--plan-file", "/tmp/test-plan.md",
             ]
         )
         self.assertEqual(rc, 2)
+
+
+class PlanFileHeaderTest(unittest.TestCase):
+    def test_header_shows_the_timestamped_plan_file(self):
+        out = render_report.render(load_example("complete-run.json"), HEADER)
+        self.assertIn("test-plan-20260729-1432.md", out)
+
+    def test_header_does_not_hardcode_an_unversioned_plan_name(self):
+        out = render_report.render(load_example("complete-run.json"), HEADER)
+        self.assertNotIn("/test-plan.md", out)
 
 
 if __name__ == "__main__":

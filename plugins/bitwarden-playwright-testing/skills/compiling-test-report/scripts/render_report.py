@@ -204,6 +204,7 @@ def render(data, header):
         SLUG=esc(header["slug"]),
         SERVICES_TESTED=esc(header["services_tested"]),
         BASE_URL=esc(header["base_url"]),
+        PLAN_FILE=esc(header["plan_file"]),
         ABORT_BLOCK=abort_block,
         TOTAL=esc(totals["total"]),
         PASSED=esc(totals["passed"]),
@@ -226,6 +227,7 @@ def main(argv):
     parser.add_argument("--slug", required=True)
     parser.add_argument("--services-tested", required=True)
     parser.add_argument("--base-url", required=True)
+    parser.add_argument("--plan-file", required=True)
     args = parser.parse_args(argv)
 
     data = load_results(args.results)
@@ -243,6 +245,7 @@ def main(argv):
         "slug": args.slug,
         "services_tested": args.services_tested,
         "base_url": args.base_url,
+        "plan_file": args.plan_file,
     }
     document = render(data, header)
     with open(args.output, "w", encoding="utf-8") as handle:
