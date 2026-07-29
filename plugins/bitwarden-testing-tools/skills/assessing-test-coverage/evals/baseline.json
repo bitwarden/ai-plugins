@@ -1,7 +1,7 @@
 {
-  "should_trigger_pass_rate": 0.9,
+  "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
-  "should_trigger_pass": "9/10",
+  "should_trigger_pass": "10/10",
   "should_not_trigger_pass": "10/10",
   "results": [
     {
@@ -14,9 +14,9 @@
     {
       "query": "does the autofill refactor PR in bitwarden/clients have tests, and which layers do they land at \u2014 unit, integration, E2E?",
       "should_trigger": true,
-      "triggers": 3,
+      "triggers": 7,
       "runs": 7,
-      "trigger_rate": 0.42857142857142855
+      "trigger_rate": 1.0
     },
     {
       "query": "PM-32009 is the item-types import/export work \u2014 what test coverage already exists for it across the repos it touches?",

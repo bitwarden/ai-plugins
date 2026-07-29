@@ -25,6 +25,9 @@ TARGET_SKILL_TOKEN = "assessing-test-coverage"
 # we bail on it (see run_query) to avoid the heavy child processes it would spawn.
 EXEC_TOOLS = {"Bash", "Task"}
 
+# Read-only Bash lookups scanned past instead of counted as real work.
+READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api", "git rev-parse", "git remote")
+
 
 def run_query(query: str, timeout: int, model: str) -> dict:
     cmd = [
@@ -82,6 +85,8 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                     # trigger. Bail so the finally block kills the child before
                     # its tool_use spawns anything. (Cheap read-only tools are
                     # scanned past; the model may inspect files first.)
+                    if name == "Bash" and inp.get("command", "").strip().startswith(READ_ONLY_BASH):
+                        continue
                     if name in EXEC_TOOLS:
                         if first_skill_seen is None:
                             first_skill_seen = f"{name} (bailed: real-work tool)"
