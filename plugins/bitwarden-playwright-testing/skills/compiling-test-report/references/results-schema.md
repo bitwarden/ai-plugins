@@ -4,13 +4,13 @@ The `test-runner` emits run results as JSON. The orchestrator assembles segments
 
 ## Run object
 
-| Field             | Type   | Notes                                                            |
-| ----------------- | ------ | ---------------------------------------------------------------- |
-| `run_status`      | string | `complete`, `paused` (segment only), or `aborted`                |
-| `abort_reason`    | string | Present only when `run_status` is `aborted`                      |
-| `need_user_input` | string | Present only on a `paused` segment; the resume question          |
-| `totals`          | object | `{ total, passed, adaptive, failed, errored }`; derived on merge |
-| `cases`           | array  | Case objects, in order; empty for an aborted run                 |
+| Field             | Type   | Notes                                                                                         |
+| ----------------- | ------ | --------------------------------------------------------------------------------------------- |
+| `run_status`      | string | `complete`, `paused` (segment only), or `aborted`                                             |
+| `abort_reason`    | string | Present only when `run_status` is `aborted`                                                   |
+| `need_user_input` | string | Present only on a `paused` segment; the resume question                                       |
+| `totals`          | object | `{ total, passed, adaptive, failed, errored }`; derived on merge                              |
+| `cases`           | array  | Case objects, in order; empty for an aborted run only if it aborted before any case completed |
 
 Totals are derived from the per-case `status` values by `merge_results.py`. The runner does not emit totals. `total = passed + adaptive + failed + errored` and `len(cases) == total` hold by construction.
 
