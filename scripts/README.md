@@ -313,12 +313,11 @@ If your plugin includes agents, each `AGENT.md` must have valid YAML frontmatter
 ---
 name: agent-name
 description: Agent description
-version: X.Y.Z
-tools:
-  - tool1
-  - tool2
+tools: Read, Grep, Glob
 ---
 ```
+
+> The validator accepts either the comma-separated scalar form above or a YAML block list. Prefer the scalar form; it is the shape Anthropic's sub-agent documentation shows, and it avoids a false-positive issue in the old check that occurred whenever `tools:` was not the last frontmatter key.
 
 ### Skill Requirements
 
