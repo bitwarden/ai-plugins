@@ -8,8 +8,37 @@ description: This skill should be used when the user asks to "review Dependabot 
 ### Step 1: Gather Alerts
 
 ```bash
-# List all open Dependabot alerts sorted by severity
-gh api /repos/{owner}/{repo}/dependabot/alerts --jq '.[] | select(.state == "open") | {number, severity: .security_vulnerability.severity, package: .security_vulnerability.package.name, ecosystem: .security_vulnerability.package.ecosystem, summary: .security_advisory.summary}'
+# List ALL open Dependabot alerts, sorted by severity. Notes on why this is
+# shaped the way it is — each of these is a trap worth avoiding:
+#   - --paginate is required: a single page caps at 100 and silently drops the
+#     rest. Page order is not severity-ranked, so a critical can be on page 2.
+#   - --slurp merges pages into one array so the sort is global, not per-page.
+#     gh rejects --slurp together with --jq, so pipe to jq instead.
+#   - The API cannot sort by severity (sort= takes only created, updated,
+#     epss_percentage), so sort in jq.
+#   - scope tells you development (build/CI only) vs runtime (ships to users).
+#     This usually decides the triage outcome — see Step 2 and Step 3.
+#   - cvss_v3.score returns 0 rather than null when an advisory carries no v3
+#     vector, so it is guarded; unguarded it reads 0 on high-severity findings.
+gh api --paginate --slurp "/repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100" \
+| jq '
+  [ .[][]
+    | (.security_advisory.cvss_severities // {}) as $c
+    | { number,
+        severity: .security_vulnerability.severity,
+        package: .dependency.package.name,
+        ecosystem: .dependency.package.ecosystem,
+        scope: .dependency.scope,
+        manifest: .dependency.manifest_path,
+        vulnerable_range: .security_vulnerability.vulnerable_version_range,
+        first_patched: .security_vulnerability.first_patched_version.identifier,
+        cvss_v3_vector: $c.cvss_v3.vector_string,
+        cvss_v3_score: (if $c.cvss_v3.vector_string then $c.cvss_v3.score else null end),
+        cvss_v4_vector: $c.cvss_v4.vector_string,
+        summary: .security_advisory.summary }
+  ]
+  | sort_by({ critical: 0, high: 1, medium: 2, low: 3 }[.severity])
+  | .[]'
 
 # Filter by severity
 gh api "/repos/{owner}/{repo}/dependabot/alerts?severity=critical&state=open"
@@ -22,20 +51,34 @@ gh api /repos/{owner}/{repo}/dependabot/alerts/{alert_number}
 
 For each alert, determine:
 
-1. **Is the vulnerable code path reachable?** — Does the application actually use the vulnerable function/feature of the dependency?
-2. **Is it a direct or transitive dependency?** — Transitive vulnerabilities may be harder to fix but still pose real risk.
-3. **What is the CVSS score and exploit availability?** — A high CVSS with a public exploit needs immediate action. A medium CVSS with no known exploit can be scheduled.
-4. **What versions are affected and what versions fix it?** — Check if updating is a minor bump or a breaking change.
+1. **Does the dependency ship, or is it build-time only?** — Start here; it usually decides the outcome. `scope` on the alert reports `development` or `runtime`. Treat `development` as a strong signal, not proof: confirm the package is absent from every shipped artifact (extension, desktop, web vault, CLI, server image) before relying on it, because some build-time packages inline code into published output. A build-time-only package has no live process in production for an attacker to reach.
+2. **Is the vulnerable code path reachable?** — Does the application actually use the vulnerable function/feature of the dependency?
+3. **Is it a direct or transitive dependency?** — Transitive vulnerabilities may be harder to fix but still pose real risk. Identify the parent that pins it (`npm ls <package>`), because when a parent pins a vulnerable version the fix may not be available to you directly.
+4. **What is the CVSS score and exploit availability?** — Score in **CVSS v3.0**, Bitwarden's standard for reporting and triage of vulnerabilities. GitHub publishes v3.1 vectors for recent advisories (v3.0 appears only on older imported CVEs), so transcribe `cvss_severities.cvss_v3.vector_string` into a v3.0 calculator — v3.0 and v3.1 share the same base metrics, so the vector maps directly. Some advisories carry a v4.0 vector only, or no vector at all; v4.0 metrics do not map onto v3.0, so score those by hand from the advisory details rather than reusing the v4.0 number. A high CVSS with a public exploit needs immediate action. A medium CVSS with no known exploit can be scheduled.
+5. **What versions are affected and what versions fix it?** — `vulnerable_range` and `first_patched` on the alert give both. Check whether reaching `first_patched` is a minor bump, a breaking change, or blocked behind a parent package that pins the vulnerable version.
 
 ### Step 3: Decide on Action
 
-| Situation                                 | Action                                         |
-| ----------------------------------------- | ---------------------------------------------- |
-| Fix available, minor version bump         | Update immediately                             |
-| Fix available, major version bump         | Evaluate breaking changes, schedule update     |
-| No fix available, code path reachable     | Implement workaround or replace dependency     |
-| No fix available, code path not reachable | Document and monitor, set review date          |
-| Vulnerability in transitive dependency    | Use overrides/resolutions to pin fixed version |
+Resolve scope first. A package that never reaches a shipped artifact cannot be attacked in production, and treating it as though it can produces pointless urgency and risky churn.
+
+| Scope                                                                    | Action                                                                                                                                                                                  |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `development`, confirmed absent from every shipped artifact              | Declare **Not Affected / Informational**. Record the reachability reasoning explicitly, then track the bump with the next routine upgrade of the parent tooling rather than as a hotfix |
+| `development`, but the package or its output lands in a shipped artifact | Treat as `runtime` and use the table below                                                                                                                                              |
+| `runtime`                                                                | Use the table below                                                                                                                                                                     |
+
+A `development` finding still needs the declaration written down. "It's a devDependency" is not by itself an assessment — state which artifacts were checked and why the code path cannot be reached in production.
+
+For `runtime` findings, and for `development` findings that turned out to ship:
+
+| Situation                                            | Action                                                                                                                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fix available, minor version bump                    | Update immediately                                                                                                                                                                                |
+| Fix available, major version bump                    | Evaluate breaking changes, schedule update                                                                                                                                                        |
+| No fix available, code path reachable                | Implement workaround or replace dependency                                                                                                                                                        |
+| No fix available, code path not reachable            | Document and monitor, set review date                                                                                                                                                             |
+| Transitive, and the fixed version is installable     | Use overrides/resolutions to pin the fixed version                                                                                                                                                |
+| Transitive, but a parent pins the vulnerable version | Overriding the parent's pin can break it. Prefer waiting for a parent release that bumps its own pin, and track it; override only when the finding is runtime-reachable and the risk justifies it |
 
 ## Transitive Dependency Risk
 
@@ -90,15 +133,19 @@ grype dir:/path/to/project
 # Output as JSON for programmatic processing
 grype <image> -o json
 
-# Filter by severity
-grype <image> --only-fixed --fail-on high
+# Show only vulnerabilities that have a fix available
+grype <image> --only-fixed
+
+# Exit non-zero (code 2) if anything at or above the given severity is found.
+# This sets the exit code for CI gating; it does not filter the output.
+grype <image> --fail-on high
 ```
 
 **Interpreting Grype output:**
 
-- Each finding includes: CVE ID, severity, package name, installed version, fixed version
-- `Fixed` column indicates whether an update is available
-- Use `--only-fixed` to focus on actionable items (vulnerabilities with available fixes)
+- Table columns (grype 0.116.x) are `NAME`, `INSTALLED`, `FIXED IN`, `TYPE`, `VULNERABILITY`, `SEVERITY`, `EPSS`, `RISK`
+- The column set is dynamic: `FIXED IN` is omitted entirely when no finding has a fix available. When present, a blank cell means that particular vulnerability has no fix
+- Use `--only-fixed` to focus on actionable items (vulnerabilities with available fixes). For scripting, read `.matches[].vulnerability.fix.state` from `-o json` (`fixed`, `not-fixed`, `wont-fix`, `unknown`) rather than parsing the table
 
 ## Platform-Specific Guidance
 

@@ -5,6 +5,27 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-07-29
+
+### Added
+
+- `reviewing-dependencies` skill: impact assessment now starts by asking whether the dependency ships or is build-time only, using the alert's `scope` field, and requires confirming absence from shipped artifacts before relying on it.
+- `reviewing-dependencies` skill: the action decision now resolves dependency scope first — a `development` finding confirmed absent from every shipped artifact is declared Not Affected / Informational and tracked with the next routine parent-tooling upgrade, rather than being routed to "update immediately" by the fix-availability table.
+- `reviewing-dependencies` skill: added a decision row distinguishing transitive findings whose fix is installable from those where a parent pins the vulnerable version, where overriding the pin risks breaking the parent.
+
+### Changed
+
+- `reviewing-dependencies` skill: the CVSS impact-assessment step now specifies CVSS v3.0 as the version used for Bitwarden's vulnerability reporting and triage, and explains how to get there from the v3.1 vectors GitHub publishes.
+- `reviewing-dependencies` skill: the Dependabot alert-gathering query now emits the CVSS v3 vector needed for v3.0 scoring, plus `scope`, `manifest`, `vulnerable_range`, and `first_patched` — the fields the assessment steps ask about.
+
+### Fixed
+
+- `reviewing-dependencies` skill: the alert-gathering query returned only the first page of results, silently discarding alerts beyond 100. Page order is not severity-ranked, so a critical finding could be dropped. Now uses `--paginate --slurp` so the severity sort is global rather than per-page.
+- `reviewing-dependencies` skill: the alert-gathering query claimed to sort by severity but performed no sort.
+- `reviewing-dependencies` skill: guarded the CVSS v3 score read, which returns `0` rather than `null` for advisories carrying only a v4.0 vector, making high-severity alerts appear to score zero.
+- `reviewing-dependencies` skill: corrected the Grype examples — `--only-fixed` filters by fix availability rather than severity, and `--fail-on` sets the exit code without filtering output.
+- `reviewing-dependencies` skill: corrected the documented Grype table columns against grype 0.116.1 — the column is `FIXED IN`, the default set also includes `EPSS` and `RISK`, and `FIXED IN` is dropped entirely when no finding has a fix. Added the `fix.state` JSON field as the reliable alternative to parsing the table.
+
 ## [1.3.0] - 2026-07-21
 
 ### Added
