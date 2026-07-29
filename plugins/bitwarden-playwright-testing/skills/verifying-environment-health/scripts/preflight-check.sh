@@ -30,9 +30,9 @@ fi
 # 2. Required Bitwarden dev containers.
 # Each row: <human label>|<compose name regex>|<aspire name regex>
 REQUIRED_SERVICES=(
-  "MSSQL database|-mssql-|^mssql-"
+  "MSSQL database|bitwardenserver-mssql-|^mssql-"
   "Mailcatcher email|bitwardenserver-mail-|^mailcatcher-"
-  "Azurite storage|-storage-|^azurite-"
+  "Azurite storage|bitwardenserver-storage-|^azurite-"
 )
 
 RUNNING_NAMES=$(docker ps --format '{{.Names}}')
