@@ -26,3 +26,6 @@ __pycache__/
 # Node
 node_modules
 pnpm-debug.log
+
+# Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+.superpowers/
