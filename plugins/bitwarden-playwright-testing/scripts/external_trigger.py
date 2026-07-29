@@ -121,24 +121,39 @@ def log_call(url, rationale, env):
             handle.write(line + "\n")
 
 
-def send(url, data, content_type, scheme):
+def tls_context(scheme, host):
+    """TLS settings for one request, or None for plain http.
+
+    Verification is disabled ONLY for the built-in dev hosts, whose Bitwarden
+    dev certs are self-signed. A host an operator added through
+    PLAYWRIGHT_TESTING_ALLOWED_HOSTS gets normal certificate verification: the
+    old unconditional bypass justified itself by claiming the host had already
+    been constrained to local dev, which that env var makes untrue.
+    """
+    if scheme != "https":
+        return None
+    context = ssl.create_default_context()
+    if host in DEFAULT_ALLOWED_HOSTS:
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+    return context
+
+
+def send(url, data, content_type, scheme, host):
     """POST to url and return the response body as text.
 
-    TLS verification is disabled for https because Bitwarden dev certs are
-    self-signed. This is only reached after check_request has constrained the
-    host to the local dev allowlist, and mirrors the curl -k the bash version
-    used. Redirects are never followed (see _NoRedirectHandler), mirroring
-    curl's default of no -L.
+    TLS handling is delegated to tls_context: bypassed for the built-in
+    self-signed dev hosts, enforced for anything an operator added. Redirects
+    are never followed (see _NoRedirectHandler), mirroring curl's default of
+    no -L.
     """
     body = data.encode("utf-8") if data else b""
     request = urllib.request.Request(
         url, data=body, method="POST", headers={"Content-Type": content_type}
     )
     handlers = [_NoRedirectHandler]
-    if scheme == "https":
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
+    context = tls_context(scheme, host)
+    if context is not None:
         handlers.append(urllib.request.HTTPSHandler(context=context))
     opener = urllib.request.build_opener(*handlers)
     with opener.open(request, timeout=REQUEST_TIMEOUT) as response:
@@ -181,7 +196,7 @@ def main(argv, env):
         return EXIT_USAGE
 
     try:
-        scheme, _host = check_request(args.url, args.method, allowed_hosts(env))
+        scheme, host = check_request(args.url, args.method, allowed_hosts(env))
     except GuardError as err:
         print(f"ERROR: {err.message}", file=sys.stderr)
         return err.code
@@ -189,7 +204,7 @@ def main(argv, env):
     log_call(args.url, args.rationale, env)
 
     try:
-        body = send(args.url, args.data, args.content_type, scheme)
+        body = send(args.url, args.data, args.content_type, scheme, host)
     except urllib.error.HTTPError as err:
         sys.stdout.write(err.read().decode("utf-8", errors="replace"))
         return EXIT_OK

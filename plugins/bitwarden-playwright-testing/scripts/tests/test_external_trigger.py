@@ -8,6 +8,7 @@ import http.server
 import io
 import os
 import shutil
+import ssl
 import sys
 import tempfile
 import threading
@@ -52,6 +53,25 @@ class AllowedHostsTest(unittest.TestCase):
         )
         self.assertIn("dev.local", hosts)
         self.assertNotIn("", hosts)
+
+
+class TlsContextTest(unittest.TestCase):
+    def test_http_needs_no_context(self):
+        self.assertIsNone(external_trigger.tls_context("http", "localhost"))
+
+    def test_default_dev_host_skips_verification(self):
+        ctx = external_trigger.tls_context("https", "localhost")
+        self.assertFalse(ctx.check_hostname)
+        self.assertEqual(ctx.verify_mode, ssl.CERT_NONE)
+
+    def test_bitwarden_test_host_skips_verification(self):
+        ctx = external_trigger.tls_context("https", "bitwarden.test")
+        self.assertEqual(ctx.verify_mode, ssl.CERT_NONE)
+
+    def test_operator_added_host_gets_normal_verification(self):
+        ctx = external_trigger.tls_context("https", "dev.internal.example")
+        self.assertTrue(ctx.check_hostname)
+        self.assertEqual(ctx.verify_mode, ssl.CERT_REQUIRED)
 
 
 class CheckRequestTest(unittest.TestCase):
