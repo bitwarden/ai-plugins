@@ -60,7 +60,13 @@ Skill(playwright-cli): open --config=<config-path>
 
 Any login, magic-link flow, or account/org creation required before the first test case is **setup**, not part of a test case.
 
-**Resolve the admin-portal token at run time.** When a setup or test step contains the literal `<bitwarden-portal-admin-email>`, resolve it now (not earlier) by reading `server/dev/secrets.json` in the server repo and taking the first entry under the `admins` key. If the file is absent or `admins` is empty, mark the affected test case FAIL with that reason.
+**Resolve the admin-portal token at run time.** When a setup or test step contains the literal `<bitwarden-portal-admin-email>`, resolve it now (not earlier) by running the co-located script:
+
+```
+${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py --secrets-path <bitwarden git root>/server/dev/secrets.json
+```
+
+Use its stdout verbatim as the address. Do NOT `Read` `server/dev/secrets.json`. That file also holds the Stripe test mode API key, the SQL password, and the installation id and key, and a whole-file read puts all of it in your context. The script prints only the one address. On exit 4 (file missing or no `admins` entry), mark the affected test case FAIL with the script's stderr as the reason.
 
 - Use `setup-{description}-{timestamp}.png` screenshot names during setup (e.g., `setup-login-complete-20260409-2057.png`)
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
