@@ -141,19 +141,18 @@ This is pure orchestrator work, no agent dispatch. Read both planning artifacts 
 
 ## Optional review gate _(only if `--confirm` was set)_
 
-Read `<artifacts-output-dir>/test-plan-<timestamp>.md`. Count the test cases and extract their names.
+When `--confirm` was passed, present the plan for approval. Do not show only the case count and names: those labels exist in the plan precisely so the approver can see them, and `build-test-cases` marks external trigger steps for this purpose.
 
-Display:
+Show, in this order:
 
-> "Test plan written to `<artifacts-output-dir>/test-plan-<timestamp>.md`
->
-> **Test Cases (<N>):**
->
-> - <test case name 1>
-> - <test case name 2>
-> - ...
->
-> Proceed with test execution? (yes/no)"
+1. The test case count and each case name.
+2. Every line in the plan matching `EXTERNAL TRIGGER:`, quoted with its endpoint and its rationale.
+3. Every step marked `[HUMAN]`, quoted with its location (test case and step number).
+4. Every step that advances a Stripe test clock, quoted with the clock id and day count.
+
+Then ask for approval. If categories 2 through 4 are all empty, say so explicitly ("no external triggers, manual steps, or Stripe writes in this plan") rather than omitting the section.
+
+Approving "3 test cases" and approving "3 test cases, 2 POSTs to localhost:33656, 1 test-clock advance, 1 manual action" are different decisions.
 
 - **No**: tell the user the test plan path and stop.
 - **Yes**: continue.
