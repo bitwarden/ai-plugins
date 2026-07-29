@@ -233,7 +233,12 @@ Return to step 1 with the new response.
 
 ### aborted
 
-Read `abort_reason` from `<artifacts-output-dir>/test-results-<timestamp>.json`, surface it to the user as the run outcome, and skip Task 8 (there are no cases to report). Proceed directly to the final summary.
+Read `abort_reason` from `<artifacts-output-dir>/test-results-<timestamp>.json` and surface it to the user as the run outcome.
+
+Then check the `cases` array in that same file:
+
+- **`cases` is non-empty** (a resumed segment aborted after earlier segments completed work): proceed to Task 8. The report renders the completed cases with the abort reason banner at the top. Do NOT discard the run.
+- **`cases` is empty** (setup failed before any test case ran): skip Task 8 and proceed directly to the final summary.
 
 ### complete
 
@@ -254,7 +259,8 @@ This is pure orchestrator work, no agent dispatch. Read the `## Required Service
   --date "<timestamp>" \
   --slug "<slug>" \
   --services-tested "<services with ports, e.g. web (8080)>" \
-  --base-url "<primary test URL, e.g. https://localhost:8080>"
+  --base-url "<primary test URL, e.g. https://localhost:8080>" \
+  --plan-file <artifacts-output-dir>/test-plan-<timestamp>.md
 ```
 
 where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to the final summary.

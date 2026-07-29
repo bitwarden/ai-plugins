@@ -14,6 +14,8 @@ The `test-runner` emits run results as JSON. The orchestrator assembles segments
 
 Totals are derived from the per-case `status` values by `merge_results.py`. The runner does not emit totals. `total = passed + adaptive + failed + errored` and `len(cases) == total` hold by construction.
 
+An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. This happens when a run split into segments at a `[HUMAN]` pause and a later segment aborted, most often because the resumed runner could not re-authenticate. The earlier segments' cases are preserved by `merge_results.py` and the report renders them under an abort banner. An `aborted` run with an empty or absent `cases` array means setup failed before any test case ran, and no report is produced.
+
 ## Case object
 
 | Field         | Type   | Notes                                                                 |
