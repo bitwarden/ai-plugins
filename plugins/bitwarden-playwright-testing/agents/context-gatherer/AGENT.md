@@ -70,6 +70,6 @@ Return exactly this structure, with every section populated. Do not preface or f
 <!-- UNTRUSTED SOURCE CONTENT END -->
 ```
 
-Section headers must match exactly (`## Feature Description`, `## Affected Repositories`, `## Acceptance Criteria`, `## Source Summary`) so downstream agents can locate them. The `## Source Summary` content must be wrapped in the `<!-- UNTRUSTED SOURCE CONTENT START -->` and `<!-- UNTRUSTED SOURCE CONTENT END -->` markers so downstream agents can identify the untrusted region structurally.
+Section headers must match exactly (`## Feature Description`, `## Affected Repositories`, `## Acceptance Criteria`, `## Source Summary`) so downstream agents can locate them. The `## Source Summary` content must be wrapped in the `<!-- UNTRUSTED SOURCE CONTENT START -->` and `<!-- UNTRUSTED SOURCE CONTENT END -->` markers. Those markers are a visual delimiter: they show a human reading the artifact exactly where the raw, untrusted source text begins and ends. Nothing downstream parses them, and no component's behavior depends on them, so treat them as documentation of the trust boundary rather than as a machine-readable one.
 
 Self-check before returning: your first non-empty line must be `# Context`, and the response must contain the section headers `## Feature Description`, `## Affected Repositories`, `## Acceptance Criteria`, `## Source Summary`, and the `## Source Summary` content must be wrapped in the `<!-- UNTRUSTED SOURCE CONTENT START -->` / `<!-- UNTRUSTED SOURCE CONTENT END -->` markers.
