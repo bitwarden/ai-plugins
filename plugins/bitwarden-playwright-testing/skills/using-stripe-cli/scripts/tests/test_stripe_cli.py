@@ -3,6 +3,8 @@
 
 Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
 """
+import contextlib
+import io
 import json
 import os
 import sys
@@ -50,6 +52,28 @@ class CheckPathTest(unittest.TestCase):
             stripe_cli.check_path("/v1/cus tomers")  # cspell:ignore tomers
 
 
+class CheckClockIdTest(unittest.TestCase):
+    def test_bare_clock_id_is_accepted(self):
+        stripe_cli.check_clock_id("clock_1234567890abcdef")
+
+    def test_path_traversal_shaped_clock_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.check_clock_id("clock_1/../../customers")
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_PATH)
+
+    def test_flag_shaped_clock_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_clock_id("clock_1 --live")
+
+    def test_wrong_prefix_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_clock_id("cus_123")
+
+    def test_empty_clock_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_clock_id("")
+
+
 class BuildArgvTest(unittest.TestCase):
     def test_read_argv_forwards_no_caller_flag(self):
         argv = stripe_cli.build_read_argv("/v1/customers", ["limit=3"])
@@ -91,6 +115,95 @@ class AdvanceClockTest(unittest.TestCase):
         self.assertEqual(posts[1][4], "frozen_time=1750172800")
         self.assertEqual(frozen, 1750172800)
         self.assertTrue(slept)
+
+    def test_traversal_shaped_clock_id_never_reaches_the_cli(self):
+        calls = []
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.advance_clock(
+                "clock_1/../../customers", 1, calls.append, lambda _s: None
+            )
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_PATH)
+        self.assertEqual(calls, [])
+
+    def test_missing_frozen_time_becomes_a_guard_error(self):
+        def run(_argv):
+            return json.dumps({"status": "ready"})
+
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.advance_clock("clock_1", 1, run, lambda _s: None)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
+        self.assertIn("frozen_time", cm.exception.message)
+
+    def test_null_frozen_time_becomes_a_guard_error(self):
+        def run(_argv):
+            return json.dumps({"frozen_time": None, "status": "ready"})
+
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.advance_clock("clock_1", 1, run, lambda _s: None)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
+
+
+class MainGuardOrderingTest(unittest.TestCase):
+    """The guards must run before any subprocess is spawned.
+
+    Proving check_environment raises in isolation, and that no built argv
+    carries --live, does not prove main() checks the environment *first*. These
+    tests replace run_cli with a recorder and assert it was never called, which
+    is the property the module docstring actually sells.
+    """
+
+    def setUp(self):
+        self.invocations = []
+        self._real_run_cli = stripe_cli.run_cli
+        stripe_cli.run_cli = self._recorder
+        self.addCleanup(setattr, stripe_cli, "run_cli", self._real_run_cli)
+
+    def _recorder(self, argv):
+        self.invocations.append(argv)
+        return json.dumps({"frozen_time": 1750000000, "status": "ready"})
+
+    def _main(self, argv, env):
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            code = stripe_cli.main(argv, env)
+        return code, err.getvalue()
+
+    def test_live_key_spawns_no_cli_on_read(self):
+        code, err = self._main(
+            ["read", "--path", "/v1/customers"], {"STRIPE_API_KEY": "sk_live_abcdef"}
+        )
+        self.assertEqual(code, stripe_cli.EXIT_KEY)
+        self.assertEqual(self.invocations, [])
+        self.assertIn("LIVE key", err)
+
+    def test_live_key_spawns_no_cli_on_advance_clock(self):
+        code, _err = self._main(
+            ["advance-clock", "--clock", "clock_1", "--days", "8"],
+            {"STRIPE_API_KEY": "rk_live_abcdef"},
+        )
+        self.assertEqual(code, stripe_cli.EXIT_KEY)
+        self.assertEqual(self.invocations, [])
+
+    def test_zero_days_is_a_usage_error_and_spawns_no_cli(self):
+        code, err = self._main(
+            ["advance-clock", "--clock", "clock_1", "--days", "0"], {}
+        )
+        self.assertEqual(code, stripe_cli.EXIT_USAGE)
+        self.assertEqual(self.invocations, [])
+        self.assertIn("--days must be at least 1", err)
+
+    def test_negative_days_is_a_usage_error(self):
+        code, _err = self._main(
+            ["advance-clock", "--clock", "clock_1", "--days", "-3"], {}
+        )
+        self.assertEqual(code, stripe_cli.EXIT_USAGE)
+        self.assertEqual(self.invocations, [])
+
+    def test_malformed_clock_id_spawns_no_cli(self):
+        code, _err = self._main(
+            ["advance-clock", "--clock", "clock_1/../../customers", "--days", "1"], {}
+        )
+        self.assertEqual(code, stripe_cli.EXIT_PATH)
+        self.assertEqual(self.invocations, [])
 
 
 class ScriptIsExecutableTest(unittest.TestCase):

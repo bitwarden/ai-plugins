@@ -24,12 +24,13 @@ advance-clock is the single permitted write: advancing an ALREADY-ATTACHED test
 clock. Everything else that creates, updates, or deletes Stripe state is out of
 scope and unreachable through this script.
 
-Exit codes: 0 ok; 1 the Stripe CLI failed; 2 usage error; 20 disallowed path;
-21 the environment points the CLI at live mode.
+Exit codes: 0 ok; 1 the Stripe CLI failed; 2 usage error; 20 disallowed path or
+malformed test clock id; 21 the environment points the CLI at live mode.
 """
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -41,6 +42,9 @@ EXIT_PATH = 20
 EXIT_KEY = 21
 
 LIVE_KEY_PREFIXES = ("sk_live_", "rk_live_")
+# Stripe test clock ids are 'clock_' followed by an alphanumeric token. Anything
+# else is rejected before it can be interpolated into a request path.
+CLOCK_ID_PATTERN = re.compile(r"clock_[A-Za-z0-9]+")
 CLOCK_POLL_DELAY = 2
 CLOCK_POLL_LIMIT = 60
 SECONDS_PER_DAY = 86400
@@ -83,6 +87,25 @@ def check_path(path):
         raise GuardError(EXIT_PATH, f"path may not contain whitespace: {path}")
     if "-" == path[4:5] or "--" in path:
         raise GuardError(EXIT_PATH, f"path may not contain flag-like segments: {path}")
+
+
+def check_clock_id(clock_id):
+    """Reject anything that is not a bare Stripe test clock id.
+
+    The read path has check_path; the clock id had nothing, yet it is
+    interpolated straight into /v1/test_helpers/test_clocks/<id>[/advance],
+    which is the only Stripe write this wrapper permits. Flag injection is not
+    reachable, since argv is a list and no shell is involved, but a value like
+    'clock_1/../../customers' would traverse to another resource, and the id
+    ultimately comes from plan content that can originate in untrusted Jira
+    text. Allowing only the documented id shape closes that.
+    """
+    if not CLOCK_ID_PATTERN.fullmatch(clock_id or ""):
+        raise GuardError(
+            EXIT_PATH,
+            "--clock must be a Stripe test clock id of the form "
+            f"clock_<alphanumeric>, got: {clock_id!r}",
+        )
 
 
 def build_read_argv(path, params):
@@ -141,7 +164,19 @@ def advance_clock(clock_id, days, run, sleep):
     eight failures. Each step waits for status to return to 'ready' before the
     next, because Stripe rejects an advance on a clock that is still advancing.
     """
-    frozen = int(_clock(clock_id, run)["frozen_time"])
+    check_clock_id(clock_id)
+    response = _clock(clock_id, run)
+    try:
+        frozen = int(response["frozen_time"])
+    except (KeyError, TypeError, ValueError):
+        # A response missing, nulling, or non-numerically typing frozen_time
+        # would otherwise escape as a traceback: main() only catches GuardError,
+        # so the operator would lose the documented exit code.
+        raise GuardError(
+            EXIT_CLI,
+            f"test clock {clock_id} response has no usable 'frozen_time': "
+            f"{response!r}",
+        )
     for _ in range(days):
         frozen += SECONDS_PER_DAY
         run(build_advance_argv(clock_id, frozen))
@@ -184,6 +219,7 @@ def main(argv, env):
             check_path(args.path)
             sys.stdout.write(run_cli(build_read_argv(args.path, args.param)))
         else:
+            check_clock_id(args.clock)
             if args.days < 1:
                 raise GuardError(EXIT_USAGE, "--days must be at least 1")
             frozen = advance_clock(args.clock, args.days, run_cli, time.sleep)
