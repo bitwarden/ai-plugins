@@ -20,15 +20,15 @@ Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The plugin mu
 python3 run_real_eval.py \
   --eval-set trigger-eval.json \
   --runs-per-query 7 \
-  --num-workers 8 \
+  --num-workers 5 \
   --timeout 90 \
   --model claude-sonnet-4-6 \
   > result.json
 ```
 
-20 queries × 7 runs = 140 `claude -p` invocations. With 8 workers the run takes several minutes.
+20 queries × 7 runs = 140 `claude -p` invocations. With 5 workers the run takes several minutes.
 
-Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for a real-work tool (Bash/Task) — but N full agents still run concurrently. Raising `--num-workers` much past the default, or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
+Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for a real-work tool (Bash/Task) — but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
 
 ## Regression check
 

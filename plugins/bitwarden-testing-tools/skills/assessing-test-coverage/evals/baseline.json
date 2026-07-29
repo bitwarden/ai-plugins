@@ -77,9 +77,9 @@
     {
       "query": "write unit tests for the new CipherService.RestoreAsync method",
       "should_trigger": false,
-      "triggers": 0,
+      "triggers": 1,
       "runs": 7,
-      "trigger_rate": 0.0
+      "trigger_rate": 0.14285714285714285
     },
     {
       "query": "what's the best testing strategy for the billing webhook handler \u2014 trophy or pyramid?",
@@ -140,9 +140,9 @@
     {
       "query": "explain how the test pyramid works and which layers bitwarden uses for its repos",
       "should_trigger": false,
-      "triggers": 1,
+      "triggers": 0,
       "runs": 7,
-      "trigger_rate": 0.14
+      "trigger_rate": 0.0
     }
   ]
 }

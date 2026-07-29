@@ -42,10 +42,53 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         env=env,
     )
 
-    triggered = False
     first_skill_seen = None
     start = time.time()
     buffer = ""
+    # Assume a timeout until we see a decisive event or a clean EOF; the caller
+    # uses this to distinguish a slow run from a genuine non-trigger.
+    timed_out = True
+
+    def scan():
+        # Parse complete lines out of `buffer`, returning a terminal result dict
+        # once the target skill triggers or a real-work tool is reached, else
+        # None. Mutates `buffer`, leaving any trailing partial line in place.
+        nonlocal buffer, first_skill_seen
+        while "\n" in buffer:
+            line, buffer = buffer.split("\n", 1)
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            if event.get("type") == "assistant":
+                msg = event.get("message", {})
+                for item in msg.get("content", []):
+                    if item.get("type") != "tool_use":
+                        continue
+                    name = item.get("name")
+                    inp = item.get("input", {})
+                    if name == "Skill" and TARGET_SKILL_TOKEN in inp.get("skill", ""):
+                        return {"triggered": True, "first_skill": inp.get("skill")}
+                    fp = inp.get("file_path", "")
+                    # Count a Read only when it opens the skill's own SKILL.md,
+                    # not any file that merely has the token in its path.
+                    if name == "Read" and TARGET_SKILL_TOKEN in fp and fp.rstrip().endswith("SKILL.md"):
+                        return {"triggered": True, "first_skill": fp}
+                    # A real-work tool without the target skill first → no
+                    # trigger. Bail so the finally block kills the child before
+                    # its tool_use spawns anything. (Cheap read-only tools are
+                    # scanned past; the model may inspect files first.)
+                    if name in EXEC_TOOLS:
+                        if first_skill_seen is None:
+                            first_skill_seen = f"{name} (bailed: real-work tool)"
+                        return {"triggered": False, "first_skill": first_skill_seen}
+            elif event.get("type") == "result":
+                return {"triggered": False, "first_skill": first_skill_seen}
+        return None
 
     try:
         while time.time() - start < timeout:
@@ -53,63 +96,42 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                 rest = process.stdout.read()
                 if rest:
                     buffer += rest.decode("utf-8", errors="replace")
+                # Child exited — parse the final buffer before giving up so a
+                # trigger event in the last chunk isn't dropped as a non-trigger.
+                result = scan()
+                if result is not None:
+                    return result
+                timed_out = False
                 break
             ready, _, _ = select.select([process.stdout], [], [], 1.0)
             if not ready:
                 continue
             chunk = os.read(process.stdout.fileno(), 8192)
             if not chunk:
+                timed_out = False
                 break
             buffer += chunk.decode("utf-8", errors="replace")
 
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    event = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-
-                if event.get("type") == "assistant":
-                    msg = event.get("message", {})
-                    for item in msg.get("content", []):
-                        if item.get("type") != "tool_use":
-                            continue
-                        name = item.get("name")
-                        inp = item.get("input", {})
-                        if name == "Skill" and TARGET_SKILL_TOKEN in inp.get("skill", ""):
-                            return {"triggered": True, "first_skill": inp.get("skill")}
-                        fp = inp.get("file_path", "")
-                        # Count a Read only when it opens the skill's own SKILL.md,
-                        # not any file that merely has the token in its path.
-                        if name == "Read" and TARGET_SKILL_TOKEN in fp and fp.rstrip().endswith("SKILL.md"):
-                            return {"triggered": True, "first_skill": fp}
-                        # A real-work tool without the target skill first → no
-                        # trigger. Bail so the finally block kills the child before
-                        # its tool_use spawns anything. (Cheap read-only tools are
-                        # scanned past; the model may inspect files first.)
-                        if name in EXEC_TOOLS:
-                            if first_skill_seen is None:
-                                first_skill_seen = f"{name} (bailed: real-work tool)"
-                            return {"triggered": False, "first_skill": first_skill_seen}
-                elif event.get("type") == "result":
-                    return {"triggered": triggered, "first_skill": first_skill_seen}
+            result = scan()
+            if result is not None:
+                return result
     finally:
         if process.poll() is None:
             process.kill()
             process.wait()
-    return {"triggered": triggered, "first_skill": first_skill_seen}
+    return {"triggered": False, "first_skill": first_skill_seen, "timed_out": timed_out}
 
 
 def runs_for(query, should_trigger, runs, timeout, model):
     triggers = 0
+    timeouts = 0
     samples = []
     for _ in range(runs):
         r = run_query(query, timeout, model)
         if r["triggered"]:
             triggers += 1
+        if r.get("timed_out"):
+            timeouts += 1
         samples.append(r.get("first_skill"))
     rate = triggers / runs
     # Print samples to stderr only on unexpected outcomes — keeps env-specific
@@ -117,6 +139,10 @@ def runs_for(query, should_trigger, runs, timeout, model):
     if (rate >= 0.5) != should_trigger:
         for s in samples:
             print(f"    sample: {s}", file=sys.stderr)
+    # A timeout is counted as a non-trigger, so warn (stderr only, not persisted)
+    # to keep a slow should-trigger run from silently reading as a real failure.
+    if timeouts:
+        print(f"    warning: {timeouts}/{runs} run(s) timed out (counted as non-trigger): {query[:80]}", file=sys.stderr)
     return {
         "query": query,
         "should_trigger": should_trigger,
