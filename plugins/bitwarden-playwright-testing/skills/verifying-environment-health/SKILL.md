@@ -1,6 +1,9 @@
 ---
 name: verifying-environment-health
 description: Verify the Bitwarden local dev environment is ready for testing — Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. Use after determining required services and before executing tests. Requires the `playwright-cli` skill for render verification.
+allowed-tools: >
+  Bash(${CLAUDE_SKILL_DIR}/scripts/preflight-check.sh *),
+  Bash(${CLAUDE_SKILL_DIR}/scripts/health-check.sh *)
 ---
 
 Given the list of required services and the primary test URL, confirm the local dev environment is ready to run Playwright tests. The user is responsible for starting all services before this skill runs — this skill never starts, builds, or stops anything.
@@ -18,7 +21,7 @@ The procedure is linear and halts on the first failure. Each step has a specific
 ### 1. Preflight check (Docker daemon + dev containers)
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/verifying-environment-health/scripts/preflight-check.sh
+${CLAUDE_SKILL_DIR}/scripts/preflight-check.sh
 ```
 
 The script verifies the Docker daemon is reachable and that the expected Bitwarden dev containers are running (mssql, mailcatcher, azurite). It accepts both Compose and Aspire naming patterns.
@@ -28,7 +31,7 @@ If the script exits non-zero, **STOP**. Paste its stdout/stderr verbatim to the 
 ### 2. Application health check
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/verifying-environment-health/scripts/health-check.sh <ServiceName1> [<ServiceName2> ...]
+${CLAUDE_SKILL_DIR}/scripts/health-check.sh <ServiceName1> [<ServiceName2> ...]
 ```
 
 Pass the required service names verbatim. Accepted names: `Api`, `Identity`, `Billing`, `billing-pricing`, `Web`, `Admin`, `Notifications`, `Events`, `Icons`. Override the 360s default timeout with `HEALTH_CHECK_TIMEOUT=<seconds>`.
