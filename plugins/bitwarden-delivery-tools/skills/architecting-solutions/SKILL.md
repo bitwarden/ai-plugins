@@ -1,7 +1,7 @@
 ---
 name: architecting-solutions
 description: Architecting solutions at the team level while staying coherent with Bitwarden's holistic architecture. Covers security mindset, architectural judgment, Bitwarden-specific constraints, and working with the architecture group. Use when designing or planning a solution, reviewing architecture within a team's scope, assessing change impact, evaluating trade-offs in different implementations, or deciding whether a choice needs architecture group input.
-allowed-tools: Skill, WebFetch(domain:contributing.bitwarden.com)
+allowed-tools: Skill, Read, Glob, Grep, WebFetch(domain:contributing.bitwarden.com)
 ---
 
 ## Security Mindset
