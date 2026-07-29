@@ -1,6 +1,6 @@
 ---
 name: verifying-environment-health
-description: Verify the Bitwarden local dev environment is ready for testing — Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. Use after determining required services and before executing tests. Requires the `playwright-cli` plugin for render verification.
+description: Verify the Bitwarden local dev environment is ready for testing — Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. Use after determining required services and before executing tests. Requires the `playwright-cli` skill for render verification.
 ---
 
 Given the list of required services and the primary test URL, confirm the local dev environment is ready to run Playwright tests. The user is responsible for starting all services before this skill runs — this skill never starts, builds, or stops anything.

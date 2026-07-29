@@ -8,7 +8,7 @@ This plugin provides a single user-facing skill, `test-web-changes`, that orches
 
 ## Prerequisites
 
-**Required Claude Code plugin:** Install the [`playwright-cli`](https://github.com/microsoft/playwright-cli) plugin before using this plugin. Render verification and all browser test execution depend on it.
+**Required Claude Code skill:** Install the [`playwright-cli`](https://github.com/microsoft/playwright-cli) skill before using this plugin. Every component here reaches it as `Skill(playwright-cli)`. Render verification and all browser test execution depend on it.
 
 **Bitwarden dev environment:** Start all required services before invoking the plugin. The plugin only verifies — it never starts, builds, or stops services.
 
