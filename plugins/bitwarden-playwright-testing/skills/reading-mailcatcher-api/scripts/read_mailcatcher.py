@@ -6,7 +6,8 @@ Exit 0 on success (prints the extracted URL on stdout).
 Exit 1: no matching message found, or a matched message had no local-host URL
         (diagnostic on stderr).
 Exit 2: usage error.
-Exit 3: Mailcatcher unreachable or returned invalid JSON.
+Exit 3: Mailcatcher unreachable, returned invalid JSON, or MAILCATCHER_URL
+        names a host outside the local dev allowlist.
 
 Usage:
   read_mailcatcher.py --recipient <email> [--pattern <subject-keyword>] [--link-filter <regex>]
@@ -80,6 +81,30 @@ def allowed_hosts(env):
     return tuple(hosts)
 
 
+def check_base(base, allowed):
+    """Validate the Mailcatcher base URL before the first request.
+
+    The extracted-URL allowlist was applied only to URLs found in message
+    bodies, never to the endpoint this script contacts. MAILCATCHER_URL is
+    operator-supplied, so this is defense in depth rather than a closed hole,
+    but it costs nothing and removes any dependence on how a leading-wildcard
+    Bash grant interacts with a leading env assignment. Port overrides still
+    work: the check is on host, not port.
+    """
+    parsed = urllib.parse.urlparse(base)
+    scheme = (parsed.scheme or "").lower()
+    host = (parsed.hostname or "").lower()
+    if scheme not in ("http", "https") or not host:
+        raise Unreachable(f"MAILCATCHER_URL is not a valid http(s) URL: {base}")
+    if host not in allowed:
+        raise Unreachable(
+            f"MAILCATCHER_URL host '{host}' is not an allowed local dev host. "
+            f"Allowed: {' '.join(allowed)}. "
+            "For a custom local hostname, set "
+            "PLAYWRIGHT_TESTING_ALLOWED_HOSTS=<host>[,<host>...]."
+        )
+
+
 def _http_get(url):
     """GET url and return the body as text. Raises Unreachable on failure.
 
@@ -90,9 +115,9 @@ def _http_get(url):
     Unreachable, as does any transport failure.
 
     No TLS bypass here: the bash original used plain `curl -fsS` with no
-    `-k`, and MAILCATCHER_URL is never allowlist-checked the way the
-    external-trigger URL is, so an https base gets normal certificate
-    verification.
+    `-k`, so an https base gets normal certificate verification. The base
+    itself is validated against the same host allowlist before any request
+    (see check_base).
     """
     opener = urllib.request.build_opener(_NoRedirectHandler)
     try:
@@ -221,6 +246,11 @@ def main(argv, env):
 
     base = (env.get("MAILCATCHER_URL") or DEFAULT_MAILCATCHER_URL).rstrip("/")
     allowed = allowed_hosts(env)
+    try:
+        check_base(base, allowed)
+    except Unreachable as err:
+        print(f"ERROR: {err}", file=sys.stderr)
+        return EXIT_UNREACHABLE
     settled = {3: EXIT_UNREACHABLE, 2: EXIT_NO_MATCH}
 
     code, url = attempt(base, args.recipient, args.pattern, args.link_filter, allowed)

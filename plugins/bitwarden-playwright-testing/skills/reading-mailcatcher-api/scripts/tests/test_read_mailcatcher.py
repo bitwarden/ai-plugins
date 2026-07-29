@@ -265,6 +265,41 @@ class MainTest(unittest.TestCase):
         self.assertIn("ERROR: --recipient is required", err.getvalue())
 
 
+class CheckBaseTest(unittest.TestCase):
+    def test_default_base_is_allowed(self):
+        allowed = read_mailcatcher.allowed_hosts({})
+        read_mailcatcher.check_base("http://localhost:1080", allowed)
+
+    def test_non_default_port_on_allowed_host_is_fine(self):
+        allowed = read_mailcatcher.allowed_hosts({})
+        read_mailcatcher.check_base("http://127.0.0.1:2080", allowed)
+
+    def test_remote_host_is_rejected(self):
+        allowed = read_mailcatcher.allowed_hosts({})
+        with self.assertRaises(read_mailcatcher.Unreachable):
+            read_mailcatcher.check_base("https://attacker.example/leak", allowed)
+
+    def test_non_http_scheme_is_rejected(self):
+        allowed = read_mailcatcher.allowed_hosts({})
+        with self.assertRaises(read_mailcatcher.Unreachable):
+            read_mailcatcher.check_base("file:///etc/passwd", allowed)
+
+    def test_operator_added_host_is_allowed(self):
+        allowed = read_mailcatcher.allowed_hosts(
+            {"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "mail.dev.internal"}
+        )
+        read_mailcatcher.check_base("http://mail.dev.internal:1080", allowed)
+
+
+class MainRejectsBadBaseTest(unittest.TestCase):
+    def test_disallowed_base_exits_3(self):
+        rc = read_mailcatcher.main(
+            ["--recipient", "x@example.com"],
+            {"MAILCATCHER_URL": "https://attacker.example/leak"},
+        )
+        self.assertEqual(rc, 3)
+
+
 class _QuietHandler(http.server.BaseHTTPRequestHandler):
     """BaseHTTPRequestHandler that stays silent on stderr during tests."""
 
