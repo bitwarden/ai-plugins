@@ -2,6 +2,10 @@
 
 Claude Code skills for GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation. Generic AI assistance doesn't know Bitwarden's workflow linter rules, approved actions list, or remediation patterns. These skills keep Claude focused on how we manage CI/CD workflows here.
 
+## Overview
+
+The skills work in pairs. Each audit skill is strictly read-only and produces a findings report; its remediation counterpart consumes those findings, applies the fixes, verifies, and opens draft PRs. `workflow-audit` → `workflow-fix` covers linter compliance inside a repo, and `action-audit` → `action-remediate` covers action references across the org. All four read `bitwarden-workflow-linter-rules` as the single source of truth for what compliant looks like and how each rule gets fixed.
+
 ## Skills
 
 | Skill                             | What It Does                                                                                                         |
@@ -24,6 +28,26 @@ Available through Bitwarden's internal Claude Code marketplace:
 /plugin install bitwarden-devops-engineer@bitwarden-marketplace
 
 # Restart Claude Code
+```
+
+## Usage
+
+Skills trigger from natural-language requests. The audit skills are read-only; run them before their remediation counterparts.
+
+```text
+Run the workflow linter on the server repo
+```
+
+```text
+Go ahead and fix the linter findings from the audit
+```
+
+```text
+Check if any repos are using tj-actions/changed-files
+```
+
+```text
+Pin the unpinned actions from the audit and open draft PRs
 ```
 
 ## References
