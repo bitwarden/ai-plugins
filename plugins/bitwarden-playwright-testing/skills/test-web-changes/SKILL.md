@@ -267,13 +267,41 @@ where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestam
 
 ## Final summary
 
-Present the final summary:
+Which summary you present depends on whether `report-<timestamp>.html` was actually written. Two paths reach this section without a report: the Task 7 aborted branch with an empty `cases` array, which skips Task 8 entirely, and a Task 8 render script that exited non-zero. Never hand the user a path to a file that was never written.
+
+**Report written** (Task 8 ran and the render script exited zero):
 
 ```
 Test run complete for <input value>
 
 Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
 Report (HTML): <artifacts-output-dir>/report-<timestamp>.html
+
+Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed | <N> errored
+```
+
+**Aborted before any test case ran** (Task 7 aborted with an empty `cases` array, so Task 8 was skipped). There is no report and there are no totals; omit both lines:
+
+```
+Test run aborted for <input value> before any test case ran
+
+Abort reason: <abort_reason>
+
+Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
+Results (JSON): <artifacts-output-dir>/test-results-<timestamp>.json
+
+No report was generated, because no test case completed.
+```
+
+**Report generation failed** (Task 8 ran but the render script exited non-zero). The canonical results JSON exists and holds the totals; the HTML does not, so omit the report line:
+
+```
+Test run finished for <input value>, but report generation failed
+
+Render failure: <the render script's stderr>
+
+Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
+Results (JSON): <artifacts-output-dir>/test-results-<timestamp>.json
 
 Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed | <N> errored
 ```
