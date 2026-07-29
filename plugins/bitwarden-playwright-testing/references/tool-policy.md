@@ -40,7 +40,9 @@ The wrapper enforces localhost-only destinations and POST-only method. A destina
 
 ## Category 4 — Stripe Data Queries (read-only)
 
-Use the `using-stripe-cli` skill (or fall back to direct `stripe get` CLI commands) only to query Stripe data that cannot be obtained through the web UI — for example, listing coupon IDs needed for an Admin portal import flow. Check your available skills list first: if `using-stripe-cli` is present, use it. If not, use `stripe get` via Bash for GET/read-only queries only.
+Use the `using-stripe-cli` skill only to query Stripe data that cannot be obtained through the web UI — for example, listing coupon IDs needed for an Admin portal import flow.
+
+`using-stripe-cli` ships with this plugin and is preloaded into the test-runner through its `skills:` frontmatter, so it is always available. It is the only sanctioned path to Stripe. The test-runner holds no grant for the `stripe` binary itself, only for the wrapper script that skill documents.
 
 Do not use Stripe calls to set up state that the application's own flows can create.
 
@@ -51,7 +53,7 @@ Never use Stripe for write operations (POST, PUT, DELETE) — no creating coupon
 - Direct database queries
 - API calls that substitute for UI actions a user could perform in the browser
 - Using API calls to verify test results when the outcome is observable in the UI (always assert via playwright-cli instead)
-- CLI tools not related to service startup (Stripe CLI excepted when used as read-only per Category 4)
+- CLI tools not related to service startup (the `using-stripe-cli` wrapper script excepted when used as read-only per Category 4)
 - Stripe write operations (POST, PUT, DELETE — creating coupons, modifying subscriptions, updating customers, or any other Stripe state changes)
 - Editing feature flags or any other application configuration
 
