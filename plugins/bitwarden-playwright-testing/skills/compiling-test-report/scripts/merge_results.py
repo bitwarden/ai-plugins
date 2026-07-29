@@ -8,9 +8,11 @@
 #   merge_results.py <segment.json> [<segment.json> ...] --output <path>
 #
 # The run_status of the assembled result is that of the LAST segment
-# (complete | paused | aborted). For a paused result, need_user_input is
-# carried forward from the last segment. Totals are derived, never trusted
-# from the runner. A single segment is validated and tallied (passthrough).
+# (complete | paused | aborted). Cases are concatenated across ALL segments
+# regardless of the last segment's status, so an aborted resume still reports
+# the work earlier segments completed. For a paused result, need_user_input is
+# carried forward from the last segment; for an aborted result, abort_reason is.
+# Totals are derived, never trusted from the runner.
 #
 # Exit codes: 0 written; 2 usage error; 3 invalid or malformed segment JSON.
 
@@ -43,19 +45,22 @@ def load_segment(path):
 
 
 def merge(segments):
+    """Concatenate cases across every segment and take the last segment's status.
+
+    An aborted last segment does NOT discard earlier segments. A run splits into
+    segments at each [HUMAN] pause, and a resumed test-runner legitimately emits
+    aborted when it cannot re-authenticate, having no memory of earlier segments.
+    Dropping cases here silently threw away completed work and left the run with
+    no report at all.
+    """
     last = segments[-1]
     run_status = last["run_status"]
-    if run_status == "aborted":
-        return {
-            "run_status": "aborted",
-            "abort_reason": last.get("abort_reason", ""),
-            "totals": tally([]),
-            "cases": [],
-        }
     cases = []
     for segment in segments:
         cases.extend(segment.get("cases", []))
     result = {"run_status": run_status, "totals": tally(cases), "cases": cases}
+    if run_status == "aborted":
+        result["abort_reason"] = last.get("abort_reason", "")
     if run_status == "paused":
         result["need_user_input"] = last.get("need_user_input", "")
     return result

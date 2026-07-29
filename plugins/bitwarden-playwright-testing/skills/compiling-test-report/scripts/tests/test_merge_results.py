@@ -49,6 +49,27 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(result["cases"], [])
         self.assertIn("login failed", result["abort_reason"])
 
+    def test_aborted_last_segment_retains_earlier_cases(self):
+        completed = {
+            "run_status": "complete",
+            "cases": [
+                {"number": 1, "name": "Login", "status": "PASS"},
+                {"number": 2, "name": "Create org", "status": "FAIL"},
+            ],
+        }
+        aborted = {
+            "run_status": "aborted",
+            "abort_reason": "setup failure before test cases (re-authentication failed)",
+        }
+        result = merge_results.merge([completed, aborted])
+        self.assertEqual(result["run_status"], "aborted")
+        self.assertEqual([c["number"] for c in result["cases"]], [1, 2])
+        self.assertEqual(
+            result["totals"],
+            {"total": 2, "passed": 1, "adaptive": 0, "failed": 1, "errored": 0},
+        )
+        self.assertIn("re-authentication failed", result["abort_reason"])
+
     def test_bad_status_exits_3(self):
         with self.assertRaises(SystemExit) as cm:
             merge_results.merge(
