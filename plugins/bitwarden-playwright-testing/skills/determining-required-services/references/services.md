@@ -8,6 +8,7 @@
 
 ### Web Vault Frontend
 
+- **Health-check name**: `Web`
 - **Port**: 8080
 - **URL**: `https://localhost:8080`
 - **Technology**: Angular (NX/Webpack)
@@ -17,6 +18,7 @@
 
 ### Api Service
 
+- **Health-check name**: `Api`
 - **Port**: 4000
 - **URL**: `http://localhost:4000`
 - **Technology**: .NET
@@ -26,6 +28,7 @@
 
 ### Identity Service
 
+- **Health-check name**: `Identity`
 - **Port**: 33656
 - **URL**: `http://localhost:33656`
 - **Technology**: .NET
@@ -35,6 +38,7 @@
 
 ### Bitwarden Portal
 
+- **Health-check name**: `Admin`
 - **Port**: 62911
 - **URL**: `http://localhost:62911`
 - **Technology**: .NET Razor views (NOT Angular)
@@ -45,6 +49,7 @@
 
 ### Billing Service
 
+- **Health-check name**: `Billing`
 - **Port**: 44519
 - **URL**: `http://localhost:44519`
 - **Technology**: .NET
@@ -54,6 +59,7 @@
 
 ### billing-pricing Service
 
+- **Health-check name**: `billing-pricing`
 - **Port**: 7088 (HTTPS), 5082 (HTTP)
 - **URL**: `https://localhost:7088`
 - **Technology**: .NET
@@ -70,6 +76,7 @@ These services are **not required to start upfront** but may be needed if tests 
 
 ### Notifications Service
 
+- **Health-check name**: `Notifications`
 - **Port**: 61840
 - **URL**: `http://localhost:61840`
 - **Technology**: .NET
@@ -79,6 +86,7 @@ These services are **not required to start upfront** but may be needed if tests 
 
 ### Events Service
 
+- **Health-check name**: `Events`
 - **Port**: 46273
 - **URL**: `http://localhost:46273`
 - **Technology**: .NET
@@ -88,6 +96,7 @@ These services are **not required to start upfront** but may be needed if tests 
 
 ### Icons Service
 
+- **Health-check name**: `Icons`
 - **Port**: 50024
 - **URL**: `http://localhost:50024`
 - **Technology**: .NET

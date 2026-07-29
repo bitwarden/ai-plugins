@@ -23,6 +23,12 @@ Given the routes the tests will navigate to AND the affected repos, determine wh
 
 Return the output as a markdown block whose first non-empty line is the literal heading `## Required Services`. Below that heading, list each required service as a bullet with name, URL, and port. Clearly note the **primary test URL** since it drives the render verification step.
 
+The leading token of each bullet MUST be the entry's **Health-check name** from `references/services.md`, not its heading. `service-manager` passes that token straight to `health-check.sh`, which accepts exactly this closed set and exits 1 on anything else:
+
+`Api`, `Identity`, `Billing`, `billing-pricing`, `Web`, `Admin`, `Notifications`, `Events`, `Icons`
+
+So an Admin-scoped run emits `- Admin — http://localhost:62911 (port 62911)`, never `- Bitwarden Portal — ...`.
+
 Example:
 
 ```markdown

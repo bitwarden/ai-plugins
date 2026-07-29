@@ -14,6 +14,10 @@
 # Exit 0: all services ready.
 # Exit 1: timeout or unknown service name.
 
+# The accepted names below are the closed set. They MUST stay in sync with the
+# **Health-check name** field of every entry in
+# skills/determining-required-services/references/services.md, which is the
+# canonical registry. Adding a service means adding it in both places.
 get_url() {
   case "$1" in
     Api)             echo "http://localhost:4000/alive" ;;
