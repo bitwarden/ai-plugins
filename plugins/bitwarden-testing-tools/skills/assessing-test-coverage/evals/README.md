@@ -1,6 +1,6 @@
 # assessing-test-coverage trigger evals
 
-Reproducible trigger-rate test for the `bitwarden-test-toolkit:assessing-test-coverage` skill. Run before merging any change to the skill's `description` frontmatter to confirm the change doesn't degrade triggering on the natural-language phrasings the skill is designed to catch (or start firing on near-miss queries that want a different kind of test work).
+Reproducible trigger-rate test for the `bitwarden-testing-tools:assessing-test-coverage` skill. Run before merging any change to the skill's `description` frontmatter to confirm the change doesn't degrade triggering on the natural-language phrasings the skill is designed to catch (or start firing on near-miss queries that want a different kind of test work).
 
 ## Why a custom runner
 
@@ -14,7 +14,7 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 
 ## Running
 
-Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The plugin must be installed and enabled (`claude plugin install bitwarden-test-toolkit@bitwarden-marketplace`), or every query records a false non-trigger. The eval reads the installed copy, not this working tree, so **reinstall after editing the skill** (uninstall + install) before running.
+Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The plugin must be installed and enabled (`claude plugin install bitwarden-testing-tools@bitwarden-marketplace`), or every query records a false non-trigger. The eval reads the installed copy, not this working tree, so **reinstall after editing the skill** (uninstall + install) before running.
 
 ```bash
 python3 run_real_eval.py \

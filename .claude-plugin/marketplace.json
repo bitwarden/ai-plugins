@@ -100,10 +100,10 @@
       "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP."
     },
     {
-      "name": "bitwarden-test-toolkit",
-      "source": "./plugins/bitwarden-test-toolkit",
+      "name": "bitwarden-testing-tools",
+      "source": "./plugins/bitwarden-testing-tools",
       "version": "1.0.0",
-      "description": "Test engineering toolkit for Bitwarden — tools for analyzing and improving test quality across its repositories."
+      "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     }
   ]
 }

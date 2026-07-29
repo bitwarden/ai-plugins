@@ -1,10 +1,10 @@
-# Bitwarden Test Toolkit Plugin
+# Bitwarden Testing Tools Plugin
 
-A toolkit of test related skills for Bitwarden.
+A set of test related skills for Bitwarden.
 
 ## Overview
 
-A toolkit of skills that support Bitwarden's testing and quality work with evidence grounded in our repos, layers, and where our tests actually live. Skills can be invoked individually and the toolkit is designed to grow over time. See the table below for what ships today.
+A set of skills that support Bitwarden's testing and quality work with evidence grounded in our repos, layers, and where our tests actually live. Skills can be invoked individually and this plugin is designed to grow over time. See the table below for what ships today.
 
 ## Skills
 
@@ -21,7 +21,7 @@ A toolkit of skills that support Bitwarden's testing and quality work with evide
 ## Installation
 
 ```bash
-/plugin install bitwarden-test-toolkit@bitwarden-marketplace
+/plugin install bitwarden-testing-tools@bitwarden-marketplace
 ```
 
 For Jira-backed analysis, install the Atlassian tools alongside it:
