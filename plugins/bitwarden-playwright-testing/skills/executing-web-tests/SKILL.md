@@ -172,7 +172,13 @@ For email-driven flows (verification, magic-link login, trial activation, OTP), 
 ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern <subject-keyword>
 ```
 
-stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`; a non-zero exit after the retry is a hard failure — mark the test case FAIL immediately with the `NO_MATCH` diagnostic in Notes. Do not attempt to read Mailcatcher via any other means (curl, direct API calls, or sub-agent). Do not invoke `Skill(reading-mailcatcher-api)` (it is documentation for the underlying API; the co-located script is the only sanctioned transport).
+stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`. Branch on the exit code:
+
+- **Exit 1** (`NO_MATCH`) after the script's own retry: mark the test case FAIL immediately with the `NO_MATCH` diagnostic in `Notes:`.
+- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable, returned unparseable JSON, or `MAILCATCHER_URL` names a disallowed host. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return the same shape as a setup failure: `{ "run_status": "aborted", "abort_reason": "environment failure (<the script's stderr>)" }`. Do not mark cases FAIL for this.
+- **Exit 2**: your invocation was wrong. Correct it and retry once; if it still fails, report the obstacle.
+
+Do not attempt to read Mailcatcher via any other means (curl, direct API calls, or sub-agent). Do not invoke `Skill(reading-mailcatcher-api)` (it is documentation for the underlying API; the co-located script is the only sanctioned transport).
 
 ### Human step halt
 

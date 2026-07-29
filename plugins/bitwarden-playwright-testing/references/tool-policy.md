@@ -19,7 +19,7 @@ Use the `playwright-cli` skill for all interactions a user would perform in the 
 
 ## Category 2 — Email Reading
 
-When a test step requires reading an email (verification links, magic links, OTP codes), use the mailcatcher reader script via Bash. The script accepts `--recipient` and `--pattern` arguments, returns the extracted URL on stdout, retries once on no-match, and exits non-zero if the email never arrives. Do not navigate to `http://localhost:1080` via playwright-cli (CORS blocks browser access).
+When a test step requires reading an email (verification links, magic links, OTP codes), use the mailcatcher reader script via Bash. The script accepts `--recipient` and `--pattern` arguments, returns the extracted URL on stdout, and retries once on no-match. The script distinguishes its failures: exit 1 is `NO_MATCH` (the email did not arrive, or held no local URL) and is a test-case concern; exit 3 is an environment fault (Mailcatcher unreachable, invalid JSON, or a disallowed `MAILCATCHER_URL`) and aborts the run rather than failing cases. Do not navigate to `http://localhost:1080` via playwright-cli (CORS blocks browser access).
 
 ## Category 3 — External Trigger Simulation
 

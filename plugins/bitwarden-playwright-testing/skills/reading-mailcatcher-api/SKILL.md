@@ -14,7 +14,14 @@ ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
 ```
 
 - **stdout** (on success): the extracted URL, ready to navigate to or paste into a form field
-- **exit 1 + stderr** (on failure): `NO_MATCH: <diagnostic>` — either no message matched after one retry, or the matched message contained no URL passing the link filter
+- **exit code** (on failure): see the table below
+
+| Exit | Meaning                                                                                                           | Correct response                                   |
+| ---- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 0    | matching URL printed on stdout                                                                                    | use it                                             |
+| 1    | `NO_MATCH`: no matching message, or the match held no local-host URL                                              | after the script's own retry, a case-level failure |
+| 2    | usage error (bad or missing arguments)                                                                            | fix the invocation                                 |
+| 3    | Mailcatcher unreachable, returned invalid JSON, or `MAILCATCHER_URL` names a host outside the local dev allowlist | environment failure, not a test failure            |
 
 The script already retries once after a 3-second sleep on the first miss; callers don't need their own retry loop. See `references/manual-api-walkthrough.md` for the underlying Mailcatcher API the script wraps — consult it when modifying the script or debugging unexpected output.
 
