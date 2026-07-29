@@ -74,6 +74,24 @@ class SelectMessageTest(unittest.TestCase):
         msgs = [message(1, "someone@else.test", "Verify your email")]
         self.assertIsNone(read_mailcatcher.select_message(msgs, "a@b.test", "verify"))
 
+    def test_message_without_an_id_is_skipped_not_indexed(self):
+        """A missing `id` used to raise KeyError, escaping the exit-code contract."""
+        broken = message(1, "a@b.test", "Verify your email")
+        del broken["id"]
+        msgs = [broken, message(3, "a@b.test", "Verify your email")]
+        self.assertEqual(read_mailcatcher.select_message(msgs, "a@b.test", "verify"), 3)
+
+    def test_only_candidate_lacking_an_id_returns_none(self):
+        broken = message(1, "a@b.test", "Verify your email")
+        broken["id"] = None
+        self.assertIsNone(
+            read_mailcatcher.select_message([broken], "a@b.test", "verify")
+        )
+
+    def test_non_object_entry_is_skipped(self):
+        msgs = ["not a message", message(2, "a@b.test", "Verify your email")]
+        self.assertEqual(read_mailcatcher.select_message(msgs, "a@b.test", "verify"), 2)
+
 
 class ExtractUrlTest(unittest.TestCase):
     def setUp(self):

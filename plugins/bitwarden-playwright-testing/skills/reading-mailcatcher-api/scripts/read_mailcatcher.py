@@ -151,13 +151,21 @@ def fetch_messages(base):
 
 
 def select_message(messages, recipient, pattern):
-    """Id of the newest message matching the recipient and optional pattern."""
+    """Id of the newest message matching the recipient and optional pattern.
+
+    A message with no `id` is dropped rather than indexed into. Mailcatcher
+    always sends one, but keying `max` on `msg["id"]` turned a malformed entry
+    into a KeyError that escaped this script's documented exit codes; an
+    unusable entry is simply not a candidate.
+    """
     recipient = recipient.lower()
     pattern = (pattern or "").lower()
     matches = [
         msg
         for msg in messages
-        if any(recipient in str(entry).lower() for entry in msg.get("recipients", []))
+        if isinstance(msg, dict)
+        and msg.get("id") is not None
+        and any(recipient in str(entry).lower() for entry in msg.get("recipients", []))
         and (not pattern or pattern in str(msg.get("subject", "")).lower())
     ]
     if not matches:
