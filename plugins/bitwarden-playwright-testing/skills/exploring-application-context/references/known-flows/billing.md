@@ -160,7 +160,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 - **Steps:**
   1. **EXTERNAL TRIGGER** — simulate the marketing site call via the external-trigger wrapper (canonical path in references/tool-policy.md):
      ```bash
-     ${CLAUDE_PLUGIN_ROOT}/scripts/external_trigger.py \
+     ${CLAUDE_PLUGIN_ROOT}/skills/executing-web-tests/scripts/external_trigger.py \
        --url http://localhost:33656/accounts/trial/send-verification-email \
        --rationale "marketing-site trial verification email; no Bitwarden service initiates this" \
        --data '{

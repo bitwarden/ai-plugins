@@ -68,7 +68,7 @@ Invoke `Skill(bitwarden-playwright-testing:executing-web-tests)`. Pass:
 
 - **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry.
 - Artifacts output dir
-- Config path: `${CLAUDE_PLUGIN_ROOT}/scripts/playwright.config.json`
+- Config path: `${CLAUDE_PLUGIN_ROOT}/skills/executing-web-tests/playwright.config.json`
 - **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
 
 Wait for the skill to return. The response is either a complete object (`"run_status": "complete"`) or a paused object (`"run_status": "paused"` with `need_user_input`). Return the skill's output verbatim in either case.

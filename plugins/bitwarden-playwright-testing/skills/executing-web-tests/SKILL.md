@@ -1,19 +1,22 @@
 ---
 name: executing-web-tests
 description: Execute Bitwarden web test cases step-by-step using the playwright-cli skill directly. Use after test cases are defined and services are running. Governs tool policy, screenshot naming, toast capture, Setup Steps execution, and the billing blocker policy.
+allowed-tools: >
+  Bash(${CLAUDE_SKILL_DIR}/scripts/external_trigger.py *),
+  Bash(${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py *)
 ---
 
-Given the test cases, artifacts output dir, and the absolute path to `scripts/playwright.config.json`, execute the tests by calling `Skill(playwright-cli)` for each browser action.
+Given the test cases, artifacts output dir, and the absolute path to `${CLAUDE_SKILL_DIR}/playwright.config.json`, execute the tests by calling `Skill(playwright-cli)` for each browser action.
 
 ## Before you start
 
 ### Resolve these values from your inputs
 
-| Value                | Source                                                                      |
-| -------------------- | --------------------------------------------------------------------------- |
-| Screenshot directory | `<artifacts-output-dir>/screenshots/`                                       |
-| Config path          | The absolute path to `scripts/playwright.config.json` you received as input |
-| Timestamp            | Generate once now as `YYYYMMDD-HHmm` and reuse across all screenshots       |
+| Value                | Source                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| Screenshot directory | `<artifacts-output-dir>/screenshots/`                                                   |
+| Config path          | The absolute path to `${CLAUDE_SKILL_DIR}/playwright.config.json` you received as input |
+| Timestamp            | Generate once now as `YYYYMMDD-HHmm` and reuse across all screenshots                   |
 
 ### Read the tool policy
 

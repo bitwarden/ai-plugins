@@ -123,11 +123,6 @@ bitwarden-playwright-testing/
 │   ├── test-planner/AGENT.md
 │   ├── service-manager/AGENT.md
 │   └── test-runner/AGENT.md
-├── scripts/
-│   ├── playwright.config.json           # Sets ignoreHTTPSErrors for dev certs
-│   ├── external_trigger.py              # Policy-guarded Category 3 POST wrapper
-│   └── tests/
-│       └── test_external_trigger.py
 └── skills/
     ├── test-web-changes/SKILL.md        # Orchestrator entry point
     ├── exploring-application-context/
@@ -145,7 +140,12 @@ bitwarden-playwright-testing/
     │   ├── SKILL.md
     │   └── references/billing-test-data.md
     ├── executing-web-tests/
-    │   └── SKILL.md
+    │   ├── SKILL.md
+    │   ├── playwright.config.json       # Sets ignoreHTTPSErrors for dev certs
+    │   └── scripts/
+    │       ├── external_trigger.py      # Policy-guarded Category 3 POST wrapper
+    │       └── tests/
+    │           └── test_external_trigger.py
     ├── reading-mailcatcher-api/
     │   ├── SKILL.md
     │   ├── references/email-patterns.md

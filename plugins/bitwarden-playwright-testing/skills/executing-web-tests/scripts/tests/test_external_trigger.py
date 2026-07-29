@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for external_trigger, the policy-guarded Category 3 POST wrapper.
 
-Run with:  python3 -m unittest discover -s scripts/tests   (from the plugin root)
+Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
 """
 import contextlib
 import http.server
