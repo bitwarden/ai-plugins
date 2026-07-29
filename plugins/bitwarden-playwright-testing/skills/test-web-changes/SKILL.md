@@ -2,15 +2,7 @@
 name: test-web-changes
 description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services but never starts them. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions. Add --confirm to review the test cases before execution begins.
 argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions] [--confirm]"
-allowed-tools:
-  [
-    Agent,
-    Read,
-    Write,
-    Bash(mkdir *),
-    Bash(*/bitwarden-playwright-testing/skills/compiling-test-report/scripts/merge_results.py *),
-    Bash(*/bitwarden-playwright-testing/skills/compiling-test-report/scripts/render_report.py *),
-  ]
+allowed-tools: [Agent, Read, Write, Bash(mkdir *)]
 ---
 
 You are the orchestrator for the Bitwarden web test pipeline. Your role is orchestration plus artifact persistence: you dispatch agents with the `Agent` tool, wait for each to return, and write their responses to artifact files. You do no research, exploration, or test execution yourself.
@@ -202,7 +194,8 @@ Artifacts output dir: <artifacts-output-dir>
 Wait for the test-runner to return a JSON object. Then, on every response:
 
 1. Write the response verbatim to `<artifacts-output-dir>/segment-<K>-<timestamp>.json` using the `Write` tool.
-2. Run the merge script over all segment files so far, writing the canonical results file:
+2. Invoke `Skill(compiling-test-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
+3. Run the merge script over all segment files so far, writing the canonical results file:
 
    ```
    <plugin>/skills/compiling-test-report/scripts/merge_results.py \
@@ -214,7 +207,7 @@ Wait for the test-runner to return a JSON object. Then, on every response:
 
    where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. Read the `run_status=<status>` value from the script's stdout line.
 
-3. Branch on `<status>`:
+4. Branch on `<status>`:
 
 ### paused
 
@@ -248,7 +241,11 @@ Capture the totals from the merge stdout line for the final summary, and proceed
 
 ## Task 8: Compile report
 
-This is pure orchestrator work, no agent dispatch. Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
+This is pure orchestrator work, no agent dispatch.
+
+Invoke `Skill(compiling-test-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
+
+Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
 
 ```
 <plugin>/skills/compiling-test-report/scripts/render_report.py \
