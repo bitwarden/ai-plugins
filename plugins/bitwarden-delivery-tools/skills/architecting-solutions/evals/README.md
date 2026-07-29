@@ -2,7 +2,7 @@
 
 Behavior test cases for the `architecting-solutions` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds nine cases targeting the  Bitwarden-specific parts of the skill.
+`behavior-eval.json` holds nine cases targeting the Bitwarden-specific parts of the skill.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs — every expectation is graded independently for both configurations.
 
@@ -10,7 +10,7 @@ Cases are **advice-only** — they grade the design the skill produces and run n
 
 Run with `/skill-creator:skill-creator` in Benchmark mode (with-skill vs. without-skill) with a config-blind grader. Any change to `SKILL.md` should be paired with a re-run and a refresh of `behavior-baseline.json`; the baseline is what future comparisons diff against.
 
-`behavior-baseline.json` records the pass/fail rate per case, keyed by model + effort. The shape is deliberately terse and non-prescriptive while we dogfood it — the minimum needed to quantify the impact of a change is the model + effort and the pass/fail rate with and without the skill. Regression check:
+`behavior-baseline.json` records the pass/fail rate per case, keyed by model + effort. Regression check:
 
 ```bash
 diff <(jq -S . behavior-baseline.json) <(jq -S . result.json)

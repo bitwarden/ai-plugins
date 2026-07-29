@@ -21,7 +21,7 @@ Bitwarden's ADRs at `https://contributing.bitwarden.com/architecture/adr/` encod
 ### How to do the check
 
 1. **WebFetch the ADR index** at `https://contributing.bitwarden.com/architecture/adr/`. Read every title. The corpus is small enough to scan in one pass.
-2. **Match every concern in your design against the corpus.** 
+2. **Match every concern in your design against the corpus.**
 3. **Fetch each candidate ADR's page** and read the decision. Treat it as a constraint. If the ADR is marked Deprecated or Superseded, follow the superseder instead.
 
 ### The ADR reference is the artifact that proves the check happened

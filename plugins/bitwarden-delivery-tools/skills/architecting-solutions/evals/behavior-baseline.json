@@ -5,9 +5,15 @@
     "no-adr-governs": { "skill": "4/4", "no-skill": "1/4" },
     "multi-client-shared-code-storage": { "skill": "4/4", "no-skill": "4/4" },
     "dual-data-access-parity": { "skill": "4/4", "no-skill": "3/4" },
-    "open-source-stewardship-hardcoded-list": { "skill": "4/4", "no-skill": "4/4" },
+    "open-source-stewardship-hardcoded-list": {
+      "skill": "4/4",
+      "no-skill": "4/4"
+    },
     "self-hosted-degradation": { "skill": "4/4", "no-skill": "2/4" },
     "v-plus-minus-2-response-shape": { "skill": "4/4", "no-skill": "2/4" },
-    "no-formal-api-versioning-required-field": { "skill": "4/4", "no-skill": "3/4" }
+    "no-formal-api-versioning-required-field": {
+      "skill": "4/4",
+      "no-skill": "3/4"
+    }
   }
 }

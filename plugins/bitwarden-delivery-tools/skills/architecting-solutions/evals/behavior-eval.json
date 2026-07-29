@@ -6,7 +6,7 @@
     {
       "id": 1,
       "name": "adr-applies-to-logging",
-      "prompt": "I'm adding a new background job in `src/Api` that runs a cleanup task on soft-deleted Ciphers. I want to log lifecycle events (`started`, `processed batch of N`, `finished`, `failed with error X`) so oncall can see what's happening in the pod logs. My first instinct is `Console.WriteLine(...)` — it goes straight to stdout, no plumbing. Reasonable, or is there a Bitwarden-specific pattern here?",
+      "prompt": "I'm adding a new background job in `src/Api` that runs a cleanup task on soft-deleted Ciphers. I want to log lifecycle events (`started`, `processed batch of N`, `finished`, `failed with error X`) so support can see what's happening in the pod logs. My first instinct is `Console.WriteLine(...)` — it goes straight to stdout, no plumbing. Reasonable, or is there a Bitwarden-specific pattern here?",
       "expected_output": "WebFetches the ADR index at `https://contributing.bitwarden.com/architecture/adr/`, identifies the applicable logging ADR (likely `standard-output-logging`) and cites it by name, rejects `Console.WriteLine` in favor of the ADR-prescribed mechanism (structured `ILogger<T>` with correlation and level), and includes an explicit ADR reference section per the skill's artifact requirement.",
       "expectations": [
         "WebFetches the ADR index at `https://contributing.bitwarden.com/architecture/adr/` before recommending an approach",
@@ -67,7 +67,7 @@
       "id": 6,
       "name": "open-source-stewardship-hardcoded-list",
       "prompt": "For an internal-only 'staff pilot' feature flag, I want to hardcode a list of Bitwarden staff account IDs directly in `src/Core/Services/Implementations/FeatureFlagService.cs` — something like `private static readonly HashSet<Guid> _staffPilotUserIds = { ... };` — so we don't need any config plumbing. Reasonable?",
-      "expected_output": "Rejects hardcoding the IDs in source. Cites the open-source nature of `bitwarden/server` — the moment the PR opens, the IDs are public, and git history preserves them even after a later commit removes them. Even non-secret identifiers reveal internal targeting mechanics to anyone reading the repo. Recommends an out-of-repo configuration mechanism: environment variable, config service, DB-driven allowlist, or a feature-flag service that already handles targeted rollouts.",
+      "expected_output": "Rejects hardcoding the IDs in source. Cites the open-source nature of `bitwarden/server` — the moment the PR opens, the IDs are public, and git history preserves them even after a later commit removes them. Even non-secret identifiers reveal internal targeting mechanics to anyone reading the repo. Recommends an out-of-repo configuration mechanism: environment variable, config service, DB-driven allowlist, or a feature-flag service that already handles targeted roll outs.",
       "expectations": [
         "Rejects hardcoding the user IDs in source code",
         "Cites the open-source / public-repo nature of `bitwarden/server` as the specific reason (not just 'hardcoding is bad')",
