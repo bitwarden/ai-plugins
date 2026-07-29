@@ -86,10 +86,18 @@
         background: #fff8e1;
         padding: 0.2rem 0 0.2rem 8px;
       }
+      .abort-banner {
+        border-left: 4px solid #c83771;
+        background: #fdf2f6;
+        padding: 0.75rem 1rem;
+        margin: 1rem 0;
+      }
     </style>
   </head>
   <body>
     <h1>Web Test Report: {{PLAN_NAME}}</h1>
+
+    {{ABORT_BLOCK}}
 
     <p><strong>Date</strong>: {{DATE}}</p>
     <p>

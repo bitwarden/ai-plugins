@@ -64,7 +64,10 @@ def validate(data):
     status = data.get("run_status")
     if status not in ("complete", "aborted"):
         fail(f"run_status must be 'complete' or 'aborted' to render, got {status!r}")
-    if status == "aborted":
+    if status == "aborted" and not data.get("cases"):
+        # An aborted run with no cases is legitimate (setup failed before any
+        # case ran). One WITH cases is a resumed run whose later segment
+        # aborted, and its cases must be validated like any other.
         return
     cases = data.get("cases")
     if not isinstance(cases, list):
@@ -187,6 +190,13 @@ def render(data, header):
     shell = read_template(header["template_dir"], "report.html")
     tc_template = read_template(header["template_dir"], "test-case.html")
     test_cases_html = "\n".join(render_case(case, tc_template) for case in cases)
+    abort_block = ""
+    if data.get("run_status") == "aborted":
+        abort_block = (
+            '<p class="abort-banner"><strong>Run aborted</strong>: '
+            f'{esc(data.get("abort_reason", ""))}<br />'
+            "The test cases below completed before the run was aborted.</p>"
+        )
     return fill(
         shell,
         PLAN_NAME=esc(header["plan_name"]),
@@ -194,6 +204,7 @@ def render(data, header):
         SLUG=esc(header["slug"]),
         SERVICES_TESTED=esc(header["services_tested"]),
         BASE_URL=esc(header["base_url"]),
+        ABORT_BLOCK=abort_block,
         TOTAL=esc(totals["total"]),
         PASSED=esc(totals["passed"]),
         ADAPTIVE=esc(totals["adaptive"]),
@@ -218,9 +229,9 @@ def main(argv):
     args = parser.parse_args(argv)
 
     data = load_results(args.results)
-    if data["run_status"] == "aborted":
+    if data["run_status"] == "aborted" and not data.get("cases"):
         print(
-            "render_report: aborted runs have no report; caller should skip rendering",
+            "render_report: aborted run has no cases; caller should skip rendering",
             file=sys.stderr,
         )
         return 2

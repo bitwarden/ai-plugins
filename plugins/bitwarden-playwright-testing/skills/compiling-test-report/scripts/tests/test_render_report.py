@@ -147,6 +147,74 @@ class RenderValidationTest(unittest.TestCase):
         self.assertEqual(self._main_expecting_exit(text), 3)
 
 
+ABORTED_WITH_CASES = {
+    "run_status": "aborted",
+    "abort_reason": "setup failure before test cases (re-authentication failed)",
+    "totals": {"total": 1, "passed": 1, "adaptive": 0, "failed": 0, "errored": 0},
+    "cases": [
+        {
+            "number": 1,
+            "name": "Login",
+            "status": "PASS",
+            "url": "https://localhost:8080",
+            "test_steps": [{"text": "Sign in", "outcome": "PASS"}],
+        }
+    ],
+}
+
+
+class RenderAbortedWithCasesTest(unittest.TestCase):
+    def test_renders_and_names_the_abort_reason(self):
+        out = render_report.render(ABORTED_WITH_CASES, HEADER)
+        self.assertIn("Run aborted", out)
+        self.assertIn("re-authentication failed", out)
+        self.assertIn("Login", out)
+
+    def test_main_renders_aborted_run_with_cases(self):
+        d = tempfile.mkdtemp()
+        results = os.path.join(d, "results.json")
+        out_path = os.path.join(d, "report.html")
+        with open(results, "w", encoding="utf-8") as f:
+            json.dump(ABORTED_WITH_CASES, f)
+        rc = render_report.main(
+            [
+                "--results", results,
+                "--template-dir", TEMPLATES,
+                "--output", out_path,
+                "--plan-name", "Billing UI",
+                "--date", "2026-07-29",
+                "--slug", "billing-ui",
+                "--services-tested", "web (8080)",
+                "--base-url", "https://localhost:8080",
+            ]
+        )
+        self.assertEqual(rc, 0)
+        self.assertTrue(os.path.exists(out_path))
+
+    def test_main_still_refuses_aborted_run_with_no_cases(self):
+        d = tempfile.mkdtemp()
+        results = os.path.join(d, "results.json")
+        with open(results, "w", encoding="utf-8") as f:
+            json.dump({"run_status": "aborted", "abort_reason": "login failed"}, f)
+        rc = render_report.main(
+            [
+                "--results", results,
+                "--template-dir", TEMPLATES,
+                "--output", os.path.join(d, "report.html"),
+                "--plan-name", "Billing UI",
+                "--date", "2026-07-29",
+                "--slug", "billing-ui",
+                "--services-tested", "web (8080)",
+                "--base-url", "https://localhost:8080",
+            ]
+        )
+        self.assertEqual(rc, 2)
+
+    def test_complete_run_has_no_abort_banner(self):
+        out = render_report.render(load_example("complete-run.json"), HEADER)
+        self.assertNotIn("Run aborted", out)
+
+
 class RenderMainTest(unittest.TestCase):
     def test_main_writes_report(self):
         d = tempfile.mkdtemp()
