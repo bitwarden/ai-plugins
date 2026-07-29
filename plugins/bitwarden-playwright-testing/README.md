@@ -111,7 +111,7 @@ The following Bitwarden surfaces are not testable via this plugin (no Playwright
 
 ## Plugin structure
 
-See [Agents](#agents) and [Skills](#skills) above for the full component list, and each component's own directory for its files. This section intentionally doesn't duplicate that list as a file tree — a hand-maintained tree here fell out of sync with the filesystem in the past and would only do so again.
+See [Agents](#agents) and [Skills](#skills) above for the full component list, and each component's own directory for its files. This section intentionally doesn't duplicate that list as a file tree, since a hand-maintained tree here fell out of sync with the filesystem in the past and would only do so again.
 
 ## Contributing
 
