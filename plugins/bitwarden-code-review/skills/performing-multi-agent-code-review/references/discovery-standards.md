@@ -1,10 +1,10 @@
 # Discovery Standards
 
-Loaded by the orchestrator in Step 1. The **Hygiene Sweep** is invoked by name from the Step 3 Agent 1 (code quality) prompt. The **Line Number Accuracy** rule is propagated verbatim into every Step 2–5 subagent prompt.
+Loaded by the orchestrator in Step 1. The **Hygiene Sweep** is invoked by name from the Step 2 architect and Step 3 Agent 1 (code quality) prompts. The **Line Number Accuracy** rule is propagated verbatim into every Step 2–5 subagent prompt.
 
 ## Hygiene Sweep
 
-Agent 1 (code quality) performs a hygiene sweep of the diff before submitting findings; the Step 2 architect performs an analogous doc/code consistency pass per its own directive. When referenced, look specifically for:
+Agent 1 (code quality) performs a hygiene sweep of the diff before submitting findings; the Step 2 architect applies the same sweep within its scope. When referenced, look specifically for:
 
 - **Dead code added by this PR** — allowlist/registry/lookup-table entries added for features that don't flow through the validated entry point; unused imports; unreachable branches.
 - **Stale references** — documentation, comments, error messages, or assertions in this diff that contradict the same diff's implementation.

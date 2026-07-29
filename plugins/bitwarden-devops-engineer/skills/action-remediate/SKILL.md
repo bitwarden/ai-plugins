@@ -15,7 +15,7 @@ description: >
   User: Replace tj-actions/changed-files with the safe version across those repos
   Action: Trigger action-remediate to swap the action and create PRs
   </example>
-allowed-tools: Read, Edit, Glob, Grep, Bash(gh pr create:*), Bash(git checkout:*), Bash(git add .github/:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*)
+allowed-tools: Read, Edit, Glob, Grep, Bash(gh pr create:*), Bash(git checkout:*), Bash(git diff:*)
 ---
 
 ## Rules
@@ -23,7 +23,7 @@ allowed-tools: Read, Edit, Glob, Grep, Bash(gh pr create:*), Bash(git checkout:*
 - **No mutating API calls without confirmation.** `gh api` GET requests are allowed freely. Any call using `-X POST`, `-X PUT`, `-X PATCH`, or `-X DELETE` must be shown to the user and approved before execution.
 - **Never force-push, delete branches, or delete repositories.**
 - **Only modify files under `.github/`.** Do not touch application code, scripts, or configuration outside of workflow files.
-- **Show a diff and get confirmation before every commit.**
+- **Show a diff and get confirmation before handing off for commit.**
 - **All PRs must be created as drafts.**
 - **Flag uncertainty.** If a finding is ambiguous or a fix could break a workflow, stop and ask rather than guessing.
 
@@ -59,13 +59,19 @@ For each selected repo:
 
 4. Show a `git diff` of changes in this repo and get confirmation before proceeding.
 
-## Step 3: Create PRs
+## Step 3: Commit, Push, and Create PRs
 
-After fixes are confirmed, for each repo:
+Do not run the staging, commit, or push commands yourself. For each repo, present the block below for the user to run manually as a suggestion:
 
 ```bash
 git add .github/
 git commit -m "Remediate <action-name> action usage"
+git push -u origin fix/action-remediation-<action-name-slug>
+```
+
+Once the user confirms the push, create the draft PR:
+
+```bash
 gh pr create \
   --title "Remediate <action-name> action usage" \
   --body "$(cat <<'EOF'

@@ -5,6 +5,12 @@ All notable changes to the bitwarden-devops-engineer plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-06-23
+
+### Security
+
+- Removed the `Bash(git add .github/:*)`, `Bash(git commit:*)`, and `Bash(git push:*)` permissions from the `action-remediate` and `workflow-fix` skills so these mutating git operations are run manually by the user instead of auto-approved. The skills now present the commands and resume to create the draft PR after the user confirms the push. Read-only `git diff`/`git status`, branch setup via `git checkout`, and `gh pr create` are retained.
+
 ## [0.1.3] - 2026-05-08
 
 ### Changed

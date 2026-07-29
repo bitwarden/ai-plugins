@@ -1,5 +1,14 @@
 # Report Template
 
+## Model Header
+
+`{model}` is the resolved global model's nickname, never a dated model ID. When any stage's resolved model differs from the global model — including the audit's sonnet default — list each differing stage in parentheses:
+
+```
+**Model:** opus                              <!-- all stages at global -->
+**Model:** opus (audit: sonnet)   <!-- differing stages listed -->
+```
+
 ## Severity Icons
 
 - 🛑 **Blocker** — Must fix before merge
@@ -16,6 +25,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 | `quality`      | Code quality agent            |
 | `bug`          | Bug analysis agent            |
 | `security`     | Security & logic agent        |
+| `config`       | Claude configuration agent    |
 | `validation`   | Validation agent (collateral) |
 
 ## Template

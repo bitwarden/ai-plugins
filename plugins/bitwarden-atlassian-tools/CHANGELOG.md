@@ -5,6 +5,26 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-07-15
+
+### Added
+
+- Three read-only Jira Agile MCP tools that expose the MCP server's existing (previously unexposed) Agile API client methods:
+  - `list_boards` — list Jira Agile boards, optionally filtered by project
+  - `get_sprints` — list sprints for a board, optionally filtered by state (active/future/closed)
+  - `get_sprint_issues` — list all issues in a sprint
+- Documented the granular Jira Software OAuth scopes (`read:board-scope:jira-software`, `read:project:jira`, `read:sprint:jira-software`, `read:issue-details:jira`, `read:jql:jira`) required by the board/sprint tools — the Agile `/rest/agile/1.0` API is not covered by the classic `read:jira-work` scope
+
+### Changed
+
+- Extracted the shared issue formatter into `src/utils/format-issue.ts`, reused by `search_issues` and `get_sprint_issues` instead of duplicating it per tool
+
+## [2.2.8] - 2026-07-01
+
+### Security
+
+- Updated the bundled MCP server's pinned pnpm toolchain from 11.5.2 to 11.8.0 to address CVE-2026-55180 (GHSA-3qhv-2rgh-x77r), where pnpm repository config could expand environment secrets into registry requests before scripts run
+
 ## [2.2.7] - 2026-06-08
 
 ### Changed
