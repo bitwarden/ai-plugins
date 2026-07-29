@@ -4,7 +4,9 @@ Automated end-to-end UI testing for Bitwarden web changes using Playwright.
 
 ## Overview
 
-This plugin provides a single user-facing skill, `test-web-changes`, that orchestrates a six-agent pipeline to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run. The pipeline gathers context, explores the affected codebases, builds grounded test cases, verifies the local dev environment is ready, executes the tests, and renders an HTML report with full-page screenshots.
+This plugin's orchestration entry point is `test-web-changes`, which drives a six-agent pipeline that takes a Jira ticket, implementation plan, or feature description and turns it into a full Playwright test run. The pipeline gathers context, explores the affected codebases, builds grounded test cases, verifies the local dev environment is ready, executes the tests, and renders an HTML report with full-page screenshots.
+
+`test-web-changes` is the only skill here that runs a pipeline. One other skill is directly invocable on its own: `reading-mailcatcher-api`, for reading a single Bitwarden email outside a test run. Everything else is a component the pipeline composes.
 
 ## Prerequisites
 
@@ -83,13 +85,13 @@ The six agents are dispatched by `test-web-changes` and are not meant to be invo
 
 | Skill                           | Description                                                                                                                                                                      |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `test-web-changes`              | Orchestration skill; the only user-facing entry point.                                                                                                                           |
+| `test-web-changes`              | Orchestration skill; the only pipeline entry point.                                                                                                                              |
 | `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories.                                                                                  |
 | `determining-required-services` | Maps changed file paths to the local services that need to be running.                                                                                                           |
 | `verifying-environment-health`  | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure.       |
 | `build-test-cases`              | Builds Playwright test cases with a web-first policy from plan context.                                                                                                          |
 | `executing-web-tests`           | Calls the `playwright-cli` skill with guardrails and screenshots.                                                                                                                |
-| `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes.                                                                          |
+| `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes. Also directly invocable outside the pipeline.                            |
 | `using-stripe-cli`              | Queries read-only Stripe test data and advances an already-attached test clock via the Stripe CLI wrapper (`stripe_cli.py`), for Category 4 data needs the web UI can't satisfy. |
 | `compiling-test-report`         | Home of the deterministic report scripts (render_report.py, merge_results.py), templates, and the results-schema reference.                                                      |
 
