@@ -2,7 +2,7 @@
 name: reading-mailcatcher-api
 description: Use this skill whenever you need to read an email from the local Bitwarden Mailcatcher inbox — account verification, magic link login, trial activation, OTP codes, password resets, or any other email-driven flow. Queries the Mailcatcher REST API at http://localhost:1080 to find a message by recipient or subject and extract URLs or tokens from its body. Prefer this over the Mailcatcher browser UI in automated contexts (Playwright's browser CORS restrictions block direct fetch access). Invoke whenever a workflow needs to read, click, or extract content from a message Bitwarden just sent — including account creation, login flows, organization invites, trial activations, and password resets.
 argument-hint: --recipient <email> --pattern <subject-keyword> [--link-filter <regex>]
-allowed-tools: [Bash, Read]
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/read_mailcatcher.py *), Read
 ---
 
 ## Quick reference — use the script
@@ -16,7 +16,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
 - **stdout** (on success): the extracted URL, ready to navigate to or paste into a form field
 - **exit 1 + stderr** (on failure): `NO_MATCH: <diagnostic>` — either no message matched after one retry, or the matched message contained no URL passing the link filter
 
-The script already retries once after a 3-second sleep on the first miss; callers don't need their own retry loop. The procedural reference below documents the underlying Mailcatcher API the script wraps — read it when modifying the script, debugging unexpected output, or doing a one-off curl by hand.
+The script already retries once after a 3-second sleep on the first miss; callers don't need their own retry loop. See `references/manual-api-walkthrough.md` for the underlying Mailcatcher API the script wraps — consult it when modifying the script or debugging unexpected output.
 
 ## User invocation
 
@@ -39,109 +39,7 @@ Invoke this skill whenever a workflow needs to:
 
 ## Prerequisites
 
-Mailcatcher must be running (Docker Compose service). Verify with:
-
-```bash
-curl -s http://localhost:1080/messages > /dev/null && echo "OK" || echo "Mailcatcher not running"
-```
-
-## Step-by-Step Workflow
-
-### Step 1 — List all messages
-
-```bash
-curl -s http://localhost:1080/messages
-```
-
-Returns a JSON array of message objects:
-
-```json
-[
-  {
-    "id": 42,
-    "sender": "<noreply@bitwarden.com>",
-    "recipients": ["<user@example.com>"],
-    "subject": "Verify Your Email",
-    "created_at": "2026-04-21T10:00:00Z",
-    "size": "4200",
-    "formats": ["html", "plain"]
-  }
-]
-```
-
-### Step 2 — Find the target message
-
-Filter by **recipient email** and/or **subject keyword** and select the **highest ID** (most recent):
-
-```bash
-curl -s http://localhost:1080/messages | python3 -c "
-import sys, json
-
-msgs = json.load(sys.stdin)
-
-target_email = 'user@example.com'
-subject_keyword = 'Verify'
-matches = [m for m in msgs if
-    any(target_email in r for r in m['recipients']) and
-    subject_keyword.lower() in m['subject'].lower()
-]
-if not matches:
-    print('NO_MATCH')
-    sys.exit()
-
-best = max(matches, key=lambda m: m['id'])
-print(best['id'])
-"
-```
-
-**Handle both outcomes before proceeding:**
-
-- `NO_MATCH` — no matching email yet; wait 3–5 seconds and retry (up to ~30 s total before giving up)
-- A numeric ID — proceed to Step 3
-
-**When filtering:**
-
-- Match on recipient email when the test account address is known (preferred)
-- Match on subject keyword when recipient is generic/unknown
-- Always take `max(id)` — higher ID = more recent message
-
-### Step 3 — Fetch the message body
-
-For link/token extraction, plain text is usually sufficient and easier to parse:
-
-```bash
-MSG_ID=42
-curl -s http://localhost:1080/messages/${MSG_ID}.plain
-```
-
-Use `.html` only when the plain text body is empty or the link is only in the HTML part:
-
-```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.html
-```
-
-### Step 4 — Extract the link or token
-
-**Extract any URL matching a keyword pattern:**
-
-```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
-  grep -oE 'https?://[^ >)"]+' | grep -i 'verify\|confirm\|signup\|token\|trial\|login' | head -1
-```
-
-**Extract an admin magic link:**
-
-```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
-  grep -oE 'http://localhost:62911/login/confirm[^ >)"]+' | head -1
-```
-
-**Extract a web vault verification/signup link:**
-
-```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
-  grep -oE 'https://localhost:8080/#/[^ >)"]+' | head -1
-```
+Mailcatcher must be running (Docker Compose service) before invoking the script. If it isn't, the script exits 3 with an `ERROR: Mailcatcher unreachable` message on stderr. See `references/manual-api-walkthrough.md` for a manual reachability check.
 
 ## Common Email Types and Patterns
 
@@ -152,8 +50,12 @@ See `${CLAUDE_SKILL_DIR}/references/email-patterns.md` for subject lines, link f
 - **Tokens expire** — extract and use links immediately; do not cache them for later steps
 - **No auth required** — Mailcatcher runs with no credentials on localhost:1080
 - **High-volume sessions** — when many test accounts are created, always filter by recipient email, not just subject, to avoid getting the wrong message
-- **CORS blocker** — never attempt `fetch('http://localhost:1080/...')` from Playwright's browser context; always use curl from the agent shell
-- **Delete messages** — if isolation is needed, `curl -X DELETE http://localhost:1080/messages` clears all messages. **ALWAYS ask the user before running this command** — it is irreversible and will destroy evidence from earlier test steps.
+- **CORS blocker** — never attempt `fetch('http://localhost:1080/...')` from Playwright's browser context; always use the co-located script from the agent shell
+
+## References
+
+- `references/email-patterns.md` — per-email-type recipients, subjects, and link filters
+- `references/manual-api-walkthrough.md` — raw REST API commands, for debugging the script only
 
 ## Result
 

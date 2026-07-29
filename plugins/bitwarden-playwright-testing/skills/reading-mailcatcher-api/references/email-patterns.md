@@ -85,11 +85,16 @@ curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
 
 ## API Quick Reference
 
+| Operation           | Command                                             |
+| ------------------- | --------------------------------------------------- |
+| List all messages   | `curl -s http://localhost:1080/messages`            |
+| Get plain text body | `curl -s http://localhost:1080/messages/{id}.plain` |
+| Get HTML body       | `curl -s http://localhost:1080/messages/{id}.html`  |
+| Get JSON metadata   | `curl -s http://localhost:1080/messages/{id}.json`  |
+
+> These two commands are destructive and irreversible. Clearing the inbox mid-run destroys verification tokens that earlier test steps depend on. They are not covered by this skill's `allowed-tools`, so each requires a fresh permission prompt.
+
 | Operation               | Command                                                                                   |
 | ----------------------- | ----------------------------------------------------------------------------------------- |
-| List all messages       | `curl -s http://localhost:1080/messages`                                                  |
-| Get plain text body     | `curl -s http://localhost:1080/messages/{id}.plain`                                       |
-| Get HTML body           | `curl -s http://localhost:1080/messages/{id}.html`                                        |
-| Get JSON metadata       | `curl -s http://localhost:1080/messages/{id}.json`                                        |
 | Delete specific message | `curl -X DELETE http://localhost:1080/messages/{id}`                                      |
 | Clear all messages      | `curl -X DELETE http://localhost:1080/messages` — **ALWAYS ask user first; irreversible** |
