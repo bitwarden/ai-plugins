@@ -7,7 +7,7 @@ description: Git commit conventions and workflow for Bitwarden repositories. Use
 
 ## Branch Check
 
-Check the current branch. If it's `main`, ask before staging or committing — offer to either take a branch name or generate one from the change (confirm before creating it). Then `git checkout -b <name>`.
+If the current branch is `main`, ask for a branch name before staging or committing. Offer to suggest one based on the change, and confirm it before switching.
 
 ## Commit Message Format
 
