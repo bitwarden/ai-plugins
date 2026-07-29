@@ -67,5 +67,15 @@ class MainTest(unittest.TestCase):
         self.assertEqual(rc, 4)
 
 
+class ScriptIsExecutableTest(unittest.TestCase):
+    def test_script_has_execute_bit(self):
+        script_path = os.path.join(SCRIPTS, "read_admin_email.py")
+        self.assertTrue(
+            os.access(script_path, os.X_OK),
+            f"{script_path} must be executable: SKILL.md invokes it by bare "
+            "path relying on its shebang, with no python3 prefix",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
