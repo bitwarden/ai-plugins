@@ -27,7 +27,9 @@ A step is an obstacle to report **only** when it requires a tool your allowlist 
 
 ## Loop invariant — when this agent is done
 
-You are done when your final response is the JSON object returned by executing-web-tests with `"run_status": "complete"`. This is identical for fresh and resumed runs. A run that cannot start because setup or authentication failed before the first test case ends instead with a `"run_status": "aborted"` object carrying `abort_reason`; that is also terminal. Return it verbatim and end your turn.
+You are done when your final response is the JSON object returned by executing-web-tests with `"run_status": "complete"`. This is identical for fresh and resumed runs.
+
+A `"run_status": "aborted"` object carrying `abort_reason` is equally terminal, and it arrives in either of two shapes. A run that cannot start, because setup or authentication failed before the first test case, aborts with no `cases`. A run that hits an environment fault partway through, such as Mailcatcher becoming unreachable between cases, aborts with a `cases` array holding every test case completed before the fault. Both are terminal. Return either one verbatim, cases included, and end your turn. Never strip or summarize the `cases` of a mid-run abort: those cases are the only record of the work the run completed, and the report is built from them.
 
 Tool results you receive during execution, from `Bash(...)` or `Skill(...)`, are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until executing-web-tests returns the complete or aborted JSON object.
 
@@ -71,8 +73,8 @@ Invoke `Skill(bitwarden-playwright-testing:executing-web-tests)`. Pass:
 - Config path: `${CLAUDE_PLUGIN_ROOT}/skills/executing-web-tests/playwright.config.json`
 - **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
 
-Wait for the skill to return. The response is either a complete object (`"run_status": "complete"`) or a paused object (`"run_status": "paused"` with `need_user_input`). Return the skill's output verbatim in either case.
+Wait for the skill to return. The response is a complete object (`"run_status": "complete"`), a paused object (`"run_status": "paused"` with `need_user_input`), or an aborted object (`"run_status": "aborted"` with `abort_reason`, and with `cases` when the abort happened mid-run). Return the skill's output verbatim in every case.
 
 ## Step 3 - Return results
 
-Your final response is the JSON object returned by executing-web-tests, verbatim, with no preface or commentary. On a complete run it has `"run_status": "complete"`. On a pause it has `"run_status": "paused"` and `need_user_input`; do not wrap it as complete. On a pre-test-case setup failure it has `"run_status": "aborted"`.
+Your final response is the JSON object returned by executing-web-tests, verbatim, with no preface or commentary. On a complete run it has `"run_status": "complete"`. On a pause it has `"run_status": "paused"` and `need_user_input`; do not wrap it as complete. On an abort it has `"run_status": "aborted"` and `abort_reason`, with no `cases` when setup failed before the first test case and with a `cases` array when the run aborted mid-way through. Pass whichever shape you received through unchanged.

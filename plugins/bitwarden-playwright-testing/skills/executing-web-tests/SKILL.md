@@ -175,7 +175,18 @@ ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
 stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`. Branch on the exit code:
 
 - **Exit 1** (`NO_MATCH`) after the script's own retry: mark the test case FAIL immediately with the `NO_MATCH` diagnostic in `Notes:`.
-- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable, returned unparseable JSON, or `MAILCATCHER_URL` names a disallowed host. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return the same shape as a setup failure: `{ "run_status": "aborted", "abort_reason": "environment failure (<the script's stderr>)" }`. Do not mark cases FAIL for this.
+- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable, returned unparseable JSON, or `MAILCATCHER_URL` names a disallowed host. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return an aborted object that carries every test case you completed before the fault, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/aborted-with-cases.json`:
+
+  ```json
+  {
+    "run_status": "aborted",
+    "abort_reason": "environment failure (<the script's stderr>)",
+    "cases": [<every test case completed before the fault>, "..."]
+  }
+  ```
+
+  This is **not** the same shape as a setup failure. A setup failure is pre-first-case by definition and so has nothing to report; this fault lands mid-run, potentially after several cases have already passed. Any test case already completed must be included, because dropping them loses the run's report entirely: the merge script has no cases to accumulate, and the orchestrator skips report generation when `cases` comes back empty. Use `[]` only if the fault hit before any case completed. Do not mark cases FAIL for this.
+
 - **Exit 2**: your invocation was wrong. Correct it and retry once; if it still fails, report the obstacle.
 
 Do not attempt to read Mailcatcher via any other means (curl, direct API calls, or sub-agent). Do not invoke `Skill(reading-mailcatcher-api)` (it is documentation for the underlying API; the co-located script is the only sanctioned transport).
@@ -213,7 +224,9 @@ Return a single JSON object and nothing else, matching `${CLAUDE_PLUGIN_ROOT}/sk
 }
 ```
 
-If setup or authentication failed before any test case ran (see Step 2), return the aborted object instead, with no cases:
+If the run aborted, return an aborted object instead. There are two shapes, and which one applies depends entirely on whether any test case had completed when the abort happened.
+
+**Aborted before any test case completed** (setup or authentication failed, see Step 2). No `cases`, because there are none:
 
 ```json
 {
@@ -221,3 +234,15 @@ If setup or authentication failed before any test case ran (see Step 2), return 
   "abort_reason": "setup failure before test cases (<reason>)"
 }
 ```
+
+**Aborted mid-run, after one or more test cases completed** (for example the Mailcatcher environment fault in Step 3). Carry every completed case, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/aborted-with-cases.json`:
+
+```json
+{
+  "run_status": "aborted",
+  "abort_reason": "environment failure (<reason>)",
+  "cases": [<every test case completed before the abort>, "..."]
+}
+```
+
+Omitting `cases` is correct only in the first shape. Once a test case has completed, its result must appear in the object you return; otherwise the run produces no report at all and that work is silently discarded.

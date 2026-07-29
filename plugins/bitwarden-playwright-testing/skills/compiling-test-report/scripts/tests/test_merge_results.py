@@ -49,6 +49,22 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(result["cases"], [])
         self.assertIn("login failed", result["abort_reason"])
 
+    def test_single_aborted_segment_retains_its_own_cases(self):
+        """A mid-run environment fault aborts one segment that carries cases.
+
+        Distinct from test_aborted_last_segment_retains_earlier_cases: there is
+        no earlier segment to carry forward here, so the cases survive only if
+        merge accumulates the aborting segment's own cases too.
+        """
+        result = merge_results.merge([load_example("aborted-with-cases.json")])
+        self.assertEqual(result["run_status"], "aborted")
+        self.assertEqual([c["number"] for c in result["cases"]], [1, 2])
+        self.assertEqual(
+            result["totals"],
+            {"total": 2, "passed": 1, "adaptive": 0, "failed": 1, "errored": 0},
+        )
+        self.assertIn("Mailcatcher unreachable", result["abort_reason"])
+
     def test_aborted_last_segment_retains_earlier_cases(self):
         completed = {
             "run_status": "complete",
