@@ -9,7 +9,7 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change, spanning all four documented input types (a PR, a Jira key, a Tech Breakdown doc, and a Testmo CSV) plus branch/component/screen surfaces ("what's already tested for this PR", "which behaviors have no test today", "cross-reference this Testmo CSV against automated coverage", "inventory coverage for the surfaces in this Tech Breakdown"), and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
-- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. Each subprocess is killed as soon as the model requests a real-work tool (Bash/Task) without first invoking the target skill, so the adversarial should-not-trigger queries never actually clone repos or run build/test toolchains — see the memory note under "Running".
+- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. Each subprocess is killed as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — so the adversarial should-not-trigger queries never actually clone repos or run build/test toolchains. See the memory note under "Running".
 - `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-07-29 with `--model claude-opus-4-8` at `--runs-per-query 7`.
 
 ## Running
@@ -28,7 +28,7 @@ python3 run_real_eval.py \
 
 20 queries × 7 runs = 140 `claude -p` invocations. With 5 workers the run takes several minutes.
 
-Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for a real-work tool (Bash/Task) — but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
+Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist — but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
 
 ## Regression check
 

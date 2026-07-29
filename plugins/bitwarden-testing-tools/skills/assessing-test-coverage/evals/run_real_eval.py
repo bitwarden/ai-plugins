@@ -4,9 +4,10 @@
 Unlike the skill-creator harness (which only counts a temp `*-skill-<uuid>`
 copy), this runs `claude -p` per query and counts a trigger when any Skill or
 Read call references the real skill token — so it works against the real
-installed skill and is portable across environments. It bails on the first
-real-work tool (see EXEC_TOOLS) to avoid the adversarial should-not-trigger
-queries cloning repos and spawning toolchains until they exhaust memory.
+installed skill and is portable across environments. Read-only `gh`/`git`
+lookups (see READ_ONLY_BASH) are scanned past, but any other real-work tool
+(see EXEC_TOOLS) bails to avoid the adversarial should-not-trigger queries
+cloning repos and spawning toolchains until they exhaust memory.
 """
 
 import argparse
@@ -27,6 +28,10 @@ EXEC_TOOLS = {"Bash", "Task"}
 
 # Read-only Bash lookups scanned past instead of counted as real work.
 READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api", "git rev-parse", "git remote")
+
+# A read-only prefix only earns the carve-out if it's a single command; any
+# shell operator could chain heavy work onto it (`gh api ... && npm test`).
+SHELL_CHAINS = (";", "|", "&", "`", "$(", "\n")
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:
@@ -85,8 +90,10 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                     # trigger. Bail so the finally block kills the child before
                     # its tool_use spawns anything. (Cheap read-only tools are
                     # scanned past; the model may inspect files first.)
-                    if name == "Bash" and inp.get("command", "").strip().startswith(READ_ONLY_BASH):
-                        continue
+                    if name == "Bash":
+                        cmd = inp.get("command", "").strip()
+                        if cmd.startswith(READ_ONLY_BASH) and not any(op in cmd for op in SHELL_CHAINS):
+                            continue
                     if name in EXEC_TOOLS:
                         if first_skill_seen is None:
                             first_skill_seen = f"{name} (bailed: real-work tool)"
