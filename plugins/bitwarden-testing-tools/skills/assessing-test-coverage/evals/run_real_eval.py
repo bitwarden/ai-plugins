@@ -158,7 +158,7 @@ def main():
     parser.add_argument("--runs-per-query", type=int, default=3)
     parser.add_argument("--num-workers", type=int, default=5)
     parser.add_argument("--timeout", type=int, default=45)
-    parser.add_argument("--model", default="claude-opus-4-7")
+    parser.add_argument("--model", default="claude-opus-4-8")
     args = parser.parse_args()
 
     eval_set = json.loads(Path(args.eval_set).read_text())

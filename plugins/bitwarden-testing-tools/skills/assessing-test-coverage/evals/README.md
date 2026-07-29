@@ -8,9 +8,9 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 
 ## Files
 
-- `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change ("what's already tested for this PR", "which behaviors have no test today", "audit the current coverage for…") and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
+- `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change, spanning all four documented input types (a PR, a Jira key, a Tech Breakdown doc, and a Testmo CSV) plus branch/component/screen surfaces ("what's already tested for this PR", "which behaviors have no test today", "cross-reference this Testmo CSV against automated coverage", "inventory coverage for the surfaces in this Tech Breakdown"), and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
 - `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. Each subprocess is killed as soon as the model requests a real-work tool (Bash/Task) without first invoking the target skill, so the adversarial should-not-trigger queries never actually clone repos or run build/test toolchains — see the memory note under "Running".
-- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-07-24 with `--model claude-sonnet-4-6` at `--runs-per-query 7`.
+- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-07-29 with `--model claude-opus-4-8` at `--runs-per-query 7`.
 
 ## Running
 
@@ -22,7 +22,7 @@ python3 run_real_eval.py \
   --runs-per-query 7 \
   --num-workers 5 \
   --timeout 90 \
-  --model claude-sonnet-4-6 \
+  --model claude-opus-4-8 \
   > result.json
 ```
 
