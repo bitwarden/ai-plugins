@@ -59,7 +59,7 @@ Research patterns from industry, comparable codebases, and Bitwarden's own prior
 - Identify **2–4 candidate approaches**. Fewer than 2 means you skipped the comparison; more than 4 usually means you haven't classified them well.
 - For each approach, document trade-offs explicitly: complexity, migration cost, performance, security posture, operational implications, self-hosted impact, V+/-2 compatibility, who builds the framework, who adopts it.
 - Pair up with current or past shepherds whose initiatives are adjacent. Sharing findings catches dependencies and conflicts early.
-- Bring `Skill(architecting-solutions)` from `bitwarden-tech-lead` into play when the trade-offs are inside one team's codebase — that skill carries the team-scope architectural judgment heuristics.
+- Bring `Skill(architecting-solutions)` from `bitwarden-delivery-tools` into play when the trade-offs are inside one team's codebase — that skill carries the team-scope architectural judgment heuristics.
 
 Be honest about the leading candidate but write the assessment as if any of the 2–4 might win. If you only document one approach seriously, leadership and Architecture Council can't actually make the decision — they're rubber-stamping yours.
 
@@ -131,4 +131,4 @@ During Research, update the BW Initiative (see [Idea-Based Initiatives](https://
 - [Software Initiative Funnel](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/584515614) §2 — canonical phase description, entry/exit criteria, examples.
 - [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779) — how to update the BW Initiative through Research.
 - [Technical Strategy Ideas](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2344517656) — the upstream TSI's Stakeholder & Engagement Map informs which friction points to surface in the assessment.
-- Related: `Skill(shepherding-an-initiative)` for the umbrella playbook, `Skill(running-a-proof-of-concept)` for what Research feeds into, `Skill(architecting-solutions)` (in `bitwarden-tech-lead`) for the team-scope architectural judgment heuristics to apply when options live inside one team's domain.
+- Related: `Skill(shepherding-an-initiative)` for the umbrella playbook, `Skill(running-a-proof-of-concept)` for what Research feeds into, `Skill(architecting-solutions)` (in `bitwarden-delivery-tools`) for the team-scope architectural judgment heuristics to apply when options live inside one team's domain.
