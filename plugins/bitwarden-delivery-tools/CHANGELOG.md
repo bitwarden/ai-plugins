@@ -14,9 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `perform-preflight`: added a **Code Review** checklist item scoped to PR preparation that delegates enforcement to `creating-pull-request`; it does not block intermediate commits or `force-multiplier` fan-out runs.
 - `creating-pull-request`: narrowed Step 1's preflight options so the quality gate can no longer be silently skipped.
-- `force-multiplier`: noted that the code-review gate resolves once at PILOT rather than per target, so bulk campaigns are not blocked by a slash command they cannot invoke.
 
 ## [2.1.0] - 2026-07-01
 

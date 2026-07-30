@@ -57,7 +57,7 @@ Force Multiplier is the **cross-target** layer. Per-target intelligence lives in
 - `Skill(labeling-changes)` — the conventional type keyword that drives the `t:` label.
 - `Skill(creating-pull-request)` — the draft-PR workflow, template, and `ai-review` label.
 
-Of these, `creating-pull-request` is **interactive** — it prompts per PR, which you cannot answer dozens of times. Resolve it at **PILOT**: walk it once to lock the title format, body template, and labels, then replicate that confirmed pattern non-interactively across the fan-out as draft PRs. Its code-review gate resolves at PILOT too — the pilot target's diff gets the review; the per-target second pass (`references/pipeline.md`) covers the rest of the fan-out. Do not attempt a slash-command review per target.
+Of these, `creating-pull-request` is **interactive** — it prompts per PR, which you cannot answer dozens of times. Resolve it at **PILOT**: walk it once to lock the title format, body template, and labels, then replicate that confirmed pattern non-interactively across the fan-out as draft PRs.
 
 ## Safety defaults (non-negotiable unless explicitly overridden)
 

@@ -43,7 +43,7 @@ After the review:
 - For **high-blast-radius** changes (auth, crypto, data handling, migrations), offer a second-model re-run — findings vary by model, so a second pass on the riskiest changes can catch what the first missed. Offer it; don't force it.
 - The review writes `review-summary.md` and `review-inline-comments.md` to the working-directory root. Delete or gitignore them before staging so they are never committed.
 
-This gate needs the `bitwarden-code-review` plugin. If it isn't installed, stop and prompt the user to install it (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing — do not silently skip the review. (In an unattended `force-multiplier` campaign this gate is resolved once at PILOT, not per target.)
+This gate needs the `bitwarden-code-review` plugin. If it isn't installed, stop and prompt the user to install it (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing — do not silently skip the review.
 
 ### Step 2 — Determine change type and propose the title
 

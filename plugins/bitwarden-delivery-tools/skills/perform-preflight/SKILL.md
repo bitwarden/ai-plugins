@@ -31,12 +31,6 @@ Run this checklist before committing or creating a PR. Consult the repo's CLAUDE
 - [ ] Dependency injection and error handling follow repo convention
 - [ ] String resources added to the correct location (if applicable)
 
-## Code Review (PR preparation only)
-
-Skip this when committing intermediate work — it applies only when preparing to open a PR. A local code review is expected before submission; the `creating-pull-request` skill enforces it and routes the review depth by change size.
-
-- [ ] Code review run over the full change (via `creating-pull-request`), with CRITICAL and IMPORTANT findings addressed or their deferral recorded in the PR body
-
 ## On Failure
 
 If any check fails, fix the issue before proceeding. For test failures, diagnose the root cause rather than skipping. For lint/format failures, run the repo's auto-fix command if available. If a check cannot be resolved, flag it to the user with the specific failure output.
