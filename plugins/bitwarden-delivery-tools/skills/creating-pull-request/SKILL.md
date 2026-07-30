@@ -18,15 +18,32 @@ Missing any one of these is silent — CI won't reject the PR, and the reviewer 
 
 Follow these steps in order. Each one produces information the next step needs, and the preview in Step 5 depends on all of them.
 
-### Step 1 — Confirm preflight is done
+### Step 1 — Confirm preflight, then run the code-review gate
 
-A PR opened on broken work wastes reviewer time and tends to mask the real problem under a pile of comment threads. Use the `AskUserQuestion` tool to confirm preflight before continuing:
+A PR opened on broken work — or work that skipped review — wastes reviewer time and buries the real problem under comment threads. Settle two things before continuing — you can ask both in a single `AskUserQuestion` call.
 
-- **Question**: "Has `perform-preflight` already run on this branch?"
+**1a — Confirm preflight passed.**
+
+- **Question**: "Has `perform-preflight` passed on this branch?"
 - **Options**:
-  - `Yes — proceed` — continue to Step 2
-  - `No — run it now` — invoke `perform-preflight`, then continue to Step 2 once it passes
-  - `Skip preflight` — proceed only if the user explicitly opts out
+  - `Yes — proceed`
+  - `No — run it now` — invoke `perform-preflight`, then continue once it passes
+
+**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR, not an optional step.
+
+- **Question**: "How deep is this change? (sets review depth)"
+- **Options**:
+  - `Trivial` — docs, comments, or a config tweak: a single `/bitwarden-code-review:code-review-local` pass is enough, or skip only on explicit user opt-out
+  - `Standard` — a typical feature or fix in one area: run `/bitwarden-code-review:code-review-local`
+  - `Substantial` — architectural, cross-cutting, or security-touching: run the `performing-multi-agent-code-review` skill (architecture compliance plus parallel quality and security passes)
+
+After the review:
+
+- Address every CRITICAL and IMPORTANT finding, or record why each is deferred in the PR body's Objective section (Step 3).
+- For **high-blast-radius** changes (auth, crypto, data handling, migrations), offer a second-model re-run — findings vary by model, so a second pass on the riskiest changes can catch what the first missed. Offer it; don't force it.
+- The review writes `review-summary.md` and `review-inline-comments.md` to the working-directory root. Delete or gitignore them before staging so they are never committed.
+
+This gate needs the `bitwarden-code-review` plugin. If it isn't installed, stop and prompt the user to install it (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing — do not silently skip the review. (In an unattended `force-multiplier` campaign this gate is resolved once at PILOT, not per target.)
 
 ### Step 2 — Determine change type and propose the title
 

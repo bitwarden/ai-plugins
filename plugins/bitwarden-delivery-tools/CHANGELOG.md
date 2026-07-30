@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.0] - 2026-07-30
 
+### Added
+
+- `creating-pull-request`: a code-review gate in Step 1 that runs before a PR is opened, routing review depth by change blast radius — Trivial → single `code-review-local` pass, Standard → `code-review-local`, Substantial → `performing-multi-agent-code-review`. Records deferred CRITICAL/IMPORTANT findings in the PR body, offers an optional second-model re-run for high-blast-radius changes, cleans up the review artifact files before staging, and prompts to install `bitwarden-code-review` if it is absent.
+- `README`: a **Companion plugins** section documenting the cross-plugin dependency on `bitwarden-code-review`.
+
 ### Changed
 
-- `perform-preflight`: added a dedicated **Code Review** gate making `/bitwarden-code-review:code-review-local` a required, checkable step before opening a PR, plus a lead-in note in the intro flagging it as a submission blocker. Codifies the staff expectation that a local code review runs before every PR submission. When the `bitwarden-code-review` plugin isn't installed, the gate prompts the user to install it rather than skipping the review; documented the cross-plugin dependency in the plugin README.
+- `perform-preflight`: added a **Code Review** checklist item scoped to PR preparation that delegates enforcement to `creating-pull-request`; it does not block intermediate commits or `force-multiplier` fan-out runs.
+- `creating-pull-request`: narrowed Step 1's preflight options so the quality gate can no longer be silently skipped.
+- `force-multiplier`: noted that the code-review gate resolves once at PILOT rather than per target, so bulk campaigns are not blocked by a slash command they cannot invoke.
 
 ## [2.1.0] - 2026-07-01
 

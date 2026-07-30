@@ -7,8 +7,6 @@ description: Quality gate checklist to run before committing or creating a PR. U
 
 Run this checklist before committing or creating a PR. Consult the repo's CLAUDE.md for platform-specific commands (test runner, linter, formatter).
 
-**Required before opening a PR:** the `/bitwarden-code-review:code-review-local` command must be run and its findings addressed. A PR is not ready to submit until this gate passes — see the Code Review section below.
-
 ## Tests
 
 - [ ] Run tests for affected modules (consult CLAUDE.md for commands)
@@ -33,16 +31,11 @@ Run this checklist before committing or creating a PR. Consult the repo's CLAUDE
 - [ ] Dependency injection and error handling follow repo convention
 - [ ] String resources added to the correct location (if applicable)
 
-## Code Review
+## Code Review (PR preparation only)
 
-Required before opening a PR — this is a submission blocker, not an optional step.
+Skip this when committing intermediate work — it applies only when preparing to open a PR. A local code review is expected before submission; the `creating-pull-request` skill enforces it and routes the review depth by change size.
 
-- [ ] Run `/bitwarden-code-review:code-review-local` over the change
-- [ ] Review every finding it writes to the local review files
-- [ ] Address CRITICAL and IMPORTANT findings, or record why each is being deferred
-- [ ] Re-run after substantive changes so the review reflects what will actually be submitted
-
-This gate requires the `bitwarden-code-review` plugin. If `/bitwarden-code-review:code-review-local` is unavailable, stop and prompt the user to install it (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing — do not skip the review. If it is installed but has not been run yet, stop and run it before opening the PR.
+- [ ] Code review run over the full change (via `creating-pull-request`), with CRITICAL and IMPORTANT findings addressed or their deferral recorded in the PR body
 
 ## On Failure
 
