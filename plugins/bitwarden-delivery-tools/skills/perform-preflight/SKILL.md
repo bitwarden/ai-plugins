@@ -42,7 +42,7 @@ Required before opening a PR — this is a submission blocker, not an optional s
 - [ ] Address CRITICAL and IMPORTANT findings, or record why each is being deferred
 - [ ] Re-run after substantive changes so the review reflects what will actually be submitted
 
-If you are preparing a PR and have not run `/bitwarden-code-review:code-review-local`, stop and run it before continuing.
+This gate requires the `bitwarden-code-review` plugin. If `/bitwarden-code-review:code-review-local` is unavailable, stop and prompt the user to install it (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing — do not skip the review. If it is installed but has not been run yet, stop and run it before opening the PR.
 
 ## On Failure
 

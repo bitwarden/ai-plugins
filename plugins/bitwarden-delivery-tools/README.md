@@ -54,6 +54,16 @@ The lifecycle skills follow the same principle: they describe the funnel and tra
 /plugin install bitwarden-delivery-tools@bitwarden-marketplace
 ```
 
+### Companion plugins
+
+The `perform-preflight` skill treats a local code review as a required gate before opening a PR, which depends on the `bitwarden-code-review` plugin. Install it alongside this one:
+
+```bash
+/plugin install bitwarden-code-review@bitwarden-marketplace
+```
+
+If it isn't installed, `perform-preflight` will prompt you to install it rather than skip the review.
+
 ## Usage
 
 Skills activate based on natural-language triggers during your delivery workflow:

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `perform-preflight`: added a dedicated **Code Review** gate making `/bitwarden-code-review:code-review-local` a required, checkable step before opening a PR, plus a lead-in note in the intro flagging it as a submission blocker. Codifies the staff expectation that a local code review runs before every PR submission.
+- `perform-preflight`: added a dedicated **Code Review** gate making `/bitwarden-code-review:code-review-local` a required, checkable step before opening a PR, plus a lead-in note in the intro flagging it as a submission blocker. Codifies the staff expectation that a local code review runs before every PR submission. When the `bitwarden-code-review` plugin isn't installed, the gate prompts the user to install it rather than skipping the review; documented the cross-plugin dependency in the plugin README.
 
 ## [2.1.0] - 2026-07-01
 
