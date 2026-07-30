@@ -1,0 +1,54 @@
+{
+  "skill_name": "committing-changes",
+  "eval_type": "behavior",
+  "purpose": "Check that the `committing-changes` Branch Check step gates a commit that would land on the repository's default branch, and stays out of the way otherwise. Two pairs: `default-is-main-no-hint` / `already-off-default` cover the gate firing on the default branch and staying silent off it; `user-supplies-branch-name` / `user-delegates-branch-naming` cover the gate yielding to an explicit instruction instead of asking redundantly. Each prompt supplies the ticket and change type so an unresolved branch is the only thing the skill has to decide, and each case is advice-only: the git state is given in the prompt and the graded artifact is the stated plan, so re-runs perform no staging, commits, or branch creation.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "default-is-main-no-hint",
+      "prompt": "I want to get this committed. Ticket is PM-40021 and it's a fix. Here's where I am:\n\n```\n$ git status --short\n M src/vault/export.ts\n$ git branch --show-current\nmain\n$ git branch -a\n* main\n  remotes/origin/HEAD -> origin/main\n  remotes/origin/main\n```\n\nWalk me through exactly what you'd run, before you run anything.",
+      "expected_output": "Recognizes that `main` is this repository's default branch (resolved from `origin/HEAD`, not assumed from the name), declines to stage or commit directly onto it, and asks for a branch name or offers to suggest one for confirmation. Does not present a plan whose first action is `git add` or `git commit` on the current branch.",
+      "expectations": [
+        "Identifies the current branch as the repository's default branch",
+        "Does not plan to stage or commit on the current branch",
+        "Asks for a branch name, or offers to suggest one and confirm it, before committing",
+        "Uses the supplied ticket and type in the proposed commit message (`[PM-40021] fix: ...`) rather than asking about them"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "already-off-default",
+      "prompt": "I want to get this committed. Ticket is PM-40021 and it's a fix. Here's where I am:\n\n```\n$ git status --short\n M src/vault/export.ts\n$ git branch --show-current\nfix/export-timeout\n$ git branch -a\n  main\n* fix/export-timeout\n  remotes/origin/HEAD -> origin/main\n  remotes/origin/main\n```\n\nWalk me through exactly what you'd run, before you run anything.",
+      "expected_output": "Recognizes the current branch is not the default, raises no branch question at all, and plans to stage and commit on `fix/export-timeout` using the supplied ticket and type.",
+      "expectations": [
+        "Does not ask for or propose a new branch",
+        "Plans to stage and commit on the current branch `fix/export-timeout`",
+        "Uses the supplied ticket and type in the proposed commit message (`[PM-40021] fix: ...`)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "user-supplies-branch-name",
+      "prompt": "I want to get this committed. Ticket is PM-40021 and it's a fix. I'm on the default branch, so put it on a branch called `fix/export-timeout` and commit it there. Here's where I am:\n\n```\n$ git status --short\n M src/vault/export.ts\n$ git branch --show-current\nmain\n$ git branch -a\n* main\n  remotes/origin/HEAD -> origin/main\n  remotes/origin/main\n```\n\nWalk me through exactly what you'd run, before you run anything.",
+      "expected_output": "Uses the branch name the user supplied without asking a redundant branch question, plans to create and switch to `fix/export-timeout`, and commits there with the supplied ticket and type.",
+      "expectations": [
+        "Does not ask which branch to use, since the user already supplied one",
+        "Plans to create and switch to `fix/export-timeout` before committing",
+        "Plans to commit on the new branch, not on the default branch",
+        "Uses the supplied ticket and type in the proposed commit message (`[PM-40021] fix: ...`)"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "user-delegates-branch-naming",
+      "prompt": "I want to get this committed. Ticket is PM-40021 and it's a fix to the vault export timeout. I'm on the default branch — just pick a sensible branch name yourself and commit it there. Here's where I am:\n\n```\n$ git status --short\n M src/vault/export.ts\n$ git branch --show-current\nmain\n$ git branch -a\n* main\n  remotes/origin/HEAD -> origin/main\n  remotes/origin/main\n```\n\nWalk me through exactly what you'd run, before you run anything.",
+      "expected_output": "Proposes a specific branch name derived from the change rather than asking the user to supply one, plans to create and switch to it, and commits there with the supplied ticket and type.",
+      "expectations": [
+        "Proposes a specific branch name rather than asking the user to supply one",
+        "The proposed name reflects the change or the ticket (e.g. references the export timeout or PM-40021)",
+        "Plans to commit on the new branch, not on the default branch",
+        "Uses the supplied ticket and type in the proposed commit message (`[PM-40021] fix: ...`)"
+      ]
+    }
+  ]
+}

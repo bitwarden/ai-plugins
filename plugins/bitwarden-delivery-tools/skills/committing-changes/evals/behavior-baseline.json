@@ -1,0 +1,27 @@
+{
+  "runs_per_arm": 2,
+  "grader_model": "claude-opus-5",
+  "denominator": "expectations x runs_per_arm",
+  "claude-sonnet-5/default": {
+    "default-is-main-no-hint": {
+      "new-skill": "8/8",
+      "old-skill": "6/8",
+      "no-skill": "6/8"
+    },
+    "already-off-default": {
+      "new-skill": "6/6",
+      "old-skill": "6/6",
+      "no-skill": "6/6"
+    },
+    "user-supplies-branch-name": {
+      "new-skill": "8/8",
+      "old-skill": "8/8",
+      "no-skill": "8/8"
+    },
+    "user-delegates-branch-naming": {
+      "new-skill": "8/8",
+      "old-skill": "8/8",
+      "no-skill": "8/8"
+    }
+  }
+}
