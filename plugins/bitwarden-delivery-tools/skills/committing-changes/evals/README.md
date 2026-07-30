@@ -1,12 +1,13 @@
 # committing-changes evals
 
-Reproducible trigger-rate test for the `bitwarden-delivery-tools:committing-changes` skill. Run before merging any change to the skill's `description` or frontmatter.
+Evals for the `bitwarden-delivery-tools:committing-changes` skill. Run the trigger eval before merging any change to the skill's `description` or frontmatter; run the behavioral eval before merging any change to the skill body.
 
 ## Files
 
 - `trigger-eval.json` — 13-query test set: 8 should-trigger phrasings and 5 should-not-trigger near-misses against sibling skills (`creating-pull-request`, `labeling-changes`, `perform-preflight`), the cross-plugin `addressing-code-review-comments` skill, and bare branch-management queries.
 - `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. See `creating-pull-request/evals/run_real_eval.py` for why this hand-rolled runner exists instead of the skill-creator harness.
-- `baseline.json` — last known-good run. Diff against this to spot regressions.
+- `baseline.json` — last known-good trigger-eval run. Diff against this to spot regressions.
+- `behavioral-eval.md` — hand-run cases for the Branch Check step, with a recorded pre-change baseline. Rerun case A on any change to the skill body.
 
 ## Running
 

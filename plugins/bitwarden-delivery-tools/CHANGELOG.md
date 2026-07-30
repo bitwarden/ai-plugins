@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`committing-changes` skill** — added a branch check step. If the current branch is `main` when the skill is invoked, the user is now asked to either provide a branch name or have Claude generate one, and the branch is switched before staging or committing.
+- **`committing-changes` skill** — added a branch check step. If the current branch is the repository's default branch when the skill is invoked, the user is now asked to either provide a branch name or have Claude generate one, and the branch is switched before staging or committing.
+- **`committing-changes` eval set** (`skills/committing-changes/evals/`) — a 13-query trigger eval with a recorded baseline, plus a behavioral eval covering the branch check step with a pre-change ablation baseline.
 
 ## [2.3.0] - 2026-07-30
 
