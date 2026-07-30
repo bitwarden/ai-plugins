@@ -19,6 +19,9 @@ import getIssueComments from "./tools/get-issue-comments.js";
 import getIssueRemoteLinks from "./tools/get-issue-remote-links.js";
 import searchIssues from "./tools/search-issues.js";
 import listProjects from "./tools/list-projects.js";
+import listBoards from "./tools/list-boards.js";
+import getSprints from "./tools/get-sprints.js";
+import getSprintIssues from "./tools/get-sprint-issues.js";
 
 // Confluence tools
 import getConfluencePage from "./tools/get-confluence-page.js";
@@ -37,6 +40,9 @@ const tools: ToolDefinition[] = [
   getIssueRemoteLinks,
   searchIssues,
   listProjects,
+  listBoards,
+  getSprints,
+  getSprintIssues,
   getConfluencePage,
   getConfluencePageComments,
   getChildPages,

@@ -14,20 +14,19 @@ The tech lead represents a team inside Bitwarden's architecture process — arch
 
 ## Skills
 
-| Skill                                | What It Does                                                                                                                                          |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `architecting-solutions`             | Architectural judgment framework: security mindset, blast radius, Bitwarden constraints, working with the architecture group and initiative shepherds |
-| `contributing-to-technical-strategy` | Full vertical from Technical Strategy Ideas through BW Initiatives to team epics and stories — recognizing, framing, tracing, breaking down           |
+| Skill                                | What It Does                                                                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contributing-to-technical-strategy` | Full vertical from Technical Strategy Ideas through BW Initiatives to team epics and stories — recognizing, framing, tracing, breaking down |
 
 ## Cross-Plugin Integration
 
-| Plugin                        | How It's Used                                                                                                                                               |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bitwarden-delivery-tools`    | Delivery lifecycle skills — `navigating-the-initiative-funnel` for funnel phase mechanics, `running-work-transitions` for ownership transitions either side |
-| `bitwarden-security-engineer` | Security context (P01-P06), architecture pattern review, threat modeling                                                                                    |
-| `bitwarden-product-analyst`   | Consumes requirements documents as upstream input                                                                                                           |
-| `bitwarden-software-engineer` | Implementation conventions for server, client, and database decisions                                                                                       |
-| `bitwarden-atlassian-tools`   | Jira issue research and Confluence page access for the funnel, operating model, and TSI documents this plugin's skills reference                            |
+| Plugin                        | How It's Used                                                                                                                                                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-delivery-tools`    | `architecting-solutions` for team-level architectural judgment; `navigating-the-initiative-funnel` for funnel phase mechanics; `running-work-transitions` for ownership transitions either side |
+| `bitwarden-security-engineer` | Security context (P01-P06), architecture pattern review, threat modeling                                                                                                                        |
+| `bitwarden-product-analyst`   | Consumes requirements documents as upstream input                                                                                                                                               |
+| `bitwarden-software-engineer` | Implementation conventions for server, client, and database decisions                                                                                                                           |
+| `bitwarden-atlassian-tools`   | Jira issue research and Confluence page access for the funnel, operating model, and TSI documents this plugin's skills reference                                                                |
 
 All cross-plugin skills are required because we rely upon each of them for a rich, complete workflow.
 
@@ -50,7 +49,7 @@ This plugin was previously named `bitwarden-architect`. The rename reflects Bitw
 /plugin install bitwarden-tech-lead@bitwarden-marketplace
 ```
 
-The `architecting-solutions` skill is retained (refactored around the holistic-architecture framing). A new `contributing-to-technical-strategy` skill is added. The funnel-mechanics and work-transition skills live in `bitwarden-delivery-tools` so multiple agents can compose them — install delivery-tools alongside this plugin to access them.
+The `architecting-solutions` skill has moved to `bitwarden-delivery-tools` (as of tech-lead 3.0.0) so any delivery-lifecycle workflow can compose it — install delivery-tools alongside this plugin. A `contributing-to-technical-strategy` skill was added to this plugin. The funnel-mechanics and work-transition skills also live in `bitwarden-delivery-tools`.
 
 ## Usage
 

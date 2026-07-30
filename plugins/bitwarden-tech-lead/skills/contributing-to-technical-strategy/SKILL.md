@@ -109,4 +109,4 @@ The initiative's link inventory is one of the most valuable things it provides �
 
 - [Technical Strategy Ideas](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2344517656) — the canonical TSI template and backlog model.
 - [Idea-Based Initiatives](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/2785181779) — the canonical BW Initiative structure and phase-by-phase evolution.
-- Related: `Skill(navigating-the-initiative-funnel)` for the phase mechanics once an idea is in the funnel, `Skill(architecting-solutions)` for the architectural judgment to bring to both idea-framing and team breakdown, `Skill(running-work-transitions)` for the Phase 4→5 handoff this breakdown feeds into — on either side of the transition.
+- Related: `Skill(navigating-the-initiative-funnel)` for the phase mechanics once an idea is in the funnel, `Skill(architecting-solutions)` (in `bitwarden-delivery-tools`) for the architectural judgment to bring to both idea-framing and team breakdown, `Skill(running-work-transitions)` for the Phase 4→5 handoff this breakdown feeds into — on either side of the transition.

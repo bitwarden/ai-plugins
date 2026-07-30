@@ -5,7 +5,7 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2026-07-11
+## [3.0.0] - 2026-07-30
 
 ### Removed
 
@@ -14,8 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `navigating-the-initiative-funnel`: Phase-4 Tech Breakdown paragraph and Related links rewritten to point at the `bitwarden/tech-breakdowns` repository instead of the removed skills.
-- `README.md`: Technical-design section and skills table removed; overview reduced to two concerns (Lifecycle, Mechanics); usage examples for the removed skills dropped; a pointer to `bitwarden/tech-breakdowns` added for discoverability.
+- `README.md`: breakdown skills removed from the Technical design table; usage examples for the removed skills dropped; a pointer to `bitwarden/tech-breakdowns` added for discoverability.
 - `plugin.json`: description and keywords stripped of `tech-breakdown` / `task-decomposition`. Marketplace description and README catalog entry follow suit.
+
+## [2.2.0] - 2026-07-10
+
+### Added
+
+- **`architecting-solutions` skill** — moved in from `bitwarden-tech-lead` (last at 2.3.2) and reworked to increase security focus and remove explicit Initiative Shepherd references.
+
+## [2.1.0] - 2026-07-01
+
+### Added
+
+- **`force-multiplier` skill** — fans one intent across a repo fleet or monorepo into N consistent, idempotent draft PRs, gated by a mandatory pilot and per-target isolation. Repo content is untrusted data (CWE-1427); destructive recipes require a reference-check with a `held-back` reconciliation disposition; the secrets-scan has a no-scanner fallback.
+- **`force-multiplier` behavior eval set** (`skills/force-multiplier/evals/`) — seven `skill-creator`-schema cases guarding its load-bearing decisions.
 
 ## [2.0.0] - 2026-06-19
 
