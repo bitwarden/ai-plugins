@@ -20,7 +20,7 @@ Follow these steps in order. Each one produces information the next step needs, 
 
 ### Step 1 — Confirm preflight, then run the code-review gate
 
-A PR opened on broken work — or work that skipped review — wastes reviewer time and buries the real problem under comment threads. Settle two things before continuing — you can ask both in a single `AskUserQuestion` call.
+A PR opened on broken work, or on work that skipped review, wastes reviewer time and buries the real problem under comment threads. Settle preflight first, then run the review.
 
 **1a — Confirm preflight passed.**
 
@@ -29,21 +29,26 @@ A PR opened on broken work — or work that skipped review — wastes reviewer t
   - `Yes — proceed`
   - `No — run it now` — invoke `perform-preflight`, then continue once it passes
 
-**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR, not an optional step.
+Only ask 1b once preflight is green: running preflight can change code, and the review should see the final diff.
+
+**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR.
 
 - **Question**: "How deep is this change? (sets review depth)"
 - **Options**:
-  - `Trivial` — docs, comments, or a config tweak: a single `/bitwarden-code-review:code-review-local` pass is enough, or skip only on explicit user opt-out
-  - `Standard` — a typical feature or fix in one area: run `/bitwarden-code-review:code-review-local`
-  - `Substantial` — architectural, cross-cutting, or security-touching: run the `performing-multi-agent-code-review` skill (architecture compliance plus parallel quality and security passes)
+  - `Standard` — a typical feature, fix, docs, or config change: run `/bitwarden-code-review:code-review-local` (tell it to review the local changes on the current branch; there is no PR yet)
+  - `Substantial` — architectural, cross-cutting, or security-touching: run `Skill(performing-multi-agent-code-review)` (architecture compliance plus parallel quality and security passes)
+
+If the user explicitly asks to skip the review, record that in the PR body's Objective section (Step 3) and continue. Never skip it on your own initiative.
 
 After the review:
 
 - Address every CRITICAL and IMPORTANT finding, or record why each is deferred in the PR body's Objective section (Step 3).
-- For **high-blast-radius** changes (auth, crypto, data handling, migrations), offer a second-model re-run — findings vary by model, so a second pass on the riskiest changes can catch what the first missed. Offer it; don't force it.
-- The review writes `review-summary.md` and `review-inline-comments.md` to the working-directory root. Delete or gitignore them before staging so they are never committed.
+- For the highest-risk changes (auth, crypto, data handling, migrations), you may re-run `Skill(performing-multi-agent-code-review)` with a different `--model-*` value; findings vary by model, so a second pass can catch what the first missed. This is optional, never required.
+- Remove any review output the tool wrote into the repo before pushing (for example, `code-review-local` writes `review-summary.md` and `review-inline-comments.md` to the working-directory root) so it never lands in the commit.
 
-This gate needs the `bitwarden-code-review` plugin. If it isn't installed, stop and prompt the user to install it (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing — do not silently skip the review.
+Each review skill checks its own prerequisites and reports what to install if something is missing. If neither review path is available, stop and prompt the user to install `bitwarden-code-review` (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing. Never silently skip the review.
+
+When another skill invokes `creating-pull-request` programmatically, with no interactive user to answer 1b, that calling skill owns whether and how a review runs. Do not block on this gate in that case.
 
 ### Step 2 — Determine change type and propose the title
 

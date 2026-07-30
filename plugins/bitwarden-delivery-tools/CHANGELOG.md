@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `creating-pull-request`: a code-review gate in Step 1 that runs before a PR is opened, routing review depth by change blast radius — Trivial → single `code-review-local` pass, Standard → `code-review-local`, Substantial → `performing-multi-agent-code-review`. Records deferred CRITICAL/IMPORTANT findings in the PR body, offers an optional second-model re-run for high-blast-radius changes, cleans up the review artifact files before staging, and prompts to install `bitwarden-code-review` if it is absent.
-- `README`: a **Companion plugins** section documenting the cross-plugin dependency on `bitwarden-code-review`.
+- `creating-pull-request`: a code-review gate in Step 1 that runs before a PR is opened, routing by change blast radius — Standard runs `code-review-local`, Substantial runs `performing-multi-agent-code-review`. Deferred CRITICAL/IMPORTANT findings are recorded in the PR body, an optional second-model re-run (via the multi-agent skill) is available for the highest-risk changes, review output is removed before pushing, and non-interactive (programmatic) invocations are exempt.
+- `README`: documented the `bitwarden-code-review` dependency in the **Related Plugins** section.
 
 ### Changed
 
