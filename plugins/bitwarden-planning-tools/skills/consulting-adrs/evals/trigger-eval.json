@@ -1,0 +1,58 @@
+[
+  {
+    "query": "Before I merge this new sync endpoint, does it conflict with any of our architecture decision records?",
+    "should_trigger": true
+  },
+  {
+    "query": "Check this design doc against our ADRs — I want to know if we're contradicting a decision we already made.",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm about to change how client-side key derivation works. Is there an accepted ADR that governs it that I'd be violating?",
+    "should_trigger": true
+  },
+  {
+    "query": "We're adding a separate data store for audit logs. Does that break any accepted ADR, or is it a gap we should record?",
+    "should_trigger": true
+  },
+  {
+    "query": "Review my PR for alignment with our recorded architecture decisions.",
+    "should_trigger": true
+  },
+  {
+    "query": "Does this threat model line up with our accepted ADRs, or does it assume something we've already decided against?",
+    "should_trigger": true
+  },
+  {
+    "query": "I think this approach contradicts one of our ADRs but I'm not sure which — can you check?",
+    "should_trigger": true
+  },
+  {
+    "query": "Help me write a new ADR documenting the token-rotation decision we just landed on.",
+    "should_trigger": false
+  },
+  {
+    "query": "What's an ADR and when should our team bother writing one?",
+    "should_trigger": false
+  },
+  {
+    "query": "Architect a solution for multi-region sync and walk me through the trade-offs.",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a threat model for the new item-sharing feature.",
+    "should_trigger": false
+  },
+  {
+    "query": "Update ADR-0012's status to superseded and link it to its replacement.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this PR for bugs and missing test coverage.",
+    "should_trigger": false
+  },
+  {
+    "query": "Summarize all our accepted ADRs into a one-page overview for onboarding.",
+    "should_trigger": true
+  }
+]

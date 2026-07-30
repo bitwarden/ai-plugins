@@ -82,6 +82,12 @@
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, commits, pull requests, preflight checks, change labeling, and Jira ticket filing."
     },
     {
+      "name": "bitwarden-planning-tools",
+      "source": "./plugins/bitwarden-planning-tools",
+      "version": "1.0.0",
+      "description": "Planning and preparation tools for Bitwarden — pre-implementation work such as architecture-decision consulting, ahead of the delivery lifecycle."
+    },
+    {
       "name": "bitwarden-designer",
       "source": "./plugins/bitwarden-designer",
       "version": "0.1.0",
@@ -91,7 +97,7 @@
       "name": "bitwarden-design-tools",
       "source": "./plugins/bitwarden-design-tools",
       "version": "0.1.0",
-      "description": "Design toolkit for Bitwarden — non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
+      "description": "Design toolkit for Bitwarden \u2014 non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
     },
     {
       "name": "bitwarden-ai-telemetry",
