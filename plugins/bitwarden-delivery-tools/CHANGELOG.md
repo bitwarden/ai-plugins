@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `creating-pull-request`: a code-review gate in Step 1 that runs before a PR is opened, routing by change blast radius — Standard runs `code-review-local`, Substantial runs `performing-multi-agent-code-review`. Deferred CRITICAL/IMPORTANT findings are recorded in the PR body, an optional second-model re-run (via the multi-agent skill) is available for the highest-risk changes, review output is removed before pushing, and non-interactive (programmatic) invocations are exempt.
+- `creating-pull-request`: a code-review gate in Step 1 that runs before a PR is opened, routing by change blast radius — Standard runs `code-review-local`, Substantial runs `performing-multi-agent-code-review` against the full branch diff. Deferred CRITICAL/IMPORTANT findings are recorded in the PR body and surfaced in the Step 5 preview, an optional second-model re-run (via the multi-agent skill) is available for the highest-risk changes, review output is cleaned up before pushing, and invocations from another delivery skill's workflow are exempt (wiring review into those callers is a tracked follow-up).
 - `README`: documented the `bitwarden-code-review` dependency in the **Related Plugins** section.
 
 ### Changed
 
 - `creating-pull-request`: narrowed Step 1's preflight options so the quality gate can no longer be silently skipped.
+
+### Security
+
+- `creating-pull-request`: submit the PR body via `--body-file` instead of `--body` so review- and model-generated text (derived from untrusted repo content) cannot be interpreted as shell during `gh pr create`.
 
 ## [2.2.0] - 2026-07-10
 
