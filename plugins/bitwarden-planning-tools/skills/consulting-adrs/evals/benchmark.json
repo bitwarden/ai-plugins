@@ -1,0 +1,384 @@
+{
+  "runs": {
+    "with": 3,
+    "base": 1
+  },
+  "grading": "blind LLM grader (haiku) over cached runs",
+  "overall": {
+    "with_skill_run_pass_rate": 1.0,
+    "baseline_run_pass_rate": 0.78
+  },
+  "cases": [
+    {
+      "name": "conflict-throws-instead-of-result",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Uses the documented finding format (a finding line labeled CONFLICT/GAP/STALE-REFERENCE, in any bracket style)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Ends with a roll-up / summary line",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Emits a CONFLICT finding for throwing instead of returning Result",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Cites ADR-0001 (Result types for expected service errors) as the conflicting decision",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not classify the change as Aligned",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Uses the documented finding format (a finding line labeled CONFLICT/GAP/STALE-REFERENCE, in any bracket style)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Ends with a roll-up / summary line",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Emits a CONFLICT finding for throwing instead of returning Result",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Cites ADR-0001 (Result types for expected service errors) as the conflicting decision",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not classify the change as Aligned",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    },
+    {
+      "name": "gap-new-event-bus",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Emits a GAP finding for the event bus decision",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Explains why the decision is significant (new contract / precedent / cross-service blast radius)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not invent a nonexistent ADR for the event bus (citing real, reviewed-and-excluded ADRs is fine)",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 0,
+        "per_assertion": [
+          {
+            "assertion": "Emits a GAP finding for the event bus decision",
+            "pass_rate": 0
+          },
+          {
+            "assertion": "Explains why the decision is significant (new contract / precedent / cross-service blast radius)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not invent a nonexistent ADR for the event bus (citing real, reviewed-and-excluded ADRs is fine)",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 1
+    },
+    {
+      "name": "aligned-returns-result",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Classifies the change as Aligned with ADR-0001 (or otherwise reports no conflict/gap)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not emit a CONFLICT or GAP finding",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Keeps the aligned note brief (does not manufacture findings)",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Classifies the change as Aligned with ADR-0001 (or otherwise reports no conflict/gap)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not emit a CONFLICT or GAP finding",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Keeps the aligned note brief (does not manufacture findings)",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    },
+    {
+      "name": "stale-reference-superseded-adr",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Flags that ADR-0002 (Vitest) is superseded / a stale reference",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Points to ADR-0005 (Jest) as the in-force decision",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not treat ADR-0002 as a current binding constraint",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Flags that ADR-0002 (Vitest) is superseded / a stale reference",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Points to ADR-0005 (Jest) as the in-force decision",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not treat ADR-0002 as a current binding constraint",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    },
+    {
+      "name": "skip-no-architectural-surface",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Reports no relevant in-force ADR / no architectural surface",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not manufacture any CONFLICT, GAP, or STALE-REFERENCE finding",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not invent an ADR",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Reports no relevant in-force ADR / no architectural surface",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not manufacture any CONFLICT, GAP, or STALE-REFERENCE finding",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not invent an ADR",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    },
+    {
+      "name": "no-adr-found-do-not-invent",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Reports that no in-force ADR governs the change",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not invent a nonexistent ADR number, title, or URL",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not fabricate a CONFLICT",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Reports that no in-force ADR governs the change",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not invent a nonexistent ADR number, title, or URL",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not fabricate a CONFLICT",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    },
+    {
+      "name": "not-governed-suboptimal-is-not-a-conflict",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Does not classify this as an ADR CONFLICT (no fixture ADR governs class size / separation of concerns)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "If mentioned, frames it as not ADR-governed rather than a recorded-decision conflict",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Does not classify this as an ADR CONFLICT (no fixture ADR governs class size / separation of concerns)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "If mentioned, frames it as not ADR-governed rather than a recorded-decision conflict",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    },
+    {
+      "name": "source-call-live-contributing-site",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "References the real package-manager ADR (adopt-pnpm / ADR-0030)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Cites a contributing.bitwarden.com ADR path",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not fabricate an ADR number or title",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 0,
+        "per_assertion": [
+          {
+            "assertion": "References the real package-manager ADR (adopt-pnpm / ADR-0030)",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Cites a contributing.bitwarden.com ADR path",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not fabricate an ADR number or title",
+            "pass_rate": 0
+          }
+        ]
+      },
+      "delta_run_pass_rate": 1
+    },
+    {
+      "name": "summarize-adr-catalog",
+      "with_skill": {
+        "runs": 3,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Returns a summary/list of ADRs (title + status), not a conflict/gap/stale finding report.",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Correctly reflects statuses: 0001, 0004, 0005 accepted; 0002 superseded; 0003 deprecated.",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not fabricate an ADR that is not in the catalog.",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "baseline": {
+        "runs": 1,
+        "run_pass_rate": 1,
+        "per_assertion": [
+          {
+            "assertion": "Returns a summary/list of ADRs (title + status), not a conflict/gap/stale finding report.",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Correctly reflects statuses: 0001, 0004, 0005 accepted; 0002 superseded; 0003 deprecated.",
+            "pass_rate": 1
+          },
+          {
+            "assertion": "Does not fabricate an ADR that is not in the catalog.",
+            "pass_rate": 1
+          }
+        ]
+      },
+      "delta_run_pass_rate": 0
+    }
+  ],
+  "model_runner": "claude-opus-4-8",
+  "model_grader": "claude-haiku-4-5",
+  "blinding": "subject: fresh subagent per run; observer: automated workflow; grader: separate blind haiku grader, config-agnostic"
+}
