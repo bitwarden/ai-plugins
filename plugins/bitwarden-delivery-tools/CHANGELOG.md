@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-07-23
+
+### Added
+
+- **`creating-jira-tickets` skill** — turns a breakdown's `tasks.md` into Jira tickets: an epic plus one child story/task per task entry, with real ticket titles, a Gherkin Acceptance criteria ADF section, and wired Blocked-by/Depends-on links. Creates tickets one at a time behind a human-in-the-loop review gate and goes through the `acli` CLI.
+- **`creating-jira-tickets` behavior eval set** (`skills/creating-jira-tickets/evals/`) — seven `skill-creator`-schema cases guarding its load-bearing decisions, plus a should-trigger/should-not set.
+
 ## [2.1.0] - 2026-07-01
 
 ### Added

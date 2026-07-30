@@ -1,0 +1,83 @@
+[
+  {
+    "query": "create the jira tickets from this tasks.md",
+    "should_trigger": true
+  },
+  {
+    "query": "turn the breakdown's task decomposition into Jira tickets",
+    "should_trigger": true
+  },
+  {
+    "query": "file the epic and its child stories for this breakdown in Jira",
+    "should_trigger": true
+  },
+  {
+    "query": "the tasks.md is done — make tickets out of each task under the epic",
+    "should_trigger": true
+  },
+  {
+    "query": "I need these breakdown tasks filed as stories in Jira, can you set that up",
+    "should_trigger": true
+  },
+  {
+    "query": "take tasks.md and create the child issues with their acceptance criteria",
+    "should_trigger": true
+  },
+  {
+    "query": "put the breakdown work into Jira as an epic plus stories and wire the blocked-by links",
+    "should_trigger": true
+  },
+  {
+    "query": "draft and create the Jira tickets for the tasks we just decomposed",
+    "should_trigger": true
+  },
+  {
+    "query": "let's get these tasks into Jira now that the plan's approved",
+    "should_trigger": true
+  },
+  {
+    "query": "create a story per task in tasks.md and link the dependencies",
+    "should_trigger": true
+  },
+
+  {
+    "query": "what's PROJ-123 about? give me context on it",
+    "should_trigger": false
+  },
+  {
+    "query": "deep dive PROJ-456 and its blocked dependencies",
+    "should_trigger": false
+  },
+  {
+    "query": "update the description on PROJ-789, it's already created",
+    "should_trigger": false
+  },
+  {
+    "query": "change the acceptance criteria on this existing ticket",
+    "should_trigger": false
+  },
+  {
+    "query": "open a PR for the feat/csv-export branch",
+    "should_trigger": false
+  },
+  {
+    "query": "commit these changes with a conventional commit message",
+    "should_trigger": false
+  },
+  {
+    "query": "decompose this breakdown plan into a tasks.md",
+    "should_trigger": false
+  },
+  {
+    "query": "how do Jira epics and stories relate to each other?",
+    "should_trigger": false
+  },
+  {
+    "query": "search Jira for open bugs in the exporter component",
+    "should_trigger": false
+  },
+  {
+    "query": "move the finished breakdown into its team's complete folder",
+    "should_trigger": false
+  }
+]

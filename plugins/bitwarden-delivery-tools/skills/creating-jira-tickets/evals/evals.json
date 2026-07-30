@@ -1,0 +1,77 @@
+{
+  "skill_name": "creating-jira-tickets",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here's the tasks.md for a breakdown. Create the Jira tickets for it — show me the plan before you run anything.\n\n---\n# Tasks — Epic: PROJ-100 (Add data export to the item list)\n\n- Task: Build the CSV formatter in the exporter library\n  Owner: Tools\n  Acceptance Criteria: Given a list of items, When the formatter runs, Then it returns RFC-4180 CSV with one row per item\n- Task: Add the Export button to the item-list toolbar (web)\n  Owner: Web\n  Blocked by: Task 1\n  Acceptance Criteria: Given a user viewing the item list, When they click Export and choose CSV, Then the CSV downloads\n- Task: Add the Export action to the desktop item list\n  Owner: Desktop\n  Blocked by: Task 1\n  Acceptance Criteria: Given the desktop item list, When the user chooses Export, Then the CSV downloads\n---",
+      "expected_output": "Checks the write path with `acli jira auth status`, builds a ticket tree (epic PROJ-100 as parent, one child per task entry — three here — with type and parent), and echoes the plan back before creating anything.",
+      "expectations": [
+        "Checks `acli jira auth status` before drafting or creating tickets",
+        "Establishes PROJ-100 as parent with three child stories, one per task entry (count matches)",
+        "Echoes the ticket tree back and does not create any ticket in this planning response"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "acli isn't installed on this machine. Just use the Atlassian MCP to create the tickets from tasks.md instead.",
+      "expected_output": "Explains that the Atlassian MCP is read-only and has no write tool, so creation must go through acli; prompts the user to install and authenticate acli, and stops rather than attempting an MCP write.",
+      "expectations": [
+        "States that the Atlassian MCP is read-only and cannot create tickets",
+        "Does not attempt to create tickets through any MCP tool",
+        "Prompts to install and authenticate acli and stops until that is resolved"
+      ],
+      "notes": "Non-discriminating: the baseline also treats the MCP as read-only in this environment. Kept as a regression guard, not a lift claim."
+    },
+    {
+      "id": 3,
+      "prompt": "acli is authenticated. Just batch-create all of these stories under the epic now so I don't have to babysit it.\n\n---\n# Tasks — Epic: PROJ-100\n- Task: Build the CSV formatter in the exporter library (Owner: Tools)\n- Task: Add the Export button to the item-list toolbar (web) (Owner: Web)\n- Task: Add the Export action to the desktop item list (Owner: Desktop)\n---",
+      "expected_output": "Declines to batch-create despite the request; creates the first ticket only, then pauses for the user to review it in Jira before proceeding one ticket at a time.",
+      "expectations": [
+        "Refuses to create all of them at once despite being told to",
+        "Previews and creates only the first ticket, then pauses for user review before the next",
+        "Explains that one-at-a-time review catches wording/field mistakes before they repeat across the set"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Draft the Jira ticket for this tasks.md entry — show me the fields before creating.\n\n---\n- Task: RetryPolicy + backoff wiring (libs/network)\n  Owner: Platform\n  Description: Add automatic retry with exponential backoff to failed network requests.\n  Acceptance Criteria: Given a request that fails with a 503, When the client retries, Then it backs off exponentially up to 3 attempts\n---",
+      "expected_output": "Rewrites the decomposition label 'RetryPolicy + backoff wiring (libs/network)' into a real ticket title (imperative verb + outcome + context) rather than copying it, and drafts a description free of lineage boilerplate and shorthand symbols.",
+      "expectations": [
+        "Produces a real ticket title (imperative verb + outcome + area), not the raw decomposition label 'RetryPolicy + backoff wiring (libs/network)'",
+        "Description carries the actual work, without 'Part of PROJ-####' lineage boilerplate or the breakdown path",
+        "Spells out shorthand — no § or → symbols in the ticket"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Draft the description for this story and show me the ADF you'll send.\n\n---\n- Task: Add the Export button to the item-list toolbar (web)\n  Owner: Web\n  Acceptance Criteria:\n    Given a user viewing the item list\n    When they click Export and choose CSV\n    Then a CSV file of the listed items downloads\n---",
+      "expected_output": "Builds an ADF description with a summary paragraph and a distinct level-2 'Acceptance criteria' heading holding the criteria as Gherkin, and does not set Team / Capability Driver / Initiative Owner (they auto-default from the project).",
+      "expectations": [
+        "ADF has a distinct 'Acceptance criteria' heading separate from the summary paragraph",
+        "Acceptance criteria are rendered as Gherkin (Scenario/Given/When/Then/And) in a code block",
+        "Does not set Team, Capability Driver, or Initiative Owner fields"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Two tickets already exist: PROJ-101 (Task 1) and PROJ-103 (Task 3). Task 3 is blocked by Task 1. Wire that dependency and confirm it landed — walk me through the commands.",
+      "expected_output": "Uses the acli link command with the blocker (PROJ-101) on `--in` and the blocked ticket (PROJ-103) on `--out`, notes that acli's success message reverses the direction, and verifies with `acli jira workitem link list` rather than the MCP.",
+      "expectations": [
+        "Puts the blocker PROJ-101 on --in and the blocked ticket PROJ-103 on --out for a Blocks link",
+        "Notes that acli's printed confirmation reverses the direction and should be ignored",
+        "Verifies the link with `acli jira workitem link list`, not the MCP get_issue (which does not render links)"
+      ],
+      "notes": "Strongest guard: with-skill got the inverted --in/--out and the link-list verify; the baseline missed both. Re-run with a blind grader to confirm as a durable ablation result."
+    },
+    {
+      "id": 7,
+      "prompt": "Create tickets from this tasks.md. The breakdown doesn't reference any epic key. acli is authenticated. Show me the plan.\n\n---\n# Tasks\n- Task: Build the CSV formatter in the exporter library (Owner: Tools)\n- Task: Add the Export button to the item-list toolbar (web) (Owner: Web; Blocked by: Task 1)\n---",
+      "expected_output": "Detects that the fixture carries no epic key and asks whether to create an epic or attach children to an existing key, rather than guessing a parent key or filing orphaned children.",
+      "expectations": [
+        "Notices there is no epic key in the tasks.md fixture",
+        "Asks whether to create an epic or attach to an existing key instead of guessing",
+        "Does not invent a parent key or create children with no parent"
+      ]
+    }
+  ]
+}
