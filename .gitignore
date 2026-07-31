@@ -32,3 +32,10 @@ pnpm-debug.log
 .claude-pr/
 review-summary.md
 review-inline-comments.md
+
+# Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+.superpowers/
+
+# Per-developer Claude Code settings. This repo's own claude-config-validator
+# treats a committed settings.local.json as a critical finding.
+.claude/settings.local.json
