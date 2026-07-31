@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`committing-changes` skill** — added a branch check step. If the current branch is the repository's default branch, the user is asked for a branch before staging or committing. If the default branch cannot be resolved, the current branch is confirmed instead of assumed.
-- **`committing-changes` eval set** (`skills/committing-changes/evals/`) — a 13-query trigger eval and a four-case behavior eval in the `skill-creator` schema, each with a recorded baseline.
+- **`committing-changes` eval set** (`skills/committing-changes/evals/`) — a 13-query trigger eval and a six-case behavior eval in the `skill-creator` schema, each with a recorded baseline.
 
 ## [2.3.0] - 2026-07-30
 

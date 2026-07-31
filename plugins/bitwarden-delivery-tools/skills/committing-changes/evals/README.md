@@ -36,7 +36,11 @@ Cases are **advice-only** — git state is quoted in the prompt and the graded a
 
 Refresh `behavior-baseline.json` in the same PR as the skill change.
 
-Two caveats on the current numbers: the advice-only framing inflates `no-skill` (`default-is-main-no-hint` scores 6/8 with no skill at all, where a live fixture had the pre-change skill committing straight to `main`), and the two skill arms separate on exactly one expectation, so treat the default-branch resolution as text correctness rather than a measured behavior change.
+Caveats on the current numbers:
+
+- The advice-only framing inflates `no-skill`. `default-is-main-no-hint` scores 12/16 with no skill at all, where a live fixture had the pre-change skill committing straight to `main`.
+- Only `default-is-main-no-hint` and `default-unresolvable` separate the arms. The other four sit at ceiling in all three, so treat them as regression guards rather than evidence.
+- A default named `main` or `master` cannot isolate the resolution instruction, because a model declines to commit onto either name unprompted. `default-is-master` shows the gate fires on a non-`main` default; it is not proof that resolution beats name matching.
 
 ### Methodology
 
