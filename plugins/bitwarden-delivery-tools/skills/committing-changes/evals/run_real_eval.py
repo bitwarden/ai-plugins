@@ -150,7 +150,7 @@ def main():
     parser.add_argument("--eval-set", required=True)
     parser.add_argument("--runs-per-query", type=int, default=3)
     parser.add_argument("--num-workers", type=int, default=8)
-    parser.add_argument("--timeout", type=int, default=45)
+    parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--model", default="claude-opus-4-7")
     args = parser.parse_args()
 
