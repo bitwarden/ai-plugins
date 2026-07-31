@@ -18,10 +18,10 @@ When making ANY changes to the plugin (code, documentation, configuration, scrip
    - MINOR (0.X.0): New features, backward-compatible additions
    - PATCH (0.0.X): Bug fixes, documentation updates, security patches
 
-2. **Bump the version** in `.claude-plugin/plugin.json` and this plugin's entry in the repository-root `.claude-plugin/marketplace.json`. A helper script that updates both at once (`bump-plugin-version.sh`) is maintained in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts):
+2. **Bump the version** everywhere it appears: this plugin's `.claude-plugin/plugin.json`, its entry in the repository-root `.claude-plugin/marketplace.json`, and the plugin catalog table in the root `README.md`. A helper script that updates all of these at once (`bump-plugin-version.sh`) lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts); run it from a checkout of that repository:
 
    ```bash
-   ./bump-plugin-version.sh bitwarden-init <new-version>
+   validate-ai/scripts/bump-plugin-version.sh bitwarden-init <new-version>
    ```
 
 3. **Add an entry to `CHANGELOG.md`** following [Keep a Changelog](https://keepachangelog.com/) format

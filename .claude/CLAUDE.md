@@ -54,9 +54,10 @@ scripts, agents):
 2. **Bump the version across all required files**. Update the version in each of:
    - `.claude-plugin/marketplace.json`
    - `plugins/<plugin-name>/.claude-plugin/plugin.json`
+   - the plugin catalog table in `README.md`
    - `plugins/<plugin-name>/agents/*/AGENT.md` (if agents exist)
 
-   A helper script that updates all three at once (`bump-plugin-version.sh`) is
+   A helper script that updates all of these at once (`bump-plugin-version.sh`) is
    maintained in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts),
    which is also what CI uses. `<plugin-name>` is the directory name under
    `plugins/` (e.g., `bitwarden-code-review`).

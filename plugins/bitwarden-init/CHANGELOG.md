@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `CONTRIBUTING.md` no longer points at the deleted repository-root `./scripts/bump-plugin-version.sh`; the version-bump helper now lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts)
+- `CONTRIBUTING.md` now points version-bump instructions at the helper's new home in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts) instead of the deleted repo-local script
 
 ## [1.2.0] - 2026-05-14
 

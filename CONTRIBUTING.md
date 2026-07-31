@@ -93,10 +93,17 @@ All plugin changes **must** include a version bump and changelog entry in the sa
 
 ### Bumping the version
 
-Update the version in every required file: `marketplace.json`, the plugin's `plugin.json`, and any agent frontmatter (`AGENT.md`). A helper script that updates all three at once (`bump-plugin-version.sh`) is maintained in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts), which is also what CI uses:
+Update the version in every place it appears:
+
+- the plugin's `.claude-plugin/plugin.json`,
+- its entry in the root `.claude-plugin/marketplace.json`,
+- the plugin catalog table in the root `README.md`,
+- any agent frontmatter (`AGENT.md`), if the plugin has agents.
+
+A helper script that updates all of these at once (`bump-plugin-version.sh`) lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts) and is what CI uses. Run it from a checkout of that repository:
 
 ```bash
-./bump-plugin-version.sh <plugin-name> <new-version>
+validate-ai/scripts/bump-plugin-version.sh <plugin-name> <new-version>
 ```
 
 ### Updating the changelog
