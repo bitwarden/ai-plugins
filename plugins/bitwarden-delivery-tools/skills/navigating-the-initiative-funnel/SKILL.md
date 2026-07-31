@@ -47,7 +47,7 @@ After the handoff, run a team breakdown session. The team creates the stories �
 
 When the breakdown is done, share it back with the shepherd. They review for consistency with the initiative's vision, not to rewrite stories or micromanage. Expect questions like "this looks good but uses callbacks instead of the async/await pattern from the PoC — was that intentional?" That's the shepherd doing their job. The tech lead's job is to have a good answer.
 
-**The Tech Breakdown Template is the canonical artifact for this phase.** The funnel hands the team an epic; the team produces a Tech Breakdown from it. Breakdowns live in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository — clone it, follow the per-team folder conventions and the template's Specification / Plan / Tasks sections. The breakdown is what the shepherd reviews when "share it back" happens above.
+**The Tech Breakdown Template is the canonical artifact for this phase.** The funnel hands the team an epic; the team produces a Tech Breakdown from it. Breakdowns live in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository. The breakdown is what the shepherd reviews when "share it back" happens above.
 
 Before the initiative advances to Implementation, engineering leadership must explicitly commit capacity — a specific allocation for specific sprints. **Do not accept an epic into a backlog without that commitment.** Executive commitment without operational prioritization is the failure mode where epics sit in backlogs and never get pulled into sprints.
 
