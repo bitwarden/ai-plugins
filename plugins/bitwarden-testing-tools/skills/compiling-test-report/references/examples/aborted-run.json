@@ -1,0 +1,4 @@
+{
+  "run_status": "aborted",
+  "abort_reason": "setup failure before test cases (login failed: invalid credentials)"
+}
