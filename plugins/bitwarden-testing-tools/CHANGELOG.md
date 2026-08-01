@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.gitignore` entries for `.claude/settings.local.json` and the subagent scratch workspace, which `main` lacked. Committed separately in Task 1.
 - `scripts/eval_harness.py`, a shared trigger-eval runner at the plugin level, with unit tests. Per-skill eval scripts are now thin configuration over it rather than near-identical copies of a 200-line runner.
 - Trigger evals for `reading-mailcatcher-api`, 20 queries with a recorded baseline.
+- Behavior evals for `using-stripe-cli`, seven advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
 
 ### Changed
 
