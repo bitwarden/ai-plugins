@@ -77,9 +77,9 @@
     {
       "query": "what port does mailcatcher listen on in our local dev setup?",
       "should_trigger": false,
-      "triggers": 2,
+      "triggers": 0,
       "runs": 7,
-      "trigger_rate": 0.2857142857142857
+      "trigger_rate": 0.0
     },
     {
       "query": "write a unit test for the email templating service in bitwarden/server",
@@ -91,9 +91,9 @@
     {
       "query": "configure the SMTP settings for my local dev environment",
       "should_trigger": false,
-      "triggers": 3,
+      "triggers": 2,
       "runs": 7,
-      "trigger_rate": 0.42857142857142855
+      "trigger_rate": 0.2857142857142857
     },
     {
       "query": "start the mailcatcher container for me",
@@ -117,11 +117,11 @@
       "trigger_rate": 0.0
     },
     {
-      "query": "configure the SMTP host and port for my local dev environment",
+      "query": "what's the retry policy when our server fails to deliver an email?",
       "should_trigger": false,
-      "triggers": 3,
+      "triggers": 0,
       "runs": 7,
-      "trigger_rate": 0.42857142857142855
+      "trigger_rate": 0.0
     },
     {
       "query": "add a new email template for subscription cancellation",

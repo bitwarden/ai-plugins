@@ -64,7 +64,7 @@
     "should_trigger": false
   },
   {
-    "query": "configure the SMTP host and port for my local dev environment",
+    "query": "what's the retry policy when our server fails to deliver an email?",
     "should_trigger": false
   },
   {
