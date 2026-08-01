@@ -16,7 +16,7 @@ Pinning --api-key would not help: the CLI reads STRIPE_API_KEY in GetAPIKey()
 over a pinned flag. Hence check_environment refuses to run at all when the
 environment points the CLI at live mode.
 
-Two operations, matching references/tool-policy.md Category 4:
+Two operations, matching references/playwright-testing-pipeline/tool-policy.md Category 4:
   stripe_cli.py read --path /v1/<resource> [--param k=v ...]
   stripe_cli.py advance-clock --clock <clock_id> --days <n>
 
