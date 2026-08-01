@@ -27,6 +27,8 @@ An earlier baseline for this skill was recorded against a four-skill inventory a
 
 This pass also corrected a defect in `trigger-eval.json` found in an earlier task and deliberately deferred to this re-recording: the near-miss "configure the SMTP host and port for my local dev environment" duplicated the pre-existing "configure the SMTP settings for my local dev environment" (both measured 3/7, both inside the flaky band). It was replaced, in the same array position, with "what's the retry policy when our server fails to deliver an email?", a server-behavior near-miss on an axis the set did not otherwise cover, and one that avoids the word "mailcatcher" since two other queries already probe that attraction. It measured 0/7 in this run, no misfire.
 
+This committed baseline was also recorded before `Agent` was added to `scripts/eval_harness.py`'s `exec_tools` bail-out set (the installed CLI emits `Agent`, with `Task` kept only as a legacy alias), so it should be re-recorded before being relied on as a regression control.
+
 ## Known consistent misfire (follow-up, not fixed here)
 
 The near-miss query "start the mailcatcher container for me" triggers the skill on every recorded run (7/7). Starting a container is not reading a message under any reading of the skill's scope, so this is a genuine over-fire rather than eval noise or an ambiguous query. The description most likely attracts on the bare word "mailcatcher" beyond the message-reading scope it actually documents.

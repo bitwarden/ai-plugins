@@ -33,7 +33,7 @@ class EvalConfig:
     # Requesting one of these means the model chose real work over the target
     # skill; we bail on it (see run_query) to avoid the heavy child processes
     # it would spawn.
-    exec_tools: frozenset = field(default_factory=lambda: frozenset({"Bash", "Task"}))
+    exec_tools: frozenset = field(default_factory=lambda: frozenset({"Agent", "Bash", "Task"}))
 
     # Read-only Bash lookups scanned past instead of counted as real work.
     read_only_bash: tuple = (

@@ -14,7 +14,13 @@ Two of those near-misses deliberately target sibling tooling. `assessing-test-co
 
 Run `run_agent_eval.py --agent <name>` once per agent. A pass is zero triggers across all eight queries for all six agents.
 
-The final two queries name an agent explicitly. A trigger there is defensible rather than a defect, since the user asked for that agent by name. Record what the baseline shows and interpret accordingly; do not treat it as an automatic failure.
+The final two queries name an agent explicitly. A trigger there would be defensible rather than a defect, since the user asked for that agent by name, but see "Known limitation" below: the harness cannot observe a direct agent dispatch at all, so it cannot register a trigger on these two queries regardless of what the model actually does. Treat any recorded result on queries 7 and 8 as uninformative, not as a pass or a failure.
+
+## Known limitation: this suite cannot fail by construction
+
+The harness counts a trigger only on a `Skill` tool_use whose `input.skill` contains the target token, or a `Read` whose `file_path` contains the token and ends in `SKILL.md`. `run_agent_eval.py` passes an agent name as that token. A direct agent invocation surfaces as an `Agent` (or legacy `Task`) tool_use carrying `subagent_type`, which matches neither branch, so it is bailed to a non-trigger by the harness's exec-tool check regardless of whether the model actually dispatched the named agent directly.
+
+This means the suite's `should_not_trigger_pass=8/8` result is guaranteed by the harness's detection gap, not measured evidence that the "do not invoke directly" convention holds. This suite does not currently validate that convention. Doing so requires extending the harness to count a trigger on an `Agent` tool_use whose `subagent_type` contains the target token. That extension is a known follow-up, not done here.
 
 ## Baseline provenance
 
@@ -37,9 +43,13 @@ plus all six agents (`context-gatherer`, `code-explorer`, `service-mapper`, `tes
 
 `should_trigger_pass=10/10`, `should_not_trigger_pass=10/10` at `--runs-per-query 7`. No query landed in the 0.35-0.65 band.
 
+This committed baseline was recorded before `Agent` was added to `scripts/eval_harness.py`'s `exec_tools` bail-out set (the installed CLI emits `Agent`, with `Task` kept only as a legacy alias), so it should be re-recorded before being relied on as a regression control.
+
 ### Agent suite result
 
-`should_not_trigger_pass=8/8` for all six agents at `--runs-per-query 3`, meaning zero triggers on queries 1 through 6 for every agent, and zero triggers on queries 7 and 8 as well. Queries 7 and 8 name `context-gatherer` and `test-runner` by name; even there the orchestrator fired instead of the named agent, so the do-not-invoke-directly convention held with no exceptions to interpret in this run.
+`should_not_trigger_pass=8/8` for all six agents at `--runs-per-query 3`, meaning zero recorded triggers on queries 1 through 6 for every agent, and zero recorded triggers on queries 7 and 8 as well. The recorded baseline rows carry only `query`, `should_trigger`, `triggers`, `runs`, and `trigger_rate` (nothing about which tool actually fired), so this result does not establish that the orchestrator fired instead of the named agent on queries 7 and 8, only that the harness did not register a trigger. See "Known limitation" above: the harness cannot observe a direct agent dispatch at all, so `8/8` is guaranteed by construction rather than measured proof that the do-not-invoke-directly convention held.
+
+This committed baseline was also recorded before `Agent` was added to the harness's `exec_tools` bail-out set, which is a separate, unrelated gap from the detection limitation above; it should likewise be re-recorded before being relied on as a regression control.
 
 One query (`gather the context for PM-40020 from Jira and give me the affected repos and acceptance criteria`) hit a single run-level timeout on two of the six agents (`test-planner`, `test-runner`), each counted conservatively as a non-trigger by the harness. The query still passed 0/3 on both, so this is noted for transparency rather than as a finding.
 
@@ -50,7 +60,7 @@ Requires Python 3.10+ and an authenticated `claude` CLI on `PATH` at v2.1.129 or
 The eval reads the **installed** copy, and the `bitwarden-marketplace` entry tracks `main` only. For an unmerged branch, point a local marketplace at the working tree:
 
 ```
-/plugin marketplace add /Users/kyle/code/bitwarden/ai-plugins
+/plugin marketplace add <path-to-your-clone>
 /plugin install bitwarden-testing-tools@ai-plugins
 ```
 

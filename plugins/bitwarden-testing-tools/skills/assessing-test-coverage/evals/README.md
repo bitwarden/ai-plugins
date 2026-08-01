@@ -9,7 +9,7 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change, spanning all four documented input types (a PR, a Jira key, a Tech Breakdown doc, and a Testmo CSV) plus branch/component/screen surfaces ("what's already tested for this PR", "which behaviors have no test today", "cross-reference this Testmo CSV against automated coverage", "inventory coverage for the surfaces in this Tech Breakdown"), and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
-- `run_real_eval.py` — thin config wrapper over the plugin's shared runner. The runner itself — spawning parallel `claude -p` subprocesses, parsing streamed tool-use events, computing per-query trigger rates, and killing each subprocess as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — now lives in `../../../scripts/eval_harness.py`, shared across the plugin's skills. See the memory note under "Running".
+- `run_real_eval.py` — thin config wrapper over the plugin's shared runner. The runner itself (spawning parallel `claude -p` subprocesses, parsing streamed tool-use events, computing per-query trigger rates, and killing each subprocess as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill) now lives in `../../../scripts/eval_harness.py`, shared across the plugin's skills. See the memory note under "Running".
 - `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes.
 
 ## Baseline provenance
@@ -37,6 +37,8 @@ The unmodified original runner reproduced this independently; nothing in the ski
 
 - `"what's the overall code-coverage percentage on bitwarden/server right now"`, rate 3/7 (0.429), still a pass (rate below 0.5) but close to the threshold.
 - `"explain how the testing pyramid works and which layers bitwarden uses"`, rate 4/7 (0.571), the same query listed above as a new failure; it sits inside the flaky band on top of having flipped verdict.
+
+This committed baseline was recorded before `Agent` was added to `scripts/eval_harness.py`'s `exec_tools` bail-out set (the installed CLI emits `Agent`, with `Task` kept only as a legacy alias), so a run that dispatched a subagent before reaching for the target skill was not being caught as real work at the time these numbers were measured; it should be re-recorded before being relied on as a regression control.
 
 ## Running
 
