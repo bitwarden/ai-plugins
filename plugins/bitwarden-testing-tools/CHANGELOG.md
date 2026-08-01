@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `test-web-changes`, the pipeline entry point and the only orchestration skill. It accepts a Jira ticket id, a Jira browse URL, an implementation plan path, or a feature description, optionally followed by extra guidance, plus a `--confirm` flag that pauses for test-plan approval before execution. It runs an eight-task pipeline, dispatching six agents and persisting each response verbatim to `.playwright-testing-artifacts/<slug>/`, then renders an HTML report. Tasks 3 and 4 are dispatched together and run concurrently.
+- Trigger evals for `test-web-changes`, a 20-query set covering all three input types, the `--confirm` review gate, and near-misses against `assessing-test-coverage` and the separate `qa-testing-notes` skill. Baseline recorded against the final ten-skill inventory: `should_trigger_pass=10/10`, `should_not_trigger_pass=10/10`, with no query landing in the flaky 0.35-0.65 band.
+- A shared agent non-trigger suite, eight queries proving the "do not invoke directly" convention that all six pipeline agents' descriptions carry. Baseline recorded against the same inventory: `should_not_trigger_pass=8/8` for every one of the six agents, including the two queries that name an agent explicitly.
 
 ### Changed
 

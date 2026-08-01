@@ -1,0 +1,34 @@
+[
+  {
+    "query": "gather the context for PM-40020 from Jira and give me the affected repos and acceptance criteria",
+    "should_trigger": false
+  },
+  {
+    "query": "explore the codebase for the org billing change and produce an application context document",
+    "should_trigger": false
+  },
+  {
+    "query": "map the changed file paths on my branch to the local services I need running",
+    "should_trigger": false
+  },
+  {
+    "query": "read my test plan and verify my local dev environment is healthy",
+    "should_trigger": false
+  },
+  {
+    "query": "execute the test cases in my test plan with playwright and return the results as JSON",
+    "should_trigger": false
+  },
+  {
+    "query": "build test cases from the application context artifact at .playwright-testing-artifacts/pm-40020/app-context-20260731-1200.md",
+    "should_trigger": false
+  },
+  {
+    "query": "run the context-gatherer agent on PM-40020",
+    "should_trigger": false
+  },
+  {
+    "query": "dispatch the test-runner directly, I already have a plan file",
+    "should_trigger": false
+  }
+]

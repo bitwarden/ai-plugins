@@ -1,0 +1,148 @@
+{
+  "should_trigger_pass_rate": 1.0,
+  "should_not_trigger_pass_rate": 1.0,
+  "should_trigger_pass": "10/10",
+  "should_not_trigger_pass": "10/10",
+  "results": [
+    {
+      "query": "run UI tests against my local web changes for PM-40010",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "plan and execute playwright tests for the feature described in ~/code/bitwarden/server/plans/PM-40011-billing-ui.md",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "test the deferred price schedule work I just built in the web vault locally",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "put https://bitwarden.atlassian.net/browse/PM-40012 through the browser test pipeline",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "build me a test plan and run it in the browser for the org billing banner change, focus on the owner role",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "exercise the trial signup flow end to end in my local environment and give me a report with screenshots",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "I want the new member invite dialog verified in a real browser against my running dev stack",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "spin up automated UI coverage for the changes on my current branch, let me review the cases before it runs",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "drive PM-40013 through the web test pipeline and pause so I can approve the plan first",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "generate playwright test cases for this feature and actually run them against localhost",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "what test coverage already exists for PM-40010?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write a playwright spec file I can commit to the repo",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "my playwright test is flaky, help me figure out why",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "start my local Bitwarden dev environment",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "should this change be covered by unit tests or integration tests?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "review the PR for the org billing banner change",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "explain how the test pyramid applies to our web clients",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "run the existing jest suite in clients/apps/web",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "the web vault will not build locally, help me fix it",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write QA testing notes for this branch so a human can test it manually",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    }
+  ]
+}
