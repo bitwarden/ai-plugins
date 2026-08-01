@@ -1,0 +1,55 @@
+{
+  "skill_name": "determining-required-services",
+  "eval_type": "behavior",
+  "purpose": "Prove the skill changes the output in the four places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `git diff --name-only origin/main...HEAD -- <repo-path>` rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; and (d) it returns a minimal set matched by the documented rules rather than a defensively padded list.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "unions-route-and-path-dependencies",
+      "prompt": "The tests navigate to /organizations/:id/billing/subscription only. The branch also changes files under server/src/Admin. Which local services need to be running?",
+      "expected_output": "Returns the union: the services the billing subscription route requires (Web, Api, Identity, and Billing, since this is a billing UI flow) plus Admin, which the changed path pulls in even though no test route touches it. Does not include billing-pricing, since the reference states billing-pricing is never triggered by routes and no billing-pricing/src/** files changed on this branch. Does not return only the route-derived set.",
+      "expectations": [
+        "Returns the union of route-derived and path-derived services, not just one",
+        "Includes Admin on the strength of the changed path alone, even though no route touches it",
+        "Includes the services the billing subscription route requires: Api, Identity, and Billing",
+        "Does not include billing-pricing, which the reference states is never triggered by routes"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "runs-its-own-diff",
+      "prompt": "The tests hit /settings/security/two-step. Affected repos: clients and server. Tell me what to start. I have not given you the list of changed files.",
+      "expected_output": "Runs `git diff --name-only origin/main...HEAD -- <repo-path>` itself against each affected repo to obtain the changed paths, rather than asking the caller for a file list or proceeding on the route alone. Then returns the union of route-derived and path-derived services.",
+      "expectations": [
+        "Runs its own `git diff --name-only origin/main...HEAD -- <repo-path>` rather than requesting the changed-file list",
+        "Does not proceed on route information alone while silently skipping the diff",
+        "Returns a union that reflects both the route and the diff",
+        "Names the diff as the source of the path-derived portion of the result"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "sources-ports-from-the-reference",
+      "prompt": "The tests hit the web vault login page. Give me the services with their URLs and ports so I can check them.",
+      "expected_output": "Returns service names with URLs and ports taken from `references/services.md` (Web, Api, and Identity, since login always requires Api and Identity alongside Web) rather than recalled from memory. Identifies Web as the primary test URL since a web vault route is present.",
+      "expectations": [
+        "Sources URLs and ports from `references/services.md` rather than from memory",
+        "Returns names alongside URLs and ports, not names alone",
+        "Includes Identity, which login requires, not just Web",
+        "Identifies the web vault (`https://localhost:8080`) as the primary test URL, since a web vault route is present"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "does-not-over-list",
+      "prompt": "The tests only open the web vault login page and assert the form renders. The branch touches nothing outside clients/apps/web. What needs to be running?",
+      "expected_output": "Returns a minimal set: Web, Identity, and Api, since a login route requires Identity and Api alongside Web, and the changed paths (clients/apps/web only) add nothing beyond Web. Does not list Billing, Events, Icons, Notifications, or Admin, none of which this test touches.",
+      "expectations": [
+        "Returns a minimal set scoped to what the test actually touches",
+        "Does not list Billing, Events, Icons, Notifications, or Admin",
+        "Includes the services login genuinely requires",
+        "Does not pad the list defensively with every service"
+      ]
+    }
+  ]
+}

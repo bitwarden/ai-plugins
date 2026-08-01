@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `determining-required-services`, resolving the union of route-based and file-path-based service dependencies from the Application Context and the branch diff, returning service names with URLs and ports.
 - Three planning-phase agents: `context-gatherer`, which acquires the feature source; `code-explorer`, which produces the Application Context; and `service-mapper`, which produces the service list. Each returns its artifact as its response for the orchestrator to persist.
 - Behavior evals for `exploring-application-context`, five advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
+- Behavior evals for `determining-required-services`, four advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
 
 ## [1.2.0] - 2026-07-31
 
