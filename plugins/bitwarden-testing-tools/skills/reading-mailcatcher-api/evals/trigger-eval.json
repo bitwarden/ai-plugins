@@ -1,0 +1,82 @@
+[
+  {
+    "query": "grab the verification link out of the email Bitwarden just sent to qa+trial@example.com",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the OTP code in the most recent login email for owner@bitwarden.test?",
+    "should_trigger": true
+  },
+  {
+    "query": "I just triggered a password reset locally, pull the reset URL from the inbox",
+    "should_trigger": true
+  },
+  {
+    "query": "read the org invite email that went out and give me the accept link",
+    "should_trigger": true
+  },
+  {
+    "query": "check the local mail inbox for the trial activation message and extract its link",
+    "should_trigger": true
+  },
+  {
+    "query": "did the magic link email arrive for admin@example.com? if so I need the URL",
+    "should_trigger": true
+  },
+  {
+    "query": "find the email with subject containing 'Verify' and pull out the token",
+    "should_trigger": true
+  },
+  {
+    "query": "the account creation flow sent a confirmation mail, get me the confirm URL from it",
+    "should_trigger": true
+  },
+  {
+    "query": "look in mailcatcher for the emergency access invite and give me the link inside",
+    "should_trigger": true
+  },
+  {
+    "query": "I need whatever URL is in the newest message sent to billing-qa@bitwarden.test",
+    "should_trigger": true
+  },
+  {
+    "query": "what port does mailcatcher listen on in our local dev setup?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a unit test for the email templating service in bitwarden/server",
+    "should_trigger": false
+  },
+  {
+    "query": "configure the SMTP settings for my local dev environment",
+    "should_trigger": false
+  },
+  {
+    "query": "start the mailcatcher container for me",
+    "should_trigger": false
+  },
+  {
+    "query": "review this PR that changes the invite email copy",
+    "should_trigger": false
+  },
+  {
+    "query": "what does our email verification flow look like on the server side?",
+    "should_trigger": false
+  },
+  {
+    "query": "configure the SMTP host and port for my local dev environment",
+    "should_trigger": false
+  },
+  {
+    "query": "add a new email template for subscription cancellation",
+    "should_trigger": false
+  },
+  {
+    "query": "the OTP validation logic is rejecting valid codes, help me debug it",
+    "should_trigger": false
+  },
+  {
+    "query": "what test coverage exists for the password reset email path?",
+    "should_trigger": false
+  }
+]
