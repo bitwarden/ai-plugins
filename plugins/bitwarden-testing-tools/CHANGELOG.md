@@ -4,6 +4,14 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-31
+
+### Added
+
+- `exploring-application-context`, exploring the clients and server repositories to build a state-centric Application Context with a `## States` section of real-user-reachable UI conditions and their verification points, and a `## Flows` section of the sequences that transition between them.
+- `determining-required-services`, resolving the union of route-based and file-path-based service dependencies from the Application Context and the branch diff, returning service names with URLs and ports.
+- Three planning-phase agents: `context-gatherer`, which acquires the feature source; `code-explorer`, which produces the Application Context; and `service-mapper`, which produces the service list. Each returns its artifact as its response for the orchestrator to persist.
+
 ## [1.2.0] - 2026-08-31
 
 ### Added
