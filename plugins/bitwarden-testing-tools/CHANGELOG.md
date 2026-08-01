@@ -4,6 +4,19 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-07-31
+
+### Added
+
+- `verifying-environment-health`, verifying Docker dev containers via preflight, application services via the health-check script, and the Angular bootstrap via render verification, halting on the first failure. It only verifies and never starts, builds, or stops services.
+- `executing-web-tests`, executing test cases through the `playwright-cli` skill with the tool policy applied throughout, plus screenshot naming, transient-toast capture, and setup-step handling. Emits a results object per segment as `complete`, `paused`, or `aborted`.
+- Two execution-phase agents: `service-manager`, which gates the run on environment health, and `test-runner`, which executes the plan and returns the segment results JSON.
+- `external_trigger.py`, the Category 3 wrapper. It restricts destinations to `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test` by default, extensible only additively through `PLAYWRIGHT_TESTING_ALLOWED_HOSTS`, enforces POST-only, and bypasses TLS verification solely for the four built-in dev hosts. This resolves the forward reference the tool policy has carried since 1.2.0.
+
+### Changed
+
+- `executing-web-tests` now reads the tool policy from `references/playwright-testing-pipeline/tool-policy.md`.
+
 ## [1.4.0] - 2026-07-31
 
 ### Added
