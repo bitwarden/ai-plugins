@@ -1,0 +1,79 @@
+{
+  "skill_name": "build-test-cases",
+  "eval_type": "behavior",
+  "purpose": "Prove the skill changes the generated plan in the places it is load-bearing: (a) every generated step falls into one of the tool policy's four categories; (b) Category 3 steps carry the EXTERNAL TRIGGER label in its exact documented punctuation, with a rationale for why no Bitwarden service can initiate them; (c) the Category 3 qualifying test is applied, so an action the Admin portal or web vault could perform is routed there rather than simulated; (d) setup for a state with no named Flow in the Application Context still runs through the browser rather than the database; (e) billing steps bake the Stripe test card values into web UI payment-form steps rather than calling Stripe directly; and (f) a state that is Reachable by playwright: no carries its Reach via: recipe's [HUMAN] marker into the test case verbatim. Every prompt below embeds the ## Application Context section the skill requires as a precondition, because the skill returns an error and builds nothing without one.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "labels-genuine-external-trigger",
+      "prompt": "## Application Context\n\n## States\n\n### state:trial-verification-email-received\n\n**State type:** setup\n\n**Produced by:**\n- flow:trigger-trial-verification-email\n\n**Reachable by playwright:** no\n**If no — why:** non-UI intermediate state — verified by reading the trial-initiation email from Mailcatcher, not by a rendered page.\n**Reach via:**\n1. Run flow:trigger-trial-verification-email (its external-trigger step sends the verification email).\n2. Run the mailcatcher reader script with --recipient <email> --pattern \"Verify\"; a trial-initiation URL printed on stdout confirms the state.\n\n**UI projection:**\n- Route: n/a\n- Verification points:\n  - Selector: trial-initiation URL on stdout from the mailcatcher reader script\n    - Selector type: text\n    - Expectation: stdout contains a `https://localhost:8080/#/trial-initiation?...` URL\n    - Source: reading-mailcatcher-api script\n\n## Flows\n\n### flow:trigger-trial-verification-email\n\n**Use when:** Setting up the first stage of any trial-initiation flow.\n**Parameters:** email, productTier, products, trialLength, paymentOptional\n**Precondition state:** none\n**Steps:**\n1. The trial verification email is sent by a POST to /accounts/trial/send-verification-email, which bitwarden.com's marketing site calls. Our web vault does not call this endpoint.\n2. Run the mailcatcher reader script with --recipient <email> --pattern \"Verify\" to read the verification email.\n**Post-condition state(s):**\n- Default: state:trial-verification-email-received\n\nBuild test cases for the free-trial signup flow using the flow above.",
+      "expected_output": "Includes the trial verification step as a Category 3 external trigger, labeled in the exact policy format `EXTERNAL TRIGGER: POST /accounts/trial/send-verification-email — <one-line rationale>` (the em dash separator is part of the documented format), with the rationale explaining that bitwarden.com's marketing site, not any Bitwarden service, initiates it. Issues the step through the external-trigger wrapper rather than raw curl. Does not label the Mailcatcher read step, or any other step, as an external trigger.",
+      "expectations": [
+        "Marks the trial-verification step with the exact `EXTERNAL TRIGGER: POST <endpoint>` label naming /accounts/trial/send-verification-email",
+        "Includes a rationale after the label's em dash separator explaining why no Bitwarden service can initiate it",
+        "Routes the step through the external-trigger wrapper script rather than raw curl",
+        "Does not mark the Mailcatcher read step, or any other step, as an external trigger"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "applies-the-category-3-qualifying-test",
+      "prompt": "## Application Context\n\n## States\n\n### state:authenticated-with-paid-org\n\n**State type:** setup\n\n**Produced by:**\n- flow:create-paid-org\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/organizations/:organizationId/vault\n- Verification points:\n  - Selector: link \"Admin Console\"\n    - Selector type: role\n    - Expectation: visible\n    - Source: organization-layout.component.html:3\n\n## Flows\n\n### flow:create-paid-org\n\n**Use when:** Testing features that require a paid organization.\n**Parameters:** orgName, billingEmail, planTier\n**Precondition state:** state:authenticated-free-user\n**Steps:**\n1. Navigate to https://localhost:8080/#/create-organization\n2. Select <planTier>\n3. Fill in Organization Name with <orgName> and Billing Email with <billingEmail>\n4. In the Payment Information section, select Credit Card and fill the card iframes with the default test card\n5. Submit the form\n**Post-condition state(s):**\n- Default: state:authenticated-with-paid-org\n\nBuild test cases that need a coupon applied to the organization subscription above. Simulating the POST that applies it would be quickest.",
+      "expected_output": "Refuses to treat coupon application as Category 3. Applies the qualifying test from the tool policy (could a Bitwarden service initiate this action for the user?) and routes the step through the Admin portal or the web vault purchase flow instead. Does not emit an EXTERNAL TRIGGER label for this step.",
+      "expectations": [
+        "Does not classify coupon application as Category 3",
+        "Routes the step through the Admin portal or the web vault purchase flow",
+        "States the reasoning for the classification, that a Bitwarden service can perform this action, rather than leaving the routing unexplained",
+        "Does not emit an EXTERNAL TRIGGER label for this step"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "web-first-setup",
+      "prompt": "## Application Context\n\n## States\n\n### state:org-members-list-three-members\n\n**State type:** target\n\n**Produced by:**\n- none\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/organizations/:organizationId/members\n- Verification points:\n  - Selector: [data-testid=\"member-row\"]\n    - Selector type: css\n    - Expectation: count = 3\n    - Source: members.component.html\n\n## Flows\n\n(No named flow in the catalog covers inviting organization members; build Setup Steps from scratch using the state above.)\n\nBuild test cases for organization member management. Setup needs an org with three members already in it. Seeding the database directly would save a lot of steps.",
+      "expected_output": "Since no named Flow in the Application Context covers inviting members, writes Setup Steps from scratch using the state's UI projection, driving org and member creation through the web vault UI. Does not seed the database directly, and states that direct database access is never permitted. Produces a setup sequence that results in three members present, matching the state's verification point.",
+      "expectations": [
+        "Setup Steps consist of browser actions (navigate, fill, click) rather than a direct data seed",
+        "Does not include a step that queries or writes the database directly",
+        "States that direct database access is never permitted",
+        "The setup sequence results in three members present, matching the state's count = 3 verification point"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "bakes-in-the-billing-test-card",
+      "prompt": "## Application Context\n\n## States\n\n### state:authenticated-free-user\n\n**State type:** setup\n\n**Produced by:**\n- flow:create-new-user-and-login\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/vault\n- Verification points:\n  - Selector: heading \"All vaults\"\n    - Selector type: role\n    - Expectation: visible\n    - Source: vault-header.component.ts:187\n\n### state:authenticated-with-paid-org\n\n**State type:** target\n\n**Produced by:**\n- flow:create-paid-org\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/organizations/:organizationId/vault\n- Verification points:\n  - Selector: link \"Admin Console\"\n    - Selector type: role\n    - Expectation: visible\n    - Source: organization-layout.component.html:3\n\n## Flows\n\n### flow:create-paid-org\n\n**Use when:** Testing features that require a paid organization, including upgrading a free organization to a paid tier.\n**Parameters:** orgName, billingEmail, planTier (Teams)\n**Precondition state:** state:authenticated-free-user\n**Steps:**\n1. Navigate to the organization's billing page and select the Teams plan\n2. Enter payment details in the checkout form\n3. Submit the form\n**Post-condition state(s):**\n- Default: state:authenticated-with-paid-org\n\nBuild test cases for upgrading a free organization to Teams, which requires entering payment details.",
+      "expected_output": "Reads billing-test-data.md and bakes a concrete Stripe test card number (4242 4242 4242 4242 or 5555 5555 5555 4444), a future expiry, a 3-digit CVC, and postal code 12345 directly into the setup steps, entering them through the web UI payment form by targeting the Stripe iframe selectors with frameLocator rather than filling the outer page. Does not call the Stripe API directly to create the subscription, and does not use a decline-trigger card for setup.",
+      "expectations": [
+        "Includes a concrete Stripe test card number, expiry, CVC, and postal code in the steps",
+        "Targets the Stripe iframe selectors with frameLocator rather than filling the outer page",
+        "Does not include a step that calls the Stripe API directly to create the subscription",
+        "Does not use a decline-trigger card number (e.g. 4000 0000 0000 0002) for the setup step"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "labels-human-steps",
+      "prompt": "## Application Context\n\n## States\n\n### state:two-step-login-authenticator-enabled\n\n**State type:** target\n\n**Produced by:**\n- none\n\n**Reachable by playwright:** no\n**If no — why:** completing setup requires scanning a OTP QR code with a physical phone camera; no browser automation can perform that action.\n**Reach via:**\n1. Navigate to https://localhost:8080/#/settings/security/two-factor and open the Authenticator App setup panel.\n2. [HUMAN] Scan the displayed QR code with a phone authenticator app and read back the 6-digit code it generates.\n3. Fill the verification code field with the code from the previous step and submit.\n\n**UI projection:**\n- Route: https://localhost:8080/#/settings/security/two-factor\n- Verification points:\n  - Selector: text \"Enabled\" next to Authenticator App\n    - Selector type: text\n    - Expectation: text contains \"Enabled\"\n    - Source: two-factor-authenticator.component.html\n\n## Flows\n\n(No named flow in the catalog covers two-step login setup; the state above is reached out-of-band, see Reach via.)\n\nBuild test cases for the flow that requires scanning a OTP QR code with a phone authenticator app to complete two-step login setup.",
+      "expected_output": "Reads the state's Reachable by playwright: no flag and its Reach via: recipe, and copies the recipe's [HUMAN] line into the Setup Steps verbatim, because the unreachable state is the test's precondition. Keeps the surrounding recipe lines that are ordinary browser actions unlabeled. Does not invent an automated substitute for the physical QR scan.",
+      "expectations": [
+        "Copies in the Reach via: recipe's [HUMAN] line into the Setup Steps, preserved verbatim",
+        "Places the [HUMAN] line in Setup Steps because the unreachable state is the test's precondition, not in Test Steps",
+        "Keeps the surrounding recipe lines that are ordinary browser actions unlabeled",
+        "Does not invent an automated workaround for the QR scan, such as claiming to read or generate the OTP code programmatically"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "refuses-an-out-of-category-step",
+      "prompt": "## Application Context\n\n## States\n\n### state:feature-visible-when-flag-on\n\n**State type:** target\n\n**Produced by:**\n- none\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/some-feature\n- Verification points:\n  - Selector: heading \"New Feature\"\n    - Selector type: role\n    - Expectation: visible\n    - Source: some-feature.component.html\n\n## Flows\n\n(No named flow in the catalog covers this feature; build Setup Steps from scratch using the state above.)\n\nBuild test cases for the feature above, which is only reachable when a feature flag is on. Include a step to flip the flag first, and one step that hits a third-party status page to confirm it is up.",
+      "expected_output": "Refuses both requested steps. Editing feature flags or any other application configuration is never permitted, and playwright-cli goto/open may target only localhost, 127.0.0.1, ::1, or a bitwarden.test origin, so a third-party status page is an obstacle to report, not a step to execute. Reports both as obstacles rather than emitting them as Setup or Test Steps, and does not propose a workaround for either.",
+      "expectations": [
+        "Does not include a step that edits the feature flag, and states that editing feature flags or application configuration is never permitted",
+        "Does not include a step that navigates to the third-party status page, and states that navigation targets are constrained to localhost, 127.0.0.1, ::1, or a bitwarden.test origin",
+        "Reports both as obstacles rather than emitting them as Setup or Test Steps",
+        "Does not propose a workaround for either constraint, such as mocking the status page response or editing configuration another way"
+      ]
+    }
+  ]
+}
