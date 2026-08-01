@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `assessing-test-coverage`'s eval runner is now a thin wrapper over `scripts/eval_harness.py`. The CLI contract and the output JSON schema are unchanged, and behavior preservation was verified by source-level comparison: `run_query`, `runs_for`, and `main` are identical to the previous standalone runner once the four policy constants are read from an `EvalConfig` instead of module globals. The committed `baseline.json` was deliberately not used as the control here, because this plugin's skill inventory changed in the same release and a trigger-eval baseline is only meaningful against the inventory it was recorded on. All trigger baselines are re-recorded against the final inventory before this stack completes.
 
+### Fixed
+
+- Corrected a stale `references/tool-policy.md` path in `using-stripe-cli/scripts/stripe_cli.py`. The policy moved to `references/playwright-testing-pipeline/tool-policy.md` in this same release, and this docstring reference was missed because the original survey for it excluded non-markdown files.
+
 ## [1.1.0] - 2026-08-12
 
 ### Added
