@@ -163,6 +163,7 @@
     "unreviewed",
     "Unrouted",
     "unsanitized",
+    "uppercased",
     "upserts",
     "urllib",
     "urlparse",

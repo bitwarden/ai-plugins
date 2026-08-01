@@ -4,6 +4,21 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-07-31
+
+### Added
+
+- `test-web-changes`, the pipeline entry point and the only orchestration skill. It accepts a Jira ticket id, a Jira browse URL, an implementation plan path, or a feature description, optionally followed by extra guidance, plus a `--confirm` flag that pauses for test-plan approval before execution. It runs an eight-task pipeline, dispatching six agents and persisting each response verbatim to `.playwright-testing-artifacts/<slug>/`, then renders an HTML report. Tasks 3 and 4 are dispatched together and run concurrently.
+
+### Changed
+
+- The plugin README now describes two families of tooling: standalone analysis skills, and the web test pipeline whose components are composed rather than invoked.
+
+### Notes
+
+- With this release the migration from the `bitwarden-playwright-testing` branch is complete. All 54 files landed across versions 1.2.0 through 1.6.0, byte-identical apart from the plugin rename and the tool-policy path. 130 unit tests pass.
+- Two constraints in the tool policy remain agent instructions rather than platform boundaries: navigation targets and `eval` payloads under Category 1, and the agent script grants, which are leading-wildcard path suffixes not anchored to the install directory. A `PreToolUse` hook on `Bash` is the documented enforcement point for both and is not yet implemented.
+
 ## [1.5.0] - 2026-07-31
 
 ### Added
