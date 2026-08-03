@@ -37,7 +37,7 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 | Skill                   | Triggers                      | Purpose                                                                              |
 | ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
-| `committing-changes`    | "commit", "stage changes"     | Commit message format, staging best practices                                        |
+| `committing-changes`    | "commit", "stage changes"     | Default-branch check, commit message format, staging best practices                  |
 | `creating-pull-request` | "create PR", "open PR"        | PR title/body format, draft workflow, AI review labels                               |
 | `force-multiplier`      | "across all repos", "in bulk" | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs |
 | `labeling-changes`      | "label", "change type"        | Conventional commit type keywords, CI label mapping                                  |
