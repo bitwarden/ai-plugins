@@ -18,10 +18,10 @@ When making ANY changes to the plugin (code, documentation, configuration, scrip
    - MINOR (0.X.0): New features, backward-compatible additions
    - PATCH (0.0.X): Bug fixes, documentation updates, security patches
 
-2. **Bump the version** everywhere it appears: this plugin's `.claude-plugin/plugin.json`, its entry in the repository-root `.claude-plugin/marketplace.json`, and the plugin catalog table in the root `README.md`. A helper script that updates all of these at once (`bump-plugin-version.sh`) lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts); run it from a checkout of that repository:
+2. **Bump the version** everywhere it appears: this plugin's `.claude-plugin/plugin.json`, its entry in the repository-root `.claude-plugin/marketplace.json`, and the plugin catalog table in the root `README.md`. A helper script that updates all of these at once (`bump-plugin-version.sh`) lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts). Run it from a checkout of that repository with `REPO_ROOT` set to the marketplace checkout — the script otherwise defaults `REPO_ROOT` to `validate-ai/` inside gh-actions and fails with "Plugin directory not found":
 
    ```bash
-   validate-ai/scripts/bump-plugin-version.sh bitwarden-init <new-version>
+   REPO_ROOT=/path/to/ai-plugins validate-ai/scripts/bump-plugin-version.sh bitwarden-init <new-version>
    ```
 
 3. **Add an entry to `CHANGELOG.md`** following [Keep a Changelog](https://keepachangelog.com/) format

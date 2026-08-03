@@ -59,8 +59,19 @@ scripts, agents):
 
    A helper script that updates all of these at once (`bump-plugin-version.sh`) is
    maintained in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts),
-   which is also what CI uses. `<plugin-name>` is the directory name under
-   `plugins/` (e.g., `bitwarden-code-review`).
+   which is also what CI uses. Run it from a gh-actions checkout and you MUST set
+   `REPO_ROOT` to this repository: the script defaults `REPO_ROOT` to the parent of
+   its own `scripts/` directory, which is `validate-ai/` inside gh-actions, so
+   without the override it looks for plugins in gh-actions and exits with
+   "Plugin directory not found".
+
+   ```bash
+   REPO_ROOT=/path/to/ai-plugins /path/to/gh-actions/validate-ai/scripts/bump-plugin-version.sh <plugin-name> <new-version>
+   ```
+
+   `<plugin-name>` is the directory name under `plugins/` (e.g.,
+   `bitwarden-code-review`). If no gh-actions checkout is available, edit the four
+   files by hand instead.
 
 3. **Add changelog entry**:
    - Update `plugins/<plugin-name>/CHANGELOG.md`
@@ -98,8 +109,17 @@ Plugin structure, marketplace consistency, and version-bump checks run automatic
 every pull request through the **Validate AI** workflow, which calls the reusable workflow
 in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai).
 The validation scripts live there under `validate-ai/scripts/` (they accept either a plugin
-name or a `plugins/<name>` path, and validate all plugins when given no arguments); to run
-them locally, invoke them from a checkout of that repository.
+name or a `plugins/<name>` path, and validate all plugins when given no arguments). To run
+them locally, invoke them from a gh-actions checkout with `REPO_ROOT` set to this
+repository — each script defaults `REPO_ROOT` to the parent of its own `scripts/`
+directory (`validate-ai/` inside gh-actions), so without the override it inspects
+gh-actions and exits with "Plugins directory not found". CI passes the same override as
+`github.workspace`.
+
+```bash
+REPO_ROOT=/path/to/ai-plugins /path/to/gh-actions/validate-ai/scripts/validate-plugin-structure.sh <plugin-name>
+REPO_ROOT=/path/to/ai-plugins /path/to/gh-actions/validate-ai/scripts/validate-marketplace.sh
+```
 
 #### 3. Run the plugin-dev validator agent
 
