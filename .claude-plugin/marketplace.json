@@ -30,7 +30,7 @@
     {
       "name": "bitwarden-init",
       "source": "./plugins/bitwarden-init",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "description": "Initialize Claude Code configuration with Bitwarden's standardized template format"
     },
     {
@@ -48,7 +48,7 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.3.0",
+      "version": "2.4.0",
       "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments"
     },
     {
@@ -60,25 +60,25 @@
     {
       "name": "bitwarden-devops-engineer",
       "source": "./plugins/bitwarden-devops-engineer",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     },
     {
       "name": "bitwarden-tech-lead",
       "source": "./plugins/bitwarden-tech-lead",
-      "version": "2.3.2",
+      "version": "3.0.0",
       "description": "Tech lead agent for a Bitwarden product team. The team's primary technical resource — architects solutions in the team's domain, partners with the EM on scoping and backlog, partners with peer tech leads on cross-team architecture, and serves as the team's conduit for cross-team technical decisions."
     },
     {
       "name": "bitwarden-shepherd",
       "source": "./plugins/bitwarden-shepherd",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Champion-of-a-technical-strategy agent for Bitwarden. Shepherds a Technical Strategy Idea through Architecture's evaluation into the Software Initiative Funnel, then drives the resulting initiative across all five funnel phases to durable adoption."
     },
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "2.1.0",
+      "version": "2.4.0",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and task decomposition, commits, pull requests, preflight checks, and change labeling."
     },
     {
@@ -96,8 +96,14 @@
     {
       "name": "bitwarden-ai-telemetry",
       "source": "./plugins/bitwarden-ai-telemetry",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP."
+    },
+    {
+      "name": "bitwarden-testing-tools",
+      "source": "./plugins/bitwarden-testing-tools",
+      "version": "1.0.0",
+      "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     }
   ]
 }
