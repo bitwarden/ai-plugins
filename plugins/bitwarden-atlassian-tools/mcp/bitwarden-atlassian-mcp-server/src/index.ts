@@ -36,7 +36,7 @@ import listSpaces from "./tools/list-spaces.js";
 // Cross-domain tools
 import downloadAttachment from "./tools/download-attachment.js";
 
-// Jira write tools (PROTOTYPE)
+// Jira write tools
 //
 // These are registered unconditionally so that their dry-run path, which sends
 // no request and needs no write credential, is available on a read-only install.
@@ -46,7 +46,8 @@ import downloadAttachment from "./tools/download-attachment.js";
 // The alternative is gating registration itself on hasJiraWriteToken(), which
 // hides the tools entirely from read-only installs. That is arguably the better
 // production choice; it is not used here because it would also hide the dry-run
-// preview this prototype exists to demonstrate.
+// preview, which should stay available so anyone can evaluate the write tools
+// before minting a token.
 // get_create_fields is read-only and useful on its own: it answers what a given
 // project requires, which is what keeps the write tools free of any hardcoded
 // per-project field knowledge.
