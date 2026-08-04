@@ -21,10 +21,10 @@ function resolveEnv(name: string): string | undefined {
  * Access mode for a Jira client.
  *
  * "read" uses ATLASSIAN_JIRA_READ_ONLY_TOKEN, which every install already sets.
- * "write" uses ATLASSIAN_JIRA_WRITE_TOKEN, which is optional: when it is absent
- * the server exposes exactly the read-only surface it always has, and the write
- * tools refuse to execute. Write capability is therefore opt-in per install
- * rather than shipped to everyone.
+ * "write" uses ATLASSIAN_JIRA_WRITE_TOKEN, which is optional: when it is absent,
+ * the write tools are still listed and their dry-run preview still works, but a
+ * live write refuses to execute. Write capability is therefore opt-in per
+ * install rather than shipped to everyone.
  */
 export type JiraAccessMode = "read" | "write";
 

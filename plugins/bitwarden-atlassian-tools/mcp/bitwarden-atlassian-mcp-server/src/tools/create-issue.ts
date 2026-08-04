@@ -21,6 +21,10 @@ import {
   ToolDefinition,
 } from "../utils/validation.js";
 import { buildDescriptionAdf } from "../utils/adf-build.js";
+import {
+  writeTokenDryRunNote,
+  writeTokenRefusalMessage,
+} from "../utils/write-guard.js";
 
 /**
  * Assemble the Jira `fields` object for a create call.
@@ -99,11 +103,7 @@ function renderDryRun(
   }
 
   if (!hasJiraWriteToken()) {
-    lines.push(
-      "> Note: ATLASSIAN_JIRA_WRITE_TOKEN is not set on this install, so a live",
-      "> create would fail at authentication. Dry runs do not need it.",
-      "",
-    );
+    lines.push(...writeTokenDryRunNote("create"));
   }
 
   return lines.join("\n");
@@ -118,12 +118,7 @@ async function handler(input: any): Promise<string> {
   }
 
   if (!hasJiraWriteToken()) {
-    return (
-      "Refusing to create: ATLASSIAN_JIRA_WRITE_TOKEN is not set.\n\n" +
-      "This install has read-only credentials. Set a write-scoped Atlassian API " +
-      "token as ATLASSIAN_JIRA_WRITE_TOKEN to enable creation, or call this tool " +
-      "with dryRun: true to preview the payload."
-    );
+    return writeTokenRefusalMessage("create");
   }
 
   try {

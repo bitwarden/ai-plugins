@@ -15,6 +15,10 @@ import {
   LinkIssuesInput,
   ToolDefinition,
 } from "../utils/validation.js";
+import {
+  writeTokenDryRunNote,
+  writeTokenRefusalMessage,
+} from "../utils/write-guard.js";
 
 /**
  * Resolve role-named parameters onto Jira's (outward, inward) pair.
@@ -55,6 +59,42 @@ function describeLink(input: LinkIssuesInput): string {
     : `${input.firstKey} relates to ${input.secondKey}`;
 }
 
+/**
+ * Read the outward issue back and confirm the link landed in the direction we
+ * intended. Each end of a link names the other end and labels it with the
+ * other end's role (see `JiraClient.createIssueLink`), so the outward issue's
+ * own record should show an `inwardIssue` entry pointing at the inward key.
+ *
+ * Uses a fresh read-mode client rather than the write client the create call
+ * used, so this never requires a read scope on the write token.
+ */
+async function verifyLink(resolved: {
+  typeName: string;
+  outwardKey: string;
+  inwardKey: string;
+}): Promise<string> {
+  try {
+    const readClient = new JiraClient("read");
+    const issue = await readClient.getIssue(resolved.outwardKey, [
+      "issuelinks",
+    ]);
+    const links = issue.fields.issuelinks ?? [];
+    const found = links.some(
+      (link) =>
+        link.type.name === resolved.typeName &&
+        link.inwardIssue?.key === resolved.inwardKey,
+    );
+
+    return found
+      ? `Verified: reading ${resolved.outwardKey} back shows the link to ${resolved.inwardKey}.`
+      : `Could not verify: reading ${resolved.outwardKey} back does not show a ` +
+          `${resolved.typeName} link to ${resolved.inwardKey}. Check Jira's Linked Issues panel.`;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return `Could not verify the link by reading ${resolved.outwardKey} back: ${message}`;
+  }
+}
+
 async function handler(input: any): Promise<string> {
   const validated = validateInput(LinkIssuesSchema, input);
   const resolved = resolveLinkDirection(validated);
@@ -88,29 +128,23 @@ async function handler(input: any): Promise<string> {
     ];
 
     if (!hasJiraWriteToken()) {
-      lines.push(
-        "> Note: ATLASSIAN_JIRA_WRITE_TOKEN is not set on this install, so a live",
-        "> link would fail at authentication. Dry runs do not need it.",
-        "",
-      );
+      lines.push(...writeTokenDryRunNote("link"));
     }
 
     return lines.join("\n");
   }
 
   if (!hasJiraWriteToken()) {
-    return (
-      "Refusing to link: ATLASSIAN_JIRA_WRITE_TOKEN is not set.\n\n" +
-      "This install has read-only credentials. Call with dryRun: true to preview " +
-      "the payload."
-    );
+    return writeTokenRefusalMessage("link");
   }
 
   try {
     const client = new JiraClient("write");
     await client.createIssueLink(resolved);
 
-    return `Linked: ${describeLink(validated)}. Verify in Jira's Linked Issues panel.`;
+    const verification = await verifyLink(resolved);
+
+    return [`Linked: ${describeLink(validated)}.`, verification].join("\n\n");
   } catch (error) {
     return `Error creating link: ${error instanceof Error ? error.message : String(error)}`;
   }

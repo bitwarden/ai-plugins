@@ -4,7 +4,7 @@
 
 Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
 
-Read access is the default and always available. Jira write access (creating work items and links) is **opt-in per install**: without `ATLASSIAN_JIRA_WRITE_TOKEN`, the server exposes exactly the read-only surface described below and the write tools refuse to execute. Confluence remains read-only with no write path.
+Read access is the default and always available. Jira write access (creating work items and links) is **opt-in per install**: `create_issue` and `link_issues` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
 
 ## Installation
 
@@ -124,6 +124,8 @@ write:issue:jira
 `get_create_fields` needs no additional scope. It calls the createmeta endpoints, which the existing read-only token already satisfies.
 
 Token scope is separate from Jira project permission. Creating also requires the **Create Issues** permission in the target project, and linking requires **Link Issues**. In a project where the user lacks Create Issues, Jira answers `You cannot create issues in this project`, which `get_create_fields` reports as an ordinary result rather than an error.
+
+A leaked write token permits more than these two tools use: `write:comment:jira`, `write:comment.property:jira`, and `write:attachment:jira` are granted only because Atlassian rejects a narrower scope set, so the token can also add comments and attachments across every project the user can reach. Treat this token as higher-blast-radius than the read-only token and rotate it accordingly.
 
 ### Confluence
 

@@ -119,6 +119,7 @@ export interface JiraIssueFields {
   attachment?: JiraAttachment[];
   subtasks?: JiraIssue[];
   parent?: JiraIssue;
+  issuelinks?: JiraIssueLink[];
   [key: string]: any; // Custom fields
 }
 
@@ -249,6 +250,24 @@ export interface JiraRemoteLink {
       };
     };
   };
+}
+
+/**
+ * An entry in an issue's `issuelinks` field. Only one of `inwardIssue` /
+ * `outwardIssue` is present per entry — each end of a link names the other
+ * end and labels it with the other end's role (see `JiraClient.createIssueLink`).
+ */
+export interface JiraIssueLink {
+  id: string;
+  self: string;
+  type: {
+    id: string;
+    name: string;
+    inward: string;
+    outward: string;
+  };
+  inwardIssue?: { id: string; key: string; self: string };
+  outwardIssue?: { id: string; key: string; self: string };
 }
 
 /**

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`get_create_fields` MCP tool** (read-only) — reports a project's creatable issue types, and for a given type every field on the create screen with its field id, required flag, and allowed values. Lets callers discover a project's shape instead of hardcoding it, which matters because Bitwarden's projects differ: PM and SM expose an Acceptance criteria field, QA and VULN do not; VULN has no Story type; PLT's only creatable type is `Platform Initiative`.
 - **`create_issue` MCP tool** (write, opt-in) — creates a single work item in any project. Defaults to a dry run that returns the exact payload without sending it; a live create requires an explicit `dryRun: false`. Carries no project-specific field knowledge: the issue type is a name Jira resolves, and anything beyond project/type/summary/description/parent/labels is passed through a `fields` object keyed by Jira field id.
 - **`link_issues` MCP tool** (write, opt-in) — links two work items. For a dependency it takes `blockerKey` and `blockedKey` and applies Jira's inward/outward mapping internally, so the direction cannot be inverted by argument order. Also defaults to a dry run.
-- **Optional `ATLASSIAN_JIRA_WRITE_TOKEN`** — write capability is opt-in per install. Without this variable the server exposes the same read-only surface it always has and the write tools refuse to execute, while their dry-run paths continue to work.
+- **Optional `ATLASSIAN_JIRA_WRITE_TOKEN`** — write capability is opt-in per install. The write tools are always listed and their dry-run paths always work; without this variable, a live write refuses to execute.
 
 ## [2.4.0] - 2026-07-24
 

@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const mockPost = vi.fn();
+const mockGet = vi.fn();
 
 vi.mock("axios", () => {
   const mockAxios: any = {
     create: vi.fn(() => ({
       post: mockPost,
+      get: mockGet,
       interceptors: { response: { use: vi.fn() } },
     })),
   };
@@ -151,9 +153,32 @@ describe("link_issues handler", () => {
     expect(mockPost).not.toHaveBeenCalled();
   });
 
-  it("posts the resolved link direction on a live link with a write token", async () => {
+  it("posts the resolved link direction and verifies it by reading the outward issue back", async () => {
     process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
     mockPost.mockResolvedValueOnce({ data: undefined });
+    mockGet.mockResolvedValueOnce({
+      data: {
+        fields: {
+          issuelinks: [
+            {
+              id: "10001",
+              self: "https://example/rest/api/3/issueLink/10001",
+              type: {
+                id: "10000",
+                name: "Blocks",
+                inward: "is blocked by",
+                outward: "blocks",
+              },
+              inwardIssue: {
+                id: "2",
+                key: "PM-2",
+                self: "https://example/PM-2",
+              },
+            },
+          ],
+        },
+      },
+    });
 
     const out = await linkIssuesTool.handler({
       ...blocksLink,
@@ -161,12 +186,47 @@ describe("link_issues handler", () => {
     });
 
     expect(out).toContain("Linked: PM-1 blocks PM-2");
+    expect(out).toContain("Verified: reading PM-1 back shows the link to PM-2");
     expect(mockPost).toHaveBeenCalledOnce();
     expect(mockPost).toHaveBeenCalledWith("/rest/api/3/issueLink", {
       type: { name: "Blocks" },
       outwardIssue: { key: "PM-1" },
       inwardIssue: { key: "PM-2" },
     });
+    expect(mockGet).toHaveBeenCalledWith(
+      "/rest/api/3/issue/PM-1",
+      expect.objectContaining({ params: { fields: "issuelinks" } }),
+    );
+  });
+
+  it("reports when the read-back does not show the expected link", async () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
+    mockPost.mockResolvedValueOnce({ data: undefined });
+    mockGet.mockResolvedValueOnce({ data: { fields: { issuelinks: [] } } });
+
+    const out = await linkIssuesTool.handler({
+      ...blocksLink,
+      dryRun: false,
+    });
+
+    expect(out).toContain("Linked: PM-1 blocks PM-2");
+    expect(out).toContain("Could not verify");
+    expect(out).toContain("Linked Issues panel");
+  });
+
+  it("reports a verification failure without treating the link creation as failed", async () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
+    mockPost.mockResolvedValueOnce({ data: undefined });
+    mockGet.mockRejectedValueOnce(new Error("JIRA API error (404): not found"));
+
+    const out = await linkIssuesTool.handler({
+      ...blocksLink,
+      dryRun: false,
+    });
+
+    expect(out).toContain("Linked: PM-1 blocks PM-2");
+    expect(out).toContain("Could not verify the link by reading PM-1 back");
+    expect(out).toContain("not found");
   });
 
   it("reports the API error rather than throwing on a failed live link", async () => {
@@ -180,5 +240,6 @@ describe("link_issues handler", () => {
 
     expect(out).toContain("Error creating link");
     expect(out).toContain("boom");
+    expect(mockGet).not.toHaveBeenCalled();
   });
 });

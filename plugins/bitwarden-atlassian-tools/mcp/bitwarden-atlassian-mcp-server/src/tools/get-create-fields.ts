@@ -18,6 +18,8 @@ import {
 } from "../utils/validation.js";
 import type { JiraCreateMetaField } from "../jira/types.js";
 
+// Jira's own createmeta 404 carries no body, so this is the Jira UI's typical
+// wording for a permission denial rather than something extracted from the response.
 const NO_CREATE_PERMISSION = "You cannot create issues in this project";
 
 function renderIssueTypes(
@@ -121,9 +123,10 @@ async function handler(input: any): Promise<string> {
     if (message.includes("not found") || message.includes("404")) {
       return (
         `Cannot read the create screen for ${validated.project}.\n\n` +
-        `Jira answers: "${NO_CREATE_PERMISSION}", or the project key does not ` +
-        `exist. This is expected for projects the authenticated user cannot ` +
-        `create in (for example AC and ARCH).`
+        `This project may not exist, or the authenticated user may lack create ` +
+        `permission in it (Jira's UI describes the latter as "${NO_CREATE_PERMISSION}"). ` +
+        `This is expected for projects the authenticated user cannot create in ` +
+        `(for example AC and ARCH).`
       );
     }
     return `Error reading create metadata: ${message}`;
