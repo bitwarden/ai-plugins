@@ -113,8 +113,9 @@ name or a `plugins/<name>` path, and validate all plugins when given no argument
 them locally, invoke them from a gh-actions checkout with `REPO_ROOT` set to this
 repository — each script defaults `REPO_ROOT` to the parent of its own `scripts/`
 directory (`validate-ai/` inside gh-actions), so without the override it inspects
-gh-actions and exits with "Plugins directory not found". CI passes the same override as
-`github.workspace`.
+gh-actions and fails on a path that isn't there — `validate-plugin-structure.sh` reports
+"Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not
+found at". CI passes the same override as `github.workspace`.
 
 ```bash
 REPO_ROOT=/path/to/ai-plugins /path/to/gh-actions/validate-ai/scripts/validate-plugin-structure.sh <plugin-name>
