@@ -2,7 +2,9 @@
 
 ## Overview
 
-Read-only Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads. All operations are read-only — the server never creates, updates, or deletes any Atlassian resource.
+Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
+
+Read access is the default and always available. Jira write access (creating work items and links) is **opt-in per install**: without `ATLASSIAN_JIRA_WRITE_TOKEN`, the server exposes exactly the read-only surface described below and the write tools refuse to execute. Confluence remains read-only with no write path.
 
 ## Installation
 
@@ -14,6 +16,10 @@ export ATLASSIAN_CLOUD_ID="your-cloud-id"
 export ATLASSIAN_EMAIL="your-email@company.com"
 export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-jira-scoped-token"
 export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
+
+# Optional — enables the Jira write tools (create_issue, link_issues).
+# Omit to keep this install read-only.
+export ATLASSIAN_JIRA_WRITE_TOKEN="your-jira-write-scoped-token"
 ```
 
 API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
@@ -67,17 +73,55 @@ The Jira Agile (Software) endpoints behind `list_boards`, `get_sprints`, and `ge
 
 ### Jira
 
-| Tool                     | Purpose                                                              |
-| ------------------------ | -------------------------------------------------------------------- |
-| `get_issue`              | Read a Jira issue by key or ID                                       |
-| `search_issues`          | Search issues using JQL                                              |
-| `get_issue_comments`     | Get comments for an issue                                            |
-| `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs) |
-| `list_projects`          | List accessible Jira projects                                        |
-| `list_boards`            | List Agile boards, optionally filtered by project                    |
-| `get_sprints`            | List sprints for a board (filter by active/future/closed)            |
-| `get_sprint_issues`      | List all issues in a sprint                                          |
-| `download_attachment`    | Download a Jira attachment as Base64                                 |
+| Tool                     | Purpose                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `get_issue`              | Read a Jira issue by key or ID                                                                                           |
+| `search_issues`          | Search issues using JQL                                                                                                  |
+| `get_issue_comments`     | Get comments for an issue                                                                                                |
+| `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs)                                                     |
+| `list_projects`          | List accessible Jira projects                                                                                            |
+| `list_boards`            | List Agile boards, optionally filtered by project                                                                        |
+| `get_sprints`            | List sprints for a board (filter by active/future/closed)                                                                |
+| `get_sprint_issues`      | List all issues in a sprint                                                                                              |
+| `download_attachment`    | Download a Jira attachment as Base64                                                                                     |
+| `get_create_fields`      | Report a project's creatable issue types, and a type's create-screen fields with ids, required flags, and allowed values |
+
+### Jira (write, requires `ATLASSIAN_JIRA_WRITE_TOKEN`)
+
+Both tools default to a dry run that returns the exact payload without sending it. A live write requires an explicit `dryRun: false`. Dry runs need no write token.
+
+| Tool           | Purpose                                                                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_issue` | Create one work item in any project. Carries no project-specific field knowledge: pass anything beyond the common core through `fields`, keyed by field id from `get_create_fields` |
+| `link_issues`  | Link two work items. For a dependency, takes `blockerKey` and `blockedKey` and maps them onto Jira's inward/outward sides internally so the direction cannot be inverted            |
+
+Write tokens need write scopes in addition to the read scopes above. Per Atlassian's OpenAPI spec for the endpoints these tools call:
+
+| Endpoint                                   | Classic scope     | Granular scopes (as documented)                                                                                     |
+| ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `POST /rest/api/3/issue` (create_issue)    | `write:jira-work` | `write:issue:jira`, `read:issue:jira`, `write:comment:jira`, `write:comment.property:jira`, `write:attachment:jira` |
+| `POST /rest/api/3/issueLink` (link_issues) | `write:jira-work` | `write:issue-link:jira`, `write:issue:jira`, `write:comment:jira`                                                   |
+
+> **Do not put `write:jira-work` on a scoped token.** Atlassian's OpenAPI spec lists the classic scope inside each operation's granular set, which reads as though it belongs in both columns. It does not. A scoped token holding only classic-style scopes fails every write with `401 Unauthorized; scope does not match`, and scopes cannot be edited after a scoped token is created. Use the granular names for a scoped token, or a classic token where scopes do not apply at all.
+
+Grant the **whole** granular set for an endpoint, not a subset. The gateway checks the full documented list for the operation regardless of what the request body actually contains, so a token holding only some of them fails with `401 Unauthorized; scope does not match`. In particular, `write:comment:jira`, `write:comment.property:jira`, and `write:attachment:jira` are required to create an issue even though these tools never send a comment or an attachment.
+
+For a scoped write token covering both write tools, that is the union of the two rows:
+
+```
+read:issue:jira
+write:attachment:jira
+write:comment:jira
+write:comment.property:jira
+write:issue:jira
+write:issue-link:jira
+```
+
+A classic (non-scoped) API token carries no scopes and acts with the user's own Jira permissions, so there is nothing to grant.
+
+`get_create_fields` needs no additional scope. It calls the createmeta endpoints, which the existing read-only token already satisfies.
+
+Token scope is separate from Jira project permission. Creating also requires the **Create Issues** permission in the target project, and linking requires **Link Issues**. In a project where the user lacks Create Issues, Jira answers `You cannot create issues in this project`, which `get_create_fields` reports as an ordinary result rather than an error.
 
 ### Confluence
 

@@ -250,3 +250,31 @@ export interface JiraRemoteLink {
     };
   };
 }
+
+/**
+ * An issue type a project can create, from
+ * `GET /issue/createmeta/{project}/issuetypes`.
+ */
+export interface JiraCreateMetaIssueType {
+  id: string;
+  name: string;
+  subtask: boolean;
+  description?: string;
+}
+
+/**
+ * A field on a project's create screen, from
+ * `GET /issue/createmeta/{project}/issuetypes/{issueTypeId}`.
+ */
+export interface JiraCreateMetaField {
+  fieldId: string;
+  name: string;
+  required: boolean;
+  hasDefaultValue?: boolean;
+  schema?: { type?: string; custom?: string; items?: string };
+  allowedValues?: Array<{
+    id?: string;
+    value?: string;
+    name?: string;
+  }>;
+}

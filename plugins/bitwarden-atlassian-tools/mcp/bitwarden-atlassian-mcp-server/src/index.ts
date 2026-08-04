@@ -34,6 +34,24 @@ import listSpaces from "./tools/list-spaces.js";
 // Cross-domain tools
 import downloadAttachment from "./tools/download-attachment.js";
 
+// Jira write tools (PROTOTYPE)
+//
+// These are registered unconditionally so that their dry-run path, which sends
+// no request and needs no write credential, is available on a read-only install.
+// Live execution is gated inside each handler on ATLASSIAN_JIRA_WRITE_TOKEN, so
+// an install without that token behaves exactly as it does today.
+//
+// The alternative is gating registration itself on hasJiraWriteToken(), which
+// hides the tools entirely from read-only installs. That is arguably the better
+// production choice; it is not used here because it would also hide the dry-run
+// preview this prototype exists to demonstrate.
+// get_create_fields is read-only and useful on its own: it answers what a given
+// project requires, which is what keeps the write tools free of any hardcoded
+// per-project field knowledge.
+import getCreateFields from "./tools/get-create-fields.js";
+import createIssue from "./tools/create-issue.js";
+import linkIssues from "./tools/link-issues.js";
+
 const tools: ToolDefinition[] = [
   getIssue,
   getIssueComments,
@@ -50,6 +68,9 @@ const tools: ToolDefinition[] = [
   searchConfluenceCql,
   listSpaces,
   downloadAttachment,
+  getCreateFields,
+  createIssue,
+  linkIssues,
 ];
 
 async function main() {
