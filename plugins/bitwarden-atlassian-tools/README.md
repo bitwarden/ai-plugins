@@ -162,6 +162,19 @@ Features:
 - Automatic Confluence page follow-through from remote links
 - Context budget guidance and graceful degradation
 
+### `filing-jira-tickets`
+
+Files Jira work items that stand on their own. Reads the target project's create screen before drafting, so no project's field layout is assumed, previews each payload before writing it, then wires and verifies dependency links. Triggered by intent to create or link tickets (e.g., "file a bug for this", "create a story for this work", "wire the blocked-by relationship").
+
+Features:
+
+- Discovers issue types, required fields, and allowed values per project rather than hardcoding them, which matters because Bitwarden's projects differ (PM and SM expose an Acceptance criteria field, QA and VULN do not; VULN has no Story type; PLT's only creatable type is `Platform Initiative`)
+- Dry-run preview of the exact payload before every live write
+- Approval required before each create, unless explicitly told to skip it
+- Role-named link arguments (`blockerKey`, `blockedKey`) so dependency direction cannot be inverted
+
+Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can still draft and preview.
+
 ## Requirements
 
 - Claude Code with MCP support
