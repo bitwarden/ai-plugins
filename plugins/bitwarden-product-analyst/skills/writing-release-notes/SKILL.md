@@ -7,21 +7,24 @@ description: Write user-facing release notes for a Bitwarden release from a Jira
 
 Produce concise, user-facing release notes for a Bitwarden release. The output is what customers read — on GitHub, in the App Store, or in Google Play — so every word should be benefit-oriented, jargon-free, and accurate about what users will actually experience.
 
+## Prerequisites
+
+Automated Jira lookups require the `bitwarden-atlassian-tools` plugin (its MCP server exposes `search_issues`, `get_issue`, and `get_issue_comments`). Without it, or when running in a Claude.ai Project (MCP tools are unavailable there), fall back to asking the user to paste the release page content and the Slack thread text directly — the rest of this skill works identically either way. There is no Slack MCP integration in this marketplace; the Slack thread is always gathered by asking the user to paste it.
+
 ## Step 1: Gather Inputs
 
-You need two things before writing anything:
+Gather two inputs before writing anything:
 
 ### 1a. Jira Release Page
 
-Ask the user for the Jira release page URL (e.g. `https://bitwarden.atlassian.net/projects/CL/versions/12345/tab/release-report-all-issues`).
+Ask the user for the Jira release page URL (e.g. `https://bitwarden.atlassian.net/projects/CL/versions/12345/tab/release-report-all-issues`) or the release version name (e.g. `2025.7.0`).
 
-If MCP Atlassian tools are available, extract the fixVersion name from the URL and fetch all issues in the release using JQL:
+If `search_issues` is available, resolve the query:
 
-```
-fixVersion = "RELEASE_NAME" ORDER BY issuetype ASC
-```
+- From a URL, extract the numeric version ID (the segment after `/versions/`) and query by ID: `fixVersion = 12345 ORDER BY issuetype ASC`
+- From a version name, quote it: `fixVersion = "2025.7.0" ORDER BY issuetype ASC`
 
-Use `searchJiraIssuesUsingJql` and page through results until all issues are retrieved. For each issue, capture: summary, issue type, labels, components, status, and any feature flag references in the description or comments.
+Call `search_issues` with `fields: ["summary", "issuetype", "labels", "components", "status", "description"]`, and page through results using the returned `nextPageToken` until none is returned. For each issue, capture summary, issue type, labels, components, status, and any feature flag references found in the description. Feature flag references usually surface more completely in the Slack thread (Step 1b); only call `get_issue_comments` for individual issues where the flag is ambiguous after checking both sources.
 
 If MCP tools are not available (web app context), ask the user to paste the release page content or a list of ticket summaries directly into the conversation.
 
@@ -32,9 +35,10 @@ The #release Slack thread is posted weekly and specifies which feature flags are
 - **Include**: Only user-facing changes whose feature flag is being enabled in this release (or that have no flag) should appear in the notes.
 - **Server releases — flag removals**: When a feature flag is being fully removed from the server codebase, this signals that self-hosted users are gaining access to the feature. These must appear in the release notes.
 
-If a Slack MCP integration is available, fetch the thread. Otherwise, ask the user to paste the thread content.
+Ask the user to paste the thread content.
 
 Parse the thread to extract:
+
 - Release version and date
 - List of flags being **enabled** for this release (per platform if specified)
 - List of flags being **removed** (for server releases — capture both the flag identifier and any associated feature description from the ticket or thread)
@@ -43,6 +47,7 @@ Parse the thread to extract:
 ## Step 2: Determine Release Scope
 
 Identify:
+
 - **Which repo/product** is being released (clients, server, mobile, browser extension, CLI, desktop)
 - **Which platforms** are covered (web app, desktop, browser extension, mobile iOS, mobile Android, CLI)
 - **Release version** number
@@ -80,7 +85,7 @@ Feature flags that are **fully removed** from the server codebase in this releas
 
 ### Exclude entirely
 
-- Security fixes that Bitwarden has chosen not to disclose in release notes
+- Security fixes, unless the Slack thread or the user explicitly approves specific wording for one (default to excluding all security fixes from named bullets)
 - Internal tooling changes with zero user impact
 - Duplicate or reverted changes
 
@@ -106,11 +111,13 @@ Informative, brief, benefit-forward. Avoid marketing superlatives ("exciting", "
 Flag removal lines describe **the feature the flag was guarding**, in plain user-facing language. Look up the associated Jira ticket, Confluence page, or Slack thread description to find the right framing. The internal flag name is a lookup key only — it never appears in the output.
 
 Use the format:
+
 ```
 Removed feature flag for [user-facing description of what the feature does]
 ```
 
 Example: a flag named `pm-36859-refactor-org-collections-vault-component` becomes:
+
 ```
 Removed feature flag for organization vault collection management improvements
 ```
@@ -148,13 +155,3 @@ Before presenting the final output, check:
 - [ ] Total named bullets are between 3 and 7 (if more than 7 are equally important, consolidate similar items)
 - [ ] The catch-all line is present
 - [ ] No markdown formatting in the output text
-
-## Usage Notes for Web App (Claude.ai)
-
-If you are using this skill via a Claude.ai Project (not Claude Code), MCP tools for Jira and Slack are not available. To use this skill:
-
-1. Navigate to the Jira release page for the version and copy the list of issue summaries
-2. Copy the text of the #release Slack thread
-3. Paste both into the conversation and ask Claude to write release notes
-
-The output will be identical — only the data-gathering step is manual rather than automated.

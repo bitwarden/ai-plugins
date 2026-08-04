@@ -10,10 +10,10 @@ Claude Code skills for product analysis at Bitwarden. Generic AI assistance does
 
 ## Skills
 
-| Skill                      | What It Does                                                                                                                                                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `requirements-elicitation` | Extracts functional, non-functional, and security requirements from specifications. Flags ambiguities, identifies constraints, and creates testable acceptance criteria using Bitwarden security vocabulary. |
-| `work-breakdown`           | Decomposes features into implementable tasks organized by phase. Identifies cross-repo dependencies (`bitwarden/server` vs. `bitwarden/clients`), task ordering, and team assignments.                       |
+| Skill                      | What It Does                                                                                                                                                                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `requirements-elicitation` | Extracts functional, non-functional, and security requirements from specifications. Flags ambiguities, identifies constraints, and creates testable acceptance criteria using Bitwarden security vocabulary.                                       |
+| `work-breakdown`           | Decomposes features into implementable tasks organized by phase. Identifies cross-repo dependencies (`bitwarden/server` vs. `bitwarden/clients`), task ordering, and team assignments.                                                             |
 | `writing-release-notes`    | Produces user-facing release notes from a Jira release tag and the weekly #release Slack thread. Filters to user-visible changes, respects feature flag enablement, and for server releases always surfaces flag removals in user-facing language. |
 
 ## Installation
@@ -60,3 +60,8 @@ Draft release notes for the 2025.7.0 server release
 - [Bitwarden Security Principles](https://contributing.bitwarden.com/architecture/security/principles/) — P01–P06 foundation principles
 - [Product Initiative Template](https://bitwarden.atlassian.net/wiki/spaces/PROD/pages/171507714/Product+initiative+template) — Canonical PM template; maps to `references/requirements-template.md`
 - [Requirements Template](references/requirements-template.md) — Full requirements document structure
+
+### writing-release-notes
+
+- [Bitwarden Atlassian Tools](../bitwarden-atlassian-tools/) — Provides the `search_issues`, `get_issue`, and `get_issue_comments` MCP tools used for automated Jira lookups
+- Jira release report pages (`https://bitwarden.atlassian.net/projects/<PROJECT>/versions/<ID>/tab/release-report-all-issues`) and the weekly `#release` Slack thread are the two data sources this skill synthesizes

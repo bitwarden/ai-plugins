@@ -12,7 +12,8 @@
     "product-analysis",
     "requirements",
     "specifications",
-    "research"
+    "research",
+    "release-notes"
   ],
   "agents": "./agents/product-analyst.md"
 }
