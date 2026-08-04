@@ -95,29 +95,31 @@ Both tools default to a dry run that returns the exact payload without sending i
 | `create_issue` | Create one work item in any project. Carries no project-specific field knowledge: pass anything beyond the common core through `fields`, keyed by field id from `get_create_fields` |
 | `link_issues`  | Link two work items. For a dependency, takes `blockerKey` and `blockedKey` and maps them onto Jira's inward/outward sides internally so the direction cannot be inverted            |
 
-Write tokens need write scopes in addition to the read scopes above. Per Atlassian's OpenAPI spec for the endpoints these tools call:
+Write tokens need write scopes in addition to the read scopes above:
 
-| Endpoint                                   | Classic scope     | Granular scopes (as documented)                                                                                     |
-| ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `POST /rest/api/3/issue` (create_issue)    | `write:jira-work` | `write:issue:jira`, `read:issue:jira`, `write:comment:jira`, `write:comment.property:jira`, `write:attachment:jira` |
-| `POST /rest/api/3/issueLink` (link_issues) | `write:jira-work` | `write:issue-link:jira`, `write:issue:jira`, `write:comment:jira`                                                   |
+| Scope                         | Required for                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| `read:issue:jira`             | `create_issue`                                                                    |
+| `read:issue:jira-software`    | `create_issue`                                                                    |
+| `write:issue:jira`            | `create_issue`, `link_issues`                                                     |
+| `write:issue:jira-software`   | `create_issue`, `link_issues`                                                     |
+| `write:issue-link:jira`       | `link_issues`                                                                     |
+| `write:comment:jira`          | `create_issue`, `link_issues` (required even though neither tool sends a comment) |
+| `write:comment.property:jira` | `create_issue` (required even though it never sends a comment)                    |
+| `write:attachment:jira`       | `create_issue` (required even though it never sends an attachment)                |
 
-> **Do not put `write:jira-work` on a scoped token.** Atlassian's OpenAPI spec lists the classic scope inside each operation's granular set, which reads as though it belongs in both columns. It does not. A scoped token holding only classic-style scopes fails every write with `401 Unauthorized; scope does not match`, and scopes cannot be edited after a scoped token is created. Use the granular names for a scoped token, or a classic token where scopes do not apply at all.
-
-Grant the **whole** granular set for an endpoint, not a subset. The gateway checks the full documented list for the operation regardless of what the request body actually contains, so a token holding only some of them fails with `401 Unauthorized; scope does not match`. In particular, `write:comment:jira`, `write:comment.property:jira`, and `write:attachment:jira` are required to create an issue even though these tools never send a comment or an attachment.
-
-For a scoped write token covering both write tools, that is the union of the two rows:
+Grant the **whole** set, not a subset — a token holding only some of them fails every write with `401 Unauthorized; scope does not match`. For a scoped write token covering both write tools, that's:
 
 ```
 read:issue:jira
+read:issue:jira-software
 write:attachment:jira
-write:comment:jira
 write:comment.property:jira
-write:issue:jira
+write:comment:jira
 write:issue-link:jira
+write:issue:jira-software
+write:issue:jira
 ```
-
-A classic (non-scoped) API token carries no scopes and acts with the user's own Jira permissions, so there is nothing to grant.
 
 `get_create_fields` needs no additional scope. It calls the createmeta endpoints, which the existing read-only token already satisfies.
 
@@ -142,6 +144,7 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Search with JQL: `mcp__bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
 - Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
 - Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
+- Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
 
 ## Skills
 
