@@ -57,6 +57,6 @@ Linking is reversible, so this step can run as a batch once the tickets exist.
 
 - A hard dependency, where one item must land before another can start, is `Blocks`. Soft or ordering-only is `Relates`.
 - For `Blocks`, pass `blockerKey` for the item that must land first and `blockedKey` for the item waiting on it. The tool maps those onto Jira's inward and outward sides internally, so the direction cannot be inverted by getting the argument order wrong.
-- Verify each link by reading the ticket back with `get_issue`. Check it against the Linked Issues panel in Jira if anything looks off.
+- `link_issues` reads the link back itself and reports whether it verified. If it reports it could not verify, read the ticket back yourself with `get_issue` and check it against the Linked Issues panel in Jira before treating the link as done.
 
 **Completion criterion:** every relationship whose target ticket exists is created and verified. Relationships pointing at work that does not exist yet are reported back to the user, not dropped.
