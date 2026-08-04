@@ -229,5 +229,19 @@ describe("create_issue handler", () => {
 
     expect(out).toContain("Error creating issue");
     expect(out).toContain("boom");
+    expect(out).not.toContain("full scope");
+  });
+
+  it("hints at partial write-token scopes on a 401, instead of the field hint", async () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
+    mockPost.mockRejectedValueOnce(
+      new Error("JIRA authentication failed. Check your API token and email."),
+    );
+
+    const out = await createIssueTool.handler({ ...story, dryRun: false });
+
+    expect(out).toContain("Error creating issue");
+    expect(out).toContain("full scope");
+    expect(out).not.toContain("get_create_fields");
   });
 });

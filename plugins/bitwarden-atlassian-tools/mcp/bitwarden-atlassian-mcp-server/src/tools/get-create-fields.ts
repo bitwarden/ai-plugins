@@ -50,17 +50,13 @@ function renderIssueTypes(
 }
 
 function renderField(field: JiraCreateMetaField): string {
-  const parts = [`- \`${field.fieldId}\` **${field.name}**`];
-
-  parts.push(field.required ? "(required" : "(optional");
+  const flags = [field.required ? "required" : "optional"];
   if (field.hasDefaultValue) {
-    parts.push("has default");
+    flags.push("has default");
   }
-  parts.push(`type ${field.schema?.type ?? "unknown"})`);
+  flags.push(`type ${field.schema?.type ?? "unknown"}`);
 
-  let line = parts.join(" ").replace(" (required has", " (required, has");
-  line = line.replace(" (optional has", " (optional, has");
-  line = line.replace(" type ", ", type ");
+  let line = `- \`${field.fieldId}\` **${field.name}** (${flags.join(", ")})`;
 
   if (field.allowedValues && field.allowedValues.length > 0) {
     const values = field.allowedValues

@@ -18,6 +18,8 @@ import {
 import {
   writeTokenDryRunNote,
   writeTokenRefusalMessage,
+  isWriteAuthError,
+  writeScopeHint,
 } from "../utils/write-guard.js";
 
 /**
@@ -146,7 +148,11 @@ async function handler(input: any): Promise<string> {
 
     return [`Linked: ${describeLink(validated)}.`, verification].join("\n\n");
   } catch (error) {
-    return `Error creating link: ${error instanceof Error ? error.message : String(error)}`;
+    const message = error instanceof Error ? error.message : String(error);
+
+    return isWriteAuthError(message)
+      ? [`Error creating link: ${message}`, "", writeScopeHint()].join("\n")
+      : `Error creating link: ${message}`;
   }
 }
 

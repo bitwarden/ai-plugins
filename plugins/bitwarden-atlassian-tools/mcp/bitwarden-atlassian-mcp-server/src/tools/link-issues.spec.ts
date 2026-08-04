@@ -240,6 +240,23 @@ describe("link_issues handler", () => {
 
     expect(out).toContain("Error creating link");
     expect(out).toContain("boom");
+    expect(out).not.toContain("full scope");
+    expect(mockGet).not.toHaveBeenCalled();
+  });
+
+  it("hints at partial write-token scopes on a 401", async () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
+    mockPost.mockRejectedValueOnce(
+      new Error("JIRA authentication failed. Check your API token and email."),
+    );
+
+    const out = await linkIssuesTool.handler({
+      ...blocksLink,
+      dryRun: false,
+    });
+
+    expect(out).toContain("Error creating link");
+    expect(out).toContain("full scope");
     expect(mockGet).not.toHaveBeenCalled();
   });
 });

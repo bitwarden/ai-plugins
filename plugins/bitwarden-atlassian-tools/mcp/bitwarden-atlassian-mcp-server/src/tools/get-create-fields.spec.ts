@@ -117,6 +117,30 @@ describe("get_create_fields", () => {
     expect(out).toContain("`customfield_10192` **Acceptance criteria**");
   });
 
+  it("does not mangle a field name with 'type' surrounded by spaces", async () => {
+    mockGet.mockResolvedValueOnce(PM_TYPES).mockResolvedValueOnce({
+      data: {
+        fields: [
+          {
+            fieldId: "customfield_10300",
+            name: "Issue type detail",
+            required: false,
+            schema: { type: "string" },
+          },
+        ],
+      },
+    });
+
+    const out = await getCreateFields.handler({
+      project: "PM",
+      issueType: "Epic",
+    });
+
+    expect(out).toContain(
+      "`customfield_10300` **Issue type detail** (optional, type string)",
+    );
+  });
+
   it("explains a project the user cannot create in rather than throwing", async () => {
     mockGet.mockRejectedValueOnce(
       new Error("JIRA resource not found: /rest/api/3/issue/createmeta/ARCH"),

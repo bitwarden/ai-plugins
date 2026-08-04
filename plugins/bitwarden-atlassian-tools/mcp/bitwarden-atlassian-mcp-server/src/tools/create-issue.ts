@@ -24,6 +24,8 @@ import { buildDescriptionAdf } from "../utils/adf-build.js";
 import {
   writeTokenDryRunNote,
   writeTokenRefusalMessage,
+  isWriteAuthError,
+  writeScopeHint,
 } from "../utils/write-guard.js";
 
 /**
@@ -134,6 +136,12 @@ async function handler(input: any): Promise<string> {
     ].join("\n");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+
+    if (isWriteAuthError(message)) {
+      return [`Error creating issue: ${message}`, "", writeScopeHint()].join(
+        "\n",
+      );
+    }
 
     return [
       `Error creating issue: ${message}`,

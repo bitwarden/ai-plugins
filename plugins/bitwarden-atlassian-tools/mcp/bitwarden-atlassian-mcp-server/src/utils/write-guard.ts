@@ -21,3 +21,20 @@ export function writeTokenRefusalMessage(action: string): string {
     "with dryRun: true to preview the payload."
   );
 }
+
+/**
+ * True for JiraClient's generic 401 text — the one failure that could mean
+ * the write token is present but missing part of the required scope set,
+ * rather than a config or field problem.
+ */
+export function isWriteAuthError(message: string): boolean {
+  return message.includes("JIRA authentication failed");
+}
+
+/** Appended when a live write fails with isWriteAuthError. */
+export function writeScopeHint(): string {
+  return (
+    "If ATLASSIAN_JIRA_WRITE_TOKEN is set, verify it carries the full scope " +
+    "set from the plugin README — Jira rejects a partial set with this same 401."
+  );
+}
