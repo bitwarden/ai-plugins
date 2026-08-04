@@ -14,6 +14,7 @@ Claude Code skills for product analysis at Bitwarden. Generic AI assistance does
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `requirements-elicitation` | Extracts functional, non-functional, and security requirements from specifications. Flags ambiguities, identifies constraints, and creates testable acceptance criteria using Bitwarden security vocabulary. |
 | `work-breakdown`           | Decomposes features into implementable tasks organized by phase. Identifies cross-repo dependencies (`bitwarden/server` vs. `bitwarden/clients`), task ordering, and team assignments.                       |
+| `writing-release-notes`    | Produces user-facing release notes from a Jira release tag and the weekly #release Slack thread. Filters to user-visible changes, respects feature flag enablement, and for server releases always surfaces flag removals in user-facing language. |
 
 ## Installation
 
@@ -41,6 +42,14 @@ Create a spec document from PROJ-1234
 
 ```
 Write a spec for adding passkey support to the browser extension
+```
+
+```
+Write release notes for https://bitwarden.atlassian.net/projects/CL/versions/12345
+```
+
+```
+Draft release notes for the 2025.7.0 server release
 ```
 
 ## References

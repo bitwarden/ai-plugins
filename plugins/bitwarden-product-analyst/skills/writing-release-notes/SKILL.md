@@ -1,0 +1,160 @@
+---
+name: writing-release-notes
+description: Write user-facing release notes for a Bitwarden release from a Jira release tag and the #release Slack thread. Use when asked to "write release notes", "draft release notes", "generate release notes", "write app store notes", or any request to produce external-facing release copy for a given version.
+---
+
+# Writing Release Notes
+
+Produce concise, user-facing release notes for a Bitwarden release. The output is what customers read — on GitHub, in the App Store, or in Google Play — so every word should be benefit-oriented, jargon-free, and accurate about what users will actually experience.
+
+## Step 1: Gather Inputs
+
+You need two things before writing anything:
+
+### 1a. Jira Release Page
+
+Ask the user for the Jira release page URL (e.g. `https://bitwarden.atlassian.net/projects/CL/versions/12345/tab/release-report-all-issues`).
+
+If MCP Atlassian tools are available, extract the fixVersion name from the URL and fetch all issues in the release using JQL:
+
+```
+fixVersion = "RELEASE_NAME" ORDER BY issuetype ASC
+```
+
+Use `searchJiraIssuesUsingJql` and page through results until all issues are retrieved. For each issue, capture: summary, issue type, labels, components, status, and any feature flag references in the description or comments.
+
+If MCP tools are not available (web app context), ask the user to paste the release page content or a list of ticket summaries directly into the conversation.
+
+### 1b. #release Slack Thread
+
+The #release Slack thread is posted weekly and specifies which feature flags are toggled for the release. This is critical for two reasons:
+
+- **Include**: Only user-facing changes whose feature flag is being enabled in this release (or that have no flag) should appear in the notes.
+- **Server releases — flag removals**: When a feature flag is being fully removed from the server codebase, this signals that self-hosted users are gaining access to the feature. These must appear in the release notes.
+
+If a Slack MCP integration is available, fetch the thread. Otherwise, ask the user to paste the thread content.
+
+Parse the thread to extract:
+- Release version and date
+- List of flags being **enabled** for this release (per platform if specified)
+- List of flags being **removed** (for server releases — capture both the flag identifier and any associated feature description from the ticket or thread)
+- Any PM or engineering notes about what to highlight or suppress
+
+## Step 2: Determine Release Scope
+
+Identify:
+- **Which repo/product** is being released (clients, server, mobile, browser extension, CLI, desktop)
+- **Which platforms** are covered (web app, desktop, browser extension, mobile iOS, mobile Android, CLI)
+- **Release version** number
+
+If the release covers multiple repos with separate release notes (e.g., clients and server each have their own GitHub release), confirm with the user whether they want notes for all or one.
+
+## Step 3: Filter to User-Facing Changes
+
+Go through every issue in the release and classify it. Only items that pass the filter appear as named bullet points.
+
+### Include as a named bullet point
+
+- New user-visible features or capabilities
+- UI or UX changes users will notice
+- Policy and admin setting changes (including new enforcement options)
+- Performance improvements users will perceive
+- Significant accessibility improvements
+- New onboarding flows, product tours, or setup wizards
+- Checkout, billing, or subscription flow changes
+- Items whose feature flag is confirmed **enabled** in this release's Slack thread
+
+### Collapse into the catch-all line
+
+- Internal refactors, code cleanup, or architecture changes with no user-visible effect
+- Dependency upgrades with no user-visible change
+- Test coverage additions
+- Logging, telemetry, or analytics instrumentation
+- Items behind a feature flag that is **not** being enabled in this release
+- Minor copy or label tweaks not worth their own bullet
+- Bug fixes that are too narrow or edge-case to be meaningful to most users
+
+### Always include (never collapse) — server releases only
+
+Feature flags that are **fully removed** from the server codebase in this release. Flag removal is the moment self-hosted users gain access to a feature. Write each removal as a user-facing line describing what the feature does — not the internal flag identifier. See Step 4 for format.
+
+### Exclude entirely
+
+- Security fixes that Bitwarden has chosen not to disclose in release notes
+- Internal tooling changes with zero user impact
+- Duplicate or reverted changes
+
+## Step 4: Write the Release Notes
+
+### Format rules
+
+- **Plain text only** — no markdown, no asterisks, no headers, no bullet characters
+- One line per notable change
+- Begin each line with a past-tense action verb: `Added`, `Updated`, `Fixed`, `Improved`, `Removed`
+- Write from the **user's perspective** — what did they gain, lose, or notice?
+- No Jira ticket numbers, no internal terminology, and critically: **no feature flag identifiers**
+- Keep each line under ~12 words
+- Aim for **3–7 notable bullet points** maximum, followed by one catch-all line
+- End with: `Various under-the-hood improvements and minor bug fixes`
+
+### Tone
+
+Informative, brief, benefit-forward. Avoid marketing superlatives ("exciting", "powerful"). Avoid engineering jargon ("refactored", "migrated", "scaffolded", "deprecated"). Write for a non-technical user who wants to know if anything changed that affects them.
+
+### Server flag removals
+
+Flag removal lines describe **the feature the flag was guarding**, in plain user-facing language. Look up the associated Jira ticket, Confluence page, or Slack thread description to find the right framing. The internal flag name is a lookup key only — it never appears in the output.
+
+Use the format:
+```
+Removed feature flag for [user-facing description of what the feature does]
+```
+
+Example: a flag named `pm-36859-refactor-org-collections-vault-component` becomes:
+```
+Removed feature flag for organization vault collection management improvements
+```
+
+Self-hosted users are the primary audience for this line — they are receiving the feature for the first time when the flag is removed, so the description should communicate the benefit clearly.
+
+### Example output (clients release)
+
+```
+Updated UI for centralized ownership policy
+Added a product tour for access intelligence
+Added information banner to SCIM setup page
+Added a checkout success page following Stripe payment flows
+Various under-the-hood improvements and minor bug fixes
+```
+
+### Example output (server release with flag removals)
+
+```
+Added support for flexible collection permissions for enterprise plans
+Improved admin console filtering for large organizations
+Removed feature flag for flexible collection permission management
+Removed feature flag for bulk collection management improvements
+Various under-the-hood improvements and minor bug fixes
+```
+
+## Step 5: Review and Calibrate
+
+Before presenting the final output, check:
+
+- [ ] Every named bullet has its corresponding feature flag enabled in the Slack thread (or has no flag)
+- [ ] No internal or infrastructure-only changes appear as named bullets
+- [ ] Server releases include a line for every flag removal mentioned in the Slack thread, written in user-facing language
+- [ ] No internal flag identifiers appear anywhere in the output
+- [ ] Total named bullets are between 3 and 7 (if more than 7 are equally important, consolidate similar items)
+- [ ] The catch-all line is present
+- [ ] No markdown formatting in the output text
+
+## Usage Notes for Web App (Claude.ai)
+
+If you are using this skill via a Claude.ai Project (not Claude Code), MCP tools for Jira and Slack are not available. To use this skill:
+
+1. Navigate to the Jira release page for the version and copy the list of issue summaries
+2. Copy the text of the #release Slack thread
+3. Paste both into the conversation and ask Claude to write release notes
+
+The output will be identical — only the data-gathering step is manual rather than automated.
