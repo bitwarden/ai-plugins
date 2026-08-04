@@ -2,7 +2,7 @@
 name: filing-jira-tickets
 description: File Jira work items that stand on their own, with real ticket titles, acceptance criteria in whatever field the target project provides, and verified dependency links. Reads the target project's create screen first, so no project's field layout is assumed.
 when_to_use: Use when the user is ready to create one or more Jira work items and wants them filed correctly. Phrasings like "file a bug for this", "create a story for this work", "open a spike", "file these tickets", "link these two tickets", or "wire the blocked-by relationship". Also use when another skill hands off a set of drafted tickets to create. Do not use for reading or researching existing issues (that is researching-jira-issues), or for editing tickets that already exist.
-allowed-tools: Read, AskUserQuestion, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_create_fields
+allowed-tools: Read, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_create_fields
 ---
 
 # Filing Jira Tickets
