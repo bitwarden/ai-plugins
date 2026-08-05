@@ -63,4 +63,4 @@ Full documentation: [Security Requirements](https://contributing.bitwarden.com/a
 
 ## Architecture Decision Records (ADRs)
 
-Bitwarden's accepted architecture decisions are catalogued separately from the security principles above. To check a design or change against them, invoke `Skill(bitwarden-planning-tools:consulting-adrs)` — it returns structured findings (conflict, gap, aligned) with cited ADRs.
+Bitwarden's accepted architecture decisions are catalogued separately from the security principles above. To check a design or change against them, invoke `Skill(bitwarden-planning-tools:consulting-adrs)` — it returns structured findings (conflict, gap, stale-reference, aligned) with cited ADRs.
