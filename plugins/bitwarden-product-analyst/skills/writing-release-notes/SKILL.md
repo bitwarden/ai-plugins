@@ -1,6 +1,7 @@
 ---
 name: writing-release-notes
 description: Write user-facing release notes for a Bitwarden release from a Jira release tag and the #release Slack thread. Use when asked to "write release notes", "draft release notes", "generate release notes", "write app store notes", or any request to produce external-facing release copy for a given version.
+allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments
 ---
 
 # Writing Release Notes
