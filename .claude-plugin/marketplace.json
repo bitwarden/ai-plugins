@@ -82,6 +82,12 @@
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, tech breakdowns and task decomposition, commits, pull requests, preflight checks, and change labeling."
     },
     {
+      "name": "bitwarden-planning-tools",
+      "source": "./plugins/bitwarden-planning-tools",
+      "version": "1.0.0",
+      "description": "Planning and preparation tools for Bitwarden — pre-implementation work such as architecture-decision consulting, ahead of the delivery lifecycle."
+    },
+    {
       "name": "bitwarden-designer",
       "source": "./plugins/bitwarden-designer",
       "version": "0.1.0",
