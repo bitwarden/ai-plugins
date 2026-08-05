@@ -1,10 +1,17 @@
-# ADR-0002: Adopt Vitest as the unit test runner
+---
+adr: "9002"
+status: Superseded
+date: 2025-04-18
+tags: [clients]
+---
 
-- Status: Superseded by ADR-0005
-- Date: 2025-04-18
-- Tags: clients
+# 9002 - Adopt Vitest as the unit test runner
 
-## Context
+<AdrTable frontMatter={frontMatter}></AdrTable>
+
+> Superseded by ADR-9005.
+
+## Context and problem statement
 
 The client codebase needed a single, fast unit test runner with native ESM and
 TypeScript support.
@@ -17,6 +24,6 @@ tests are written for Vitest.
 ## Consequences
 
 - One runner across client packages.
-- Superseded: ADR-0005 later reversed this in favor of Jest for alignment with
+- Superseded: ADR-9005 later reversed this in favor of Jest for alignment with
   the shared mocking utilities. Do not write new tests against this decision;
-  see ADR-0005.
+  see ADR-9005.

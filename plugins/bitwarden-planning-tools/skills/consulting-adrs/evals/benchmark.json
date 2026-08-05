@@ -28,7 +28,7 @@
             "pass_rate": 1
           },
           {
-            "assertion": "Cites ADR-0001 (Result types for expected service errors) as the conflicting decision",
+            "assertion": "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision",
             "pass_rate": 1
           },
           {
@@ -54,7 +54,7 @@
             "pass_rate": 1
           },
           {
-            "assertion": "Cites ADR-0001 (Result types for expected service errors) as the conflicting decision",
+            "assertion": "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision",
             "pass_rate": 1
           },
           {
@@ -112,7 +112,7 @@
         "run_pass_rate": 1,
         "per_assertion": [
           {
-            "assertion": "Classifies the change as Aligned with ADR-0001 (or otherwise reports no conflict/gap)",
+            "assertion": "Classifies the change as Aligned with ADR-9001 (or otherwise reports no conflict/gap)",
             "pass_rate": 1
           },
           {
@@ -130,7 +130,7 @@
         "run_pass_rate": 1,
         "per_assertion": [
           {
-            "assertion": "Classifies the change as Aligned with ADR-0001 (or otherwise reports no conflict/gap)",
+            "assertion": "Classifies the change as Aligned with ADR-9001 (or otherwise reports no conflict/gap)",
             "pass_rate": 1
           },
           {
@@ -152,15 +152,15 @@
         "run_pass_rate": 1,
         "per_assertion": [
           {
-            "assertion": "Flags that ADR-0002 (Vitest) is superseded / a stale reference",
+            "assertion": "Flags that ADR-9002 (Vitest) is superseded / a stale reference",
             "pass_rate": 1
           },
           {
-            "assertion": "Points to ADR-0005 (Jest) as the in-force decision",
+            "assertion": "Points to ADR-9005 (Jest) as the in-force decision",
             "pass_rate": 1
           },
           {
-            "assertion": "Does not treat ADR-0002 as a current binding constraint",
+            "assertion": "Does not treat ADR-9002 as a current binding constraint",
             "pass_rate": 1
           }
         ]
@@ -170,15 +170,15 @@
         "run_pass_rate": 1,
         "per_assertion": [
           {
-            "assertion": "Flags that ADR-0002 (Vitest) is superseded / a stale reference",
+            "assertion": "Flags that ADR-9002 (Vitest) is superseded / a stale reference",
             "pass_rate": 1
           },
           {
-            "assertion": "Points to ADR-0005 (Jest) as the in-force decision",
+            "assertion": "Points to ADR-9005 (Jest) as the in-force decision",
             "pass_rate": 1
           },
           {
-            "assertion": "Does not treat ADR-0002 as a current binding constraint",
+            "assertion": "Does not treat ADR-9002 as a current binding constraint",
             "pass_rate": 1
           }
         ]
@@ -348,7 +348,7 @@
             "pass_rate": 1
           },
           {
-            "assertion": "Correctly reflects statuses: 0001, 0004, 0005 accepted; 0002 superseded; 0003 deprecated.",
+            "assertion": "Correctly reflects statuses: 9001, 9004, 9005 accepted; 9002 superseded; 9003 deprecated.",
             "pass_rate": 1
           },
           {
@@ -366,7 +366,7 @@
             "pass_rate": 1
           },
           {
-            "assertion": "Correctly reflects statuses: 0001, 0004, 0005 accepted; 0002 superseded; 0003 deprecated.",
+            "assertion": "Correctly reflects statuses: 9001, 9004, 9005 accepted; 9002 superseded; 9003 deprecated.",
             "pass_rate": 1
           },
           {

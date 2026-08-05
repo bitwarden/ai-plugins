@@ -1,10 +1,15 @@
-# ADR-0004: Cross-client DTOs live in the shared common package
+---
+adr: "9004"
+status: Accepted
+date: 2025-06-12
+tags: [clients, server]
+---
 
-- Status: Accepted
-- Date: 2025-06-12
-- Tags: clients, server
+# 9004 - Cross-client DTOs live in the shared common package
 
-## Context
+<AdrTable frontMatter={frontMatter}></AdrTable>
+
+## Context and problem statement
 
 Request and response DTOs shared across clients were duplicated per client,
 drifting over time and breaking the version matrix (server must support clients
