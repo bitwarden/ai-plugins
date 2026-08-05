@@ -1,10 +1,15 @@
-# ADR-0001: Return Result types for expected service errors
+---
+adr: "9001"
+status: Accepted
+date: 2025-03-04
+tags: [server]
+---
 
-- Status: Accepted
-- Date: 2025-03-04
-- Tags: server
+# 9001 - Return Result types for expected service errors
 
-## Context
+<AdrTable frontMatter={frontMatter}></AdrTable>
+
+## Context and problem statement
 
 Service methods historically threw exceptions for expected, non-exceptional
 outcomes (a record not found, a validation failure). Throwing for control flow
