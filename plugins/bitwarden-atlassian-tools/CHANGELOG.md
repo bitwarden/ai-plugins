@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-07-20
+
+### Added
+
+- Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing instructions, implementation notes, feature-flag state, acceptance criteria, affected clients, and a linked PR/build) via the read-only Atlassian MCP and drafts a ready-to-paste developer comment for any gaps
+
 ## [2.2.8] - 2026-07-01
 
 ### Security

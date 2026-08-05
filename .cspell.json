@@ -95,6 +95,7 @@
     "pyproject",
     "pytest",
     "remotelink",
+    "reprompt",
     "Rescope",
     "resolutiondate",
     "rustdoc",

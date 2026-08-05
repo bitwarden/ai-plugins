@@ -1,6 +1,6 @@
 ---
 name: evaluating-qa-readiness
-description: Use whenever someone wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", "Review PROJ-123 before I move it to Ready for QA", "Is this story ready to test?", or any request to validate that a story/bug has the information a tester needs before testing starts. Reads the ticket via the read-only Atlassian MCP and reports, per objective criterion, what QA needs that is present or missing — feature flag state, testing instructions, implementation notes, acceptance criteria, affected clients, and a linked PR/build — plus a ready-to-paste comment the developer can act on. Use this proactively when a developer says they are moving a ticket to Ready for QA, even if they don't say "QA readiness."
+description: Use whenever someone wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", "Review PROJ-123 before I move it to Ready for QA", or any request to validate that a story/bug has the information a tester needs before testing starts. Reports what QA needs that is present or missing and drafts a ready-to-paste comment for the developer. Use proactively when a developer says they are moving a ticket to Ready for QA, even if they don't say "QA readiness."
 ---
 
 # Evaluating QA Readiness
@@ -21,7 +21,7 @@ If the description or comments reference a PR, build, or Confluence page, note i
 
 ### Step 2: Evaluate each criterion
 
-Judge each criterion against everything you gathered — description, all custom fields, comments, and links. For each, decide one of:
+Judge each criterion against everything gathered — description, all custom fields, comments, and links. For each, decide one of:
 
 - **Present** — the information is there and a tester could act on it.
 - **Missing** — no trace of it anywhere on the ticket.
