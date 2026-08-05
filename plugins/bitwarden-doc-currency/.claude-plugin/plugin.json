@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-doc-currency",
+  "version": "1.0.0",
+  "description": "Enforces the documentation standard's base obligations — docs and diagrams update in the same change as the code they describe. Session instructions, a Stop-hook tripwire, a semantic verification skill, and a CI review face.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-doc-currency",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "documentation",
+    "doc-currency",
+    "doc-drift",
+    "hooks",
+    "standards",
+    "review"
+  ]
+}
