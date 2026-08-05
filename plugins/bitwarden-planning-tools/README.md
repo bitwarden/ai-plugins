@@ -14,13 +14,6 @@ Skills can be invoked individually, and the plugin is designed to grow. It is pr
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `consulting-adrs` | Checks a design, change, plan, or threat model against Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/), or locates/summarizes the catalog. Returns structured findings (conflict, gap, aligned) with cited ADRs — not vague commentary. |
 
-## Cross-Plugin Integration
-
-| Plugin                        | How It's Used                                                                                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bitwarden-security-engineer` | Consumer — its `bitwarden-security-context`, `reviewing-security-architecture`, and `threat-modeling` skills invoke `consulting-adrs` for the ADR-alignment check. |
-| `bitwarden-delivery-tools`    | Counterpart — the post-implementation lifecycle (commits, PRs, preflight, delivery). Planning happens here; delivery happens there.                                |
-
 ## Installation
 
 ```bash
