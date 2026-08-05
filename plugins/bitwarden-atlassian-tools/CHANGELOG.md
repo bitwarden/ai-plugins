@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-08-04
+
+### Added
+
+- **`filing-jira-tickets` skill** — files work items that stand on their own: reads the target project's create screen first, translates work into real ticket titles and criteria placed in whatever field the project provides, previews each payload and takes approval before writing it, then wires and verifies dependency links. Approval is the default and only an explicit instruction skips it.
+
 ## [2.5.0] - 2026-08-03
 
 ### Added
