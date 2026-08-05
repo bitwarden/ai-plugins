@@ -28,14 +28,6 @@
     "should_trigger": true
   },
   {
-    "query": "Help me write a new ADR documenting the token-rotation decision we just landed on.",
-    "should_trigger": false
-  },
-  {
-    "query": "What's an ADR and when should our team bother writing one?",
-    "should_trigger": false
-  },
-  {
     "query": "Architect a solution for multi-region sync and walk me through the trade-offs.",
     "should_trigger": false
   },

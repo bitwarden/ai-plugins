@@ -1,16 +1,16 @@
 ---
 name: consulting-adrs
-description: Check a design, change, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, or when someone needs to find or summarize ADRs. Produces structured findings (conflict, gap, aligned) with cited ADRs, or an ADR summary when that is the ask.
-allowed-tools: Skill, WebFetch(domain:contributing.bitwarden.com), Read, Grep
+description: Check a design, change, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, or when someone needs to find or summarize ADRs. Produces structured findings (conflict, gap, stale-reference, aligned) with cited ADRs, or an ADR summary when that is the ask.
+allowed-tools: WebFetch(domain:contributing.bitwarden.com), Read, Grep
 ---
 
 # Validate against ADRs
 
 Check the design, diff, plan, or threat model under review against Bitwarden's Architecture Decision Records. Return findings; the caller decides what to do with them.
 
-Source: https://contributing.bitwarden.com/architecture/adr/ (fetch the index, then the ADR). If `bitwarden/contributing` is checked out locally, Grep/Read it instead.
+Source: https://contributing.bitwarden.com/architecture/adr/ (fetch the index, then the ADR). If `bitwarden/contributing-docs` is checked out locally, Grep/Read it instead.
 
-If the ask is to locate or summarize ADRs rather than validate a specific change, skip the finding format: use Steps 1-2 to find the relevant ADRs and confirm status, then return them as a concise list of title and status. Include a URL only if you verified it from the source; otherwise cite the local path. Never construct or guess an ADR URL.
+If the ask is to locate or summarize ADRs rather than validate a specific change, skip the finding format: enumerate or search the catalog (Step 1) and confirm status (Step 2), then return them as a concise list of title and status. Include a URL only if you verified it from the source; otherwise cite the local path. Never construct or guess an ADR URL.
 
 ## Steps
 
@@ -24,8 +24,14 @@ If the ask is to locate or summarize ADRs rather than validate a specific change
 
 ## Output
 
-Per finding:
-`[CONFLICT|GAP|STALE-REFERENCE] <summary> — ADR <n> <title> (<status>, <url>); decision: "<text>" (omit for GAP); in change: <element>.`
+Label each finding with exactly one of these four literal tokens — `[CONFLICT]`, `[GAP]`, `[STALE-REFERENCE]`, `[ALIGNED]` — no bold, no colon variant, no other formatting.
+
+One line per finding, per type:
+
+- `[CONFLICT] <summary> — ADR <n> <title> (<status>, <url>); decision: "<text>"; in change: <element>.`
+- `[GAP] <summary> — no ADR found; in change: <element>.`
+- `[STALE-REFERENCE] <summary> — ADR <n> <title> (<status>, <url>) superseded by ADR <n2> <title2>; in change: <element>.`
+- `[ALIGNED] ADR <n> <title> — <element>.`
 
 End with a roll-up: counts per type, or one line stating no in-force ADR was relevant.
 

@@ -9,11 +9,11 @@
     "should_trigger_pass_rate": 0.875,
     "should_not_trigger_pass_rate": 1.0,
     "should_trigger_pass": "7/8",
-    "should_not_trigger_pass": "6/6",
+    "should_not_trigger_pass": "4/4",
     "reliability": {
-      "all_runs_agree_rate": 0.7857142857142857,
+      "all_runs_agree_rate": 0.9166666666666666,
       "should_trigger_reliable": "7/8",
-      "should_not_trigger_reliable": "4/6"
+      "should_not_trigger_reliable": "4/4"
     },
     "results": [
       {
@@ -101,32 +101,6 @@
         }
       },
       {
-        "query": "Help me write a new ADR documenting the token-rotation decision we just landed on.",
-        "should_trigger": false,
-        "triggers": 1,
-        "runs": 3,
-        "trigger_rate": 0.3333333333333333,
-        "all_runs_agree": false,
-        "failure_mode": {
-          "silent": 0,
-          "competitor": {
-            "superpowers:brainstorming": 2
-          }
-        }
-      },
-      {
-        "query": "What's an ADR and when should our team bother writing one?",
-        "should_trigger": false,
-        "triggers": 1,
-        "runs": 3,
-        "trigger_rate": 0.3333333333333333,
-        "all_runs_agree": false,
-        "failure_mode": {
-          "silent": 2,
-          "competitor": {}
-        }
-      },
-      {
         "query": "Architect a solution for multi-region sync and walk me through the trade-offs.",
         "should_trigger": false,
         "triggers": 0,
@@ -193,6 +167,6 @@
         }
       }
     ],
-    "_notes": "Clean isolated run on a de-contaminated environment (no duplicate-copy competitors). Watch items (not yet addressed, description kept lean): (1) 'Review my PR for alignment with our recorded architecture decisions' under-triggers at 1/3 (goes silent, not to a competitor) \u2014 a real should-trigger phrasing worth strengthening if it matters in practice; (2) 'Help me write a new ADR' and 'What's an ADR' mildly over-trigger at 1/3 (authoring/conceptual asks, out of scope)."
+    "_notes": "Clean isolated run on a de-contaminated environment (no duplicate-copy competitors). 'Review my PR for alignment with our recorded architecture decisions' under-triggers at 1/3 (goes silent, not to a competitor)."
   }
 }

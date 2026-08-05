@@ -67,7 +67,7 @@
       "name": "bitwarden-tech-lead",
       "source": "./plugins/bitwarden-tech-lead",
       "version": "3.0.0",
-      "description": "Tech lead agent for a Bitwarden product team. The team's primary technical resource \u2014 architects solutions in the team's domain, partners with the EM on scoping and backlog, partners with peer tech leads on cross-team architecture, and serves as the team's conduit for cross-team technical decisions."
+      "description": "Tech lead agent for a Bitwarden product team. The team's primary technical resource — architects solutions in the team's domain, partners with the EM on scoping and backlog, partners with peer tech leads on cross-team architecture, and serves as the team's conduit for cross-team technical decisions."
     },
     {
       "name": "bitwarden-shepherd",
@@ -97,7 +97,7 @@
       "name": "bitwarden-design-tools",
       "source": "./plugins/bitwarden-design-tools",
       "version": "0.1.0",
-      "description": "Design toolkit for Bitwarden \u2014 non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
+      "description": "Design toolkit for Bitwarden — non-persona skills for the design lifecycle. Content style guide reference, Figma Dev Mode MCP usage, Bitwarden brand application, design-to-engineering handoff prep, Design System governance, and the Product and Design Jira workflow. Composed by the bitwarden-designer agent and usable standalone."
     },
     {
       "name": "bitwarden-ai-telemetry",
@@ -109,7 +109,7 @@
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.0.0",
-      "description": "Testing tools for Bitwarden \u2014 analyzing and improving test quality across its repositories."
+      "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     }
   ]
 }
