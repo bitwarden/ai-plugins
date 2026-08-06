@@ -24,7 +24,7 @@ This means the suite's `should_not_trigger_pass=8/8` result is guaranteed by the
 
 ## Baseline provenance
 
-These baselines are authoritative, not provisional. They were recorded on 2026-08-01 against the final, ten-skill plugin inventory:
+These readings were recorded on 2026-08-01 against the final, ten-skill plugin inventory:
 
 - `assessing-test-coverage`
 - `build-test-cases`
@@ -39,11 +39,9 @@ These baselines are authoritative, not provisional. They were recorded on 2026-0
 
 plus all six agents (`context-gatherer`, `code-explorer`, `service-mapper`, `test-planner`, `service-manager`, `test-runner`). A trigger eval measures whether the model auto-selects a skill or agent from a natural-language query among everything installed alongside it, so the recorded numbers are only meaningful against this exact inventory.
 
-### Orchestrator suite result
+### Orchestrator trigger suite: last observed reading
 
-`should_trigger_pass=10/10`, `should_not_trigger_pass=10/10` at `--runs-per-query 7`. No query landed in the 0.35-0.65 band.
-
-This committed baseline was recorded before `Agent` was added to `scripts/eval_harness.py`'s `exec_tools` bail-out set (the installed CLI emits `Agent`, with `Task` kept only as a legacy alias), so it should be re-recorded before being relied on as a regression control.
+On-demand diagnostic, not a committed regression control. Last run 2026-08-01, model `claude-opus-4-8`, against the ten-skill inventory and six agents named above: should_trigger 10/10, should_not_trigger 10/10 at `--runs-per-query 7`, with no query in the 0.35-0.65 band. These numbers predate the addition of `Agent` to `scripts/eval_harness.py`'s `exec_tools` set, so the should_trigger figure is a ceiling and the should_not_trigger figure is a floor. There is no committed `baseline.json` for the orchestrator trigger suite: the query set and shared harness are kept and re-run on demand when editing the skill's description. This diverges deliberately from skill-creator's baseline-oriented methodology, which assumes the description can be tuned in response to the number; do not restore a committed baseline here.
 
 ### Agent suite result
 
@@ -90,14 +88,14 @@ done
 
 ## Regression check
 
-Diff each query's PASS/FAIL verdict, not the raw `trigger_rate` values, which are stochastic.
+The orchestrator trigger suite has no committed baseline. When editing the skill's `description`, run the trigger eval once before the edit and once after, in the same session so the model and installed inventory match, and diff the two by PASS/FAIL verdict rather than the raw `trigger_rate` values, which are stochastic:
 
 ```bash
 project='{
   should_trigger_pass, should_not_trigger_pass,
   results: [.results[] | {query, should_trigger, pass: ((.trigger_rate >= 0.5) == .should_trigger)}]
 }'
-diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
+diff <(jq -S "$project" before.json) <(jq -S "$project" after.json)
 ```
 
-Empty diff means no regression. Fix the skill description rather than the eval set when a failure appears.
+An empty diff means the edit changed no verdict. Fix the skill description rather than the eval set if an edit regresses a verdict, and update the orchestrator reading above. The agent non-trigger suite still carries its committed `agent-non-trigger-baseline.json`.
