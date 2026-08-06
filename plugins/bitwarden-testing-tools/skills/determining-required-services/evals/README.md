@@ -13,13 +13,13 @@ Case 3's expectation about sourcing ports from `references/services.md` is only 
 ## Files
 
 - `behavior-eval.json` - the four cases and their 16 expectations, described above.
-- `behavior-baseline.json` - not yet recorded. This suite is authored ahead of its first benchmark run; the file will be added once that run happens.
+- `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running
 
-This suite is intended to run with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus without-skill) with a config-blind grader. That benchmark has not been run yet. It will be run, and `behavior-baseline.json` recorded, in a later dedicated pass once all of this plugin's behavior suites exist, so they can be benchmarked together rather than one at a time. Until then, this file set defines intent (what the skill should be graded on) rather than a measured control.
+This suite runs with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus without-skill) with a config-blind grader. It has not been benchmarked. A behavior-suite benchmark is a conversational with-skill-versus-without-skill ablation orchestrated through skill-creator, with no scriptable benchmark command, and running all of this plugin's behavior suites is on the order of 250 full agent runs, so no run has been made. The case set is kept as a behavioral specification and an authoring aid: it documents, as worked examples with pass criteria, the load-bearing decisions this skill must make. If the suite is benchmarked, record `behavior-baseline.json` in the same change.
 
-When the benchmark does run, any subsequent change to `SKILL.md` should be paired with a re-run and a refresh of `behavior-baseline.json`.
+If the suite is ever benchmarked, a subsequent change to `SKILL.md` should be paired with a re-run and a refresh of `behavior-baseline.json`.
 
 ## Regression check
 
