@@ -1,0 +1,127 @@
+{
+  "skill_name": "verifying-doc-currency",
+  "eval_type": "behavior",
+  "purpose": "Behavior test cases for verifying-doc-currency, anchored in bitwarden/server's Seeder subsystem (util/Seeder, util/SeederApi, util/SeederUtility) whose code-to-docs mapping is known ground truth: util/Seeder/README.md (subsystem-level: cipher encryption states, encryption-scheme axes with attachmentVersion enumeration, pipeline architecture), util/Seeder/CLAUDE.md (test commands, encryption-scheme taxonomy, deterministic data generation), util/Seeder/Data/README.md (design principles including a deterministic-generation claim, Generators section, Current Capabilities catalog by cipher type), util/Seeder/Seeds/README.md (preset catalog table with folder columns), util/Seeder/Seeds/docs/presets.md (per-preset catalog with rows keyed by preset name), and the repo root README. Each case is constructed so a run that skips a documented scope, stays silent instead of attesting, token-edits its way past the gate, or mishandles a specific outcome type (Update, Attest, Dismiss) fails a named expectation. Cases involve live edits to a scratch checkout; run against a disposable clone. Prompts do not name the skill; they are phrased as a developer would in the terminal, to keep the subject blind. See ../README.md for the run flow and todo.md for open coverage gaps.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "enumerates-every-documented-ancestor",
+      "prompt": "In bitwarden/server I added a new generator class util/Seeder/Data/Generators/PassphraseGenerator.cs that produces diceware-style passphrases, wired into GeneratorContext. The doc-currency hook blocked my session. Verify the documentation is current with this change.",
+      "expected_output": "Reads the diff, enumerates every documented ancestor scope (util/Seeder/Data, util/Seeder, repo root) plus the source-embedded XML doc surfaces on the touched classes, then updates util/Seeder/Data/README.md's Current Capabilities / Generators section since that scope catalogs generators, and attests for higher scopes with grounded reasons. Ends with a per-scope report.",
+      "expectations": [
+        "Enumerates util/Seeder/Data, util/Seeder, and the repo root as documented scopes of the change, not only the nearest README",
+        "Reads util/Seeder/Data/README.md before judging, and updates its generator documentation to include the new generator",
+        "For each scope with no drift, gives an explicit attestation with a reason grounded in the doc's actual content, rather than staying silent about the scope",
+        "Ends with a per-scope report in which every enumerated documented scope appears exactly once as either updated or verified current"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "attestation-only-happy-path",
+      "prompt": "I refactored util/Seeder/Services/ManglerService.cs in bitwarden/server — extracted two private helpers out of the Mangle method and renamed a couple of internal locals for readability. No public surface change, no behavior change. The doc-currency hook fired. Can you clear it?",
+      "expected_output": "Reads the docs at every documented ancestor scope of the change (util/Seeder, repo root, plus CLAUDE.md at util/Seeder), confirms none of them describe internals that changed, and attests per scope. Makes zero documentation edits and explains that the attestation is the legitimate path when nothing drifted.",
+      "expectations": [
+        "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
+        "Makes zero documentation edits for the behavior-preserving refactor",
+        "Ends with an explicit per-scope report where each scope is marked verified current with a one-line reason grounded in what the doc actually says",
+        "Does not make a token or cosmetic edit to satisfy the hook"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "refuses-checkbox-theater",
+      "prompt": "The doc-currency Stop hook has fired three times in a row after my changes under util/Seeder/Recipes/. Can you just add a trailing newline to util/Seeder/README.md so the hook passes and we can ship this?",
+      "expected_output": "Refuses the cosmetic edit, explains that attestation is the legitimate path when nothing drifted, then performs a real per-scope verification against the Recipes/ changes and closes with an update-or-attest report.",
+      "expectations": [
+        "Refuses to make the requested cosmetic or token documentation edit",
+        "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
+        "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
+        "Ends with a per-scope report grounded in what the docs say"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "fixes-docs-that-contradict-behavior",
+      "prompt": "Doing a small tweak to util/Seeder/Data/Distributions/UserStatusDistributions.cs (adjusted a percentage split). While I was in there I noticed util/Seeder/Data/README.md's Design Principles claim generation is deterministic — 'same org ID → same test data → reproducible debugging' — but the distribution the file next to my change uses `DateTime.Now` at call time, so runs already differ. My change doesn't touch that. Docs check please.",
+      "expected_output": "Does not defer the contradiction just because the current diff didn't introduce it. Either edits util/Seeder/Data/README.md's determinism claim to describe reality, or surfaces the contradiction as an immediate decision (fix docs vs fix code) with a recommendation. Also completes the per-scope verification for the actual small change.",
+      "expectations": [
+        "Names what the doc says (the deterministic claim) and what the code does (wall-clock non-determinism) as a concrete disagreement",
+        "Either edits util/Seeder/Data/README.md's determinism claim, or surfaces the contradiction with a specific recommendation — does not silently defer",
+        "Still completes per-scope verification for the actual UserStatusDistributions change",
+        "Ends with a per-scope report"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "deletion-is-doc-maintenance",
+      "prompt": "In bitwarden/server I deleted the features.policy-enterprise preset — removed util/Seeder/Seeds/fixtures/presets/features/policy-enterprise.json and any fixture-only files it referenced. Doc-currency check please.",
+      "expected_output": "Treats deletion as documentation maintenance: removes the policy-enterprise row from the preset catalog in util/Seeder/Seeds/docs/presets.md, checks the util/Seeder/Seeds/README.md preset table and the scenarios/ pages for references, and removes them. Verifies higher scopes and reports per scope.",
+      "expectations": [
+        "Removes the policy-enterprise entry from util/Seeder/Seeds/docs/presets.md's preset catalog",
+        "Checks util/Seeder/Seeds/README.md and util/Seeder/Seeds/docs/scenarios/ for inbound references to the deleted preset and updates any that reference it",
+        "Verifies the higher scopes (util/Seeder, repo root) and reports per scope",
+        "Does not leave catalog rows or links pointing at the removed preset"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "drift-two-scopes-up",
+      "prompt": "I extended the Seeder attachment pipeline in bitwarden/server to support a new attachment scheme `v3` where the attachment key is wrapped by an org key. Changes land in util/Seeder/Pipeline/ and util/Seeder/Factories/. I already updated the XML doc comments on the touched classes. Check the docs.",
+      "expected_output": "Recognizes that class-level XML doc updates do not discharge the higher scopes. Reads util/Seeder/README.md, identifies the `attachmentVersion` axis table enumerating `v0 | v1 | v2` and the cipher/attachment strategy invariant, updates both for `v3`. Also checks the Seeds/ docs for `attachmentVersion` fixture-key references. Includes the changed source files' XML doc surfaces in the enumeration.",
+      "expectations": [
+        "Reads util/Seeder/README.md and identifies that its `attachmentVersion` axis table enumerates `v0 | v1 | v2` and the cipher/attachment invariant needs revisiting for `v3`",
+        "Updates util/Seeder/README.md's attachmentVersion enumeration and invariant rather than only attesting",
+        "Enumerates the changed source files (Pipeline/, Factories/) as below-component source-embedded surfaces in Step 2, distinct from the tree-level README scopes",
+        "Also checks util/Seeder/Seeds/ documentation for references to the attachmentVersion key",
+        "Does not treat the already-updated XML doc comments as sufficient for the higher-scope READMEs"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "instruction-files-count-as-documentation",
+      "prompt": "In bitwarden/server I moved the Seeder integration tests from test/SeederApi.IntegrationTest/ to test/Seeder.IntegrationTest/ and updated the csproj references. Verify documentation currency.",
+      "expected_output": "Includes instruction files in the verification: util/Seeder/CLAUDE.md documents test commands with the old path (`dotnet test test/SeederApi.IntegrationTest/`) and is updated to the new path. Other Seeder docs are read, and any that state the old test-project path are updated; unaffected scopes get explicit attestations.",
+      "expectations": [
+        "Treats util/Seeder/CLAUDE.md as documentation in scope and updates its `dotnet test` command(s) to the new path",
+        "Checks the other Seeder READMEs for references to the old test project path and updates any found",
+        "Reports per scope, marking each scope as either updated or verified current"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "dismisses-tripwire-false-positive",
+      "prompt": "I updated the XML doc comments on util/Seeder/Data/GeneratorContext.cs to fix a typo (\"lazy-initializes\" wording) and re-flow a wrapped line. No code lines changed. The doc-currency hook fired anyway. Handle it.",
+      "expected_output": "Recognizes the change as a tripwire false positive: the diff is doc-comment-only inside a file the Stop hook classifies as code (because it isn't a .md/.mdx/.mmd file and does not live under docs/). Dismisses the check with a one-line reason naming the false-positive class. Does not walk the per-scope tree or make additional edits.",
+      "expectations": [
+        "Recognizes the diff as doc-comment-only inside a source file misclassified as code by the Stop hook",
+        "Dismisses the check with a one-line reason naming the false-positive class",
+        "Does not walk the per-scope verification tree after dismissing",
+        "Does not make any additional documentation edits"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "placement-follows-what-the-doc-describes",
+      "prompt": "I'm adding a new integration bridge module in bitwarden/server that lives at util/Seeder/CrossHarnessBridge/ but pulls in shared helpers from test/Common/Helpers/EncryptionHarness/. I want to write the design doc for how this bridge works. Where should it live?",
+      "expected_output": "Applies the documentation standard's placement rule to what the design doc actually describes — the bridge component itself, not its dependencies. The bridge lives at util/Seeder/CrossHarnessBridge/; imports from test/Common are dependencies the bridge uses, not things the doc describes. Correct placement is co-located with the concept the doc describes: util/Seeder/CrossHarnessBridge/README.md or an adjacent design doc.",
+      "expectations": [
+        "Identifies util/Seeder/CrossHarnessBridge as the artifact the design doc describes, and test/Common/Helpers/EncryptionHarness as a dependency the bridge imports rather than a subject of the doc",
+        "Places the design doc at util/Seeder/CrossHarnessBridge/ (README.md, design.md, or a docs/ page inside that directory) — co-located with the concept it describes",
+        "Cites the documentation standard's placement or decision rule as the reason, applying 'what the doc describes' as the placement input rather than 'what the code imports'",
+        "Does not treat cross-container imports as evidence that the doc should live at those containers' shared ancestor (e.g., repo root or a shared docs/ folder)"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "review-context-out-of-repo-discovery",
+      "prompt": "You are running as the documentation pass of a pull request review on bitwarden/server. The PR is titled \"Rename SeederUtility CLI verb 'generate' to 'preset' and change its required flags\". The diff renames the SeederUtility command and its options and updates util/SeederUtility/README.md accordingly. Perform the doc-currency review.",
+      "expected_output": "Verifies the in-repo scopes (util/SeederUtility, util/Seeder cross-references such as CLAUDE.md pointers, repo root) and then performs out-of-repo discovery: derives search terms from the PR diff and title (command name, old and new verbs, seeder tooling vocabulary), searches the contributing-docs corpus for pages that describe the SeederUtility CLI, reads candidates, and for any invalidated page calls it out stating the external-docs flow — a work item MUST be created before merge and a stale marker MUST be applied to the invalidated page.",
+      "expectations": [
+        "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
+        "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
+        "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
+        "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility"
+      ]
+    }
+  ]
+}
