@@ -5,6 +5,41 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-31
+
+### Added
+
+- **`committing-changes` skill** — added a branch check step. If the current branch is the repository's default branch, the user is asked for a branch before staging or committing. If the default branch cannot be resolved, the current branch is confirmed instead of assumed.
+- **`committing-changes` eval set** (`skills/committing-changes/evals/`) — a 13-query trigger eval and a six-case behavior eval in the `skill-creator` schema, each with a recorded baseline.
+
+## [2.3.0] - 2026-07-30
+
+### Added
+
+- `creating-pull-request`: a code-review gate in Step 1 that runs before a PR is opened, routing by change blast radius — Standard runs `code-review-local`, Substantial runs `performing-multi-agent-code-review` against the full branch diff. Deferred CRITICAL/IMPORTANT findings are recorded in the PR body and surfaced in the Step 5 preview, an optional second-model re-run (via the multi-agent skill) is available for the highest-risk changes, review output is cleaned up before pushing, and invocations from another delivery skill's workflow are exempt (wiring review into those callers is a tracked follow-up).
+- `README`: documented the `bitwarden-code-review` dependency in the **Related Plugins** section.
+
+### Changed
+
+- `creating-pull-request`: narrowed Step 1's preflight options so the quality gate can no longer be silently skipped.
+
+### Security
+
+- `creating-pull-request`: submit the PR body via `--body-file` instead of `--body` so review- and model-generated text (derived from untrusted repo content) cannot be interpreted as shell during `gh pr create`.
+
+## [2.2.0] - 2026-07-10
+
+### Added
+
+- **`architecting-solutions` skill** — moved in from `bitwarden-tech-lead` (last at 2.3.2) and reworked to increase security focus and remove explicit Initiative Shepherd references.
+
+## [2.1.0] - 2026-07-01
+
+### Added
+
+- **`force-multiplier` skill** — fans one intent across a repo fleet or monorepo into N consistent, idempotent draft PRs, gated by a mandatory pilot and per-target isolation. Repo content is untrusted data (CWE-1427); destructive recipes require a reference-check with a `held-back` reconciliation disposition; the secrets-scan has a no-scanner fallback.
+- **`force-multiplier` behavior eval set** (`skills/force-multiplier/evals/`) — seven `skill-creator`-schema cases guarding its load-bearing decisions.
+
 ## [2.0.0] - 2026-06-19
 
 ### Added

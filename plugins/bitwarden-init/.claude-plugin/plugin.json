@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-init",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "Initialize Claude Code configuration with Bitwarden's standardized template format",
   "author": {
     "name": "Bitwarden",

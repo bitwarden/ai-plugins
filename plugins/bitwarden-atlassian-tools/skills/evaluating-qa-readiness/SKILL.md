@@ -1,23 +1,23 @@
 ---
 name: evaluating-qa-readiness
-description: Use whenever someone wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", "Review PROJ-123 before I move it to Ready for QA", or any request to validate that a story/bug has the information a tester needs before testing starts. Reports what QA needs that is present or missing and drafts a ready-to-paste comment for the developer. Use proactively when a developer says they are moving a ticket to Ready for QA, even if they don't say "QA readiness."
+description: Use whenever someone wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", or any request to validate that a story or bug has what a tester needs before testing starts. Reports which pieces are present or missing and drafts a comment for the developer. Use proactively when someone says they are moving a ticket to Ready for QA, even without the words "QA readiness."
 ---
 
 # Evaluating QA Readiness
 
 When a ticket moves to **Ready for QA**, the tester should not have to hunt down the developer to learn how to test it. This skill checks a Jira ticket for the concrete, objectively-verifiable pieces of information QA needs _before_ testing starts, so gaps get fixed by the implementer instead of turning into back-and-forth later.
 
-**This is a completeness check, not a quality judgment.** You are checking whether the _information_ a tester needs is present and usable — not whether the fix is correct, whether the acceptance criteria are good, or whether the design is right. Those are QA's and the team's calls. Staying inside that boundary is what keeps this check objective and trustworthy: a developer should be able to look at any "missing" flag and agree it's genuinely absent.
+**This is a completeness check, not a quality judgment.** Check whether the _information_ a tester needs is present and usable — not whether the fix is correct, whether the acceptance criteria are good, or whether the design is right. Those are QA's and the team's calls. Staying inside that boundary is what keeps this check objective and trustworthy: a developer should be able to look at any "missing" flag and agree it's genuinely absent.
 
 ## Workflow
 
 ### Step 1: Read the ticket
 
-Use the `get_issue` MCP tool with the issue key. It defaults to expanding `renderedFields` and `names`, giving you HTML-rendered field values and human-readable custom-field display names — you need both, because feature-flag and implementation info often live in custom fields, not the description.
+Use the `get_issue` MCP tool with the issue key. It defaults to expanding `renderedFields` and `names`, which surfaces HTML-rendered field values and human-readable custom-field display names — both matter, because feature-flag and implementation info often live in custom fields, not the description.
 
 Then use `get_issue_comments` — developers frequently drop testing steps, flag names, or "how to test" notes in a comment rather than editing the description. Treat comments as a first-class source, not an afterthought.
 
-If the description or comments reference a PR, build, or Confluence page, note it; use `get_issue_remote_links` to catch linked PRs and pages that aren't inline. You are looking for _evidence that the information exists somewhere on the ticket_, wherever the developer put it.
+If the description or comments reference a PR, build, or Confluence page, note it; use `get_issue_remote_links` to catch linked PRs and pages that aren't inline. The goal is _evidence that the information exists somewhere on the ticket_, wherever the developer put it.
 
 ### Step 2: Evaluate each criterion
 

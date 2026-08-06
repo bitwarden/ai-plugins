@@ -5,11 +5,34 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.0] - 2026-07-20
+## [2.5.0] - 2026-08-06
 
 ### Added
 
 - Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing instructions, implementation notes, feature-flag state, acceptance criteria, affected clients, and a linked PR/build) via the read-only Atlassian MCP and drafts a ready-to-paste developer comment for any gaps
+
+## [2.4.0] - 2026-07-24
+
+### Added
+
+- `assessing-jira-issue-relevance` skill for determining whether a single Jira issue still applies to the current codebase. Fetches the ticket along with its comments, linked issues, and parent epic; confirms which repositories are in scope before searching; greps for the code path the ticket describes; checks git history since the filed date; and returns a verdict (still relevant / partially addressed / no longer relevant / technically relevant but worth questioning / cannot determine) with `file:line` evidence. Intended for backlog cleanup — one ticket per invocation.
+  - Works against any Bitwarden repository. Where the ticket does not name one outright, the skill infers the likely repo from the available signals and presents that inference for confirmation before searching anything, then orients itself by reading the confirmed repo's own `CLAUDE.md`/`README`.
+  - Halts without a verdict if a repository in scope is not cloned locally and the user declines to clone it. Searching an absent repo returns no matches, which is indistinguishable from the code having been removed, and would otherwise produce a confident "no longer relevant" on a live ticket.
+  - Ships scoped `allowed-tools` covering the four read-only Atlassian MCP tools the workflow calls, so routine use does not prompt for permission on every fetch.
+
+## [2.3.0] - 2026-07-15
+
+### Added
+
+- Three read-only Jira Agile MCP tools that expose the MCP server's existing (previously unexposed) Agile API client methods:
+  - `list_boards` — list Jira Agile boards, optionally filtered by project
+  - `get_sprints` — list sprints for a board, optionally filtered by state (active/future/closed)
+  - `get_sprint_issues` — list all issues in a sprint
+- Documented the granular Jira Software OAuth scopes (`read:board-scope:jira-software`, `read:project:jira`, `read:sprint:jira-software`, `read:issue-details:jira`, `read:jql:jira`) required by the board/sprint tools — the Agile `/rest/agile/1.0` API is not covered by the classic `read:jira-work` scope
+
+### Changed
+
+- Extracted the shared issue formatter into `src/utils/format-issue.ts`, reused by `search_issues` and `get_sprint_issues` instead of duplicating it per tool
 
 ## [2.2.8] - 2026-07-01
 

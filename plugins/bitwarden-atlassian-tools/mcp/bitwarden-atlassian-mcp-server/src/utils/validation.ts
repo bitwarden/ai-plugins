@@ -70,6 +70,38 @@ export const ListProjectsSchema = z.object({
 
 export type ListProjectsInput = z.infer<typeof ListProjectsSchema>;
 
+/**
+ * Schema for list_boards tool parameters
+ */
+export const ListBoardsSchema = z.object({
+  projectKeyOrId: z.string().optional(),
+  maxResults: z.number().int().min(1).max(100).optional().default(50),
+});
+
+export type ListBoardsInput = z.infer<typeof ListBoardsSchema>;
+
+/**
+ * Schema for get_sprints tool parameters
+ */
+export const GetSprintsSchema = z.object({
+  boardId: z.number().int().positive(),
+  state: z.enum(["active", "future", "closed"]).optional(),
+  maxResults: z.number().int().min(1).max(100).optional().default(50),
+});
+
+export type GetSprintsInput = z.infer<typeof GetSprintsSchema>;
+
+/**
+ * Schema for get_sprint_issues tool parameters
+ */
+export const GetSprintIssuesSchema = z.object({
+  sprintId: z.number().int().positive(),
+  fields: z.array(z.string()).optional(),
+  maxResults: z.number().int().min(1).max(100).optional().default(50),
+});
+
+export type GetSprintIssuesInput = z.infer<typeof GetSprintIssuesSchema>;
+
 // ── Confluence Schemas ───────────────────────────────────────────────
 
 export const GetConfluencePageSchema = z.object({

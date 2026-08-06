@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-21
+
+### Added
+
+- `bitwarden-security-context`, `reviewing-security-architecture`, and `threat-modeling` skills now check alignment against Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/) as part of security assessments. Conflicts with an accepted ADR are treated as findings, significant undocumented architectural decisions are flagged as gaps, and ADR status is verified (not superseded/deprecated) before being cited.
+
 ## [1.2.0] - 2026-05-08
 
 ### Added
