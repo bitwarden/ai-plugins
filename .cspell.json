@@ -134,6 +134,7 @@
     "sast",
     "sbom",
     "SCIM",
+    "scriptable",
     "SDLC",
     "semver",
     "shellcheck",
