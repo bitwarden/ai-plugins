@@ -14,14 +14,9 @@ This skill's load-bearing invocation paths are the doc-currency Stop hook and th
 
 ## Eval cases
 
-Behavior cases run against the Seeder subsystem of [bitwarden/server](https://github.com/bitwarden/server) (`util/Seeder/`, `util/SeederApi/`, `util/SeederUtility/`), chosen because its code-to-docs mapping is known:
+Behavior cases run against the Seeder subsystem of [bitwarden/server](https://github.com/bitwarden/server) (`util/Seeder/`, `util/SeederApi/`, `util/SeederUtility/`), chosen because its code-to-docs mapping is known.
 
-- `util/Seeder/README.md` — subsystem-level. Enumerates cipher encryption states, the `cipherEncryption` / `attachmentVersion` axes (with `v0 | v1 | v2` values and the cipher/attachment strategy invariant), and the pipeline architecture.
-- `util/Seeder/CLAUDE.md` — test commands (`dotnet test test/SeederApi.IntegrationTest/`), the encryption-scheme taxonomy, and the deterministic-data-generation contract.
-- `util/Seeder/Data/README.md` — design principles (including a deterministic-generation claim), the Generators section, and a Current Capabilities catalog by cipher type.
-- `util/Seeder/Seeds/README.md` — preset catalog table with folder columns (`features/`, `qa/`, `scale/`, `individual/`, `validation/`).
-- `util/Seeder/Seeds/docs/presets.md` — per-preset catalog with rows keyed by preset name (e.g., `features.policy-enterprise`).
-- Repo root `README.md`.
+These evals are executed against a pinned server ref, `d6c84a7562cc6b464de910dbf829690885500137`. To increase stability in testing, evaluate against that reference point.
 
 Each case is constructed so a run that skips a documented scope, stays silent instead of attesting, token-edits its way past the gate, or mishandles a specific outcome type (Update, Attest, Dismiss) fails a named expectation. Behavior cases assume the run happens inside a bitwarden/server checkout so the ground-truth docs are readable.
 
