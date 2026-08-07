@@ -2,8 +2,8 @@
 """Trigger-rate evaluator that checks for the real plugin-registered skill.
 
 The skill-creator harness registers a temp copy named
-`creating-pull-request-skill-<uuid>` and only counts invocations of that name
-as triggers. When the real `bitwarden-delivery-tools:creating-pull-request`
+`committing-changes-skill-<uuid>` and only counts invocations of that name
+as triggers. When the real `bitwarden-delivery-tools:committing-changes`
 skill is already installed in the environment running the eval, the model
 invokes the real one and the harness records a false negative.
 
@@ -25,7 +25,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-TARGET_SKILL_TOKEN = "creating-pull-request"
+TARGET_SKILL_TOKEN = "committing-changes"
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:

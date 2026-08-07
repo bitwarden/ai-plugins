@@ -4,15 +4,15 @@ Claude Code hooks that emit **metadata-only** AI-usage telemetry as [OTLP](https
 
 ## What it does
 
-The plugin registers Claude Code lifecycle hooks (`PostToolUse` and `SubagentStop`) that fire after tool use and subagent completion. Each hook POSTs a single OTLP-JSON log record describing what happened, using metadata only. The hooks emit four event families:
+The plugin registers Claude Code lifecycle hooks (`PostToolUse`, `SubagentStop`, and `UserPromptExpansion`) that fire after tool use, subagent completion, and prompt expansion. Each hook POSTs a single OTLP-JSON log record describing what happened, using metadata only. The hooks emit four event families:
 
-| Event         | Fires on                                           | Recovers                                                                                    |
-| ------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `bw.identity` | `Task` / `Agent` / `Skill` tool use; subagent stop | Skill and agent names that native telemetry redacts                                         |
-| `bw.edit`     | `Edit` / `MultiEdit` / `Write` / `NotebookEdit`    | Repo slug, branch, base SHA, and the edited file **path**                                   |
-| `bw.commit`   | `Bash` running `git commit`                        | Repo slug, branch, and the resulting commit **SHA**                                         |
-| `bw.pr`       | `Bash` running `gh pr create`                      | Repo slug, branch, and the **PR number**                                                    |
-| `bw.mcp`      | Any `mcp__*` tool                                  | The real `mcp__<server>__<tool>` name that native telemetry redacts to a generic identifier |
+| Event         | Fires on                                                                  | Recovers                                                                                    |
+| ------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `bw.identity` | `Task` / `Agent` / `Skill` tool use; subagent stop; `UserPromptExpansion` | Skill and agent names that native telemetry redacts                                         |
+| `bw.edit`     | `Edit` / `MultiEdit` / `Write` / `NotebookEdit`                           | Repo slug, branch, base SHA, and the edited file **path**                                   |
+| `bw.commit`   | `Bash` running `git commit`                                               | Repo slug, branch, and the resulting commit **SHA**                                         |
+| `bw.pr`       | `Bash` running `gh pr create`                                             | Repo slug, branch, and the **PR number**                                                    |
+| `bw.mcp`      | Any `mcp__*` tool                                                         | The real `mcp__<server>__<tool>` name that native telemetry redacts to a generic identifier |
 
 ## What it collects
 

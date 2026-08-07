@@ -1,0 +1,52 @@
+{
+  "grader_model": "claude-opus-5",
+  "denominator": "expectations x runs_per_arm",
+  "per_expectation": "passes per expectation, in behavior-eval.json order, out of runs_per_arm",
+  "claude-sonnet-5/default": {
+    "default-is-main-no-hint": {
+      "runs_per_arm": 4,
+      "new-skill": "16/16",
+      "old-skill": "12/16",
+      "no-skill": "12/16",
+      "new-skill-per-expectation": "4/4/4/4",
+      "old-skill-per-expectation": "0/4/4/4",
+      "no-skill-per-expectation": "0/4/4/4"
+    },
+    "already-off-default": {
+      "runs_per_arm": 2,
+      "new-skill": "6/6",
+      "old-skill": "6/6",
+      "no-skill": "6/6"
+    },
+    "user-supplies-branch-name": {
+      "runs_per_arm": 2,
+      "new-skill": "8/8",
+      "old-skill": "8/8",
+      "no-skill": "8/8"
+    },
+    "user-delegates-branch-naming": {
+      "runs_per_arm": 2,
+      "new-skill": "8/8",
+      "old-skill": "8/8",
+      "no-skill": "8/8"
+    },
+    "default-is-master": {
+      "runs_per_arm": 4,
+      "new-skill": "16/16",
+      "old-skill": "16/16",
+      "no-skill": "14/16",
+      "new-skill-per-expectation": "4/4/4/4",
+      "old-skill-per-expectation": "4/4/4/4",
+      "no-skill-per-expectation": "2/4/4/4"
+    },
+    "default-unresolvable": {
+      "runs_per_arm": 4,
+      "new-skill": "15/16",
+      "old-skill": "4/16",
+      "no-skill": "4/16",
+      "new-skill-per-expectation": "4/4/3/4",
+      "old-skill-per-expectation": "0/0/0/4",
+      "no-skill-per-expectation": "0/0/0/4"
+    }
+  }
+}

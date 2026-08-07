@@ -1,0 +1,54 @@
+[
+  {
+    "query": "commit my staged changes with a feat: message about the new passkey enrollment flow",
+    "should_trigger": true
+  },
+  {
+    "query": "I've got some changes ready, help me write a commit message for the PM-45213 fix",
+    "should_trigger": true
+  },
+  {
+    "query": "stage these files and commit them, this is a bug fix for the vault export timeout",
+    "should_trigger": true
+  },
+  {
+    "query": "prepare a commit for this refactor, I don't have a ticket number yet",
+    "should_trigger": true
+  },
+  {
+    "query": "git commit this, keep it short since it's just a followup to my last commit",
+    "should_trigger": true
+  },
+  {
+    "query": "help me commit this security patch, not sure if it should be a fix or security type message",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm on main and want to commit this fix real quick",
+    "should_trigger": true
+  },
+  {
+    "query": "wrap up these changes into a commit — should I run anything before staging?",
+    "should_trigger": true
+  },
+  {
+    "query": "open a draft pr for me — the branch is fix/sync-crash and it tracks origin already, nothing left to commit",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the right t: label for adding tests to a previously untested service class? is it t:tech-debt or something else?",
+    "should_trigger": false
+  },
+  {
+    "query": "explain how pull requests work in the bitwarden org — I'm new and trying to understand the review process",
+    "should_trigger": false
+  },
+  {
+    "query": "address the PR review comments on #1234 — the reviewer flagged a race condition in the session middleware and I want to push back on one of them",
+    "should_trigger": false
+  },
+  {
+    "query": "create a new branch for the PM-33210 work before I start coding, nothing to commit yet",
+    "should_trigger": false
+  }
+]

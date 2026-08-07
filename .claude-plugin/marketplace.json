@@ -30,14 +30,14 @@
     {
       "name": "bitwarden-init",
       "source": "./plugins/bitwarden-init",
-      "version": "1.2.0",
+      "version": "1.2.2",
       "description": "Initialize Claude Code configuration with Bitwarden's standardized template format"
     },
     {
       "name": "bitwarden-product-analyst",
       "source": "./plugins/bitwarden-product-analyst",
-      "version": "0.1.5",
-      "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources"
+      "version": "0.1.6",
+      "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources, and writing user-facing release notes"
     },
     {
       "name": "bitwarden-software-engineer",
@@ -48,7 +48,7 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.3.0",
+      "version": "2.4.0",
       "description": "Read-only Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, and attachments"
     },
     {
@@ -60,7 +60,7 @@
     {
       "name": "bitwarden-devops-engineer",
       "source": "./plugins/bitwarden-devops-engineer",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     },
     {
@@ -96,7 +96,7 @@
     {
       "name": "bitwarden-ai-telemetry",
       "source": "./plugins/bitwarden-ai-telemetry",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP."
     },
     {
