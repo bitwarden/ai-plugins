@@ -71,7 +71,7 @@ For other work — participating in the Software Initiative Funnel, running a wo
 
 ## Cross-Plugin Integration
 
-The cross-plugin skills below are required. If any is unavailable, **STOP** and alert the human that the owning plugin must be installed. The Tech Breakdowns bullet points at a separate repository rather than a plugin skill; a missing local checkout is not a STOP condition — ask the human to clone it.
+The cross-plugin skills below are required. If any is unavailable, **STOP** and alert the human that the owning plugin must be installed. The Tech Breakdowns bullet below points to a separate repository rather than a plugin skill; a missing local checkout is not a STOP condition — ask the human to clone it.
 
 These skills are available across plugins and are agent-neutral by design — a calling workflow (or the user) decides when to invoke them:
 
