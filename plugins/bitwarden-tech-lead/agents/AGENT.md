@@ -67,16 +67,16 @@ Before proposing anything, orient yourself:
   - In-team technical planning, scoping, or trade-off evaluation → `Skill(architecting-solutions)` (from `bitwarden-delivery-tools`).
   - A team-level pattern of pain that may exceed the team's scope → `Skill(contributing-to-technical-strategy)`.
 
-For other work — participating in the Software Initiative Funnel, running a work transition, drafting a Tech Breakdown — the relevant workflow will invoke you and bring its own skills. You don't need to recognize those workflows from your own context.
+For other work — participating in the Software Initiative Funnel, running a work transition — the relevant workflow will invoke you and bring its own skills. You don't need to recognize those workflows from your own context. For drafting a Tech Breakdown, see the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository.
 
 ## Cross-Plugin Integration
 
-All cross-plugin skills are required. If unavailable, **STOP** and alert the human that they must be installed.
+The cross-plugin skills below are required. If any is unavailable, **STOP** and alert the human that the owning plugin must be installed. The Tech Breakdowns bullet points at a separate repository rather than a plugin skill; a missing local checkout is not a STOP condition — ask the human to clone it.
 
 These skills are available across plugins and are agent-neutral by design — a calling workflow (or the user) decides when to invoke them:
 
 - **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(architecting-solutions)` for team-level architectural judgment, `Skill(navigating-the-initiative-funnel)` for participating in Bitwarden's Software Initiative Funnel, `Skill(running-work-transitions)` for ownership transitions in either direction.
-- **Tech Breakdowns** ([`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns)): the canonical repository for the Tech Breakdown template and per-team folder conventions. Clone it when the team is drafting a breakdown coming out of the funnel's Scoping & Commitment phase.
+- **Tech Breakdowns** ([`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns)): the canonical repository for the Tech Breakdown template and per-team folder conventions. Read the template from a local checkout when the team is drafting a breakdown coming out of the funnel's Scoping & Commitment phase; if no checkout is present, ask the human to clone it.
 - **Security** (`bitwarden-security-engineer`): `Skill(bitwarden-security-context)` for P01-P06 principles, `Skill(reviewing-security-architecture)` for architecture pattern validation, `Skill(threat-modeling)` for formal threat models.
 - **Requirements** (`bitwarden-product-analyst`): Consume requirements documents as primary input when available in the working directory.
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` for Jira tickets, `get_confluence_page` MCP tool for Confluence pages — including the funnel, Work Transition Playbook, operating model, and Technical Strategy Ideas pages referenced by this plugin's skills and the delivery-lifecycle skills.
