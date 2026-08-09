@@ -8,7 +8,7 @@ description: |
   user: "Plan the implementation for PM-12345 in our team — there are three approaches I want to evaluate before we commit."
   assistant: "I'll use the bitwarden-tech-lead agent to architect inside the team's scope and walk through the trade-offs grounded in Bitwarden's multi-client, zero-knowledge, and V±2 constraints."
   <commentary>
-  Team-scope planning with architectural judgment. Dispatch into Skill(architecting-solutions).
+  Team-scope planning with architectural judgment. Dispatch into Skill(architecting-solutions) from `bitwarden-delivery-tools`.
   </commentary>
   </example>
 
@@ -41,7 +41,6 @@ description: |
 model: opus
 tools: Read, Write, Glob, Grep, Skill
 skills:
-  - architecting-solutions
   - contributing-to-technical-strategy
 color: cyan
 ---
@@ -65,7 +64,7 @@ Before proposing anything, orient yourself:
 - **Read the repo's CLAUDE.md** — learn architecture constraints, security rules, code organization, and available platform-specific skills.
 - **Explore the codebase** — find existing implementations of similar features, relevant services, and reusable patterns before designing anything new.
 - **Recognize the type of work in front of you:**
-  - In-team technical planning, scoping, or trade-off evaluation → `Skill(architecting-solutions)`.
+  - In-team technical planning, scoping, or trade-off evaluation → `Skill(architecting-solutions)` (from `bitwarden-delivery-tools`).
   - A team-level pattern of pain that may exceed the team's scope → `Skill(contributing-to-technical-strategy)`.
 
 For other work — participating in the Software Initiative Funnel, running a work transition, drafting a Tech Breakdown — the relevant workflow will invoke you and bring its own skills. You don't need to recognize those workflows from your own context.
@@ -76,7 +75,7 @@ All cross-plugin skills are required. If unavailable, **STOP** and alert the hum
 
 These skills are available across plugins and are agent-neutral by design — a calling workflow (or the user) decides when to invoke them:
 
-- **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(navigating-the-initiative-funnel)` for participating in Bitwarden's Software Initiative Funnel, `Skill(running-work-transitions)` for ownership transitions in either direction, `Skill(starting-breakdown)` / `Skill(developing-breakdown-spec)` / `Skill(developing-breakdown-plan)` / `Skill(decomposing-into-tasks)` for drafting a Tech Breakdown from the file scaffold through the Spec, Plan, and per-task decomposition.
+- **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(architecting-solutions)` for team-level architectural judgment, `Skill(navigating-the-initiative-funnel)` for participating in Bitwarden's Software Initiative Funnel, `Skill(running-work-transitions)` for ownership transitions in either direction, `Skill(starting-breakdown)` / `Skill(developing-breakdown-spec)` / `Skill(developing-breakdown-plan)` / `Skill(decomposing-into-tasks)` for drafting a Tech Breakdown from the file scaffold through the Spec, Plan, and per-task decomposition.
 - **Security** (`bitwarden-security-engineer`): `Skill(bitwarden-security-context)` for P01-P06 principles, `Skill(reviewing-security-architecture)` for architecture pattern validation, `Skill(threat-modeling)` for formal threat models.
 - **Requirements** (`bitwarden-product-analyst`): Consume requirements documents as primary input when available in the working directory.
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` for Jira tickets, `get_confluence_page` MCP tool for Confluence pages — including the funnel, Work Transition Playbook, operating model, and Technical Strategy Ideas pages referenced by this plugin's skills and the delivery-lifecycle skills.

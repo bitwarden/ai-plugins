@@ -13,6 +13,7 @@ import json
 import os
 import sys
 import unittest
+from datetime import datetime, timedelta
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -61,7 +62,8 @@ class EmitFailClosedTest(unittest.TestCase):
             body = json.loads(req.data)
             attrs = body["resourceLogs"][0]["scopeLogs"][0]["logRecords"][0]["attributes"]
             keys = {a["key"] for a in attrs}
-            self.assertEqual(keys, {"bw.tool"})
+            # event.timestamp is stamped on every record; see EventTimestampTest.
+            self.assertEqual(keys, {"bw.tool", "event.timestamp"})
 
     def test_network_error_is_swallowed_fail_open(self):
         os.environ["BW_TELEMETRY_OTLP"] = "https://example.bitwarden.pw/v1/logs"
@@ -103,6 +105,58 @@ class EmitFailClosedTest(unittest.TestCase):
         with mock.patch("urllib.request.urlopen") as urlopen:
             emit_module.emit("bw.identity", {"bw.skill": "x"})
             urlopen.assert_not_called()
+
+
+class EventTimestampTest(unittest.TestCase):
+    """Every record carries a client-side event.timestamp so consumers don't
+    fall back to collector ingest time."""
+
+    def setUp(self):
+        self._env_patch = mock.patch.dict(os.environ, {}, clear=False)
+        self._env_patch.start()
+        os.environ["BW_TELEMETRY_OTLP"] = "https://example.bitwarden.pw/v1/logs"
+        importlib.reload(emit_module)
+
+    def tearDown(self):
+        self._env_patch.stop()
+        importlib.reload(emit_module)
+
+    def _attrs_for(self, attrs):
+        with mock.patch("urllib.request.urlopen") as urlopen:
+            urlopen.return_value.read.return_value = b""
+            emit_module.emit("bw.identity", attrs)
+            body = json.loads(urlopen.call_args[0][0].data)
+        records = body["resourceLogs"][0]["scopeLogs"][0]["logRecords"][0]
+        return {a["key"]: a["value"]["stringValue"] for a in records["attributes"]}
+
+    def test_timestamp_is_added_when_absent(self):
+        self.assertIn("event.timestamp", self._attrs_for({"bw.tool": "Skill"}))
+
+    def test_timestamp_parses_as_utc_iso8601(self):
+        raw = self._attrs_for({"bw.tool": "Skill"})["event.timestamp"]
+        self.assertTrue(raw.endswith("Z"), raw)
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        self.assertEqual(parsed.tzinfo.utcoffset(parsed), timedelta(0))
+
+    def test_timestamp_has_millisecond_precision(self):
+        # Second granularity would collapse distinct same-second invocations
+        # under a consumer deduplication key that includes the timestamp.
+        raw = self._attrs_for({"bw.tool": "Skill"})["event.timestamp"]
+        self.assertRegex(raw, r"\.\d{3}Z$")
+
+    def test_caller_supplied_timestamp_is_preserved(self):
+        supplied = "2026-06-10T21:25:21.770Z"
+        got = self._attrs_for({"bw.tool": "Skill", "event.timestamp": supplied})
+        self.assertEqual(got["event.timestamp"], supplied)
+
+    def test_empty_caller_timestamp_falls_back_to_generated(self):
+        got = self._attrs_for({"bw.tool": "Skill", "event.timestamp": ""})
+        self.assertRegex(got["event.timestamp"], r"\.\d{3}Z$")
+
+    def test_caller_dict_is_not_mutated(self):
+        caller = {"bw.tool": "Skill"}
+        self._attrs_for(caller)
+        self.assertEqual(caller, {"bw.tool": "Skill"})
 
 
 class IsAllowedCollectorTest(unittest.TestCase):
