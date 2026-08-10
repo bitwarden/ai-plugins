@@ -10,21 +10,19 @@ Two of those near-misses deliberately target sibling tooling. `assessing-test-co
 
 ## `agent-non-trigger-eval.json`
 
-8 queries, all `should_trigger: false`, testing a claim every one of the six agent descriptions makes: "Do not invoke directly; dispatched by the `test-web-changes` skill." Each query is phrased to tempt one specific agent with exactly the work it does.
+6 queries, all `should_trigger: false`, testing a claim every one of the six agent descriptions makes: "Do not invoke directly; dispatched by the `test-web-changes` skill." Each query is phrased to tempt one specific agent with exactly the work it does, without naming any agent, so a trigger means the model reached for an internal agent on its own.
 
-Run `run_agent_eval.py --agent <name>` once per agent. A pass is zero triggers across all eight queries for all six agents.
+Run `run_agent_eval.py --agent <name>` once per agent. A pass is zero triggers across all six queries for all six agents.
 
-The final two queries name an agent explicitly. A trigger there would be defensible rather than a defect, since the user asked for that agent by name, but see "Known limitation" below: the harness cannot observe a direct agent dispatch at all, so it cannot register a trigger on these two queries regardless of what the model actually does. Treat any recorded result on queries 7 and 8 as uninformative, not as a pass or a failure.
+## What this suite measures
 
-## Known limitation: this suite cannot fail by construction
+The harness counts a trigger three ways: a `Skill` tool_use whose `input.skill` contains the target token, a `Read` whose `file_path` contains the token and ends in `SKILL.md` or `AGENT.md`, or an `Agent` (or legacy `Task`) tool_use whose `subagent_type` contains the target token. `run_agent_eval.py` passes an agent name as that token, so a direct dispatch of the named agent, or the model reading that agent's `AGENT.md`, registers as a trigger. This suite is a real measurement of the "do not invoke directly" convention.
 
-The harness counts a trigger only on a `Skill` tool_use whose `input.skill` contains the target token, or a `Read` whose `file_path` contains the token and ends in `SKILL.md`. `run_agent_eval.py` passes an agent name as that token. A direct agent invocation surfaces as an `Agent` (or legacy `Task`) tool_use carrying `subagent_type`, which matches neither branch, so it is bailed to a non-trigger by the harness's exec-tool check regardless of whether the model actually dispatched the named agent directly.
-
-This means the suite's `should_not_trigger_pass=8/8` result is guaranteed by the harness's detection gap, not measured evidence that the "do not invoke directly" convention holds. This suite does not currently validate that convention. Doing so requires extending the harness to count a trigger on an `Agent` tool_use whose `subagent_type` contains the target token. That extension is a known follow-up, not done here.
+One residual caveat: direct-dispatch detection depends on the CLI surfacing a dispatch as an `Agent`/`Task` tool_use carrying `subagent_type`. If a future CLI changes that event shape, this branch needs revisiting.
 
 ## Baseline provenance
 
-These readings were recorded on 2026-08-01 against the final, ten-skill plugin inventory:
+These readings were recorded against the final, ten-skill plugin inventory (each reading below notes its own run date):
 
 - `assessing-test-coverage`
 - `build-test-cases`
@@ -43,13 +41,22 @@ plus all six agents (`context-gatherer`, `code-explorer`, `service-mapper`, `tes
 
 On-demand diagnostic, not a committed regression control. Last run 2026-08-01, model `claude-opus-4-8`, against the ten-skill inventory and six agents named above: should_trigger 10/10, should_not_trigger 10/10 at `--runs-per-query 7`, with no query in the 0.35-0.65 band. These numbers predate the addition of `Agent` to `scripts/eval_harness.py`'s `exec_tools` set, so the should_trigger figure is a ceiling and the should_not_trigger figure is a floor. There is no committed `baseline.json` for the orchestrator trigger suite: the query set and shared harness are kept and re-run on demand when editing the skill's description. This diverges deliberately from skill-creator's baseline-oriented methodology, which assumes the description can be tuned in response to the number; do not restore a committed baseline here.
 
-### Agent suite result
+### Agent suite result: last observed reading
 
-`should_not_trigger_pass=8/8` for all six agents at `--runs-per-query 3`, meaning zero recorded triggers on queries 1 through 6 for every agent, and zero recorded triggers on queries 7 and 8 as well. The recorded baseline rows carry only `query`, `should_trigger`, `triggers`, `runs`, and `trigger_rate` (nothing about which tool actually fired), so this result does not establish that the orchestrator fired instead of the named agent on queries 7 and 8, only that the harness did not register a trigger. See "Known limitation" above: the harness cannot observe a direct agent dispatch at all, so `8/8` is guaranteed by construction rather than measured proof that the do-not-invoke-directly convention held.
+On-demand diagnostic, not a committed regression control. Last run 2026-08-10, model `claude-opus-4-8`, six queries per agent at `--runs-per-query 3`, against the ten-skill inventory and six agents named above. This is the first real measurement of the "do not invoke directly" convention: the harness now detects a direct agent dispatch, so a `should_not_trigger` pass is evidence the model did not reach for the agent on its own.
 
-This committed baseline was also recorded before `Agent` was added to the harness's `exec_tools` bail-out set, which is a separate, unrelated gap from the detection limitation above; it should likewise be re-recorded before being relied on as a regression control.
+should_not_trigger result per agent:
 
-One query (`gather the context for PM-40020 from Jira and give me the affected repos and acceptance criteria`) hit a single run-level timeout on two of the six agents (`test-planner`, `test-runner`), each counted conservatively as a non-trigger by the harness. The query still passed 0/3 on both, so this is noted for transparency rather than as a finding.
+- context-gatherer: 6/6
+- code-explorer: 6/6
+- service-mapper: 6/6
+- test-planner: 6/6
+- service-manager: 6/6
+- test-runner: 6/6
+
+No agent triggered on any of the six work requests; the convention held across the suite.
+
+The earlier committed reading of `should_not_trigger_pass=8/8` for all six agents is retired: it was an artifact of a harness that could not observe a direct agent dispatch, not measured evidence. There is no committed `agent-non-trigger-baseline.json` for this suite. A trigger rate depends on the agent set, the harness, the model, and the full installed skill inventory competing for selection, and most of those are outside any one agent, so a committed baseline would go stale for reasons unrelated to the agents. The query set and shared harness are kept and re-run on demand when an agent's behavior or description changes. This diverges deliberately from skill-creator's baseline-oriented methodology; do not restore a committed baseline here.
 
 ## Running
 
@@ -76,7 +83,7 @@ python3 run_real_eval.py \
 
 Keep `--num-workers` at 5 or below. The should-not-trigger queries are adversarial real-work prompts and each worker is a full agent.
 
-For the agent suite, run once per agent name at `--runs-per-query 3`. Three runs are enough here because the expectation is zero triggers, and a zero-versus-nonzero signal does not need seven samples to establish:
+For the agent suite, run once per agent name at `--runs-per-query 3`. Three runs are enough here because the expectation is zero triggers, and a zero-versus-nonzero signal does not need seven samples to establish. Install from a local marketplace pointing at the worktree checkout (`/Users/kyle/code/bitwarden/worktrees/testing-tools`), not the `ai-plugins` checkout, which is on the frozen source branch and holds a differently named plugin; reinstall after any harness edit so the run measures the current harness:
 
 ```bash
 for a in context-gatherer code-explorer service-mapper test-planner service-manager test-runner; do
@@ -98,4 +105,4 @@ project='{
 diff <(jq -S "$project" before.json) <(jq -S "$project" after.json)
 ```
 
-An empty diff means the edit changed no verdict. Fix the skill description rather than the eval set if an edit regresses a verdict, and update the orchestrator reading above. The agent non-trigger suite still carries its committed `agent-non-trigger-baseline.json`.
+An empty diff means the edit changed no verdict. Fix the skill description rather than the eval set if an edit regresses a verdict, and update the orchestrator reading above. The agent non-trigger suite has no committed baseline either: re-run it on demand with the per-agent loop above and update the agent reading when an agent's behavior or description changes.
