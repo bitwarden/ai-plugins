@@ -108,6 +108,12 @@ def _read_event(file_path):
     ]}}
 
 
+def _agent_event(subagent_type, name="Agent"):
+    return {"type": "assistant", "message": {"content": [
+        {"type": "tool_use", "name": name, "input": {"subagent_type": subagent_type}},
+    ]}}
+
+
 class TestRunQueryDecisionLogic(unittest.TestCase):
     """Drives run_query's bail-out and carve-out decisions against synthetic
     stream-json event sequences instead of real agents, so a future edit that
@@ -169,6 +175,50 @@ class TestRunQueryDecisionLogic(unittest.TestCase):
             _read_event("/plugins/bitwarden-testing-tools/skills/assessing-test-coverage/evals/README.md"),
         ]
         result = self._run(events)
+        self.assertFalse(result["triggered"])
+
+
+class TestAgentDispatchDetection(unittest.TestCase):
+    """The agent non-trigger suite passes an agent name as the target token.
+    A direct dispatch surfaces as an Agent (or legacy Task) tool_use carrying
+    subagent_type; an inspection surfaces as a Read of the agent's AGENT.md.
+    Both must count as triggers, and neither may move a skill suite's counts."""
+
+    def _run(self, token, events):
+        cfg = eval_harness.EvalConfig(target_skill_token=token)
+        data = _stream(events)
+        with mock.patch.object(eval_harness.subprocess, "Popen", return_value=_FakeCompletedProcess(data)):
+            return eval_harness.run_query("dummy query", 30, "claude-opus-4-8", cfg)
+
+    def test_agent_dispatch_naming_the_target_is_a_trigger(self):
+        result = self._run("context-gatherer", [_agent_event("context-gatherer")])
+        self.assertTrue(result["triggered"])
+        self.assertEqual(result["first_skill"], "context-gatherer")
+
+    def test_legacy_task_dispatch_naming_the_target_is_a_trigger(self):
+        result = self._run("context-gatherer", [_agent_event("context-gatherer", name="Task")])
+        self.assertTrue(result["triggered"])
+
+    def test_read_of_agent_md_containing_the_token_is_a_trigger(self):
+        result = self._run("context-gatherer", [
+            _read_event("/plugins/bitwarden-testing-tools/agents/context-gatherer/AGENT.md"),
+        ])
+        self.assertTrue(result["triggered"])
+
+    def test_agent_dispatch_not_naming_the_target_bails_as_real_work(self):
+        result = self._run("context-gatherer", [_agent_event("service-mapper")])
+        self.assertFalse(result["triggered"])
+        self.assertEqual(result["first_skill"], "Agent (bailed: real-work tool)")
+
+    def test_skill_target_is_inert_to_agent_dispatch(self):
+        result = self._run("assessing-test-coverage", [_agent_event("context-gatherer")])
+        self.assertFalse(result["triggered"])
+        self.assertEqual(result["first_skill"], "Agent (bailed: real-work tool)")
+
+    def test_skill_target_is_inert_to_agent_md_read(self):
+        result = self._run("assessing-test-coverage", [
+            _read_event("/plugins/bitwarden-testing-tools/agents/context-gatherer/AGENT.md"),
+        ])
         self.assertFalse(result["triggered"])
 
 
