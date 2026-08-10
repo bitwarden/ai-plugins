@@ -22,19 +22,79 @@ EXIT_USAGE = 2
 EXIT_NO_ADMIN = 4
 
 
+def _strip_jsonc(text):
+    """Strip // line comments and /* */ block comments from JSONC text.
+
+    server/dev/secrets.json is JSONC: the .NET config loader tolerates comments,
+    so the file carries commented-out settings (e.g. //"databaseProvider": ...).
+    Python's json.loads does not, so strip comments first. String contents are
+    preserved verbatim so a // or /* inside a value (like an https:// URL) is
+    never mistaken for a comment.
+    """
+    out = []
+    i = 0
+    n = len(text)
+    in_string = False
+    while i < n:
+        ch = text[i]
+        if in_string:
+            out.append(ch)
+            if ch == "\\" and i + 1 < n:
+                out.append(text[i + 1])
+                i += 2
+                continue
+            if ch == '"':
+                in_string = False
+            i += 1
+            continue
+        if ch == '"':
+            in_string = True
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "/" and i + 1 < n and text[i + 1] == "/":
+            i += 2
+            while i < n and text[i] not in "\r\n":
+                i += 1
+            continue
+        if ch == "/" and i + 1 < n and text[i + 1] == "*":
+            i += 2
+            while i + 1 < n and not (text[i] == "*" and text[i + 1] == "/"):
+                i += 1
+            i += 2
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def first_admin(path):
-    """Return the first non-empty string under the 'admins' key."""
+    """Return the first non-empty admin email under the 'admins' key.
+
+    In server/dev/secrets.json 'admins' is a comma-separated string
+    (e.g. "admin@localhost,owner@localhost"); a JSON list is also accepted.
+    """
     with open(path, encoding="utf-8") as handle:
-        data = json.load(handle)
+        data = json.loads(_strip_jsonc(handle.read()))
     if not isinstance(data, dict):
         raise ValueError("secrets root must be a JSON object")
-    admins = data.get("admins")
-    if not isinstance(admins, list) or not admins:
+    # 'admins' lives under 'adminSettings' in server/dev/secrets.json; accept a
+    # top-level key too in case the layout differs.
+    section = data.get("adminSettings")
+    if isinstance(section, dict) and "admins" in section:
+        admins = section.get("admins")
+    else:
+        admins = data.get("admins")
+    if isinstance(admins, str):
+        entries = [part.strip() for part in admins.split(",")]
+    elif isinstance(admins, list):
+        entries = [part.strip() for part in admins if isinstance(part, str)]
+    else:
+        raise ValueError("secrets file has no usable 'admins' entry")
+    entries = [entry for entry in entries if entry]
+    if not entries:
         raise ValueError("secrets file has no 'admins' entries")
-    first = admins[0]
-    if not isinstance(first, str) or not first.strip():
-        raise ValueError("first 'admins' entry is not a non-empty string")
-    return first.strip()
+    return entries[0]
 
 
 def main(argv):

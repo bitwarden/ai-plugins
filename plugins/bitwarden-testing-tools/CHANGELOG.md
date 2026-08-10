@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `executing-web-tests` now reads the tool policy from `references/playwright-testing-pipeline/tool-policy.md`.
 
+### Fixed
+
+- `read_admin_email.py` now reads the real JSONC dev secrets file: string-aware `//` and `/* */` comment stripping, `adminSettings.admins` resolution with a top-level fallback, and comma-separated string values. Tests rewritten to the real file's shape.
+
 ## [1.4.0] - 2026-07-31
 
 ### Added
