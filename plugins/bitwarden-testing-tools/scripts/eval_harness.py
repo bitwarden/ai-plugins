@@ -104,10 +104,20 @@ def run_query(query: str, timeout: int, model: str, config: EvalConfig) -> dict:
                     if name == "Skill" and config.target_skill_token in inp.get("skill", ""):
                         return {"triggered": True, "first_skill": inp.get("skill")}
                     fp = inp.get("file_path", "")
-                    # Count a Read only when it opens the skill's own SKILL.md,
-                    # not any file that merely has the token in its path.
-                    if name == "Read" and config.target_skill_token in fp and fp.rstrip().endswith("SKILL.md"):
+                    # Count a Read only when it opens the skill's own SKILL.md
+                    # or an agent's own AGENT.md, not any file that merely has
+                    # the token in its path.
+                    if name == "Read" and config.target_skill_token in fp and fp.rstrip().endswith(("SKILL.md", "AGENT.md")):
                         return {"triggered": True, "first_skill": fp}
+                    # A direct agent dispatch surfaces as an Agent (or legacy
+                    # Task) tool_use carrying subagent_type: a match is a
+                    # trigger, a non-match bails as real work.
+                    if name in ("Agent", "Task"):
+                        if config.target_skill_token in inp.get("subagent_type", ""):
+                            return {"triggered": True, "first_skill": inp.get("subagent_type")}
+                        if first_skill_seen is None:
+                            first_skill_seen = f"{name} (bailed: real-work tool)"
+                        return {"triggered": False, "first_skill": first_skill_seen}
                     # A real-work tool without the target skill first → no
                     # trigger. Bail so the finally block kills the child before
                     # its tool_use spawns anything. (Cheap read-only tools are
