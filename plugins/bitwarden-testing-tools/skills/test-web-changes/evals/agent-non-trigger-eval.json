@@ -22,13 +22,5 @@
   {
     "query": "build test cases from the application context artifact at .playwright-testing-artifacts/pm-40020/app-context-20260731-1200.md",
     "should_trigger": false
-  },
-  {
-    "query": "run the context-gatherer agent on PM-40020",
-    "should_trigger": false
-  },
-  {
-    "query": "dispatch the test-runner directly, I already have a plan file",
-    "should_trigger": false
   }
 ]
