@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Corrected a stale `references/tool-policy.md` path in `using-stripe-cli/scripts/stripe_cli.py`. The policy moved to `references/playwright-testing-pipeline/tool-policy.md` in this same release, and this docstring reference was missed because the original survey for it excluded non-markdown files.
+- `scripts/eval_harness.py` now detects a direct agent dispatch. It counts a trigger on an `Agent` or legacy `Task` tool_use whose `subagent_type` contains the target token, and its `Read` branch now accepts an `AGENT.md` path as well as `SKILL.md`. Before this, an agent dispatch fell through to the `exec_tools` bail and was recorded as a non-trigger, so the agent non-trigger suite could not fail. The change is inert for the skill trigger suites and is locked by new cases in `scripts/tests/test_eval_harness.py`.
 
 ## [1.1.0] - 2026-08-12
 
