@@ -4,7 +4,7 @@ Claude Code skills for GitHub Actions workflow compliance, action security audit
 
 ## Overview
 
-The skills work in pairs. Each audit skill is strictly read-only and produces a findings report; its remediation counterpart consumes those findings, applies the fixes, verifies, and opens draft PRs. `workflow-audit` → `workflow-fix` covers linter compliance inside a repo, and `action-audit` → `action-remediate` covers action references across the org. All four read `bitwarden-workflow-linter-rules` as the single source of truth for what compliant looks like and how each rule gets fixed.
+The skills work in pairs. Each audit skill is strictly read-only and produces a findings report; its remediation counterpart consumes those findings, applies the fixes, verifies, and opens draft PRs. `workflow-audit` → `workflow-fix` covers linter compliance inside a repo, and `action-audit` → `action-remediate` covers action references across the org. All four read `bitwarden-workflow-linter-rules` as the single source of truth for what compliant looks like and how each rule gets fixed. `workflow-naming-conventions` is a second reference skill covering the naming standards the linter does not check — job IDs, step name casing, and workflow file names — and defers to the linter-rules skill wherever the two overlap.
 
 ## Skills
 
@@ -15,6 +15,7 @@ The skills work in pairs. Each audit skill is strictly read-only and produces a 
 | `action-audit`                    | Searches org-wide for compromised, deprecated, or unpinned GitHub Actions and produces a findings report. Read-only. |
 | `action-remediate`                | Applies hash pins or action replacements across selected repos and creates draft PRs based on audit findings.        |
 | `bitwarden-workflow-linter-rules` | Reference for all 10 `bwwl` linter rules — triggers, fix procedures, and mechanical vs. judgment categorization.     |
+| `workflow-naming-conventions`     | Reference for naming standards `bwwl` does not enforce — job IDs, step names, and workflow file names.               |
 
 ## Installation
 
