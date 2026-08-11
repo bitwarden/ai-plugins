@@ -29,6 +29,8 @@ This skill covers only what `bwwl` cannot check. For anything the linter enforce
 
 ## Standards
 
+These three IDs are defined by this skill, not by `bwwl`. Label them as convention findings, never as linter findings.
+
 ### `job-id-kebab-case`
 
 - **Applies to:** every key under `jobs:`.
