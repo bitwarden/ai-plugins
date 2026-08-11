@@ -2,7 +2,7 @@
 
 Behavior test cases for the `verifying-doc-parity` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds eleven cases exercising what happens when the skill fires. Covers both primary success paths (session and pull-request review), every outcome the skill claims to produce (Update, Attest, Dismiss), and each recently-added instruction (below-component source-embedded surfaces, placement follows what the doc describes, root-level placement for a repo-wide capability).
+`behavior-eval.json` holds cases exercising what happens when the skill fires. Covers both primary success paths (session and pull-request review), every outcome the skill claims to produce (Update, Attest, Dismiss), and each recently-added instruction (below-component source-embedded surfaces, placement follows what the doc describes, root-level placement for a repo-wide capability).
 
 `behavior-baseline.json` is the recorded benchmark that intentional skill changes must not regress silently.
 
