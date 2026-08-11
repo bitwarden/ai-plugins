@@ -1,6 +1,6 @@
-# verifying-doc-currency evals
+# verifying-doc-parity evals
 
-Behavior test cases for the `verifying-doc-currency` skill, in the `skill-creator` schema.
+Behavior test cases for the `verifying-doc-parity` skill, in the `skill-creator` schema.
 
 `behavior-eval.json` holds eleven cases exercising what happens when the skill fires. Covers both primary success paths (session and pull-request review), every outcome the skill claims to produce (Update, Attest, Dismiss), and each recently-added instruction (below-component source-embedded surfaces, placement follows what the doc describes, root-level placement for a repo-wide capability).
 
@@ -10,7 +10,7 @@ Behavior test cases for the `verifying-doc-currency` skill, in the `skill-creato
 
 It was found that the `run_eval.py`'s methodology incorrectly failed to detect skill triggers due to requiring immediate skill execution rather than context exploration, which models almost always do regardless of description changes.
 
-This skill's load-bearing invocation paths are the doc-currency Stop hook and the ai-review workflow's documentation pass. Natural-language triggering is a nice-to-have fallback, not the critical path.
+This skill's load-bearing invocation paths are the doc-parity Stop hook and the ai-review workflow's documentation pass. Natural-language triggering is a nice-to-have fallback, not the critical path.
 
 ## Eval cases
 

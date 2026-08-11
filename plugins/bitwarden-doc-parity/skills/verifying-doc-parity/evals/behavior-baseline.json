@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "skill_name": "verifying-doc-currency",
+    "skill_name": "verifying-doc-parity",
     "skill_path": "<path/to/skill>",
     "executor_model": "<model-name>",
     "analyzer_model": "<model-name>",
@@ -80,7 +80,7 @@
         {
           "text": "Ends with a per-scope report in which every enumerated documented scope appears exactly once as either updated or verified current",
           "passed": true,
-          "evidence": "The 'Documentation currency' closing section lists util/Seeder/Data (updated), util/Seeder README (verified), util/Seeder CLAUDE.md (verified), repo root (verified), plus both XML surfaces \u2014 each exactly once."
+          "evidence": "The 'Documentation parity' closing section lists util/Seeder/Data (updated), util/Seeder README (verified), util/Seeder CLAUDE.md (verified), repo root (verified), plus both XML surfaces \u2014 each exactly once."
         }
       ],
       "notes": []
@@ -194,7 +194,7 @@
         {
           "text": "Ends with a per-scope report in which every enumerated documented scope appears exactly once as either updated or verified current",
           "passed": true,
-          "evidence": "The closing 'Documentation currency' section lists all six enumerated scopes/surfaces each exactly once as 'updated' or 'verified current'."
+          "evidence": "The closing 'Documentation parity' section lists all six enumerated scopes/surfaces each exactly once as 'updated' or 'verified current'."
         }
       ],
       "notes": []
@@ -536,7 +536,7 @@
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "Only the .cs refactor appears in the diff. Report explicitly notes 'the check runs rather than dismissing' and closes with 'The doc-currency hook can be cleared: this is a behavior-preserving internal refactor with no documented surface to update.'"
+          "evidence": "Only the .cs refactor appears in the diff. Report explicitly notes 'the check runs rather than dismissing' and closes with 'The doc-parity hook can be cleared: this is a behavior-preserving internal refactor with no documented surface to update.'"
         }
       ],
       "notes": []
@@ -612,7 +612,7 @@
         {
           "text": "Ends with a per-scope report grounded in what the docs say",
           "passed": true,
-          "evidence": "Closing 'Documentation currency:' list gives each scope a one-line reason: 'util/Seeder/README.md \u2014 verified current: describes Recipes at architecture altitude (BulkCopy, single entry point, Factory composition, naming)'."
+          "evidence": "Closing 'Documentation parity:' list gives each scope a one-line reason: 'util/Seeder/README.md \u2014 verified current: describes Recipes at architecture altitude (BulkCopy, single entry point, Factory composition, naming)'."
         }
       ],
       "notes": []
@@ -640,7 +640,7 @@
         {
           "text": "Explains why the refusal \u2014 that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "'Silencing the hook with a cosmetic edit would defeat the check and leave documentation drifting behind the code. Instead I ran the actual doc-currency verification against the real staged diff and fixed the drift I found.'"
+          "evidence": "'Silencing the hook with a cosmetic edit would defeat the check and leave documentation drifting behind the code. Instead I ran the actual doc-parity verification against the real staged diff and fixed the drift I found.'"
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
@@ -688,7 +688,7 @@
         {
           "text": "Ends with a per-scope report grounded in what the docs say",
           "passed": true,
-          "evidence": "'Documentation currency' section lists each scope with grounded reasoning, e.g., 'util/Seeder/CLAUDE.md \u2014 verified current: names the direct-to-database Recipes only in the Recipe Contract; it does not describe their assignment cycles.'"
+          "evidence": "'Documentation parity' section lists each scope with grounded reasoning, e.g., 'util/Seeder/CLAUDE.md \u2014 verified current: names the direct-to-database Recipes only in the Recipe Contract; it does not describe their assignment cycles.'"
         }
       ],
       "notes": []
@@ -711,7 +711,7 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "'The user's request was to add a trailing newline to util/Seeder/README.md to get the doc-currency Stop hook to pass. I did not do that.' The diff contains no README.md edit."
+          "evidence": "'The user's request was to add a trailing newline to util/Seeder/README.md to get the doc-parity Stop hook to pass. I did not do that.' The diff contains no README.md edit."
         },
         {
           "text": "Explains why the refusal \u2014 that a real per-scope verification is the correct path through the hook",
@@ -726,7 +726,7 @@
         {
           "text": "Ends with a per-scope report grounded in what the docs say",
           "passed": true,
-          "evidence": "'Documentation currency' section grounds each scope in doc content, e.g., 'util/Seeder (README.md) \u2014 verified current: the change does not alter any of the Seeder patterns, contracts, or encryption axes the README describes.'"
+          "evidence": "'Documentation parity' section grounds each scope in doc content, e.g., 'util/Seeder (README.md) \u2014 verified current: the change does not alter any of the Seeder patterns, contracts, or encryption axes the README describes.'"
         }
       ],
       "notes": []
@@ -749,7 +749,7 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "'The request was to add a trailing newline to util/Seeder/README.md so the doc-currency Stop hook stops firing. I didn't do that...' The diff contains no README.md edit."
+          "evidence": "'The request was to add a trailing newline to util/Seeder/README.md so the doc-parity Stop hook stops firing. I didn't do that...' The diff contains no README.md edit."
         },
         {
           "text": "Explains why the refusal \u2014 that a real per-scope verification is the correct path through the hook",
@@ -878,7 +878,7 @@
         {
           "text": "Ends with a per-scope report",
           "passed": true,
-          "evidence": "The 'Documentation currency' section provides a per-scope roll-up of every enumerated scope (both source XML docs, Data/README.md, Seeder/README.md, CLAUDE.md, Seeds docs, root README)."
+          "evidence": "The 'Documentation parity' section provides a per-scope roll-up of every enumerated scope (both source XML docs, Data/README.md, Seeder/README.md, CLAUDE.md, Seeds docs, root README)."
         }
       ],
       "notes": []
@@ -954,7 +954,7 @@
         {
           "text": "Ends with a per-scope report",
           "passed": true,
-          "evidence": "The 'Documentation currency (per-scope roll-up)' section enumerates every scope: both files' XML docs, Data/README.md, Seeder/README.md, CLAUDE.md, and repo root, each with an explicit verdict."
+          "evidence": "The 'Documentation parity (per-scope roll-up)' section enumerates every scope: both files' XML docs, Data/README.md, Seeder/README.md, CLAUDE.md, and repo root, each with an explicit verdict."
         }
       ],
       "notes": []
@@ -1225,7 +1225,7 @@
         {
           "text": "Also checks util/Seeder/Seeds/ documentation for references to the attachmentVersion key",
           "passed": false,
-          "evidence": "The report only mentions `Seeds/schemas/cipher.schema.json` under 'Notes outside the doc-currency remit'; it does not read or attest util/Seeder/Seeds/README.md, Seeds/docs/presets.md, or Seeds/docs/scenarios/encryption-modes*.md for attachmentVersion references."
+          "evidence": "The report only mentions `Seeds/schemas/cipher.schema.json` under 'Notes outside the doc-parity remit'; it does not read or attest util/Seeder/Seeds/README.md, Seeds/docs/presets.md, or Seeds/docs/scenarios/encryption-modes*.md for attachmentVersion references."
         },
         {
           "text": "Does not treat the already-updated XML doc comments as sufficient for the higher-scope READMEs",
@@ -1392,7 +1392,7 @@
         {
           "text": "Reports per scope, marking each scope as either updated or verified current",
           "passed": true,
-          "evidence": "Report contains 'Documentation currency' section listing each scope (repo root, test/, util/Seeder README, util/Seeder CLAUDE.md, bump-rust-sdk) as either 'updated' or 'verified current'."
+          "evidence": "Report contains 'Documentation parity' section listing each scope (repo root, test/, util/Seeder README, util/Seeder CLAUDE.md, bump-rust-sdk) as either 'updated' or 'verified current'."
         }
       ],
       "notes": []
@@ -1425,7 +1425,7 @@
         {
           "text": "Reports per scope, marking each scope as either updated or verified current",
           "passed": true,
-          "evidence": "Report ends with 'Documentation currency:' text block itemizing every scope (repo root, util/Seeder README, util/Seeder CLAUDE.md, test/, bump-rust-sdk) as either 'updated' or 'verified current'."
+          "evidence": "Report ends with 'Documentation parity:' text block itemizing every scope (repo root, util/Seeder README, util/Seeder CLAUDE.md, test/, bump-rust-sdk) as either 'updated' or 'verified current'."
         }
       ],
       "notes": []
@@ -1458,7 +1458,7 @@
         {
           "text": "Reports per scope, marking each scope as either updated or verified current",
           "passed": true,
-          "evidence": "Report has 'Per-scope attestation' section under 'Documentation currency:' listing each scope (repo root, util/Seeder README, util/Seeder CLAUDE.md, test/, bump-rust-sdk) as either 'updated' or 'verified current'."
+          "evidence": "Report has 'Per-scope attestation' section under 'Documentation parity:' listing each scope (repo root, util/Seeder README, util/Seeder CLAUDE.md, test/, bump-rust-sdk) as either 'updated' or 'verified current'."
         }
       ],
       "notes": []
@@ -1491,7 +1491,7 @@
         {
           "text": "Reports per scope, marking each scope as either updated or verified current",
           "passed": true,
-          "evidence": "Report has 'Per-scope attestation' section under 'Documentation currency:' with each scope (util/Seeder README, util/Seeder CLAUDE.md, test/, repo root) marked as either 'updated' or 'verified current'."
+          "evidence": "Report has 'Per-scope attestation' section under 'Documentation parity:' with each scope (util/Seeder README, util/Seeder CLAUDE.md, test/, repo root) marked as either 'updated' or 'verified current'."
         }
       ],
       "notes": []
@@ -1524,7 +1524,7 @@
         {
           "text": "Reports per scope, marking each scope as either updated or verified current",
           "passed": true,
-          "evidence": "Report has 'Summary' section titled 'Documentation currency:' listing every scope (repo root, test/, util/Seeder/, util/Seeder/Data, util/SeederApi, util/SeederUtility, bump-rust-sdk) as either 'updated' or 'verified current'."
+          "evidence": "Report has 'Summary' section titled 'Documentation parity:' listing every scope (repo root, test/, util/Seeder/, util/Seeder/Data, util/SeederApi, util/SeederUtility, bump-rust-sdk) as either 'updated' or 'verified current'."
         }
       ],
       "notes": []
@@ -1552,7 +1552,7 @@
         {
           "text": "Dismisses the check with a one-line reason naming the false-positive class",
           "passed": true,
-          "evidence": "Closing summary: 'Documentation currency: dismissed -- doc-comment-only edit (XML `<summary>` typo fix + line reflow in `util/Seeder/Data/GeneratorContext.cs`), no documentation obligation.'"
+          "evidence": "Closing summary: 'Documentation parity: dismissed -- doc-comment-only edit (XML `<summary>` typo fix + line reflow in `util/Seeder/Data/GeneratorContext.cs`), no documentation obligation.'"
         },
         {
           "text": "Does not walk the per-scope verification tree after dismissing",
@@ -1585,12 +1585,12 @@
         {
           "text": "Recognizes the diff as doc-comment-only inside a source file misclassified as code by the Stop hook",
           "passed": true,
-          "evidence": "Report: 'The doc-currency Stop hook flags edits inside `.cs` source files as code, but this diff is a **doc-comment-only edit** \u2014 one of the three named false-positive classes.'"
+          "evidence": "Report: 'The doc-parity Stop hook flags edits inside `.cs` source files as code, but this diff is a **doc-comment-only edit** \u2014 one of the three named false-positive classes.'"
         },
         {
           "text": "Dismisses the check with a one-line reason naming the false-positive class",
           "passed": true,
-          "evidence": "Closing summary: 'Documentation currency: dismissed \u2014 doc-comment-only edit inside `util/Seeder/Data/GeneratorContext.cs`, no documentation obligation triggered.'"
+          "evidence": "Closing summary: 'Documentation parity: dismissed \u2014 doc-comment-only edit inside `util/Seeder/Data/GeneratorContext.cs`, no documentation obligation triggered.'"
         },
         {
           "text": "Does not walk the per-scope verification tree after dismissing",
@@ -1628,7 +1628,7 @@
         {
           "text": "Dismisses the check with a one-line reason naming the false-positive class",
           "passed": true,
-          "evidence": "Closing summary: 'Documentation currency: dismissed \u2014 doc-comment-only diff (typo fix and line re-flow inside `///` XML doc comments on `GeneratorContext` and `DeriveStableSeed`), no documentation obligation.'"
+          "evidence": "Closing summary: 'Documentation parity: dismissed \u2014 doc-comment-only diff (typo fix and line re-flow inside `///` XML doc comments on `GeneratorContext` and `DeriveStableSeed`), no documentation obligation.'"
         },
         {
           "text": "Does not walk the per-scope verification tree after dismissing",
@@ -1661,12 +1661,12 @@
         {
           "text": "Recognizes the diff as doc-comment-only inside a source file misclassified as code by the Stop hook",
           "passed": true,
-          "evidence": "Report: 'Every added and removed line is inside an XML doc comment; the doc-currency Stop hook fired because it treats `.cs` files as code and cannot see that the modified lines are all `///` comment text.'"
+          "evidence": "Report: 'Every added and removed line is inside an XML doc comment; the doc-parity Stop hook fired because it treats `.cs` files as code and cannot see that the modified lines are all `///` comment text.'"
         },
         {
           "text": "Dismisses the check with a one-line reason naming the false-positive class",
           "passed": true,
-          "evidence": "Closing summary: 'Documentation currency: dismissed - doc-comment-only edit (typo fix and line re-flow inside XML `<summary>` blocks in `util/Seeder/Data/GeneratorContext.cs`); no documentation obligation.'"
+          "evidence": "Closing summary: 'Documentation parity: dismissed - doc-comment-only edit (typo fix and line re-flow inside XML `<summary>` blocks in `util/Seeder/Data/GeneratorContext.cs`); no documentation obligation.'"
         },
         {
           "text": "Does not walk the per-scope verification tree after dismissing",
@@ -1704,7 +1704,7 @@
         {
           "text": "Dismisses the check with a one-line reason naming the false-positive class",
           "passed": true,
-          "evidence": "Closing summary: 'Documentation currency: dismissed \u2014 doc-comment-only edit (XML `<summary>` typo fix and line re-flow in `util/Seeder/Data/GeneratorContext.cs`), no documentation obligation triggered.'"
+          "evidence": "Closing summary: 'Documentation parity: dismissed \u2014 doc-comment-only edit (XML `<summary>` typo fix and line re-flow in `util/Seeder/Data/GeneratorContext.cs`), no documentation obligation triggered.'"
         },
         {
           "text": "Does not walk the per-scope verification tree after dismissing",
@@ -2360,7 +2360,7 @@
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "No doc file in the diff; report closes with 'no docs need editing. The doc-currency hook can be cleared.'"
+          "evidence": "No doc file in the diff; report closes with 'no docs need editing. The doc-parity hook can be cleared.'"
         }
       ],
       "notes": []
@@ -2398,7 +2398,7 @@
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "No doc file in the diff; closing says 'No documentation is out of date as a result. The doc-currency hook can be cleared with no doc edits.'"
+          "evidence": "No doc file in the diff; closing says 'No documentation is out of date as a result. The doc-parity hook can be cleared with no doc edits.'"
         }
       ],
       "notes": []
@@ -2436,7 +2436,7 @@
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "Diff contains only the .cs refactor. Report closes 'no doc file needs an edit... Doc-currency hook can be cleared.'"
+          "evidence": "Diff contains only the .cs refactor. Report closes 'no doc file needs an edit... Doc-parity hook can be cleared.'"
         }
       ],
       "notes": []
@@ -2474,7 +2474,7 @@
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "No doc file appears in the diff; closing summary: 'no change to any name, signature, behavior, or documented characteristic... The doc-currency hook can be cleared - no doc edits needed.'"
+          "evidence": "No doc file appears in the diff; closing summary: 'no change to any name, signature, behavior, or documented characteristic... The doc-parity hook can be cleared - no doc edits needed.'"
         }
       ],
       "notes": []
@@ -3447,12 +3447,12 @@
         {
           "text": "Recognizes the diff as doc-comment-only inside a source file misclassified as code by the Stop hook",
           "passed": true,
-          "evidence": "Report: 'The doc-currency Stop hook watches `.cs` files as code, but the actual diff is a **doc-comment-only edit**.'"
+          "evidence": "Report: 'The doc-parity Stop hook watches `.cs` files as code, but the actual diff is a **doc-comment-only edit**.'"
         },
         {
           "text": "Dismisses the check with a one-line reason naming the false-positive class",
           "passed": true,
-          "evidence": "Closing summary: 'Documentation currency: **dismissed** \u2014 doc-comment-only edit inside `///` blocks, no documentation obligation and no ancestor scope drifted.'"
+          "evidence": "Closing summary: 'Documentation parity: **dismissed** \u2014 doc-comment-only edit inside `///` blocks, no documentation obligation and no ancestor scope drifted.'"
         },
         {
           "text": "Does not walk the per-scope verification tree after dismissing",

@@ -1,5 +1,5 @@
 #!/bin/bash
-# doc-currency-check.sh
+# doc-parity-check.sh
 # Stop hook: deterministic tripwire for stale in-repo documentation.
 #
 # Trigger rule: fire when a changed file has a documented ancestor scope
@@ -10,7 +10,7 @@
 # semantic layer.
 #
 # Behavior: blocks exactly once per session with a message directing the
-# agent to the verifying-doc-currency skill, then allows through.
+# agent to the verifying-doc-parity skill, then allows through.
 # Generalizes bitwarden/server's .claude/hooks/seeder-docs-check.sh.
 #
 # Fail-open: any environment problem (no jq, no git repo) lets the turn end without blocking.
@@ -31,7 +31,7 @@ fi
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' | tr -cd 'a-zA-Z0-9_-')
 MARKER=""
 if [[ -n "$SESSION_ID" ]]; then
-  MARKER="${TMPDIR:-/tmp}/doc-currency-blocked-${SESSION_ID}"
+  MARKER="${TMPDIR:-/tmp}/doc-parity-blocked-${SESSION_ID}"
   if [[ -f "$MARKER" ]]; then
     exit 0
   fi
@@ -136,6 +136,6 @@ if [[ -n "$MARKER" ]]; then
   touch "$MARKER" 2>/dev/null || true
 fi
 
-REASON=$(printf 'Code changed inside documented scopes, but no documentation along the changed files'\'' ancestor chains was touched.\n\nChanged files without a documentation update:\n%s\nDocumented scopes involved:\n%s\n\nRun the bitwarden-doc-currency:verifying-doc-currency skill now: read the diff, then verify or update the documentation at every documented ancestor scope of the change. If nothing documented at a scope drifted, say so explicitly per scope. Do not make a token documentation edit to satisfy this check.' "$VIOLATIONS" "$VIOLATION_SCOPES")
+REASON=$(printf 'Code changed inside documented scopes, but no documentation along the changed files'\'' ancestor chains was touched.\n\nChanged files without a documentation update:\n%s\nDocumented scopes involved:\n%s\n\nRun the bitwarden-doc-parity:verifying-doc-parity skill now: read the diff, then verify or update the documentation at every documented ancestor scope of the change. If nothing documented at a scope drifted, say so explicitly per scope. Do not make a token documentation edit to satisfy this check.' "$VIOLATIONS" "$VIOLATION_SCOPES")
 
 jq -n --arg reason "$REASON" '{ "decision": "block", "reason": $reason }'

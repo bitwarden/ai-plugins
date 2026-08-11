@@ -1,12 +1,12 @@
 ---
-name: verifying-doc-currency
-description: Use this skill whenever the user mentions doc drift, documentation verification, README or docs/ updates that follow a code change, or a doc-currency Stop hook block — even if the request does not name a skill or documentation explicitly. Also use as the documentation pass of a pull request review. Verifies or updates documentation at every documented ancestor scope of a code change; in review context, also discovers out-of-repo documentation the change invalidates. Triggered by phrasings such as "verify doc currency", "are my docs up to date", "did I miss any doc updates", "what documentation should this change touch", "do I need to update any docs for my current changes", or "check if the docs still match the code".
+name: verifying-doc-parity
+description: Use this skill whenever the user mentions doc drift, documentation verification, README or docs/ updates that follow a code change, or a doc-parity Stop hook block — even if the request does not name a skill or documentation explicitly. Also use as the documentation pass of a pull request review. Verifies or updates documentation at every documented ancestor scope of a code change; in review context, also discovers out-of-repo documentation the change invalidates. Triggered by phrasings such as "verify doc parity", "are my docs up to date", "did I miss any doc updates", "what documentation should this change touch", "do I need to update any docs for my current changes", or "check if the docs still match the code".
 agent: general-purpose
 context: fork
 allowed-tools: WebFetch(domain:contributing.bitwarden.com), WebFetch(domain:contributing-docs.bitwarden.com)
 ---
 
-# Verifying documentation currency
+# Verifying documentation parity
 
 This skill is the judgment that code has drifted away from the documentation which describes it. It enforces the base obligations of the [documentation standard](https://contributing-docs.bitwarden.com/contributing/documentation): docs and diagrams update in the same change as the code they describe, and a change that invalidates documentation the repo does not contain gets called out at review.
 
@@ -14,7 +14,7 @@ This skill is the judgment that code has drifted away from the documentation whi
 
 The skill runs in two contexts where change source and relevant document discovery differ.
 
-- **Agent session**, invoked by the doc-currency Stop hook or on demand. The change is the working tree (`git diff HEAD` plus untracked files). Verification is in-repo only.
+- **Agent session**, invoked by the doc-parity Stop hook or on demand. The change is the working tree (`git diff HEAD` plus untracked files). Verification is in-repo only.
 - **Pull request review**, run through the ai-review workflow. The change is the PR diff plus the PR description. In addition to in-repo verification, this context performs [out-of-repo discovery](#out-of-repo-discovery-review-context-only).
 
 ## Workflow
@@ -43,7 +43,7 @@ For each documented scope or surface, exactly one of two outcomes:
 Close with an explicit per-scope list so the user, or the PR review summary, can audit the judgment:
 
 ```text
-Documentation currency:
+Documentation parity:
 - util/Seeder/Data (README.md) — updated: generator table gained the new distribution.
 - util/Seeder (README.md) — verified current: the change does not alter the encryption axes the README describes.
 - crates/bitwarden-crypto/src/lib.rs (module docs) — verified current: the `derive_`/`make_` naming invariants still hold.
@@ -55,7 +55,7 @@ Every documented scope and surface from Step 2 appears in the list. A scope miss
 When the check exits early via Dismiss, the report is a single line naming the false-positive class:
 
 ```text
-Documentation currency: dismissed — formatting-only diff, no documentation obligation.
+Documentation parity: dismissed — formatting-only diff, no documentation obligation.
 ```
 
 ## Out-of-repo discovery (review context only)
