@@ -27,12 +27,17 @@ if [[ "$STOP_HOOK_ACTIVE" == "true" ]]; then
   exit 0
 fi
 
-# Guard: block at most once per session.
+# Guard: block at most once per session. Markers live under a plugin-owned
+# subdirectory of TMPDIR to keep them off the world-writable top level, and
+# the -O check skips markers we do not own so a stray file cannot silently
+# suppress the session's only block.
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' | tr -cd 'a-zA-Z0-9_-')
 MARKER=""
 if [[ -n "$SESSION_ID" ]]; then
-  MARKER="${TMPDIR:-/tmp}/doc-parity-blocked-${SESSION_ID}"
-  if [[ -f "$MARKER" ]]; then
+  MARKER_DIR="${TMPDIR:-/tmp}/doc-parity"
+  mkdir -p "$MARKER_DIR" 2>/dev/null || true
+  MARKER="${MARKER_DIR}/blocked-${SESSION_ID}"
+  if [[ -f "$MARKER" && -O "$MARKER" ]]; then
     exit 0
   fi
 fi
@@ -45,8 +50,10 @@ fi
 REPO_ROOT=$(git -C "$CWD" rev-parse --show-toplevel 2>/dev/null) || exit 0
 
 # Gather all changed files (staged, unstaged, and untracked) relative to repo root.
-DIFF_HEAD=$(git -C "$REPO_ROOT" diff --name-only HEAD 2>/dev/null || true)
-UNTRACKED=$(git -C "$REPO_ROOT" ls-files --others --exclude-standard 2>/dev/null || true)
+# core.quotePath=false so non-ASCII filenames come through unquoted and match the
+# filesystem checks below.
+DIFF_HEAD=$(git -C "$REPO_ROOT" -c core.quotePath=false diff --name-only HEAD 2>/dev/null || true)
+UNTRACKED=$(git -C "$REPO_ROOT" -c core.quotePath=false ls-files --others --exclude-standard 2>/dev/null || true)
 ALL_CHANGED=$(printf "%s\n%s" "$DIFF_HEAD" "$UNTRACKED" | sort -u | grep -v '^$' || true)
 
 if [[ -z "$ALL_CHANGED" ]]; then
@@ -103,11 +110,14 @@ is_covered() {
 }
 
 # Documented ancestor scopes of a file, strictly below the repo root.
+# Match README case-insensitively; CLAUDE.md and docs/ are the other markers,
+# aligning with SKILL.md's scope definition.
 documented_ancestors() {
   local dir
   dir=$(dirname "$1")
   while [[ "$dir" != "." && "$dir" != "/" ]]; do
-    if [[ -f "$REPO_ROOT/$dir/README.md" || -d "$REPO_ROOT/$dir/docs" ]]; then
+    if compgen -G "$REPO_ROOT/$dir/[Rr][Ee][Aa][Dd][Mm][Ee].md" >/dev/null 2>&1 \
+        || [[ -f "$REPO_ROOT/$dir/CLAUDE.md" || -d "$REPO_ROOT/$dir/docs" ]]; then
       echo "$dir"
     fi
     dir=$(dirname "$dir")

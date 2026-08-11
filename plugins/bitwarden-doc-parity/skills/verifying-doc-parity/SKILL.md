@@ -1,8 +1,9 @@
 ---
 name: verifying-doc-parity
-description: Use this skill whenever the user mentions doc drift, documentation verification, README or docs/ updates that follow a code change, or a doc-parity Stop hook block — even if the request does not name a skill or documentation explicitly. Also use as the documentation pass of a pull request review. Verifies or updates documentation at every documented ancestor scope of a code change; in review context, also discovers out-of-repo documentation the change invalidates. Triggered by phrasings such as "verify doc parity", "are my docs up to date", "did I miss any doc updates", "what documentation should this change touch", "do I need to update any docs for my current changes", or "check if the docs still match the code".
+description: This skill should be used when the user mentions doc drift, documentation verification, README or docs/ updates that follow a code change, or a doc-parity Stop hook block — even if the request does not name a skill or documentation explicitly. Also runs as the documentation pass of a pull request review. Triggered by phrasings such as "verify doc parity", "are my docs up to date", "did I miss any doc updates", "what documentation should this change touch", "do I need to update any docs for my current changes", or "check if the docs still match the code".
 agent: general-purpose
 context: fork
+background: false
 allowed-tools: WebFetch(domain:contributing.bitwarden.com)
 ---
 
