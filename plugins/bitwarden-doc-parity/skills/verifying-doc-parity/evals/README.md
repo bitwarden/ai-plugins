@@ -26,7 +26,7 @@ Each case's `expectations` array is the pass criterion — every expectation is 
 
 ## Running
 
-Run with `/skill-creator:skill-creator` in benchmark mode (with-skill vs. without-skill) with a config-blind grader. The AI Review Guidelines want at least three iterations per case per configuration so pass rate and variance are both captured. See `todo.md` for the full running / ablation / baseline sequence.
+Run with `/skill-creator:skill-creator` in benchmark mode (with-skill vs. without-skill) with a config-blind grader. The AI Review Guidelines want at least three iterations per case per configuration so pass rate and variance are both captured.
 
 Regression check against the current baseline:
 
