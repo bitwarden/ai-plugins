@@ -95,7 +95,7 @@ is_covered() {
   local file="$1" scope
   while IFS= read -r scope; do
     [[ -z "$scope" ]] && continue
-    if [[ "$scope" == "." || "$file" == "$scope/"* ]]; then
+    if [[ "$file" == "$scope/"* ]]; then
       return 0
     fi
   done <<<"$TOUCHED_DOC_SCOPES"
