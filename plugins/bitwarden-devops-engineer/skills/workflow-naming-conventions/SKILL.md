@@ -87,7 +87,7 @@ If a rename is explicitly requested, establish the known reference set first, th
 
 Run history is keyed to the file path and always detaches on rename. Prior runs remain but no longer group under the renamed workflow. This is unavoidable — surface it, do not try to preserve it.
 
-## Advisory: canonical step names
+## Advisory: Canonical Step Names
 
 Preferred wording, not a standard. Consistent phrasing makes steps greppable across repos, but a step name outside this table is never a finding — most step names are legitimately unique to their workflow.
 
@@ -102,7 +102,7 @@ Preferred wording, not a standard. Consistent phrasing makes steps greppable acr
 
 When a step name both deviates from Sentence case and appears in this table (`Azure Login`), the casing is the finding and the canonical form is the suggested fix.
 
-## Applying these standards
+## Applying These Standards
 
 - **A deviation is a flag, not a verdict.** These standards describe the target state; they do not authorize a rename. Real workflows carry deliberate exceptions — a job ID matched by external tooling, a filename referenced by a system outside this repo, a step name that reads better than the canonical phrase. Surface the deviation with what a compliant form would be, and let the owner decide. Do not treat silence as consent.
 - **Only step names are safe to change in place.** Job IDs and filenames both require a reference sweep first. Never fold either rename into an unrelated change.
