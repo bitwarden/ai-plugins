@@ -13,7 +13,7 @@ description: >-
 
 ## Ownership
 
-This skill covers only what `bwwl` cannot check. For anything the linter enforces, `bitwarden-workflow-linter-rules` is the source of truth — do not report a finding here that duplicates a linter rule.
+This skill covers only what `bwwl` cannot check. For anything the linter enforces, `${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-workflow-linter-rules/SKILL.md` is the source of truth — do not report a finding here that duplicates a linter rule.
 
 | Naming category                        | Owner                                                                 |
 | -------------------------------------- | --------------------------------------------------------------------- |
