@@ -32,7 +32,8 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 ### flow:create-new-user-and-login
 
 - **Use when:** Any test that requires a fresh authenticated user account with no prior subscription or organization state.
-- **Parameters:** `email`, `password`
+- **Parameters:** `email`, `password` (the fixed dev master password `test-master-password-12`; see Note)
+- **Note:** The dev master password is fixed at `test-master-password-12` for every test account, so credentials can be reconstructed from the email alone. Any value of at least 12 characters is valid, but this is the convention. A test case needing a distinct password writes that value into its own SETUP step.
 - **Precondition state:** none
 - **Steps:**
   1. Navigate to `https://localhost:8080/#/signup`
@@ -43,7 +44,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
   5. Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"` to fetch the verification email; stdout is the magic-link URL
   6. Navigate to the magic-link URL (it targets `https://localhost:8080/#/finish-signup?...`)
      - Feedback: finish-signup form appears
-  7. Fill the Master Password field with `<password>` (must be ≥12 characters)
+  7. Fill the Master Password field with `<password>` (the fixed dev master password `test-master-password-12`)
   8. Fill the Confirm Master Password field with `<password>`
   9. Click Create Account
      - Feedback: redirect to the vault
