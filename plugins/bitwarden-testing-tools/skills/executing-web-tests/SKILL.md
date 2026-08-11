@@ -32,7 +32,7 @@ Only when a `Resume:` block is present in your inputs: extract and hold:
 For the resuming test case (the first test case in your input), before executing any of its steps:
 
 1. Open the browser fresh: `playwright-cli open --config=<config-path>` (always first)
-2. Re-establish browser session using credentials from that test case's SETUP steps in the test plan
+2. Re-establish the browser session. Take the credentials from the resuming test case's own SETUP steps in the test plan. If the case instead depends on an account an earlier case created, so its email is not in this case's SETUP, read that account's `{ email, password }` from the earlier case's `account` block in the checkpoint file passed as the `Checkpoint path` input. When only the email is known, the password is the fixed dev master password `test-master-password-12`.
 3. Start from the step immediately after the `[HUMAN]` step identified by "Paused at", applying the user's answer to any steps that reference it
 
 All subsequent test cases run fully and normally from their first step.
@@ -112,7 +112,8 @@ Build each test case as a JSON object matching `${CLAUDE_PLUGIN_ROOT}/skills/com
   "setup_steps": [<step>, "..."],
   "test_steps": [<step>, "..."],
   "notes": "<notes, if any>",
-  "adaptive": { "specified": "<what the plan asserted>", "found": "<what actually rendered>" }
+  "adaptive": { "specified": "<what the plan asserted>", "found": "<what actually rendered>" },
+  "account": { "email": "<account email, if the case created one>", "password": "<the password used>" }
 }
 ```
 
@@ -134,6 +135,7 @@ Each step object:
 - Include `screenshot` only for a step that produced a visual change; use the exact filename from the screenshot directory listing.
 - Set `"human": true` and `"outcome": "COMPLETED (User: <answer>)"` for a `[HUMAN]` step.
 - Include `adaptive` only when `status` is `"PASS (adaptive)"`, filled from the adaptive evaluation.
+- Include `account` only when the case created a login account, holding the exact `{ email, password }` used, so a resumed segment can re-authenticate.
 - Do not emit run totals. The orchestrator's merge script derives them from the per-case `status` values.
 
 ### Adaptive assertion evaluation
