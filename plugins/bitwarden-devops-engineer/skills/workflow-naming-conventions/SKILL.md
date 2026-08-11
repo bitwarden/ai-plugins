@@ -4,24 +4,11 @@ description: >-
   Reference for Bitwarden GitHub Actions naming conventions that the workflow linter (bwwl) does
   not enforce. Covers three standards — job IDs (kebab-case), step names (Sentence case
   imperative), and workflow file names (kebab-case.yml, `_` prefix for reusable) — plus an
-  advisory canonical step-name glossary. Read this alongside bitwarden-workflow-linter-rules when
-  auditing or authoring workflows; that skill is the source of truth for linted rules, this one
-  covers the gaps.
-
-  <example>
-  User: What casing should job IDs use in our workflows?
-  Action: Consult this skill for the job-id-kebab-case standard and its rename procedure
-  </example>
-
-  <example>
-  User: Should this reusable workflow file be named build.yml or _build.yml?
-  Action: Consult this skill for the workflow-file-naming standard
-  </example>
-
-  <example>
-  User: Review these workflows for naming consistency
-  Action: Apply the standards in this skill; treat glossary deviations as advisory
-  </example>
+  advisory canonical step-name glossary and reference-sweep procedures for job ID and filename
+  renames. Use when auditing or authoring workflows and questions like "what casing should job IDs
+  use", "should this reusable workflow be build.yml or _build.yml", or "review these workflows for
+  naming consistency" come up. Read alongside bitwarden-workflow-linter-rules, which is the source
+  of truth for linted rules; this skill covers only the gaps.
 ---
 
 ## Ownership
