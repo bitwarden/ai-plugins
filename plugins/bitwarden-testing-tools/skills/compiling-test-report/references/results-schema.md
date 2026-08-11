@@ -28,6 +28,7 @@ An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. Any ab
 | `test_steps`  | array  | Step objects                                                          |
 | `notes`       | string | Optional                                                              |
 | `adaptive`    | object | `{ specified, found }`; present only when status is `PASS (adaptive)` |
+| `account`     | object | Optional; `{ email, password }` for an account the case created       |
 
 ## Step object
 
