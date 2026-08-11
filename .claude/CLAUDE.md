@@ -87,7 +87,7 @@ scripts, agents):
 
 ### Validating Plugin Changes
 
-After making any plugin changes, run the same validations that CI enforces. This catches issues before pushing.
+After making any plugin changes, run these validations locally. This catches issues before pushing.
 
 #### 1. Run formatting and spell checks
 
@@ -105,8 +105,8 @@ If new domain-specific terms trip cspell, add them to `.cspell.json`. For delibe
 
 #### 2. Structure, marketplace, and version-bump validation
 
-Plugin structure, marketplace consistency, and version-bump checks come from validation
-scripts in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
+Plugin structure, marketplace consistency, and version-bump checks are covered by the
+validation scripts in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai),
 under `validate-ai/scripts/` (they accept either a plugin name or a `plugins/<name>` path,
 and validate all plugins when given no arguments). To run
 them locally, invoke them from a gh-actions checkout with `REPO_ROOT` set to this

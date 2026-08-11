@@ -121,7 +121,7 @@ See the [validate-ai scripts README](https://github.com/bitwarden/gh-actions/tre
 
 ## Validating Changes
 
-Plugin structure, marketplace consistency, and version-bump checks come from validation scripts (`validate-plugin-structure.sh`, `validate-marketplace.sh`) in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) under `validate-ai/scripts/`.
+Plugin structure, marketplace consistency, and version-bump checks are covered by the validation scripts (`validate-plugin-structure.sh`, `validate-marketplace.sh`) in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai), under `validate-ai/scripts/`.
 
 To run them locally before pushing, invoke them from a checkout of that repository with `REPO_ROOT` pointed at this one. Each script defaults `REPO_ROOT` to the parent of its own `scripts/` directory — `validate-ai/` inside a gh-actions checkout — so without the override it inspects gh-actions instead of this repository and fails on a path that isn't there (`validate-plugin-structure.sh` reports "Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not found at"). Each script accepts a plugin name or `plugins/<name>` path, and validates all plugins when given no arguments:
 
