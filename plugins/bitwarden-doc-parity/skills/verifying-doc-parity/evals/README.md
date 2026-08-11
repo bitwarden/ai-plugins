@@ -26,15 +26,22 @@ Each case's `expectations` array is the pass criterion — every expectation is 
 
 ## Running
 
-Run with `/skill-creator:skill-creator` in benchmark mode (with-skill vs. without-skill) with a config-blind grader. The AI Review Guidelines want at least three iterations per case per configuration so pass rate and variance are both captured.
-
-Regression check against the current baseline:
+Run with `/skill-creator:skill-creator` in benchmark mode (with-skill vs. without-skill) with a config-blind grader. Install the runner from the `claude-plugins-official` marketplace if it is not already present:
 
 ```bash
-diff <(jq -S . behavior-baseline.json) <(jq -S . result.json)
+/plugin install skill-creator@claude-plugins-official
 ```
 
-An empty diff means no regression. When a change is intentional and the new numbers are the new desired state, replace the baseline with the new results in the same PR as the skill change.
+The AI Review Guidelines want at least three iterations per case per configuration so pass rate and variance are both captured.
+
+Regression check against the current baseline compares the aggregate summary and per-run pass rates; timestamps, models, and per-run evidence prose vary on every execution and are not signal:
+
+```bash
+proj='{run_summary, runs: [.runs[] | {eval_id, configuration, run_number, pass_rate: .result.pass_rate}]}'
+diff <(jq -S "$proj" behavior-baseline.json) <(jq -S "$proj" result.json)
+```
+
+An empty diff on that projection means no regression on the graded data. When a change is intentional and the new numbers are the new desired state, replace the baseline with the new results in the same PR as the skill change.
 
 ## Updating the test surface
 
