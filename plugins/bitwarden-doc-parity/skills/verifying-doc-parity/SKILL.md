@@ -3,12 +3,12 @@ name: verifying-doc-parity
 description: Use this skill whenever the user mentions doc drift, documentation verification, README or docs/ updates that follow a code change, or a doc-parity Stop hook block — even if the request does not name a skill or documentation explicitly. Also use as the documentation pass of a pull request review. Verifies or updates documentation at every documented ancestor scope of a code change; in review context, also discovers out-of-repo documentation the change invalidates. Triggered by phrasings such as "verify doc parity", "are my docs up to date", "did I miss any doc updates", "what documentation should this change touch", "do I need to update any docs for my current changes", or "check if the docs still match the code".
 agent: general-purpose
 context: fork
-allowed-tools: WebFetch(domain:contributing.bitwarden.com), WebFetch(domain:contributing-docs.bitwarden.com)
+allowed-tools: WebFetch(domain:contributing.bitwarden.com)
 ---
 
 # Verifying documentation parity
 
-This skill is the judgment that code has drifted away from the documentation which describes it. It enforces the base obligations of the [documentation standard](https://contributing-docs.bitwarden.com/contributing/documentation): docs and diagrams update in the same change as the code they describe, and a change that invalidates documentation the repo does not contain gets called out at review.
+This skill is the judgment that code has drifted away from the documentation which describes it. It enforces the base obligations of the [documentation standard](https://contributing.bitwarden.com/contributing/documentation): docs and diagrams update in the same change as the code they describe, and a change that invalidates documentation the repo does not contain gets called out at review.
 
 ## Contexts
 
@@ -35,7 +35,7 @@ Check every documented ancestor, not just the nearest one, since documentation l
 
 For each documented scope or surface, exactly one of two outcomes:
 
-- **Update.** If behavior contradicts documentation and the code is correct, fix the documentation. Do not leave them disagreeing. If the change adds behavior this scope's altitude should describe, add documentation of that new behavior. A scope's documentation describes what is present at that scope and below, regardless of whether higher-level callers currently exercise or guard against its use. Edit the documentation in the same change. When code was removed, remove its documentation, and treat a moved doc as a strict move. Every edit conforms to the [documentation standard](https://contributing-docs.bitwarden.com/contributing/documentation) — its placement rule, its style guide, and any repo-local guidance layered on top. Consult the standard when a placement, format, or style question isn't obvious from what you already have. If placement routes a doc outside the working repo, handle it as an out-of-repo callout (see below) rather than an in-repo edit.
+- **Update.** If behavior contradicts documentation and the code is correct, fix the documentation. Do not leave them disagreeing. If the change adds behavior this scope's altitude should describe, add documentation of that new behavior. A scope's documentation describes what is present at that scope and below, regardless of whether higher-level callers currently exercise or guard against its use. Edit the documentation in the same change. When code was removed, remove its documentation, and treat a moved doc as a strict move. Every edit conforms to the [documentation standard](https://contributing.bitwarden.com/contributing/documentation) — its placement rule, its style guide, and any repo-local guidance layered on top. Consult the standard when a placement, format, or style question isn't obvious from what you already have. If placement routes a doc outside the working repo, handle it as an out-of-repo callout (see below) rather than an in-repo edit.
 - **Attest.** Nothing documented at this scope drifted. State that explicitly, with a one-line reason grounded in what the doc actually says.
 
 ### Step 4: Report with per-scope attestation
