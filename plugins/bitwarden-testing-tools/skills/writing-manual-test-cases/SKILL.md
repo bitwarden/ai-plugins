@@ -44,7 +44,7 @@ If a pasted source exceeds 200 words, first give a one-sentence summary and ask 
 ```
 [Smoke] User can create a new login item
 
-Background: User has a Premium account and is logged into the Web Vault
+Background: User has a Free account and is logged into the Web Vault
 
 Given the user navigates to the Vault tab
 When the user submits a new login item with credentials
@@ -65,7 +65,7 @@ And appears in the vault list
 
 Assign each case a **Type** and an **Automation Type**.
 
-Map the requirement's priority first:
+Map the requirement's priority map as a starting point:
 
 | Priority    | Type       |
 | ----------- | ---------- |
@@ -73,7 +73,7 @@ Map the requirement's priority first:
 | High        | Regression |
 | Medium, Low | Functional |
 
-Then sanity-check against these qualitative criteria:
+Then, let the qualitative criteria override it when they disagree:
 
 - **Smoke** — the core happy path that must pass before broader testing begins. Usually exactly one per feature.
 - **Regression** — primary user flows with the primary actor; the feature working as designed for the main use case.
@@ -102,7 +102,7 @@ Four columns, header row `Title,Description,Type,Automation Type`.
 Wrap every field in double quotes. Use real line breaks inside the quoted Description field — never literal `\n`. A Description cell looks like this:
 
 ```
-Background: User has a Premium account and is logged into the Web Vault and has an existing item
+Background: User has a Free account and is logged into the Web Vault and has an existing item
 
 Given the user navigates to the Vault tab
 When the user deletes the item
