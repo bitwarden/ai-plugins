@@ -107,14 +107,12 @@ If new domain-specific terms trip cspell, add them to `.cspell.json`. For delibe
 
 Plugin structure, marketplace consistency, and version-bump checks are covered by the
 validation scripts in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai),
-under `validate-ai/scripts/` (they accept either a plugin name or a `plugins/<name>` path,
-and validate all plugins when given no arguments). To run
-them locally, invoke them from a gh-actions checkout with `REPO_ROOT` set to this
-repository — each script defaults `REPO_ROOT` to the parent of its own `scripts/`
-directory (`validate-ai/` inside gh-actions), so without the override it inspects
-gh-actions and fails on a path that isn't there — `validate-plugin-structure.sh` reports
-"Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not
-found at".
+under `validate-ai/scripts/` (they accept either a plugin name or a `plugins/<name>` path, and
+validate all plugins when given no arguments). To run them locally, invoke them from a gh-actions
+checkout with `REPO_ROOT` set to this repository — each script defaults `REPO_ROOT` to the parent
+of its own `scripts/` directory (`validate-ai/` inside gh-actions), so without the override it
+inspects gh-actions and fails on a path that isn't there — `validate-plugin-structure.sh` reports
+"Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not found at".
 
 ```bash
 REPO_ROOT=/path/to/ai-plugins /path/to/gh-actions/validate-ai/scripts/validate-plugin-structure.sh <plugin-name>
