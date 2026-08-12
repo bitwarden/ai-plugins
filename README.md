@@ -69,3 +69,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for plugin development guidelines, struct
 - [Plugin Reference](https://docs.claude.com/en/docs/claude-code/plugins-reference.md)
 - [Plugin Marketplaces](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces.md)
 - [Validation Scripts](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts)
+
+Graham Walker
