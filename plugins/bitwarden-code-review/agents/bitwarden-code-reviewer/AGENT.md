@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.13.0
+version: 1.14.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
@@ -81,6 +81,10 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 **Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config):
 
 - invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Fold its findings into your own classification and validation in Steps 3–4.
+
+**Documentation parity** (any code change with a documented ancestor scope — a `README.md`, `docs/` directory, or source-embedded doc comments in the change's ancestor chain — which covers most substantive PRs):
+
+- invoke `Skill(verifying-doc-parity)` to run the documentation pass in review context: identify drifted in-repo docs at every documented ancestor scope of the change, and discover out-of-repo pages the change invalidates. Report drift as findings — do not edit files in the PR — and fold them into your classification and validation in Steps 3–4, applying the documentation standard's external-docs flow (work item before merge, stale marker on the page) when applicable.
 
 These skills are optional. If unavailable, apply existing review knowledge.
 

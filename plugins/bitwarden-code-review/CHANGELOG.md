@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-08-07
+
+### Added
+
+- Documentation-parity review enrichment. When the diff touches any code with a documented ancestor scope (a `README.md`, `docs/` directory, or source-embedded doc comments in the change's ancestor chain), the `bitwarden-code-reviewer` agent now invokes `Skill(verifying-doc-parity)` during Cross-Plugin Enrichment to run the documentation pass — verify or update in-repo docs at every documented ancestor scope of the change, and discover out-of-repo pages the change invalidates. The dependency on the `bitwarden-doc-parity` plugin is optional; if it is not installed in the review environment, the review falls back to existing review knowledge.
+
 ## [1.13.1] - 2026-07-01
 
 ### Changed
