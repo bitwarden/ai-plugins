@@ -1,6 +1,6 @@
 ---
 argument-hint: "[PR#] | [PR URL] | (blank for the checked-out PR)"
-allowed-tools: Read, Write, Grep, Glob, Task, Skill, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr list:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
+allowed-tools: Read, Write(//tmp/validation-summary.md), Grep, Glob, Task, Skill, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr list:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
 description: Validate the Claude Code material changed in a pull request (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and report results to the pull request
 ---
 

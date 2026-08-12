@@ -23,6 +23,13 @@ A changed path is in scope when it matches any of these patterns:
 
 If no changed path matches, there is nothing to validate — say so and stop.
 
+`^scripts/validate-` is the one pattern that feeds no bucket below. It comes from the
+action, where it decides only whether the run happens at all. A changeset touching
+nothing but those scripts is therefore in scope, lands in no bucket, and leaves every row
+of the gating table skipped. That empty report is the intended outcome, not a gap: say in
+the report that the changeset touched only the validation scripts, so the next reader is
+not left hunting for the checks that did not run.
+
 ## Buckets derived from the in-scope paths
 
 Classify the in-scope paths into these buckets. They drive which validations run.

@@ -1,6 +1,6 @@
 ---
 argument-hint: "[base-ref] (defaults to the repository default branch)"
-allowed-tools: Read, Write, Grep, Glob, Task, Skill, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git fetch:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(ls:*)
+allowed-tools: Read, Write(validation-summary.md), Grep, Glob, Task, Skill, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git fetch:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(ls:*)
 description: Validate the Claude Code material you changed locally (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and write the report to a local file
 ---
 

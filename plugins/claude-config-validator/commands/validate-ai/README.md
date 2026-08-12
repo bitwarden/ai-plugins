@@ -112,7 +112,8 @@ skipped — in workflow mode it is the only path results have to the pull reques
 ## Permissions
 
 The command pre-approves only read-only pull request inspection: `gh pr view`,
-`gh pr diff`, `gh pr list`, `git rev-parse`, and reading `GITHUB_ACTIONS`. The `gh api`
+`gh pr diff`, `gh pr list`, `git rev-parse`, and reading `GITHUB_ACTIONS`. `Write` is
+scoped to the one file the command produces, `//tmp/validation-summary.md`. The `gh api`
 calls that create or edit the sticky comment in interactive mode are left out on purpose,
 so writing to a pull request is a decision you see and approve. Allowlist them yourself if
 you run this often.

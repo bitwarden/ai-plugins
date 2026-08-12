@@ -77,7 +77,8 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 ## Permissions
 
 The command pre-approves read-only git inspection only — `git status`, `git diff`,
-`git log`, `git fetch`, `git rev-parse`, `git symbolic-ref`, `git ls-files`. Cloning
+`git log`, `git fetch`, `git rev-parse`, `git symbolic-ref`, `git ls-files` — plus a
+`Write` scoped to the one file it produces, `validation-summary.md`. Cloning
 `gh-actions` and running its scripts are left out on purpose and will be asked for: that
 step executes shell code from outside this repository, and a blanket `Bash(bash:*)` grant
 would pre-approve arbitrary commands on the one path that fetches code from the network.
