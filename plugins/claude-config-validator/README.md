@@ -76,6 +76,23 @@ Provides specific, file:line referenced feedback with:
 
 ## Usage
 
+### Commands
+
+| Command                                                      | Purpose                                                                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| [`/validate-ai-local`](commands/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write `validation-summary.md` |
+| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report to a sticky pull request comment                        |
+
+Both commands run the same review the
+[validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub
+Action runs org-wide: this plugin's `reviewing-claude-config` skill for configuration and
+security, plus the `plugin-dev` plugin's `plugin-validator` and `skill-reviewer` agents
+for plugin structure and skill quality. `/validate-ai-local` additionally runs the
+action's structure, marketplace, and version-bump shell checks against your checkout.
+They share their scope rules and report contract in
+[`reference/validate-ai-scope.md`](skills/reviewing-claude-config/reference/validate-ai-scope.md),
+so the two commands and the action cannot drift apart.
+
 ### Basic Invocation
 
 ```bash
@@ -347,6 +364,9 @@ Reference: `reference/quality-specificity.md` - Specificity Best Practices
 plugins/claude-config-validator/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
+├── commands/
+│   ├── validate-ai/         # /validate-ai - pull request validation
+│   └── validate-ai-local/   # /validate-ai-local - local checkout validation
 ├── skills/
 │   └── reviewing-claude-config/
 │       ├── SKILL.md         # Main skill instructions

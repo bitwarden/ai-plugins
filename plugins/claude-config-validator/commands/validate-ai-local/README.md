@@ -1,0 +1,142 @@
+# `/validate-ai-local` - Local Claude Material Validation
+
+## Overview
+
+`/validate-ai-local` runs the [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
+review against your local checkout instead of a pull request. It finds the Claude Code
+material you changed — plugins, agents, skills, commands, hooks, `CLAUDE.md`, `.claude/` —
+runs the same checks CI runs, and writes the report to `validation-summary.md` in your
+working directory. Nothing is posted to GitHub.
+
+Use it before you push, so a version bump you forgot or an agent frontmatter mistake
+shows up on your machine rather than as a red check.
+
+## Usage
+
+```bash
+/validate-ai-local [base-ref]
+```
+
+### Arguments
+
+- **`[base-ref]`** (optional): Git ref to compare against, e.g. `origin/main` or a tag.
+- **No arguments**: resolves the repository's default branch via
+  `git symbolic-ref refs/remotes/origin/HEAD`, falling back to `origin/main`.
+
+### Examples
+
+```bash
+# Validate everything changed on this branch, plus uncommitted work
+/validate-ai-local
+
+# Compare against a specific base
+/validate-ai-local origin/release/2026.8
+```
+
+## What it covers
+
+| Check                      | Source                                      | Runs when                                                                |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------ |
+| Plugin structure           | `validate-plugin-structure.sh` (gh-actions) | A `plugins/` directory changed and the repo has a marketplace manifest   |
+| Marketplace consistency    | `validate-marketplace.sh` (gh-actions)      | A plugin or the root `.claude-plugin/` changed                           |
+| Version bump and changelog | `validate-version-bump.sh` (gh-actions)     | Component files changed inside `plugins/`                                |
+| Plugin components          | `plugin-dev:plugin-validator` agent         | Any plugin directory changed                                             |
+| Skill quality              | `plugin-dev:skill-reviewer` agent           | Any `SKILL.md` changed                                                   |
+| Configuration and security | `reviewing-claude-config` skill             | Any agent, skill, command, hook, `CLAUDE.md`, or `.claude/` file changed |
+
+Scope rules, gating, and the report format are defined once in
+[`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
+shared with `/validate-ai` and kept in step with the action.
+
+## Change detection
+
+Local review deliberately covers more than a pull request diff. The changed-file set is
+the union of:
+
+- `git diff --name-only <base-ref>...HEAD` — committed on this branch
+- `git diff --name-only HEAD` — staged and unstaged tracked files
+- `git ls-files --others --exclude-standard` — untracked files
+
+## Requirements
+
+- **`git`**, with the base ref fetchable or already local.
+- **`plugin-dev` plugin** (from the `anthropics/claude-code` marketplace) for the plugin
+  and skill validation sections. Without it those sections are reported as skipped, not
+  silently dropped.
+- **A `bitwarden/gh-actions` checkout** for the three shell checks. The command looks at
+  `$BW_GH_ACTIONS_PATH/validate-ai/scripts`, then a sibling `../gh-actions` checkout, and
+  otherwise offers to shallow-clone the repository to a temporary directory. Decline and
+  those checks are recorded as skipped.
+- **`jq`**, used by the bundled scripts.
+
+The scripts are never vendored into this repository —
+[`validate-ai/scripts/`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts)
+in `bitwarden/gh-actions` is their sole source of truth, and they are invoked with
+`REPO_ROOT` pointed at your checkout.
+
+## Permissions
+
+The command pre-approves read-only git inspection only — `git status`, `git diff`,
+`git log`, `git fetch`, `git rev-parse`, `git symbolic-ref`, `git ls-files`. Cloning
+`gh-actions` and running its scripts are left out on purpose and will be asked for: that
+step executes shell code from outside this repository, and a blanket `Bash(bash:*)` grant
+would pre-approve arbitrary commands on the one path that fetches code from the network.
+If you run this often, allowlist the exact script invocations yourself.
+
+## Known local caveat
+
+`validate-version-bump.sh` reads the current plugin version from your working tree, so an
+uncommitted version bump counts. It detects the changelog entry with
+`git diff <base-ref>...HEAD`, so an **uncommitted** `CHANGELOG.md` edit is not visible to
+it and gets reported as missing until you commit. The command states this in the report
+whenever that check runs.
+
+## Output
+
+`validation-summary.md` in the current working directory, containing:
+
+- Overall result and what was validated against which base
+- Findings grouped as critical, major, and minor, each with `file:line` and a fix
+- A checks table showing what ran, what failed, and what was skipped and why
+
+The file is always written, including when everything passes and when every section was
+skipped.
+
+## Differences from `/validate-ai`
+
+|                          | `/validate-ai-local`                             | `/validate-ai`                                                                       |
+| ------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| Input                    | Working tree + branch commits                    | A pull request                                                                       |
+| Shell script checks      | Runs them                                        | Left to the workflow's own steps                                                     |
+| `.claude-pr/` trust rule | Not applicable                                   | Applied when the snapshot exists                                                     |
+| Output                   | `validation-summary.md` in the working directory | `/tmp/validation-summary.md`, plus a sticky pull request comment in interactive mode |
+
+## Related documentation
+
+- [Claude Config Validator plugin README](../../README.md)
+- [`reviewing-claude-config` skill](../../skills/reviewing-claude-config/SKILL.md)
+- [validate-ai action](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
+
+## Troubleshooting
+
+### "Invalid base ref"
+
+The ref could not be resolved. Fetch it first (`git fetch origin main`) or pass an
+explicit ref: `/validate-ai-local origin/main`.
+
+### Script checks always skipped
+
+No `gh-actions` checkout was found and the clone was declined. Set
+`BW_GH_ACTIONS_PATH` to your checkout, or clone `bitwarden/gh-actions` next to this
+repository.
+
+### "Plugin directory not found" from a script
+
+`REPO_ROOT` did not reach the script. Each script defaults `REPO_ROOT` to the parent of
+its own `scripts/` directory — `validate-ai/` inside `gh-actions` — so it must be
+overridden to point at the repository being validated.
+
+### Plugin or skill sections reported as skipped
+
+The `plugin-dev` plugin is not installed. Install it with
+`/plugin install plugin-dev@claude-code-plugins`.

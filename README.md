@@ -20,7 +20,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-security-engineer](plugins/bitwarden-security-engineer/) | 1.3.0   | Application security engineering: vulnerability triage, threat modeling, and secure code analysis                                                           |
 | [bitwarden-software-engineer](plugins/bitwarden-software-engineer/) | 1.0.0   | Software engineer agent for a Bitwarden product team. Implements stories, tasks, and bugs with code quality, performance, security, and team comms in mind. |
 | [bitwarden-testing-tools](plugins/bitwarden-testing-tools/)         | 1.0.0   | Testing tools for analyzing and improving test quality across Bitwarden's repositories.                                                                     |
-| [claude-config-validator](plugins/claude-config-validator/)         | 1.1.1   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
+| [claude-config-validator](plugins/claude-config-validator/)         | 1.2.0   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                  |
 
 ## Usage

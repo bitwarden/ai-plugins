@@ -5,6 +5,17 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-08-12
+
+### Added
+
+- `/validate-ai` command: validates the Claude Code material changed in a pull request and reports to a sticky pull request comment. Ports the review prompt from the `bitwarden/gh-actions` `validate-ai` action, including the `.claude-pr/` trust rule for pull-request-authored configuration, so the action and a human run the same review
+- `/validate-ai-local` command: runs the same validation against a local checkout (branch commits plus uncommitted and untracked work) and writes the report to `validation-summary.md`. Also runs the `validate-plugin-structure.sh`, `validate-marketplace.sh`, and `validate-version-bump.sh` checks from a `bitwarden/gh-actions` checkout when one is available
+- Explicit `commands` array in `plugin.json`, matching the convention in
+  `bitwarden-code-review` and `bitwarden-init`: the per-command `README.md` files sit
+  inside `commands/`, so without it they would be auto-discovered as commands
+- `reference/validate-ai-scope.md` in the `reviewing-claude-config` skill: changed-file classification rules, validation gating, report contract, and the mapping from the skill's CRITICAL/IMPORTANT/SUGGESTED/OPTIONAL priorities onto the report's critical/major/minor severities. Shared by both commands so they cannot drift from each other or from the action
+
 ## [1.1.1] - 2026-03-12
 
 ### Changed
