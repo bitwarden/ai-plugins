@@ -104,6 +104,12 @@
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.0.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+    },
+    {
+      "name": "bitwarden-doc-parity",
+      "source": "./plugins/bitwarden-doc-parity",
+      "version": "1.0.0",
+      "description": "Enforces the documentation standard's base obligations — docs and diagrams update in the same change as the code they describe. Session instructions, a Stop-hook tripwire, a semantic verification skill, and a CI review face."
     }
   ]
 }
