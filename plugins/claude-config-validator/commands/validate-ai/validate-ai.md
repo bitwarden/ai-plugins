@@ -151,7 +151,7 @@ For each changed `SKILL.md`, invoke the `plugin-dev:skill-reviewer` agent. It ev
 - YAML frontmatter (required: `name`, `description`)
 - Description quality: specific trigger phrases, third-person form, appropriate length
 - Content quality: word count (target 1,000-3,000 words), imperative writing style
-- Progressive disclosure: lean `SKILL.md`, details in `references/`, examples in `examples/`, scripts in `scripts/`
+- Progressive disclosure: lean `SKILL.md`, details in a references directory (`reference/` or `references/`), examples in `examples/`, scripts in `scripts/`
 - All referenced files actually exist
 - Anti-patterns: vague triggers, bloated `SKILL.md`, missing examples
 

@@ -368,16 +368,17 @@ Reference: `checklists/claude-md.md` - Clarity and Specificity
 plugins/claude-config-validator/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
+├── CHANGELOG.md             # Version history
 ├── commands/
-│   ├── validate-ai/         # /validate-ai - pull request validation
-│   └── validate-ai-local/   # /validate-ai-local - local checkout validation
+│   ├── validate-ai/         # /validate-ai - pull request validation (command + README)
+│   └── validate-ai-local/   # /validate-ai-local - local checkout validation (command + README)
 ├── skills/
 │   └── reviewing-claude-config/
 │       ├── SKILL.md         # Main skill instructions
 │       ├── README.md        # Skill-specific documentation
 │       ├── checklists/      # One per configuration type (agents, skills, CLAUDE.md, prompts, hooks, settings)
 │       ├── reference/       # Priority framework, security patterns, requirements, changeset scope
-│       ├── examples/        # One sample review per configuration type
+│       ├── examples/        # Sample reviews, one or more per configuration type
 │       └── scripts/         # Security scan helper (human-run)
 └── README.md               # This file
 ```

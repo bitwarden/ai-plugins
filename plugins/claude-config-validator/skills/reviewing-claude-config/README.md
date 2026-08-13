@@ -45,7 +45,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 - **Specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
 - **Reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
-- **A review example per configuration type**: Demonstrating proper feedback format
+- **Review examples**: One or more per configuration type, demonstrating proper feedback format
 - **Executable security script**: Automated security scanning
 
 ## Installation
@@ -228,7 +228,7 @@ If you want to customize for your organization:
 
 ## Examples
 
-One comprehensive review example per configuration type, each demonstrating the feedback format:
+Review examples per configuration type, each demonstrating the feedback format:
 
 - `examples/example-agent-review.md` - Agent review with security and quality issues
 - `examples/example-agent-composition-review.md` - Agent invocation patterns and a circular-dependency anti-pattern
@@ -309,11 +309,11 @@ See `reference/claude-code-requirements.md` for the requirements these criteria 
 
 ### Security Script Fails
 
-**Issue**: `./security-scan.sh` returns errors
+**Issue**: `./scripts/security-scan.sh` returns errors
 
 **Solutions:**
 
-1. Make executable: `chmod +x security-scan.sh`
+1. Make executable: `chmod +x scripts/security-scan.sh`
 2. Verify you're in a git repository (for git commands)
 3. Check script has access to `.claude` directory
 4. Review error messages for specific issues

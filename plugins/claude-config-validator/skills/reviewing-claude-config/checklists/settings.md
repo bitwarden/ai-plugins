@@ -258,8 +258,6 @@ Classify findings using `../reference/priority-framework.md`:
 
 ---
 
----
-
 ## Output Format
 
 Report findings using the standard format in `SKILL.md` Step 5.

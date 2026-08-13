@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hook review now also reaches hooks declared under a `hooks` key in a settings file, which is where a repository usually puts them
 - Documentation accuracy in the skill: `SKILL.md` casing throughout, dead paths, and the marketplace name
 - Stale citations in the examples: off-by-one line anchors in the hooks example, and line ranges into `claude-code-requirements.md` that had drifted. Reference sections by name instead, since a line range cannot survive an edit to the file it points at
+- Duplicate thematic breaks left by appending the output-format section to three checklists, orphaned example numbering in the split composition file, and script paths in the skill README that omitted `scripts/`
 - `example-agent-review.md` was 559 lines, over the 500-line guideline this plugin applies to everyone else. Split, with agent invocation and dependency reviews moving to `example-agent-composition-review.md`
 - Counts of checklists, references, and examples are gone from both READMEs. They went stale twice in this release alone, since nothing checks a number in prose against the files on disk; the lists carry the same information and cannot drift
 - A security finding no longer stops the review: a changeset report has to say which sections ran, which an early exit makes impossible

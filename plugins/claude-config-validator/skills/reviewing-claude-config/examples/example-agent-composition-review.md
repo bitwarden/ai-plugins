@@ -6,7 +6,7 @@ For reviews of individual agent files, see `example-agent-review.md`.
 
 ---
 
-## Example 4: Agent Invocation Review
+## Example 1: Agent Invocation Review
 
 **Context:** Reviewing a skill that invokes agents.
 
@@ -61,7 +61,7 @@ Specific invocations with context improve agent output quality by ~40%.
 
 ---
 
-## Example 5: Circular Agent Dependency (Anti-Pattern)
+## Example 2: Circular Agent Dependency (Anti-Pattern)
 
 **Context:** Reviewing agents that invoke each other circularly.
 
@@ -109,5 +109,3 @@ After fixing, report completion. Do NOT invoke analyzer.
 ```
 
 Rationale: Circular dependencies cause unpredictable behavior and infinite loops. Use explicit workflow coordination instead.
-
----
