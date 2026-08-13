@@ -80,6 +80,31 @@ passed.
   so in the report rather than omitting the section — a silent omission reads as a pass
 - If all checks pass, confirm with a summary of what was validated
 
+### Finishing the report
+
+Write the file exactly once, as the last thing you do, in a single Write call. Never write
+an interim, partial, or "in progress" version of it first.
+
+Wait for every subagent to return before you write. Run them synchronously, passing
+`run_in_background: false` where that parameter exists, and never describe work a subagent
+has not yet handed back.
+
+End the report with this line, exactly, on a line of its own:
+
+```markdown
+<!-- validation-complete -->
+```
+
+The marker is how a caller tells a finished report from an abandoned one. It must be the
+last line, and it must appear only on a report you consider complete.
+
+Both rules exist because of how this runs in CI. The session is non-interactive: when the
+turn ends the process exits, so whatever is in the file at that moment is what reaches the
+pull request, permanently. A subagent still in flight is killed with its findings, and the
+`validate-ai` action discards a report with no marker and fails the check. There is no
+retry step to fall back on. The same discipline is worth keeping locally, where a report
+that describes results nobody collected is just as wrong, only cheaper to correct.
+
 Suggested structure:
 
 ```markdown
@@ -111,7 +136,11 @@ Suggested structure:
 | Plugin validation (AI)   | ...                               |
 | Skill review (AI)        | ...                               |
 | Configuration & security | ...                               |
+
+<!-- validation-complete -->
 ```
+
+The marker closes the document, after the checks table.
 
 ## Severity mapping
 

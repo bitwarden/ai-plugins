@@ -101,7 +101,8 @@ whenever that check runs.
 - A checks table showing what ran, what failed, and what was skipped and why
 
 The file is always written, including when everything passes and when every section was
-skipped.
+skipped, and it ends with `<!-- validation-complete -->` so a local report matches what
+`/validate-ai` produces. In CI that marker is what tells the action a report is finished.
 
 ## Differences from `/validate-ai`
 

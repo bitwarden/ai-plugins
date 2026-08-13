@@ -97,6 +97,13 @@ way the workflow-mode rule above guards against.
 Run these in order, each gated as described in the scope reference. A section that
 cannot run is recorded as skipped with its reason — never silently omitted.
 
+Run every subagent synchronously: pass `run_in_background: false` on each Task call, and
+wait for its result before moving on. Subagents default to the background, on the
+assumption that a notification will wake you when one finishes. In workflow mode nothing
+wakes you, so a subagent still outstanding when your turn ends is killed and its findings
+are lost. Do not end your turn with a subagent in flight, and do not describe work one has
+not yet returned.
+
 ### 4a. Plugin validation (plugin-validator agent from plugin-dev)
 
 For each changed plugin, invoke the `plugin-dev:plugin-validator` agent via the Task
@@ -151,7 +158,14 @@ absence as a pass. To run them yourself against a local checkout, use
 ## 5. Write the report
 
 Write the full report to `/tmp/validation-summary.md`, following the report contract in
-the scope reference. Use a single Write call.
+the scope reference, and end it with `<!-- validation-complete -->` on a line of its own.
+
+One Write call, once, as the last thing you do. Never write an interim, partial, or "in
+progress" version first. In workflow mode the session is non-interactive: when your turn
+ends the process exits, so whatever sits in that file at that moment is what lands on the
+pull request, permanently. The `validate-ai` action reads the completion marker to tell a
+finished report from an abandoned one, discards a report that lacks it, and fails the
+check. There is no retry step behind you.
 
 Writing this file is mandatory. Write it even when everything passed, and even when
 every section above was skipped as not applicable. In workflow mode it is the only way
@@ -180,7 +194,9 @@ your results reach the pull request: the sticky comment is replaced with its con
 
 # Final step (required)
 
-Your task is not done until `/tmp/validation-summary.md` exists on disk. If a section did
-not apply or a check could not run, still write the file and say so in it. If you have
-not written this file, you have not completed the task, no matter what you reported in
-your responses.
+Your task is not done until `/tmp/validation-summary.md` exists on disk with
+`<!-- validation-complete -->` as its last line, and every subagent you started has
+returned. If a section did not apply or a check could not run, still write the file and
+say so in it: a report that documents a skipped check is complete, one that omits it is
+not. If you have not written this file, you have not completed the task, no matter what
+you reported in your responses.

@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Explicit `commands` array in `plugin.json`, matching the convention in
   `bitwarden-code-review` and `bitwarden-init`: the per-command `README.md` files sit
   inside `commands/`, so without it they would be auto-discovered as commands
+- Report completion contract, matching the `validate-ai` action as of
+  bitwarden/gh-actions#867: the report ends
+  with a `<!-- validation-complete -->` marker, is written exactly once at the end with no
+  interim versions, and is written only after every subagent has returned. The action
+  discards a report without the marker and fails the check, and a headless run kills any
+  subagent still in flight when the turn ends
 - `reference/validate-ai-scope.md` in the `reviewing-claude-config` skill: changed-file classification rules, validation gating, report contract, and the mapping from the skill's CRITICAL/IMPORTANT/SUGGESTED/OPTIONAL priorities onto the report's critical/major/minor severities. Shared by both commands so they cannot drift from each other or from the action
 
 ## [1.1.1] - 2026-03-12

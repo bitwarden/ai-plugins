@@ -87,7 +87,9 @@ is not seen and will be reported as missing until you commit it.
 ## 4. Plugin validation (plugin-validator agent from plugin-dev)
 
 Runs when any plugin directory changed. For each changed plugin, invoke the
-`plugin-dev:plugin-validator` agent via the Task tool. It checks:
+`plugin-dev:plugin-validator` agent via the Task tool, synchronously
+(`run_in_background: false`), and wait for its result. Never describe a subagent's findings
+before it has returned them. It checks:
 
 - `plugin.json` manifest correctness (name, version, required fields) and semantic versioning
 - Directory structure and auto-discovery compliance
@@ -106,7 +108,7 @@ reason — do not silently approximate it.
 ## 5. Skill review (skill-reviewer agent from plugin-dev)
 
 Runs when any `SKILL.md` changed. Invoke the `plugin-dev:skill-reviewer` agent for each
-modified skill. It evaluates:
+modified skill, synchronously, as in the previous step. It evaluates:
 
 - YAML frontmatter (required: `name`, `description`)
 - Description quality: specific trigger phrases, third-person form, appropriate length
@@ -138,8 +140,14 @@ directly from the working tree. There is no `.claude-pr/` snapshot to redirect t
 ## 7. Write the report
 
 Write the full report to `validation-summary.md` in the current working directory,
-following the report contract in the scope reference. Writing it is mandatory — write it
-even when everything passed and even when every section was skipped.
+following the report contract in the scope reference, and end it with
+`<!-- validation-complete -->` on a line of its own. One Write call, once, after every
+subagent has returned. Writing it is mandatory — write it even when everything passed and
+even when every section was skipped.
+
+The marker matters less locally than in CI, where it is what tells the `validate-ai` action
+a report is finished. Keeping it here means a local report and a pull request report are the
+same document, and that a report cut short is recognizable as one.
 
 Then print a short console summary: the overall result, the count of critical/major/minor
 findings, and the path to the report. If any check failed, say plainly that validation

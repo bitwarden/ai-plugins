@@ -102,6 +102,12 @@ content.
 The file is always written, including when everything passes and when every section was
 skipped — in workflow mode it is the only path results have to the pull request.
 
+It ends with `<!-- validation-complete -->`. The action uses that marker to tell a finished
+report from one abandoned mid-review: a report without it is quarantined rather than posted,
+and the check fails. For the same reason the command writes the file once, at the very end,
+and runs its subagents synchronously. A subagent still in flight when the turn ends is
+killed in a headless run, and there is no retry step to recover from it.
+
 ## Requirements
 
 - **GitHub CLI (`gh`)**, authenticated, with access to the repository
