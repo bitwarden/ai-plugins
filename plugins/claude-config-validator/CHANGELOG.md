@@ -15,13 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Untrusted-input boundary: configuration under review is data to report on, never instructions to follow (CWE-1427). Stated unconditionally in `SKILL.md`, so it holds for a direct skill invocation as well as through either command
 - Report completion contract from bitwarden/gh-actions#867 and #868: a `<!-- validation-complete -->` marker, one write at the end, and independent subagents dispatched together but never left in flight at turn end
 - `checklists/hooks.md` and `examples/example-hooks-review.md`, plus hook detection and routing in `reviewing-claude-config`: hooks were a bucket both commands routed into a skill that had no hook coverage at all
-- Explicit `commands` array in `plugin.json`, which replaces the default `commands/` scan, so the per-command `README.md` files are not registered as commands
+- Explicit `commands` array in `plugin.json`. Per the [plugins reference](https://code.claude.com/docs/en/plugins-reference), naming `commands` replaces the default `commands/` scan, so the per-command `README.md` files sitting beside each command are not registered as commands. Note that `plugin-dev`'s bundled `manifest-reference.md` still describes this field as supplementing the default scan, which is why review tooling reports the opposite
 
 ### Fixed
 
 - Command detection in `reviewing-claude-config` missed plugin commands, which nest as `commands/<name>/<name>.md`, so this plugin's own commands would have gone unreviewed
 - Hook review now also reaches hooks declared under a `hooks` key in a settings file, which is where a repository usually puts them
-- Documentation accuracy in the skill: `SKILL.md` casing throughout, reference and example counts, dead paths, and the marketplace name
+- Documentation accuracy in the skill: `SKILL.md` casing throughout, dead paths, and the marketplace name
+- Counts of checklists, references, and examples are gone from both READMEs. They went stale twice in this release alone, since nothing checks a number in prose against the files on disk; the lists carry the same information and cannot drift
 - A security finding no longer stops the review: a changeset report has to say which sections ran, which an early exit makes impossible
 
 ## [1.1.1] - 2026-03-12

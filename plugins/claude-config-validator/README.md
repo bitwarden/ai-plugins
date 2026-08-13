@@ -10,17 +10,17 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 ### Comprehensive Configuration Coverage
 
-Validates **7 configuration file types** with specialized checklists:
+Validates these configuration file types, each with its own checklist except where noted:
 
-| Configuration Type                                                                    | What Gets Validated                                                                                        |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity        |
-| **Skills** (skill directories)                                                        | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
-| **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                          |
-| **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                          |
-| **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                  |
-| **Settings** (`.claude/settings.json`)                                                | Security (no committed credentials), permission scoping, valid JSON structure                              |
-| **Plugin Configurations** (`plugins/*/`)                                              | Manifest validation, directory structure, marketplace standards                                            |
+| Configuration Type                                                                    | What Gets Validated                                                                                                                                   |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity                                                   |
+| **Skills** (skill directories)                                                        | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency                                            |
+| **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                                                                     |
+| **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                                                                     |
+| **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                                                             |
+| **Settings** (`.claude/settings.json`)                                                | Security (no committed credentials), permission scoping, valid JSON structure                                                                         |
+| **Plugin Configurations** (`plugins/*/`)                                              | Manifest validation, directory structure, marketplace standards. No checklist of its own: the commands delegate this to `plugin-dev:plugin-validator` |
 
 ### Security-First Validation
 
@@ -37,7 +37,7 @@ Every review **always** includes critical security checks:
 All validation criteria sourced from **official Anthropic documentation** and enterprise best practices (Microsoft Azure AI patterns):
 
 - Agent tool access security matrices
-- Progressive disclosure guidelines (500-line file limits)
+- Progressive disclosure guidelines (500-line target per file)
 - Model selection decision trees (haiku/sonnet/opus)
 - System prompt engineering patterns
 - Token efficiency optimization
@@ -169,7 +169,7 @@ Security audit all Claude configuration files in this project
 
 ### reviewing-claude-config
 
-**Description**: Reviews Claude configuration files in .claude directories for security, structure, and prompt engineering quality.
+**Description**: Reviews Claude configuration files for security, structure, and prompt engineering quality, wherever they live: a repository's `.claude/` directory, a root `CLAUDE.md`, or a plugin's own components.
 
 **Validates**:
 
@@ -178,6 +178,7 @@ Security audit all Claude configuration files in this project
 - Agents
 - Prompts
 - Commands
+- Hooks
 - Settings
 
 **Capabilities**:
@@ -186,7 +187,7 @@ Security audit all Claude configuration files in this project
 - Progressive disclosure pattern analysis
 - Token efficiency assessment
 - Security best practice enforcement
-- Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access)
+- Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access, unsafe hook commands)
 
 **Validation Strategy**:
 
@@ -312,7 +313,7 @@ Rationale:
 
 Security principle: Grant minimum necessary tools only.
 
-Reference: `reference/agent-configuration-security.md` - Tool Access Security Matrix
+Reference: `reference/claude-code-requirements.md` - Tool Access Security
 ```
 
 ### Example 2: Skill Progressive Disclosure Violation
@@ -358,7 +359,7 @@ Recommended:
 
 Specific, actionable instructions improve AI behavior by 60% (Anthropic research).
 
-Reference: `reference/quality-specificity.md` - Specificity Best Practices
+Reference: `checklists/claude-md.md` - Clarity and Specificity
 ```
 
 ## Plugin Structure
@@ -374,9 +375,9 @@ plugins/claude-config-validator/
 │   └── reviewing-claude-config/
 │       ├── SKILL.md         # Main skill instructions
 │       ├── README.md        # Skill-specific documentation
-│       ├── checklists/      # 6 validation checklists (agents, skills, CLAUDE.md, prompts, hooks, settings)
-│       ├── reference/       # 4 reference files (priority, security, requirements, changeset scope)
-│       ├── examples/        # 6 example review outputs
+│       ├── checklists/      # One per configuration type (agents, skills, CLAUDE.md, prompts, hooks, settings)
+│       ├── reference/       # Priority framework, security patterns, requirements, changeset scope
+│       ├── examples/        # One sample review per configuration type
 │       └── scripts/         # Security scan helper (human-run)
 └── README.md               # This file
 ```

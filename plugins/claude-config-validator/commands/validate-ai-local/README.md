@@ -5,8 +5,8 @@
 `/validate-ai-local` runs the [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
 review against your local checkout instead of a pull request. It finds the Claude Code
 material you changed — plugins, agents, skills, commands, hooks, `CLAUDE.md`, `.claude/` —
-runs the same checks CI runs, and writes the report to `validation-summary.md` in your
-working directory. Nothing is posted to GitHub.
+runs the same checks CI runs, and writes the report to `validation-summary.md` at your
+repository root. Nothing is posted to GitHub.
 
 Use it before you push, so a version bump you forgot or an agent frontmatter mistake
 shows up on your machine rather than as a red check.
@@ -95,7 +95,7 @@ whenever that check runs.
 
 ## Output
 
-`validation-summary.md` in the current working directory, containing:
+`validation-summary.md` at the repository root, containing:
 
 - Overall result and what was validated against which base
 - Findings grouped as critical, major, and minor, each with `file:line` and a fix
@@ -107,12 +107,12 @@ skipped, and it ends with `<!-- validation-complete -->` so a local report match
 
 ## Differences from `/validate-ai`
 
-|                          | `/validate-ai-local`                             | `/validate-ai`                                                                       |
-| ------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Input                    | Working tree + branch commits                    | A pull request                                                                       |
-| Shell script checks      | Runs them                                        | Left to the workflow's own steps                                                     |
-| `.claude-pr/` trust rule | Not applicable                                   | Applied when the snapshot exists                                                     |
-| Output                   | `validation-summary.md` in the working directory | `/tmp/validation-summary.md`, plus a sticky pull request comment in interactive mode |
+|                          | `/validate-ai-local`                           | `/validate-ai`                                                                       |
+| ------------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Input                    | Working tree + branch commits                  | A pull request                                                                       |
+| Shell script checks      | Runs them                                      | Left to the workflow's own steps                                                     |
+| `.claude-pr/` trust rule | Not applicable                                 | Applied when the snapshot exists                                                     |
+| Output                   | `validation-summary.md` at the repository root | `/tmp/validation-summary.md`, plus a sticky pull request comment in interactive mode |
 
 ## Related documentation
 

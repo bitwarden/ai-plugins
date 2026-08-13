@@ -150,7 +150,8 @@ directly from the working tree. There is no `.claude-pr/` snapshot to redirect t
 
 ## 7. Write the report
 
-Write the full report to `validation-summary.md` in the current working directory,
+Write the full report to `validation-summary.md` at the repository root, which is where the
+command's `Write` grant is anchored,
 following the report contract in the scope reference, and end it with
 `<!-- validation-complete -->` on a line of its own. One Write call, once, after every
 subagent has returned. Writing it is mandatory — write it even when everything passed and

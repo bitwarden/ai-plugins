@@ -36,16 +36,16 @@ This skill provides systematic review guidance for Claude Code configuration fil
 ### Quality Enforcement
 
 - YAML frontmatter validation
-- Progressive disclosure enforcement (500 line limit)
+- Progressive disclosure checks (500-line guideline)
 - Prompt engineering quality checks
 - File reference integrity validation
 - Token efficiency optimization
 
 ### Comprehensive Coverage
 
-- **6 specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
-- **4 reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
-- **6 review examples**: Demonstrating proper feedback format
+- **Specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
+- **Reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
+- **A review example per configuration type**: Demonstrating proper feedback format
 - **Executable security script**: Automated security scanning
 
 ## Installation
@@ -69,19 +69,20 @@ To use the skill on its own, outside the plugin, copy the directory into a proje
 cp -r reviewing-claude-config /path/to/your/project/.claude/skills/
 ```
 
-Paths in this README that begin with `${CLAUDE_PLUGIN_ROOT}` become `.claude/skills/reviewing-claude-config` under this layout.
+Under this layout the skill's own directory is `.claude/skills/reviewing-claude-config`, which is where the plugin-install paths below point instead.
 
 ### Verify Installation
 
+For a plugin install, `/plugin list` inside Claude Code is the check that matters.
+
+To inspect the files from a terminal, note that `CLAUDE_PLUGIN_ROOT` is set by Claude Code only while it runs plugin-owned commands and hooks. It is unset in your shell, so use a real path:
+
 ```bash
-# Plugin install: confirm Claude Code sees it
-/plugin list
+# Standalone layout, from the project root
+ls -la .claude/skills/reviewing-claude-config/SKILL.md
 
-# Either layout: confirm the skill file is where you expect
-ls -la "${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/SKILL.md"
-
-# Optionally, make the security script executable
-chmod +x "${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/scripts/security-scan.sh"
+# Plugin install: under the plugin cache, keyed by marketplace and version
+ls -la ~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/SKILL.md
 ```
 
 ## Usage
@@ -105,12 +106,17 @@ The skill will:
 
 Run the executable security script directly:
 
-```bash
-# From a project root, scans that project's .claude directory
-"${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/scripts/security-scan.sh"
+With no argument it scans the `.claude` directory of the current working directory:
 
-# Or scan a specific directory
-"${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/scripts/security-scan.sh" /path/to/.claude
+```bash
+# Standalone layout
+.claude/skills/reviewing-claude-config/scripts/security-scan.sh
+
+# Plugin install
+~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh
+
+# Or scan a specific directory, from either layout
+.claude/skills/reviewing-claude-config/scripts/security-scan.sh /path/to/.claude
 ```
 
 The script checks for:
@@ -221,7 +227,7 @@ If you want to customize for your organization:
 
 ## Examples
 
-This skill includes 6 comprehensive review examples demonstrating proper feedback format:
+One comprehensive review example per configuration type, each demonstrating the feedback format:
 
 - `examples/example-agent-review.md` - Agent review with security and quality issues
 - `examples/example-skill-review.md` - Skill review with multiple issues

@@ -11,7 +11,7 @@ Review checklist for changes to Claude Code skill files (`SKILL.md` and supporti
 <thinking>
 Critical structural elements:
 1. Is YAML frontmatter present and valid?
-2. Is the skill file within 500 line limit?
+2. Is the skill file within the 500-line guideline?
 3. Are there any security issues (hardcoded secrets, committed settings)?
 4. Do all file references point to existing files?
 5. Is progressive disclosure properly implemented?
@@ -20,7 +20,7 @@ Critical structural elements:
 **Focus Areas:**
 
 - [ ] YAML frontmatter present and valid
-- [ ] Skill file size ≤ 500 lines (progressive disclosure requirement)
+- [ ] Skill file size ≤ 500 lines (progressive disclosure guideline)
 - [ ] No hardcoded secrets or credentials
 - [ ] File references point to existing files
 - [ ] Supporting files are properly organized
