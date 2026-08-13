@@ -10,7 +10,9 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 - Reviewing changes to `CLAUDE.md` files
 - Reviewing skill files (`SKILL.md` and supporting files)
-- Reviewing prompts or commands (`.claude/prompts/*.md`, `.claude/commands/*.md`)
+- Reviewing agents (`.claude/agents/`, `plugins/*/agents/`)
+- Reviewing prompts or commands (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`)
+- Reviewing hooks (`hooks.json`, or a `hooks` block in a settings file)
 - Reviewing settings files (`.claude/settings.json`)
 - Validating Claude configuration security and quality
 
@@ -43,7 +45,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 - **6 specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
 - **4 reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
-- **5 review examples**: Demonstrating proper feedback format
+- **6 review examples**: Demonstrating proper feedback format
 - **Executable security script**: Automated security scanning
 
 ## Installation
@@ -104,12 +106,11 @@ The skill will:
 Run the executable security script directly:
 
 ```bash
-# From the scripts directory
-cd .claude/skills/reviewing-claude-config/scripts
-./security-scan.sh
+# From a project root, scans that project's .claude directory
+"${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/scripts/security-scan.sh"
 
 # Or scan a specific directory
-./security-scan.sh /path/to/.claude
+"${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/scripts/security-scan.sh" /path/to/.claude
 ```
 
 The script checks for:
@@ -159,6 +160,7 @@ reviewing-claude-config/
 ├── examples/                         # Sample review outputs
 │   ├── example-agent-review.md       # Agent review example
 │   ├── example-claude-md-review.md   # CLAUDE.md review example
+│   ├── example-hooks-review.md       # Hooks review example
 │   ├── example-prompts-review.md     # Prompts review example
 │   ├── example-settings-review.md    # Settings review example
 │   └── example-skill-review.md       # Skill review example
@@ -171,7 +173,7 @@ reviewing-claude-config/
 
 The skill follows a systematic 5-step review process:
 
-1. **Detect File Type**: Determines whether reviewing skills, CLAUDE.md, prompts, or settings
+1. **Detect File Type**: Determines whether reviewing agents, skills, CLAUDE.md, prompts and commands, hooks, or settings
 2. **Execute Security Scan**: Always performs critical security checks first
 3. **Load Appropriate Checklist**: Routes to specialized review guidance
 4. **Consult References**: Loads detailed criteria only when needed
@@ -219,11 +221,12 @@ If you want to customize for your organization:
 
 ## Examples
 
-This skill includes 5 comprehensive review examples demonstrating proper feedback format:
+This skill includes 6 comprehensive review examples demonstrating proper feedback format:
 
 - `examples/example-agent-review.md` - Agent review with security and quality issues
 - `examples/example-skill-review.md` - Skill review with multiple issues
 - `examples/example-claude-md-review.md` - CLAUDE.md review with duplication
+- `examples/example-hooks-review.md` - Hooks review with shell injection and prompt-hook findings
 - `examples/example-settings-review.md` - Settings review with security concerns
 - `examples/example-prompts-review.md` - Prompts review with quality improvements
 

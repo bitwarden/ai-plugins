@@ -376,7 +376,7 @@ plugins/claude-config-validator/
 │       ├── README.md        # Skill-specific documentation
 │       ├── checklists/      # 6 validation checklists (agents, skills, CLAUDE.md, prompts, hooks, settings)
 │       ├── reference/       # 4 reference files (priority, security, requirements, changeset scope)
-│       ├── examples/        # 5 example review outputs
+│       ├── examples/        # 6 example review outputs
 │       └── scripts/         # Security scan helper (human-run)
 └── README.md               # This file
 ```
