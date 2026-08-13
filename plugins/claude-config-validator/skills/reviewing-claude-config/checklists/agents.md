@@ -137,7 +137,7 @@ tools: Read, Write, Edit, Bash # Why does documentation need Bash?
 - Write/Edit access for analysis-only agents
 - Tool access mismatched to agent description
 
-**Reference:** `reference/claude-code-requirements.md` - Tool Access Security (lines 109-133)
+**Reference:** `../reference/claude-code-requirements.md` - Tool Access Security (lines 109-133)
 
 ---
 
@@ -427,7 +427,7 @@ Marketplace quality considerations:
 
 ## Priority Classification
 
-Classify findings using `reference/priority-framework.md`:
+Classify findings using `../reference/priority-framework.md`:
 
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability

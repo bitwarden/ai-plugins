@@ -48,28 +48,34 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 ## Installation
 
-### Option 1: Copy to Your Project
+### Install the plugin (recommended)
+
+The skill ships inside the `claude-config-validator` plugin, so installing the plugin is all it takes:
 
 ```bash
-# Copy the entire skill directory to your project's .claude/skills/ directory
+/plugin marketplace add bitwarden/ai-plugins
+/plugin install claude-config-validator@bitwarden-marketplace
+```
+
+Its files then live under the plugin root rather than in your project.
+
+### Standalone use
+
+To use the skill on its own, outside the plugin, copy the directory into a project's `.claude/skills/`:
+
+```bash
 cp -r reviewing-claude-config /path/to/your/project/.claude/skills/
 ```
 
-### Option 2: Clone from Repository
-
-```bash
-# In your project's .claude/skills/ directory
-cd .claude/skills/
-git clone [repository-url] reviewing-claude-config
-```
+Paths in this README that begin with `${CLAUDE_PLUGIN_ROOT}` become `.claude/skills/reviewing-claude-config` under this layout.
 
 ### Verify Installation
 
 ```bash
-# Check that the skill is recognized by Claude Code
+# Plugin install: confirm Claude Code sees it
 /plugin list
 
-# The skill ships inside the plugin, so its files live under the plugin root
+# Either layout: confirm the skill file is where you expect
 ls -la "${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/SKILL.md"
 
 # Optionally, make the security script executable
@@ -319,8 +325,8 @@ This skill is designed for internal team use but follows open-source best practi
 
 1. Test changes in your project first
 2. Ensure changes remain 100% generic (no project-specific references)
-3. Update CHANGELOG.md with changes
-4. Increment version in `SKILL.md` YAML frontmatter (semver)
+3. Update the plugin's [`CHANGELOG.md`](../../CHANGELOG.md) with your changes
+4. Bump the plugin version across the files the repository's `.claude/CLAUDE.md` lists. The skill has no version of its own
 
 ## Versioning
 
