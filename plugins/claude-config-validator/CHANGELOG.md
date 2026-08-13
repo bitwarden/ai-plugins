@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Command detection in `reviewing-claude-config` missed plugin commands, which nest as `commands/<name>/<name>.md`, so this plugin's own commands would have gone unreviewed
+- Hook review now also reaches hooks declared under a `hooks` key in a settings file, which is where a repository usually puts them
+- Documentation accuracy in the skill: `SKILL.md` casing throughout, reference and example counts, dead paths, and the marketplace name
 - A security finding no longer stops the review: a changeset report has to say which sections ran, which an early exit makes impossible
 
 ## [1.1.1] - 2026-03-12

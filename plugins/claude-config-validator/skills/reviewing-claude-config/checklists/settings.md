@@ -2,6 +2,8 @@
 
 Review checklist for changes to `.claude/settings.json` and `.claude/settings.local.json`.
 
+**If the settings file declares a `hooks` block, review that block against `hooks.md` as well.** Hooks run shell commands automatically on tool events, and none of the passes below cover what those commands do. A repository's hooks are more often declared here than in a separate `hooks.json`, so this is the common case rather than the exception.
+
 ---
 
 ## CRITICAL SECURITY CHECK

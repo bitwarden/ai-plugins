@@ -266,7 +266,7 @@ When multiple issues exist in a single review:
 
 **Example 2: Structure Issue**
 
-❌ **skill.md:1** - Missing YAML frontmatter
+❌ **SKILL.md:1** - Missing YAML frontmatter
 **Priority:** CRITICAL
 **Rationale:** Skill won't be recognized by Claude Code without frontmatter.
 
@@ -274,7 +274,7 @@ When multiple issues exist in a single review:
 
 **Example 3: Quality Issue**
 
-❌ **skill.md:3** - Description lacks activation triggers
+❌ **SKILL.md:3** - Description lacks activation triggers
 **Priority:** IMPORTANT
 **Rationale:** Users won't know when to invoke this skill. Reduces discoverability.
 
@@ -290,6 +290,6 @@ When multiple issues exist in a single review:
 
 **Example 5: Style Preference**
 
-❌ **skill.md:12** - Alternative phrasing possible
+❌ **SKILL.md:12** - Alternative phrasing possible
 **Priority:** OPTIONAL
 **Rationale:** Current phrasing is clear, alternative is just personal preference.

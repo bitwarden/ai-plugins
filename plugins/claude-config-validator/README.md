@@ -12,15 +12,15 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 Validates **7 configuration file types** with specialized checklists:
 
-| Configuration Type                                                     | What Gets Validated                                                                                        |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Agents** (`.claude/agents/*.md`)                                     | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity        |
-| **Skills** (skill directories)                                         | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
-| **CLAUDE.md** (project instructions)                                   | Clarity, specificity, security patterns, proper emphasis, structured organization                          |
-| **Prompts/Commands** (`.claude/prompts/*.md`, `.claude/commands/*.md`) | Purpose clarity, session context handling, skill references, parameter validation                          |
-| **Hooks** (`hooks.json`)                                               | Schema and event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command safety, matcher scope                |
-| **Settings** (`.claude/settings.json`)                                 | Security (no committed credentials), permission scoping, valid JSON structure                              |
-| **Plugin Configurations** (`plugins/*/`)                               | Manifest validation, directory structure, marketplace standards                                            |
+| Configuration Type                                                                    | What Gets Validated                                                                                        |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity        |
+| **Skills** (skill directories)                                                        | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
+| **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                          |
+| **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                          |
+| **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                  |
+| **Settings** (`.claude/settings.json`)                                                | Security (no committed credentials), permission scoping, valid JSON structure                              |
+| **Plugin Configurations** (`plugins/*/`)                                              | Manifest validation, directory structure, marketplace standards                                            |
 
 ### Security-First Validation
 
@@ -66,7 +66,7 @@ Provides specific, file:line referenced feedback with:
 ### Add Bitwarden Marketplace (if not already added)
 
 ```bash
-/plugin marketplace add bitwarden/ai-marketplace
+/plugin marketplace add bitwarden/ai-plugins
 ```
 
 ### Install the Plugin
@@ -97,8 +97,10 @@ so the two commands and the action cannot drift apart.
 ### Basic Invocation
 
 ```bash
-/skill reviewing-claude-config
+/claude-config-validator:reviewing-claude-config
 ```
+
+Or describe the review in your own words, which is how the skill's triggers are written to be reached.
 
 The skill will automatically:
 
@@ -389,6 +391,6 @@ Contributions welcome! Please follow:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-marketplace/issues)
+- **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-plugins/issues)
 - **Documentation**: [Claude Code Docs](https://docs.claude.com/en/docs/claude-code/)
-- **Marketplace**: [Bitwarden AI Marketplace](https://github.com/bitwarden/ai-marketplace)
+- **Marketplace**: [Bitwarden AI Plugins](https://github.com/bitwarden/ai-plugins)

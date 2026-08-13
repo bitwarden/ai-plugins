@@ -81,13 +81,13 @@ version: 1.0.0 # Semver format if marketplace-bound
 
 <thinking>
 Progressive disclosure requirements:
-1. Is the main skill.md file under 500 lines?
+1. Is the main SKILL.md file under 500 lines?
 2. Are supporting files properly referenced?
 3. Are supporting files self-contained?
 4. Is the loading strategy clear (when to load what)?
 </thinking>
 
-**Main skill.md Requirements:**
+**Main SKILL.md Requirements:**
 
 - [ ] File size ≤ 500 lines
 - [ ] Clear routing logic (when to load which files)
@@ -105,7 +105,7 @@ Progressive disclosure requirements:
 
 ```
 skill-name/
-├── skill.md              # Main orchestration (≤500 lines)
+├── SKILL.md              # Main orchestration (≤500 lines)
 ├── checklists/           # Task-specific procedures
 ├── reference/            # Detailed criteria loaded as needed
 ├── examples/             # Sample outputs for guidance
@@ -114,7 +114,7 @@ skill-name/
 
 **Red Flags:**
 
-- Main skill.md > 500 lines (should be split into supporting files)
+- Main SKILL.md > 500 lines (should be split into supporting files)
 - Supporting files reference each other in circles
 - All context loaded upfront instead of on-demand
 - Supporting files not self-contained (require reading multiple files)
@@ -254,7 +254,7 @@ Classify findings using `reference/priority-framework.md`:
 Before completing review, verify:
 
 - [ ] YAML frontmatter present and valid
-- [ ] Main skill.md ≤ 500 lines
+- [ ] Main SKILL.md ≤ 500 lines
 - [ ] No security issues (secrets, credentials)
 - [ ] All file references valid
 - [ ] Progressive disclosure properly implemented

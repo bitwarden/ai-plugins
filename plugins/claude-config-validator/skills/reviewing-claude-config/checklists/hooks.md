@@ -32,17 +32,21 @@ Before anything else:
 ### First Pass: Schema and Structure
 
 - [ ] File is valid JSON
-- [ ] Every event name is one Claude Code recognizes: `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `UserPromptSubmit`, `PreCompact`, `Notification`
 - [ ] Each entry has the matcher and `hooks` array shape the event requires
 - [ ] Matchers are valid, and a tool matcher names a real tool
+- [ ] Each hook's `type` is one Claude Code supports: `command` or `prompt`
+- [ ] Any `timeout` is present in the unit the schema expects and is long enough for the work
+- [ ] Every event name is current
 
-A misspelled event name fails silently: the hook never fires and nobody finds out until the behavior it was meant to enforce goes missing.
+A misspelled event name fails silently: the hook never fires and nobody finds out until the behavior it was meant to enforce goes missing. Verify each name against the current [hooks documentation](https://code.claude.com/docs/en/hooks) rather than against memory or a list in this repository. The event set grows, so a name you do not recognize is more likely new than wrong. Report an unfamiliar event as a question to confirm, never as a defect: this repository's own `bitwarden-ai-telemetry` plugin registers `UserPromptExpansion`, which is easy to mistake for a typo.
+
+Passes two and three below apply to `command` hooks. For `prompt` hooks, skip to the prompt-hook section.
 
 ### Second Pass: Script Paths
 
 - [ ] Plugin hooks reference scripts through `${CLAUDE_PLUGIN_ROOT}`, never a relative or absolute path
 - [ ] Referenced scripts exist on disk
-- [ ] Scripts are executable, or are invoked through an interpreter (`bash script.sh`)
+- [ ] Scripts are executable, or are invoked through an interpreter (`bash script.sh`). Confirming the mode bit needs `ls -l`, which this skill's own grant does not include: check it when Bash is available, and otherwise record the check as skipped rather than assuming either answer
 
 `${CLAUDE_PLUGIN_ROOT}` is what makes a plugin hook work in someone else's checkout. A path like `./scripts/check.sh` resolves against the user's working directory instead.
 
@@ -55,7 +59,15 @@ Read every command as though a contributor wrote it to attack the person running
 - [ ] Commands fail closed: a blocking hook that errors should block, not silently pass
 - [ ] Exit codes match intent (a `PreToolUse` hook blocks with exit code 2)
 
-Consult `../reference/security-patterns.md` for the dangerous-command patterns and detection commands.
+Consult `../reference/security-patterns.md` for the dangerous-command patterns. Its detection commands are written around `.claude/settings.json` and hardcode that path, so reuse the patterns and retarget the greps at the hooks file you are reviewing.
+
+### Prompt Hooks
+
+A hook with `"type": "prompt"` runs a prompt instead of a shell command, so passes two and three do not apply. Its risk is different rather than smaller: tool input flows into a prompt the model then acts on.
+
+- [ ] The prompt treats tool input, file contents, and command output as data to evaluate, never as instructions to follow
+- [ ] The prompt states its decision contract explicitly, so the outcome does not depend on the model's mood
+- [ ] Quoted file content cannot steer the decision, which is the same CWE-1427 boundary that applies to any reviewer of contributor-authored text
 
 ### Fourth Pass: Behavior and Cost
 

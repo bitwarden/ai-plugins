@@ -1,7 +1,6 @@
 ---
 name: reviewing-claude-config
-description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md files (project-level or .claude/), skills (SKILL.md), agents, prompts, commands, or settings. Validates YAML frontmatter, progressive disclosure patterns, token efficiency, and security best practices. Detects critical issues like committed settings.local.json, hardcoded secrets, malformed YAML, broken file references, oversized skill files, and insecure agent tool access.
-version: 1.1.0
+description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md files (project-level or .claude/), skills (SKILL.md), agents, prompts, commands, hooks (hooks.json or a hooks block in settings), or settings. Validates YAML frontmatter, progressive disclosure patterns, token efficiency, and security best practices. Detects critical issues like committed settings.local.json, hardcoded secrets, malformed YAML, broken file references, oversized skill files, insecure agent tool access, and unsafe hook commands.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -31,7 +30,7 @@ Determine the primary file type(s) being reviewed:
 - **Skills**: Changes to `SKILL.md` files or skill support files (checklists, references, examples)
 - **CLAUDE.md**: Changes to `CLAUDE.md` files (any location: project root, `.claude/`, or subdirectories)
 - **Prompts/Commands**: Changes to `.claude/prompts/**/*.md`, `.claude/commands/**/*.md`, or `plugins/*/commands/**/*.md` (plugin commands nest as `commands/<name>/<name>.md`)
-- **Hooks**: Changes to `hooks.json`, in `.claude/hooks/` or inside a plugin
+- **Hooks**: Changes to `hooks.json` (in `.claude/hooks/`, or `hooks/` inside a plugin), or to a `hooks` block inside `.claude/settings.json` or `.claude/settings.local.json`
 - **Settings**: Changes to `.claude/settings.json` or `.claude/settings.local.json`
 
 If multiple types modified, review each with appropriate checklist.
@@ -58,6 +57,8 @@ Run these mental checks immediately:
 **If ANY security issue found**: Flag as **CRITICAL** immediately and lead the report with it, then finish the remaining checks. A changeset review has to state which sections ran and which were skipped, so abandoning the rest leaves the report unable to say what was and was not looked at.
 
 Consult `reference/security-patterns.md` for detailed security checks and detection commands.
+
+`scripts/security-scan.sh` is a human-run helper, not part of this path: the skill's tools are read-only, so run the checks above with Read and Grep rather than reaching for the script.
 
 ### Step 3: Load Appropriate Checklist
 

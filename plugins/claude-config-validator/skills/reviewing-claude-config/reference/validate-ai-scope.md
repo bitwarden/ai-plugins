@@ -38,7 +38,10 @@ Classify the in-scope paths into these buckets. They drive which validations run
   and as `agents/<name>.md`, so match any Markdown file under an `agents/` directory.
 - **Skill files** — `(^|/)skills/.*/SKILL\.md$`
 - **Command files** — `(^|/)commands/.*\.md$`
-- **Hook files** — `(^|/)hooks\.json$`
+- **Hook files** — `(^|/)hooks\.json$`. Keep this pattern as written: it mirrors the action's
+  change detection, and widening it here would put the two out of step. Hooks declared under
+  a `hooks` key in `.claude/settings.json` arrive through the config bucket instead, and are
+  still reviewed as hooks once there.
 - **Config files** — `(^|/)CLAUDE\.md$` or `(^|/)\.claude/`
 - **Changed plugins** — the first two path segments of every changed `plugins/` path,
   deduplicated (`plugins/<name>`)
@@ -167,7 +170,7 @@ The marker closes the document, after the checks table.
 ## Severity mapping
 
 The AI-driven checks classify findings as CRITICAL / IMPORTANT / SUGGESTED / OPTIONAL
-(see `${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/reference/priority-framework.md`). Map them onto the report's three severities:
+(see `priority-framework.md`, alongside this file). Map them onto the report's three severities:
 
 | Source classification | Report severity | Error or warning |
 | --------------------- | --------------- | ---------------- |

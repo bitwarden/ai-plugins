@@ -431,7 +431,7 @@ Formatting is a high-frequency operation. Wrong model selection will significant
 
 ### Skill Code
 
-**File:** `.claude/skills/code-reviewer/skill.md`
+**File:** `.claude/skills/code-reviewer/SKILL.md`
 
 ```markdown
 ## Step 3: Invoke Reviewer
@@ -441,7 +441,7 @@ Use the code-reviewer agent.
 
 ### Review Comments
 
-**`.claude/skills/code-reviewer/skill.md:28`** - IMPORTANT: Agent invocation lacks specificity
+**`.claude/skills/code-reviewer/SKILL.md:28`** - IMPORTANT: Agent invocation lacks specificity
 
 Current invocation is too vague and provides no context or expectations.
 
