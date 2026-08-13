@@ -1,5 +1,5 @@
 ---
-name: workflow-naming-conventions
+name: auditing-workflow-conventions
 description: >-
   Reference for Bitwarden GitHub Actions naming conventions that the workflow linter (bwwl) does
   not enforce. Covers three standards — job IDs (kebab-case), step names (Sentence case
@@ -107,7 +107,7 @@ When a step name both deviates from Sentence case and appears in this table (`Az
 
 - **A deviation is a flag, not a verdict.** These standards describe the target state; they do not authorize a rename. Real workflows carry deliberate exceptions — a job ID matched by external tooling, a filename referenced by a system outside this repo, a step name that reads better than the canonical phrase. Surface the deviation with what a compliant form would be, and let the owner decide. Do not treat silence as consent.
 - **Only step names are safe to change in place.** Job IDs and filenames both require a reference sweep first. Never fold either rename into an unrelated change.
-- **This skill does not edit.** Its `allowed-tools` is read-only — enough to inspect workflows and run the org-wide reference sweep, nothing more. 
+- **This skill does not edit.** Its `allowed-tools` is read-only — enough to inspect workflows and run the org-wide reference sweep, nothing more.
 - **Renames are all-or-nothing.** A partially applied rename is worse than the original deviation — it produces a broken workflow instead of an inconsistent one. If the full reference set cannot be resolved, do not start.
 - **Do not double-report.** If an item is already covered by `name_capitalized`, `underscore_outputs`, or `job_environment_prefix`, the finding belongs to the linter. See the ownership table.
 - **Flag gaps honestly.** Inputs, bash variable casing, and artifact names have no enforced standard. Say so; do not assert a convention this skill does not define.

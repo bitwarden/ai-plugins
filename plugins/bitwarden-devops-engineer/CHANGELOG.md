@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `workflow-naming-conventions` reference skill documenting the GitHub Actions naming standards `bwwl` does not enforce: job IDs (`kebab-case`), step names (Sentence case with a leading imperative verb), and workflow file names (`kebab-case.yml`, `_` prefix for exclusively reusable workflows). Includes an ownership table that defers to `bitwarden-workflow-linter-rules` for every linted rule so findings are not double-reported, reference-sweep procedures for the two rename types that are not display-only, and an advisory canonical step-name glossary. Listed in the plugin README alongside the existing linter-rules reference.
+- New `auditing-workflow-conventions` reference skill documenting the GitHub Actions naming standards `bwwl` does not enforce: job IDs (`kebab-case`), step names (Sentence case with a leading imperative verb), and workflow file names (`kebab-case.yml`, `_` prefix for exclusively reusable workflows). Includes an ownership table that defers to `bitwarden-workflow-linter-rules` for every linted rule so findings are not double-reported, reference-sweep procedures for the two rename types that are not display-only, and an advisory canonical step-name glossary. Listed in the plugin README alongside the existing linter-rules reference.
 
 ## [0.1.5] - 2026-07-28
 
