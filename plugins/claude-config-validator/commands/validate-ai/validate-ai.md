@@ -94,15 +94,21 @@ way the workflow-mode rule above guards against.
 
 ## 4. Run the validations
 
-Run these in order, each gated as described in the scope reference. A section that
-cannot run is recorded as skipped with its reason — never silently omitted.
+Each is gated as described in the scope reference. A section that cannot run is recorded as
+skipped with its reason — never silently omitted.
 
-Run every subagent synchronously: pass `run_in_background: false` on each Task call, and
-wait for its result before moving on. Subagents default to the background, on the
-assumption that a notification will wake you when one finishes. In workflow mode nothing
-wakes you, so a subagent still outstanding when your turn ends is killed and its findings
-are lost. Do not end your turn with a subagent in flight, and do not describe work one has
-not yet returned.
+Run every subagent synchronously: pass `run_in_background: false` on each Task call.
+Subagents default to the background, on the assumption that a notification will wake you
+when one finishes. In workflow mode nothing wakes you, so a subagent still outstanding when
+your turn ends is killed and its findings are lost. Do not end your turn with a subagent in
+flight, and do not describe work one has not yet returned.
+
+Synchronous does not mean one at a time. Every call in 4a and 4b is independent of every
+other, and there can be more than two: 4a is one validation per changed plugin, 4b one
+review per changed skill. Work out the full set first and send all of it in one message with
+several tool calls, rather than batching by section or dispatching one at a time. 4c is
+yours to carry out once their results come back. The numbering is for the report's order,
+not for execution.
 
 ### 4a. Plugin validation (plugin-validator agent from plugin-dev)
 

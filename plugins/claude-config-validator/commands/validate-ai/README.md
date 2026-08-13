@@ -108,6 +108,10 @@ and the check fails. For the same reason the command writes the file once, at th
 and runs its subagents synchronously. A subagent still in flight when the turn ends is
 killed in a headless run, and there is no retry step to recover from it.
 
+Synchronous is not the same as one at a time. The plugin and skill reviews are dispatched
+together in one message so they overlap, since the review is bounded by the job's timeout
+rather than by its turn count.
+
 ## Requirements
 
 - **GitHub CLI (`gh`)**, authenticated, with access to the repository

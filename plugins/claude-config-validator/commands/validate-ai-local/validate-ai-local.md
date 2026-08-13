@@ -86,10 +86,15 @@ is not seen and will be reported as missing until you commit it.
 
 ## 4. Plugin validation (plugin-validator agent from plugin-dev)
 
-Runs when any plugin directory changed. For each changed plugin, invoke the
-`plugin-dev:plugin-validator` agent via the Task tool, synchronously
-(`run_in_background: false`), and wait for its result. Never describe a subagent's findings
-before it has returned them. It checks:
+Sections 4 and 5 are subagent work, and every call in them is independent: one validation
+per changed plugin, one review per changed skill. Work out the full set across both
+sections and dispatch it in a single message with several tool calls, so they run
+concurrently. Keep them synchronous (`run_in_background: false`), and never describe a
+subagent's findings before it has returned them. Section 6 is yours to carry out once their
+results come back. The numbering is for the report's order, not for execution.
+
+Section 4 runs when any plugin directory changed. For each changed plugin, invoke the
+`plugin-dev:plugin-validator` agent via the Task tool. It checks:
 
 - `plugin.json` manifest correctness (name, version, required fields) and semantic versioning
 - Directory structure and auto-discovery compliance
@@ -108,7 +113,7 @@ reason — do not silently approximate it.
 ## 5. Skill review (skill-reviewer agent from plugin-dev)
 
 Runs when any `SKILL.md` changed. Invoke the `plugin-dev:skill-reviewer` agent for each
-modified skill, synchronously, as in the previous step. It evaluates:
+modified skill, dispatched in the same message as the section 4 calls. It evaluates:
 
 - YAML frontmatter (required: `name`, `description`)
 - Description quality: specific trigger phrases, third-person form, appropriate length

@@ -89,6 +89,13 @@ Wait for every subagent to return before you write. Run them synchronously, pass
 `run_in_background: false` where that parameter exists, and never describe work a subagent
 has not yet handed back.
 
+Synchronous does not mean one at a time. Each plugin validation and each skill review is
+independent of every other, and there can be many of them: one per changed plugin, one per
+changed skill. Work out the full set first and dispatch it in a single message with several
+tool calls, rather than batching by section or sending one and waiting. They then run
+concurrently and still all return before the turn ends, which is both faster and safe. The
+review runs on a wall clock, and in CI a job timeout kills it outright.
+
 End the report with this line, exactly, on a line of its own:
 
 ```markdown
