@@ -121,8 +121,8 @@ rather than by its turn count.
 
 ## Permissions
 
-The command pre-approves only read-only pull request inspection: `gh pr view`,
-`gh pr diff`, `gh pr list`, `git rev-parse`, and reading `GITHUB_ACTIONS`. `Write` is
+The command pre-approves only read-only inspection: `gh pr view`, `gh pr diff`,
+`git rev-parse`, `ls`, and reading `GITHUB_ACTIONS`. `Write` is
 scoped to the one file the command produces, `//tmp/validation-summary.md`. The `gh api`
 calls that create or edit the sticky comment in interactive mode are left out on purpose,
 so writing to a pull request is a decision you see and approve. Allowlist them yourself if

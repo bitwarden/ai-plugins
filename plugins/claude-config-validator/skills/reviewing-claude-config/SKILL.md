@@ -21,11 +21,13 @@ Analyze the changed files:
 4. What's the review scope (single file or multiple)?
 </thinking>
 
+Reviewing a whole changeset rather than named files? Read `reference/validate-ai-scope.md` first — its scope rules decide what is in the review at all, which has to be settled before type detection.
+
 Determine the primary file type(s) being reviewed:
 
 **Detection Rules**:
 
-- **Agents**: Changes to `.claude/agents/*.md` or `plugins/*/agents/*.md`
+- **Agents**: Changes to `.claude/agents/**/*.md` or `plugins/*/agents/**/*.md` (agents appear both as `agents/<name>.md` and as `agents/<name>/AGENT.md`)
 - **Skills**: Changes to `skill.md` files or skill support files (checklists, references, examples)
 - **CLAUDE.md**: Changes to `CLAUDE.md` files (any location: project root, `.claude/`, or subdirectories)
 - **Prompts/Commands**: Changes to `.claude/prompts/*.md` or `.claude/commands/*.md`
@@ -80,6 +82,7 @@ When to load references:
 1. Need to classify issue priority? → priority-framework.md
 2. Security patterns unclear? → security-patterns.md
 3. Claude Code requirements (YAML, tools, models, limits)? → claude-code-requirements.md
+4. Reviewing a whole changeset rather than named files? → validate-ai-scope.md
 </thinking>
 
 Load reference files only when needed for specific questions:
@@ -87,7 +90,7 @@ Load reference files only when needed for specific questions:
 - **Issue prioritization** → `reference/priority-framework.md` (CRITICAL vs IMPORTANT vs SUGGESTED vs OPTIONAL)
 - **Security patterns** → `reference/security-patterns.md` (detection commands, fix examples)
 - **Claude Code requirements** → `reference/claude-code-requirements.md` (YAML frontmatter, model selection, tool names, progressive disclosure, settings conventions)
-- **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude material, which validations each bucket gates, and the structured report contract used by the `/validate-ai` and `/validate-ai-local` commands)
+- **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude material, which validations each bucket gates, and the structured report contract used by the `/validate-ai` and `/validate-ai-local` commands). When you are following that reference, its single-document report contract replaces the inline-comment format in Step 5. Its report-writing and subagent instructions address those commands, which hold the `Write` and `Task` grants; this skill is read-only, so a skill-only invocation applies its scope and severity rules and reports findings in the Step 5 format.
 
 ### Step 5: Document Findings
 
@@ -104,6 +107,8 @@ Before writing each comment:
 Checklists reference this section rather than duplicating content.
 
 **CRITICAL**: Use inline comments on specific lines, NOT one large summary comment.
+
+**Exception**: whole-changeset reviews follow the single-document report contract in `reference/validate-ai-scope.md` instead. That contract governs when the review covers a changeset rather than specific files, which is how the `/validate-ai` and `/validate-ai-local` commands invoke this skill.
 
 **Inline Comment Rules**:
 

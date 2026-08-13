@@ -372,9 +372,8 @@ plugins/claude-config-validator/
 │       ├── SKILL.md         # Main skill instructions
 │       ├── README.md        # Skill-specific documentation
 │       ├── checklists/      # 5 validation checklists (agents, skills, CLAUDE.md, prompts, settings)
-│       ├── reference/       # 16 reference files (security, quality, agent patterns)
-│       ├── examples/        # 6 example review outputs
-│       ├── docs/            # Implementation plans, changelog
+│       ├── reference/       # 4 reference files (priority, security, requirements, changeset scope)
+│       ├── examples/        # 5 example review outputs
 │       └── scripts/         # Validation automation scripts
 └── README.md               # This file
 ```

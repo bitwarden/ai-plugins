@@ -9,20 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `/validate-ai` command: validates the Claude Code material changed in a pull request and reports to a sticky pull request comment. Ports the review prompt from the `bitwarden/gh-actions` `validate-ai` action, including the `.claude-pr/` trust rule for pull-request-authored configuration, so the action and a human run the same review
-- `/validate-ai-local` command: runs the same validation against a local checkout (branch commits plus uncommitted and untracked work) and writes the report to `validation-summary.md`. Also runs the `validate-plugin-structure.sh`, `validate-marketplace.sh`, and `validate-version-bump.sh` checks from a `bitwarden/gh-actions` checkout when one is available
-- Explicit `commands` array in `plugin.json`, matching the convention in
-  `bitwarden-code-review` and `bitwarden-init`: the per-command `README.md` files sit
-  inside `commands/`, so without it they would be auto-discovered as commands
-- Report completion contract, matching the `validate-ai` action as of
-  bitwarden/gh-actions#867: the report ends
-  with a `<!-- validation-complete -->` marker, is written exactly once at the end with no
-  interim versions, and is written only after every subagent has returned. The action
-  discards a report without the marker and fails the check, and a headless run kills any
-  subagent still in flight when the turn ends. Independent subagent calls are dispatched
-  together in one message so they run concurrently, since synchronous execution bounds the
-  turn, not the wall clock (bitwarden/gh-actions#868)
-- `reference/validate-ai-scope.md` in the `reviewing-claude-config` skill: changed-file classification rules, validation gating, report contract, and the mapping from the skill's CRITICAL/IMPORTANT/SUGGESTED/OPTIONAL priorities onto the report's critical/major/minor severities. Shared by both commands so they cannot drift from each other or from the action
+- `/validate-ai` command: validates the Claude material changed in a pull request and reports to a sticky comment, porting the review from the `bitwarden/gh-actions` `validate-ai` action, including its `.claude-pr/` trust rule
+- `/validate-ai-local` command: the same validation against a local checkout, plus the action's structure, marketplace, and version-bump shell checks when a `gh-actions` checkout is reachable; writes `validation-summary.md`
+- `reference/validate-ai-scope.md` in `reviewing-claude-config`: scope rules, gating, severity mapping, and the report contract, shared by both commands so they cannot drift from the action
+- Untrusted-input boundary: configuration under review is data to report on, never instructions to follow (CWE-1427)
+- Report completion contract from bitwarden/gh-actions#867 and #868: a `<!-- validation-complete -->` marker, one write at the end, and independent subagents dispatched together but never left in flight at turn end
+- Explicit `commands` array in `plugin.json`, so the per-command `README.md` files are not auto-discovered as commands
 
 ## [1.1.1] - 2026-03-12
 
