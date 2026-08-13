@@ -1,7 +1,7 @@
 ---
 name: reviewing-claude-config
 description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md files (project-level or .claude/), skills (SKILL.md), agents, prompts, commands, or settings. Validates YAML frontmatter, progressive disclosure patterns, token efficiency, and security best practices. Detects critical issues like committed settings.local.json, hardcoded secrets, malformed YAML, broken file references, oversized skill files, and insecure agent tool access.
-version: 1.0.0
+version: 1.1.0
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -28,9 +28,10 @@ Determine the primary file type(s) being reviewed:
 **Detection Rules**:
 
 - **Agents**: Changes to `.claude/agents/**/*.md` or `plugins/*/agents/**/*.md` (agents appear both as `agents/<name>.md` and as `agents/<name>/AGENT.md`)
-- **Skills**: Changes to `skill.md` files or skill support files (checklists, references, examples)
+- **Skills**: Changes to `SKILL.md` files or skill support files (checklists, references, examples)
 - **CLAUDE.md**: Changes to `CLAUDE.md` files (any location: project root, `.claude/`, or subdirectories)
-- **Prompts/Commands**: Changes to `.claude/prompts/*.md` or `.claude/commands/*.md`
+- **Prompts/Commands**: Changes to `.claude/prompts/**/*.md`, `.claude/commands/**/*.md`, or `plugins/*/commands/**/*.md` (plugin commands nest as `commands/<name>/<name>.md`)
+- **Hooks**: Changes to `hooks.json`, in `.claude/hooks/` or inside a plugin
 - **Settings**: Changes to `.claude/settings.json` or `.claude/settings.local.json`
 
 If multiple types modified, review each with appropriate checklist.
@@ -54,7 +55,7 @@ Run these mental checks immediately:
 - [ ] Permissions scoped appropriately (if settings.json modified)
 - [ ] No API keys, tokens, or passwords in plaintext
 
-**If ANY security issue found**: Flag as **CRITICAL** immediately, stop and report.
+**If ANY security issue found**: Flag as **CRITICAL** immediately and lead the report with it, then finish the remaining checks. A changeset review has to state which sections ran and which were skipped, so abandoning the rest leaves the report unable to say what was and was not looked at.
 
 Consult `reference/security-patterns.md` for detailed security checks and detection commands.
 
@@ -66,6 +67,7 @@ Based on detected file type, read and follow the relevant checklist:
 - **Skills** → `checklists/skills.md` (structure, YAML, progressive disclosure, quality)
 - **CLAUDE.md** → `checklists/claude-md.md` (clarity, references, no duplication)
 - **Prompts/Commands** → `checklists/prompts.md` (purpose, session context, skill references)
+- **Hooks** → `checklists/hooks.md` (schema, event names, `${CLAUDE_PLUGIN_ROOT}` paths, command safety)
 - **Settings** → `checklists/settings.md` (security, permissions scoping)
 
 The checklist provides:
@@ -90,7 +92,7 @@ Load reference files only when needed for specific questions:
 - **Issue prioritization** → `reference/priority-framework.md` (CRITICAL vs IMPORTANT vs SUGGESTED vs OPTIONAL)
 - **Security patterns** → `reference/security-patterns.md` (detection commands, fix examples)
 - **Claude Code requirements** → `reference/claude-code-requirements.md` (YAML frontmatter, model selection, tool names, progressive disclosure, settings conventions)
-- **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude material, which validations each bucket gates, and the structured report contract used by the `/validate-ai` and `/validate-ai-local` commands). When you are following that reference, its single-document report contract replaces the inline-comment format in Step 5. Its report-writing and subagent instructions address those commands, which hold the `Write` and `Task` grants; this skill is read-only, so a skill-only invocation applies its scope and severity rules and reports findings in the Step 5 format.
+- **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude material, which validations each bucket gates, and the structured report contract used by the `/validate-ai` and `/validate-ai-local` commands). Its report-writing and subagent instructions address those commands, which hold the `Write` and `Task` grants this skill does not.
 
 ### Step 5: Document Findings
 
@@ -108,7 +110,7 @@ Checklists reference this section rather than duplicating content.
 
 **CRITICAL**: Use inline comments on specific lines, NOT one large summary comment.
 
-**Exception**: whole-changeset reviews follow the single-document report contract in `reference/validate-ai-scope.md` instead. That contract governs when the review covers a changeset rather than specific files, which is how the `/validate-ai` and `/validate-ai-local` commands invoke this skill.
+**Exception**: when invoked by `/validate-ai` or `/validate-ai-local`, follow the single-document report contract in `reference/validate-ai-scope.md` instead. A skill-only changeset review borrows that reference's scope and severity rules but still reports in the inline format below. The invoking command decides the format, not the shape of the review.
 
 **Inline Comment Rules**:
 
@@ -133,7 +135,7 @@ Reference: [documentation link if applicable]
 **Example inline comment**:
 
 ````
-**.claude/skills/my-skill/skill.md:1** - CRITICAL: Missing YAML frontmatter
+**.claude/skills/my-skill/SKILL.md:1** - CRITICAL: Missing YAML frontmatter
 
 Skills require YAML frontmatter to be discoverable by Claude Code:
 

@@ -35,14 +35,14 @@ shows up on your machine rather than as a red check.
 
 ## What it covers
 
-| Check                      | Source                                      | Runs when                                                                |
-| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------ |
-| Plugin structure           | `validate-plugin-structure.sh` (gh-actions) | A `plugins/` directory changed and the repo has a marketplace manifest   |
-| Marketplace consistency    | `validate-marketplace.sh` (gh-actions)      | A plugin or the root `.claude-plugin/` changed                           |
-| Version bump and changelog | `validate-version-bump.sh` (gh-actions)     | Component files changed inside `plugins/`                                |
-| Plugin components          | `plugin-dev:plugin-validator` agent         | Any plugin directory changed                                             |
-| Skill quality              | `plugin-dev:skill-reviewer` agent           | Any `SKILL.md` changed                                                   |
-| Configuration and security | `reviewing-claude-config` skill             | Any agent, skill, command, hook, `CLAUDE.md`, or `.claude/` file changed |
+| Check                      | Source                                      | Runs when                                                                      |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| Plugin structure           | `validate-plugin-structure.sh` (gh-actions) | A `plugins/` directory changed and the repo has a marketplace manifest         |
+| Marketplace consistency    | `validate-marketplace.sh` (gh-actions)      | A plugin or the root `.claude-plugin/` changed, and the repo has that manifest |
+| Version bump and changelog | `validate-version-bump.sh` (gh-actions)     | Component files changed inside `plugins/`, and the repo has that manifest      |
+| Plugin components          | `plugin-dev:plugin-validator` agent         | Any plugin directory changed                                                   |
+| Skill quality              | `plugin-dev:skill-reviewer` agent           | Any `SKILL.md` changed                                                         |
+| Configuration and security | `reviewing-claude-config` skill             | Any agent, skill, command, hook, `CLAUDE.md`, or `.claude/` file changed       |
 
 Scope rules, gating, and the report format are defined once in
 [`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
@@ -60,9 +60,10 @@ the union of:
 ## Requirements
 
 - **`git`**, with the base ref fetchable or already local.
-- **`plugin-dev` plugin** (from the `anthropics/claude-code` marketplace) for the plugin
-  and skill validation sections. Without it those sections are reported as skipped, not
-  silently dropped.
+- **`plugin-dev` plugin** for the plugin and skill validation sections. Install it with
+  `/plugin install plugin-dev@claude-code-plugins`, from the `claude-code-plugins`
+  marketplace at `anthropics/claude-code`. Without it those sections are reported as
+  skipped, not silently dropped.
 - **A `bitwarden/gh-actions` checkout** for the three shell checks. The command looks at
   `$BW_GH_ACTIONS_PATH/validate-ai/scripts`, then a sibling `../gh-actions` checkout, and
   otherwise offers to shallow-clone the repository to a temporary directory. Decline and

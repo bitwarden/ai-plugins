@@ -1,6 +1,6 @@
 # Prompts and Commands Review Checklist
 
-Review checklist for changes to `.claude/prompts/*.md` and `.claude/commands/*.md` files.
+Review checklist for changes to `.claude/prompts/**/*.md`, `.claude/commands/**/*.md`, and `plugins/*/commands/**/*.md` files. Plugin commands nest one level, as `commands/<name>/<name>.md`.
 
 ---
 

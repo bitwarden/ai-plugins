@@ -26,3 +26,8 @@ __pycache__/
 # Node
 node_modules
 pnpm-debug.log
+
+# Local AI review and validation output
+validation-summary.md
+review-summary.md
+review-inline-comments.md

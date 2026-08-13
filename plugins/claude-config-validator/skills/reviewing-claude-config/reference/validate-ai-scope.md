@@ -44,7 +44,10 @@ Classify the in-scope paths into these buckets. They drive which validations run
   deduplicated (`plugins/<name>`)
 - **Component plugins** — changed plugins that had an agent, skill, command, or hook
   file change. Version-bump enforcement applies to these only, so a docs-only edit
-  under `plugins/<name>` does not force a version bump.
+  under `plugins/<name>` does not force a version bump. That describes the script's gate,
+  which is narrower than this repository's own policy: `.claude/CLAUDE.md` asks for a bump
+  and a changelog entry on any substantive change, documentation included, at PATCH level.
+  A docs-only change passing the script is not the same as it satisfying policy.
 - **Marketplace changed** — any changed path under a root `.claude-plugin/`
 
 **Components changed** means at least one of agent, skill, command, hook, or config

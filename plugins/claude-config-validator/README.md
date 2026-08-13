@@ -10,7 +10,7 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 ### Comprehensive Configuration Coverage
 
-Validates **6 configuration file types** with specialized checklists:
+Validates **7 configuration file types** with specialized checklists:
 
 | Configuration Type                                                     | What Gets Validated                                                                                        |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -18,6 +18,7 @@ Validates **6 configuration file types** with specialized checklists:
 | **Skills** (skill directories)                                         | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
 | **CLAUDE.md** (project instructions)                                   | Clarity, specificity, security patterns, proper emphasis, structured organization                          |
 | **Prompts/Commands** (`.claude/prompts/*.md`, `.claude/commands/*.md`) | Purpose clarity, session context handling, skill references, parameter validation                          |
+| **Hooks** (`hooks.json`)                                               | Schema and event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command safety, matcher scope                |
 | **Settings** (`.claude/settings.json`)                                 | Security (no committed credentials), permission scoping, valid JSON structure                              |
 | **Plugin Configurations** (`plugins/*/`)                               | Manifest validation, directory structure, marketplace standards                                            |
 
@@ -371,7 +372,7 @@ plugins/claude-config-validator/
 │   └── reviewing-claude-config/
 │       ├── SKILL.md         # Main skill instructions
 │       ├── README.md        # Skill-specific documentation
-│       ├── checklists/      # 5 validation checklists (agents, skills, CLAUDE.md, prompts, settings)
+│       ├── checklists/      # 6 validation checklists (agents, skills, CLAUDE.md, prompts, hooks, settings)
 │       ├── reference/       # 4 reference files (priority, security, requirements, changeset scope)
 │       ├── examples/        # 5 example review outputs
 │       └── scripts/         # Validation automation scripts

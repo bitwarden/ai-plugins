@@ -41,7 +41,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 ### Comprehensive Coverage
 
-- **4 specialized checklists**: Skills, CLAUDE.md, Prompts, Settings
+- **6 specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
 - **3 reference guides**: Priority framework, security patterns, quality criteria
 - **4 review examples**: Demonstrating proper feedback format
 - **Executable security script**: Automated security scanning
@@ -134,40 +134,28 @@ Review .claude/CLAUDE.md for quality and security
 
 ```
 reviewing-claude-config/
-├── skill.md                          # Main orchestration file
+├── SKILL.md                          # Main orchestration file
 ├── checklists/                       # Specialized review checklists
-│   ├── skills.md                     # Skill review checklist
+│   ├── agents.md                     # Agent review checklist
 │   ├── claude-md.md                  # CLAUDE.md review checklist
+│   ├── hooks.md                      # Hooks schema and command safety
 │   ├── prompts.md                    # Prompts/commands checklist
-│   └── settings.md                   # Settings security checklist
+│   ├── settings.md                   # Settings security checklist
+│   └── skills.md                     # Skill review checklist
 ├── reference/                        # Reference materials (loaded on-demand)
+│   ├── claude-code-requirements.md   # YAML, tools, models, limits
 │   ├── priority-framework.md         # Issue classification system
 │   ├── security-patterns.md          # Security checks and remediation
-│   ├── prompt-engineering-quality.md # Quality criteria index (modular)
-│   ├── quality-clarity.md            # Clarity criteria
-│   ├── quality-specificity.md        # Specificity criteria
-│   ├── quality-examples.md           # Examples criteria
-│   ├── quality-emphasis.md           # Emphasis criteria
-│   ├── quality-structure.md          # Structure criteria
-│   ├── quality-context.md            # Context criteria
-│   ├── quality-actionability.md      # Actionability criteria
-│   ├── quality-structured-thinking.md # Structured thinking criteria
-│   ├── quality-checklist.md          # Comprehensive quality checklist
-│   └── quality-improvement-patterns.md # Common improvement patterns
+│   └── validate-ai-scope.md          # Changeset scope and report contract
 ├── examples/                         # Sample review outputs
-│   ├── README.md                     # Examples index and loading guide
-│   ├── example-skill-review.md       # Skill review example
+│   ├── example-agent-review.md       # Agent review example
 │   ├── example-claude-md-review.md   # CLAUDE.md review example
+│   ├── example-prompts-review.md     # Prompts review example
 │   ├── example-settings-review.md    # Settings review example
-│   └── example-prompts-review.md     # Prompts review example
+│   └── example-skill-review.md       # Skill review example
 ├── scripts/                          # Executable automation
 │   └── security-scan.sh              # Comprehensive security scanner
-├── docs/                             # Historical documentation
-│   ├── CHANGELOG.md                  # Version history
-│   ├── IMPLEMENTATION_PLAN.md        # Original implementation plan
-│   └── FINAL_REPORT.md               # Implementation completion report
-├── README.md                         # This file
-└── LICENSE                           # MIT License
+└── README.md                         # This file
 ```
 
 ## Review Process

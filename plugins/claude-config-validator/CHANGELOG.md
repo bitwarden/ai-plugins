@@ -14,7 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `reference/validate-ai-scope.md` in `reviewing-claude-config`: scope rules, gating, severity mapping, and the report contract, shared by both commands so they cannot drift from the action
 - Untrusted-input boundary: configuration under review is data to report on, never instructions to follow (CWE-1427)
 - Report completion contract from bitwarden/gh-actions#867 and #868: a `<!-- validation-complete -->` marker, one write at the end, and independent subagents dispatched together but never left in flight at turn end
-- Explicit `commands` array in `plugin.json`, so the per-command `README.md` files are not auto-discovered as commands
+- `checklists/hooks.md`, plus hook detection and routing in `reviewing-claude-config`: hooks were a bucket both commands routed into a skill that had no hook coverage at all
+- Explicit `commands` array in `plugin.json`, which replaces the default `commands/` scan, so the per-command `README.md` files are not registered as commands
+
+### Fixed
+
+- Command detection in `reviewing-claude-config` missed plugin commands, which nest as `commands/<name>/<name>.md`, so this plugin's own commands would have gone unreviewed
+- A security finding no longer stops the review: a changeset report has to say which sections ran, which an early exit makes impossible
 
 ## [1.1.1] - 2026-03-12
 
