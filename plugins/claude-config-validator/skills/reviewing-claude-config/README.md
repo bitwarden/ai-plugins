@@ -164,7 +164,8 @@ reviewing-claude-config/
 │   ├── security-patterns.md          # Security checks and remediation
 │   └── validate-ai-scope.md          # Changeset scope and report contract
 ├── examples/                         # Sample review outputs
-│   ├── example-agent-review.md       # Agent review example
+│   ├── example-agent-composition-review.md # Agent invocation and dependency review
+│   ├── example-agent-review.md       # Agent configuration review example
 │   ├── example-claude-md-review.md   # CLAUDE.md review example
 │   ├── example-hooks-review.md       # Hooks review example
 │   ├── example-prompts-review.md     # Prompts review example
@@ -230,6 +231,7 @@ If you want to customize for your organization:
 One comprehensive review example per configuration type, each demonstrating the feedback format:
 
 - `examples/example-agent-review.md` - Agent review with security and quality issues
+- `examples/example-agent-composition-review.md` - Agent invocation patterns and a circular-dependency anti-pattern
 - `examples/example-skill-review.md` - Skill review with multiple issues
 - `examples/example-claude-md-review.md` - CLAUDE.md review with duplication
 - `examples/example-hooks-review.md` - Hooks review with shell injection and prompt-hook findings

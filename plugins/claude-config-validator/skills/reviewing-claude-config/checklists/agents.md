@@ -137,7 +137,7 @@ tools: Read, Write, Edit, Bash # Why does documentation need Bash?
 - Write/Edit access for analysis-only agents
 - Tool access mismatched to agent description
 
-**Reference:** `../reference/claude-code-requirements.md` - Tool Access Security (lines 109-133)
+**Reference:** `../reference/claude-code-requirements.md` - "Tool Access Patterns"
 
 ---
 
@@ -490,3 +490,9 @@ Before completing review, verify:
 - [ ] Single responsibility principle followed
 - [ ] Security implications considered
 - [ ] Marketplace standards met (if applicable)
+
+---
+
+## Output Format
+
+Report findings using the standard format in `SKILL.md` Step 5.

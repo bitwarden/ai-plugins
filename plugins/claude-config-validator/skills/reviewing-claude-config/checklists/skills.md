@@ -263,3 +263,9 @@ Before completing review, verify:
 - [ ] Examples provided for complex concepts
 - [ ] Token-efficient organization
 - [ ] Constructive, actionable feedback tone
+
+---
+
+## Output Format
+
+Report findings using the standard format in `SKILL.md` Step 5.
