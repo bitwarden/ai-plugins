@@ -1,384 +1,538 @@
 {
   "runs": {
     "with": 3,
-    "base": 1
+    "base": 3
   },
-  "grading": "blind LLM grader (haiku) over cached runs",
+  "grading": "Blind LLM grader over cached runs, one assertion at a time. The grader states its reasoning in one sentence and then emits a VERDICT line. A grader constrained to a single-word answer with no reasoning returns unusable verdicts, so the reasoning step is required. Two graders are recorded because they disagree.",
   "overall": {
-    "with_skill_run_pass_rate": 1.0,
-    "baseline_run_pass_rate": 0.78
+    "claude-opus-5": {
+      "with_skill_run_pass_rate": 1.0,
+      "baseline_run_pass_rate": 0.704
+    },
+    "claude-sonnet-5": {
+      "with_skill_run_pass_rate": 0.926,
+      "baseline_run_pass_rate": 0.667
+    }
   },
+  "model_runner": "claude-opus-4-8",
+  "model_graders": ["claude-opus-5", "claude-sonnet-5"],
+  "blinding": "subject: fresh session per run with no conversation context; observer: automated runner; grader: separate session in a bare directory, given one output and one assertion, told neither the arm nor the expected classification",
+  "arms": "with_skill runs the skill as a forked subagent, so the graded artifact is the result the skill returns. baseline runs the same prompts in an environment where the skill does not exist, so the graded artifact is the assistant's own answer.",
   "cases": [
     {
       "name": "conflict-throws-instead-of-result",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Uses the documented finding format (a finding line labeled CONFLICT/GAP/STALE-REFERENCE, in any bracket style)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Ends with a roll-up / summary line",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Emits a CONFLICT finding for throwing instead of returning Result",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not classify the change as Aligned",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 0.667
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Uses the documented finding format (a finding line labeled CONFLICT/GAP/STALE-REFERENCE, in any bracket style)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Ends with a roll-up / summary line",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Emits a CONFLICT finding for throwing instead of returning Result",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not classify the change as Aligned",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 0.0,
+          "claude-sonnet-5": 0.0
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 1.0,
+        "claude-sonnet-5": 0.667
+      },
+      "per_assertion": [
+        {
+          "assertion": "Each finding is labeled with its type (conflict, gap, stale-reference, or aligned); how the label is rendered does not matter.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.333,
+            "claude-sonnet-5": 0.667
+          }
+        },
+        {
+          "assertion": "Output ends with a roll-up line giving counts per finding type or stating no in-force ADR was relevant.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 0.667
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.0,
+            "claude-sonnet-5": 0.0
+          }
+        },
+        {
+          "assertion": "Emits a CONFLICT finding.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not classify this change as Aligned.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     },
     {
       "name": "gap-new-event-bus",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Emits a GAP finding for the event bus decision",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Explains why the decision is significant (new contract / precedent / cross-service blast radius)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not invent a nonexistent ADR for the event bus (citing real, reviewed-and-excluded ADRs is fine)",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 0,
-        "per_assertion": [
-          {
-            "assertion": "Emits a GAP finding for the event bus decision",
-            "pass_rate": 0
-          },
-          {
-            "assertion": "Explains why the decision is significant (new contract / precedent / cross-service blast radius)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not invent a nonexistent ADR for the event bus (citing real, reviewed-and-excluded ADRs is fine)",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 0.667,
+          "claude-sonnet-5": 1.0
+        }
       },
-      "delta_run_pass_rate": 1
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.333,
+        "claude-sonnet-5": 0.0
+      },
+      "per_assertion": [
+        {
+          "assertion": "Emits a GAP finding for the event bus decision.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Explains why it is significant (new cross-service pattern / precedent / blast radius).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.667,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not invent or cite a specific ADR number, title, or URL for the event bus.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     },
     {
       "name": "aligned-returns-result",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Classifies the change as Aligned with ADR-9001 (or otherwise reports no conflict/gap)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not emit a CONFLICT or GAP finding",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Keeps the aligned note brief (does not manufacture findings)",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Classifies the change as Aligned with ADR-9001 (or otherwise reports no conflict/gap)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not emit a CONFLICT or GAP finding",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Keeps the aligned note brief (does not manufacture findings)",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 0.667,
+          "claude-sonnet-5": 0.333
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.333,
+        "claude-sonnet-5": 0.667
+      },
+      "per_assertion": [
+        {
+          "assertion": "Classifies the change as Aligned with ADR-9001 (or otherwise reports no conflict/gap).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not emit a CONFLICT or GAP finding for this change.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 0.667
+          }
+        },
+        {
+          "assertion": "Keeps the aligned note brief (does not manufacture findings).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.667,
+            "claude-sonnet-5": 0.333
+          }
+        }
+      ]
     },
     {
       "name": "stale-reference-superseded-adr",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Flags that ADR-9002 (Vitest) is superseded / a stale reference",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Points to ADR-9005 (Jest) as the in-force decision",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not treat ADR-9002 as a current binding constraint",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Flags that ADR-9002 (Vitest) is superseded / a stale reference",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Points to ADR-9005 (Jest) as the in-force decision",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not treat ADR-9002 as a current binding constraint",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.0,
+        "claude-sonnet-5": 0.0
+      },
+      "per_assertion": [
+        {
+          "assertion": "Emits a STALE-REFERENCE finding (or flags that ADR-9002 is superseded).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Points to ADR-9005 (Jest) as the in-force decision.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not treat ADR-9002 (Vitest) as a current, binding constraint.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     },
     {
       "name": "skip-no-architectural-surface",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Reports no relevant in-force ADR / no architectural surface",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not manufacture any CONFLICT, GAP, or STALE-REFERENCE finding",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not invent an ADR",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Reports no relevant in-force ADR / no architectural surface",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not manufacture any CONFLICT, GAP, or STALE-REFERENCE finding",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not invent an ADR",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 0.667,
+          "claude-sonnet-5": 0.667
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.333,
+        "claude-sonnet-5": 0.333
+      },
+      "per_assertion": [
+        {
+          "assertion": "Reports no relevant in-force ADR / no architectural surface.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.667,
+            "claude-sonnet-5": 0.667
+          }
+        },
+        {
+          "assertion": "Does not manufacture a CONFLICT, GAP, or STALE-REFERENCE finding.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not invent an ADR.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     },
     {
       "name": "no-adr-found-do-not-invent",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Reports that no in-force ADR governs the change",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not invent a nonexistent ADR number, title, or URL",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not fabricate a CONFLICT",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Reports that no in-force ADR governs the change",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not invent a nonexistent ADR number, title, or URL",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not fabricate a CONFLICT",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.0,
+        "claude-sonnet-5": 0.0
+      },
+      "per_assertion": [
+        {
+          "assertion": "Reports that no in-force ADR governs the change (none found).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not invent an ADR number, title, or URL.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not fabricate a conflict.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     },
     {
       "name": "not-governed-suboptimal-is-not-a-conflict",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Does not classify this as an ADR CONFLICT (no fixture ADR governs class size / separation of concerns)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "If mentioned, frames it as not ADR-governed rather than a recorded-decision conflict",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Does not classify this as an ADR CONFLICT (no fixture ADR governs class size / separation of concerns)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "If mentioned, frames it as not ADR-governed rather than a recorded-decision conflict",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.0,
+        "claude-sonnet-5": 0.0
+      },
+      "per_assertion": [
+        {
+          "assertion": "Does not classify this as an ADR CONFLICT (no fixture ADR governs class size or separation of concerns).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "If mentioned at all, frames it as not ADR-governed rather than a recorded-decision conflict.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     },
     {
       "name": "source-call-live-contributing-site",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "References the real package-manager ADR (adopt-pnpm / ADR-0030)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Cites a contributing.bitwarden.com ADR path",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not fabricate an ADR number or title",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 0.667
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 0,
-        "per_assertion": [
-          {
-            "assertion": "References the real package-manager ADR (adopt-pnpm / ADR-0030)",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Cites a contributing.bitwarden.com ADR path",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not fabricate an ADR number or title",
-            "pass_rate": 0
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 0.333,
+          "claude-sonnet-5": 0.0
+        }
       },
-      "delta_run_pass_rate": 1
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.667,
+        "claude-sonnet-5": 0.667
+      },
+      "per_assertion": [
+        {
+          "assertion": "Output references the real package-manager ADR (adopt-pnpm / ADR-0030).",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Cites a contributing.bitwarden.com ADR path.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.333,
+            "claude-sonnet-5": 0.0
+          }
+        },
+        {
+          "assertion": "Does not fabricate an ADR: any cited ADR path resolves under contributing.bitwarden.com/architecture/adr/.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 0.667
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 0.667,
+            "claude-sonnet-5": 0.333
+          }
+        }
+      ]
     },
     {
       "name": "summarize-adr-catalog",
       "with_skill": {
         "runs": 3,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Returns a summary/list of ADRs (title + status), not a conflict/gap/stale finding report.",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Correctly reflects statuses: 9001, 9004, 9005 accepted; 9002 superseded; 9003 deprecated.",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not fabricate an ADR that is not in the catalog.",
-            "pass_rate": 1
-          }
-        ]
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
       "baseline": {
-        "runs": 1,
-        "run_pass_rate": 1,
-        "per_assertion": [
-          {
-            "assertion": "Returns a summary/list of ADRs (title + status), not a conflict/gap/stale finding report.",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Correctly reflects statuses: 9001, 9004, 9005 accepted; 9002 superseded; 9003 deprecated.",
-            "pass_rate": 1
-          },
-          {
-            "assertion": "Does not fabricate an ADR that is not in the catalog.",
-            "pass_rate": 1
-          }
-        ]
+        "runs": 3,
+        "run_pass_rate": {
+          "claude-opus-5": 1.0,
+          "claude-sonnet-5": 1.0
+        }
       },
-      "delta_run_pass_rate": 0
+      "delta_run_pass_rate": {
+        "claude-opus-5": 0.0,
+        "claude-sonnet-5": 0.0
+      },
+      "per_assertion": [
+        {
+          "assertion": "Returns a summary/list of ADRs (title + status), not a conflict/gap/stale finding report.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Correctly reflects statuses: 9001, 9004, 9005 accepted; 9002 superseded; 9003 deprecated.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        },
+        {
+          "assertion": "Does not fabricate an ADR that is not in the catalog.",
+          "with_skill_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          },
+          "baseline_pass_rate": {
+            "claude-opus-5": 1.0,
+            "claude-sonnet-5": 1.0
+          }
+        }
+      ]
     }
-  ],
-  "model_runner": "claude-opus-4-8",
-  "model_grader": "claude-haiku-4-5",
-  "blinding": "subject: fresh subagent per run; observer: automated workflow; grader: separate blind haiku grader, config-agnostic"
+  ]
 }

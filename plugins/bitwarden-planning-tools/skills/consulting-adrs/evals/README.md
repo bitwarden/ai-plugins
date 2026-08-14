@@ -24,10 +24,18 @@ and **Behavior**. Baselines were recorded on `claude-opus-4-8`.
 Structure + behavior: run each `evals.json` case with the skill vs without
 (baseline), then grade blind; actual run counts per arm are recorded in
 `benchmark.json`. Grading must be an **LLM
-grader**, not regex: the finding tokens (`CONFLICT`/`GAP`/`STALE-REFERENCE`)
-appear both as finding labels and inside roll-up count lines (`CONFLICT: 0`),
-which defeats naive pattern matching. Blind all three tiers (subject, observer,
-grader).
+grader**, not regex: the type names (`CONFLICT`/`GAP`/`STALE-REFERENCE`) appear
+both as finding labels and inside the roll-up count line, and label rendering is
+not fixed, so pattern matching both over-counts and misses. Assertions grade the
+finding a run reached, not the characters it used. Give the grader room to reason:
+one sentence of justification before a `VERDICT:` line. A grader constrained to a
+bare one-word answer returns verdicts that track the model rather than the output,
+strong models failing outputs they pass once allowed to explain. Blind all three
+tiers (subject, observer, grader).
+
+The skill runs as a forked subagent, so the with-skill artifact to grade is the
+result the skill returns, not the calling session's summary of it. The caller
+paraphrases, and the paraphrase is not the skill's output.
 
 Behavior cases point the skill at `fixtures/adr/` via its local-clone path so
 grading is deterministic and offline. The `source-call-live` case provides no
@@ -40,3 +48,12 @@ fabricate, not that a fetch actually occurred.
 - **Under-trigger on "review my PR for alignment with our recorded architecture
   decisions".** A genuine should-trigger phrasing fires only 1/3 (goes silent,
   not to a competitor).
+- **The fixtures path leaks the skill name into every offline prompt.** Baseline
+  runs read `skills/consulting-adrs/evals/fixtures/adr` and go looking for a skill
+  that is absent from that environment, spending turns on a call that cannot
+  succeed. The baseline stays valid, since nothing loads, but it is not blind to
+  the skill's existence.
+- **Four cases do not discriminate.** `stale-reference-superseded-adr`,
+  `no-adr-found-do-not-invent`, `not-governed-suboptimal-is-not-a-conflict`, and
+  `summarize-adr-catalog` pass in both arms, so they guard against regression
+  rather than measure the skill's contribution.
