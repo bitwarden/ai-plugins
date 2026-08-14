@@ -79,10 +79,10 @@ Provides specific, file:line referenced feedback with:
 
 ### Commands
 
-| Command                                                      | Purpose                                                                                                                   |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| [`/validate-ai-local`](commands/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write `validation-summary.md` |
-| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report to a sticky pull request comment                        |
+| Command                                                      | Purpose                                                                                                                                              |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`/validate-ai-local`](commands/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
+| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report to a sticky pull request comment                                                   |
 
 Both commands run the same review the
 [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub

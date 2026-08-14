@@ -5,6 +5,13 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-08-14
+
+### Changed
+
+- `/validate-ai-local` writes its report to `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md` instead of `validation-summary.md` in the working directory. The command runs against any checkout, so the old location meant every repository it was pointed at needed a `.gitignore` entry to keep the report out of a commit. The repo and timestamp in the name also stop reports from different checkouts overwriting each other. The command prints the path it wrote, since the new location is not one you would stumble across
+- `Write` grant on `/validate-ai-local` is scoped to `${CLAUDE_PLUGIN_DATA}/ai-validation/`, and `Bash(date:*)` is pre-approved for the report timestamp
+
 ## [1.2.0] - 2026-08-12
 
 ### Added

@@ -1,6 +1,6 @@
 ---
 argument-hint: "[base-ref] (defaults to the repository default branch)"
-allowed-tools: Read, Write(validation-summary.md), Grep, Glob, Task, Skill, Bash(git diff:*), Bash(git fetch:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(ls:*)
+allowed-tools: Read, Write(${CLAUDE_PLUGIN_DATA}/ai-validation/*), Grep, Glob, Task, Skill, Bash(git diff:*), Bash(git fetch:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
 description: Validate the Claude Code material you changed locally (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and write the report to a local file
 ---
 
@@ -150,10 +150,14 @@ directly from the working tree. There is no `.claude-pr/` snapshot to redirect t
 
 ## 7. Write the report
 
-Write the full report to `validation-summary.md` in the current working directory. That is
-where the `Write(validation-summary.md)` grant resolves: a bare pattern anchors at the
-current directory, and only the `//` form is absolute. Follow the report contract in the
-scope reference, and end the report with
+Write the full report to
+`${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md`, where `<repo>` is
+the basename of `git rev-parse --show-toplevel` and `<timestamp>` comes from
+`date +%Y-%m-%d-%H%M%S`. The directory is outside any repository, so the report never needs
+a `.gitignore` entry in whichever checkout you ran against, and the repo and timestamp in
+the name keep reports from different checkouts apart.
+
+Follow the report contract in the scope reference, and end the report with
 `<!-- validation-complete -->` on a line of its own. One Write call, once, after every
 subagent has returned. Writing it is mandatory — write it even when everything passed and
 even when every section was skipped.
