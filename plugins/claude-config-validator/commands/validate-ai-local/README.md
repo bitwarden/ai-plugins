@@ -79,7 +79,7 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 
 The command pre-approves read-only inspection only — `git diff`, `git fetch`,
 `git rev-parse`, `git symbolic-ref`, `git ls-files`, `date`, `ls` — plus a `Write` scoped
-to `~/.claude/plugins/data/**/ai-validation/`, the only directory it writes to. Cloning
+to `~/.claude/plugins/data/*/ai-validation/`, the only directory it writes to. Cloning
 `gh-actions` and running its scripts are left out on purpose and will be asked for: that
 step executes shell code from outside this repository, and a blanket `Bash(bash:*)` grant
 would pre-approve arbitrary commands on the one path that fetches code from the network.
@@ -88,10 +88,12 @@ If you run this often, allowlist the exact script invocations yourself.
 The `Write` grant is written home-relative rather than as `${CLAUDE_PLUGIN_DATA}/...`
 because a permission pattern is only filesystem-absolute in its `~/` or `//` form — the
 single leading slash `${CLAUDE_PLUGIN_DATA}` expands to would anchor the rule at your
-current directory and never match. Two consequences: the pattern spans any plugin's
-`ai-validation/` directory rather than this one's, and it does not follow
-`CLAUDE_CODE_PLUGIN_CACHE_DIR` if you have relocated plugin storage, in which case the
-final write asks for permission.
+current directory and never match. Two consequences. The `*` standing in for the plugin's
+data directory means the pattern spans any plugin's `ai-validation/` directory rather than
+this one's; naming a single directory would require hardcoding the plugin identifier, which
+embeds the marketplace you installed from and so differs between installs. And the pattern
+is written against `~/.claude`, so if you have relocated that tree with
+`CLAUDE_CONFIG_DIR`, the final write asks for permission.
 
 ## Known local caveat
 
@@ -114,7 +116,8 @@ whenever that check runs.
 which can be any repository — so no repository needs a `.gitignore` entry for them, and
 reports from different checkouts do not overwrite each other. The trade-off is that they
 accumulate somewhere you have to go looking for; the command prints the path it wrote each
-time. `/plugin uninstall` deletes that directory unless you pass `--keep-data`.
+time. `claude plugin uninstall <plugin>` deletes that directory unless you pass
+`--keep-data`.
 
 The file is always written, including when everything passes and when every section was
 skipped, and it ends with `<!-- validation-complete -->` so a local report matches what
