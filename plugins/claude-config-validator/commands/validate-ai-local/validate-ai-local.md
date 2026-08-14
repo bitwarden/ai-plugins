@@ -1,7 +1,7 @@
 ---
 argument-hint: "[base-ref] (defaults to the repository default branch)"
-allowed-tools: Read, Write(${CLAUDE_PLUGIN_DATA}/ai-validation/*), Grep, Glob, Task, Skill, Bash(git diff:*), Bash(git fetch:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
-description: Validate the Claude Code material you changed locally (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and write the report to a local file
+allowed-tools: Read, Write(~/.claude/plugins/data/**/ai-validation/*), Grep, Glob, Task, Skill, Bash(git diff:*), Bash(git fetch:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
+description: Validate the Claude Code material you changed locally (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and write a timestamped report to the plugin's data directory
 ---
 
 Validate the Claude Code material changed in this checkout, the same way the
