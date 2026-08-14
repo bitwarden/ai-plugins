@@ -9,7 +9,7 @@
       "type": ["structure", "behavior"],
       "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: OrganizationService methods will throw a NotFoundException when an entity is missing and throw a ValidationException on bad input, instead of returning a result object.",
       "assertions": [
-        "Output uses the finding format: at least one finding line starts with [CONFLICT], [GAP], or [STALE-REFERENCE].",
+        "Each finding is labeled with its type (conflict, gap, stale-reference, or aligned); how the label is rendered does not matter.",
         "Output ends with a roll-up line giving counts per finding type or stating no in-force ADR was relevant.",
         "Emits a CONFLICT finding.",
         "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision.",
