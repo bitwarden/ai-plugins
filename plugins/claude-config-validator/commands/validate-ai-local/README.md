@@ -78,7 +78,7 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 ## Permissions
 
 The command pre-approves read-only inspection only — `git diff`, `git fetch`,
-`git rev-parse`, `git symbolic-ref`, `git ls-files`, `date`, `ls` — plus a `Write` scoped
+`git rev-parse`, `git symbolic-ref`, `git ls-files`, `date` — plus an `Edit` rule scoped
 to `~/.claude/plugins/data/claude-config-validator-*/ai-validation/`, the only directory it
 writes to. Cloning
 `gh-actions` and running its scripts are left out on purpose and will be asked for: that
@@ -86,14 +86,17 @@ step executes shell code from outside this repository, and a blanket `Bash(bash:
 would pre-approve arbitrary commands on the one path that fetches code from the network.
 If you run this often, allowlist the exact script invocations yourself.
 
-The `Write` grant is written home-relative rather than as `${CLAUDE_PLUGIN_DATA}/...`
-because a permission pattern is only filesystem-absolute in its `~/` or `//` form — the
-single leading slash `${CLAUDE_PLUGIN_DATA}` expands to would anchor the rule at your
-current directory and never match. The data directory is named from the plugin's install
-id, which appends the marketplace you installed from, so the trailing `-*` globs that
-suffix while still naming this plugin. The pattern is written against `~/.claude`, so
-relocating the tree with either `CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR` means
-the final write asks for permission.
+Two details in that rule are deliberate. It is an `Edit` rule even though the command uses
+`Write`, because Claude Code checks file permissions against `Edit(path)` and `Read(path)`
+rules only: a path rule written for `Write` is accepted, never consulted, and warned about
+at startup, while an `Edit` rule applies to every built-in tool that edits files. And the
+path is written out literally rather than as `${CLAUDE_PLUGIN_DATA}/...`, because
+substitution in `allowed-tools` is documented for Bash rules, not for file-path rules. The
+data directory is named from the plugin's install id, which appends the marketplace you
+installed from, so the trailing `-*` globs that suffix while still naming this plugin.
+Because the pattern is written against `~/.claude`, relocating that tree with
+`CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR` means the final write asks for
+permission.
 
 ## Known local caveat
 
