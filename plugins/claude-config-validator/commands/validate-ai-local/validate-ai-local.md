@@ -157,6 +157,11 @@ the basename of `git rev-parse --show-toplevel` and `<timestamp>` comes from
 a `.gitignore` entry in whichever checkout you ran against, and the repo and timestamp in
 the name keep reports from different checkouts apart.
 
+If `${CLAUDE_PLUGIN_DATA}` reaches you unexpanded, which can happen on a local
+`--plugin-dir` load, write to `~/.claude/plugins/data/claude-config-validator/ai-validation/`
+instead. Never fall back to the working directory: landing the report in whichever
+repository you validated is the outcome this path exists to avoid.
+
 Follow the report contract in the scope reference, and end the report with
 `<!-- validation-complete -->` on a line of its own. One Write call, once, after every
 subagent has returned. Writing it is mandatory — write it even when everything passed and

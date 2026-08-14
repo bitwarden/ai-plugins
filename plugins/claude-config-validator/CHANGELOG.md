@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `/validate-ai-local` writes its report to `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md` instead of the working directory, so no repository it runs against needs a `.gitignore` entry for the report
-- `Edit` rule scoped to `~/.claude/plugins/data/claude-config-validator*/ai-validation/`, plus `Bash(date:*)` for the report timestamp. The path is written literally because substitution in `allowed-tools` is documented for Bash rules only; it therefore does not follow `CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR`
+- `Edit` rule scoped to `~/.claude/plugins/data/claude-config-validator*/ai-validation/`, plus `Bash(date:*)` for the report timestamp. The path is written literally rather than as `${CLAUDE_PLUGIN_DATA}` because that substitution is skipped for a local `--plugin-dir` load; it therefore does not follow `CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR`
 - `/validate-ai-local` description names the report location, which is the string `/help` shows
 
 ### Fixed

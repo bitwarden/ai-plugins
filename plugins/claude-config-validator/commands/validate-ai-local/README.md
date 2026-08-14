@@ -91,9 +91,11 @@ Three details in that rule are deliberate. It is an `Edit` rule even though the 
 rules only: a path rule written for `Write` is accepted, never consulted, and warned about
 at startup, while an `Edit` rule applies to every built-in tool that edits files. That
 behavior needs Claude Code 2.1.210 or later; on an older CLI the write asks for permission
-instead. The path is written out literally rather than as `${CLAUDE_PLUGIN_DATA}/...`,
-because substitution in `allowed-tools` is documented for Bash rules, not for file-path
-rules. And the trailing `*` is loose on purpose: the data directory is named from the
+instead. The path is written out literally rather than as `${CLAUDE_PLUGIN_DATA}/...`
+because that substitution is skipped for a local `--plugin-dir` load, where it is guarded on
+the plugin having a marketplace source, so the variable can survive into the rule unexpanded
+and match nothing. A literal path covers both install kinds. And the trailing `*` is loose
+on purpose: the data directory is named from the
 plugin's install id, which is `claude-config-validator-bitwarden-marketplace` for a
 marketplace install but bare `claude-config-validator` for a local `--plugin-dir` load, so a
 required hyphen would fail to match the second case.
