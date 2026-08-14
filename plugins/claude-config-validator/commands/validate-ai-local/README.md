@@ -78,22 +78,26 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 ## Permissions
 
 The command pre-approves read-only inspection only — `git diff`, `git fetch`,
-`git rev-parse`, `git symbolic-ref`, `git ls-files`, `date` — plus an `Edit` rule scoped
-to `~/.claude/plugins/data/claude-config-validator-*/ai-validation/`, the only directory it
-writes to. Cloning
+`git rev-parse`, `git symbolic-ref`, `git ls-files`, `date`, `ls` — plus an `Edit` rule
+scoped to `~/.claude/plugins/data/claude-config-validator*/ai-validation/`, the only
+directory it writes to. Cloning
 `gh-actions` and running its scripts are left out on purpose and will be asked for: that
 step executes shell code from outside this repository, and a blanket `Bash(bash:*)` grant
 would pre-approve arbitrary commands on the one path that fetches code from the network.
 If you run this often, allowlist the exact script invocations yourself.
 
-Two details in that rule are deliberate. It is an `Edit` rule even though the command uses
+Three details in that rule are deliberate. It is an `Edit` rule even though the command uses
 `Write`, because Claude Code checks file permissions against `Edit(path)` and `Read(path)`
 rules only: a path rule written for `Write` is accepted, never consulted, and warned about
-at startup, while an `Edit` rule applies to every built-in tool that edits files. And the
-path is written out literally rather than as `${CLAUDE_PLUGIN_DATA}/...`, because
-substitution in `allowed-tools` is documented for Bash rules, not for file-path rules. The
-data directory is named from the plugin's install id, which appends the marketplace you
-installed from, so the trailing `-*` globs that suffix while still naming this plugin.
+at startup, while an `Edit` rule applies to every built-in tool that edits files. That
+behavior needs Claude Code 2.1.210 or later; on an older CLI the write asks for permission
+instead. The path is written out literally rather than as `${CLAUDE_PLUGIN_DATA}/...`,
+because substitution in `allowed-tools` is documented for Bash rules, not for file-path
+rules. And the trailing `*` is loose on purpose: the data directory is named from the
+plugin's install id, which is `claude-config-validator-bitwarden-marketplace` for a
+marketplace install but bare `claude-config-validator` for a local `--plugin-dir` load, so a
+required hyphen would fail to match the second case.
+
 Because the pattern is written against `~/.claude`, relocating that tree with
 `CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR` means the final write asks for
 permission.
@@ -120,7 +124,8 @@ which can be any repository — so no repository needs a `.gitignore` entry for 
 reports from different checkouts do not overwrite each other. The trade-off is that they
 accumulate somewhere you have to go looking for; the command prints the path it wrote each
 time. `claude plugin uninstall <plugin>` deletes that directory unless you pass
-`--keep-data`.
+`--keep-data`; `claude plugin uninstall --help` documents both the flag and the
+`~/.claude/plugins/data/{id}/` layout the `Edit` rule is written against.
 
 The file is always written, including when everything passes and when every section was
 skipped, and it ends with `<!-- validation-complete -->` so a local report matches what

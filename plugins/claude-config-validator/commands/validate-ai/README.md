@@ -123,10 +123,12 @@ rather than by its turn count.
 ## Permissions
 
 The command pre-approves only read-only inspection: `gh pr view`, `gh pr diff`,
-`git rev-parse`, and reading `GITHUB_ACTIONS`. An `Edit` rule is scoped to the one file the
-command produces, `//tmp/validation-summary.md`. It is an `Edit` rule rather than a `Write`
-one because Claude Code consults `Edit(path)` and `Read(path)` rules only, and an `Edit`
-rule covers every built-in tool that edits files. The `gh api`
+`git rev-parse`, `ls`, and reading `GITHUB_ACTIONS`. An `Edit(//tmp/validation-summary.md)`
+rule scopes the one file the command produces, `/tmp/validation-summary.md` — the doubled
+slash is permission-rule syntax for "absolute from the filesystem root", not part of the
+path. It is an `Edit` rule rather than a `Write` one because Claude Code consults
+`Edit(path)` and `Read(path)` rules only, and an `Edit` rule covers every built-in tool that
+edits files; that needs Claude Code 2.1.210 or later. The `gh api`
 calls that create or edit the sticky comment in interactive mode are left out on purpose,
 so writing to a pull request is a decision you see and approve. Allowlist them yourself if
 you run this often.

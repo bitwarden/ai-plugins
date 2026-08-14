@@ -97,7 +97,7 @@ Load reference files only when needed for specific questions:
 - **Issue prioritization** → `reference/priority-framework.md` (CRITICAL vs IMPORTANT vs SUGGESTED vs OPTIONAL)
 - **Security patterns** → `reference/security-patterns.md` (detection commands, fix examples)
 - **Claude Code requirements** → `reference/claude-code-requirements.md` (YAML frontmatter, model selection, tool names, progressive disclosure, settings conventions)
-- **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude material, which validations each bucket gates, and the structured report contract used by the `/validate-ai` and `/validate-ai-local` commands). Its report-writing and subagent instructions address those commands, which hold the `Write` and `Task` grants this skill does not.
+- **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude material, which validations each bucket gates, and the structured report contract used by the `/validate-ai` and `/validate-ai-local` commands). Its report-writing and subagent instructions address those commands, which hold the report-writing and `Task` grants this skill does not.
 
 ### Step 5: Document Findings
 
