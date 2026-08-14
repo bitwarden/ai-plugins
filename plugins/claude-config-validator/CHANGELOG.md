@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `/validate-ai-local` writes its report to `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md` instead of the working directory, so no repository it runs against needs a `.gitignore` entry for the report
-- `Write` grant scoped to `~/.claude/plugins/data/*/ai-validation/`, plus `Bash(date:*)` for the report timestamp. The grant is home-relative because a permission pattern is absolute only in its `~/` or `//` form; it does not follow `CLAUDE_CONFIG_DIR`
+- `Write` grant scoped to `~/.claude/plugins/data/claude-config-validator-*/ai-validation/`, plus `Bash(date:*)` for the report timestamp. The grant is home-relative because a permission pattern is absolute only in its `~/` or `//` form; it does not follow `CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR`
 - `/validate-ai-local` description names the report location, which is the string `/help` shows
 
 ## [1.2.0] - 2026-08-12
