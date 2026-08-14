@@ -5,13 +5,13 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-08-14
+## [1.2.1] - 2026-08-14
 
 ### Changed
 
-- `/validate-ai-local` writes its report to `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md` instead of `validation-summary.md` in the working directory. The command runs against any checkout, so the old location meant every repository it was pointed at needed a `.gitignore` entry to keep the report out of a commit. The repo and timestamp in the name also stop reports from different checkouts overwriting each other. The command prints the path it wrote, since the new location is not one you would stumble across
-- `Write` grant on `/validate-ai-local` is scoped to `~/.claude/plugins/data/**/ai-validation/`, and `Bash(date:*)` is pre-approved for the report timestamp. The grant is home-relative rather than `${CLAUDE_PLUGIN_DATA}`-based because a permission pattern is absolute only in its `~/` or `//` form; the single leading slash the variable expands to would anchor the rule at the current directory and never match. It does not follow `CLAUDE_CODE_PLUGIN_CACHE_DIR`, so a relocated plugin store means the final write asks for permission
-- `description` on `/validate-ai-local` names the new report location, since that string is what `/help` and the command listing show
+- `/validate-ai-local` writes its report to `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md` instead of the working directory, so no repository it runs against needs a `.gitignore` entry for the report
+- `Write` grant scoped to `~/.claude/plugins/data/**/ai-validation/`, plus `Bash(date:*)` for the report timestamp. The grant is home-relative because a permission pattern is absolute only in its `~/` or `//` form; it does not follow `CLAUDE_CODE_PLUGIN_CACHE_DIR`
+- `/validate-ai-local` description names the report location, which is the string `/help` shows
 
 ## [1.2.0] - 2026-08-12
 
