@@ -30,6 +30,5 @@ pnpm-debug.log
 # Local AI review and validation output
 # .claude-pr is claude-code-action's snapshot of PR-authored config; never ours to commit
 .claude-pr/
-validation-summary.md
 review-summary.md
 review-inline-comments.md

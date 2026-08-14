@@ -100,7 +100,10 @@ required hyphen would fail to match the second case.
 
 Because the pattern is written against `~/.claude`, relocating that tree with
 `CLAUDE_CONFIG_DIR` or `CLAUDE_CODE_PLUGIN_CACHE_DIR` means the final write asks for
-permission.
+permission. On Linux with the Bash sandbox enabled you may also see a startup warning that
+glob patterns in permission rules are not fully supported when deriving sandbox write paths;
+it names this rule, and the report is still written, since the permission check the write
+goes through is a separate path.
 
 ## Known local caveat
 
