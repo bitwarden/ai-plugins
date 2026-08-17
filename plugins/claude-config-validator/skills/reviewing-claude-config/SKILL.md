@@ -118,7 +118,7 @@ Checklists reference this section rather than duplicating content.
 The skill itself posts nothing: its grant is `Read, Grep, Glob`. It produces findings, and the invoking context decides where they go. Take the first case below that applies:
 
 - **`/validate-ai` or `/validate-ai-local`**: follow the single-document report contract in `reference/validate-ai-scope.md`. A skill-only changeset review borrows that reference's scope and severity rules while still reporting per issue. The invoking context decides the format, not the shape of the review.
-- **Any other invoking context where a comment-posting tool is available in the session**: post one comment per issue on its exact line, in the per-issue format below. Create new comments rather than updating existing ones.
+- **Any other invoking context where a comment-posting tool is available in the session**: post one comment per issue on its exact line, in the per-issue format below. Follow that context's own comment convention for whether to add or update, since some callers keep a pull request to one comment that the caller upserts.
 - **A direct invocation**: return the findings as text in that same format. This is the default, and the only option available under the skill's own grant.
 
 **Per-Issue Rules**:

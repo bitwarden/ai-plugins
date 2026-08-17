@@ -242,10 +242,11 @@ Review examples per configuration type, each demonstrating the feedback format:
 
 ### Review Output Format
 
-Each review follows this structure. Findings are returned as text by default; an invoking
-context that holds a comment-posting grant can post one comment per finding instead, and the
-two `validate-ai` commands write the single-document report contract in
-`reference/validate-ai-scope.md`.
+Each review follows this structure. Where the findings go is decided by the first case that
+applies, in the order `SKILL.md` step 5 sets out: the two `validate-ai` commands write the
+single-document report contract in `reference/validate-ai-scope.md`; any other context where
+a comment-posting tool is available posts one comment per finding, following that context's
+own convention for adding versus updating; otherwise the findings are returned as text.
 
 **Findings**, one per issue:
 
