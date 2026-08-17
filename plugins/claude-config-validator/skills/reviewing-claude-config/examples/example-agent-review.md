@@ -111,7 +111,7 @@ Use JSDoc format:
 [Include 2-3 examples of good documentation]
 ```
 
-Structured thinking reduces errors by 40% (Anthropic Chain of Thought research).
+Structured thinking reduces errors (Anthropic Chain of Thought guidance).
 
 ---
 

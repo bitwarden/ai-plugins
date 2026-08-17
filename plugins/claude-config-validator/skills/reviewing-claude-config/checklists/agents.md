@@ -308,7 +308,7 @@ You're a code reviewer. Look at code and tell the user what's wrong with it. Che
 - [ ] No unnecessary verbosity
 - [ ] Direct language preferred
 
-**Reference:** Anthropic Chain of Thought documentation (40% error reduction with structured thinking)
+**Reference:** Anthropic Chain of Thought documentation (structured thinking reduces reasoning errors)
 
 ---
 

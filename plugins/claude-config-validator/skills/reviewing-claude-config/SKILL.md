@@ -51,7 +51,7 @@ Security first, regardless of file type:
 
 **CRITICAL CHECKS** (perform for ALL Claude config reviews):
 
-Run these mental checks immediately:
+Run these checks with `Grep` over the changed files, immediately:
 
 - [ ] settings.local.json NOT in git (check changed files list)
 - [ ] No hardcoded credentials in any modified files
@@ -115,10 +115,10 @@ Checklists reference this section rather than duplicating content.
 
 **CRITICAL**: Report one finding per issue, anchored to its exact line. Never collapse everything found into a single summary.
 
-The skill's own grant is `Read, Grep, Glob`, so it cannot post anything. It produces findings, and the invoking context decides where they go. Take the first case below that applies:
+The skill itself posts nothing: its grant is `Read, Grep, Glob`. It produces findings, and the invoking context decides where they go. Take the first case below that applies:
 
 - **`/validate-ai` or `/validate-ai-local`**: follow the single-document report contract in `reference/validate-ai-scope.md`. A skill-only changeset review borrows that reference's scope and severity rules while still reporting per issue. The invoking context decides the format, not the shape of the review.
-- **Any other invoking context that holds a comment-posting grant**: post one comment per issue on its exact line, in the per-issue format below. Create new comments rather than updating existing ones.
+- **Any other invoking context where a comment-posting tool is available in the session**: post one comment per issue on its exact line, in the per-issue format below. Create new comments rather than updating existing ones.
 - **A direct invocation**: return the findings as text in that same format. This is the default, and the only option available under the skill's own grant.
 
 **Per-Issue Rules**:

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `reviewing-claude-config` output mode is per-issue findings, replacing inline pull request comments, which its `Read, Grep, Glob` grant cannot produce
+- `reviewing-claude-config` defaults to per-issue findings instead of requiring inline pull request comments, which its `Read, Grep, Glob` grant cannot post; comment posting stays available to invoking contexts that can
 - Cross-plugin secret-detection enrichment is conditioned on the `Skill` grant, which the skill does not hold on the direct-invocation path
 - Skill and plugin docs no longer describe executable scripts or inline comments as things the skill does
 

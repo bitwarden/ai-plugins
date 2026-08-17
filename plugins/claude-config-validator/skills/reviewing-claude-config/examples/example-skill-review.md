@@ -63,7 +63,7 @@ Key questions to determine type:
 Analyze the changeset...
 ```
 
-Research shows structured thinking reduces logic errors by 40% (Anthropic Chain of Thought study).
+Structured thinking reduces logic errors (Anthropic Chain of Thought guidance).
 
 Reference: Anthropic Prompt Engineering - Structured Thinking
 
@@ -71,10 +71,10 @@ Reference: Anthropic Prompt Engineering - Structured Thinking
 
 **`.claude/skills/my-new-skill/SKILL.md:120`** - SUGGESTED: Add concrete examples
 
-This section describes the expected comment format but doesn't show an example. Consider adding:
+This section describes the expected finding format but doesn't show an example. Consider adding:
 
 ````markdown
-**Example inline comment:**
+**Example finding:**
 
 \```
 **file.kt:123** - CRITICAL: Issue description

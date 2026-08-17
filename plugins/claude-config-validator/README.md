@@ -274,15 +274,14 @@ Security audit all Claude configuration files in this project
 
 **Critical Checks** (all configuration types):
 
-- settings.local.json NOT committed to git
+- settings.local.json not tracked by git — checked from the changed-files list when one is available, otherwise reported as skipped
 - No hardcoded credentials (passwords, API keys, tokens)
 - Permissions appropriately scoped
 - No secrets in plaintext
 
 **Detection Methods**:
 
-- Git status checks
-- Pattern matching for common secret formats
+- Pattern matching for common secret formats, applied with `Grep`
 - Permission validation against least privilege principle
 
 ## Examples
@@ -328,7 +327,7 @@ Reference: `reference/claude-code-requirements.md` - Tool Access Security
 Current: 690 lines (38% over recommended limit)
 Guideline: 500 lines maximum for on-demand loading
 
-Impact: Loads extra 190 lines into context unnecessarily, reducing token efficiency by 38%.
+Impact: Loads an extra 190 lines into context unnecessarily on every use.
 
 Recommended: Split into focused files:
 - patterns-security.md (tool access, permissions)
@@ -357,7 +356,7 @@ Recommended:
 - Add inline comments explaining 'why', not 'what'
 - Follow project's established patterns in `docs/architecture.md`"
 
-Specific, actionable instructions improve AI behavior by 60% (Anthropic research).
+Specific, actionable instructions improve AI behavior (Anthropic prompt engineering guidance).
 
 Reference: `checklists/claude-md.md` - Clarity and Specificity
 ```

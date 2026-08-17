@@ -145,7 +145,7 @@ I found these issues:
 - Doesn't retain history if comment is edited
 
 **DO THIS INSTEAD:**
-Create separate inline comment for EACH issue on the specific line.
+Report one finding per issue, each anchored to its specific line.
 
 ---
 
