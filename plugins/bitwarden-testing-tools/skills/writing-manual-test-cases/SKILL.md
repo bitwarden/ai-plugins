@@ -75,7 +75,7 @@ Map the requirement's priority map as a starting point:
 
 Then, let the qualitative criteria override it when they disagree:
 
-- **Smoke** — the core happy path that must pass before broader testing begins. Usually exactly one per feature.
+- **Smoke** — the core happy path that must pass before broader testing begins. Typically no more than one per feature.
 - **Regression** — primary user flows with the primary actor; the feature working as designed for the main use case.
 - **Functional** — negative and edge cases (verifying what should _not_ happen); secondary role or permission checks where the primary role already has a Regression case; multi-item or data-variation scenarios; detailed UI interaction behavior (hover, dismiss, expand/collapse, focus states).
 
