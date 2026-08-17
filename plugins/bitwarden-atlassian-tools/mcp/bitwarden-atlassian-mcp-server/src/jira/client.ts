@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance, AxiosError } from "axios";
-import { loadJiraConfig, getJiraHeaders } from "./auth.js";
+import { loadJiraConfig, getJiraHeaders, JiraAccessMode } from "./auth.js";
 import {
   JiraConfig,
   JiraSearchParams,
@@ -17,6 +17,8 @@ import {
   JiraSprintsResponse,
   JiraSprintIssuesResponse,
   JiraRemoteLink,
+  JiraCreateMetaIssueType,
+  JiraCreateMetaField,
 } from "./types.js";
 
 export class JiraClient {
@@ -25,8 +27,14 @@ export class JiraClient {
   private readonly API_BASE = "/rest/api/3";
   private readonly AGILE_API_BASE = "/rest/agile/1.0";
 
-  constructor() {
-    this.config = loadJiraConfig();
+  /**
+   * @param mode - "read" (default) authenticates with the read-only token that
+   *   every install sets. "write" authenticates with the optional write token
+   *   and throws if it is absent, so a missing token fails at construction
+   *   rather than on a half-completed sequence of creates.
+   */
+  constructor(mode: JiraAccessMode = "read") {
+    this.config = loadJiraConfig(mode);
     this.client = axios.create({
       baseURL: this.config.gatewayBaseUrl,
       headers: getJiraHeaders(this.config),
@@ -67,10 +75,19 @@ export class JiraClient {
           return new Error(
             "JIRA API rate limit exceeded. Please try again later.",
           );
-        default:
-          return new Error(
-            `JIRA API error (${status}): ${data?.errorMessages?.join(", ") || error.message}`,
-          );
+        default: {
+          // Field-level create/update errors (missing required field, field not on
+          // screen) land in `errors` keyed by field id, not in `errorMessages`.
+          const fieldErrors = data?.errors
+            ? Object.entries(data.errors).map(
+                ([field, msg]) => `${field}: ${msg}`,
+              )
+            : [];
+          const detail =
+            [...(data?.errorMessages ?? []), ...fieldErrors].join("; ") ||
+            error.message;
+          return new Error(`JIRA API error (${status}): ${detail}`);
+        }
       }
     }
 
@@ -310,6 +327,96 @@ export class JiraClient {
           maxResults: Math.min(maxResults, 100),
         },
       },
+    );
+
+    return response.data;
+  }
+
+  // ── Write Methods (require a client constructed with mode "write") ──
+
+  /**
+   * Create a work item.
+   *
+   * @param fields - A fully-formed Jira `fields` object. Built by the calling
+   *   tool so that field-ID knowledge lives in one place.
+   * @returns The created item's key and id.
+   */
+  async createIssue(
+    fields: Record<string, unknown>,
+  ): Promise<{ id: string; key: string; self: string }> {
+    const response = await this.client.post<{
+      id: string;
+      key: string;
+      self: string;
+    }>(`${this.API_BASE}/issue`, { fields });
+
+    return response.data;
+  }
+
+  /**
+   * Link two work items.
+   *
+   * Jira's payload is (inwardIssue, outwardIssue) and reads
+   * "outwardIssue <outward description> inwardIssue". For type "Blocks" the
+   * descriptions are outward "blocks" and inward "is blocked by", so the
+   * outward issue is the blocker.
+   *
+   * Verified read-only against the live PM project: the same Blocks link between
+   * PM-39203 and PM-38796 is reported from PM-39203 as carrying `inwardIssue:
+   * PM-38796`, and from PM-38796 as carrying `outwardIssue: PM-39203`. Each end
+   * names the other and labels it with the other end's role, so the canonical
+   * pair is outward=PM-39203, inward=PM-38796, i.e. PM-39203 blocks PM-38796.
+   *
+   * Note this is the opposite of the acli CLI's `--in`/`--out` mapping.
+   */
+  async createIssueLink(params: {
+    typeName: string;
+    outwardKey: string;
+    inwardKey: string;
+  }): Promise<void> {
+    await this.client.post(`${this.API_BASE}/issueLink`, {
+      type: { name: params.typeName },
+      outwardIssue: { key: params.outwardKey },
+      inwardIssue: { key: params.inwardKey },
+    });
+  }
+
+  // ── Create-screen Metadata (read-only, works with either token) ─────
+
+  /**
+   * List the issue types a project can create, as this user.
+   *
+   * Jira answers 404 with "You cannot create issues in this project" when the
+   * user has no create permission there, which the calling tool surfaces as an
+   * ordinary result rather than a failure.
+   */
+  async getCreateMetaIssueTypes(
+    projectKey: string,
+  ): Promise<{ issueTypes: JiraCreateMetaIssueType[] }> {
+    const response = await this.client.get<{
+      issueTypes: JiraCreateMetaIssueType[];
+    }>(`${this.API_BASE}/issue/createmeta/${projectKey}/issuetypes`, {
+      params: { maxResults: 60 },
+    });
+
+    return response.data;
+  }
+
+  /**
+   * Read the create screen's field metadata for a project + issue type.
+   *
+   * This is the authority on which fields exist, which are required, and what
+   * their allowed values are. It varies per project: PM and SM expose an
+   * Acceptance criteria field, QA and VULN do not, and team-managed projects can
+   * scope custom fields to themselves.
+   */
+  async getCreateMetaFields(
+    projectKey: string,
+    issueTypeId: string,
+  ): Promise<{ fields: JiraCreateMetaField[] }> {
+    const response = await this.client.get<{ fields: JiraCreateMetaField[] }>(
+      `${this.API_BASE}/issue/createmeta/${projectKey}/issuetypes/${issueTypeId}`,
+      { params: { maxResults: 200 } },
     );
 
     return response.data;

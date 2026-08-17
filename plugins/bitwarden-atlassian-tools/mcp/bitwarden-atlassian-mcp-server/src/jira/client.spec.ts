@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  */
 
 const mockInstanceGet = vi.fn();
+const mockInterceptorUse = vi.fn();
 
 // Mock axios before importing the client
 vi.mock("axios", () => {
@@ -15,7 +16,7 @@ vi.mock("axios", () => {
     create: vi.fn(() => ({
       get: mockInstanceGet,
       interceptors: {
-        response: { use: vi.fn() },
+        response: { use: mockInterceptorUse },
       },
     })),
     get: vi.fn(),
@@ -115,5 +116,70 @@ describe("JiraClient.downloadAttachment", () => {
 
   it("should throw TypeError for invalid URL", async () => {
     await expect(client.downloadAttachment("not-a-url")).rejects.toThrow();
+  });
+});
+
+describe("JiraClient error handling", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function getErrorHandler(): (error: unknown) => Promise<never> {
+    new JiraClient();
+    return mockInterceptorUse.mock.calls[0][1];
+  }
+
+  it("surfaces Jira's field-level errors from the errors map", async () => {
+    const errorHandler = getErrorHandler();
+
+    const axiosError = {
+      response: {
+        status: 400,
+        data: {
+          errorMessages: [],
+          errors: {
+            customfield_10192:
+              "Field 'customfield_10192' cannot be set. It is not on the appropriate screen, or unknown.",
+          },
+        },
+      },
+      message: "Request failed with status code 400",
+    };
+
+    await expect(errorHandler(axiosError)).rejects.toThrow(
+      "customfield_10192: Field 'customfield_10192' cannot be set. It is not on the appropriate screen, or unknown.",
+    );
+  });
+
+  it("combines errorMessages and field errors when both are present", async () => {
+    const errorHandler = getErrorHandler();
+
+    const axiosError = {
+      response: {
+        status: 400,
+        data: {
+          errorMessages: ["Issue does not exist"],
+          errors: { summary: "Summary is required." },
+        },
+      },
+      message: "Request failed with status code 400",
+    };
+
+    await expect(errorHandler(axiosError)).rejects.toThrow(
+      "Issue does not exist; summary: Summary is required.",
+    );
+  });
+
+  it("falls back to the axios message when neither errorMessages nor errors is present", async () => {
+    const errorHandler = getErrorHandler();
+
+    const axiosError = {
+      response: { status: 400, data: {} },
+      message: "Request failed with status code 400",
+    };
+
+    await expect(errorHandler(axiosError)).rejects.toThrow(
+      "JIRA API error (400): Request failed with status code 400",
+    );
   });
 });

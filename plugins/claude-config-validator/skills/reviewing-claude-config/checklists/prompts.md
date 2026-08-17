@@ -1,6 +1,6 @@
 # Prompts and Commands Review Checklist
 
-Review checklist for changes to `.claude/prompts/*.md` and `.claude/commands/*.md` files.
+Review checklist for changes to `.claude/prompts/**/*.md`, `.claude/commands/**/*.md`, and `plugins/*/commands/**/*.md` files. Plugin commands nest one level, as `commands/<name>/<name>.md`.
 
 ---
 
@@ -219,7 +219,7 @@ a convenient shorthand for PR and commit reviews.
 
 ## Priority Classification
 
-Classify findings using `reference/priority-framework.md`:
+Classify findings using `../reference/priority-framework.md`:
 
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
@@ -227,3 +227,7 @@ Classify findings using `reference/priority-framework.md`:
 - **OPTIONAL** - Personal preferences
 
 ---
+
+## Output Format
+
+Report findings using the standard format in `SKILL.md` Step 5.

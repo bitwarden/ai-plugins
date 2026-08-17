@@ -11,7 +11,7 @@ Review checklist for changes to Claude Code skill files (`SKILL.md` and supporti
 <thinking>
 Critical structural elements:
 1. Is YAML frontmatter present and valid?
-2. Is the skill file within 500 line limit?
+2. Is the skill file within the 500-line guideline?
 3. Are there any security issues (hardcoded secrets, committed settings)?
 4. Do all file references point to existing files?
 5. Is progressive disclosure properly implemented?
@@ -20,7 +20,7 @@ Critical structural elements:
 **Focus Areas:**
 
 - [ ] YAML frontmatter present and valid
-- [ ] Skill file size ≤ 500 lines (progressive disclosure requirement)
+- [ ] Skill file size ≤ 500 lines (progressive disclosure guideline)
 - [ ] No hardcoded secrets or credentials
 - [ ] File references point to existing files
 - [ ] Supporting files are properly organized
@@ -81,13 +81,13 @@ version: 1.0.0 # Semver format if marketplace-bound
 
 <thinking>
 Progressive disclosure requirements:
-1. Is the main skill.md file under 500 lines?
+1. Is the main SKILL.md file under 500 lines?
 2. Are supporting files properly referenced?
 3. Are supporting files self-contained?
 4. Is the loading strategy clear (when to load what)?
 </thinking>
 
-**Main skill.md Requirements:**
+**Main SKILL.md Requirements:**
 
 - [ ] File size ≤ 500 lines
 - [ ] Clear routing logic (when to load which files)
@@ -105,7 +105,7 @@ Progressive disclosure requirements:
 
 ```
 skill-name/
-├── skill.md              # Main orchestration (≤500 lines)
+├── SKILL.md              # Main orchestration (≤500 lines)
 ├── checklists/           # Task-specific procedures
 ├── reference/            # Detailed criteria loaded as needed
 ├── examples/             # Sample outputs for guidance
@@ -114,7 +114,7 @@ skill-name/
 
 **Red Flags:**
 
-- Main skill.md > 500 lines (should be split into supporting files)
+- Main SKILL.md > 500 lines (should be split into supporting files)
 - Supporting files reference each other in circles
 - All context loaded upfront instead of on-demand
 - Supporting files not self-contained (require reading multiple files)
@@ -204,7 +204,7 @@ Token efficiency considerations:
 
 ## Priority Classification
 
-Classify findings using `reference/priority-framework.md`:
+Classify findings using `../reference/priority-framework.md`:
 
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
@@ -254,7 +254,7 @@ Classify findings using `reference/priority-framework.md`:
 Before completing review, verify:
 
 - [ ] YAML frontmatter present and valid
-- [ ] Main skill.md ≤ 500 lines
+- [ ] Main SKILL.md ≤ 500 lines
 - [ ] No security issues (secrets, credentials)
 - [ ] All file references valid
 - [ ] Progressive disclosure properly implemented
@@ -263,3 +263,9 @@ Before completing review, verify:
 - [ ] Examples provided for complex concepts
 - [ ] Token-efficient organization
 - [ ] Constructive, actionable feedback tone
+
+---
+
+## Output Format
+
+Report findings using the standard format in `SKILL.md` Step 5.

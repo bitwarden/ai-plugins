@@ -201,6 +201,131 @@ export type GetIssueRemoteLinksInput = z.infer<
   typeof GetIssueRemoteLinksSchema
 >;
 
+// ── Write Schemas (opt-in, require ATLASSIAN_JIRA_WRITE_TOKEN) ────────
+
+const JiraIssueKey = z
+  .string()
+  .regex(
+    /^[A-Z][A-Z0-9_]+-\d+$/,
+    "Must be a valid Jira issue key (e.g. PM-123)",
+  );
+
+/**
+ * `project` is interpolated directly into a createmeta REST path, so unlike
+ * `CreateIssueSchema.project` (which only ever lands in a JSON body), an
+ * unconstrained string here would let a caller redirect the request to a
+ * different path on the same host.
+ */
+const JiraProjectKey = z
+  .string()
+  .regex(/^[A-Z][A-Z0-9_]+$/, "Must be a valid Jira project key (e.g. PM)");
+
+/**
+ * Field keys owned by named parameters. Passing them inside `fields` would make
+ * two sources of truth for the same value, so they are rejected there.
+ */
+export const RESERVED_FIELD_KEYS = [
+  "project",
+  "issuetype",
+  "summary",
+  "description",
+  "parent",
+  "labels",
+] as const;
+
+/**
+ * Create parameters carry no project-specific knowledge.
+ *
+ * Bitwarden files into many projects (PM, SM, QA, VULN, PLT, and more), and they
+ * do not agree on issue types, screen fields, or which fields are required. A
+ * team-managed project can also scope custom fields to itself. So rather than
+ * enumerate any project's shape here:
+ *
+ *  - `issueType` is a free-form name. Jira resolves it against the project and
+ *    rejects it if absent, which is validation we do not need to duplicate.
+ *  - everything beyond the common core goes through `fields` untouched, and Jira
+ *    is the authority on what is required and what is on the screen.
+ *  - `get_create_fields` exists to discover a project's shape when drafting.
+ */
+export const CreateIssueSchema = z.object({
+  project: JiraProjectKey,
+  issueType: z
+    .string()
+    .min(
+      1,
+      "Issue type name is required (e.g. Story, Task, Platform Initiative)",
+    ),
+  summary: z
+    .string()
+    .min(1, "Summary cannot be empty")
+    .max(255, "Jira summaries are limited to 255 characters"),
+  /** Description body as paragraphs of plain text, converted to ADF. */
+  descriptionParagraphs: z.array(z.string().min(1)).optional().default([]),
+  /** Parent key, for a child of an epic. */
+  parentKey: JiraIssueKey.optional(),
+  labels: z.array(z.string().min(1)).optional().default([]),
+  /**
+   * Arbitrary additional fields, merged into the create payload as-is. Keys are
+   * Jira field IDs (e.g. `customfield_10192`) discovered via `get_create_fields`
+   * for the target project, not assumed.
+   */
+  fields: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .default({})
+    .refine(
+      (value) =>
+        !Object.keys(value).some((key) =>
+          (RESERVED_FIELD_KEYS as readonly string[]).includes(key),
+        ),
+      `These keys have named parameters and must not be passed in fields: ${RESERVED_FIELD_KEYS.join(", ")}`,
+    ),
+  /**
+   * Defaults to true. A live create requires an explicit `dryRun: false`, so
+   * the failure mode of forgetting the flag is a preview, not a ticket.
+   */
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type CreateIssueInput = z.infer<typeof CreateIssueSchema>;
+
+/**
+ * Read the create screen for a project + issue type, so a caller can discover
+ * required fields, field IDs, and allowed values instead of hardcoding them.
+ */
+export const GetCreateFieldsSchema = z.object({
+  project: JiraProjectKey,
+  issueType: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("Issue type name. Omit to list the project's creatable types."),
+});
+
+export type GetCreateFieldsInput = z.infer<typeof GetCreateFieldsSchema>;
+
+/**
+ * Link parameters are named by role rather than by Jira's inward/outward
+ * vocabulary, so the caller cannot invert the direction. The inward/outward
+ * mapping is applied once, in the client.
+ */
+export const LinkIssuesSchema = z.discriminatedUnion("linkType", [
+  z.object({
+    linkType: z.literal("Blocks"),
+    blockerKey: JiraIssueKey,
+    blockedKey: JiraIssueKey,
+    dryRun: z.boolean().optional().default(true),
+  }),
+  z.object({
+    linkType: z.literal("Relates"),
+    firstKey: JiraIssueKey,
+    secondKey: JiraIssueKey,
+    dryRun: z.boolean().optional().default(true),
+  }),
+]);
+
+export type LinkIssuesInput = z.infer<typeof LinkIssuesSchema>;
+
 /**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against

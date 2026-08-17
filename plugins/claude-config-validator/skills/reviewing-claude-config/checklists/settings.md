@@ -2,6 +2,8 @@
 
 Review checklist for changes to `.claude/settings.json` and `.claude/settings.local.json`.
 
+**If the settings file declares a `hooks` block, review that block against `hooks.md` as well.** Hooks run shell commands automatically on tool events, and none of the passes below cover what those commands do. A repository's hooks are more often declared here than in a separate `hooks.json`, so this is the common case rather than the exception.
+
 ---
 
 ## CRITICAL SECURITY CHECK
@@ -247,7 +249,7 @@ Syntax validation:
 
 ## Priority Classification
 
-Classify findings using `reference/priority-framework.md`:
+Classify findings using `../reference/priority-framework.md`:
 
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
@@ -255,3 +257,7 @@ Classify findings using `reference/priority-framework.md`:
 - **OPTIONAL** - Personal preferences
 
 ---
+
+## Output Format
+
+Report findings using the standard format in `SKILL.md` Step 5.

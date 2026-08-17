@@ -4,7 +4,7 @@
 
 ### Review Comments
 
-**`.claude/skills/my-new-skill/skill.md:1`** - CRITICAL: Missing YAML frontmatter
+**`.claude/skills/my-new-skill/SKILL.md:1`** - CRITICAL: Missing YAML frontmatter
 
 Skills require YAML frontmatter to be discoverable by Claude Code:
 
@@ -22,7 +22,7 @@ Reference: Anthropic Skills Documentation - YAML Requirements
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:1-650`** - IMPORTANT: File exceeds 500 line limit
+**`.claude/skills/my-new-skill/SKILL.md:1-650`** - IMPORTANT: File exceeds 500 line limit
 
 Main skill file is 650 lines, exceeding Anthropic's 500-line progressive disclosure recommendation.
 
@@ -30,7 +30,7 @@ Suggested structure:
 
 ```
 my-new-skill/
-├── skill.md (≤500 lines - routing logic only)
+├── SKILL.md (≤500 lines - routing logic only)
 ├── checklists/
 │   ├── type-a.md
 │   └── type-b.md
@@ -46,7 +46,7 @@ Reference: Progressive disclosure best practices
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:45`** - IMPORTANT: Missing structured thinking blocks
+**`.claude/skills/my-new-skill/SKILL.md:45`** - IMPORTANT: Missing structured thinking blocks
 
 Add `<thinking>` blocks before major decision points:
 
@@ -69,7 +69,7 @@ Reference: Anthropic Prompt Engineering - Structured Thinking
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:120`** - SUGGESTED: Add concrete examples
+**`.claude/skills/my-new-skill/SKILL.md:120`** - SUGGESTED: Add concrete examples
 
 This section describes the expected comment format but doesn't show an example. Consider adding:
 
@@ -89,7 +89,7 @@ Examples improve clarity significantly, especially for complex output formats.
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:200`** - OPTIONAL: Alternative phrasing
+**`.claude/skills/my-new-skill/SKILL.md:200`** - OPTIONAL: Alternative phrasing
 
 Current: "You should check for these patterns..."
 
