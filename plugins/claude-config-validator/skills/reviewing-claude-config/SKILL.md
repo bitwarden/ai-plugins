@@ -113,19 +113,22 @@ Before writing each comment:
 **This section defines the standard output format for ALL Claude config reviews.**
 Checklists reference this section rather than duplicating content.
 
-**CRITICAL**: Use inline comments on specific lines, NOT one large summary comment.
+**CRITICAL**: Report one finding per issue, anchored to its exact line. Never collapse everything found into a single summary.
 
-**Exception**: when invoked by `/validate-ai` or `/validate-ai-local`, follow the single-document report contract in `reference/validate-ai-scope.md` instead. A skill-only changeset review borrows that reference's scope and severity rules but still reports in the inline format below. The invoking command decides the format, not the shape of the review.
+The skill's own grant is `Read, Grep, Glob`, so it cannot post anything. It produces findings, and the invoking context decides where they go:
 
-**Inline Comment Rules**:
+- **A direct invocation**: return the findings as text in the per-issue format below. This is the default, and the only option available under the skill's own grant.
+- **An invoking context that holds a comment-posting grant**: post one comment per issue on its exact line, in that same format. Create new comments rather than updating existing ones.
+- **`/validate-ai` or `/validate-ai-local`**: follow the single-document report contract in `reference/validate-ai-scope.md`. A skill-only changeset review borrows that reference's scope and severity rules while still reporting per issue. The invoking context decides the format, not the shape of the review.
 
-- Create separate comment for EACH specific issue on the exact line
-- Do NOT create one large summary comment with all issues
-- Do NOT update existing comments - always create new comments
+**Per-Issue Rules**:
+
+- One finding per specific issue, anchored to the exact line
+- Do NOT merge several issues into one entry
 - Include specific fix with code example when applicable
 - Explain rationale (why this matters)
 
-**Comment Format**:
+**Finding Format**:
 
 ```
 **[file:line]** - [PRIORITY]: [Issue description]
@@ -137,7 +140,7 @@ Checklists reference this section rather than duplicating content.
 Reference: [documentation link if applicable]
 ```
 
-**Example inline comment**:
+**Example finding**:
 
 ````
 **.claude/skills/my-skill/SKILL.md:1** - CRITICAL: Missing YAML frontmatter
@@ -156,10 +159,10 @@ Without frontmatter, the skill won't be recognized by Claude Code.
 Reference: Anthropic Skills Documentation
 ````
 
-**When to use inline vs summary**:
+**When to use a finding vs an overall assessment**:
 
-- **Inline comment**: Specific issue, recommendation, or question (use `file:line` format)
-- **Summary comment**: Overall assessment, recommendation (APPROVE or REQUEST CHANGES)
+- **Finding**: Specific issue, recommendation, or question (use `file:line` format)
+- **Overall assessment**: The verdict (APPROVE or REQUEST CHANGES), stated once alongside the findings
 
 Load the specific example relevant to your file type (on-demand only, not upfront):
 
@@ -174,11 +177,11 @@ Load the specific example relevant to your file type (on-demand only, not upfron
 
 ### Enhanced Secret Detection (bitwarden-security-engineer plugin)
 
-When the `bitwarden-security-engineer` plugin is installed, supplement the manual security scan above with:
+When the `bitwarden-security-engineer` plugin is installed **and the invoking context grants `Skill`**, supplement the manual security scan above with:
 
 - **Comprehensive secret patterns** → activate `Skill(detecting-secrets)` for context-aware detection that distinguishes test fixtures from production secrets, and covers patterns beyond the manual checks above (connection strings, private keys, cloud provider tokens)
 
-This skill is optional. If unavailable, rely on the manual security checks above.
+Two things can make this unavailable, and the manual security checks above are the fallback for both. The plugin may not be installed. Or the grant may be missing: this skill's own `allowed-tools` is `Read, Grep, Glob`, so a direct invocation cannot invoke another skill, while `/validate-ai` and `/validate-ai-local` both hold `Skill` and can reach it. Record the enrichment as skipped rather than passed when it could not run.
 
 ## Core Principles
 

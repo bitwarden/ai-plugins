@@ -4,7 +4,7 @@ Comprehensive skill for reviewing Claude Code configuration files with security-
 
 ## Overview
 
-This skill provides systematic review guidance for Claude Code configuration files in `.claude` directories. It detects file types, applies appropriate review checklists, and enforces security best practices with executable detection scripts.
+This skill provides systematic review guidance for Claude Code configuration files in `.claude` directories. It detects file types, applies appropriate review checklists, and runs its security checks with `Grep`. Its own grant is `Read, Grep, Glob`, so it reads and reports rather than executing anything or posting anywhere.
 
 **Use this skill when:**
 
@@ -24,7 +24,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 - Scans for hardcoded secrets and credentials
 - Validates permission scoping
 - Identifies dangerous command auto-approvals
-- Includes executable `security-scan.sh` script
+- Ships a `security-scan.sh` helper you can run yourself; the skill performs the same checks with `Grep`
 
 ### Intelligent Routing
 
@@ -184,7 +184,7 @@ The skill follows a systematic 5-step review process:
 2. **Execute Security Scan**: Always performs critical security checks first
 3. **Load Appropriate Checklist**: Routes to specialized review guidance
 4. **Consult References**: Loads detailed criteria only when needed
-5. **Document Findings**: Provides inline comments with specific fixes
+5. **Document Findings**: Returns one finding per issue, anchored to `file:line`, with a specific fix
 
 ### Security Checks (Always First)
 

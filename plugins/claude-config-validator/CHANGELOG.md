@@ -5,6 +5,19 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-08-17
+
+### Fixed
+
+- `reviewing-claude-config` made inline pull request comments the required output mode, which its own `Read, Grep, Glob` grant cannot produce. Only the two commands were exempted, so the default path could not be carried out on any direct invocation. Findings are now per-issue text by default, with comment posting and the single-document report contract as the options an invoking context can supply
+- Cross-plugin secret-detection enrichment told the reviewer to activate `Skill(detecting-secrets)` without `Skill` among its grants, so the instruction was dead on the direct-invocation path. It is now conditioned on the grant, with the manual checks named as the fallback and the enrichment recorded as skipped when it cannot run
+- Skill README described executable detection scripts and inline comments, neither of which the skill's grant allows
+
+### Changed
+
+- `Bash(git fetch:*)` on `/validate-ai-local` narrowed to `Bash(git fetch origin:*)`. Step 1 only ever fetches from `origin`, while the prefix grant also pre-approved arbitrary remotes and URLs
+- `/validate-ai`'s README notes that `/tmp/validation-summary.md` is a fixed path in a world-writable directory: on a shared host a pre-planted symlink there is followed without a prompt, and the report is world-readable while it sits there
+
 ## [1.2.1] - 2026-08-14
 
 ### Changed
