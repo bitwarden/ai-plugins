@@ -2,7 +2,7 @@
 
 **Context:** Reviewing settings.json with multiple security concerns.
 
-### Review Comments
+### Findings
 
 **`.claude/settings.json:5`** - CRITICAL: Overly broad file permissions
 
@@ -79,7 +79,7 @@ Never grant blanket access to directories containing credentials.
 
 ---
 
-### Summary Comment
+### Overall Assessment
 
 **Overall Assessment:** BLOCK - Critical Security Issues
 

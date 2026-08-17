@@ -2,7 +2,7 @@
 
 **Context:** Reviewing a new skill with structural and quality issues.
 
-### Review Comments
+### Findings
 
 **`.claude/skills/my-new-skill/SKILL.md:1`** - CRITICAL: Missing YAML frontmatter
 
@@ -99,7 +99,7 @@ More direct phrasing slightly improves token efficiency, but current version is 
 
 ---
 
-### Summary Comment
+### Overall Assessment
 
 **Overall Assessment:** REQUEST CHANGES
 

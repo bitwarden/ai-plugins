@@ -20,7 +20,7 @@ For reviews of individual agent files, see `example-agent-review.md`.
 Use the code-reviewer agent.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/skills/code-reviewer/SKILL.md:28`** - IMPORTANT: Agent invocation lacks specificity
 
@@ -79,7 +79,7 @@ If issues found, invoke code-fixer agent.
 After fixing, invoke code-analyzer agent to verify.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/code-analyzer.md:45` + `.claude/agents/code-fixer.md:38`** - CRITICAL: Circular agent dependency
 

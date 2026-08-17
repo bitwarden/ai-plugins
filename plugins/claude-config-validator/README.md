@@ -26,7 +26,7 @@ Validates these configuration file types, each with its own checklist except whe
 
 Every review **always** includes critical security checks:
 
-- ✅ No committed `settings.local.json` files
+- ✅ No `settings.local.json` in the changeset, checked from the changed-files list when one is available and reported as skipped otherwise
 - ✅ No hardcoded credentials (API keys, passwords, tokens)
 - ✅ Appropriate permission scoping
 - ✅ Principle of least privilege for agent tool access
@@ -34,7 +34,7 @@ Every review **always** includes critical security checks:
 
 ### Evidence-Based Quality Standards
 
-All validation criteria sourced from **official Anthropic documentation** and enterprise best practices (Microsoft Azure AI patterns):
+All validation criteria sourced from **official Anthropic documentation**:
 
 - Agent tool access security matrices
 - Progressive disclosure guidelines (500-line target per file)

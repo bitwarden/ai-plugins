@@ -22,6 +22,8 @@ validations each bucket gates, and the report contract. Follow it exactly.
   `git symbolic-ref --quiet refs/remotes/origin/HEAD` → strip `refs/remotes/`; fall back
   to `origin/main` if that fails, and to `main` if there is no `origin` remote.
 - Best-effort `git fetch origin <branch>` so the comparison is against current base.
+  Only `origin` is pre-approved, so a base ref on another remote is not fetched; the
+  comparison then runs against whatever that ref already points at locally.
   If the fetch fails (offline, no remote), continue with what is local and note it in
   the report.
 - If the resolved base ref does not exist (`git rev-parse --verify`), stop and tell the

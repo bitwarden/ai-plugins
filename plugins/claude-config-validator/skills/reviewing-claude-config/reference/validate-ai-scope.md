@@ -101,7 +101,10 @@ passed.
 ### Finishing the report
 
 Write the file exactly once, as the last thing you do, in a single Write call. Never write
-an interim, partial, or "in progress" version of it first.
+an interim, partial, or "in progress" version of it first. Both commands scope that write
+with an `Edit(<path>)` rule rather than a `Write` one, because Claude Code consults
+`Edit(path)` and `Read(path)` rules only and an `Edit` rule covers every built-in tool that
+edits files.
 
 Wait for every subagent to return before you write. Run them synchronously, passing
 `run_in_background: false` where that parameter exists, and never describe work a subagent

@@ -22,7 +22,7 @@ description: Helps write documentation.
 Write good documentation for code.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/documentation-writer.md:3`** - IMPORTANT: Description lacks activation triggers
 
@@ -255,7 +255,7 @@ Rationale: Unescaped user input allows script injection. Template escaping preve
 - Reference OWASP category where applicable
 ```
 
-### Review Comments
+### Findings
 
 **`plugins/security-tools/agents/security-scanner.md:1-8`** - OPTIONAL: Excellent configuration
 
@@ -324,7 +324,7 @@ model: opus
 Format code files using project style guide.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/code-formatter.md:5`** - IMPORTANT: Model selection inappropriate for task
 

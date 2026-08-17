@@ -20,7 +20,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 ### Security-First Approach
 
-- Detects committed `settings.local.json` files
+- Flags `settings.local.json` appearing in a changeset, from the changed-files list when one is available, reported as skipped otherwise
 - Scans for hardcoded secrets and credentials
 - Validates permission scoping
 - Identifies dangerous command auto-approvals
