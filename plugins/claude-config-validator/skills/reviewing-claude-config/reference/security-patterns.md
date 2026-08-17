@@ -19,7 +19,11 @@ If ANY check fails, flag as **CRITICAL** immediately.
 
 ## Detection Scripts
 
-### Check 1: Detect Committed settings.local.json
+### Check 1: Detect settings.local.json in the changeset
+
+When reviewing, resolve this from the changed-files list, and record the check as skipped
+when there is none. The git commands below belong to the human-run `security-scan.sh` path,
+which has a shell the skill does not.
 
 **Manual Detection:**
 

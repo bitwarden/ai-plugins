@@ -217,7 +217,7 @@ When multiple issues exist in a single review:
    - Security issues first
    - Functionality issues second
    - Quality issues third
-3. **Focus review comments on highest priorities**
+3. **Focus findings on highest priorities**
 4. **May skip OPTIONAL issues if many higher-priority issues exist**
 
 ---

@@ -104,7 +104,7 @@ Or describe the review in your own words, which is how the skill's triggers are 
 
 The skill will automatically:
 
-1. Detect which configuration files were recently modified
+1. Detect the type of each configuration file you name
 2. Select appropriate validation checklists
 3. Execute security-first review
 4. Return one finding per issue with file:line references

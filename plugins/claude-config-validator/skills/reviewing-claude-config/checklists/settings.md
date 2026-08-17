@@ -29,7 +29,7 @@ CRITICAL security considerations:
 
 ## Multi-Pass Review Strategy
 
-### First Pass: Committed Settings Detection
+### First Pass: Local Settings in the Changeset
 
 **CRITICAL SECURITY ISSUE: settings.local.json in git**
 
