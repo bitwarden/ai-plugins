@@ -115,11 +115,11 @@ Checklists reference this section rather than duplicating content.
 
 **CRITICAL**: Report one finding per issue, anchored to its exact line. Never collapse everything found into a single summary.
 
-The skill's own grant is `Read, Grep, Glob`, so it cannot post anything. It produces findings, and the invoking context decides where they go:
+The skill's own grant is `Read, Grep, Glob`, so it cannot post anything. It produces findings, and the invoking context decides where they go. Take the first case below that applies:
 
-- **A direct invocation**: return the findings as text in the per-issue format below. This is the default, and the only option available under the skill's own grant.
-- **An invoking context that holds a comment-posting grant**: post one comment per issue on its exact line, in that same format. Create new comments rather than updating existing ones.
 - **`/validate-ai` or `/validate-ai-local`**: follow the single-document report contract in `reference/validate-ai-scope.md`. A skill-only changeset review borrows that reference's scope and severity rules while still reporting per issue. The invoking context decides the format, not the shape of the review.
+- **Any other invoking context that holds a comment-posting grant**: post one comment per issue on its exact line, in the per-issue format below. Create new comments rather than updating existing ones.
+- **A direct invocation**: return the findings as text in that same format. This is the default, and the only option available under the skill's own grant.
 
 **Per-Issue Rules**:
 

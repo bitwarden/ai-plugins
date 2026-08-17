@@ -52,7 +52,7 @@ Uses structured, systematic validation approach:
 4. **Quality Assessment** - Best practices, prompt engineering, documentation
 5. **Marketplace Standards** - Elevated requirements for public plugins
 
-### Inline, Actionable Feedback
+### Specific, Actionable Feedback
 
 Provides specific, file:line referenced feedback with:
 
@@ -121,7 +121,7 @@ The skill will automatically:
 Review my new agent configuration in .claude/agents/code-analyzer.md
 ```
 
-**Output**: Inline comments with specific improvements, security concerns flagged as CRITICAL, quality suggestions as IMPORTANT/SUGGESTED.
+**Output**: One finding per issue with specific improvements, security concerns flagged as CRITICAL, quality suggestions as IMPORTANT/SUGGESTED.
 
 ---
 
@@ -194,7 +194,7 @@ Security audit all Claude configuration files in this project
 - Multi-pass review (structure → security → functionality → quality)
 - Evidence-based recommendations (all criteria from official docs)
 - Priority-classified feedback (CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL)
-- Inline comments with specific fixes and rationale
+- Per-issue findings with specific fixes and rationale
 
 ## Validation Coverage Details
 

@@ -24,7 +24,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 - Scans for hardcoded secrets and credentials
 - Validates permission scoping
 - Identifies dangerous command auto-approvals
-- Ships a `security-scan.sh` helper you can run yourself; the skill performs the same checks with `Grep`
+- Ships a `security-scan.sh` helper you can run yourself; the skill performs the same pattern checks with `Grep`
 
 ### Intelligent Routing
 
@@ -100,7 +100,7 @@ The skill will:
 1. Detect the file type (CLAUDE.md in this case)
 2. Execute security scan
 3. Load the appropriate checklist
-4. Provide structured review with inline comments
+4. Return a structured review, one finding per issue
 
 ### Manual Security Scan
 
@@ -240,9 +240,12 @@ Review examples per configuration type, each demonstrating the feedback format:
 
 ### Review Output Format
 
-Each review follows this structure:
+Each review follows this structure. Findings are returned as text by default; an invoking
+context that holds a comment-posting grant can post one comment per finding instead, and the
+two `validate-ai` commands write the single-document report contract in
+`reference/validate-ai-scope.md`.
 
-**Inline Comments:**
+**Findings**, one per issue:
 
 ```
 **file:line** - PRIORITY: Issue description
@@ -252,7 +255,7 @@ Each review follows this structure:
 [Rationale explaining why this matters]
 ```
 
-**Summary Comment:**
+**Overall assessment**, stated once:
 
 ```
 **Overall Assessment:** APPROVE / REQUEST CHANGES

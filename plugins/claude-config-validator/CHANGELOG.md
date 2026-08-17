@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `reviewing-claude-config` made inline pull request comments the required output mode, which its own `Read, Grep, Glob` grant cannot produce. Only the two commands were exempted, so the default path could not be carried out on any direct invocation. Findings are now per-issue text by default, with comment posting and the single-document report contract as the options an invoking context can supply
 - Cross-plugin secret-detection enrichment told the reviewer to activate `Skill(detecting-secrets)` without `Skill` among its grants, so the instruction was dead on the direct-invocation path. It is now conditioned on the grant, with the manual checks named as the fallback and the enrichment recorded as skipped when it cannot run
-- Skill README described executable detection scripts and inline comments, neither of which the skill's grant allows
+- Skill and plugin READMEs described executable detection scripts and inline comments, neither of which the skill's grant allows
 
 ### Changed
 
