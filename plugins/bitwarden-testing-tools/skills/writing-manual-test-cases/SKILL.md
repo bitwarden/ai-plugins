@@ -65,7 +65,7 @@ And appears in the vault list
 
 Assign each case a **Type** and an **Automation Type**.
 
-Map the requirement's priority map as a starting point:
+Map the requirement's priority as a starting point:
 
 | Priority    | Type       |
 | ----------- | ---------- |
