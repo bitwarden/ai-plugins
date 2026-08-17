@@ -99,7 +99,7 @@ Four columns, header row `Title,Description,Type,Automation Type`.
 - **Type** — `Smoke`, `Regression`, or `Functional`.
 - **Automation Type** — per the table above.
 
-Wrap every field in double quotes. Use real line breaks inside the quoted Description field — never literal `\n`. A Description cell looks like this:
+Wrap every field in double quotes, and escape any double quote inside a field by doubling it (" → ""). Use real line breaks inside the quoted Description field — never literal \n. A Description cell looks like this:
 
 ```
 Background: User has a Free account and is logged into the Web Vault and has an existing item
