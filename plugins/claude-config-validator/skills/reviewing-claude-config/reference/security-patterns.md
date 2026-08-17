@@ -8,7 +8,7 @@ Security checks, detection commands, and remediation patterns for Claude configu
 
 Perform these checks for EVERY Claude configuration review:
 
-1. **settings.local.json NOT in git**
+1. **settings.local.json absent from the changeset**
 2. **No hardcoded credentials**
 3. **Permissions appropriately scoped**
 4. **No dangerous command auto-approvals**

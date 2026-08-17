@@ -190,7 +190,7 @@ The skill follows a systematic 5-step review process:
 
 Regardless of file type, these checks are performed:
 
-- ✅ settings.local.json not tracked by git — checked from the changed-files list when one is available, otherwise reported as skipped
+- ✅ No `settings.local.json` in the changeset, from the changed-files list when one is available and reported as skipped otherwise
 - ✅ No hardcoded credentials
 - ✅ Permissions appropriately scoped
 - ✅ No dangerous command auto-approvals
@@ -242,11 +242,10 @@ Review examples per configuration type, each demonstrating the feedback format:
 
 ### Review Output Format
 
-Each review follows this structure. Where the findings go is decided by the first case that
-applies, in the order `SKILL.md` step 5 sets out: the two `validate-ai` commands write the
-single-document report contract in `reference/validate-ai-scope.md`; any other context where
-a comment-posting tool is available posts one comment per finding, following that context's
-own convention for adding versus updating; otherwise the findings are returned as text.
+Each review follows this structure. The skill produces findings and never delivers them, so
+where they go is decided by the invoking context, in the order `SKILL.md` step 5 sets out:
+the two `validate-ai` commands write the single-document report contract in
+`reference/validate-ai-scope.md`; anything else gets the findings back as text to route.
 
 **Findings**, one per issue:
 

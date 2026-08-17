@@ -274,7 +274,7 @@ Security audit all Claude configuration files in this project
 
 **Critical Checks** (all configuration types):
 
-- settings.local.json not tracked by git — checked from the changed-files list when one is available, otherwise reported as skipped
+- No `settings.local.json` in the changeset, from the changed-files list when one is available and reported as skipped otherwise
 - No hardcoded credentials (passwords, API keys, tokens)
 - Permissions appropriately scoped
 - No secrets in plaintext

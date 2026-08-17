@@ -10,7 +10,7 @@ Review checklist for changes to `.claude/settings.json` and `.claude/settings.lo
 
 <thinking>
 CRITICAL security considerations:
-1. Is settings.local.json committed to git?
+1. Does settings.local.json appear in the changeset?
 2. Are there hardcoded credentials or secrets?
 3. Are file permissions overly broad?
 4. Are command auto-approvals safe?
@@ -18,12 +18,12 @@ CRITICAL security considerations:
 
 **Before anything else, verify:**
 
-- [ ] **settings.local.json is NOT committed to git**
+- [ ] **settings.local.json does not appear in the changeset** (from the changed-files list; record as skipped when there is none)
 - [ ] **No hardcoded API keys, tokens, or passwords**
 - [ ] **No sensitive paths exposed in permissions**
 - [ ] **No dangerous command auto-approvals**
 
-**If ANY of these fail, FLAG IMMEDIATELY as CRITICAL and stop review.**
+**If ANY of these fail, FLAG IMMEDIATELY as CRITICAL, then finish the remaining passes** so the report can still say which checks ran.
 
 ---
 

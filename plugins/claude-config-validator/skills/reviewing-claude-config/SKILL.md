@@ -53,7 +53,7 @@ If multiple types modified, review each with appropriate checklist.
 
 <thinking>
 Security first, regardless of file type:
-1. Is settings.local.json committed to git?
+1. Does settings.local.json appear in the changeset?
 2. Any hardcoded secrets (passwords, tokens, API keys)?
 3. Are permissions appropriately scoped (if settings modified)?
 4. Any suspicious patterns in changed files?
@@ -63,7 +63,7 @@ Security first, regardless of file type:
 
 Run the pattern checks below with `Grep` over the files in scope, immediately. The first item is not a Grep check: resolve it from the changed-files list, and record it as skipped when there is none.
 
-- [ ] settings.local.json NOT in git (check changed files list)
+- [ ] settings.local.json does not appear in the changeset (check the changed-files list)
 - [ ] No hardcoded credentials in any modified files
 - [ ] Permissions scoped appropriately (if settings.json modified)
 - [ ] No API keys, tokens, or passwords in plaintext
@@ -72,7 +72,7 @@ Run the pattern checks below with `Grep` over the files in scope, immediately. T
 
 Consult `reference/security-patterns.md` for detailed security checks and detection commands.
 
-The skill's tools are read-only, so neither `scripts/security-scan.sh` nor the shell commands in `reference/security-patterns.md` can run from here. The script is a human-run helper. Reuse the reference's patterns as Grep queries instead; for the git-tracking check, use the changed-files list, and record the check as skipped rather than passed when neither that nor Bash is available.
+The skill's tools are read-only, so neither `scripts/security-scan.sh` nor the shell commands in `reference/security-patterns.md` can run from here. The script is a human-run helper. Reuse the reference's patterns as Grep queries instead; for the `settings.local.json` check, use the changed-files list, and record the check as skipped rather than passed when neither that nor Bash is available.
 
 ### Step 3: Load Appropriate Checklist
 
