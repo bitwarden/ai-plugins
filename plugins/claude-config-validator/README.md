@@ -107,7 +107,7 @@ The skill will automatically:
 1. Detect which configuration files were recently modified
 2. Select appropriate validation checklists
 3. Execute security-first review
-4. Provide inline feedback with file:line references
+4. Return one finding per issue with file:line references
 
 ### Use Cases
 

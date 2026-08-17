@@ -254,7 +254,7 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 2. Analyze against security checklist
 3. Check performance patterns
 4. Verify architectural principles
-5. Provide inline comments with file:line references
+5. Report one finding per issue with file:line references
 
 ## Output Format
 

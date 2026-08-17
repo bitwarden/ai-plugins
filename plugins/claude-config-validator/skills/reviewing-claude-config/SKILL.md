@@ -102,7 +102,7 @@ Load reference files only when needed for specific questions:
 ### Step 5: Document Findings
 
 <thinking>
-Before writing each comment:
+Before writing each finding:
 1. Priority level? (Critical/Important/Suggested/Optional)
 2. Security issue or quality issue?
 3. What's the specific fix or recommendation?

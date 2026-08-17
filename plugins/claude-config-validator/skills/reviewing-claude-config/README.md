@@ -46,7 +46,7 @@ This skill provides systematic review guidance for Claude Code configuration fil
 - **Specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
 - **Reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
 - **Review examples**: One or more per configuration type, demonstrating proper feedback format
-- **Executable security script**: Automated security scanning
+- **Human-run security script**: `security-scan.sh`, which you run yourself; the skill applies the same patterns with `Grep`
 
 ## Installation
 
@@ -69,7 +69,7 @@ To use the skill on its own, outside the plugin, copy the directory into a proje
 cp -r reviewing-claude-config /path/to/your/project/.claude/skills/
 ```
 
-Under this layout the skill's own directory is `.claude/skills/reviewing-claude-config`, which is where the plugin-install paths below point instead.
+Under this layout the skill's own directory is `.claude/skills/reviewing-claude-config`. A plugin install puts the same files under the plugin cache instead; see the paths below.
 
 ### Verify Installation
 
@@ -171,7 +171,7 @@ reviewing-claude-config/
 │   ├── example-prompts-review.md     # Prompts review example
 │   ├── example-settings-review.md    # Settings review example
 │   └── example-skill-review.md       # Skill review example
-├── scripts/                          # Executable automation
+├── scripts/                          # Human-run helpers
 │   └── security-scan.sh              # Comprehensive security scanner
 └── README.md                         # This file
 ```
@@ -190,27 +190,29 @@ The skill follows a systematic 5-step review process:
 
 Regardless of file type, these checks are performed:
 
-- ✅ settings.local.json NOT in git
+- ✅ settings.local.json not tracked by git — checked from the changed-files list when one is available, otherwise reported as skipped
 - ✅ No hardcoded credentials
 - ✅ Permissions appropriately scoped
 - ✅ No dangerous command auto-approvals
 
-If any security check fails, it's flagged as **CRITICAL** immediately.
+If any security check fails, it's flagged as **CRITICAL** immediately and the review then finishes the remaining checks, so the report can still say which ones ran.
 
 ### Priority Levels
 
-Issues are classified into four priority levels:
+Issues are classified into four priority levels, defined in
+[`reference/priority-framework.md`](reference/priority-framework.md):
 
 - **CRITICAL**: Prevents functionality, exposes security vulnerabilities (must fix)
 - **IMPORTANT**: Significantly impacts quality or maintainability (should fix)
-- **SUGGESTED**: Nice-to-have improvements (optional)
-- **OPTIONAL**: Personal preferences (author decides)
+- **SUGGESTED**: Nice-to-have improvements (could fix)
+- **OPTIONAL**: Personal preferences, alternatives (consider)
 
 ## Requirements
 
 - Claude Code (tested with latest version)
-- Git (for committed file detection in security scan)
-- Bash (for security-scan.sh script)
+
+The optional `security-scan.sh` helper additionally needs Git, for committed-file detection,
+and Bash to run it. The skill itself needs neither: its grant is `Read, Grep, Glob`.
 
 ## Configuration
 
@@ -263,13 +265,6 @@ two `validate-ai` commands write the single-document report contract in
 [Findings grouped by priority: CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL]
 ```
 
-### Priority Levels
-
-- **CRITICAL** - Prevents functionality, security vulnerabilities (must fix)
-- **IMPORTANT** - Significant quality/maintainability impact (should fix)
-- **SUGGESTED** - Nice-to-have improvements (could fix)
-- **OPTIONAL** - Personal preferences, alternatives (consider)
-
 ### Best Practices
 
 **Feedback Quality:**
@@ -290,7 +285,7 @@ two `validate-ai` commands write the single-document report contract in
 
 This skill incorporates research-backed best practices:
 
-- **Chain of Thought prompting**: 40% error reduction (Anthropic)
+- **Chain of Thought prompting**: reduces reasoning errors (Anthropic)
 - **Progressive disclosure**: <500 line main files (Anthropic)
 - **Structured thinking**: Systematic analysis before feedback
 - **Security-first approach**: Critical checks before quality review
@@ -307,7 +302,8 @@ See `reference/claude-code-requirements.md` for the requirements these criteria 
 
 1. Verify YAML frontmatter exists in `SKILL.md`
 2. Check skill name is `reviewing-claude-config`
-3. Ensure file is in `.claude/skills/reviewing-claude-config/`
+3. Confirm the skill is available: run `/plugin list` for a plugin install, or check that the
+   files sit in `.claude/skills/reviewing-claude-config/` for a standalone copy
 4. Try invoking explicitly: "Use reviewing-claude-config skill"
 
 ### Security Script Fails
