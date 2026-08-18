@@ -31,6 +31,7 @@ echo "Scanning: ${CLAUDE_DIR}"
 echo ""
 
 ISSUES_FOUND=0
+CHECKS_SKIPPED=0
 
 # ============================================================================
 # Check 1: Committed settings.local.json
@@ -38,18 +39,25 @@ ISSUES_FOUND=0
 echo "[1/4] Checking for committed settings.local.json..."
 
 if ! git -C "${CLAUDE_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
+    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
     echo "  ⏭️  SKIPPED: ${CLAUDE_DIR} is not inside a git repository"
-elif git -C "${CLAUDE_DIR}" ls-files | grep -q "settings.local.json"; then
+else
+    # Ask git directly rather than piping it to grep: under `pipefail`, a matching
+    # `grep -q` exits first, git dies of SIGPIPE, and the pipeline reports failure.
+    LOCAL_SETTINGS=$(git -C "${CLAUDE_DIR}" ls-files -- '*settings.local.json') || LOCAL_SETTINGS=""
+fi
+
+if [ "${CHECKS_SKIPPED}" -eq 0 ] && [ -n "${LOCAL_SETTINGS:-}" ]; then
     echo "  ❌ CRITICAL: settings.local.json is committed to git"
     echo "     Files found:"
-    git -C "${CLAUDE_DIR}" ls-files | grep "settings.local.json" | sed 's/^/     - /'
+    echo "${LOCAL_SETTINGS}" | sed 's/^/     - /'
     echo ""
     echo "     Remediation:"
     echo "     git rm --cached .claude/settings.local.json"
     echo "     echo '.claude/settings.local.json' >> .gitignore"
     echo ""
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
-else
+elif [ "${CHECKS_SKIPPED}" -eq 0 ]; then
     echo "  ✅ OK: settings.local.json not in git"
 fi
 echo ""
@@ -232,7 +240,19 @@ echo ""
 echo "=== Scan Complete ==="
 echo ""
 
-if [ $ISSUES_FOUND -eq 0 ]; then
+if [ $ISSUES_FOUND -eq 0 ] && [ "${CHECKS_SKIPPED}" -gt 0 ]; then
+    echo "✅ No issues found (${CHECKS_SKIPPED} check(s) skipped)"
+    echo ""
+    echo "Checks that ran found nothing:"
+    echo "  - No hardcoded secrets detected"
+    echo "  - Permissions appropriately scoped"
+    echo "  - No dangerous command auto-approvals"
+    echo ""
+    echo "Skipped, so not verified:"
+    echo "  - Whether local settings are committed to git"
+    echo ""
+    exit 0
+elif [ $ISSUES_FOUND -eq 0 ]; then
     echo "✅ All security checks passed"
     echo ""
     echo "Claude configuration appears secure:"
