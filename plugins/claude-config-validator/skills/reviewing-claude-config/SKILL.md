@@ -127,7 +127,7 @@ Checklists reference this section rather than duplicating content.
 
 This skill produces findings. It does not deliver them anywhere, so never post a comment, even where a comment-posting tool happens to be available: callers that post run the findings through their own classification and validation first, and posting directly would bypass that. Take the first case below that applies:
 
-- **`/validate-ai` or `/validate-ai-local`**: follow the single-document report contract in `reference/validate-ai-scope.md`. A skill-only changeset review borrows that reference's scope and severity rules while still reporting per issue. The invoking context decides the format, not the shape of the review.
+- **`/validate-ai` or `/validate-ai-local`**: use the scope rules and severity source in `reference/validate-ai-scope.md`, and hand back findings in the four-level CRITICAL / IMPORTANT / SUGGESTED / OPTIONAL classification. The command owns the single write of the report document and the mapping down to its critical/major/minor severities.
 - **Anything else**: return the findings as text in the per-issue format below, for the invoking context to route. This is the default, and what a direct invocation always does.
 
 **Per-Issue Rules**:
@@ -171,7 +171,7 @@ Reference: Anthropic Skills Documentation
 **When to use a finding vs an overall assessment**:
 
 - **Finding**: Specific issue, recommendation, or question (use `file:line` format)
-- **Overall assessment**: The verdict (APPROVE or REQUEST CHANGES), stated once alongside the findings
+- **Overall assessment**: The verdict (Pass or Issues found), stated once alongside the findings. A caller that reports in its own vocabulary maps it from there
 
 Load the specific example relevant to your file type (on-demand only, not upfront):
 
@@ -194,7 +194,7 @@ Two things can make this unavailable, and the manual security checks above are t
 
 ## Core Principles
 
-- **Security first**: Always check for committed settings, secrets, overly broad permissions
+- **Security first**: Always check for local settings appearing in the changeset, secrets, overly broad permissions
 - **Structure matters**: YAML frontmatter, file references, progressive disclosure, line limits
 - **Quality counts**: Clear instructions, examples, proper emphasis, structured thinking
 - **Token efficiency**: Progressive disclosure, appropriate file sizes, on-demand loading

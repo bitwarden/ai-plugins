@@ -1,7 +1,7 @@
 ---
 argument-hint: "[PR#] | [PR URL] | (blank for the checked-out PR)"
 allowed-tools: Read, Edit(//tmp/validation-summary.md), Grep, Glob, Task, Skill, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
-description: Validate the Claude Code material changed in a pull request (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and report results to the pull request via the workflow's sticky comment in CI
+description: Validate the Claude Code material changed in a pull request and report results to its sticky comment
 ---
 
 Validate the Claude Code material changed in a pull request. This is the review the
@@ -151,7 +151,7 @@ For each changed `SKILL.md`, invoke the `plugin-dev:skill-reviewer` agent. It ev
 - YAML frontmatter (required: `name`, `description`)
 - Description quality: specific trigger phrases, third-person form, appropriate length
 - Content quality: word count (target 1,000-3,000 words), imperative writing style
-- Progressive disclosure: lean `SKILL.md`, details in a references directory (`reference/` or `references/`), examples in `examples/`, scripts in `scripts/`
+- Progressive disclosure: lean `SKILL.md`, details in a references directory (`reference/` or `references/`), checklists in `checklists/`, examples in `examples/`, scripts in `scripts/`
 - All referenced files actually exist
 - Anti-patterns: vague triggers, bloated `SKILL.md`, missing examples
 

@@ -36,7 +36,7 @@ CRITICAL security considerations:
 `settings.local.json` must NEVER be committed. It contains user-specific and potentially sensitive configuration.
 
 **Detection:**
-Check if `settings.local.json` appears in changed files list. If present in git diff or PR, this is CRITICAL.
+Check whether `settings.local.json` appears in the changed-files list. If it does, this is CRITICAL. Record the check as skipped when no changed-files list is available.
 
 **Fix:**
 
@@ -260,4 +260,4 @@ Classify findings using `../reference/priority-framework.md`:
 
 ## Output Format
 
-Report findings using the standard format in `SKILL.md` Step 5.
+Report findings using the standard format in `../SKILL.md` Step 5.

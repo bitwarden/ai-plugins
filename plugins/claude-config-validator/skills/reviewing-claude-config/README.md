@@ -260,7 +260,7 @@ the two `validate-ai` commands write the single-document report contract in
 **Overall assessment**, stated once:
 
 ```
-**Overall Assessment:** APPROVE / REQUEST CHANGES
+**Overall Assessment:** Pass / Issues found
 
 [Findings grouped by priority: CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL]
 ```

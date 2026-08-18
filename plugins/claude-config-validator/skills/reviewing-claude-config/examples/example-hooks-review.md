@@ -52,7 +52,7 @@ Quoting fixes the splitting case. For anything more complex than a single argume
 
 Rationale: hooks run automatically on tool events with no permission prompt, so a shell-injection bug here executes without anyone approving it.
 
-Reference: `checklists/hooks.md` - Third Pass: Command Safety
+Reference: `../checklists/hooks.md` - Third Pass: Command Safety
 
 ---
 
@@ -68,7 +68,7 @@ Recommended:
 
 Rationale: a prompt hook has the same untrusted-input boundary as any reviewer of contributor-authored text (CWE-1427). Its decision contract belongs in the hook, not in a file the decision is about.
 
-Reference: `checklists/hooks.md` - Prompt Hooks
+Reference: `../checklists/hooks.md` - Prompt Hooks
 
 ---
 
@@ -76,4 +76,4 @@ Reference: `checklists/hooks.md` - Prompt Hooks
 
 `Write|Edit` with no path constraint runs prettier on every edited file, including ones it cannot format. Narrow the matcher, or exit early when the extension is not one prettier handles, so the hook stays quiet on success.
 
-Reference: `checklists/hooks.md` - Fourth Pass: Behavior and Cost
+Reference: `../checklists/hooks.md` - Fourth Pass: Behavior and Cost

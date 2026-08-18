@@ -44,13 +44,15 @@ All validation criteria sourced from **official Anthropic documentation**:
 
 ### Multi-Pass Review Strategy
 
-Uses structured, systematic validation approach:
+The skill works through five steps:
 
-1. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
-2. **Structure Validation** - YAML frontmatter, file organization, required fields
-3. **Functionality Review** - Logic, completeness, integration points
-4. **Quality Assessment** - Best practices, prompt engineering, documentation
-5. **Marketplace Standards** - Elevated requirements for public plugins
+1. **Detect File Type** - Determines which checklists apply
+2. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
+3. **Load Checklist** - Routes to the checklist for the detected type
+4. **Consult References** - Loads detailed criteria only when needed
+5. **Document Findings** - One finding per issue, anchored to `file:line`
+
+Each checklist then runs its own multi-pass strategy over the file under review.
 
 ### Specific, Actionable Feedback
 
@@ -135,7 +137,7 @@ Review my new agent configuration in .claude/agents/code-analyzer.md
 Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 ```
 
-**Output**: Comprehensive validation against marketplace standards, documentation completeness checks, security validation, example quality assessment.
+**Output**: The component files inside `plugins/my-plugin/` reviewed against the agent, skill, command, and hook checklists, with security findings first. Manifest and marketplace-standard checks are not this skill's: `/validate-ai-local` covers those by delegating to `plugin-dev:plugin-validator`.
 
 ---
 
@@ -243,32 +245,35 @@ Security audit all Claude configuration files in this project
 - Error handling
 - Example quality
 
-### Skill Validation (4-Pass Strategy)
+### Skill Validation (5-Pass Strategy)
 
-**Pass 1: Structure and YAML**
+**Pass 1: Structure and Security**
 
-- Valid YAML frontmatter with required fields
-- SKILL.md presence
 - Proper file organization
+- SKILL.md presence
+- Security checks first
 
-**Pass 2: Progressive Disclosure**
+**Pass 2: YAML Frontmatter Validation**
+
+- Valid frontmatter with required fields
+- Description quality and trigger phrases
+
+**Pass 3: Progressive Disclosure**
 
 - File size limits (500-line guideline for references)
 - On-demand vs auto-loaded content
-- Token efficiency optimization
+- No broken file references
 
-**Pass 3: Quality and Clarity**
+**Pass 4: Prompt Engineering Quality**
 
 - Clear instructions
 - Structured thinking blocks
-- Example inclusion
-- Proper emphasis
+- Example inclusion and proper emphasis
 
-**Pass 4: Integration and Completeness**
+**Pass 5: Token Efficiency**
 
-- No broken file references
-- Checklist completeness
-- Reference accuracy
+- Lean SKILL.md with detail deferred to supporting files
+- No duplicated content across tiers
 
 ### Security Validation (Always Executed)
 

@@ -51,7 +51,7 @@ description: Reviews code # ❌ Too vague, no activation triggers
 
 ---
 
-### Agents (.claude/agents/_.md or plugins/_/agents/\*.md)
+### Agents (`.claude/agents/*.md` or `plugins/*/agents/*.md`)
 
 **Required Fields:**
 

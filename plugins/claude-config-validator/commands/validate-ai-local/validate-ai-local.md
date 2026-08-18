@@ -1,7 +1,7 @@
 ---
 argument-hint: "[base-ref] (defaults to the repository default branch)"
 allowed-tools: Read, Edit(~/.claude/plugins/data/claude-config-validator*/ai-validation/*), Grep, Glob, Task, Skill, Bash(git diff:*), Bash(git fetch origin:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
-description: Validate the Claude Code material you changed locally (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and write a timestamped report to the plugin's data directory
+description: Validate the Claude Code material you changed locally and write a timestamped report to the plugin's data directory
 ---
 
 Validate the Claude Code material changed in this checkout, the same way the
@@ -126,7 +126,7 @@ modified skill, dispatched in the same message as the section 4 calls. It evalua
 - YAML frontmatter (required: `name`, `description`)
 - Description quality: specific trigger phrases, third-person form, appropriate length
 - Content quality: word count (target 1,000-3,000 words), imperative writing style
-- Progressive disclosure: lean `SKILL.md`, details in a references directory (`reference/` or `references/`), examples in `examples/`, scripts in `scripts/`
+- Progressive disclosure: lean `SKILL.md`, details in a references directory (`reference/` or `references/`), checklists in `checklists/`, examples in `examples/`, scripts in `scripts/`
 - All referenced files actually exist
 - Anti-patterns: vague triggers, bloated `SKILL.md`, missing examples
 
