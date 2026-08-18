@@ -95,7 +95,7 @@ These issues expose significant security risks:
 - Exposure of SSH private keys and credentials
 - Access to sensitive system files
 
-**All three CRITICAL issues must be fixed; the caller decides what that blocks.**
+**Both CRITICAL issues must be fixed; the caller decides what that blocks.**
 
 After fixes, re-review the scoped permissions to ensure they follow principle of least privilege.
 

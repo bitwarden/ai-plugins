@@ -36,7 +36,7 @@ CRITICAL security considerations:
 `settings.local.json` must NEVER be committed. It contains user-specific and potentially sensitive configuration.
 
 **Detection:**
-Check whether `settings.local.json` appears in the changed-files list. If it does, this is CRITICAL. Record the check as skipped when no changed-files list is available.
+Check whether `settings.local.json` is added or modified in the changed-files list. If it is, this is CRITICAL. A changeset that deletes it is the remediation, not a finding. Record the check as skipped when no changed-files list is available.
 
 **Fix:**
 

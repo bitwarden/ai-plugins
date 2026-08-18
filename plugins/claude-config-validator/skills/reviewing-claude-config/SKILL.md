@@ -51,7 +51,7 @@ If multiple types modified, review each with appropriate checklist.
 
 <thinking>
 Security first, regardless of file type:
-1. Does settings.local.json appear in the changeset?
+1. Is settings.local.json added or modified in the changeset?
 2. Any hardcoded secrets (passwords, tokens, API keys)?
 3. Are permissions appropriately scoped (if settings modified)?
 4. Any suspicious patterns in changed files?
@@ -61,7 +61,7 @@ Security first, regardless of file type:
 
 Run the pattern checks below with `Grep` over the files in scope, immediately. The first item is not a Grep check: resolve it from the changed-files list, and record it as skipped when there is none.
 
-- [ ] settings.local.json does not appear in the changeset (check the changed-files list)
+- [ ] settings.local.json is not added or modified in the changeset (check the changed-files list; a deletion is the fix, not a finding)
 - [ ] No hardcoded credentials in any modified file (API keys, tokens, passwords, connection strings)
 - [ ] Permissions scoped appropriately (if a settings file changed)
 - [ ] No dangerous command auto-approvals (if a settings file changed)
@@ -186,7 +186,7 @@ When the `bitwarden-security-engineer` plugin is installed **and the invoking co
 
 - **Comprehensive secret patterns** → activate `Skill(detecting-secrets)` for context-aware detection that distinguishes test fixtures from production secrets, and covers patterns beyond the manual checks above (connection strings, private keys, cloud provider tokens)
 
-Two things can make this unavailable, and the manual security checks above are the fallback for both. The plugin may not be installed. Or the grant may be missing: this skill's own `allowed-tools` is `Read, Grep, Glob`, so a direct invocation cannot invoke another skill, while `/validate-ai` and `/validate-ai-local` both hold `Skill` and can reach it. Record the enrichment as skipped rather than passed when it could not run.
+Two things can make this unavailable, and the manual security checks above are the fallback for both. The plugin may not be installed. Or the grant may be missing: this skill's own `allowed-tools` is `Read, Grep, Glob`, so on a direct invocation `Skill` is not pre-approved and the call prompts, which makes it unavailable in a non-interactive run. `/validate-ai` and `/validate-ai-local` both hold `Skill` and reach it without prompting. Record the enrichment as skipped rather than passed when it could not run.
 
 ## Core Principles
 
