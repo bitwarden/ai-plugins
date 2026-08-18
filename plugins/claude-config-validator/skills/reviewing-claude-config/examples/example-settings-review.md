@@ -83,17 +83,14 @@ Never grant blanket access to directories containing credentials.
 
 Issues found
 
-**CRITICAL issues must be fixed immediately:**
+**Must Fix (CRITICAL):**
 
-- Overly broad `Read://*` permission
-- Auto-approved `rm -rf` command
-- Access to `.ssh` directory
+- Overly broad `Read://*` permission, exposing sensitive system files
+- Auto-approved `rm -rf` command, risking data loss
 
-These issues expose significant security risks:
+**Should Fix (IMPORTANT):**
 
-- Potential data loss from dangerous commands
-- Exposure of SSH private keys and credentials
-- Access to sensitive system files
+- Access to the `.ssh` directory, exposing private keys and credentials
 
 **Both CRITICAL issues must be fixed; the caller decides what that blocks.**
 
