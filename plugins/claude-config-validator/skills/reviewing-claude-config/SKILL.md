@@ -66,7 +66,7 @@ Run the pattern checks below with `Grep` over the files in scope, immediately. T
 - [ ] Permissions scoped appropriately (if a settings file changed)
 - [ ] No dangerous command auto-approvals (if a settings file changed)
 
-**If ANY security issue found**: Flag as **CRITICAL** immediately and lead the report with it, then finish the remaining checks. A changeset review has to state which sections ran and which were skipped, so abandoning the rest leaves the report unable to say what was and was not looked at.
+**If ANY security issue found**: Flag as **CRITICAL** immediately and lead your returned findings with it, then finish the remaining checks. State which ran and which were skipped, so the caller's report can say what was and was not looked at; abandoning the rest leaves it unable to.
 
 Consult `reference/security-patterns.md` for detailed security checks and detection commands.
 
