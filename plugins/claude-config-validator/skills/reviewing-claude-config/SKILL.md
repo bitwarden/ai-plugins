@@ -167,7 +167,7 @@ Reference: Anthropic Skills Documentation
 **When to use a finding vs an overall assessment**:
 
 - **Finding**: Specific issue, recommendation, or question (use `file:line` format)
-- **Overall assessment**: The verdict (Pass or Issues found), stated once alongside the findings. A caller that reports in its own vocabulary maps it from there
+- **Overall assessment**: The verdict, stated once alongside the findings. Any CRITICAL or IMPORTANT finding makes it `Issues found`; a review with only SUGGESTED or OPTIONAL findings is `Pass`, with those findings still listed. A caller that reports in its own vocabulary maps it from there
 
 Load the specific example relevant to your file type (on-demand only, not upfront):
 
