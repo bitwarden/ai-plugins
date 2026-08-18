@@ -134,9 +134,9 @@ Reference: `../reference/claude-code-requirements.md` - "Model Selection"
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** Issues found
+Issues found
 
 This agent requires fixes before approval:
 
@@ -289,9 +289,9 @@ This is a design choice - current scope is excellent.
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** Pass
+Pass
 
 This is an exemplary agent configuration that demonstrates:
 
@@ -413,9 +413,9 @@ Clear specification prevents ambiguous behavior.
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** Issues found
+Issues found
 
 **Must Fix (IMPORTANT):**
 

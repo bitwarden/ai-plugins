@@ -260,7 +260,7 @@ the two `validate-ai` commands write the single-document report contract in
 **Overall assessment**, stated once:
 
 ```
-**Overall Assessment:** Pass / Issues found
+Pass / Issues found
 
 [Findings grouped by priority: CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL]
 ```
@@ -323,7 +323,7 @@ See `reference/claude-code-requirements.md` for the requirements these criteria 
 
 **Solutions:**
 
-1. Security scan excludes `examples/` and `security-patterns.md`
+1. Security scan excludes `examples/`, `checklists/`, and `security-patterns.md`, which hold deliberately-bad fixtures
 2. Use "example" or "your-key-here" as placeholders in docs
 3. Review manually to confirm false positives
 

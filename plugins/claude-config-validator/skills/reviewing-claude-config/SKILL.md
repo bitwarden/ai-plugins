@@ -39,7 +39,7 @@ Determine the primary file type(s) being reviewed:
 **Detection Rules**:
 
 - **Agents**: Changes to `.claude/agents/**/*.md` or `plugins/*/agents/**/*.md` (agents appear both as `agents/<name>.md` and as `agents/<name>/AGENT.md`)
-- **Skills**: Changes to `SKILL.md` files or skill support files (checklists, references, examples)
+- **Skills**: Changes to `SKILL.md` files or skill support files (checklists, references, examples). Support-file changes are reviewed against this checklist, but do not by themselves fill the skill bucket in `reference/validate-ai-scope.md`
 - **CLAUDE.md**: Changes to `CLAUDE.md` files (any location: project root, `.claude/`, or subdirectories)
 - **Prompts/Commands**: Changes to `.claude/prompts/**/*.md`, `.claude/commands/**/*.md`, or `plugins/*/commands/**/*.md` (plugin commands nest as `commands/<name>/<name>.md`)
 - **Hooks**: Changes to `hooks.json` (in `.claude/hooks/`, or `hooks/` inside a plugin), or to a `hooks` block inside `.claude/settings.json` or `.claude/settings.local.json`

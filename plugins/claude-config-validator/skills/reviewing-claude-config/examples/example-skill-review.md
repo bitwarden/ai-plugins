@@ -22,7 +22,7 @@ Reference: Anthropic Skills Documentation - YAML Requirements
 
 ---
 
-**`.claude/skills/my-new-skill/SKILL.md:1-650`** - IMPORTANT: File exceeds 500 line limit
+**`.claude/skills/my-new-skill/SKILL.md:1-650`** - IMPORTANT: File exceeds 500-line guideline
 
 Main skill file is 650 lines, exceeding Anthropic's 500-line progressive disclosure recommendation.
 
@@ -101,7 +101,7 @@ More direct phrasing slightly improves token efficiency, but current version is 
 
 ### Overall Assessment
 
-**Overall Assessment:** Issues found
+Issues found
 
 This skill has strong potential but requires fixes before approval:
 

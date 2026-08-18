@@ -81,7 +81,7 @@ Never grant blanket access to directories containing credentials.
 
 ### Overall Assessment
 
-**Overall Assessment:** Issues found
+Issues found
 
 **CRITICAL issues must be fixed immediately:**
 
@@ -95,7 +95,7 @@ These issues expose significant security risks:
 - Exposure of SSH private keys and credentials
 - Access to sensitive system files
 
-**Cannot approve until all CRITICAL issues are resolved.**
+**All three CRITICAL issues must be fixed; the caller decides what that blocks.**
 
 After fixes, re-review the scoped permissions to ensure they follow principle of least privilege.
 

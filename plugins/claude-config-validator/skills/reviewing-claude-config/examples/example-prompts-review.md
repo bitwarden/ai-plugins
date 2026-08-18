@@ -104,7 +104,7 @@ Reusing existing skills improves consistency and reduces duplication.
 
 ### Overall Assessment
 
-**Overall Assessment:** Issues found
+Issues found
 
 **Must Fix (IMPORTANT):**
 

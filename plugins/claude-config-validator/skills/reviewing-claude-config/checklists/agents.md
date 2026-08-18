@@ -264,7 +264,7 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 
 ## Examples
 
-[Include 2-3 examples of good review comments]
+[Include 2-3 examples of good findings]
 ```
 
 ✅ **GOOD - Includes structured thinking:**

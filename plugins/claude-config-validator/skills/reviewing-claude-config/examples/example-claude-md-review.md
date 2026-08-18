@@ -63,7 +63,7 @@ This helps Claude make appropriate judgment calls without over-asking or under-a
 
 ### Overall Assessment
 
-**Overall Assessment:** Issues found
+Issues found
 
 **Must Fix (IMPORTANT):**
 

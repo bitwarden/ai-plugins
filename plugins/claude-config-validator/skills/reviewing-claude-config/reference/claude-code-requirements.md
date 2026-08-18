@@ -21,6 +21,7 @@ description: Clear description with activation triggers
 
 ```yaml
 version: 1.0.0 # Semver format (MAJOR.MINOR.PATCH)
+allowed-tools: Read, Grep, Glob # Tools pre-approved for the turn that invokes the skill
 ```
 
 **Field Requirements:**
@@ -28,6 +29,7 @@ version: 1.0.0 # Semver format (MAJOR.MINOR.PATCH)
 - `name`: **MUST** be kebab-case (use-dashes-not_underscores)
 - `description`: **MUST** include activation triggers (when to use the skill)
 - `version`: **SHOULD** follow semantic versioning if marketplace-bound
+- `allowed-tools`: pre-approves the listed tools for the invoking turn. It does not restrict what the skill may call, so treat it as the grant the skill can rely on rather than a ceiling
 - **NO TABS**: Use spaces only (YAML requirement)
 
 **Valid Example:**

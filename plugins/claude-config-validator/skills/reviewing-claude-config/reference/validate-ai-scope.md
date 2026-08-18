@@ -38,9 +38,10 @@ Classify the in-scope paths into these buckets. They drive which validations run
   and as `agents/<name>.md`, so match any Markdown file under an `agents/` directory.
 - **Skill files** — `(^|/)skills/.*/SKILL\.md$`. Only `SKILL.md` itself, matching the action's
   change detection. A changeset touching only skill support files (`checklists/`, `reference/`,
-  `examples/`) therefore lands in no component bucket, so the configuration and security row
-  below does not fire for it; those changes reach review through the plugin-validation row
-  instead. Widening the pattern here would put this reference out of step with the action.
+  `examples/`) therefore lands in no skill bucket. Inside a plugin those changes still reach
+  review through the plugin-validation row. Under `.claude/skills/` they land in the config
+  bucket instead, so the configuration and security row does fire for them. Widening the
+  pattern here would put this reference out of step with the action.
 - **Command files** — `(^|/)commands/.*\.md$`
 - **Hook files** — `(^|/)hooks\.json$`. Keep this pattern as written: it mirrors the action's
   change detection, and widening it here would put the two out of step. Hooks declared under
