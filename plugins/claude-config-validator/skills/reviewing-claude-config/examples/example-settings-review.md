@@ -81,7 +81,7 @@ Never grant blanket access to directories containing credentials.
 
 ### Overall Assessment
 
-**Overall Assessment:** BLOCK - Critical Security Issues
+**Overall Assessment:** Issues found
 
 **CRITICAL issues must be fixed immediately:**
 

@@ -65,6 +65,11 @@ Provides specific, file:line referenced feedback with:
 
 ## Installation
 
+Requires Claude Code 2.1.210 or later. Both commands scope their report write with an
+`Edit(<path>)` rule, and consulting that rule for the `Write` tool is behavior that release
+introduced. On an older CLI the report write falls back to a permission prompt, which in a
+headless workflow run means no report and a failed check.
+
 ### Add Bitwarden Marketplace (if not already added)
 
 ```bash

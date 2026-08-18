@@ -192,7 +192,7 @@ skill-name/
 **Example routing:**
 
 ```markdown
-### Step 2: Load Appropriate Checklist
+### Load Appropriate Checklist
 
 Based on detected type, read the relevant checklist:
 
