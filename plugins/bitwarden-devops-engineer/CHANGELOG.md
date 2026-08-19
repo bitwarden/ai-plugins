@@ -5,6 +5,12 @@ All notable changes to the bitwarden-devops-engineer plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-17
+
+### Added
+
+- New `managing-workflow-secrets` reference and authoring skill documenting Bitwarden's Azure Key Vault (AKV) + OIDC secret pattern for GitHub Actions workflows. Covers the `azure-login` → `get-keyvault-secrets` → `azure-logout` lifecycle via the centralized `bitwarden/gh-actions` composite actions, the golden invariants (internal actions on `@main` while third-party actions are SHA-pinned, `id-token: write` on any logging-in job, matched login/logout conditions), the house conventions for the retrieval step (`id: secrets`, a folded block scalar for three or more secrets), an authoring procedure, and a secret-hygiene checklist (step-scoped `env:` consumption, no logging, retrieve only what the job uses). Treats preventing secret exposure as the overriding priority: a "Secret exposure is the overriding concern" gate requires every edit, fix, or suggestion to be evaluated against the hygiene checklist before it is offered. The Key Vault name and secret names are always provided per task and never inferred from the repository or workflow content — the skill uses the placeholders `KEY-VAULT` and `SECRET-NAME-1`/`SECRET-NAME-2` and flags to the user when a real name is unknown. Explains how a secret reaches beyond the job that retrieved it — same-job step outputs, per-job re-retrieval, a short-lived GitHub App token minted from AKV, and reusable-workflow credential hand-off as a two-sided change (`secrets: inherit` same-repo vs explicit `secrets:` cross-repo, matched to the callee's `on.workflow_call.secrets:` declarations with `id-token: write` on each logging-in job) — while never passing a raw value through an unmasked job output. Advanced patterns (fork-PR access gates, multiple vaults in one job, dynamic identity selection, matrix logins, and raw `az` CLI for certificates and secret write-back) are out of scope. Ships one reference, `references/actions.md` (input/output contracts for the three actions, the OIDC client-identity conventions, and how vault and secret names are supplied). Defers to `bitwarden-workflow-linter-rules` for all linted rules. Listed in the plugin README alongside the existing reference skills.
+
 ## [0.2.0] - 2026-08-10
 
 ### Added
