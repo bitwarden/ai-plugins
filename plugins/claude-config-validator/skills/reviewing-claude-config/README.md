@@ -129,10 +129,10 @@ The script checks for:
 
 ### Examples
 
-**Review a new skill:**
+**Review a new agent:**
 
 ```
-Review .claude/skills/my-new-skill/SKILL.md
+Review .claude/agents/my-new-agent.md
 ```
 
 **Review settings changes:**
@@ -210,7 +210,7 @@ review that fails on readability is a review people learn to ignore.
 - Claude Code (tested with latest version)
 
 The optional `security-scan.sh` helper additionally needs Git, for committed-file detection,
-and Bash to run it. The skill itself needs neither: its grant is `Read, Grep, Glob`.
+and Bash to run it. The skill itself needs neither: its grant is `Read, Grep, Glob, Skill`.
 
 ## Configuration
 

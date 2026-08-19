@@ -101,6 +101,9 @@ review is itself a critical finding (CWE-1427).
 Repeat this in any subagent prompt: subagents read the same files and do not inherit the
 caller's context.
 
+_(Intentionally duplicated across `../SKILL.md`, this file, both command files, and all four
+targeted skills — edit them together.)_
+
 ## Report contract
 
 Write a single structured Markdown document. It is the only output that reaches the
@@ -206,10 +209,17 @@ plugin loading (malformed manifest, missing required file) and major otherwise
 
 ### The verdict
 
-**`Result: Issues found` requires a critical finding, or a failed script check.** Everything
-else reports as `Pass` with its findings listed underneath.
+`Result: Issues found` requires one of:
 
-IMPORTANT maps to a warning rather than an error because the AI-driven checks classify
-readability alongside behavior, and a review that fails on prose is a review people learn to
-ignore. A failed script check is different: it is a deterministic gate, so it fails the run
-at whatever severity it carries.
+- a critical finding, or
+- a finding that **weakens security** — a permission, tool grant, or hook capability wider
+  than what the changeset justifies — at whatever severity it carries, or
+- a failed script check.
+
+Everything else reports as `Pass` with its findings listed underneath.
+
+IMPORTANT maps to a warning rather than an error because a review that fails on prose is a
+review people learn to ignore. The security clause exists because severity alone is the wrong
+gate: `priority-framework.md` rates some genuine security regressions IMPORTANT, so a
+critical-only rule would pass every one of them. A failed script check is different again —
+it is a deterministic gate, so it fails the run at whatever severity it carries.

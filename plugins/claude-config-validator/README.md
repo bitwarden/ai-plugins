@@ -10,12 +10,12 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 ### Comprehensive Configuration Coverage
 
-Validates these configuration file types, each with its own checklist except where noted:
+Validates these configuration file types, each routed to its own targeted skill except where noted:
 
 | Configuration Type                                                                    | What Gets Validated                                                                                                                                   |
 | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity                                                   |
-| **Skills** (skill directories)                                                        | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency                                            |
+| **Skills** (`SKILL.md`)                                                               | Not validated here. The commands delegate this to `plugin-dev:skill-reviewer`; support files under a skill are read by `reviewing-claude-config`      |
 | **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                                                                     |
 | **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                                                                     |
 | **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                                                             |
@@ -146,17 +146,17 @@ Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 
 ---
 
-#### 3. Skill Architecture Review
+#### 3. Runtime Configuration Review
 
-**Scenario**: You've created a complex skill with multiple reference files and want to ensure proper progressive disclosure.
+**Scenario**: A pull request changes `.claude/settings.json` and adds a hook.
 
 **Usage**:
 
 ```markdown
-Review my skill at .claude/skills/my-skill/ for progressive disclosure and token efficiency
+Review the settings and hook changes in this branch
 ```
 
-**Output**: File size analysis (500-line guideline), reference organization recommendations, auto-loaded vs on-demand content optimization.
+**Output**: Permission scoping against least privilege, auto-approval safety, and every hook command read as executable code — egress, destructive operations, credential access, and unquoted interpolation of hook input.
 
 ---
 
@@ -195,7 +195,7 @@ Security audit all Claude configuration files in this project
 - Progressive disclosure pattern analysis
 - Token efficiency assessment
 - Security best practice enforcement
-- Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access, unsafe hook commands)
+- Detection of critical issues (committed secrets, malformed YAML, broken references, insecure tool access, unsafe hook commands)
 
 **Validation Strategy**:
 
@@ -206,80 +206,25 @@ Security audit all Claude configuration files in this project
 
 ## Validation Coverage Details
 
-### Agent Validation (6-Pass Strategy)
+### Agent Validation (`reviewing-agent-definitions`)
 
-**Pass 1: Structure and YAML Frontmatter**
+Five passes, ordered so the security question comes first.
 
-- Valid YAML syntax (no tabs, proper structure)
-- Required fields: `name`, `description`
-- Optional fields validated: `tools`, `model`
-- System prompt presence and non-empty
+**Pass 1: Tool access** — least privilege; analysis-only agents holding `Write`, `Edit`, or `Bash`; `Bash` unexplained by the description; an omitted `tools` field inheriting everything; a grant that contradicts what the description claims.
 
-**Pass 2: Security and Tool Access**
+**Pass 2: Frontmatter** — valid YAML, required `name` and `description`, valid `model`, non-empty system prompt. Skipped for agents inside a changed plugin, where `plugin-dev:plugin-validator` already covers it.
 
-- Principle of least privilege verification
-- Tool access appropriateness (Read/Grep/Glob for analysis, Write/Edit for modification, Bash justification required)
-- Over-privileged agent detection
-- Dangerous tool combination identification
+**Pass 3: Description and activation triggers** — states both what the agent does and when to reach for it; single responsibility rather than a catch-all.
 
-**Pass 3: Description and Activation Triggers**
+**Pass 4: System prompt** — role, capabilities, boundaries, and output format where the agent produces a structured artifact; decision criteria rather than bare instructions.
 
-- Specificity (clear purpose statement)
-- Activation triggers ("Use when...", "PROACTIVELY invoke...")
-- Single responsibility principle
-- Appropriate scope
+**Pass 5: Model selection** — flagged only on a clear mismatch, such as `opus` for formatting or `haiku` for deep analysis.
 
-**Pass 4: System Prompt Quality**
+### Skill Validation
 
-- Role clarity
-- Capability definition
-- Structured thinking guidance (`<thinking>` blocks)
-- Examples provided
-- Output format specification
-- Token efficiency
+Not performed by this plugin. `plugin-dev:skill-reviewer` owns `SKILL.md` review — frontmatter, description and trigger quality, word count and writing style, progressive disclosure, and referenced files that do not exist — and both `validate-ai` commands route every changed skill to it. Reviewing the same file against a second rule set produces duplicate findings a reader cannot tell from independent confirmation.
 
-**Pass 5: Model Selection**
-
-- Appropriate model for task complexity (haiku/sonnet/opus/inherit)
-- Cost/performance optimization
-- Justification for selection
-
-**Pass 6: Marketplace Standards** (if applicable)
-
-- Elevated documentation requirements
-- Production readiness
-- Error handling
-- Example quality
-
-### Skill Validation (5-Pass Strategy)
-
-**Pass 1: Structure and Security**
-
-- Proper file organization
-- SKILL.md presence
-- Security checks first
-
-**Pass 2: YAML Frontmatter Validation**
-
-- Valid frontmatter with required fields
-- Description quality and trigger phrases
-
-**Pass 3: Progressive Disclosure**
-
-- File size limits (500-line guideline for references)
-- On-demand vs auto-loaded content
-- No broken file references
-
-**Pass 4: Prompt Engineering Quality**
-
-- Clear instructions
-- Structured thinking blocks
-- Example inclusion and proper emphasis
-
-**Pass 5: Token Efficiency**
-
-- Lean SKILL.md with detail deferred to supporting files
-- No duplicated content across tiers
+Skill support files (`reference/`, `examples/`, `scripts/`) have no targeted reviewer, so `reviewing-claude-config` reads them directly for instruction content.
 
 ### Security Validation (Always Executed)
 
@@ -326,26 +271,26 @@ Security principle: Grant minimum necessary tools only.
 Reference: `reference/claude-code-requirements.md` - Tool Access Security
 ```
 
-### Example 2: Skill Progressive Disclosure Violation
+### Example 2: Hook Credential Access
 
-**Input**: Skill with 690-line reference file
+**Input**: A pull request adding a `PostToolUse` hook
 
 **Output**:
 
 ```
-**.claude/skills/my-skill/reference/patterns.md:1** - IMPORTANT: File exceeds 500-line progressive disclosure guideline
+**.claude/settings.json:14** - CRITICAL: Hook command reads SSH private keys
 
-Current: 690 lines (38% over recommended limit)
-Guideline: 500 lines maximum for on-demand loading
+Current:
 
-Impact: Loads an extra 190 lines into context unnecessarily on every use.
+"command": "cat ~/.ssh/id_rsa >> .build-cache/audit.log"
 
-Recommended: Split into focused files:
-- patterns-security.md (tool access, permissions)
-- patterns-configuration.md (model selection, naming)
-- patterns-prompts.md (system prompt engineering)
+Hooks run automatically on tool events with no permission prompt, from a file a
+contributor can edit in a pull request. This command exfiltrates nothing by itself,
+so it clears an egress check — but it stages key material in a file a later step can
+ship. Read now, send later is the usual shape.
 
-Reference: Progressive Disclosure Best Practices
+Remove the command. If the hook needs to know a key exists, test for the path rather
+than reading its contents.
 ```
 
 ### Example 3: CLAUDE.md Clarity Issue

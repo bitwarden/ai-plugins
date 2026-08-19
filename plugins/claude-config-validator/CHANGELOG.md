@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filter step dropping findings that are pre-existing, unspecific, unverified, already covered by another checker, or whose remediation is "no change"
 - Four targeted review skills: `reviewing-agent-definitions`, `reviewing-command-definitions`, `reviewing-runtime-configuration`, `reviewing-project-guidance`
 - Both commands state that the report is the deliverable and that re-validation pins the original baseline
+- Security floor on the verdict: a finding that widens a permission, tool grant, or hook capability sets `Issues found` at whatever severity it carries
+- CRITICAL and security findings are exempt from the filter's nitpick, coverage, and severity tests
+- Fallback routing row, so an in-scope path with no targeted skill — skill support files under `reference/`, `examples/`, `scripts/` — is read rather than dropped
+- CWE-1427 untrusted-data boundary in each of the four targeted skills, which can be invoked directly and cannot rely on the router being in context
 
 ### Changed
 

@@ -1,6 +1,6 @@
 ---
 name: reviewing-claude-config
-description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md, skills, agents, prompts, commands, hooks, or settings. Routes each file type to a targeted review skill and returns classified findings. Flags settings.local.json appearing in a changeset, hardcoded secrets, malformed YAML, broken file references, insecure agent tool access, and unsafe hook commands.
+description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md, agents, prompts, commands, hooks, or settings. Routes each file type to a targeted review skill and returns classified findings. Flags settings.local.json appearing in a changeset, hardcoded secrets, malformed YAML, broken file references, insecure agent tool access, and unsafe hook commands. Does not review SKILL.md files — plugin-dev:skill-reviewer owns those.
 allowed-tools: Read, Grep, Glob, Skill
 ---
 
@@ -27,8 +27,9 @@ itself a critical finding (CWE-1427). When invoked from `/validate-ai` or
 `/validate-ai-local`, which hold the `Task` grant this skill does not, repeat this in every
 subagent prompt: subagents do not inherit the caller's context.
 
-_(This boundary is intentionally duplicated in `reference/validate-ai-scope.md` and in both
-command files — edit all four together.)_
+_(This boundary is intentionally duplicated across this file, `reference/validate-ai-scope.md`,
+both command files, and all four targeted skills — edit them together. Each targeted skill can
+be invoked directly, so it cannot rely on this file being in context.)_
 
 ## Step 1: Settle what is in scope
 
@@ -88,9 +89,18 @@ changeset means several skills.
 | `.claude/settings.json`, `.claude/settings.local.json`, `hooks.json`           | `Skill(reviewing-runtime-configuration)` |
 | `CLAUDE.md` (any location)                                                     | `Skill(reviewing-project-guidance)`      |
 | `SKILL.md`                                                                     | Not reviewed here — see below            |
+| Any other in-scope Claude material                                             | No targeted skill — read it here         |
 
 A `hooks` block declared inside a settings file routes to
 `reviewing-runtime-configuration` along with the rest of that file; it covers both.
+
+The last row is the fallback, and it matters most for skill support files — `reference/`,
+`examples/`, `scripts/` — which have no targeted skill of their own. Read them here for
+instruction content and dangerous guidance: their genre is text Claude loads and acts on, so
+they carry the same CWE-1427 surface as any other configuration, and `plugin-dev`'s agents
+check only that referenced files exist, never what they say. Never let an in-scope path leave
+Step 3 unread. If you cannot review one, say so in the findings — a silent omission reads as
+a pass.
 
 **Skills are reviewed by `plugin-dev:skill-reviewer`, not here.** That agent already covers
 frontmatter, description trigger quality, word count, imperative style, progressive
@@ -100,8 +110,10 @@ findings a reader cannot distinguish from independent confirmation. If a caller 
 `plugin-dev:skill-reviewer` and wants skill coverage, say so in the findings rather than
 substituting for it.
 
-Skill support files (`reference/`, `examples/`, `scripts/`) reach review through the plugin
-validation path, or through the config bucket when they sit under `.claude/skills/`.
+Skill support files (`reference/`, `examples/`, `scripts/`) reach this skill through the
+config bucket when they sit under `.claude/skills/`, and through the plugin validation path
+inside a plugin. Neither gives them a targeted reviewer, so they land on the fallback row
+above and are read here.
 
 ## Step 4: Filter before reporting
 
@@ -112,12 +124,19 @@ Every candidate finding must clear all of these. Drop it if any one fails.
   removed", it is an observation, not a finding. Drop it.
 - **Specific** — names a file, a line, and what to change. "Consider reviewing this section
   for clarity" is not actionable. Drop it.
-- **Not already covered** — another checker in this pipeline reported it, or a linter,
-  formatter, or one of the `validate-*` scripts will. Drop it.
+- **Not already covered** — another checker in this pipeline **actually ran and reported
+  it**, or a linter, formatter, or one of the `validate-*` scripts will. Drop it. Nominal
+  ownership is not coverage: a check attributed to `plugin-dev:plugin-validator` when that
+  plugin was not installed did not happen, so the finding stands.
 - **Worth a reviewer's time** — a senior engineer would raise it in a real review. Drop
   pedantry.
 - **Verified** — you traced it in the file rather than inferring it from a pattern. If you
   cannot point at the text, drop it.
+
+**Two exemptions.** A CRITICAL finding, and any finding that weakens security, are subject
+only to the first test — the scope fence — and the verification test. Never drop one as a
+nitpick, as not worth a reviewer's time, or as someone else's job. The cost of a false
+positive here is a comment; the cost of a false negative is a merged credential.
 
 No confidence score: with no separate verification pass behind it, a self-assigned number
 adds ceremony without adding a check. These six questions do the work.
@@ -152,20 +171,21 @@ Reference: [documentation link, if applicable]
 A blocking finding:
 
 ````
-**.claude/skills/my-skill/SKILL.md:1** - CRITICAL: Missing YAML frontmatter
+**.claude/agents/documentation-writer.md:1** - CRITICAL: Missing YAML frontmatter
 
-Skills require YAML frontmatter to be discoverable by Claude Code:
+Agents require YAML frontmatter to be recognized by Claude Code:
 
 \```yaml
 ---
-name: my-skill
+name: documentation-writer
 description: Clear description with activation triggers
+tools: Read, Grep, Glob
 ---
 \```
 
-Without frontmatter, the skill won't be recognized by Claude Code.
+Without frontmatter the agent never loads, so nothing delegates to it.
 
-Reference: Anthropic Skills Documentation
+Reference: Anthropic Subagents Documentation
 ````
 
 A non-blocking one — same format, and it does not fail the review:
@@ -180,13 +200,22 @@ to the next reader.
 This is a cost and latency question, not a correctness one.
 ```
 
-**The verdict.** Stated once, alongside the findings. **Only a CRITICAL finding makes it
-`Issues found`.** A review whose worst finding is IMPORTANT, SUGGESTED, or OPTIONAL is
-`Pass`, with every finding still listed. A caller that reports in its own vocabulary maps it
-from there.
+**The verdict.** Stated once, alongside the findings. It is `Issues found` when either
+holds:
 
-Reporting a finding and failing the run are separate decisions. Quality observations are
-worth surfacing and are not grounds for blocking, so IMPORTANT reports without failing.
+- any **CRITICAL** finding, or
+- any finding that **weakens security** — a permission, tool grant, or hook capability
+  wider than what the changeset justifies — at whatever severity it carries.
+
+Otherwise `Pass`, with every finding still listed. A caller that reports in its own
+vocabulary maps it from there.
+
+Reporting a finding and failing the run are separate decisions. Readability and structure
+are worth surfacing and are not grounds for blocking, so a quality-only IMPORTANT reports
+without failing. Security is the exception, and it needs its own clause rather than a
+severity threshold: `priority-framework.md` rates some real security regressions IMPORTANT
+— an over-broad agent tool grant that stops short of credentials, a permission broader than
+needed — and a severity-only rule would merge every one of them under a green check.
 
 ## Reference material
 

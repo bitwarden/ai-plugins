@@ -150,11 +150,9 @@ In security-sensitive configurations (settings.json, permissions):
 
 ### Marketplace-Bound Components
 
-A component published to a marketplace is read and installed by people who did not write it, so discoverability defects matter more than they would internally:
+A component published to a marketplace is read and installed by people who did not write it. That raises the stakes of a discoverability defect, but it does not change any severity: unclear activation triggers are already IMPORTANT at baseline, because a component that never fires is functionally broken whoever installs it.
 
-- Unclear activation triggers: SUGGESTED → IMPORTANT (the component never fires for its intended audience)
-
-Do not elevate readability or organization to CRITICAL for marketplace components. CRITICAL means broken or unsafe, and that bar does not move with the audience.
+So there is no marketplace escalation. Do not elevate readability or organization to CRITICAL for marketplace components — CRITICAL means broken or unsafe, and that bar does not move with the audience.
 
 ### Internal Tools
 
