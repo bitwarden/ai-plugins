@@ -82,20 +82,27 @@ a check as skipped rather than passed when the tool it needs is unavailable.
 Detect the file types in scope and invoke the matching skill for each. Several types in one
 changeset means several skills.
 
-| Changed path                                                                   | Skill                                    |
-| ------------------------------------------------------------------------------ | ---------------------------------------- |
-| `agents/**/*.md` (`agents/<name>.md` or `agents/<name>/AGENT.md`)              | `Skill(reviewing-agent-definitions)`     |
-| `.claude/commands/**/*.md`, `.claude/prompts/**/*.md`, `plugins/*/commands/**` | `Skill(reviewing-command-definitions)`   |
-| `.claude/settings.json`, `.claude/settings.local.json`, `hooks.json`           | `Skill(reviewing-runtime-configuration)` |
-| `CLAUDE.md` (any location)                                                     | `Skill(reviewing-project-guidance)`      |
-| `SKILL.md`                                                                     | Not reviewed here — see below            |
-| Any other in-scope Claude material                                             | No targeted skill — read it here         |
+| Changed path                                                                           | Skill                                                            |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `agents/**/*.md` (`agents/<name>.md` or `agents/<name>/AGENT.md`)                      | `Skill(claude-config-validator:reviewing-agent-definitions)`     |
+| `commands/**/*.md` (any location) and `.claude/prompts/**/*.md`, excluding `README.md` | `Skill(claude-config-validator:reviewing-command-definitions)`   |
+| `.claude/settings.json`, `.claude/settings.local.json`, `hooks.json`                   | `Skill(claude-config-validator:reviewing-runtime-configuration)` |
+| `CLAUDE.md` (any location)                                                             | `Skill(claude-config-validator:reviewing-project-guidance)`      |
+| `SKILL.md`                                                                             | Not reviewed here — see below                                    |
+| Any other in-scope Claude material                                                     | No targeted skill — read it here                                 |
 
 A `hooks` block declared inside a settings file routes to
 `reviewing-runtime-configuration` along with the rest of that file; it covers both.
 
+The command row matches any `commands/` directory at any depth, which is what
+`reference/validate-ai-scope.md` puts in the command bucket. It excludes `README.md`, since a
+command's sibling documentation is not a command definition and would otherwise be judged for
+absent frontmatter.
+
 The last row is the fallback, and it matters most for skill support files — `reference/`,
-`examples/`, `scripts/` — which have no targeted skill of their own. Read them here for
+`examples/`, `scripts/` — which have no targeted skill of their own. They reach this skill
+through the config bucket under `.claude/skills/`, and through the plugin validation path
+inside a plugin; neither gives them a targeted reviewer. Read them here for
 instruction content and dangerous guidance: their genre is text Claude loads and acts on, so
 they carry the same CWE-1427 surface as any other configuration, and `plugin-dev`'s agents
 check only that referenced files exist, never what they say. Never let an in-scope path leave
@@ -109,11 +116,6 @@ disclosure, and broken file references, and both `validate-ai` commands route ev
 findings a reader cannot distinguish from independent confirmation. If a caller has not run
 `plugin-dev:skill-reviewer` and wants skill coverage, say so in the findings rather than
 substituting for it.
-
-Skill support files (`reference/`, `examples/`, `scripts/`) reach this skill through the
-config bucket when they sit under `.claude/skills/`, and through the plugin validation path
-inside a plugin. Neither gives them a targeted reviewer, so they land on the fallback row
-above and are read here.
 
 ## Step 4: Filter before reporting
 
@@ -248,6 +250,6 @@ enrichment as skipped rather than passed when it could not run.
 
 - **Only what changed**: the Step 1 fence governs every finding
 - **Security first**: local settings in the changeset, secrets, overly broad permissions
-- **Only CRITICAL blocks**: everything else informs without failing the run
+- **Only CRITICAL or a security weakening blocks**: everything else informs without failing the run
 - **Actionable feedback**: say what to do and why, not just what is wrong
 - **Constructive tone**: focus on the configuration, not the person who wrote it

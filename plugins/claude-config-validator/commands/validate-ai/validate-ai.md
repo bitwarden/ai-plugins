@@ -134,9 +134,12 @@ Invoke the `plugin-dev:skill-reviewer` agent, once per changed `SKILL.md`. It ow
 frontmatter, description and trigger quality, word count and writing style, progressive
 disclosure, and referenced files that do not exist.
 
-This is the pipeline's only skill review. 4c deliberately does not review `SKILL.md` files —
-a second rule set over the same file produces duplicate findings a reader cannot tell from
-independent confirmation.
+If `plugin-dev` is not installed, record this section as skipped with that reason, the same as
+4a. It is the pipeline's only skill review, so a silent omission here reads as a skill review
+that passed.
+
+4c deliberately does not review `SKILL.md` files — a second rule set over the same file
+produces duplicate findings a reader cannot tell from independent confirmation.
 
 ### 4c. Configuration and security review (reviewing-claude-config)
 

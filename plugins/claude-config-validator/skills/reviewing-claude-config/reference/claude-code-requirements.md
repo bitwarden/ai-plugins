@@ -201,9 +201,10 @@ reader; routing between files inside a skill is not.
 
 Based on detected type, invoke the relevant skill:
 
-- **Agents** → `Skill(reviewing-agent-definitions)`
-- **Settings and hooks** → `Skill(reviewing-runtime-configuration)`
-- **CLAUDE.md** → `Skill(reviewing-project-guidance)`
+- **Agents** → `Skill(claude-config-validator:reviewing-agent-definitions)`
+- **Commands** → `Skill(claude-config-validator:reviewing-command-definitions)`
+- **Settings and hooks** → `Skill(claude-config-validator:reviewing-runtime-configuration)`
+- **CLAUDE.md** → `Skill(claude-config-validator:reviewing-project-guidance)`
 ```
 
 ---
@@ -227,19 +228,26 @@ git diff --cached | grep "settings.local.json"
 
 ---
 
-### Auto-Approved Tool Patterns
+### Permission Rule Patterns
 
-**Format** (in settings.json):
+**Format** (in settings.json). Rules live under `permissions`, in `allow`, `deny`, or `ask`,
+and each rule is `Tool(specifier)`:
 
 ```json
 {
-  "autoApproved": [
-    "Bash(git status:*)",
-    "Bash(git diff:*)",
-    "Read(/absolute/path/to/specific/dir/**)"
-  ]
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Read(/absolute/path/to/specific/dir/**)"
+    ],
+    "deny": ["Read(/absolute/path/to/.env)"]
+  }
 }
 ```
+
+`deny` wins over `allow`, so it is the control to reach for when something must never happen.
+A top-level `autoApproved` or `autoApprovedTools` array is not read by Claude Code.
 
 **Guidelines**:
 

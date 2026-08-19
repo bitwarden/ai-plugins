@@ -17,6 +17,7 @@ Classification system for prioritizing issues found in Claude configuration file
 - Missing YAML frontmatter (skill won't be recognized)
 - Dangerous command auto-approvals (rm -rf, chmod 777)
 - Overly broad permissions exposing sensitive paths
+- An agent tool grant reaching credentials or destructive commands
 - Broken file references preventing skill loading
 
 **Action Required:** Must fix immediately before approval.
@@ -168,14 +169,16 @@ For internal-only configurations:
 
 ### Security Issues
 
-| Issue                                          | Priority  |
-| ---------------------------------------------- | --------- |
-| Committed settings.local.json                  | CRITICAL  |
-| Hardcoded API keys/tokens                      | CRITICAL  |
-| Dangerous auto-approved commands               | CRITICAL  |
-| Overly broad permissions (Read://_, Write://_) | CRITICAL  |
-| Permissions exposing ~/.ssh, /etc              | CRITICAL  |
-| Permissions broader than needed                | IMPORTANT |
+| Issue                                                             | Priority  |
+| ----------------------------------------------------------------- | --------- |
+| Committed settings.local.json                                     | CRITICAL  |
+| Hardcoded API keys/tokens                                         | CRITICAL  |
+| Dangerous auto-approved commands                                  | CRITICAL  |
+| Overly broad permissions (Read://_, Write://_)                    | CRITICAL  |
+| Permissions exposing ~/.ssh, /etc                                 | CRITICAL  |
+| Permissions broader than needed                                   | IMPORTANT |
+| Agent tool grant reaching credentials or destructive commands     | CRITICAL  |
+| Agent tool grant otherwise broader than its description justifies | IMPORTANT |
 
 ### Structure Issues
 

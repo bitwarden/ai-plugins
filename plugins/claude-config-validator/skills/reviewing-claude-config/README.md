@@ -1,6 +1,6 @@
 # reviewing-claude-config
 
-Comprehensive skill for reviewing Claude Code configuration files with security-first approach.
+Entry point for reviewing Claude Code configuration. Runs the security checks, then routes each file type to a targeted review skill.
 
 ## Overview
 
@@ -42,7 +42,7 @@ Two rules shape every review it produces: findings are limited to **what the cha
 - Verbosity of `CLAUDE.md`, which is re-read every turn in its scope
 - Instruction-content review of skill support files that have no targeted reviewer
 
-### Comprehensive Coverage
+### What it routes to
 
 - **Targeted review skills**: agent definitions, command definitions, runtime configuration (settings and hooks), project guidance (`CLAUDE.md`)
 - **Reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope

@@ -211,7 +211,7 @@ Five passes, ordered so the security question comes first.
 
 **Pass 1: Tool access** — least privilege; analysis-only agents holding `Write`, `Edit`, or `Bash`; `Bash` unexplained by the description; an omitted `tools` field inheriting everything; a grant that contradicts what the description claims.
 
-**Pass 2: Frontmatter** — valid YAML, required `name` and `description`, valid `model`, non-empty system prompt. Skipped for agents inside a changed plugin, where `plugin-dev:plugin-validator` already covers it.
+**Pass 2: Frontmatter** — valid YAML, required `name` and `description`, valid `model`, non-empty system prompt. Skipped only where `plugin-dev:plugin-validator` actually ran; a bare `.claude/agents/*.md`, or any agent when `plugin-dev` is not installed, is checked here.
 
 **Pass 3: Description and activation triggers** — states both what the agent does and when to reach for it; single responsibility rather than a catch-all.
 

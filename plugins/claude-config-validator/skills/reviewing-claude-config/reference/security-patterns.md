@@ -299,7 +299,7 @@ Set required environment variables:
 
 ```json
 {
-  "autoApprovedTools": ["Read://*"]
+  "permissions": { "allow": ["Read(//**)"] }
 }
 ```
 
@@ -307,10 +307,12 @@ Set required environment variables:
 
 ```json
 {
-  "autoApprovedTools": [
-    "Read://Users/username/projects/myproject/**",
-    "Read://Users/username/.claude/projects/**"
-  ]
+  "permissions": {
+    "allow": [
+      "Read(//Users/username/projects/myproject/**)",
+      "Read(//Users/username/.claude/projects/**)"
+    ]
+  }
 }
 ```
 
@@ -320,7 +322,7 @@ Set required environment variables:
 
 ```json
 {
-  "autoApprovedTools": ["Bash:*"]
+  "permissions": { "allow": ["Bash(:*)"] }
 }
 ```
 
@@ -328,15 +330,20 @@ Set required environment variables:
 
 ```json
 {
-  "autoApprovedTools": [
-    "Bash:git status:*",
-    "Bash:git log:*",
-    "Bash:git diff:*",
-    "Bash:npm install:*",
-    "Bash:./gradlew test:*"
-  ]
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(npm run build)"
+    ]
+  }
 }
 ```
+
+`npm install` and `./gradlew test` are deliberately absent. Both write state and run
+project- or registry-controlled code, so neither belongs in a list offered as the safe
+default; approve them only behind a pattern narrow enough to name what runs.
 
 ---
 

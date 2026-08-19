@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Breaking**: `reviewing-claude-config` is a router; the `checklists/` and `examples/` directories are gone
 - **Breaking**: `reviewing-claude-config` no longer reviews `SKILL.md` — `plugin-dev:skill-reviewer` owns it
-- Only a CRITICAL finding sets the verdict to `Issues found`; IMPORTANT maps to a warning
+- The verdict is `Issues found` only on a CRITICAL finding or one that weakens security; a quality-only IMPORTANT maps to a warning
 - IMPORTANT narrowed to functional defects and security regressions; vague instructions, missing examples, duplicated documentation, poor progressive disclosure, and missing structured-thinking blocks are SUGGESTED
 - Marketplace escalation no longer raises readability findings to CRITICAL
 - `reviewing-claude-config` holds `Skill` in `allowed-tools`
@@ -30,8 +30,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Agent frontmatter review is skipped only where `plugin-dev:plugin-validator` actually ran, not wherever the file sits inside a plugin
-- `Bash(rm -rf:*)` and `Bash(npm install:*)` permission examples in `reviewing-project-guidance`, whose wildcards had been consumed as Markdown emphasis
+- Agent and command frontmatter review is skipped only where `plugin-dev:plugin-validator` actually ran, not wherever the file sits inside a plugin
+- Permission examples use `Tool(specifier)` rules under `permissions.allow` / `deny`, replacing a top-level `autoApprovedTools` array and bare `Tool:specifier` rules that Claude Code does not read, in `reviewing-runtime-configuration`, `reviewing-project-guidance`, `security-patterns.md`, and `claude-code-requirements.md`
+- `npm install` and `./gradlew test` are no longer described as read-only or idempotent, and no longer appear in a list offered as the safe default
+- Hook `timeout` is documented as seconds, and an unfamiliar hook `type` is treated as a question to confirm rather than a defect
+- Routing table qualifies all four targeted skills as `claude-config-validator:<name>`, matches the command bucket's `commands/**/*.md` at any depth, and excludes `README.md`
+- Targeted skills reference the router by relative path, which they can resolve without a `Skill` grant
+- `/validate-ai` section 4b records itself as skipped when `plugin-dev` is unavailable, as 4a already did
+- Verdict statements in `SKILL.md` Core Principles and the changelog carry the security floor
+- Agent tool grants reaching credentials or destructive commands are CRITICAL in `priority-framework.md`, matching what `reviewing-agent-definitions` already said
+
+### Added, from review
+
+- `reviewing-command-definitions` pass covering `` !`cmd` `` shell execution and argument interpolation, the security surface no sibling skill covered
+- Network-egress, subagent-spawning, and exact-tool-name checks in the agent tool-access pass
+- A `permissions.deny` check, a path-resolution check for `CLAUDE.md` references, and a check for natural-language directives that loosen the harness
 
 ### Removed
 
