@@ -86,7 +86,7 @@ changeset means several skills.
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `agents/**/*.md` (`agents/<name>.md` or `agents/<name>/AGENT.md`)                      | `Skill(claude-config-validator:reviewing-agent-definitions)`     |
 | `commands/**/*.md` (any location) and `.claude/prompts/**/*.md`, excluding `README.md` | `Skill(claude-config-validator:reviewing-command-definitions)`   |
-| `.claude/settings.json`, `.claude/settings.local.json`, `hooks.json`                   | `Skill(claude-config-validator:reviewing-runtime-configuration)` |
+| `settings.json`, `settings.local.json`, `hooks.json` (any location)                    | `Skill(claude-config-validator:reviewing-runtime-configuration)` |
 | `CLAUDE.md` (any location)                                                             | `Skill(claude-config-validator:reviewing-project-guidance)`      |
 | `SKILL.md`                                                                             | Not reviewed here — see below                                    |
 | Any other in-scope Claude material                                                     | No targeted skill — read it here                                 |

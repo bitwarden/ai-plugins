@@ -1,6 +1,6 @@
 ---
 name: reviewing-runtime-configuration
-description: Reviews Claude Code settings and hook definitions for security, permission scoping, and command safety. Use when reviewing changes to .claude/settings.json, .claude/settings.local.json, or hooks.json in a repository or plugin. Flags local settings appearing in a changeset, hardcoded secrets, filesystem-wide permissions, dangerous auto-approvals, and hook commands that exfiltrate data or run unquoted input.
+description: Reviews Claude Code settings and hook definitions for security, permission scoping, and command safety. Use when reviewing changes to .claude/settings.json, .claude/settings.local.json, or hooks.json in a repository or plugin. Flags local settings appearing in a changeset, hardcoded secrets, filesystem-wide permissions, dangerous auto-approvals, and hook commands that exfiltrate data or route their input into a shell.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -36,18 +36,29 @@ reference, both commands, and all four targeted skills — edit them together.)_
 - [ ] No hardcoded API keys, tokens, or passwords
 - [ ] No sensitive paths exposed in permissions
 - [ ] No dangerous command auto-approvals
+- [ ] `permissions.defaultMode` is not `bypassPermissions` or `acceptEdits`, and
+      `disableBypassPermissionsMode` has not been removed. CRITICAL: `bypassPermissions` in a
+      committed settings file turns off the permission prompt for everyone who opens the repo,
+      which is broader than any single over-broad rule
+- [ ] `permissions.additionalDirectories` does not reach outside the project
 - [ ] No hook command sends repository, prompt, or environment content off the machine
 - [ ] No hook command destroys state without a guard
 - [ ] No hook command reads credentials or secrets — `.env`, `~/.aws`, `~/.ssh`, the
       keychain, `printenv`. Egress is not required for this to be an attack: reading now and
       shipping later, or through an already-approved network step, is the usual shape
-- [ ] No hook interpolates its input unquoted into a shell string
+- [ ] No hook interpolates its input into a shell string that a second shell re-parses.
+      Unquoted is CRITICAL. Quoted is CRITICAL too whenever the quoted value reaches a nested
+      shell (`bash -c`, `eval`, `ssh`), and IMPORTANT otherwise. See Command safety below for
+      why the three cases differ
 
 A failure here is CRITICAL. Report it first, then finish the remaining passes so the caller
 can still say which checks ran.
 
-On the routed path the router has already run the first four of these as its Step 2, so do not
-re-report them; the hook items are always yours. On a direct invocation all of them are yours.
+The router's Step 2 covers the first four with a shallow `Grep` sweep. Run the passes below
+regardless: they carry the analysis a grep cannot do, including `allow` versus `deny`
+disambiguation, `//` versus `/` path resolution, and trailing-wildcard scope. Where that
+produces the same issue at the same `file:line` the router already has, its Step 4 merges the
+two at the higher severity, so overlap costs nothing and silence costs coverage.
 
 ## Part 1 — Settings
 
@@ -139,20 +150,31 @@ Check `deny` as carefully as `allow`. It is the stronger control, and a rule rem
 
 ### Auto-approval safety
 
-✅ Safe to auto-approve, because they only read: `git status`, `ls`. `git log` and `git diff`
-are read-only in effect but honour repository-influenced config such as `textconv` and external
-diff drivers, so they run code the reviewer did not audit. Narrow patterns for both.
-
-⚠️ Conventionally auto-approved, but only with a narrow pattern, because each writes state and
-runs project- or registry-controlled code: `npm install`, `./gradlew test`. Neither is
-read-only and neither is idempotent in any useful sense. An npm lifecycle script is arbitrary
-code execution at install time.
+The tiering lives in `../reviewing-claude-config/reference/security-patterns.md`, under Safe
+Command Whitelist. Read it there rather than from memory: `npm install`, `npm ci`,
+`./gradlew build`, and `./gradlew test` all execute project- or registry-controlled code, and
+`git log` and `git diff` honour repository-controlled `textconv` and external diff drivers.
 
 ❌ Requires approval: `rm -rf`, `git push --force`, `chmod 777`, `curl * | sh`, `dd`, `mkfs`,
 and anything else destructive or that executes code fetched at runtime.
 
 A trailing wildcard is what decides this. `Bash(npm run build)` names one command;
 `Bash(npm install:*)` approves installing any package from any registry.
+
+### Fields that execute or bypass
+
+Rules are not the only thing in this file that decides what runs. These are not rules, so
+nothing in the permission-scoping pass above sees them:
+
+- [ ] `permissions.defaultMode` — `bypassPermissions` disables prompting entirely,
+      `acceptEdits` auto-accepts file edits
+- [ ] `permissions.additionalDirectories` — extends the reachable filesystem beyond the project
+- [ ] `apiKeyHelper` — a shell command run to mint credentials
+- [ ] `statusLine.command` — a shell command run on every render
+- [ ] `enableAllProjectMcpServers` — trusts every MCP server the project declares
+- [ ] `env` — values injected into every command's environment
+
+Read each as executable configuration, on the same terms as a hook command.
 
 ### Syntax and fields
 
@@ -212,11 +234,29 @@ confirm, never as a defect. This repository's own `bitwarden-ai-telemetry` plugi
 Read every command as though a contributor wrote it to attack the person running it,
 because in a pull request that is exactly the threat.
 
-- [ ] Hook input reaching a shell command is quoted, and read from stdin rather than
-      interpolated where possible
+- [ ] Hook input reaches the command on stdin, or as a shell variable used directly, or
+      validated against an allowlist. Quoting alone is not the pass condition
+- [ ] No hook input is interpolated into a string handed to a nested shell
 - [ ] No `eval`, no piping a download into a shell
 - [ ] Commands fail closed: a blocking hook that errors should block, not silently pass
 - [ ] Exit codes match intent — a `PreToolUse` hook blocks with exit code 2
+
+Use the dangerous-command patterns in
+`../reviewing-claude-config/reference/security-patterns.md`. Its detection commands hardcode
+`.claude/settings.json`, so reuse the patterns and retarget the greps at the hooks file you are
+reviewing.
+
+Quoting is worth more here than it is for a slash command, and still not enough. Three cases,
+which is why the rule cannot be stated as one:
+
+| Shape                                                                         | Quoted input                                                                                        |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Hook input in a shell variable, used directly: `grep "$file_path"`            | Safe. Variable expansion does not re-enter command substitution                                     |
+| Hook input interpolated into a nested shell: `bash -c "check \"$file_path\""` | **Unsafe.** The outer shell interpolates, the inner shell re-parses, and `$(...)` in the value runs |
+| Slash-command `$ARGUMENTS`, per `../reviewing-command-definitions/SKILL.md`   | **Unsafe.** Substitution is textual and happens before any shell parses the line                    |
+
+So a quoted hook interpolation is IMPORTANT on its own and CRITICAL once a nested shell is in
+the path. Prefer stdin either way: it removes the question rather than answering it.
 
 ### Prompt hooks
 

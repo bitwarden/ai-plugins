@@ -59,6 +59,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `model` admits full identifiers and the reviewed tool list includes `Task`, `Skill`, `TodoWrite`, and `NotebookEdit`, matching what the skills expect
 - Severity rows for over-broad permissions are qualified to `allow`, with a row recording that a bare or sensitive-path rule in `deny` is the control rather than a finding
 - `/validate-ai-local` carries the full CWE-1427 boundary rather than a paraphrase that dropped the identifier and the critical-finding instruction
+- Hook input guidance states the three cases that actually differ, verified by execution: a quoted value in a shell variable used directly is safe, the same value handed to a nested shell is not, and slash-command substitution has no safe quoted form. `reviewing-command-definitions` no longer claims the sibling applies an identical rule
+- A broken `CLAUDE.md` pointer is IMPORTANT rather than CRITICAL, since it breaks no load; a broken `@path` import stays CRITICAL
+- The settings routing row is qualified for depth, so a nested `packages/app/.claude/settings.json` reaches the targeted skill instead of the fallback
+- The routed path runs the deeper settings passes and lets the router's Step 4 merge overlaps, rather than suppressing them as already covered by a shallow `Grep` sweep
+- `reviewing-agent-definitions` owns Passes 1 and 3 to 5, since `plugin-dev` checks that a description and system prompt exist rather than whether they are any good
+- `priority-framework.md` has hook and settings severity tables; it previously contained no occurrence of "hook" while a skill delegated hook classification to it
+- Non-rule settings fields that execute or bypass are a pass of their own: `permissions.defaultMode`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, `enableAllProjectMcpServers`, and `env`. `bypassPermissions` in a committed settings file is CRITICAL
+- The command tier is stated once, in `security-patterns.md`, with `reviewing-runtime-configuration` pointing at it. `npm install`, `npm ci`, `./gradlew build`, and `./gradlew test` are one tier: a lock file makes `npm ci` reproducible, not inert
+- Tool-name enumerations include `Task`, `Skill`, `TodoWrite`, and `NotebookEdit`, with `Task` ranked at or above `Bash` because it escapes the grant under review
+- `claude-code-requirements.md` has a `### Commands` subsection, which the command skill already pointed at for frontmatter fields
+- The documented bare-rule detector gates its verdict on the skip, exiting 2 rather than printing a pass for a check that could not run
+- `/validate-ai` writes the report rather than asking which pull request to validate when there is nobody to ask
 - The documented bare-rule detector guards on `jq` like the shipped script, instead of reporting a pass for a check that could not run
 - Frontmatter severity is stated per file type: missing frontmatter is CRITICAL for an agent, optional for a command, and YAML that does not parse is CRITICAL for either
 - All six `model` statements in `claude-code-requirements.md` admit full identifiers, including the detection table and the validation checkbox a reviewer classifies from

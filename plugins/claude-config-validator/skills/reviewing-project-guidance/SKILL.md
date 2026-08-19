@@ -70,8 +70,9 @@ directive is re-read every turn in scope, so it applies to work nobody is watchi
 - [ ] Detailed specifications referenced rather than reproduced
 - [ ] Purpose of the file clear from the first few lines
 - [ ] Every path referenced from CLAUDE.md resolves on disk, which `Glob` can confirm. A
-      broken reference is CRITICAL: the guidance points at nothing and the reader never learns
-      the rule it was standing in for
+      broken pointer is IMPORTANT: the reader never learns the rule it stood for, but nothing
+      fails to load. A broken `@path` import is CRITICAL, since that content was meant to be in
+      context and silently is not
 
 A workable shape:
 

@@ -1,6 +1,6 @@
 ---
 name: reviewing-command-definitions
-description: Reviews Claude Code slash command and prompt files for purpose clarity, completeness, and correct skill references. Use when reviewing changes to .claude/commands/**/*.md, .claude/prompts/**/*.md, or plugins/*/commands/**/*.md. Flags commands with no stated purpose or usage, complex tasks left as one vague instruction, and references to skills that do not exist.
+description: Reviews Claude Code slash command and prompt files for purpose clarity, completeness, shell-execution safety, and correct skill references. Use when reviewing changes to commands/**/*.md at any location, or .claude/prompts/**/*.md. Flags argument interpolation into a shell string, commands with no stated purpose or usage, complex tasks left as one vague instruction, and references to skills that do not exist.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -212,10 +212,19 @@ clauses. Adding quotes stops that particular payload and two others still work:
   closes the quote the author wrote and opens a new command.
 
 So treat the unquoted form as CRITICAL and the quoted form as IMPORTANT, and in both cases
-recommend stdin or a validated allowlist rather than better quoting. The sibling at
-`../reviewing-runtime-configuration/SKILL.md` applies the same rule to hook input, and prefers
-stdin for the same reason. See
-`../reviewing-claude-config/reference/security-patterns.md` for the dangerous-command patterns.
+recommend stdin or a validated allowlist rather than better quoting.
+
+The sibling at `../reviewing-runtime-configuration/SKILL.md` deliberately does **not** apply an
+identical rule, and the difference is real rather than an oversight. Hook input arrives as a
+shell variable, and `"$VAR"` does not re-enter command substitution, so a quoted hook
+interpolation used directly is safe. It stops being safe the moment the quoted value is handed
+to a nested shell such as `bash -c`, because the inner shell re-parses it. A slash command has
+no safe quoted form at all, since substitution here is textual and pre-shell. That skill states
+all three cases.
+
+See `../reviewing-claude-config/reference/security-patterns.md` for the dangerous-command
+patterns. Its detection commands hardcode `.claude/settings.json`, so reuse the patterns and
+retarget the greps at the file you are reviewing.
 
 ## Pass 8: Tool grants match the work
 

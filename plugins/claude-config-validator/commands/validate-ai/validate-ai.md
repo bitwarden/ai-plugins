@@ -30,7 +30,10 @@ Resolve, in this order:
   surrounding prompt if present; else from `$ARGUMENTS`, accepting `123`, `PR #123`, or
   `https://github.com/org/repo/pull/123`; else from the checked-out branch via
   `gh pr view --json number,baseRefName,headRefName,url`. If none of these resolve a pull
-  request, stop and ask which one to validate.
+  request, stop. Ask which one to validate only when you can be answered; a workflow run has
+  nobody to ask, so write the report saying the pull request could not be resolved and which
+  sources you tried, then stop. Resolve the mode below first if you need to tell the two
+  apart.
 - **Sticky comment ID.** From a `STICKY COMMENT ID:` line in the surrounding prompt.
 - **Mode.** **Workflow mode** when a sticky comment ID was supplied, or when
   `printenv GITHUB_ACTIONS` reports a value; otherwise **interactive mode**. The mode changes

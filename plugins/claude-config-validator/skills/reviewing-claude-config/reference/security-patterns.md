@@ -148,6 +148,7 @@ control, not a defect.
 # detect-broad-permissions.sh
 
 ISSUES=0
+SKIPPED=0
 
 if grep -qE '"Read\(//\*\*\)"' .claude/settings.json 2>/dev/null; then
     echo "CRITICAL: Overly broad Read permissions (Read(//**))"
@@ -165,6 +166,7 @@ fi
 # check that never ran.
 if ! command -v jq >/dev/null 2>&1; then
     echo "SKIPPED: bare-rule check needs jq to tell allow from deny"
+    SKIPPED=1
 elif jq -e '.permissions.allow[]? | select(. == "Bash")' .claude/settings.json >/dev/null 2>&1; then
     echo "CRITICAL: Bare Bash rule in allow auto-approves every shell command"
     ISSUES=1
@@ -176,11 +178,14 @@ if grep -rE '(\.ssh|/etc|\.aws|\.config)' .claude/settings.json 2>/dev/null; the
     ISSUES=1
 fi
 
-if [ $ISSUES -eq 0 ]; then
+if [ $ISSUES -ne 0 ]; then
+    exit 1
+elif [ $SKIPPED -ne 0 ]; then
+    echo "INCOMPLETE: nothing found, but ${SKIPPED} check(s) could not run"
+    exit 2
+else
     echo "OK: Permissions appropriately scoped"
     exit 0
-else
-    exit 1
 fi
 ```
 
@@ -363,23 +368,28 @@ gives the reason.
 
 ## Safe Command Whitelist
 
-**Read-Only Commands (Generally Safe):**
+This is the canonical tiering. `reviewing-runtime-configuration` points here rather than
+restating it.
 
-- `git status`, `git log`, `git diff`, `git show`
+**Read-only:**
+
 - `ls`, `cat`, `head`, `tail`, `less`
 - `grep`, `find`, `wc`, `sort`
-- `npm list`, `./gradlew tasks`
+- `git status`, `npm list`, `./gradlew tasks`
 
-**State-changing but conventionally approved, with narrow patterns only:**
+**Read-only in effect, but they honour repository-controlled config:**
 
-- `npm ci`, `./gradlew build` - reproducible from a lock file or build script, but both still
-  execute project-controlled code
+- `git log`, `git diff`, `git show` - `textconv` and external diff drivers run code the
+  reviewer did not audit, so these want narrow patterns rather than a bare grant
+
+**State-changing, and they execute project- or registry-controlled code:**
+
+- `npm install`, `npm ci`, `./gradlew build`, `./gradlew test` - narrow patterns only, and only
+  with a stated reason. A lock file makes `npm ci` reproducible, not inert: lifecycle scripts
+  still run at install time, and a Gradle task runs whatever the build file names. None of the
+  four is idempotent in any useful sense
 - `git pull` (on feature branches)
 - `mkdir -p` (with scoped paths)
-
-`npm install` and `./gradlew test` are deliberately absent. An npm lifecycle script is arbitrary
-code execution at install time, and a Gradle test task runs whatever the build file names, so
-neither belongs in a list offered as the safe default.
 
 **Commands Requiring Approval:**
 

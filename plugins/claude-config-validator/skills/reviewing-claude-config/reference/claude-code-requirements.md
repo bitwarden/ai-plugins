@@ -53,6 +53,31 @@ description: Reviews code # ❌ Too vague, no activation triggers
 
 ---
 
+### Commands (`commands/**/*.md` or `.claude/prompts/**/*.md`)
+
+Frontmatter is **optional** for a command. A file with none still loads and is invocable, so
+its absence is not a finding; YAML that does not parse is, because the file then fails to load.
+
+**Optional fields:**
+
+```yaml
+description: What the command does, shown by /help
+argument-hint: "[what the arguments are]"
+allowed-tools: Read, Grep, Bash(git status:*)
+model: sonnet
+disable-model-invocation: false
+```
+
+**Field requirements:**
+
+- `description`: without it `/help` has no text for the command
+- `argument-hint`: shown when completing the command; free-form
+- `allowed-tools`: each rule is `Tool` or `Tool(specifier)`, the same grammar as `permissions`
+- `model`: an alias or a full model identifier
+- An unrecognized key is a question to confirm, not a defect
+
+---
+
 ### Agents (`.claude/agents/*.md` or `plugins/*/agents/*.md`)
 
 **Required Fields:**
@@ -116,11 +141,18 @@ Both the aliases below and full model identifiers such as `claude-opus-4-5` are 
 **Execution Tools** (HIGH RISK):
 
 - `Bash` - Execute shell commands
+- `Task` - Spawns a subagent, which carries its own grant. Rank this at or above `Bash`: it
+  escapes the grant being reviewed rather than widening it
+- `Skill` - Invokes a skill, which may itself hold a wider grant
 
 **Network Tools** (MEDIUM-HIGH RISK):
 
 - `WebFetch` - Fetch URL content
 - `WebSearch` - Search web
+
+**Other** (LOW RISK): `TodoWrite`, `NotebookEdit`
+
+This list is not closed. An unfamiliar tool name is a question to confirm, not a defect.
 
 ### Tool Access Security
 
@@ -337,7 +369,7 @@ restriction that silently never applies.
 
 **Model Values**: `haiku` | `sonnet` | `opus` | `inherit` | a full model identifier
 
-**Tool Names**: `Read` | `Write` | `Edit` | `Grep` | `Glob` | `Bash` | `WebFetch` | `WebSearch`
+**Tool Names**: `Read` | `Write` | `Edit` | `Grep` | `Glob` | `Bash` | `WebFetch` | `WebSearch` | `Task` | `Skill` | `TodoWrite` | `NotebookEdit` | the set grows, so confirm an unfamiliar name rather than flagging it
 
 **Line Limit**: SKILL.md ≤500 lines (guideline)
 

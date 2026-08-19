@@ -182,6 +182,32 @@ For internal-only configurations:
 | Agent tool grant reaching credentials or destructive commands                  | CRITICAL                          |
 | Agent tool grant otherwise broader than its description justifies              | IMPORTANT                         |
 
+### Hook Issues
+
+| Issue                                                               | Priority  |
+| ------------------------------------------------------------------- | --------- |
+| Network egress carrying repository, prompt, or environment content  | CRITICAL  |
+| Destructive command with no guard                                   | CRITICAL  |
+| Reads credentials or secrets (`.env`, `~/.aws`, `~/.ssh`, keychain) | CRITICAL  |
+| Hook input reaching a nested shell, quoted or not                   | CRITICAL  |
+| Hook input quoted into a shell variable used directly               | IMPORTANT |
+| Misspelled or unrecognized event name                               | IMPORTANT |
+| Plugin hook script path not using `${CLAUDE_PLUGIN_ROOT}`           | IMPORTANT |
+| Blocking hook that fails open on error                              | IMPORTANT |
+| Long-running work on a hot event                                    | SUGGESTED |
+| Chatty output on success                                            | SUGGESTED |
+
+### Settings Issues
+
+| Issue                                                                    | Priority  |
+| ------------------------------------------------------------------------ | --------- |
+| `permissions.defaultMode` set to `bypassPermissions`                     | CRITICAL  |
+| `permissions.defaultMode` set to `acceptEdits`                           | CRITICAL  |
+| `disableBypassPermissionsMode` removed                                   | CRITICAL  |
+| `apiKeyHelper` or `statusLine.command` running a command nobody reviewed | CRITICAL  |
+| `permissions.additionalDirectories` reaching outside the project         | IMPORTANT |
+| `enableAllProjectMcpServers` enabled                                     | IMPORTANT |
+
 ### Structure Issues
 
 | Issue                                           | Priority                       |
