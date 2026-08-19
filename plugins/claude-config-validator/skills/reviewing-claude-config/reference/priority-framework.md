@@ -146,9 +146,12 @@ reaches IMPORTANT, however strongly you feel it.
 
 In security-sensitive configurations (settings.json, permissions):
 
-- Elevate permission issues to CRITICAL
 - Elevate secret exposure to CRITICAL
-- Broad permissions: IMPORTANT → CRITICAL
+
+Permission and settings severities are not adjusted here. The Security Issues and Settings
+Issues tables below are the single statement for those, per-field, and a blanket elevation
+would erase their IMPORTANT tier — including the row the verdict's security floor cites as its
+reason for existing.
 
 ### Marketplace-Bound Components
 
@@ -184,41 +187,44 @@ For internal-only configurations:
 
 ### Hook Issues
 
-| Issue                                                               | Priority  |
-| ------------------------------------------------------------------- | --------- |
-| Network egress carrying repository, prompt, or environment content  | CRITICAL  |
-| Destructive command with no guard                                   | CRITICAL  |
-| Reads credentials or secrets (`.env`, `~/.aws`, `~/.ssh`, keychain) | CRITICAL  |
-| Hook input reaching a nested shell, quoted or not                   | CRITICAL  |
-| Hook input quoted into a shell variable used directly               | IMPORTANT |
-| Misspelled or unrecognized event name                               | IMPORTANT |
-| Plugin hook script path not using `${CLAUDE_PLUGIN_ROOT}`           | IMPORTANT |
-| Blocking hook that fails open on error                              | IMPORTANT |
-| Long-running work on a hot event                                    | SUGGESTED |
-| Chatty output on success                                            | SUGGESTED |
+| Issue                                                               | Priority                     |
+| ------------------------------------------------------------------- | ---------------------------- |
+| Network egress carrying repository, prompt, or environment content  | CRITICAL                     |
+| Destructive command with no guard                                   | CRITICAL                     |
+| Reads credentials or secrets (`.env`, `~/.aws`, `~/.ssh`, keychain) | CRITICAL                     |
+| Hook input reaching a nested shell, quoted or not                   | CRITICAL                     |
+| Hook input interpolated unquoted into a shell string                | CRITICAL                     |
+| Hook input quoted and consumed directly by the command              | Not a finding                |
+| Misspelled event name                                               | IMPORTANT                    |
+| Unrecognized event name                                             | Confirm it, do not report it |
+| Plugin hook script path not using `${CLAUDE_PLUGIN_ROOT}`           | IMPORTANT                    |
+| Blocking hook that fails open on error                              | IMPORTANT                    |
+| Long-running work on a hot event                                    | SUGGESTED                    |
+| Chatty output on success                                            | SUGGESTED                    |
 
 ### Settings Issues
 
-| Issue                                                                    | Priority  |
-| ------------------------------------------------------------------------ | --------- |
-| `permissions.defaultMode` set to `bypassPermissions`                     | CRITICAL  |
-| `permissions.defaultMode` set to `acceptEdits`                           | CRITICAL  |
-| `disableBypassPermissionsMode` removed                                   | CRITICAL  |
-| `apiKeyHelper` or `statusLine.command` running a command nobody reviewed | CRITICAL  |
-| `permissions.additionalDirectories` reaching outside the project         | IMPORTANT |
-| `enableAllProjectMcpServers` enabled                                     | IMPORTANT |
+| Issue                                                                    | Priority                                                                              |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `permissions.defaultMode` set to `bypassPermissions`                     | CRITICAL                                                                              |
+| `permissions.defaultMode` set to `acceptEdits`                           | IMPORTANT, since some projects opt into it deliberately: ask why rather than blocking |
+| `disableBypassPermissionsMode` removed                                   | CRITICAL                                                                              |
+| `apiKeyHelper` or `statusLine.command` running a command nobody reviewed | CRITICAL                                                                              |
+| `permissions.additionalDirectories` reaching outside the project         | IMPORTANT                                                                             |
+| `enableAllProjectMcpServers` enabled                                     | IMPORTANT                                                                             |
 
 ### Structure Issues
 
-| Issue                                           | Priority                       |
-| ----------------------------------------------- | ------------------------------ |
-| Missing YAML frontmatter, agents                | CRITICAL                       |
-| YAML frontmatter that does not parse, any type  | CRITICAL                       |
-| Missing YAML frontmatter, commands              | Not a finding — it is optional |
-| Broken file references                          | CRITICAL                       |
-| File > 500 lines without progressive disclosure | SUGGESTED                      |
-| Poor file organization                          | SUGGESTED                      |
-| Missing structured thinking blocks              | SUGGESTED                      |
+| Issue                                                                    | Priority                       |
+| ------------------------------------------------------------------------ | ------------------------------ |
+| Missing YAML frontmatter, agents                                         | CRITICAL                       |
+| YAML frontmatter that does not parse, any type                           | CRITICAL                       |
+| Missing YAML frontmatter, commands                                       | Not a finding — it is optional |
+| Broken reference preventing load, or a broken `CLAUDE.md` `@path` import | CRITICAL                       |
+| Broken plain-path pointer in guidance prose                              | IMPORTANT                      |
+| File > 500 lines without progressive disclosure                          | SUGGESTED                      |
+| Poor file organization                                                   | SUGGESTED                      |
+| Missing structured thinking blocks                                       | SUGGESTED                      |
 
 ### Quality Issues
 

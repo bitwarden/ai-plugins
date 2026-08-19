@@ -61,7 +61,7 @@ SECRET_FOUND=0
 TEMP_FILE=$(mktemp)
 
 # OpenAI API keys (sk-...)
-if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -viE "example|your-key-here|xxx" > "${TEMP_FILE}"; then
+if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -v "sk-EXAMPLE" > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: OpenAI API key pattern detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'
@@ -70,7 +70,7 @@ if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "securit
 fi
 
 # GitHub tokens (ghp_..., gho_...)
-if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -viE "example|your-key-here|xxx" > "${TEMP_FILE}"; then
+if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -v "ghp_EXAMPLE" > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: GitHub token pattern detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'

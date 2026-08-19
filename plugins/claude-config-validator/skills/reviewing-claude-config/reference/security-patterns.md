@@ -354,7 +354,7 @@ Set required environment variables:
     "allow": [
       "Bash(git status:*)",
       "Bash(git log:*)",
-      "Bash(git diff:*)",
+      "Bash(git diff --stat)",
       "Bash(npm run build)"
     ]
   }

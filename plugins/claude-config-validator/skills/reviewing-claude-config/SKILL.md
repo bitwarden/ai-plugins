@@ -89,7 +89,13 @@ changeset means several skills.
 | `settings.json`, `settings.local.json`, `hooks.json` (any location)                    | `Skill(claude-config-validator:reviewing-runtime-configuration)` |
 | `CLAUDE.md` (any location)                                                             | `Skill(claude-config-validator:reviewing-project-guidance)`      |
 | `SKILL.md`                                                                             | Not reviewed here — see below                                    |
+| `.claude-plugin/*.json`                                                                | Not reviewed here — `plugin-dev:plugin-validator` owns manifests |
 | Any other in-scope Claude material                                                     | No targeted skill — read it here                                 |
+
+If a targeted skill cannot be invoked — a partial plugin install, no `Skill` grant, a standalone
+copy with bare skill names — do not let the routing failure pass silently. Review the file here
+against `reference/claude-code-requirements.md` and record the routed review as skipped, the same
+way Step 2 records a check whose tool is unavailable.
 
 A `hooks` block declared inside a settings file routes to
 `reviewing-runtime-configuration` along with the rest of that file; it covers both.
@@ -227,7 +233,7 @@ vocabulary maps it from there.
 Reporting a finding and failing the run are separate decisions. Readability and structure
 are worth surfacing and are not grounds for blocking, so a quality-only IMPORTANT reports
 without failing. Security is the exception, and it needs its own clause rather than a
-severity threshold: `priority-framework.md` rates some real security regressions IMPORTANT,
+severity threshold: `reference/priority-framework.md` rates some real security regressions IMPORTANT,
 such as an over-broad agent tool grant that stops short of credentials or a permission broader
 than needed, and a severity-only rule would merge every one of them under a green check. The
 shell-execution clause is there for the same reason: `reviewing-command-definitions` rates a

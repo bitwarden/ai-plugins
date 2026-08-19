@@ -1,6 +1,6 @@
 ---
 name: reviewing-agent-definitions
-description: Reviews Claude Code agent definition files for tool-access security, triggering quality, and system prompt clarity. Use when reviewing changes to agents/<name>.md or agents/<name>/AGENT.md, whether under .claude/agents/ or inside a plugin. Flags over-privileged tool grants, unjustified Bash access, descriptions with no activation triggers, and system prompts too vague to act on.
+description: Reviews Claude Code agent definition files for tool-access security, triggering quality, and system prompt clarity. Use when reviewing changes to agents/<name>.md or agents/<name>/AGENT.md, whether under .claude/agents/ or inside a plugin. Flags over-privileged tool grants, unjustified Bash access, descriptions with no activation triggers, and system prompts too vague to act on. Also use when asked to audit a subagent's tool access or check whether an agent will trigger. Normally reached through `reviewing-claude-config`, which runs an always-on secret scan and a finding filter first.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -95,7 +95,9 @@ Check:
       either mis-described or over-granted, and both are findings
 - [ ] No unexplained network egress: `WebFetch` or `WebSearch` alongside read access is a
       read-then-send path, so the description has to justify the network half
-- [ ] No unexplained `Task`, which spawns subagents and so escapes this grant entirely
+- [ ] No unexplained `Task` or `Skill`. Both escape the grant under review rather than
+      widening it: `Task` spawns a subagent with its own grant, and a skill may itself hold
+      `Bash` or `Write`. An agent declared `Read, Grep, Glob, Skill` is not read-only
 - [ ] Tool names are exact and case-sensitive. A misspelled entry is silently not a grant, so
       the live agent differs from the one under review
 

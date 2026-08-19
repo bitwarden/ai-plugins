@@ -1,6 +1,6 @@
 ---
 name: reviewing-runtime-configuration
-description: Reviews Claude Code settings and hook definitions for security, permission scoping, and command safety. Use when reviewing changes to .claude/settings.json, .claude/settings.local.json, or hooks.json in a repository or plugin. Flags local settings appearing in a changeset, hardcoded secrets, filesystem-wide permissions, dangerous auto-approvals, and hook commands that exfiltrate data or route their input into a shell.
+description: Reviews Claude Code settings and hook definitions for security, permission scoping, and command safety. Use when reviewing changes to .claude/settings.json, .claude/settings.local.json, or hooks.json in a repository or plugin. Flags local settings appearing in a changeset, hardcoded secrets, filesystem-wide permissions, dangerous auto-approvals, and hook commands that exfiltrate data or route their input into a shell. Also use when asked to review hooks, audit permissions, or check what runs without a prompt. Normally reached through `reviewing-claude-config`, which runs an always-on secret scan and a finding filter first.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -46,10 +46,9 @@ reference, both commands, and all four targeted skills — edit them together.)_
 - [ ] No hook command reads credentials or secrets — `.env`, `~/.aws`, `~/.ssh`, the
       keychain, `printenv`. Egress is not required for this to be an attack: reading now and
       shipping later, or through an already-approved network step, is the usual shape
-- [ ] No hook interpolates its input into a shell string that a second shell re-parses.
-      Unquoted is CRITICAL. Quoted is CRITICAL too whenever the quoted value reaches a nested
-      shell (`bash -c`, `eval`, `ssh`), and IMPORTANT otherwise. See Command safety below for
-      why the three cases differ
+- [ ] No hook interpolates its input unquoted into a shell string, and no hook routes its
+      input into a nested shell (`bash -c`, `eval`, `ssh`) quoted or not. See Command safety
+      below for the case that is safe and why
 
 A failure here is CRITICAL. Report it first, then finish the remaining passes so the caller
 can still say which checks ran.
@@ -134,7 +133,7 @@ relative to the directory holding the settings file, so `Read(/etc/**)` does not
       "Read(//Users/username/projects/myproject/**)",
       "Write(//Users/username/projects/myproject/src/**)",
       "Bash(git status:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff --stat)"
     ],
     "deny": ["Read(//Users/username/.ssh/**)"]
   }
@@ -255,8 +254,9 @@ which is why the rule cannot be stated as one:
 | Hook input interpolated into a nested shell: `bash -c "check \"$file_path\""` | **Unsafe.** The outer shell interpolates, the inner shell re-parses, and `$(...)` in the value runs |
 | Slash-command `$ARGUMENTS`, per `../reviewing-command-definitions/SKILL.md`   | **Unsafe.** Substitution is textual and happens before any shell parses the line                    |
 
-So a quoted hook interpolation is IMPORTANT on its own and CRITICAL once a nested shell is in
-the path. Prefer stdin either way: it removes the question rather than answering it.
+So a quoted value consumed directly by the command is not a finding. Once a nested shell is in
+the path it is CRITICAL, quoted or not, and an unquoted interpolation is CRITICAL anywhere.
+Prefer stdin regardless: it removes the question rather than answering it.
 
 ### Prompt hooks
 

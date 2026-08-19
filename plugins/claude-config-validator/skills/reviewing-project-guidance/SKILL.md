@@ -1,6 +1,6 @@
 ---
 name: reviewing-project-guidance
-description: Reviews CLAUDE.md files for security, structure, and directive clarity. Use when reviewing changes to CLAUDE.md at a project root, in .claude/, or scoped to a subdirectory. Flags credentials and sensitive paths in guidance text, detailed specifications that belong in their own docs, and directives too vague to act on.
+description: Reviews CLAUDE.md files for security, structure, and directive clarity. Use when reviewing changes to CLAUDE.md at a project root, in .claude/, or scoped to a subdirectory. Flags credentials and sensitive paths in guidance text, detailed specifications that belong in their own docs, directives too vague to act on, and directives that loosen the harness itself such as `--dangerously-skip-permissions` or `--no-verify`. Also use when asked to review project instructions or CLAUDE.md quality. Normally reached through `reviewing-claude-config`, which runs an always-on secret scan and a finding filter first.
 allowed-tools: Read, Grep, Glob
 ---
 

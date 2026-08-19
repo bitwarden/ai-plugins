@@ -1,6 +1,6 @@
 ---
 name: reviewing-command-definitions
-description: Reviews Claude Code slash command and prompt files for purpose clarity, completeness, shell-execution safety, and correct skill references. Use when reviewing changes to commands/**/*.md at any location, or .claude/prompts/**/*.md. Flags argument interpolation into a shell string, commands with no stated purpose or usage, complex tasks left as one vague instruction, and references to skills that do not exist.
+description: Reviews Claude Code slash command and prompt files for purpose clarity, completeness, shell-execution safety, and correct skill references. Use when reviewing changes to commands/**/*.md at any location, or .claude/prompts/**/*.md. Flags argument interpolation into a shell string, commands with no stated purpose or usage, complex tasks left as one vague instruction, and references to skills that do not exist. Also use when asked to check a slash command or review what a command actually runs. Normally reached through `reviewing-claude-config`, which runs an always-on secret scan and a finding filter first.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -230,8 +230,11 @@ retarget the greps at the file you are reviewing.
 
 Where the command declares `allowed-tools`, check the grant against what the body actually
 instructs. A command that writes a file needs an `Edit` or `Write` rule scoped to that path;
-one that only reads needs neither. A grant broader than the body justifies is the same
-finding as an over-privileged agent, and belongs at the same severity.
+one that only reads needs neither.
+
+A grant broader than the body justifies carries the same severity as an over-privileged agent:
+CRITICAL when it reaches credentials or destructive commands, IMPORTANT otherwise. See
+`../reviewing-agent-definitions/SKILL.md` Pass 1.
 
 ## Output
 

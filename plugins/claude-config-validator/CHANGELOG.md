@@ -71,6 +71,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `claude-code-requirements.md` has a `### Commands` subsection, which the command skill already pointed at for frontmatter fields
 - The documented bare-rule detector gates its verdict on the skip, exiting 2 rather than printing a pass for a check that could not run
 - `/validate-ai` writes the report rather than asking which pull request to validate when there is nobody to ask
+- Hook severity is consistent across the table, the pre-flight checklist, the prose, and `priority-framework.md`: a quoted value consumed directly by the command is not a finding, an unquoted interpolation is CRITICAL, and a nested shell is CRITICAL either way
+- `priority-framework.md` no longer elevates permission severities wholesale in Security Context, which had overridden the IMPORTANT tier of the per-field tables and falsified the security floor's stated reason for existing
+- Broken references are split by consequence: a load failure or a broken `CLAUDE.md` `@path` import is CRITICAL, a plain-path pointer in prose is IMPORTANT
+- `permissions.defaultMode: acceptEdits` is IMPORTANT rather than CRITICAL, since projects opt into it deliberately
+- Agent tool-access review covers `Skill` alongside `Task`; both escape the grant under review rather than widening it
+- Standalone-install instructions copy all five skill directories and note that the plugin-qualified routing names must be reduced to bare names
+- Step 3 says what to do when a targeted skill cannot be invoked, and routes plugin manifests to `plugin-dev:plugin-validator` explicitly
+- Unrecognized hook event names are confirmed rather than reported, matching the treatment already given to an unfamiliar hook `type`
+- Targeted skill descriptions carry natural-language triggers and state that the router is the preferred entry point
+
+### Migration
+
+- `bitwarden-code-review` routes changed `SKILL.md` files to `Skill(claude-config-validator:reviewing-claude-config)` at `skills/performing-multi-agent-code-review/SKILL.md:173` and `agents/bitwarden-code-reviewer/AGENT.md:83`. From 2.0.0 that router declines `SKILL.md`, and that pipeline does not invoke `plugin-dev:skill-reviewer`, so a changeset touching only skills gets a stated omission rather than a review. Updating that consumer needs its own version bump and is tracked as a follow-up
 - The documented bare-rule detector guards on `jq` like the shipped script, instead of reporting a pass for a check that could not run
 - Frontmatter severity is stated per file type: missing frontmatter is CRITICAL for an agent, optional for a command, and YAML that does not parse is CRITICAL for either
 - All six `model` statements in `claude-code-requirements.md` admit full identifiers, including the detection table and the validation checkbox a reviewer classifies from

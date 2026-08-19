@@ -66,10 +66,18 @@ Its files then live under the plugin root rather than in your project.
 To use the skill on its own, outside the plugin, copy the directory into a project's `.claude/skills/`:
 
 ```bash
-cp -r reviewing-claude-config /path/to/your/project/.claude/skills/
+cp -r reviewing-claude-config reviewing-agent-definitions reviewing-command-definitions \
+  reviewing-runtime-configuration reviewing-project-guidance \
+  /path/to/your/project/.claude/skills/
 ```
 
-Under this layout the skill's own directory is `.claude/skills/reviewing-claude-config`. A plugin install puts the same files under the plugin cache instead; see the paths below.
+All five directories are required. The router dispatches to its siblings and they resolve their
+own references as `../reviewing-claude-config/...`, so copying the router alone leaves every
+routed review unreachable. Outside a plugin install you also need to reduce the routing table's
+`Skill(claude-config-validator:reviewing-*)` names to bare `Skill(reviewing-*)`, since the
+plugin qualifier does not resolve for a standalone copy.
+
+Under this layout the router's own directory is `.claude/skills/reviewing-claude-config`. A plugin install puts the same files under the plugin cache instead; see the paths below.
 
 ### Verify Installation
 
@@ -207,7 +215,7 @@ contributor-controlled input to a shell, sets `Issues found` at whatever severit
 
 Reporting a finding and failing the run are separate decisions: a review that fails on
 readability is a review people learn to ignore. Security needs its own clause rather than a
-severity threshold, because `priority-framework.md` rates some real regressions IMPORTANT — an
+severity threshold, because `reference/priority-framework.md` rates some real regressions IMPORTANT — an
 over-broad agent tool grant that stops short of credentials, a permission broader than needed.
 
 ## Requirements
