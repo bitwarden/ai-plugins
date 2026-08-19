@@ -2,7 +2,7 @@
 name: writing-manual-test-cases
 description: Use when authoring NEW manual test cases in Gherkin format from a feature description, Jira ticket, acceptance criteria, PR, or design doc — the kind a QA engineer imports into Testmo. Triggers on "write test cases for", "manual test cases", "Gherkin scenarios for this ticket", "test cases for Testmo", "what scenarios should we test for this feature". Produces a paired .txt and Testmo-importable .csv. Do NOT use it to write automated test code (NUnit, Jest, xUnit, Playwright), to inventory what tests already exist for a change (use assessing-test-coverage), to run or fix existing tests, or to review a PR.
 argument-hint: "[Jira key | PR URL | feature description | path to acceptance criteria]"
-allowed-tools: "Read, Write, Glob, Grep, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh api repos/bitwarden/*), Skill(bitwarden-atlassian-tools:researching-jira-issues)"
+allowed-tools: "Read, Write, Glob, Grep, Bash(gh pr view:*), Bash(gh pr diff:*), Skill(bitwarden-atlassian-tools:researching-jira-issues)"
 ---
 
 # Writing Manual Test Cases
