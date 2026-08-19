@@ -83,11 +83,7 @@ fi
 if grep -rE '(apiKey|api_key|password|passwd|token|secret)["'\'']?\s*[:=]\s*["'\''][^"'\'']{8,}' "${CLAUDE_DIR}" 2>/dev/null | \
    grep -v "security-scan.sh" | \
    grep -v "security-patterns.md" | \
-   grep -v "examples/" | \
-   grep -v "example" | \
-   grep -v "EXAMPLE" | \
-   grep -v "your-key-here" | \
-   grep -v "xxx" > "${TEMP_FILE}"; then
+   grep -vE '[:=][[:space:]]*["'\''](sk-EXAMPLE|ghp_EXAMPLE|EXAMPLE|your-key-here|xxx|XXX|<)' > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: Potential hardcoded credential detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'

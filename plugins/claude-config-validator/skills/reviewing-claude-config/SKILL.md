@@ -227,6 +227,12 @@ holds:
   permission, tool grant, or hook capability wider than what the changeset justifies, and any
   new path by which contributor-controlled input reaches a shell.
 
+A widening the changeset justifies is not a finding at all, so it never reaches this rule.
+"Ask why rather than blocking" is what settles that, and it happens before severity is
+assigned: `permissions.defaultMode: acceptEdits` with a stated reason is not a finding, and
+the same line added silently is one. Once something is a finding, severity changes how the
+report reads rather than whether the run fails.
+
 Otherwise `Pass`, with every finding still listed. A caller that reports in its own
 vocabulary maps it from there.
 

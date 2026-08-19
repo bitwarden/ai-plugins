@@ -36,10 +36,11 @@ reference, both commands, and all four targeted skills — edit them together.)_
 - [ ] No hardcoded API keys, tokens, or passwords
 - [ ] No sensitive paths exposed in permissions
 - [ ] No dangerous command auto-approvals
-- [ ] `permissions.defaultMode` is not `bypassPermissions` or `acceptEdits`, and
+- [ ] `permissions.defaultMode` is not `bypassPermissions`, and
       `disableBypassPermissionsMode` has not been removed. CRITICAL: `bypassPermissions` in a
       committed settings file turns off the permission prompt for everyone who opens the repo,
-      which is broader than any single over-broad rule
+      which is broader than any single over-broad rule. `acceptEdits` is narrower and often
+      deliberate, so it belongs with the other non-rule fields below rather than here
 - [ ] `permissions.additionalDirectories` does not reach outside the project
 - [ ] No hook command sends repository, prompt, or environment content off the machine
 - [ ] No hook command destroys state without a guard

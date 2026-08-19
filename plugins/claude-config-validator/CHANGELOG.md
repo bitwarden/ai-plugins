@@ -81,14 +81,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unrecognized hook event names are confirmed rather than reported, matching the treatment already given to an unfamiliar hook `type`
 - Targeted skill descriptions carry natural-language triggers and state that the router is the preferred entry point
 
-### Migration
-
-- `bitwarden-code-review` routes changed `SKILL.md` files to `Skill(claude-config-validator:reviewing-claude-config)` at `skills/performing-multi-agent-code-review/SKILL.md:173` and `agents/bitwarden-code-reviewer/AGENT.md:83`. From 2.0.0 that router declines `SKILL.md`, and that pipeline does not invoke `plugin-dev:skill-reviewer`, so a changeset touching only skills gets a stated omission rather than a review. Updating that consumer needs its own version bump and is tracked as a follow-up
 - The documented bare-rule detector guards on `jq` like the shipped script, instead of reporting a pass for a check that could not run
 - Frontmatter severity is stated per file type: missing frontmatter is CRITICAL for an agent, optional for a command, and YAML that does not parse is CRITICAL for either
 - All six `model` statements in `claude-code-requirements.md` admit full identifiers, including the detection table and the validation checkbox a reviewer classifies from
 - The verdict's security floor covers a new path from contributor-controlled input to a shell, not only a widened permission, tool grant, or hook capability, so a newly introduced command-injection vector cannot report `Pass`
 - The Grep-path bare-rule pattern is annotated as producing candidates rather than findings, since a line-oriented match cannot tell `permissions.allow` from `deny` and the router holds no Bash to fall back on
+- The generic-credential check anchors its placeholder filter to the value, matching the two token checks. It previously discarded any match whose file path contained `example` or `xxx`
+- A widening the changeset justifies is stated as not a finding, which is what lets `acceptEdits` be asked about rather than blocked
+
+### Migration
+
+- `bitwarden-code-review` routes changed `SKILL.md` files to `Skill(claude-config-validator:reviewing-claude-config)` at `skills/performing-multi-agent-code-review/SKILL.md:173` and `agents/bitwarden-code-reviewer/AGENT.md:83`. From 2.0.0 that router declines `SKILL.md`, and that pipeline does not invoke `plugin-dev:skill-reviewer`, so a changeset touching only skills gets a stated omission rather than a review. Updating that consumer needs its own version bump and is tracked as a follow-up
 
 ### Added, from review
 
