@@ -156,8 +156,12 @@ if grep -qE '"Write\(//\*\*\)"' .claude/settings.json 2>/dev/null; then
 fi
 
 # A bare rule is only a defect in allow. In deny it is the strongest form of the control,
-# so this needs the array the rule sits in rather than a file-wide grep.
-if jq -e '.permissions.allow[]? | select(. == "Bash")' .claude/settings.json >/dev/null 2>&1; then
+# so this needs the array the rule sits in rather than a file-wide grep. Without jq the check
+# cannot tell them apart, so it reports itself skipped rather than letting a pass stand for a
+# check that never ran.
+if ! command -v jq >/dev/null 2>&1; then
+    echo "SKIPPED: bare-rule check needs jq to tell allow from deny"
+elif jq -e '.permissions.allow[]? | select(. == "Bash")' .claude/settings.json >/dev/null 2>&1; then
     echo "CRITICAL: Bare Bash rule in allow auto-approves every shell command"
     ISSUES=1
 fi

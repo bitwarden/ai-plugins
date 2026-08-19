@@ -67,7 +67,7 @@ description: Clear description of agent purpose
 **Optional Fields:**
 
 ```yaml
-model: sonnet # haiku, sonnet, opus, or inherit
+model: sonnet # an alias, or a full model identifier; see Field Requirements
 tools: Read, Write, Grep, Glob, Bash # Specific tools only
 ```
 
@@ -84,6 +84,8 @@ tools: Read, Write, Grep, Glob, Bash # Specific tools only
 ## Model Selection
 
 ### Valid Model Values
+
+Both the aliases below and full model identifiers such as `claude-opus-4-5` are valid.
 
 | Model   | Value     | Use Case                                                   |
 | ------- | --------- | ---------------------------------------------------------- |
@@ -271,12 +273,12 @@ restriction that silently never applies.
 
 ### YAML Errors
 
-| Issue                  | Detection            | Fix                                       |
-| ---------------------- | -------------------- | ----------------------------------------- |
-| Tabs instead of spaces | Malformed YAML error | Replace tabs with spaces                  |
-| Missing colon          | Parser error         | Add `:` after field name                  |
-| Wrong field name       | Skill not recognized | Check exact spelling: `name` not `Name`   |
-| Invalid model value    | Ignored or error     | Use: `haiku`, `sonnet`, `opus`, `inherit` |
+| Issue                  | Detection            | Fix                                                                   |
+| ---------------------- | -------------------- | --------------------------------------------------------------------- |
+| Tabs instead of spaces | Malformed YAML error | Replace tabs with spaces                                              |
+| Missing colon          | Parser error         | Add `:` after field name                                              |
+| Wrong field name       | Skill not recognized | Check exact spelling: `name` not `Name`                               |
+| Unfamiliar model value | Usually none         | Aliases and full identifiers are both valid; confirm rather than flag |
 
 ### Tool Access Errors
 

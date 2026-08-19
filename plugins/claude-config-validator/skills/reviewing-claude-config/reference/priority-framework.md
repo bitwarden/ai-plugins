@@ -14,7 +14,7 @@ Classification system for prioritizing issues found in Claude configuration file
 
 - settings.local.json committed to git
 - Hardcoded API keys, tokens, or passwords
-- Missing YAML frontmatter (skill won't be recognized)
+- Missing YAML frontmatter on an agent, which then never loads
 - Dangerous command auto-approvals (rm -rf, chmod 777)
 - Overly broad permissions exposing sensitive paths
 - An agent tool grant reaching credentials or destructive commands
@@ -184,13 +184,15 @@ For internal-only configurations:
 
 ### Structure Issues
 
-| Issue                                           | Priority  |
-| ----------------------------------------------- | --------- |
-| Missing YAML frontmatter                        | CRITICAL  |
-| Broken file references                          | CRITICAL  |
-| File > 500 lines without progressive disclosure | SUGGESTED |
-| Poor file organization                          | SUGGESTED |
-| Missing structured thinking blocks              | SUGGESTED |
+| Issue                                           | Priority                       |
+| ----------------------------------------------- | ------------------------------ |
+| Missing YAML frontmatter, agents                | CRITICAL                       |
+| YAML frontmatter that does not parse, any type  | CRITICAL                       |
+| Missing YAML frontmatter, commands              | Not a finding — it is optional |
+| Broken file references                          | CRITICAL                       |
+| File > 500 lines without progressive disclosure | SUGGESTED                      |
+| Poor file organization                          | SUGGESTED                      |
+| Missing structured thinking blocks              | SUGGESTED                      |
 
 ### Quality Issues
 

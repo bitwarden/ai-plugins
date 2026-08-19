@@ -59,6 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `model` admits full identifiers and the reviewed tool list includes `Task`, `Skill`, `TodoWrite`, and `NotebookEdit`, matching what the skills expect
 - Severity rows for over-broad permissions are qualified to `allow`, with a row recording that a bare or sensitive-path rule in `deny` is the control rather than a finding
 - `/validate-ai-local` carries the full CWE-1427 boundary rather than a paraphrase that dropped the identifier and the critical-finding instruction
+- The documented bare-rule detector guards on `jq` like the shipped script, instead of reporting a pass for a check that could not run
+- Frontmatter severity is stated per file type: missing frontmatter is CRITICAL for an agent, optional for a command, and YAML that does not parse is CRITICAL for either
+- All four `model` statements in `claude-code-requirements.md` admit full identifiers, including the detection table a reviewer classifies from
 
 ### Added, from review
 
