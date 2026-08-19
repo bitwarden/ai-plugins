@@ -4,12 +4,13 @@ Comprehensive skill for reviewing Claude Code configuration files with security-
 
 ## Overview
 
-This skill provides systematic review guidance for Claude Code configuration files in `.claude` directories. It detects file types, applies appropriate review checklists, and runs its security checks with `Grep`. Its own grant is `Read, Grep, Glob`, so it reads and reports rather than executing anything or posting anywhere.
+This skill is the entry point for reviewing Claude Code configuration. It settles what is in scope, runs the security checks with `Grep`, routes each file type to a targeted review skill, filters the results, and returns classified findings. Its grant is `Read, Grep, Glob, Skill`, so it reads, routes, and reports rather than executing anything or posting anywhere.
+
+Two rules shape every review it produces: findings are limited to **what the changeset introduced or worsened**, and **only a CRITICAL finding fails the review**.
 
 **Use this skill when:**
 
 - Reviewing changes to `CLAUDE.md` files
-- Reviewing skill files (`SKILL.md` and supporting files)
 - Reviewing agents (`.claude/agents/`, `plugins/*/agents/`)
 - Reviewing prompts or commands (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`)
 - Reviewing hooks (`hooks.json`, or a `hooks` block in a settings file)
@@ -26,12 +27,12 @@ This skill provides systematic review guidance for Claude Code configuration fil
 - Identifies dangerous command auto-approvals
 - Ships a `security-scan.sh` helper you can run yourself; the skill performs the same pattern checks with `Grep`
 
-### Intelligent Routing
+### Routing
 
 - Detects configuration file type automatically
-- Routes to appropriate specialized checklist
-- Progressive disclosure for token efficiency
-- Structured thinking throughout review process
+- Invokes the targeted review skill for that type
+- Loads reference material only when a specific question calls for it
+- Leaves `SKILL.md` review to `plugin-dev:skill-reviewer`, which already covers it
 
 ### Quality Enforcement
 
@@ -43,9 +44,8 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 ### Comprehensive Coverage
 
-- **Specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
+- **Targeted review skills**: agent definitions, command definitions, runtime configuration (settings and hooks), project guidance (`CLAUDE.md`)
 - **Reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
-- **Review examples**: One or more per configuration type, demonstrating proper feedback format
 - **Human-run security script**: `security-scan.sh`, which you run yourself; the skill applies the same patterns with `Grep`
 
 ## Installation
@@ -97,10 +97,11 @@ Review the changes to .claude/CLAUDE.md
 
 The skill will:
 
-1. Detect the file type (CLAUDE.md in this case)
-2. Execute security scan
-3. Load the appropriate checklist
-4. Return a structured review, one finding per issue
+1. Settle scope — only what the change introduced or worsened
+2. Execute the security scan
+3. Detect the file type (CLAUDE.md in this case) and invoke the targeted review skill
+4. Filter the candidate findings
+5. Return a structured review, one finding per issue
 
 ### Manual Security Scan
 
@@ -149,41 +150,34 @@ Review .claude/CLAUDE.md for quality and security
 ## File Structure
 
 ```
-reviewing-claude-config/
-├── SKILL.md                          # Main orchestration file
-├── checklists/                       # Specialized review checklists
-│   ├── agents.md                     # Agent review checklist
-│   ├── claude-md.md                  # CLAUDE.md review checklist
-│   ├── hooks.md                      # Hooks schema and command safety
-│   ├── prompts.md                    # Prompts/commands checklist
-│   ├── settings.md                   # Settings security checklist
-│   └── skills.md                     # Skill review checklist
-├── reference/                        # Reference materials (loaded on-demand)
-│   ├── claude-code-requirements.md   # YAML, tools, models, limits
-│   ├── priority-framework.md         # Issue classification system
-│   ├── security-patterns.md          # Security checks and remediation
-│   └── validate-ai-scope.md          # Changeset scope and report contract
-├── examples/                         # Sample review outputs
-│   ├── example-agent-composition-review.md # Agent invocation and dependency review
-│   ├── example-agent-review.md       # Agent configuration review example
-│   ├── example-claude-md-review.md   # CLAUDE.md review example
-│   ├── example-hooks-review.md       # Hooks review example
-│   ├── example-prompts-review.md     # Prompts review example
-│   ├── example-settings-review.md    # Settings review example
-│   └── example-skill-review.md       # Skill review example
-├── scripts/                          # Human-run helpers
-│   └── security-scan.sh              # Comprehensive security scanner
-└── README.md                         # This file
+skills/
+├── reviewing-claude-config/              # This skill — the entry point
+│   ├── SKILL.md                          # Scope, security scan, routing, filtering, output
+│   ├── reference/                        # Reference materials (loaded on-demand)
+│   │   ├── claude-code-requirements.md   # YAML, tools, models, limits
+│   │   ├── priority-framework.md         # Issue classification system
+│   │   ├── security-patterns.md          # Security checks and remediation
+│   │   └── validate-ai-scope.md          # Changeset scope and report contract
+│   ├── scripts/                          # Human-run helpers
+│   │   └── security-scan.sh              # Comprehensive security scanner
+│   └── README.md                         # This file
+├── reviewing-agent-definitions/          # Tool access, triggers, system prompts
+├── reviewing-command-definitions/        # Slash commands and prompts
+├── reviewing-runtime-configuration/      # Settings and hooks
+└── reviewing-project-guidance/           # CLAUDE.md
 ```
+
+Each targeted skill is a single `SKILL.md`. Its calibration examples live inline at the
+point of the check, rather than in a separate directory.
 
 ## Review Process
 
 The skill follows a systematic 5-step review process:
 
-1. **Detect File Type**: Determines whether reviewing agents, skills, CLAUDE.md, prompts and commands, hooks, or settings
+1. **Settle Scope**: Findings are limited to what the changeset introduced or worsened. A changed file is not a changed line
 2. **Execute Security Scan**: Always performs critical security checks first
-3. **Load Appropriate Checklist**: Routes to specialized review guidance
-4. **Consult References**: Loads detailed criteria only when needed
+3. **Route**: Invokes the targeted review skill for each file type in scope
+4. **Filter**: Drops candidates that are pre-existing, have no remediation, are unspecific, are already covered by another checker, or could not be verified in the file
 5. **Document Findings**: Returns one finding per issue, anchored to `file:line`, with a specific fix
 
 ### Security Checks (Always First)
@@ -203,9 +197,13 @@ Issues are classified into four priority levels, defined in
 [`reference/priority-framework.md`](reference/priority-framework.md):
 
 - **CRITICAL**: Prevents functionality, exposes security vulnerabilities (must fix)
-- **IMPORTANT**: Significantly impacts quality or maintainability (should fix)
-- **SUGGESTED**: Nice-to-have improvements (could fix)
+- **IMPORTANT**: Functional defect or security regression that still loads (should fix)
+- **SUGGESTED**: Quality, readability, and structure improvements (could fix)
 - **OPTIONAL**: Personal preferences, alternatives (consider)
+
+**Only CRITICAL fails a review.** Everything else is reported and listed without setting the
+verdict to `Issues found`. Reporting a finding and failing the run are separate decisions: a
+review that fails on readability is a review people learn to ignore.
 
 ## Requirements
 
@@ -222,25 +220,13 @@ This skill works out-of-the-box with no configuration needed. It's 100% generic 
 
 If you want to customize for your organization:
 
-1. **Modify checklists**: Add project-specific requirements to checklist files
+1. **Modify a targeted skill**: Add project-specific requirements to the skill for that file type
 2. **Adjust security patterns**: Add organization-specific secret patterns to `security-scan.sh`
 3. **Update priority framework**: Adjust severity levels based on team standards
 
 **Note**: Keep changes generic to maintain portability if sharing with other teams.
 
-## Examples
-
-Review examples per configuration type, each demonstrating the feedback format:
-
-- `examples/example-agent-review.md` - Agent review with security and quality issues
-- `examples/example-agent-composition-review.md` - Agent invocation patterns and a circular-dependency anti-pattern
-- `examples/example-skill-review.md` - Skill review with multiple issues
-- `examples/example-claude-md-review.md` - CLAUDE.md review with duplication
-- `examples/example-hooks-review.md` - Hooks review with shell injection and prompt-hook findings
-- `examples/example-settings-review.md` - Settings review with security concerns
-- `examples/example-prompts-review.md` - Prompts review with quality improvements
-
-### Review Output Format
+## Review Output Format
 
 Each review follows this structure. The skill produces findings and never delivers them, so
 where they go is decided by the invoking context, in the order `SKILL.md` step 5 sets out:
@@ -257,7 +243,7 @@ the two `validate-ai` commands write the single-document report contract in
 [Rationale explaining why this matters]
 ```
 
-**Overall assessment**, stated once:
+**Overall assessment**, stated once. Only a CRITICAL finding makes it `Issues found`:
 
 ```
 Pass / Issues found
@@ -323,7 +309,7 @@ See `reference/claude-code-requirements.md` for the requirements these criteria 
 
 **Solutions:**
 
-1. Security scan excludes `examples/` and `security-patterns.md`
+1. Security scan excludes `examples/` directories and `security-patterns.md`
 2. Use "example" or "your-key-here" as placeholders in docs
 3. Review manually to confirm false positives
 
@@ -343,7 +329,7 @@ This skill is designed for internal team use but follows open-source best practi
 This skill follows [Semantic Versioning](https://semver.org/):
 
 - **MAJOR**: Breaking changes to skill interface or file structure
-- **MINOR**: New features, new checklists, backward-compatible changes
+- **MINOR**: New features, new targeted review skills, backward-compatible changes
 - **PATCH**: Bug fixes, documentation updates, minor improvements
 
 The skill ships with the plugin and carries the plugin's version. See
@@ -354,7 +340,7 @@ The skill ships with the plugin and carries the plugin's version. See
 For issues, questions, or feedback:
 
 1. Check troubleshooting section above
-2. Review the examples in `examples/`
+2. Read the targeted review skill for the file type in question
 3. Consult reference files for detailed guidance
 4. Contact your team's Claude Code administrator
 

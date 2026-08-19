@@ -46,13 +46,13 @@ All validation criteria sourced from **official Anthropic documentation**:
 
 The skill works through five steps:
 
-1. **Detect File Type** - Determines which checklists apply
+1. **Settle Scope** - Only what the changeset introduced or worsened; a changed file is not a changed line
 2. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
-3. **Load Checklist** - Routes to the checklist for the detected type
-4. **Consult References** - Loads detailed criteria only when needed
+3. **Route** - Invokes the targeted review skill for the detected type
+4. **Filter** - Drops candidates that are pre-existing, unspecific, have no remediation, or duplicate another checker
 5. **Document Findings** - One finding per issue, anchored to `file:line`
 
-Each checklist then runs its own multi-pass strategy over the file under review.
+Each targeted skill then runs its own multi-pass strategy over the file under review.
 
 ### Specific, Actionable Feedback
 
@@ -112,7 +112,7 @@ Or describe the review in your own words, which is how the skill's triggers are 
 The skill will automatically:
 
 1. Detect the type of each configuration file you name
-2. Select appropriate validation checklists
+2. Route it to the targeted review skill for that type
 3. Execute security-first review
 4. Return one finding per issue with file:line references
 
@@ -142,7 +142,7 @@ Review my new agent configuration in .claude/agents/code-analyzer.md
 Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 ```
 
-**Output**: The component files inside `plugins/my-plugin/` reviewed against the agent, skill, command, and hook checklists, with security findings first. Manifest and marketplace-standard checks are not this skill's: `/validate-ai-local` covers those by delegating to `plugin-dev:plugin-validator`.
+**Output**: The component files inside `plugins/my-plugin/` reviewed by the targeted skills for agents, commands, hooks, and settings, with security findings first. Two things are deliberately not this skill's: `SKILL.md` review, which `plugin-dev:skill-reviewer` owns, and manifest and marketplace-standard checks, which `plugin-dev:plugin-validator` owns. `/validate-ai-local` runs all three together.
 
 ---
 
@@ -178,15 +178,16 @@ Security audit all Claude configuration files in this project
 
 **Description**: Reviews Claude configuration files for security, structure, and prompt engineering quality, wherever they live: a repository's `.claude/` directory, a root `CLAUDE.md`, or a plugin's own components.
 
-**Validates**:
+**Validates**, by routing each type to a targeted skill:
 
-- CLAUDE.md files
-- Skills (SKILL.md)
-- Agents
-- Prompts
-- Commands
-- Hooks
-- Settings
+| Type                 | Skill                             |
+| -------------------- | --------------------------------- |
+| Agents               | `reviewing-agent-definitions`     |
+| Prompts and commands | `reviewing-command-definitions`   |
+| Settings and hooks   | `reviewing-runtime-configuration` |
+| CLAUDE.md files      | `reviewing-project-guidance`      |
+
+`SKILL.md` files are reviewed by `plugin-dev:skill-reviewer`, not here — it already covers frontmatter, trigger quality, word count, progressive disclosure, and broken references, and both `validate-ai` commands route every changed skill to it.
 
 **Capabilities**:
 
@@ -354,7 +355,7 @@ Reference: Progressive Disclosure Best Practices
 **Output**:
 
 ```
-**.claude/CLAUDE.md:42** - IMPORTANT: Instruction lacks specificity
+**.claude/CLAUDE.md:42** - SUGGESTED: Instruction lacks specificity
 
 Current: "Always write good code"
 Issue: "Good code" is subjective and non-actionable.
@@ -368,7 +369,7 @@ Recommended:
 
 Specific, actionable instructions improve AI behavior (Anthropic prompt engineering guidance).
 
-Reference: `checklists/claude-md.md` - Clarity and Specificity
+Reference: `reviewing-project-guidance` - Pass 4: Clarity
 ```
 
 ## Plugin Structure
@@ -382,13 +383,15 @@ plugins/claude-config-validator/
 │   ├── validate-ai/         # /validate-ai - pull request validation (command + README)
 │   └── validate-ai-local/   # /validate-ai-local - local checkout validation (command + README)
 ├── skills/
-│   └── reviewing-claude-config/
-│       ├── SKILL.md         # Main skill instructions
-│       ├── README.md        # Skill-specific documentation
-│       ├── checklists/      # One per configuration type (agents, skills, CLAUDE.md, prompts, hooks, settings)
-│       ├── reference/       # Priority framework, security patterns, requirements, changeset scope
-│       ├── examples/        # Sample reviews, one or more per configuration type
-│       └── scripts/         # Security scan helper (human-run)
+│   ├── reviewing-claude-config/        # Entry point: scope, security scan, routing, filtering
+│   │   ├── SKILL.md
+│   │   ├── README.md                   # Skill-specific documentation
+│   │   ├── reference/                  # Priority framework, security patterns, requirements, changeset scope
+│   │   └── scripts/                    # Security scan helper (human-run)
+│   ├── reviewing-agent-definitions/    # Tool access, triggers, system prompts
+│   ├── reviewing-command-definitions/  # Slash commands and prompts
+│   ├── reviewing-runtime-configuration/ # Settings and hooks
+│   └── reviewing-project-guidance/     # CLAUDE.md
 └── README.md               # This file
 ```
 

@@ -171,11 +171,14 @@ tools: Read, Grep, Glob, Write, Edit
 ```
 skill-name/
 ├── SKILL.md              # Main orchestration (aim for ≤500 lines)
-├── checklists/           # Task-specific procedures
 ├── reference/            # Detailed criteria (loaded as needed)
 ├── examples/             # Sample outputs
 └── scripts/              # Executable automation (if applicable)
 ```
+
+A skill whose body splits cleanly by subject is often better as several narrow skills than
+as one skill with a directory of procedure files. Routing between skills is visible to the
+reader; routing between files inside a skill is not.
 
 ### On-Demand Loading
 
@@ -194,13 +197,13 @@ skill-name/
 **Example routing:**
 
 ```markdown
-### Load Appropriate Checklist
+### Route to the targeted skill
 
-Based on detected type, read the relevant checklist:
+Based on detected type, invoke the relevant skill:
 
-- **Agents** → `checklists/agents.md`
-- **Skills** → `checklists/skills.md`
-- **Settings** → `checklists/settings.md`
+- **Agents** → `Skill(reviewing-agent-definitions)`
+- **Settings and hooks** → `Skill(reviewing-runtime-configuration)`
+- **CLAUDE.md** → `Skill(reviewing-project-guidance)`
 ```
 
 ---

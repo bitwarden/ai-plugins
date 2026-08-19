@@ -5,6 +5,30 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-08-19
+
+### Added
+
+- Scope fence limiting findings to what a changeset introduced or worsened, stated in `SKILL.md`, the scope reference, and both commands' subagent prompts
+- Filter step dropping findings that are pre-existing, unspecific, unverified, already covered by another checker, or whose remediation is "no change"
+- Four targeted review skills: `reviewing-agent-definitions`, `reviewing-command-definitions`, `reviewing-runtime-configuration`, `reviewing-project-guidance`
+- Both commands state that the report is the deliverable and that re-validation pins the original baseline
+
+### Changed
+
+- **Breaking**: `reviewing-claude-config` is a router; the `checklists/` and `examples/` directories are gone
+- **Breaking**: `reviewing-claude-config` no longer reviews `SKILL.md` — `plugin-dev:skill-reviewer` owns it
+- Only a CRITICAL finding sets the verdict to `Issues found`; IMPORTANT maps to a warning
+- IMPORTANT narrowed to functional defects and security regressions; vague instructions, missing examples, duplicated documentation, poor progressive disclosure, and missing structured-thinking blocks are SUGGESTED
+- Marketplace escalation no longer raises readability findings to CRITICAL
+- `reviewing-claude-config` holds `Skill` in `allowed-tools`
+- `/validate-ai` trimmed from 226 to 193 lines
+
+### Removed
+
+- Seven `examples/example-*-review.md` files
+- Six `checklists/*.md` files
+
 ## [1.2.2] - 2026-08-17
 
 ### Fixed

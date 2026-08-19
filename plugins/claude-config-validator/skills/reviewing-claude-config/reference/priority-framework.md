@@ -35,19 +35,19 @@ This must be fixed before approval because [security/functionality reason].
 
 ### IMPORTANT
 
-**Definition:** Issues that significantly impact quality, maintainability, or user experience but don't prevent basic functionality.
+**Definition:** Functional defects and security regressions that do not stop the file loading. The configuration works, but it does the wrong thing, or does it less safely than it should.
+
+Quality, style, and readability observations are **not** IMPORTANT — they are SUGGESTED. The test is whether the behavior is wrong, not whether the prose could be better.
 
 **Examples:**
 
-- Duplicated documentation content
-- Poor progressive disclosure (file > 500 lines)
-- Missing structured thinking blocks
-- Vague activation triggers
-- Unclear purpose statements
-- Inefficient token usage patterns
-- Missing examples for complex concepts
+- Permissions broader than the stated purpose needs
+- Agent tool grant broader than its description justifies
+- Vague activation triggers, so the skill or agent never fires
+- Incorrect field names, or missing non-required fields the feature depends on
+- A documented behavior the configuration does not actually implement
 
-**Action Required:** Should fix in this PR/commit. If time-constrained, create follow-up issue.
+**Action Required:** Should fix in this PR/commit. If time-constrained, create follow-up issue. Does not block the review — see the verdict rule in `../SKILL.md` Step 5.
 
 **Finding Format:**
 
@@ -63,16 +63,18 @@ This must be fixed before approval because [security/functionality reason].
 
 ### SUGGESTED
 
-**Definition:** Improvements that enhance quality but aren't essential for approval.
+**Definition:** Improvements that enhance quality but aren't essential for approval. Most readability, structure, and documentation observations land here.
 
 **Examples:**
 
-- Additional examples for clarity
+- Duplicated documentation content
+- Poor progressive disclosure (file > 500 lines)
+- Missing structured thinking blocks
+- Unclear purpose statements
+- Missing examples for complex concepts
+- Inefficient token usage patterns
 - Better file organization
-- More specific guidance
-- Enhanced documentation
 - Alternative approaches
-- Stylistic improvements
 
 **Action Required:** Optional improvements. Consider for future work.
 
@@ -118,18 +120,21 @@ This is a personal preference - feel free to keep current approach.
 Use this structured thinking approach to classify issues:
 
 <thinking>
-1. Does this issue create security vulnerability or prevent functionality?
+1. Does this create a security vulnerability or stop the file loading?
    → YES: CRITICAL
    → NO: Continue
 
-2. Does this significantly impact quality, maintainability, or UX?
+2. Does the configuration behave wrongly or less safely than intended, while still loading?
    → YES: IMPORTANT
    → NO: Continue
 
-3. Would this improve quality but not essential?
+3. Would fixing it improve quality, readability, or structure?
    → YES: SUGGESTED
    → NO: OPTIONAL
-   </thinking>
+
+Behavior decides between CRITICAL, IMPORTANT, and SUGGESTED. "This reads badly" never
+reaches IMPORTANT, however strongly you feel it.
+</thinking>
 
 ---
 
@@ -143,13 +148,13 @@ In security-sensitive configurations (settings.json, permissions):
 - Elevate secret exposure to CRITICAL
 - Broad permissions: IMPORTANT → CRITICAL
 
-### Marketplace-Bound Skills
+### Marketplace-Bound Components
 
-For skills intended for marketplace:
+A component published to a marketplace is read and installed by people who did not write it, so discoverability defects matter more than they would internally:
 
-- Elevate missing examples to IMPORTANT
-- Elevate unclear activation triggers to IMPORTANT
-- Elevate poor progressive disclosure to CRITICAL
+- Unclear activation triggers: SUGGESTED → IMPORTANT (the component never fires for its intended audience)
+
+Do not elevate readability or organization to CRITICAL for marketplace components. CRITICAL means broken or unsafe, and that bar does not move with the audience.
 
 ### Internal Tools
 
@@ -180,21 +185,23 @@ For internal-only configurations:
 | ----------------------------------------------- | --------- |
 | Missing YAML frontmatter                        | CRITICAL  |
 | Broken file references                          | CRITICAL  |
-| File > 500 lines without progressive disclosure | IMPORTANT |
+| File > 500 lines without progressive disclosure | SUGGESTED |
 | Poor file organization                          | SUGGESTED |
-| Missing structured thinking blocks              | IMPORTANT |
+| Missing structured thinking blocks              | SUGGESTED |
 
 ### Quality Issues
 
 | Issue                                 | Priority  |
 | ------------------------------------- | --------- |
-| Vague or unclear instructions         | IMPORTANT |
-| Missing examples for complex concepts | IMPORTANT |
 | No activation triggers in description | IMPORTANT |
-| Duplicated documentation              | IMPORTANT |
+| Vague or unclear instructions         | SUGGESTED |
+| Missing examples for complex concepts | SUGGESTED |
+| Duplicated documentation              | SUGGESTED |
 | Inefficient token usage               | SUGGESTED |
 | Additional examples would help        | SUGGESTED |
 | Alternative phrasing                  | OPTIONAL  |
+
+Only the first is IMPORTANT, and only because a description with no triggers means the component never fires — a functional defect. The rest are readability, and readability does not fail a review.
 
 ### Syntax Issues
 
