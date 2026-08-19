@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`creating-jira-tickets` skill** — turns a breakdown's `tasks.md` into Jira tickets: an epic plus one child story/task per task entry, with real ticket titles, a Gherkin Acceptance criteria ADF section, and wired Blocked-by/Depends-on links. Creates tickets one at a time behind a human-in-the-loop review gate and goes through the `acli` CLI.
-- **`creating-jira-tickets` behavior eval set** (`skills/creating-jira-tickets/evals/`) — seven `skill-creator`-schema cases guarding its load-bearing decisions, plus a should-trigger/should-not set.
+- **`filing-breakdown-tasks` skill** — turns a breakdown's `tasks.md` into Jira ticket drafts: an epic parent plus one child story/task per task entry, with real ticket titles, Gherkin acceptance criteria, and a mapped Blocked-by/Depends-on link set. Hands the drafts off to the `filing-jira-tickets` skill to file and link them. Requires `bitwarden-atlassian-tools` to provide that skill and its opt-in Jira write MCP tools (`create_issue`, `link_issues`).
+- **`filing-breakdown-tasks` trigger eval** (`skills/filing-breakdown-tasks/evals/`) — an 18-query should-trigger/should-not set (10/8) with a `run_real_eval.py` runner hardened with `--permission-mode plan` and `--plugin-dir`.
 
 ## [2.4.0] - 2026-07-31
 

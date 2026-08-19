@@ -41,27 +41,19 @@
   },
 
   {
-    "query": "what's PROJ-123 about? give me context on it",
+    "query": "what's PM-XXXX about? give me context on it",
     "should_trigger": false
   },
   {
-    "query": "deep dive PROJ-456 and its blocked dependencies",
+    "query": "deep dive PM-YYYY and its blocked dependencies",
     "should_trigger": false
   },
   {
-    "query": "update the description on PROJ-789, it's already created",
+    "query": "update the description on PM-ZZZZ, it's already created",
     "should_trigger": false
   },
   {
     "query": "change the acceptance criteria on this existing ticket",
-    "should_trigger": false
-  },
-  {
-    "query": "open a PR for the feat/csv-export branch",
-    "should_trigger": false
-  },
-  {
-    "query": "commit these changes with a conventional commit message",
     "should_trigger": false
   },
   {

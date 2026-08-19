@@ -32,6 +32,7 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | `developing-breakdown-spec` | "understand the work", "resolve open questions", "write the breakdown spec", "Spec Alternatives"                                      | Resolve open design questions one at a time with concrete options, then capture what's being built into the Specification section.                                                      |
 | `developing-breakdown-plan` | "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts" | Develop the Plan section after the Spec is filled: technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption. |
 | `decomposing-into-tasks`    | "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table"    | Decompose a Plan into a `tasks.md` document with one entry per future Jira work item.                                                                                                   |
+| `filing-breakdown-tasks`    | "create the tickets from tasks.md", "turn this breakdown into Jira tickets", "file the epic and stories"                              | Turn a `tasks.md` decomposition into epic + child ticket drafts and hand off to `filing-jira-tickets` to file them. Requires `bitwarden-atlassian-tools`.                               |
 
 ### Mechanics
 
