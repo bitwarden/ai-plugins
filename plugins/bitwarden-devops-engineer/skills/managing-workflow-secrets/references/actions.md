@@ -67,8 +67,8 @@ Outputs:
 
 - **One output per requested secret**, named after the secret. Consume as
   `${{ steps.<id>.outputs.<SECRET-NAME> }}`.
-- **Output names are case-insensitive** in GitHub expressions, so `outputs.SECRET-1` and
-  `outputs.secret-1` resolve to the same value. Both casings appear in real workflows; match
+- **Output names are case-insensitive** in GitHub expressions, so `outputs.SECRET-NAME-1` and
+  `outputs.secret-name-1` resolve to the same value. Both casings appear in real workflows; match
   the requested name for readability.
 - Requires that `azure-login` has already run in the same job (it uses the active session).
 
@@ -85,9 +85,9 @@ Usage notes:
 
   ```yaml
   secrets: >-
-    SECRET-1,
-    SECRET-2,
-    SECRET-3
+    SECRET-NAME-1,
+    SECRET-NAME-2,
+    SECRET-NAME-3
   ```
 
 - A single call can fetch many secrets. To pull from two vaults, use two steps (one login/logout
@@ -128,13 +128,12 @@ The `keyvault` value and every entry in the `secrets:` list are supplied per tas
 them from the repository, the workflow's contents, or the surrounding steps, and never invent
 one.** If a name is missing or you are unsure, flag it to the user and ask.
 
-- In drafts and examples, use the placeholders **`KEY-VAULT`** for the vault and **`SECRET-1`**,
-  **`SECRET-2`**, … for the secret names, and swap in the real values only once they are confirmed.
+- In drafts and examples, use the placeholders **`KEY-VAULT`** for the vault and **`SECRET-NAME-1`**,
+  **`SECRET-NAME-2`**, … for the secret names, and swap in the real values only once they are confirmed.
 - Secret names you retrieve are still secret material in transit — apply the hygiene rules in the
   `get-keyvault-secrets` section above regardless of the name.
 - When editing an existing workflow, read the vault and secret names already present in that file
   and preserve them exactly; matching an existing, in-file name is reading, not inferring.
 
-There is deliberately no catalogue of real vault or secret names in this skill: enumerating them
-would both invite guessing and expose the organization's secret topology. Confirm names with the
-user or read them from the file you are editing.
+This skill contains no catalogue of real vault or secret names. Confirm names with the user or read
+them from the file you are editing.

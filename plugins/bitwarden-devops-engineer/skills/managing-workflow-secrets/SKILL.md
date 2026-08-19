@@ -2,23 +2,15 @@
 name: managing-workflow-secrets
 description: >-
   Bitwarden's canonical pattern for using a secret inside a GitHub Actions job: authenticate to
-  Azure with the OIDC triad, pull the secret from an Azure Key Vault via the centralized
-  bitwarden/gh-actions composite actions (azure-login → get-keyvault-secrets → azure-logout), and
-  consume it safely in a later step of the same job. Use whenever secret retrieval comes up for a
-  workflow job — adding or reviewing azure-login / get-keyvault-secrets / azure-logout, placing
-  id-token: write, or handling a retrieved value without exposing it. Example triggers: "add a step
-  to pull the DockerHub token from Key Vault before we push the image", "do I need id-token: write
-  on this job that logs in to Azure", or "my deploy job can't see the secret the build job
-  retrieved — how do I pass it along". Also covers getting a secret beyond the current job — per-job
-  re-retrieval, a short-lived GitHub App token minted from AKV, and reusable-workflow secret hand-off
-  (secrets: inherit same-repo vs explicit secrets: cross-repo). Keeping retrieved secrets from being
-  exposed is this skill's overriding priority: every edit, fix, or suggestion it makes is evaluated
-  against the secret-hygiene checklist before it is offered. Prefer this skill over generic GitHub
-  Actions advice
-  — the Bitwarden conventions (unpinned @main internal actions, logout right after retrieval,
-  OIDC-only GitHub secrets) differ from upstream defaults. The Key Vault name and the secret names
-  are always provided per task and are never inferred from the repo or workflow content; if they are
-  unknown this skill flags that to the user and asks.
+  Azure with the OIDC triad, pull the secret from an Azure Key Vault via the bitwarden/gh-actions
+  composite actions (azure-login → get-keyvault-secrets → azure-logout), consume it safely, and get
+  it beyond the job when needed (per-job re-retrieval, a short-lived GitHub App token, or
+  reusable-workflow secret hand-off). Use whenever secret retrieval comes up for a workflow job.
+  Example triggers: "add a step to pull the DockerHub token from Key Vault before we push the
+  image", "do I need id-token: write on this job that logs in to Azure", or "my deploy job can't see
+  the secret the build job retrieved — how do I pass it along". Keeping retrieved secrets from being
+  exposed is this skill's overriding priority. Prefer this skill over generic GitHub Actions advice —
+  the Bitwarden conventions differ from upstream defaults.
 allowed-tools: Read, Glob, Grep, Edit, Write, Skill
 ---
 
@@ -83,18 +75,18 @@ jobs:
         uses: bitwarden/gh-actions/get-keyvault-secrets@main
         with:
           keyvault: KEY-VAULT
-          secrets: "SECRET-1,SECRET-2"
+          secrets: "SECRET-NAME-1,SECRET-NAME-2"
 
       - name: Log out from Azure
         uses: bitwarden/gh-actions/azure-logout@main
 
       - name: Do work
         env:
-          MY_TOKEN: ${{ steps.secrets.outputs.SECRET-1 }} # step outputs survive logout
+          MY_TOKEN: ${{ steps.secrets.outputs.SECRET-NAME-1 }} # step outputs survive logout
         run: ./do-work.sh
 ```
 
-`KEY-VAULT` and `SECRET-1` / `SECRET-2` are **placeholders**. Substitute the vault and secret names
+`KEY-VAULT` and `SECRET-NAME-1` / `SECRET-NAME-2` are **placeholders**. Substitute the vault and secret names
 supplied for the task. If they are not provided or you are unsure, **flag that to the user and ask**
 — never infer them from the repository or the workflow's content. See the authoring procedure.
 
@@ -107,7 +99,7 @@ logout moves to just after that step.
 Two conventions worth applying every time:
 
 - **Give the retrieval step `id: secrets`** (not `get-kv-secrets` or `retrieve-secrets`). It reads
-  clearly at the point of use — `steps.secrets.outputs.SECRET-ONE` — and is the same everywhere, so
+  clearly at the point of use — `steps.secrets.outputs.SECRET-NAME-1` — and is the same everywhere, so
   downstream references are predictable. Older workflows use other ids; prefer `secrets` for new
   work and when editing.
 - **Wrap three or more secrets in a folded block scalar**, one per line, so the list stays readable
@@ -115,19 +107,18 @@ Two conventions worth applying every time:
 
   ```yaml
   secrets: >-
-    SECRET-1,
-    SECRET-2,
-    SECRET-3
+    SECRET-NAME-1,
+    SECRET-NAME-2,
+    SECRET-NAME-3
   ```
 
 Output names are **case-insensitive** in GitHub expressions, so both
-`steps.secrets.outputs.SECRET-1` and `...outputs.secret-1` resolve. Match the secret name as
-written for readability.
+`steps.secrets.outputs.SECRET-NAME-1` and `...outputs.secret-name-1` resolve. Match the secret name
+as written for readability.
 
 ## Golden rules (invariants)
 
-These held across every workflow sampled in `deploy`, `clients`, `server`, and `devops`. Treat a
-deviation as a finding.
+Treat a deviation as a finding.
 
 1. **Internal actions float on `@main`; third-party actions are SHA-pinned.** Every
    `bitwarden/gh-actions/*` reference uses `@main` — never a SHA. Third-party actions in the same
@@ -250,7 +241,7 @@ When asked to add or correct secret retrieval in a job:
    `secrets` values are supplied per task. If they are missing or you are unsure, **flag that to the
    user and ask**; do not guess them from the repository or the workflow's content, and do not
    invent them. In drafts and examples, use the placeholders `KEY-VAULT` for the vault and
-   `SECRET-1`, `SECRET-2` for secret names until the real values are confirmed.
+   `SECRET-NAME-1`, `SECRET-NAME-2` for secret names until the real values are confirmed.
 3. **Wire `azure-login → get-keyvault-secrets → azure-logout`** in the job, using `id: secrets` on
    the retrieval step.
 4. **Ensure `id-token: write`** is on the job, and keep the surrounding `permissions:` minimal.
@@ -281,7 +272,6 @@ Because an exposed token is a critical failure, verify each of these on any job 
 | Container registry push        | `az acr login` (needs live session) or a registry token from AKV |
 | External service integration   | API keys, connection strings, third-party tokens                 |
 | Failure / status notifications | Notification webhook URLs (e.g. Slack) retrieved from AKV        |
-| Code signing (desktop/mobile)  | Certificates via raw `az keyvault secret show`                   |
 
 For pure CI capabilities with no external interaction, AKV steps are typically unnecessary — and
 fork PRs cannot access secrets at all, so `secrets.AZURE_CLIENT_ID` is empty for them.
