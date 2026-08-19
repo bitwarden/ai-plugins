@@ -61,7 +61,7 @@ SECRET_FOUND=0
 TEMP_FILE=$(mktemp)
 
 # OpenAI API keys (sk-...)
-if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" > "${TEMP_FILE}"; then
+if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -viE "example|your-key-here|xxx" > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: OpenAI API key pattern detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'
@@ -70,7 +70,7 @@ if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "securit
 fi
 
 # GitHub tokens (ghp_..., gho_...)
-if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" > "${TEMP_FILE}"; then
+if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -viE "example|your-key-here|xxx" > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: GitHub token pattern detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'
@@ -128,16 +128,21 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         PERM_ISSUES=1
     fi
 
-    # A bare tool rule matches every use of the tool. In allow that is the broadest
-    # grant available; in deny it is the strongest control, so only allow is checked.
-    if grep -qE '"allow"[[:space:]]*:' "${CLAUDE_DIR}/settings.json" 2>/dev/null &&
-        grep -qE '"(Bash|Write|Edit|WebFetch|WebSearch)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-        echo "  ⚠️  REVIEW: Bare tool rule present"
-        echo "     File: ${CLAUDE_DIR}/settings.json"
-        echo "     Issue: a bare rule such as \"Bash\" matches every use of the tool."
-        echo "            Confirm it sits in deny, not allow."
+    # A bare tool rule matches every use of the tool. In allow that is the broadest grant
+    # available; in deny it is the strongest control. Telling them apart needs the array the
+    # rule sits in, so this check requires jq and is recorded as skipped without it.
+    if command -v jq >/dev/null 2>&1; then
+        if jq -e '.permissions.allow[]? | select(test("^(Bash|Write|Edit|WebFetch|WebSearch)$"))' \
+            "${CLAUDE_DIR}/settings.json" >/dev/null 2>&1; then
+            echo "  ❌ CRITICAL: Bare tool rule in permissions.allow"
+            echo "     File: ${CLAUDE_DIR}/settings.json"
+            echo "     Issue: a bare rule such as \"Bash\" matches every use of the tool"
+            echo ""
+            PERM_ISSUES=1
+        fi
+    else
+        echo "  ⚠️  SKIPPED: bare-tool-rule check needs jq to tell allow from deny"
         echo ""
-        PERM_ISSUES=1
     fi
 
     if grep -qE '"(autoApprovedTools|autoApproved)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then

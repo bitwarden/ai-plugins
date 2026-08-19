@@ -155,8 +155,10 @@ if grep -qE '"Write\(//\*\*\)"' .claude/settings.json 2>/dev/null; then
     ISSUES=1
 fi
 
-if grep -qE '"Bash"' .claude/settings.json 2>/dev/null; then
-    echo "CRITICAL: Bare Bash rule auto-approves every shell command"
+# A bare rule is only a defect in allow. In deny it is the strongest form of the control,
+# so this needs the array the rule sits in rather than a file-wide grep.
+if jq -e '.permissions.allow[]? | select(. == "Bash")' .claude/settings.json >/dev/null 2>&1; then
+    echo "CRITICAL: Bare Bash rule in allow auto-approves every shell command"
     ISSUES=1
 fi
 
@@ -327,7 +329,7 @@ Set required environment variables:
 
 ```json
 {
-  "permissions": { "allow": ["Bash(:*)"] }
+  "permissions": { "allow": ["Bash"] }
 }
 ```
 
@@ -346,9 +348,8 @@ Set required environment variables:
 }
 ```
 
-`npm install` and `./gradlew test` are deliberately absent. Both write state and run
-project- or registry-controlled code, so neither belongs in a list offered as the safe
-default; approve them only behind a pattern narrow enough to name what runs.
+`npm install` and `./gradlew test` are deliberately absent; the Safe Command Whitelist below
+gives the reason.
 
 ---
 
@@ -365,13 +366,12 @@ default; approve them only behind a pattern narrow enough to name what runs.
 
 - `npm ci`, `./gradlew build` - reproducible from a lock file or build script, but both still
   execute project-controlled code
-
-`npm install` and `./gradlew test` are deliberately absent. An npm lifecycle script is
-arbitrary code execution at install time, and a Gradle test task runs whatever the build file
-names, so neither belongs in a list offered as the safe default.
-
 - `git pull` (on feature branches)
 - `mkdir -p` (with scoped paths)
+
+`npm install` and `./gradlew test` are deliberately absent. An npm lifecycle script is arbitrary
+code execution at install time, and a Gradle test task runs whatever the build file names, so
+neither belongs in a list offered as the safe default.
 
 **Commands Requiring Approval:**
 

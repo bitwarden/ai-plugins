@@ -54,6 +54,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Targeted skills state that a direct invocation skips the router's secret scan and filter, and cite `claude-code-requirements.md` for frontmatter and rule syntax
 - Teaching credentials match the quantifiers in the regexes the skills point at
 
+- Argument interpolation into a `` !`cmd` `` shell string is a finding regardless of quoting: CRITICAL unquoted, IMPORTANT quoted. Quoting stops word-splitting and `;` chaining but not command substitution or quote breakout, so the guidance now recommends stdin or a validated allowlist
+- Command frontmatter is optional, so YAML that does not parse is CRITICAL while a missing `description` is SUGGESTED
+- Bare-tool-rule detection reads `permissions.allow` rather than the whole file, so a bare rule confined to `deny` no longer fails the scan; the check records itself as skipped where `jq` is unavailable
+- Secret detection excludes placeholder text, so the plugin's own teaching examples no longer register as live credentials after moving inline
+- `model` admits full identifiers and the reviewed tool list includes `Task`, `Skill`, `TodoWrite`, and `NotebookEdit`, matching what the skills expect
+- Severity rows for over-broad permissions are qualified to `allow`, with a row recording that a bare or sensitive-path rule in `deny` is the control rather than a finding
+- `/validate-ai-local` carries the full CWE-1427 boundary rather than a paraphrase that dropped the identifier and the critical-finding instruction
+
 ### Added, from review
 
 - `reviewing-command-definitions` pass covering `` !`cmd` `` shell execution and argument interpolation, the security surface no sibling skill covered

@@ -75,8 +75,8 @@ tools: Read, Write, Grep, Glob, Bash # Specific tools only
 
 - `name`: kebab-case, unique within project
 - `description`: Clear purpose and activation context
-- `model`: One of: `haiku`, `sonnet`, `opus`, `inherit` (lowercase)
-- `tools`: Exact tool names (case-sensitive): `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Bash`, `WebFetch`, `WebSearch`
+- `model`: one of the aliases `haiku`, `sonnet`, `opus`, `inherit` (lowercase), or a full model identifier such as `claude-opus-4-5`. Treat an unfamiliar identifier as a question to confirm, not a defect
+- `tools`: exact tool names, case-sensitive. Commonly reviewed: `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Bash`, `WebFetch`, `WebSearch`, `Task`, `Skill`, `TodoWrite`, `NotebookEdit`. The set grows, so an unfamiliar name is a question to confirm rather than an unavailable tool
 - **Omit `tools` field** to inherit all tools (default)
 
 ---

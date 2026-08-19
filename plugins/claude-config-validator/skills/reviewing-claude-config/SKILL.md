@@ -99,19 +99,21 @@ The command row matches any `commands/` directory at any depth, which is what
 command's sibling documentation is not a command definition and would otherwise be judged for
 absent frontmatter.
 
-The last row is the fallback, and it matters most for skill support files — `reference/`,
-`examples/`, `scripts/` — which have no targeted skill of their own. Under `.claude/skills/`
-they reach this skill through the config bucket. Inside a plugin they reach it only when another
-component in the same plugin also changed: per `reference/validate-ai-scope.md`, a changeset
-touching nothing but `plugins/x/skills/y/reference/z.md` fills no bucket that fires this review,
-so only plugin validation runs, and that checks whether referenced files exist rather than what
-they say. Say so in the report when that is the case, rather than letting silence read as
-coverage. Read them here for
-instruction content and dangerous guidance: their genre is text Claude loads and acts on, so
-they carry the same CWE-1427 surface as any other configuration, and `plugin-dev`'s agents
-check only that referenced files exist, never what they say. Never let an in-scope path leave
-Step 3 unread. If you cannot review one, say so in the findings — a silent omission reads as
-a pass.
+The last row is the fallback, and it matters most for skill support files (`reference/`,
+`examples/`, `scripts/`), which have no targeted skill of their own. Read them here for
+instruction content and dangerous guidance: their genre is text Claude loads and acts on, so they
+carry the same CWE-1427 surface as any other configuration.
+
+Three caveats on how those files reach you:
+
+- Under `.claude/skills/` they arrive through the config bucket, so this review fires.
+- Inside a plugin they arrive only when another component in the same plugin also changed. Per
+  `reference/validate-ai-scope.md`, a changeset touching nothing but
+  `plugins/x/skills/y/reference/z.md` fills no bucket that fires this review, so only plugin
+  validation runs — and that checks whether referenced files exist, not what they say. Say so in
+  the report when that is the case, rather than letting silence read as coverage.
+- Never let an in-scope path leave Step 3 unread. If you cannot review one, say so in the
+  findings: a silent omission reads as a pass.
 
 **Skills are reviewed by `plugin-dev:skill-reviewer`, not here.** That agent already covers
 frontmatter, description trigger quality, word count, imperative style, progressive
@@ -130,18 +132,19 @@ Every candidate finding must clear all of these. Drop it if any one fails.
   removed", it is an observation, not a finding. Drop it.
 - **Specific** — names a file, a line, and what to change. "Consider reviewing this section
   for clarity" is not actionable. Drop it.
-- **Not already covered** — another checker in this pipeline **actually ran and reported
-  it**, or a linter, formatter, or one of the `validate-*` scripts will. Drop it. Nominal
-  ownership is not coverage: a check attributed to `plugin-dev:plugin-validator` when that
-  plugin was not installed did not happen, so the finding stands.
+- **Not already covered** — a checker **outside** this pipeline actually ran and reported it,
+  or a linter, formatter, or one of the `validate-*` scripts will. Drop it. Nominal ownership is
+  not coverage: a check attributed to `plugin-dev:plugin-validator` when that plugin was not
+  installed did not happen, so the finding stands. Duplicates from two checkers **inside** this
+  pipeline are merged rather than dropped, per the rule below.
 - **Worth a reviewer's time** — a senior engineer would raise it in a real review. Drop
   pedantry.
 - **Verified** — you traced it in the file rather than inferring it from a pattern. If you
   cannot point at the text, drop it.
 
-**Deduplicate before reporting.** The same issue at the same `file:line` from two checkers is
-one finding: merge at the higher severity. Never drop it as "already covered" when the other
-checker is inside this pipeline, since that is what the exemption below protects.
+**Deduplicate before reporting.** The same issue at the same `file:line` from two checkers
+inside this pipeline is one finding: merge at the higher severity rather than dropping either
+copy.
 
 **Two exemptions.** A CRITICAL finding, and any finding that weakens security, are subject
 only to the first test — the scope fence — and the verification test. Never drop one as a

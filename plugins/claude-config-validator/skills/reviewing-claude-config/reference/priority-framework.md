@@ -170,16 +170,17 @@ For internal-only configurations:
 
 ### Security Issues
 
-| Issue                                                               | Priority  |
-| ------------------------------------------------------------------- | --------- |
-| Committed settings.local.json                                       | CRITICAL  |
-| Hardcoded API keys/tokens                                           | CRITICAL  |
-| Dangerous auto-approved commands                                    | CRITICAL  |
-| Overly broad permissions (`Read(//**)`, `Write(//**)`, bare `Bash`) | CRITICAL  |
-| Permissions exposing ~/.ssh, /etc                                   | CRITICAL  |
-| Permissions broader than needed                                     | IMPORTANT |
-| Agent tool grant reaching credentials or destructive commands       | CRITICAL  |
-| Agent tool grant otherwise broader than its description justifies   | IMPORTANT |
+| Issue                                                                          | Priority                          |
+| ------------------------------------------------------------------------------ | --------------------------------- |
+| Committed settings.local.json                                                  | CRITICAL                          |
+| Hardcoded API keys/tokens                                                      | CRITICAL                          |
+| Dangerous auto-approved commands                                               | CRITICAL                          |
+| Overly broad permissions in `allow` (`Read(//**)`, `Write(//**)`, bare `Bash`) | CRITICAL                          |
+| A bare or sensitive-path rule in `deny`                                        | Not a finding — it is the control |
+| Permissions exposing ~/.ssh, /etc                                              | CRITICAL                          |
+| Permissions broader than needed                                                | IMPORTANT                         |
+| Agent tool grant reaching credentials or destructive commands                  | CRITICAL                          |
+| Agent tool grant otherwise broader than its description justifies              | IMPORTANT                         |
 
 ### Structure Issues
 
