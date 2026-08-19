@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IMPORTANT narrowed to functional defects and security regressions; vague instructions, missing examples, duplicated documentation, poor progressive disclosure, and missing structured-thinking blocks are SUGGESTED
 - Marketplace escalation no longer raises readability findings to CRITICAL
 - `reviewing-claude-config` holds `Skill` in `allowed-tools`
-- `/validate-ai` trimmed from 226 to 193 lines
+- `/validate-ai` trimmed, cutting rationale duplicated in the scope reference
 
 ### Fixed
 
@@ -39,6 +39,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/validate-ai` section 4b records itself as skipped when `plugin-dev` is unavailable, as 4a already did
 - Verdict statements in `SKILL.md` Core Principles and the changelog carry the security floor
 - Agent tool grants reaching credentials or destructive commands are CRITICAL in `priority-framework.md`, matching what `reviewing-agent-definitions` already said
+
+- Permission rule grammar is `Tool` or `Tool(specifier)`. The bare form is valid and is the broadest grant available, so `deny: ["WebFetch"]` is a control rather than a defect; the CRITICAL finding is scoped to the two forms Claude Code genuinely does not read
+- `//` is documented as the absolute path prefix, and a single leading `/` as relative to the settings file's directory, which had been mixed within one release
+- Detection greps, `detect-broad-permissions.sh`, and the shipped `security-scan.sh` match the real schema; all three previously reported a filesystem-wide grant as scoped
+- Hook schema and script-path review is skipped only where `plugin-dev:plugin-validator` actually ran, matching the agent and command skills
+- `reviewing-command-definitions` has a numbered frontmatter pass rather than a promise, and treats a quoted `$ARGUMENTS` as acceptable rather than flagging it
+- `Skill(bitwarden-security-engineer:detecting-secrets)` is qualified, which it needs now that the router holds `Skill`
+- Findings duplicated at the same `file:line` by two checkers merge at the higher severity instead of being dropped or double-reported
+- `CLAUDE.md` path-resolution moved to the structure pass, out from under "Length alone is not a finding"
+- Harness-loosening directives in `CLAUDE.md` are a checkbox with a CRITICAL severity and a `priority-framework.md` row, not prose
+- Agent frontmatter covers `<example>` blocks and `color` where the pass is ours, treats a full model identifier as valid, and judges an omitted `tools` field on what it grants
+- Worked severity examples re-anchored away from `SKILL.md` and `checklists/`, both out of scope after this release
+- Targeted skills state that a direct invocation skips the router's secret scan and filter, and cite `claude-code-requirements.md` for frontmatter and rule syntax
+- Teaching credentials match the quantifiers in the regexes the skills point at
 
 ### Added, from review
 

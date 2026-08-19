@@ -230,8 +230,9 @@ git diff --cached | grep "settings.local.json"
 
 ### Permission Rule Patterns
 
-**Format** (in settings.json). Rules live under `permissions`, in `allow`, `deny`, or `ask`,
-and each rule is `Tool(specifier)`:
+**Format** (in settings.json). Rules live under `permissions`, in `allow`, `deny`, or `ask`. A
+rule is `Tool(specifier)`, or a bare `Tool` with no specifier, which matches every use of that
+tool:
 
 ```json
 {
@@ -239,21 +240,30 @@ and each rule is `Tool(specifier)`:
     "allow": [
       "Bash(git status:*)",
       "Bash(git diff:*)",
-      "Read(/absolute/path/to/specific/dir/**)"
+      "Read(//absolute/path/to/specific/dir/**)"
     ],
-    "deny": ["Read(/absolute/path/to/.env)"]
+    "deny": ["Read(//absolute/path/to/.env)", "WebFetch"]
   }
 }
 ```
 
 `deny` wins over `allow`, so it is the control to reach for when something must never happen.
-A top-level `autoApproved` or `autoApprovedTools` array is not read by Claude Code.
+The bare `WebFetch` above is the maximal deny for that tool, and is the intended way to write
+it rather than an omission.
+
+A top-level `autoApproved` or `autoApprovedTools` array is not read by Claude Code, and neither
+is a colon-separated `Tool:specifier` rule with no parentheses.
+
+**Path prefixes**: `//` is absolute from the filesystem root. A single leading `/` resolves
+relative to the directory holding the settings file, so `Read(/etc/**)` matches
+`<settings-dir>/etc/**` and not `/etc`. Getting this wrong on a `deny` rule produces a
+restriction that silently never applies.
 
 **Guidelines**:
 
-- Use specific command patterns, not wildcards: `Bash(git status:*)` not `Bash(*)`
-- Use absolute paths for Read permissions: `Read(/full/path/**)` not `Read(**)`
-- Glob patterns for restricted access: `Read(/project/src/**/*.ts)` to limit file types
+- Use specific command patterns where a tool has them: `Bash(git status:*)` not a bare `Bash`
+- Use `//` for absolute Read paths: `Read(//full/path/**)` not `Read(**)`
+- Glob patterns for restricted access: `Read(//project/src/**/*.ts)` to limit file types
 
 ---
 

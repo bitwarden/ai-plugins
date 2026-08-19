@@ -314,7 +314,7 @@ See `reference/claude-code-requirements.md` for the requirements these criteria 
 
 **Solutions:**
 
-1. Security scan excludes `examples/` directories and `security-patterns.md`
+1. Security scan excludes `examples/` directories, `security-patterns.md`, and the scanner itself. It does not exclude the targeted skills, whose teaching examples sit inline in `skills/reviewing-*/SKILL.md`, so add those paths if you scan this plugin
 2. Use "example" or "your-key-here" as placeholders in docs
 3. Review manually to confirm false positives
 

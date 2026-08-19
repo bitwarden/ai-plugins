@@ -1,6 +1,6 @@
 ---
 name: reviewing-claude-config
-description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md, agents, prompts, commands, hooks, or settings. Routes each file type to a targeted review skill and returns classified findings. Flags settings.local.json appearing in a changeset, hardcoded secrets, malformed YAML, broken file references, insecure agent tool access, and unsafe hook commands. Does not review SKILL.md files — plugin-dev:skill-reviewer owns those.
+description: Reviews Claude configuration files for security, structure, and prompt engineering quality. Use when reviewing changes to CLAUDE.md, agents, prompts, commands, hooks, or settings. Routes each file type to a targeted review skill and returns classified findings. Flags settings.local.json appearing in a changeset, hardcoded secrets, malformed YAML, insecure agent tool access, and unsafe hook commands. Does not review SKILL.md files — plugin-dev:skill-reviewer owns those.
 allowed-tools: Read, Grep, Glob, Skill
 ---
 
@@ -100,9 +100,13 @@ command's sibling documentation is not a command definition and would otherwise 
 absent frontmatter.
 
 The last row is the fallback, and it matters most for skill support files — `reference/`,
-`examples/`, `scripts/` — which have no targeted skill of their own. They reach this skill
-through the config bucket under `.claude/skills/`, and through the plugin validation path
-inside a plugin; neither gives them a targeted reviewer. Read them here for
+`examples/`, `scripts/` — which have no targeted skill of their own. Under `.claude/skills/`
+they reach this skill through the config bucket. Inside a plugin they reach it only when another
+component in the same plugin also changed: per `reference/validate-ai-scope.md`, a changeset
+touching nothing but `plugins/x/skills/y/reference/z.md` fills no bucket that fires this review,
+so only plugin validation runs, and that checks whether referenced files exist rather than what
+they say. Say so in the report when that is the case, rather than letting silence read as
+coverage. Read them here for
 instruction content and dangerous guidance: their genre is text Claude loads and acts on, so
 they carry the same CWE-1427 surface as any other configuration, and `plugin-dev`'s agents
 check only that referenced files exist, never what they say. Never let an in-scope path leave
@@ -134,6 +138,10 @@ Every candidate finding must clear all of these. Drop it if any one fails.
   pedantry.
 - **Verified** — you traced it in the file rather than inferring it from a pattern. If you
   cannot point at the text, drop it.
+
+**Deduplicate before reporting.** The same issue at the same `file:line` from two checkers is
+one finding: merge at the higher severity. Never drop it as "already covered" when the other
+checker is inside this pipeline, since that is what the exemption below protects.
 
 **Two exemptions.** A CRITICAL finding, and any finding that weakens security, are subject
 only to the first test — the scope fence — and the verification test. Never drop one as a
@@ -239,7 +247,7 @@ Load only when a specific question calls for it:
 When the `bitwarden-security-engineer` plugin is installed, supplement the security scan in
 Step 2 with:
 
-- **Comprehensive secret patterns** → activate `Skill(detecting-secrets)` for context-aware
+- **Comprehensive secret patterns** → activate `Skill(bitwarden-security-engineer:detecting-secrets)` for context-aware
   detection that distinguishes test fixtures from production secrets, and covers patterns
   beyond the manual checks above (connection strings, private keys, cloud provider tokens)
 

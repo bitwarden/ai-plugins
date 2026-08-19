@@ -209,9 +209,9 @@ Security audit all Claude configuration files in this project
 
 Five passes, ordered so the security question comes first.
 
-**Pass 1: Tool access** — least privilege; analysis-only agents holding `Write`, `Edit`, or `Bash`; `Bash` unexplained by the description; an omitted `tools` field inheriting everything; a grant that contradicts what the description claims.
+**Pass 1: Tool access** — least privilege; analysis-only agents holding `Write`, `Edit`, or `Bash`; `Bash` unexplained by the description; unexplained `WebFetch` or `WebSearch` egress alongside read access; unexplained `Task`, which spawns subagents and escapes the grant; tool names exact and case-sensitive, since a misspelled entry is silently not a grant; a grant that contradicts what the description claims.
 
-**Pass 2: Frontmatter** — valid YAML, required `name` and `description`, valid `model`, non-empty system prompt. Skipped only where `plugin-dev:plugin-validator` actually ran; a bare `.claude/agents/*.md`, or any agent when `plugin-dev` is not installed, is checked here.
+**Pass 2: Frontmatter** — valid YAML, required `name` and `description`, `<example>` blocks, valid `color`, non-empty system prompt. Skipped only where `plugin-dev:plugin-validator` actually ran, and recorded as skipped rather than passed; a bare `.claude/agents/*.md`, or any agent when `plugin-dev` is not installed, is checked here.
 
 **Pass 3: Description and activation triggers** — states both what the agent does and when to reach for it; single responsibility rather than a catch-all.
 

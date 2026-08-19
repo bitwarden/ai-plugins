@@ -120,26 +120,31 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     PERM_ISSUES=0
 
     # Check for wildcard permissions
-    if grep -q 'Read://\*' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-        echo "  ❌ CRITICAL: Overly broad Read permissions (Read://*)"
+    if grep -qE '"(Read|Write|Edit)\(//\*\*\)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
+        echo "  ❌ CRITICAL: Filesystem-wide permission rule"
         echo "     File: ${CLAUDE_DIR}/settings.json"
-        echo "     Issue: Grants read access to entire filesystem"
+        echo "     Issue: Read(//**), Write(//**), or Edit(//**) covers the whole filesystem"
         echo ""
         PERM_ISSUES=1
     fi
 
-    if grep -q 'Write://\*' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-        echo "  ❌ CRITICAL: Overly broad Write permissions (Write://*)"
+    # A bare tool rule matches every use of the tool. In allow that is the broadest
+    # grant available; in deny it is the strongest control, so only allow is checked.
+    if grep -qE '"allow"[[:space:]]*:' "${CLAUDE_DIR}/settings.json" 2>/dev/null &&
+        grep -qE '"(Bash|Write|Edit|WebFetch|WebSearch)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
+        echo "  ⚠️  REVIEW: Bare tool rule present"
         echo "     File: ${CLAUDE_DIR}/settings.json"
-        echo "     Issue: Grants write access to entire filesystem"
+        echo "     Issue: a bare rule such as \"Bash\" matches every use of the tool."
+        echo "            Confirm it sits in deny, not allow."
         echo ""
         PERM_ISSUES=1
     fi
 
-    if grep -q '"Bash:\*"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-        echo "  ❌ CRITICAL: Auto-approve all Bash commands (Bash:*)"
+    if grep -qE '"(autoApprovedTools|autoApproved)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
+        echo "  ❌ CRITICAL: Unread permission key"
         echo "     File: ${CLAUDE_DIR}/settings.json"
-        echo "     Issue: Allows any bash command without approval"
+        echo "     Issue: Claude Code reads permissions.allow/deny/ask, not autoApprovedTools."
+        echo "            The file looks configured but has no effective rules."
         echo ""
         PERM_ISSUES=1
     fi

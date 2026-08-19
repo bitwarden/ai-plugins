@@ -18,6 +18,7 @@ Classification system for prioritizing issues found in Claude configuration file
 - Dangerous command auto-approvals (rm -rf, chmod 777)
 - Overly broad permissions exposing sensitive paths
 - An agent tool grant reaching credentials or destructive commands
+- A CLAUDE.md directive that loosens the harness (`--dangerously-skip-permissions`, `--no-verify`)
 - Broken file references preventing skill loading
 
 **Action Required:** Must fix immediately before approval.
@@ -169,16 +170,16 @@ For internal-only configurations:
 
 ### Security Issues
 
-| Issue                                                             | Priority  |
-| ----------------------------------------------------------------- | --------- |
-| Committed settings.local.json                                     | CRITICAL  |
-| Hardcoded API keys/tokens                                         | CRITICAL  |
-| Dangerous auto-approved commands                                  | CRITICAL  |
-| Overly broad permissions (Read://_, Write://_)                    | CRITICAL  |
-| Permissions exposing ~/.ssh, /etc                                 | CRITICAL  |
-| Permissions broader than needed                                   | IMPORTANT |
-| Agent tool grant reaching credentials or destructive commands     | CRITICAL  |
-| Agent tool grant otherwise broader than its description justifies | IMPORTANT |
+| Issue                                                               | Priority  |
+| ------------------------------------------------------------------- | --------- |
+| Committed settings.local.json                                       | CRITICAL  |
+| Hardcoded API keys/tokens                                           | CRITICAL  |
+| Dangerous auto-approved commands                                    | CRITICAL  |
+| Overly broad permissions (`Read(//**)`, `Write(//**)`, bare `Bash`) | CRITICAL  |
+| Permissions exposing ~/.ssh, /etc                                   | CRITICAL  |
+| Permissions broader than needed                                     | IMPORTANT |
+| Agent tool grant reaching credentials or destructive commands       | CRITICAL  |
+| Agent tool grant otherwise broader than its description justifies   | IMPORTANT |
 
 ### Structure Issues
 
@@ -274,23 +275,23 @@ When multiple issues exist in a single review:
 
 **Example 2: Structure Issue**
 
-❌ **SKILL.md:1** - Missing YAML frontmatter
+❌ **.claude/agents/reviewer.md:1** - Missing YAML frontmatter
 **Priority:** CRITICAL
-**Rationale:** Skill won't be recognized by Claude Code without frontmatter.
+**Rationale:** The agent is not recognized by Claude Code without frontmatter, so nothing delegates to it.
 
 ---
 
 **Example 3: Quality Issue**
 
-❌ **SKILL.md:3** - Description lacks activation triggers
+❌ **.claude/agents/reviewer.md:3** - Description lacks activation triggers
 **Priority:** IMPORTANT
-**Rationale:** Users won't know when to invoke this skill. Reduces discoverability.
+**Rationale:** Claude cannot tell when to delegate, so the agent never fires.
 
 ---
 
 **Example 4: Improvement Suggestion**
 
-❌ **checklist.md:45** - Could add more examples
+❌ **commands/review-pr/review-pr.md:45** - Could add more examples
 **Priority:** SUGGESTED
 **Rationale:** Additional examples would clarify complex concept, but current instruction is functional.
 
@@ -298,6 +299,6 @@ When multiple issues exist in a single review:
 
 **Example 5: Style Preference**
 
-❌ **SKILL.md:12** - Alternative phrasing possible
+❌ **CLAUDE.md:12** - Alternative phrasing possible
 **Priority:** OPTIONAL
 **Rationale:** Current phrasing is clear, alternative is just personal preference.

@@ -118,19 +118,24 @@ fi
 **Dangerous Permission Patterns:**
 
 ```bash
-# Check for overly broad permissions
-grep -r "Read://\*" .claude/settings.json
-grep -r "Write://\*" .claude/settings.json
-grep -r "Bash:\*" .claude/settings.json
+# Filesystem-wide read, write, or edit
+grep -nE '"(Read|Write|Edit)\(//\*\*\)"' .claude/settings.json
+# Bare tool rules, which match every use of the tool
+grep -nE '"(Bash|WebFetch|WebSearch|Write|Edit)"' .claude/settings.json
+# Credential directories
+grep -nE '"(Read|Edit)\(//[^"]*/\.(ssh|aws|gnupg)/' .claude/settings.json
 ```
 
 **Red Flags:**
 
-- `Read://*` - Read access to entire filesystem
-- `Write://*` - Write access to entire filesystem
-- `Bash:*` - Auto-approve ALL bash commands
-- `Read://Users/username/.ssh/**` - Access to SSH keys
-- `Read:///etc/**` - Access to system config
+- `Read(//**)` - Read access to entire filesystem
+- `Write(//**)` - Write access to entire filesystem
+- A bare `Bash` rule in `allow` - auto-approves every shell command
+- `Read(//Users/username/.ssh/**)` - access to SSH keys
+- `Read(//etc/**)` - access to system config
+
+A bare rule in `deny` is the opposite: `"deny": ["WebFetch"]` is the strongest form of that
+control, not a defect.
 
 **Automated Detection:**
 
@@ -140,18 +145,18 @@ grep -r "Bash:\*" .claude/settings.json
 
 ISSUES=0
 
-if grep -q 'Read://\*"' .claude/settings.json 2>/dev/null; then
-    echo "CRITICAL: Overly broad Read permissions (Read://*)"
+if grep -qE '"Read\(//\*\*\)"' .claude/settings.json 2>/dev/null; then
+    echo "CRITICAL: Overly broad Read permissions (Read(//**))"
     ISSUES=1
 fi
 
-if grep -q 'Write://\*"' .claude/settings.json 2>/dev/null; then
-    echo "CRITICAL: Overly broad Write permissions (Write://*)"
+if grep -qE '"Write\(//\*\*\)"' .claude/settings.json 2>/dev/null; then
+    echo "CRITICAL: Overly broad Write permissions (Write(//**))"
     ISSUES=1
 fi
 
-if grep -q '"Bash:\*"' .claude/settings.json 2>/dev/null; then
-    echo "CRITICAL: Auto-approve all Bash commands (Bash:*)"
+if grep -qE '"Bash"' .claude/settings.json 2>/dev/null; then
+    echo "CRITICAL: Bare Bash rule auto-approves every shell command"
     ISSUES=1
 fi
 
@@ -356,10 +361,15 @@ default; approve them only behind a pattern narrow enough to name what runs.
 - `grep`, `find`, `wc`, `sort`
 - `npm list`, `./gradlew tasks`
 
-**Idempotent Commands (Safe):**
+**State-changing but conventionally approved, with narrow patterns only:**
 
-- `npm install`, `npm ci`
-- `./gradlew build`, `./gradlew test`
+- `npm ci`, `./gradlew build` - reproducible from a lock file or build script, but both still
+  execute project-controlled code
+
+`npm install` and `./gradlew test` are deliberately absent. An npm lifecycle script is
+arbitrary code execution at install time, and a Gradle test task runs whatever the build file
+names, so neither belongs in a list offered as the safe default.
+
 - `git pull` (on feature branches)
 - `mkdir -p` (with scoped paths)
 
