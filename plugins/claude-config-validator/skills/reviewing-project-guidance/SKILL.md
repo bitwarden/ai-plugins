@@ -31,12 +31,12 @@ reference, both commands, and all four targeted skills — edit them together.)_
 - [ ] No dangerous auto-approved commands
 - [ ] No paths exposing personal or credential directories
 
-```markdown
+```text
 ❌ apiKey: "sk-1234567890abcdef"
 ✅ Use the $API_KEY environment variable
 
-❌ Auto-approve: Bash(rm -rf:_)
-✅ Auto-approve: Bash(npm install:_)
+❌ Auto-approve: Bash(rm -rf:*)
+✅ Auto-approve: Bash(npm install:*)
 
 ❌ Read://Users/username/.ssh/**
 ✅ Read://Users/username/projects/myproject/**

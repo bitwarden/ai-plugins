@@ -6,7 +6,7 @@ Comprehensive skill for reviewing Claude Code configuration files with security-
 
 This skill is the entry point for reviewing Claude Code configuration. It settles what is in scope, runs the security checks with `Grep`, routes each file type to a targeted review skill, filters the results, and returns classified findings. Its grant is `Read, Grep, Glob, Skill`, so it reads, routes, and reports rather than executing anything or posting anywhere.
 
-Two rules shape every review it produces: findings are limited to **what the changeset introduced or worsened**, and **only a CRITICAL finding fails the review**.
+Two rules shape every review it produces: findings are limited to **what the changeset introduced or worsened**, and a review fails only on **a CRITICAL finding, or one that weakens security**.
 
 **Use this skill when:**
 
@@ -37,10 +37,10 @@ Two rules shape every review it produces: findings are limited to **what the cha
 ### Quality Enforcement
 
 - YAML frontmatter validation
-- Progressive disclosure checks (500-line guideline)
 - Prompt engineering quality checks
 - File reference integrity validation
-- Token efficiency optimization
+- Verbosity of `CLAUDE.md`, which is re-read every turn in its scope
+- Instruction-content review of skill support files that have no targeted reviewer
 
 ### Comprehensive Coverage
 
@@ -201,9 +201,14 @@ Issues are classified into four priority levels, defined in
 - **SUGGESTED**: Quality, readability, and structure improvements (could fix)
 - **OPTIONAL**: Personal preferences, alternatives (consider)
 
-**Only CRITICAL fails a review.** Everything else is reported and listed without setting the
-verdict to `Issues found`. Reporting a finding and failing the run are separate decisions: a
-review that fails on readability is a review people learn to ignore.
+**Only a CRITICAL finding, or a finding that weakens security, fails a review.** A finding
+that widens a permission, tool grant, or hook capability sets `Issues found` at whatever
+severity it carries. Everything else is reported and listed without setting the verdict.
+
+Reporting a finding and failing the run are separate decisions: a review that fails on
+readability is a review people learn to ignore. Security needs its own clause rather than a
+severity threshold, because `priority-framework.md` rates some real regressions IMPORTANT — an
+over-broad agent tool grant that stops short of credentials, a permission broader than needed.
 
 ## Requirements
 
@@ -243,7 +248,7 @@ the two `validate-ai` commands write the single-document report contract in
 [Rationale explaining why this matters]
 ```
 
-**Overall assessment**, stated once. Only a CRITICAL finding makes it `Issues found`:
+**Overall assessment**, stated once. A CRITICAL finding, or one that weakens security, makes it `Issues found`:
 
 ```
 Pass / Issues found
@@ -272,7 +277,7 @@ Pass / Issues found
 This skill incorporates research-backed best practices:
 
 - **Chain of Thought prompting**: reduces reasoning errors (Anthropic)
-- **Progressive disclosure**: <500 line main files (Anthropic)
+- **Least privilege**: tool grants scoped to what a component's description justifies
 - **Structured thinking**: Systematic analysis before feedback
 - **Security-first approach**: Critical checks before quality review
 

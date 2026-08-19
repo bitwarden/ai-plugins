@@ -25,12 +25,16 @@ reference, both commands, and all four targeted skills — edit them together.)_
 
 For an agent **inside a changed plugin**, `plugin-dev:plugin-validator` already checks the
 frontmatter: `name`, `description`, `<example>` blocks, valid `model`, valid `color`, and a
-non-empty system prompt. Do not re-report those — a second finding on the same line from a
-second checker is noise, and the reader cannot tell it from an independent confirmation.
+non-empty system prompt. Where it ran, do not re-report those — a second finding on the same
+line from a second checker is noise, and the reader cannot tell it from an independent
+confirmation.
 
-For a bare `.claude/agents/*.md` in a repository with no changed plugin, that agent never
-runs, so the frontmatter pass below is yours. Check first which case you are in, and say in
-the finding which checker covered a given file.
+Where it did not run, the frontmatter pass below is yours. That covers a bare
+`.claude/agents/*.md` with no changed plugin, and any agent at all when `plugin-dev` is not
+installed. Location alone does not settle it: nominal ownership is not coverage, and missing
+frontmatter is CRITICAL, so a skip taken on the assumption that someone else looked leaves the
+worst band unchecked. Work out which case you are in, and say in the finding which checker
+covered a given file.
 
 Nothing in `plugin-dev` reviews tool access. Pass 1 is always yours.
 

@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `reviewing-claude-config` holds `Skill` in `allowed-tools`
 - `/validate-ai` trimmed from 226 to 193 lines
 
+### Fixed
+
+- Agent frontmatter review is skipped only where `plugin-dev:plugin-validator` actually ran, not wherever the file sits inside a plugin
+- `Bash(rm -rf:*)` and `Bash(npm install:*)` permission examples in `reviewing-project-guidance`, whose wildcards had been consumed as Markdown emphasis
+
 ### Removed
 
 - Seven `examples/example-*-review.md` files

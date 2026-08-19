@@ -37,10 +37,9 @@ Every review **always** includes critical security checks:
 All validation criteria sourced from **official Anthropic documentation**:
 
 - Agent tool access security matrices
-- Progressive disclosure guidelines (500-line target per file)
 - Model selection decision trees (haiku/sonnet/opus)
 - System prompt engineering patterns
-- Token efficiency optimization
+- Hook command safety and event-name currency
 
 ### Multi-Pass Review Strategy
 
@@ -192,8 +191,8 @@ Security audit all Claude configuration files in this project
 **Capabilities**:
 
 - YAML frontmatter validation
-- Progressive disclosure pattern analysis
-- Token efficiency assessment
+- Verbosity of `CLAUDE.md`, which is re-read every turn in its scope
+- Instruction-content review of skill support files that have no targeted reviewer
 - Security best practice enforcement
 - Detection of critical issues (committed secrets, malformed YAML, broken references, insecure tool access, unsafe hook commands)
 
