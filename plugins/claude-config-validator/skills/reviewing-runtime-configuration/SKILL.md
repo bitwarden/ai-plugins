@@ -60,11 +60,13 @@ echo ".claude/settings.local.json" >> .gitignore
 
 ❌ CRITICAL:
 
+<!-- cspell:ignore EXAMPLENOTAREALPASSWORD EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAM EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEE -->
+
 ```json
 {
-  "apiKey": "sk-aBcD1234EfGh5678IjKl9012MnOp3456",
-  "password": "mypassword123",
-  "token": "ghp_aBcD1234EfGh5678IjKl9012MnOp3456QrSt"
+  "apiKey": "sk-EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAM",
+  "password": "EXAMPLENOTAREALPASSWORD",
+  "token": "ghp_EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEE"
 }
 ```
 
