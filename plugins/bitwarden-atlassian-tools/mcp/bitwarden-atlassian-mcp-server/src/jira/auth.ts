@@ -18,18 +18,43 @@ function resolveEnv(name: string): string | undefined {
 }
 
 /**
+ * Access mode for a Jira client.
+ *
+ * "read" uses ATLASSIAN_JIRA_READ_ONLY_TOKEN, which every install already sets.
+ * "write" uses ATLASSIAN_JIRA_WRITE_TOKEN, which is optional: when it is absent,
+ * the write tools are still listed and their dry-run preview still works, but a
+ * live write refuses to execute. Write capability is therefore opt-in per
+ * install rather than shipped to everyone.
+ */
+export type JiraAccessMode = "read" | "write";
+
+const TOKEN_ENV_VAR: Record<JiraAccessMode, string> = {
+  read: "ATLASSIAN_JIRA_READ_ONLY_TOKEN",
+  write: "ATLASSIAN_JIRA_WRITE_TOKEN",
+};
+
+/**
+ * Whether this install has been given a write-capable Jira token.
+ */
+export function hasJiraWriteToken(): boolean {
+  return resolveEnv(TOKEN_ENV_VAR.write) !== undefined;
+}
+
+/**
  * Load JIRA configuration from environment variables
+ * @param mode - Which token to authenticate with. Defaults to read-only.
  * @throws {Error} If required environment variables are missing
  */
-export function loadJiraConfig(): JiraConfig {
+export function loadJiraConfig(mode: JiraAccessMode = "read"): JiraConfig {
   const cloudId = resolveEnv("ATLASSIAN_CLOUD_ID");
   const email = resolveEnv("ATLASSIAN_EMAIL");
-  const apiToken = resolveEnv("ATLASSIAN_JIRA_READ_ONLY_TOKEN");
+  const tokenVar = TOKEN_ENV_VAR[mode];
+  const apiToken = resolveEnv(tokenVar);
 
   if (!cloudId || !email || !apiToken) {
     throw new Error(
       "Missing required JIRA environment variables. " +
-        "Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_JIRA_READ_ONLY_TOKEN",
+        `Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ${tokenVar}`,
     );
   }
 

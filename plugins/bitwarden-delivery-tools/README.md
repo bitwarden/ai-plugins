@@ -1,16 +1,18 @@
 # Bitwarden Delivery Tools
 
-Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, through drafting Tech Breakdowns and decomposing them into tasks, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
 
 ## Overview
 
-These skills define delivery **process** — initiative phases, transition playbooks, tech-breakdown drafting, task decomposition, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
+These skills define delivery **process** — initiative phases, transition playbooks, commit formats, PR workflows, quality gates, and labeling conventions. Platform-specific details (build commands, lint tools, test runners) are discovered dynamically from each repo's CLAUDE.md.
 
 The plugin spans three concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
-- **Technical design** — how teams apply architectural judgment inside their scope, draft Tech Breakdowns under Bitwarden's standard template, and decompose them into tasks.
+- **Technical design** — how teams apply architectural judgment inside their scope.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
+
+Tech Breakdown drafting lives in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository, where the templates and per-team folder conventions are canonical.
 
 Any agent (tech-lead, software-engineer, shepherds, others) can compose these skills as needed.
 
@@ -25,24 +27,20 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Technical design
 
-| Skill                       | Triggers                                                                                                                              | Purpose                                                                                                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `architecting-solutions`    | "plan the solution", "assess blast radius", "evaluate trade-offs", "should Architecture weigh in"                                     | Architectural judgment framework: security mindset, blast radius, Bitwarden-specific constraints, and the signals that warrant pulling in the Architecture group.                       |
-| `starting-breakdown`        | "start a tech breakdown", "create a new breakdown for X", "set up the breakdown file"                                                 | Set up a new Tech Breakdown file in `bitwarden/tech-breakdowns`: gather context from the user, copy the template, fill the Status block.                                                |
-| `developing-breakdown-spec` | "understand the work", "resolve open questions", "write the breakdown spec", "Spec Alternatives"                                      | Resolve open design questions one at a time with concrete options, then capture what's being built into the Specification section.                                                      |
-| `developing-breakdown-plan` | "develop the plan", "draft the implementation plan", "map per-layer impact", "scan for in-flight work", "identify cross-team impacts" | Develop the Plan section after the Spec is filled: technical architecture, per-layer impact, in-flight collision scan, cross-team impact mapping, and self-review. Supports resumption. |
-| `decomposing-into-tasks`    | "decompose into tasks", "draft the tasks section", "break this into stories", "split into Jira tickets", "fill in the tasks table"    | Decompose a Plan into a `tasks.md` document with one entry per future Jira work item.                                                                                                   |
-| `filing-breakdown-tasks`    | "create the tickets from tasks.md", "turn this breakdown into Jira tickets", "file the epic and stories"                              | Turn a `tasks.md` decomposition into epic + child ticket drafts and hand off to `filing-jira-tickets` to file them. Requires `bitwarden-atlassian-tools`.                               |
+| Skill                    | Triggers                                                                                          | Purpose                                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `architecting-solutions` | "plan the solution", "assess blast radius", "evaluate trade-offs", "should Architecture weigh in" | Architectural judgment framework: security mindset, blast radius, Bitwarden-specific constraints, and the signals that warrant pulling in the Architecture group. |
 
 ### Mechanics
 
-| Skill                   | Triggers                      | Purpose                                                                              |
-| ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
-| `committing-changes`    | "commit", "stage changes"     | Default-branch check, commit message format, staging best practices                  |
-| `creating-pull-request` | "create PR", "open PR"        | PR title/body format, draft workflow, AI review labels                               |
-| `force-multiplier`      | "across all repos", "in bulk" | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs |
-| `labeling-changes`      | "label", "change type"        | Conventional commit type keywords, CI label mapping                                  |
-| `perform-preflight`     | "preflight", "self review"    | Pre-commit quality gate checklist                                                    |
+| Skill                    | Triggers                                                                                                 | Purpose                                                                                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `committing-changes`     | "commit", "stage changes"                                                                                | Default-branch check, commit message format, staging best practices                                                                                         |
+| `creating-pull-request`  | "create PR", "open PR"                                                                                   | PR title/body format, draft workflow, AI review labels                                                                                                      |
+| `filing-breakdown-tasks` | "create the tickets from tasks.md", "turn this breakdown into Jira tickets", "file the epic and stories" | Turn a `tasks.md` decomposition into epic + child ticket drafts, then hand off to `filing-jira-tickets` to file them. Requires `bitwarden-atlassian-tools`. |
+| `force-multiplier`       | "across all repos", "in bulk"                                                                            | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs                                                                        |
+| `labeling-changes`       | "label", "change type"                                                                                   | Conventional commit type keywords, CI label mapping                                                                                                         |
+| `perform-preflight`      | "preflight", "self review"                                                                               | Pre-commit quality gate checklist                                                                                                                           |
 
 ## Design Principle
 
@@ -54,7 +52,7 @@ The lifecycle skills follow the same principle: they describe the funnel and tra
 
 Several skills in this plugin reference tools or skills provided by sibling plugins. Install these alongside `bitwarden-delivery-tools` for full functionality:
 
-- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel` and the breakdown skills.
+- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel`, and the `filing-jira-tickets` skill plus its opt-in Jira write tools that `filing-breakdown-tasks` hands off to.
 - **`bitwarden-security-engineer`** — provides `Skill(bitwarden-security-context)`, referenced from `architecting-solutions`.
 - **`bitwarden-code-review`** — provides `/bitwarden-code-review:code-review-local` and `Skill(performing-multi-agent-code-review)`, the code-review gate `creating-pull-request` runs before opening a PR. If it is absent, `creating-pull-request` prompts you to install it rather than skip the review.
 
@@ -74,14 +72,6 @@ What's my role at the scoping & commitment phase of the funnel?
 
 ```
 We're handing off this framework to another team — walk me through the playbook
-```
-
-```
-Start a Tech Breakdown for this feature — walk me through the scope checklist
-```
-
-```
-Decompose this breakdown's Plan into tasks
 ```
 
 ```

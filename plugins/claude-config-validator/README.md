@@ -10,16 +10,17 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 ### Comprehensive Configuration Coverage
 
-Validates **6 configuration file types** with specialized checklists:
+Validates these configuration file types, each with its own checklist except where noted:
 
-| Configuration Type                                                     | What Gets Validated                                                                                        |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Agents** (`.claude/agents/*.md`)                                     | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity        |
-| **Skills** (skill directories)                                         | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency |
-| **CLAUDE.md** (project instructions)                                   | Clarity, specificity, security patterns, proper emphasis, structured organization                          |
-| **Prompts/Commands** (`.claude/prompts/*.md`, `.claude/commands/*.md`) | Purpose clarity, session context handling, skill references, parameter validation                          |
-| **Settings** (`.claude/settings.json`)                                 | Security (no committed credentials), permission scoping, valid JSON structure                              |
-| **Plugin Configurations** (`plugins/*/`)                               | Manifest validation, directory structure, marketplace standards                                            |
+| Configuration Type                                                                    | What Gets Validated                                                                                                                                   |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity                                                   |
+| **Skills** (skill directories)                                                        | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency                                            |
+| **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                                                                     |
+| **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                                                                     |
+| **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                                                             |
+| **Settings** (`.claude/settings.json`)                                                | Security (no committed credentials), permission scoping, valid JSON structure                                                                         |
+| **Plugin Configurations** (`plugins/*/`)                                              | Manifest validation, directory structure, marketplace standards. No checklist of its own: the commands delegate this to `plugin-dev:plugin-validator` |
 
 ### Security-First Validation
 
@@ -36,7 +37,7 @@ Every review **always** includes critical security checks:
 All validation criteria sourced from **official Anthropic documentation** and enterprise best practices (Microsoft Azure AI patterns):
 
 - Agent tool access security matrices
-- Progressive disclosure guidelines (500-line file limits)
+- Progressive disclosure guidelines (500-line target per file)
 - Model selection decision trees (haiku/sonnet/opus)
 - System prompt engineering patterns
 - Token efficiency optimization
@@ -65,7 +66,7 @@ Provides specific, file:line referenced feedback with:
 ### Add Bitwarden Marketplace (if not already added)
 
 ```bash
-/plugin marketplace add bitwarden/ai-marketplace
+/plugin marketplace add bitwarden/ai-plugins
 ```
 
 ### Install the Plugin
@@ -76,11 +77,30 @@ Provides specific, file:line referenced feedback with:
 
 ## Usage
 
+### Commands
+
+| Command                                                      | Purpose                                                                                                                                              |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`/validate-ai-local`](commands/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
+| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report to a sticky pull request comment                                                   |
+
+Both commands run the same review the
+[validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub
+Action runs org-wide: this plugin's `reviewing-claude-config` skill for configuration and
+security, plus the `plugin-dev` plugin's `plugin-validator` and `skill-reviewer` agents
+for plugin structure and skill quality. `/validate-ai-local` additionally runs the
+action's structure, marketplace, and version-bump shell checks against your checkout.
+They share their scope rules and report contract in
+[`reference/validate-ai-scope.md`](skills/reviewing-claude-config/reference/validate-ai-scope.md),
+so the two commands and the action cannot drift apart.
+
 ### Basic Invocation
 
 ```bash
-/skill reviewing-claude-config
+/claude-config-validator:reviewing-claude-config
 ```
+
+Or describe the review in your own words, which is how the skill's triggers are written to be reached.
 
 The skill will automatically:
 
@@ -149,7 +169,7 @@ Security audit all Claude configuration files in this project
 
 ### reviewing-claude-config
 
-**Description**: Reviews Claude configuration files in .claude directories for security, structure, and prompt engineering quality.
+**Description**: Reviews Claude configuration files for security, structure, and prompt engineering quality, wherever they live: a repository's `.claude/` directory, a root `CLAUDE.md`, or a plugin's own components.
 
 **Validates**:
 
@@ -158,6 +178,7 @@ Security audit all Claude configuration files in this project
 - Agents
 - Prompts
 - Commands
+- Hooks
 - Settings
 
 **Capabilities**:
@@ -166,7 +187,7 @@ Security audit all Claude configuration files in this project
 - Progressive disclosure pattern analysis
 - Token efficiency assessment
 - Security best practice enforcement
-- Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access)
+- Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access, unsafe hook commands)
 
 **Validation Strategy**:
 
@@ -292,7 +313,7 @@ Rationale:
 
 Security principle: Grant minimum necessary tools only.
 
-Reference: `reference/agent-configuration-security.md` - Tool Access Security Matrix
+Reference: `reference/claude-code-requirements.md` - Tool Access Security
 ```
 
 ### Example 2: Skill Progressive Disclosure Violation
@@ -338,7 +359,7 @@ Recommended:
 
 Specific, actionable instructions improve AI behavior by 60% (Anthropic research).
 
-Reference: `reference/quality-specificity.md` - Specificity Best Practices
+Reference: `checklists/claude-md.md` - Clarity and Specificity
 ```
 
 ## Plugin Structure
@@ -347,15 +368,18 @@ Reference: `reference/quality-specificity.md` - Specificity Best Practices
 plugins/claude-config-validator/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
+├── CHANGELOG.md             # Version history
+├── commands/
+│   ├── validate-ai/         # /validate-ai - pull request validation (command + README)
+│   └── validate-ai-local/   # /validate-ai-local - local checkout validation (command + README)
 ├── skills/
 │   └── reviewing-claude-config/
 │       ├── SKILL.md         # Main skill instructions
 │       ├── README.md        # Skill-specific documentation
-│       ├── checklists/      # 5 validation checklists (agents, skills, CLAUDE.md, prompts, settings)
-│       ├── reference/       # 16 reference files (security, quality, agent patterns)
-│       ├── examples/        # 6 example review outputs
-│       ├── docs/            # Implementation plans, changelog
-│       └── scripts/         # Validation automation scripts
+│       ├── checklists/      # One per configuration type (agents, skills, CLAUDE.md, prompts, hooks, settings)
+│       ├── reference/       # Priority framework, security patterns, requirements, changeset scope
+│       ├── examples/        # Sample reviews, one or more per configuration type
+│       └── scripts/         # Security scan helper (human-run)
 └── README.md               # This file
 ```
 
@@ -369,6 +393,6 @@ Contributions welcome! Please follow:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-marketplace/issues)
+- **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-plugins/issues)
 - **Documentation**: [Claude Code Docs](https://docs.claude.com/en/docs/claude-code/)
-- **Marketplace**: [Bitwarden AI Marketplace](https://github.com/bitwarden/ai-marketplace)
+- **Marketplace**: [Bitwarden AI Plugins](https://github.com/bitwarden/ai-plugins)

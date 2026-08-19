@@ -1,7 +1,7 @@
 ---
 name: filing-breakdown-tasks
 description: Turn a tech breakdown's tasks.md into Jira ticket drafts — an epic parent plus one child story/task per task entry, each a real ticket with acceptance criteria and mapped Blocked-by/Depends-on links — then hand off to filing-jira-tickets to file them.
-when_to_use: Use only when starting from a finished tasks.md (a tech breakdown's task decomposition) to create a set of new Jira tickets — phrasings like "create the tickets from tasks.md", "make Jira tickets for these tasks", "file the epic and stories", "turn this breakdown into Jira tickets". Also use when decomposing-into-tasks or developing-breakdown-plan hands off a finished tasks.md. Do not use to edit or update an existing ticket's fields such as description, acceptance criteria, status, or labels (there's no tasks.md involved); to read or research existing issues (that is researching-jira-issues); or to move, organize, or otherwise manage breakdown files and folders.
+when_to_use: Use only when starting from a finished tasks.md (a tech breakdown's task decomposition) to create a set of new Jira tickets — phrasings like "create the tickets from tasks.md", "make Jira tickets for these tasks", "file the epic and stories", "turn this breakdown into Jira tickets". Also use when a tech breakdown in bitwarden/tech-breakdowns hands off a finished tasks.md. Do not use to edit or update an existing ticket's fields such as description, acceptance criteria, status, or labels (there's no tasks.md involved); to read or research existing issues (that is researching-jira-issues); or to move, organize, or otherwise manage breakdown files and folders.
 allowed-tools: Read, Glob, Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue
 ---
 
@@ -27,7 +27,7 @@ Translate each entry into ticket fields; don't copy it:
 
 - **Title** — imperative verb + outcome + context (client/area), matching sibling-ticket house style, e.g. `Add CSV export to the item list (web)`. NOT the decomposition label (`ExportService + column mapping (libs/exporter)`).
 - **Description** — one short paragraph of the actual work plus genuinely per-ticket caveats. No lineage boilerplate (`Part of PM-XXXX`), no breakdown path — the epic-child link already conveys that.
-  esk- **Acceptance criteria** — written in Gherkin (`Scenario` / `Given` / `When` / `Then` / `And`). Supply the content only; filing-jira-tickets decides the field — the project's criteria field, or the description if it has none.
+- **Acceptance criteria** — written in Gherkin (`Scenario` / `Given` / `When` / `Then` / `And`). Supply the content only; filing-jira-tickets decides the field — the project's criteria field, or the description if it has none.
 - **Parent** — the epic key from Step 1.
 
 Leave labels unset unless the user asked for a specific one.

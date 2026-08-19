@@ -8,7 +8,7 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 
 ## Files
 
-- `trigger-eval.json` — 18-query test set: 10 should-trigger `tasks.md` phrasings ("create the tickets from tasks.md", "turn this breakdown into Jira tickets", etc.) and 8 should-not-trigger near-misses against sibling skills (`researching-jira-issues`, `decomposing-into-tasks`), against editing an existing ticket, a generic Jira search, and a breakdown-file-move. Ticket keys are masked (`PM-XXXX`) so a live session can't resolve them against real Jira.
+- `trigger-eval.json` — 18-query test set: 10 should-trigger `tasks.md` phrasings ("create the tickets from tasks.md", "turn this breakdown into Jira tickets", etc.) and 8 should-not-trigger near-misses against `researching-jira-issues` and against the upstream `tasks.md` decomposition step, against editing an existing ticket, a generic Jira search, and a breakdown-file-move. Ticket keys are masked (`PM-XXXX`) so a live session can't resolve them against real Jira.
 - `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. A local copy of `../creating-pull-request/evals/run_real_eval.py` with `TARGET_SKILL_TOKEN` set to this skill, plus two additions (see below).
 
 ## Running
