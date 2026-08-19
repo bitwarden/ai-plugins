@@ -217,8 +217,9 @@ This is a cost and latency question, not a correctness one.
 holds:
 
 - any **CRITICAL** finding, or
-- any finding that **weakens security** — a permission, tool grant, or hook capability
-  wider than what the changeset justifies — at whatever severity it carries.
+- any finding that **weakens security**, at whatever severity it carries. That covers a
+  permission, tool grant, or hook capability wider than what the changeset justifies, and any
+  new path by which contributor-controlled input reaches a shell.
 
 Otherwise `Pass`, with every finding still listed. A caller that reports in its own
 vocabulary maps it from there.
@@ -226,9 +227,11 @@ vocabulary maps it from there.
 Reporting a finding and failing the run are separate decisions. Readability and structure
 are worth surfacing and are not grounds for blocking, so a quality-only IMPORTANT reports
 without failing. Security is the exception, and it needs its own clause rather than a
-severity threshold: `priority-framework.md` rates some real security regressions IMPORTANT
-— an over-broad agent tool grant that stops short of credentials, a permission broader than
-needed — and a severity-only rule would merge every one of them under a green check.
+severity threshold: `priority-framework.md` rates some real security regressions IMPORTANT,
+such as an over-broad agent tool grant that stops short of credentials or a permission broader
+than needed, and a severity-only rule would merge every one of them under a green check. The
+shell-execution clause is there for the same reason: `reviewing-command-definitions` rates a
+quoted `$ARGUMENTS` interpolation IMPORTANT, and quoting does not close the hole.
 
 ## Reference material
 

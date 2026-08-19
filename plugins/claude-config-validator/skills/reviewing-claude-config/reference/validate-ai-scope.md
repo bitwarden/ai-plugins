@@ -212,8 +212,9 @@ plugin loading (malformed manifest, missing required file) and major otherwise
 `Result: Issues found` requires one of:
 
 - a critical finding, or
-- a finding that **weakens security** — a permission, tool grant, or hook capability wider
-  than what the changeset justifies — at whatever severity it carries, or
+- a finding that **weakens security** at whatever severity it carries, covering a permission,
+  tool grant, or hook capability wider than what the changeset justifies, and any new path by
+  which contributor-controlled input reaches a shell, or
 - a failed script check.
 
 Everything else reports as `Pass` with its findings listed underneath.

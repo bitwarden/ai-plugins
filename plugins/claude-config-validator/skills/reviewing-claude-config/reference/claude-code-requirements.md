@@ -305,7 +305,7 @@ restriction that silently never applies.
 - [ ] `name` field present and kebab-case
 - [ ] `description` field present with activation triggers
 - [ ] `version` follows semver (if present)
-- [ ] `model` is valid value: `haiku`/`sonnet`/`opus`/`inherit` (if present)
+- [ ] `model` is an alias (`haiku`/`sonnet`/`opus`/`inherit`) or a full model identifier (if present)
 - [ ] `tools` uses exact case-sensitive names (if present)
 - [ ] No tabs (spaces only)
 - [ ] Valid YAML syntax
@@ -335,7 +335,7 @@ restriction that silently never applies.
 
 ## Quick Reference
 
-**Model Values**: `haiku` | `sonnet` | `opus` | `inherit`
+**Model Values**: `haiku` | `sonnet` | `opus` | `inherit` | a full model identifier
 
 **Tool Names**: `Read` | `Write` | `Edit` | `Grep` | `Glob` | `Bash` | `WebFetch` | `WebSearch`
 

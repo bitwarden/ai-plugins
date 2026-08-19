@@ -6,7 +6,7 @@ Entry point for reviewing Claude Code configuration. Runs the security checks, t
 
 This skill is the entry point for reviewing Claude Code configuration. It settles what is in scope, runs the security checks with `Grep`, routes each file type to a targeted review skill, filters the results, and returns classified findings. Its grant is `Read, Grep, Glob, Skill`, so it reads, routes, and reports rather than executing anything or posting anywhere.
 
-Two rules shape every review it produces: findings are limited to **what the changeset introduced or worsened**, and a review fails only on **a CRITICAL finding, or one that weakens security**.
+Two rules shape every review it produces: findings are limited to **what the changeset introduced or worsened**, and a review fails only on **a CRITICAL finding, or one that weakens security**, which includes a new route from contributor input to a shell.
 
 **Use this skill when:**
 
@@ -202,8 +202,8 @@ Issues are classified into four priority levels, defined in
 - **OPTIONAL**: Personal preferences, alternatives (consider)
 
 **Only a CRITICAL finding, or a finding that weakens security, fails a review.** A finding
-that widens a permission, tool grant, or hook capability sets `Issues found` at whatever
-severity it carries. Everything else is reported and listed without setting the verdict.
+that widens a permission, tool grant, or hook capability, or that opens a new path from
+contributor-controlled input to a shell, sets `Issues found` at whatever severity it carries. Everything else is reported and listed without setting the verdict.
 
 Reporting a finding and failing the run are separate decisions: a review that fails on
 readability is a review people learn to ignore. Security needs its own clause rather than a

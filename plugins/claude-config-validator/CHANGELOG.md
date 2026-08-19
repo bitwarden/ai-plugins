@@ -61,7 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/validate-ai-local` carries the full CWE-1427 boundary rather than a paraphrase that dropped the identifier and the critical-finding instruction
 - The documented bare-rule detector guards on `jq` like the shipped script, instead of reporting a pass for a check that could not run
 - Frontmatter severity is stated per file type: missing frontmatter is CRITICAL for an agent, optional for a command, and YAML that does not parse is CRITICAL for either
-- All four `model` statements in `claude-code-requirements.md` admit full identifiers, including the detection table a reviewer classifies from
+- All six `model` statements in `claude-code-requirements.md` admit full identifiers, including the detection table and the validation checkbox a reviewer classifies from
+- The verdict's security floor covers a new path from contributor-controlled input to a shell, not only a widened permission, tool grant, or hook capability, so a newly introduced command-injection vector cannot report `Pass`
+- The Grep-path bare-rule pattern is annotated as producing candidates rather than findings, since a line-oriented match cannot tell `permissions.allow` from `deny` and the router holds no Bash to fall back on
 
 ### Added, from review
 

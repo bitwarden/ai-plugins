@@ -120,7 +120,11 @@ fi
 ```bash
 # Filesystem-wide read, write, or edit
 grep -nE '"(Read|Write|Edit)\(//\*\*\)"' .claude/settings.json
-# Bare tool rules, which match every use of the tool
+# Bare tool rules, which match every use of the tool. A hit here is a candidate, not a
+# finding: this is line-oriented, so it cannot tell permissions.allow from deny or ask, and
+# a hooks matcher written as "matcher": "Write" matches too. Read the array the hit sits in
+# before reporting, and report only rules in allow. The Automated Detection block below uses
+# jq for the same reason.
 grep -nE '"(Bash|WebFetch|WebSearch|Write|Edit)"' .claude/settings.json
 # Credential directories
 grep -nE '"(Read|Edit)\(//[^"]*/\.(ssh|aws|gnupg)/' .claude/settings.json
