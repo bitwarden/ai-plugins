@@ -26,8 +26,8 @@ Read `tasks.md` and its sibling `breakdown.md`. Establish the hierarchy before d
 Translate each entry into ticket fields; don't copy it:
 
 - **Title** — imperative verb + outcome + context (client/area), matching sibling-ticket house style, e.g. `Add CSV export to the item list (web)`. NOT the decomposition label (`ExportService + column mapping (libs/exporter)`).
-- **Description** — one short paragraph of the actual work plus genuinely per-ticket caveats. No lineage boilerplate (`Part of PM-XXXX`), no breakdown path — the epic-child link already conveys that. Spell out shorthand; no `§` or `→` symbols.
-- **Acceptance criteria** — written in Gherkin (`Scenario` / `Given` / `When` / `Then` / `And`). Supply the content only; filing-jira-tickets decides the field — the project's criteria field, or the description if it has none.
+- **Description** — one short paragraph of the actual work plus genuinely per-ticket caveats. No lineage boilerplate (`Part of PM-XXXX`), no breakdown path — the epic-child link already conveys that.
+  esk- **Acceptance criteria** — written in Gherkin (`Scenario` / `Given` / `When` / `Then` / `And`). Supply the content only; filing-jira-tickets decides the field — the project's criteria field, or the description if it has none.
 - **Parent** — the epic key from Step 1.
 
 Leave labels unset unless the user asked for a specific one.
