@@ -254,7 +254,7 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 2. Analyze against security checklist
 3. Check performance patterns
 4. Verify architectural principles
-5. Provide inline comments with file:line references
+5. Report one finding per issue with file:line references
 
 ## Output Format
 
@@ -264,7 +264,7 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 
 ## Examples
 
-[Include 2-3 examples of good review comments]
+[Include 2-3 examples of good findings]
 ```
 
 ✅ **GOOD - Includes structured thinking:**
@@ -308,7 +308,7 @@ You're a code reviewer. Look at code and tell the user what's wrong with it. Che
 - [ ] No unnecessary verbosity
 - [ ] Direct language preferred
 
-**Reference:** Anthropic Chain of Thought documentation (40% error reduction with structured thinking)
+**Reference:** Anthropic Chain of Thought documentation (structured thinking reduces reasoning errors)
 
 ---
 
@@ -495,4 +495,4 @@ Before completing review, verify:
 
 ## Output Format
 
-Report findings using the standard format in `SKILL.md` Step 5.
+Report findings using the standard format in `../SKILL.md` Step 5.

@@ -36,7 +36,12 @@ Classify the in-scope paths into these buckets. They drive which validations run
 
 - **Agent files** — `(^|/)agents/.*\.md$`. Agents appear both as `agents/<name>/AGENT.md`
   and as `agents/<name>.md`, so match any Markdown file under an `agents/` directory.
-- **Skill files** — `(^|/)skills/.*/SKILL\.md$`
+- **Skill files** — `(^|/)skills/.*/SKILL\.md$`. Only `SKILL.md` itself, matching the action's
+  change detection. A changeset touching only skill support files (`checklists/`, `reference/`,
+  `examples/`) therefore lands in no skill bucket. Inside a plugin those changes still reach
+  review through the plugin-validation row. Under `.claude/skills/` they land in the config
+  bucket instead, so the configuration and security row does fire for them. Widening the
+  pattern here would put this reference out of step with the action.
 - **Command files** — `(^|/)commands/.*\.md$`
 - **Hook files** — `(^|/)hooks\.json$`. Keep this pattern as written: it mirrors the action's
   change detection, and widening it here would put the two out of step. Hooks declared under
@@ -101,7 +106,10 @@ passed.
 ### Finishing the report
 
 Write the file exactly once, as the last thing you do, in a single Write call. Never write
-an interim, partial, or "in progress" version of it first.
+an interim, partial, or "in progress" version of it first. Both commands scope that write
+with an `Edit(<path>)` rule rather than a `Write` one, because Claude Code consults
+`Edit(path)` and `Read(path)` rules only and an `Edit` rule covers every built-in tool that
+edits files.
 
 Wait for every subagent to return before you write. Run them synchronously, passing
 `run_in_background: false` where that parameter exists, and never describe work a subagent

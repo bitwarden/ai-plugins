@@ -122,7 +122,7 @@ Quality considerations:
 1. Read the PR description and changed files
 2. Identify the change type (feature, bug fix, refactor)
 3. Apply appropriate review checklist
-4. Document findings with inline comments
+4. Document one finding per issue with file:line references
 ```
 
 **Examples for Complex Tasks:**
@@ -230,4 +230,4 @@ Classify findings using `../reference/priority-framework.md`:
 
 ## Output Format
 
-Report findings using the standard format in `SKILL.md` Step 5.
+Report findings using the standard format in `../SKILL.md` Step 5.

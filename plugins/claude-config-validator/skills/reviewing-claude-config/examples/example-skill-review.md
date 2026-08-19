@@ -2,7 +2,7 @@
 
 **Context:** Reviewing a new skill with structural and quality issues.
 
-### Review Comments
+### Findings
 
 **`.claude/skills/my-new-skill/SKILL.md:1`** - CRITICAL: Missing YAML frontmatter
 
@@ -22,7 +22,7 @@ Reference: Anthropic Skills Documentation - YAML Requirements
 
 ---
 
-**`.claude/skills/my-new-skill/SKILL.md:1-650`** - IMPORTANT: File exceeds 500 line limit
+**`.claude/skills/my-new-skill/SKILL.md:1-650`** - IMPORTANT: File exceeds 500-line guideline
 
 Main skill file is 650 lines, exceeding Anthropic's 500-line progressive disclosure recommendation.
 
@@ -63,7 +63,7 @@ Key questions to determine type:
 Analyze the changeset...
 ```
 
-Research shows structured thinking reduces logic errors by 40% (Anthropic Chain of Thought study).
+Structured thinking reduces logic errors (Anthropic Chain of Thought guidance).
 
 Reference: Anthropic Prompt Engineering - Structured Thinking
 
@@ -71,10 +71,10 @@ Reference: Anthropic Prompt Engineering - Structured Thinking
 
 **`.claude/skills/my-new-skill/SKILL.md:120`** - SUGGESTED: Add concrete examples
 
-This section describes the expected comment format but doesn't show an example. Consider adding:
+This section describes the expected finding format but doesn't show an example. Consider adding:
 
 ````markdown
-**Example inline comment:**
+**Example finding:**
 
 \```
 **file.kt:123** - CRITICAL: Issue description
@@ -99,9 +99,9 @@ More direct phrasing slightly improves token efficiency, but current version is 
 
 ---
 
-### Summary Comment
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 This skill has strong potential but requires fixes before approval:
 

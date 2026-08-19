@@ -23,7 +23,7 @@ Before anything else:
 - [ ] **No credential or secret access** (`.env`, `~/.aws`, `~/.ssh`, keychain, `printenv`)
 - [ ] **No unquoted interpolation** of hook input into a shell command
 
-**If ANY of these fail, FLAG IMMEDIATELY as CRITICAL.** A malicious hook needs no user approval to run.
+**If ANY of these fail, FLAG IMMEDIATELY as CRITICAL, then finish the remaining passes.** A malicious hook needs no user approval to run.
 
 ---
 
@@ -86,4 +86,4 @@ For hooks inside a plugin, the `plugin-dev:plugin-validator` agent already check
 
 ## Output Format
 
-Report findings using the standard format in `SKILL.md` Step 5.
+Report findings using the standard format in `../SKILL.md` Step 5.

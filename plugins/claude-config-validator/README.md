@@ -26,7 +26,7 @@ Validates these configuration file types, each with its own checklist except whe
 
 Every review **always** includes critical security checks:
 
-- ✅ No committed `settings.local.json` files
+- ✅ No `settings.local.json` in the changeset, checked from the changed-files list when one is available and reported as skipped otherwise
 - ✅ No hardcoded credentials (API keys, passwords, tokens)
 - ✅ Appropriate permission scoping
 - ✅ Principle of least privilege for agent tool access
@@ -34,7 +34,7 @@ Every review **always** includes critical security checks:
 
 ### Evidence-Based Quality Standards
 
-All validation criteria sourced from **official Anthropic documentation** and enterprise best practices (Microsoft Azure AI patterns):
+All validation criteria sourced from **official Anthropic documentation**:
 
 - Agent tool access security matrices
 - Progressive disclosure guidelines (500-line target per file)
@@ -44,15 +44,17 @@ All validation criteria sourced from **official Anthropic documentation** and en
 
 ### Multi-Pass Review Strategy
 
-Uses structured, systematic validation approach:
+The skill works through five steps:
 
-1. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
-2. **Structure Validation** - YAML frontmatter, file organization, required fields
-3. **Functionality Review** - Logic, completeness, integration points
-4. **Quality Assessment** - Best practices, prompt engineering, documentation
-5. **Marketplace Standards** - Elevated requirements for public plugins
+1. **Detect File Type** - Determines which checklists apply
+2. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
+3. **Load Checklist** - Routes to the checklist for the detected type
+4. **Consult References** - Loads detailed criteria only when needed
+5. **Document Findings** - One finding per issue, anchored to `file:line`
 
-### Inline, Actionable Feedback
+Each checklist then runs its own multi-pass strategy over the file under review.
+
+### Specific, Actionable Feedback
 
 Provides specific, file:line referenced feedback with:
 
@@ -62,6 +64,11 @@ Provides specific, file:line referenced feedback with:
 - **References** to official documentation
 
 ## Installation
+
+Requires Claude Code 2.1.210 or later. Both commands scope their report write with an
+`Edit(<path>)` rule, and consulting that rule for the `Write` tool is behavior that release
+introduced. On an older CLI the report write falls back to a permission prompt, which in a
+headless workflow run means no report and a failed check.
 
 ### Add Bitwarden Marketplace (if not already added)
 
@@ -104,10 +111,10 @@ Or describe the review in your own words, which is how the skill's triggers are 
 
 The skill will automatically:
 
-1. Detect which configuration files were recently modified
+1. Detect the type of each configuration file you name
 2. Select appropriate validation checklists
 3. Execute security-first review
-4. Provide inline feedback with file:line references
+4. Return one finding per issue with file:line references
 
 ### Use Cases
 
@@ -121,7 +128,7 @@ The skill will automatically:
 Review my new agent configuration in .claude/agents/code-analyzer.md
 ```
 
-**Output**: Inline comments with specific improvements, security concerns flagged as CRITICAL, quality suggestions as IMPORTANT/SUGGESTED.
+**Output**: One finding per issue with specific improvements, security concerns flagged as CRITICAL, quality suggestions as IMPORTANT/SUGGESTED.
 
 ---
 
@@ -135,7 +142,7 @@ Review my new agent configuration in .claude/agents/code-analyzer.md
 Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 ```
 
-**Output**: Comprehensive validation against marketplace standards, documentation completeness checks, security validation, example quality assessment.
+**Output**: The component files inside `plugins/my-plugin/` reviewed against the agent, skill, command, and hook checklists, with security findings first. Manifest and marketplace-standard checks are not this skill's: `/validate-ai-local` covers those by delegating to `plugin-dev:plugin-validator`.
 
 ---
 
@@ -194,7 +201,7 @@ Security audit all Claude configuration files in this project
 - Multi-pass review (structure → security → functionality → quality)
 - Evidence-based recommendations (all criteria from official docs)
 - Priority-classified feedback (CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL)
-- Inline comments with specific fixes and rationale
+- Per-issue findings with specific fixes and rationale
 
 ## Validation Coverage Details
 
@@ -243,46 +250,48 @@ Security audit all Claude configuration files in this project
 - Error handling
 - Example quality
 
-### Skill Validation (4-Pass Strategy)
+### Skill Validation (5-Pass Strategy)
 
-**Pass 1: Structure and YAML**
+**Pass 1: Structure and Security**
 
-- Valid YAML frontmatter with required fields
-- SKILL.md presence
 - Proper file organization
+- SKILL.md presence
+- Security checks first
 
-**Pass 2: Progressive Disclosure**
+**Pass 2: YAML Frontmatter Validation**
+
+- Valid frontmatter with required fields
+- Description quality and trigger phrases
+
+**Pass 3: Progressive Disclosure**
 
 - File size limits (500-line guideline for references)
 - On-demand vs auto-loaded content
-- Token efficiency optimization
+- No broken file references
 
-**Pass 3: Quality and Clarity**
+**Pass 4: Prompt Engineering Quality**
 
 - Clear instructions
 - Structured thinking blocks
-- Example inclusion
-- Proper emphasis
+- Example inclusion and proper emphasis
 
-**Pass 4: Integration and Completeness**
+**Pass 5: Token Efficiency**
 
-- No broken file references
-- Checklist completeness
-- Reference accuracy
+- Lean SKILL.md with detail deferred to supporting files
+- No duplicated content across tiers
 
 ### Security Validation (Always Executed)
 
 **Critical Checks** (all configuration types):
 
-- settings.local.json NOT committed to git
+- No `settings.local.json` in the changeset, from the changed-files list when one is available and reported as skipped otherwise
 - No hardcoded credentials (passwords, API keys, tokens)
 - Permissions appropriately scoped
 - No secrets in plaintext
 
 **Detection Methods**:
 
-- Git status checks
-- Pattern matching for common secret formats
+- Pattern matching for common secret formats, applied with `Grep`
 - Permission validation against least privilege principle
 
 ## Examples
@@ -328,7 +337,7 @@ Reference: `reference/claude-code-requirements.md` - Tool Access Security
 Current: 690 lines (38% over recommended limit)
 Guideline: 500 lines maximum for on-demand loading
 
-Impact: Loads extra 190 lines into context unnecessarily, reducing token efficiency by 38%.
+Impact: Loads an extra 190 lines into context unnecessarily on every use.
 
 Recommended: Split into focused files:
 - patterns-security.md (tool access, permissions)
@@ -357,7 +366,7 @@ Recommended:
 - Add inline comments explaining 'why', not 'what'
 - Follow project's established patterns in `docs/architecture.md`"
 
-Specific, actionable instructions improve AI behavior by 60% (Anthropic research).
+Specific, actionable instructions improve AI behavior (Anthropic prompt engineering guidance).
 
 Reference: `checklists/claude-md.md` - Clarity and Specificity
 ```

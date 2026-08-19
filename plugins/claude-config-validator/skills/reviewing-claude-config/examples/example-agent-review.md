@@ -22,7 +22,7 @@ description: Helps write documentation.
 Write good documentation for code.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/documentation-writer.md:3`** - IMPORTANT: Description lacks activation triggers
 
@@ -63,7 +63,7 @@ Rationale:
 
 Security principle: Grant minimum necessary tools only.
 
-Reference: `reference/claude-code-requirements.md` - "Tool Access Patterns"
+Reference: `../reference/claude-code-requirements.md` - "Tool Access Patterns"
 
 ---
 
@@ -111,7 +111,7 @@ Use JSDoc format:
 [Include 2-3 examples of good documentation]
 ```
 
-Structured thinking reduces errors by 40% (Anthropic Chain of Thought research).
+Structured thinking reduces errors (Anthropic Chain of Thought guidance).
 
 ---
 
@@ -130,13 +130,13 @@ model: sonnet # Or haiku for simple documentation
 
 Documentation generation is moderately complex (Sonnet) but could use Haiku for speed if following strict templates.
 
-Reference: `reference/claude-code-requirements.md` - "Model Selection"
+Reference: `../reference/claude-code-requirements.md` - "Model Selection"
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 This agent requires fixes before approval:
 
@@ -255,7 +255,7 @@ Rationale: Unescaped user input allows script injection. Template escaping preve
 - Reference OWASP category where applicable
 ```
 
-### Review Comments
+### Findings
 
 **`plugins/security-tools/agents/security-scanner.md:1-8`** - OPTIONAL: Excellent configuration
 
@@ -289,9 +289,9 @@ This is a design choice - current scope is excellent.
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** APPROVE
+Pass
 
 This is an exemplary agent configuration that demonstrates:
 
@@ -324,7 +324,7 @@ model: opus
 Format code files using project style guide.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/code-formatter.md:5`** - IMPORTANT: Model selection inappropriate for task
 
@@ -343,7 +343,7 @@ Rationale:
 - Opus should be reserved for complex architectural decisions
 - This agent will be invoked frequently (cost multiplier)
 
-Reference: `reference/claude-code-requirements.md` - "Model Selection"
+Reference: `../reference/claude-code-requirements.md` - "Model Selection"
 
 ---
 
@@ -368,7 +368,7 @@ Clarify in system prompt whether agent:
 - Reads and writes new formatted files (Read, Write)
 - Modifies files in place (Read, Edit)
 
-Reference: `reference/claude-code-requirements.md` - "Tool Access Patterns"
+Reference: `../reference/claude-code-requirements.md` - "Tool Access Patterns"
 
 ---
 
@@ -413,9 +413,9 @@ Clear specification prevents ambiguous behavior.
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 **Must Fix (IMPORTANT):**
 

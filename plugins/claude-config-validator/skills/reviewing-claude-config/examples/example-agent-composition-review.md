@@ -20,7 +20,7 @@ For reviews of individual agent files, see `example-agent-review.md`.
 Use the code-reviewer agent.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/skills/code-reviewer/SKILL.md:28`** - IMPORTANT: Agent invocation lacks specificity
 
@@ -45,7 +45,7 @@ Invoke the security-scanner agent to analyze modified files for vulnerabilities:
 
 **Expected output:**
 
-- Inline comments with file:line references
+- One finding per issue with file:line references
 - CRITICAL priority for vulnerabilities
 - Specific fix recommendations with secure code examples
 - OWASP category for each finding
@@ -57,7 +57,7 @@ Invoke the security-scanner agent to analyze modified files for vulnerabilities:
 - Framework is Flask with Jinja2 templates
 ```
 
-Specific invocations with context improve agent output quality by ~40%.
+Specific invocations with context improve agent output quality.
 
 ---
 
@@ -79,7 +79,7 @@ If issues found, invoke code-fixer agent.
 After fixing, invoke code-analyzer agent to verify.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/code-analyzer.md:45` + `.claude/agents/code-fixer.md:38`** - CRITICAL: Circular agent dependency
 
