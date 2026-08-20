@@ -42,7 +42,7 @@ coverage. A missing `description` means the command carries no `/help` text, so 
 rather than assuming someone else did.
 
 Nothing in `plugin-dev` reviews what the command body does. Passes 1 and 3 to 8 are always
-yours; Pass 2 is yours only in the case above.
+yours. Pass 2 is yours too, unless you can confirm the validator covered that specific file.
 
 Also run the router's credential scan over any command you review directly, using the patterns
 in `../reviewing-claude-config/reference/security-patterns.md`. A bearer token inside a
@@ -73,7 +73,10 @@ Does PR stuff.
 
 ## Pass 2: Frontmatter
 
-Yours only where `plugin-dev:plugin-validator` did not run — see the division of labor above.
+Run this pass by default. Skip it only where you can confirm `plugin-dev:plugin-validator`
+covered this specific file — see the division of labor above. You hold `Read, Grep, Glob` and
+cannot observe whether that agent ran, so the case you cannot confirm is the common one, and
+YAML that does not parse is the CRITICAL this pass owns.
 
 ```yaml
 ---

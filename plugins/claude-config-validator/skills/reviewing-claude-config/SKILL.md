@@ -243,8 +243,8 @@ without failing. Security is the exception, and it needs its own clause rather t
 severity threshold: `reference/priority-framework.md` rates some real security regressions IMPORTANT,
 such as an over-broad agent tool grant that stops short of credentials or a permission broader
 than needed, and a severity-only rule would merge every one of them under a green check. The
-shell-execution clause is there for the same reason: `reviewing-command-definitions` rates a
-quoted `$ARGUMENTS` interpolation IMPORTANT, and quoting does not close the hole.
+shell-execution clause is a floor of the same kind: the sub-skills rate every interpolation
+into a shell CRITICAL today, and the verdict does not rest on their continuing to.
 
 ## Reference material
 

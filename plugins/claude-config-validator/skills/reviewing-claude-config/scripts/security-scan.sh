@@ -115,6 +115,7 @@ echo "[3/4] Validating permission scoping..."
 
 if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     PERM_ISSUES=0
+    PERM_SKIPPED=0
 
     # Check for wildcard permissions
     if grep -qE '"(Read|Write|Edit)\(//\*\*\)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
@@ -137,7 +138,10 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     # available; in deny it is the strongest control. Telling them apart needs the array the
     # rule sits in, so this check requires jq and is recorded as skipped without it.
     if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
-        :
+        echo "  ⚠️  SKIPPED: bare-tool-rule check needs a settings.json that parses"
+        echo ""
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        PERM_SKIPPED=1
     elif command -v jq >/dev/null 2>&1; then
         if jq -e '.permissions.allow[]? | select(test("^(Bash|Write|Edit|WebFetch|WebSearch)$"))' \
             "${CLAUDE_DIR}/settings.json" >/dev/null 2>&1; then
@@ -151,6 +155,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         echo "  ⚠️  SKIPPED: bare-tool-rule check needs jq to tell allow from deny"
         echo ""
         CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        PERM_SKIPPED=1
     fi
 
     if grep -qE '"(autoApprovedTools|autoApproved)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
@@ -165,7 +170,10 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     # Sensitive paths, in allow only. The same path in deny is the control, not a defect,
     # so this needs the array the rule sits in and is recorded as skipped without jq.
     if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
-        :
+        echo "  ⚠️  SKIPPED: sensitive-path check needs a settings.json that parses"
+        echo ""
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        PERM_SKIPPED=1
     elif command -v jq >/dev/null 2>&1; then
         SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" ".config/" "/etc" "id_rsa" "credentials")
         for path in "${SENSITIVE_PATHS[@]}"; do
@@ -183,9 +191,12 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         echo "  ⚠️  SKIPPED: sensitive-path check needs jq to tell allow from deny"
         echo ""
         CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        PERM_SKIPPED=1
     fi
 
-    if [ $PERM_ISSUES -eq 0 ]; then
+    if [ $PERM_ISSUES -eq 0 ] && [ $PERM_SKIPPED -eq 1 ]; then
+        :
+    elif [ $PERM_ISSUES -eq 0 ]; then
         echo "  ✅ OK: Permissions appropriately scoped"
     else
         echo "     Remediation:"
@@ -207,6 +218,7 @@ echo "[4/4] Checking for dangerous command auto-approvals..."
 
 if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     DANGEROUS_FOUND=0
+    DANGEROUS_SKIPPED=0
 
     # Define dangerous command patterns
     DANGEROUS_PATTERNS=(
@@ -227,7 +239,10 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
 
     # allow only: the same command in deny is the control, not an auto-approval.
     if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
-        :
+        echo "  ⚠️  SKIPPED: dangerous-command check needs a settings.json that parses"
+        echo ""
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        DANGEROUS_SKIPPED=1
     elif command -v jq >/dev/null 2>&1; then
         for pattern in "${DANGEROUS_PATTERNS[@]}"; do
             if jq -e --arg p "$pattern" \
@@ -242,9 +257,12 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         echo "  ⚠️  SKIPPED: dangerous-command check needs jq to tell allow from deny"
         echo ""
         CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        DANGEROUS_SKIPPED=1
     fi
 
-    if [ $DANGEROUS_FOUND -eq 0 ]; then
+    if [ $DANGEROUS_SKIPPED -eq 1 ]; then
+        :
+    elif [ $DANGEROUS_FOUND -eq 0 ]; then
         echo "  ✅ OK: No dangerous command auto-approvals"
     else
         echo ""
