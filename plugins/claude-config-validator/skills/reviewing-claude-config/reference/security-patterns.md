@@ -8,18 +8,22 @@ Security checks, detection commands, and remediation patterns for Claude configu
 
 Perform these checks for EVERY Claude configuration review:
 
-1. **settings.local.json NOT in git**
+1. **settings.local.json absent from the changeset**
 2. **No hardcoded credentials**
 3. **Permissions appropriately scoped**
 4. **No dangerous command auto-approvals**
 
-If ANY check fails, flag as **CRITICAL** immediately.
+If ANY check fails, flag as **CRITICAL** immediately, then finish the remaining checks so the report can say which ran.
 
 ---
 
 ## Detection Scripts
 
-### Check 1: Detect Committed settings.local.json
+### Check 1: Detect settings.local.json in the changeset
+
+When reviewing, resolve this from the changed-files list, and record the check as skipped
+when there is none. The git commands below belong to the human-run `security-scan.sh` path,
+which has a shell the skill does not.
 
 **Manual Detection:**
 
@@ -230,140 +234,15 @@ fi
 
 ## Comprehensive Security Scan Script
 
-**Full automated security scan:**
+The shipped script is the single source: [`../scripts/security-scan.sh`](../scripts/security-scan.sh).
+Run it yourself, optionally passing the directory to scan:
 
 ```bash
-#!/bin/bash
-# security-scan.sh
-# Comprehensive security scan for Claude configuration files
-
-set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_DIR="${SCRIPT_DIR}/.."
-ISSUES_FOUND=0
-
-echo "=== Claude Configuration Security Scan ==="
-echo ""
-
-# Check 1: Committed settings.local.json
-echo "[1/4] Checking for committed settings.local.json..."
-if git ls-files | grep -q "settings.local.json"; then
-    echo "  ❌ CRITICAL: settings.local.json is committed to git"
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
-else
-    echo "  ✅ OK: settings.local.json not in git"
-fi
-echo ""
-
-# Check 2: Hardcoded secrets
-echo "[2/4] Scanning for hardcoded secrets..."
-SECRET_FOUND=0
-
-if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh"; then
-    echo "  ❌ CRITICAL: OpenAI API key pattern detected"
-    SECRET_FOUND=1
-fi
-
-if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh"; then
-    echo "  ❌ CRITICAL: GitHub token pattern detected"
-    SECRET_FOUND=1
-fi
-
-if grep -rE '(apiKey|api_key|password|token)["'\'']?\s*[:=]\s*["'\''][^"'\'']{8,}' "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "example"; then
-    echo "  ❌ CRITICAL: Potential hardcoded credential detected"
-    SECRET_FOUND=1
-fi
-
-if [ $SECRET_FOUND -eq 0 ]; then
-    echo "  ✅ OK: No hardcoded secrets detected"
-else
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
-fi
-echo ""
-
-# Check 3: Broad permissions
-echo "[3/4] Validating permission scoping..."
-PERM_ISSUES=0
-
-if [ -f "${CLAUDE_DIR}/settings.json" ]; then
-    if grep -q 'Read://\*' "${CLAUDE_DIR}/settings.json"; then
-        echo "  ❌ CRITICAL: Overly broad Read permissions (Read://*)"
-        PERM_ISSUES=1
-    fi
-
-    if grep -q 'Write://\*' "${CLAUDE_DIR}/settings.json"; then
-        echo "  ❌ CRITICAL: Overly broad Write permissions (Write://*)"
-        PERM_ISSUES=1
-    fi
-
-    if grep -q '"Bash:\*"' "${CLAUDE_DIR}/settings.json"; then
-        echo "  ❌ CRITICAL: Auto-approve all Bash commands"
-        PERM_ISSUES=1
-    fi
-
-    if grep -qE '(\.ssh|\.aws|\.gnupg)' "${CLAUDE_DIR}/settings.json"; then
-        echo "  ⚠️ WARNING: Permissions reference sensitive directories"
-        PERM_ISSUES=1
-    fi
-
-    if [ $PERM_ISSUES -eq 0 ]; then
-        echo "  ✅ OK: Permissions appropriately scoped"
-    else
-        ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    fi
-else
-    echo "  ℹ️  No settings.json found (OK)"
-fi
-echo ""
-
-# Check 4: Dangerous commands
-echo "[4/4] Checking for dangerous command auto-approvals..."
-DANGEROUS_FOUND=0
-
-if [ -f "${CLAUDE_DIR}/settings.json" ]; then
-    DANGEROUS_PATTERNS=(
-        "rm -rf"
-        "rm -fr"
-        "git push --force"
-        "git push -f"
-        "chmod 777"
-        "curl.*\| sh"
-        "curl.*\| bash"
-        "wget.*\| sh"
-        "dd if="
-        "mkfs"
-    )
-
-    for pattern in "${DANGEROUS_PATTERNS[@]}"; do
-        if grep -qE "$pattern" "${CLAUDE_DIR}/settings.json"; then
-            echo "  ❌ CRITICAL: Dangerous command auto-approved: ${pattern}"
-            DANGEROUS_FOUND=1
-        fi
-    done
-
-    if [ $DANGEROUS_FOUND -eq 0 ]; then
-        echo "  ✅ OK: No dangerous command auto-approvals"
-    else
-        ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    fi
-else
-    echo "  ℹ️  No settings.json found (OK)"
-fi
-echo ""
-
-# Summary
-echo "=== Scan Complete ==="
-if [ $ISSUES_FOUND -eq 0 ]; then
-    echo "✅ All security checks passed"
-    exit 0
-else
-    echo "❌ Found ${ISSUES_FOUND} critical security issue(s)"
-    echo ""
-    echo "Review the issues above and remediate before approval."
-    exit 1
-fi
+../scripts/security-scan.sh /path/to/.claude
 ```
+
+It is not reproduced here. An inline copy drifts from the file that actually runs, and the
+two had already diverged on how they resolve the directory to scan.
 
 ---
 

@@ -20,15 +20,16 @@ The tech lead represents a team inside Bitwarden's architecture process — arch
 
 ## Cross-Plugin Integration
 
-| Plugin                        | How It's Used                                                                                                                                                                                   |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bitwarden-delivery-tools`    | `architecting-solutions` for team-level architectural judgment; `navigating-the-initiative-funnel` for funnel phase mechanics; `running-work-transitions` for ownership transitions either side |
-| `bitwarden-security-engineer` | Security context (P01-P06), architecture pattern review, threat modeling                                                                                                                        |
-| `bitwarden-product-analyst`   | Consumes requirements documents as upstream input                                                                                                                                               |
-| `bitwarden-software-engineer` | Implementation conventions for server, client, and database decisions                                                                                                                           |
-| `bitwarden-atlassian-tools`   | Jira issue research and Confluence page access for the funnel, operating model, and TSI documents this plugin's skills reference                                                                |
+| Plugin                                                                      | How It's Used                                                                                                                                                                                               |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bitwarden-delivery-tools`                                                  | `architecting-solutions` for team-level architectural judgment; `navigating-the-initiative-funnel` for funnel phase mechanics; `running-work-transitions` for ownership transitions either side             |
+| `bitwarden-security-engineer`                                               | Security context (P01-P06), architecture pattern review, threat modeling                                                                                                                                    |
+| `bitwarden-product-analyst`                                                 | Consumes requirements documents as upstream input                                                                                                                                                           |
+| `bitwarden-software-engineer`                                               | Implementation conventions for server, client, and database decisions                                                                                                                                       |
+| `bitwarden-atlassian-tools`                                                 | Jira issue research and Confluence page access for the funnel, operating model, and TSI documents this plugin's skills reference                                                                            |
+| [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) | External repository (not a plugin) holding the canonical Tech Breakdown template and per-team folder conventions the team uses to draft the breakdown coming out of the funnel's Scoping & Commitment phase |
 
-All cross-plugin skills are required because we rely upon each of them for a rich, complete workflow.
+The cross-plugin **skills** above are required — if a listed plugin is not installed the agent stops and alerts the human. The `bitwarden/tech-breakdowns` row is an external repository rather than a plugin skill; a missing local checkout is not a stop condition, and the agent asks the human to clone it.
 
 ## Related Plugins
 

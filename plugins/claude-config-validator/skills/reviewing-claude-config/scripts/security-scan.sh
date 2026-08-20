@@ -3,15 +3,19 @@
 # Comprehensive security scan for Claude configuration files
 #
 # Usage: ./security-scan.sh [claude-directory]
-# Default: Scans parent directory of this script (assumes .claude/skills/reviewing-claude-config/scripts/)
+# Default: the .claude directory of the current working directory, falling back to
+# three levels above this script, which is the .claude root under the standalone
+# .claude/skills/reviewing-claude-config/scripts/ layout. Under a plugin install that
+# fallback resolves to the plugin root instead, so pass the directory explicitly there.
 
 set -eo pipefail
 
 # Determine Claude directory
 if [ -n "$1" ]; then
     CLAUDE_DIR="$1"
+elif [ -d "${PWD}/.claude" ]; then
+    CLAUDE_DIR="${PWD}/.claude"
 else
-    # Default: Assume script is in .claude/skills/reviewing-claude-config/scripts/
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     CLAUDE_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 fi

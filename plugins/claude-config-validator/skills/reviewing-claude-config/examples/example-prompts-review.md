@@ -2,7 +2,7 @@
 
 **Context:** Reviewing a new slash command prompt.
 
-### Review Comments
+### Findings
 
 **`.claude/commands/review-feature.md:1`** - IMPORTANT: Missing usage information
 
@@ -102,9 +102,9 @@ Reusing existing skills improves consistency and reduces duplication.
 
 ---
 
-### Summary Comment
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 **Must Fix (IMPORTANT):**
 
@@ -122,7 +122,7 @@ The core concept is good - this command would be very useful once the instructio
 
 ## Anti-Patterns to Avoid
 
-### ❌ One Large Summary Comment
+### ❌ One Large Combined Finding
 
 **DON'T DO THIS:**
 
@@ -142,10 +142,9 @@ I found these issues:
 - All feedback in one comment, no specific line references
 - Harder to track what's been addressed
 - Loses context for each issue
-- Doesn't retain history if comment is edited
 
 **DO THIS INSTEAD:**
-Create separate inline comment for EACH issue on the specific line.
+Report one finding per issue, each anchored to its specific line.
 
 ---
 

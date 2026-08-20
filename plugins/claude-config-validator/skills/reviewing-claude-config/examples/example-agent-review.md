@@ -1,6 +1,8 @@
 # Example Agent Configuration Reviews
 
-Examples of agent configuration reviews showing common issues and best practices.
+Reviews of individual agent configuration files: tool access, model selection, and system prompt quality.
+
+For reviews of how agents are invoked and composed, see `example-agent-composition-review.md`.
 
 ---
 
@@ -20,7 +22,7 @@ description: Helps write documentation.
 Write good documentation for code.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/documentation-writer.md:3`** - IMPORTANT: Description lacks activation triggers
 
@@ -61,7 +63,7 @@ Rationale:
 
 Security principle: Grant minimum necessary tools only.
 
-Reference: `reference/claude-code-requirements.md` - Tool Access Patterns (lines 89-133)
+Reference: `../reference/claude-code-requirements.md` - "Tool Access Patterns"
 
 ---
 
@@ -109,7 +111,7 @@ Use JSDoc format:
 [Include 2-3 examples of good documentation]
 ```
 
-Structured thinking reduces errors by 40% (Anthropic Chain of Thought research).
+Structured thinking reduces errors (Anthropic Chain of Thought guidance).
 
 ---
 
@@ -128,13 +130,13 @@ model: sonnet # Or haiku for simple documentation
 
 Documentation generation is moderately complex (Sonnet) but could use Haiku for speed if following strict templates.
 
-Reference: `reference/claude-code-requirements.md` - Model Selection (lines 73-86)
+Reference: `../reference/claude-code-requirements.md` - "Model Selection"
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 This agent requires fixes before approval:
 
@@ -253,7 +255,7 @@ Rationale: Unescaped user input allows script injection. Template escaping preve
 - Reference OWASP category where applicable
 ```
 
-### Review Comments
+### Findings
 
 **`plugins/security-tools/agents/security-scanner.md:1-8`** - OPTIONAL: Excellent configuration
 
@@ -287,9 +289,9 @@ This is a design choice - current scope is excellent.
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** APPROVE
+Pass
 
 This is an exemplary agent configuration that demonstrates:
 
@@ -322,7 +324,7 @@ model: opus
 Format code files using project style guide.
 ```
 
-### Review Comments
+### Findings
 
 **`.claude/agents/code-formatter.md:5`** - IMPORTANT: Model selection inappropriate for task
 
@@ -341,7 +343,7 @@ Rationale:
 - Opus should be reserved for complex architectural decisions
 - This agent will be invoked frequently (cost multiplier)
 
-Reference: `reference/claude-code-requirements.md` - Model Selection (lines 73-86)
+Reference: `../reference/claude-code-requirements.md` - "Model Selection"
 
 ---
 
@@ -366,7 +368,7 @@ Clarify in system prompt whether agent:
 - Reads and writes new formatted files (Read, Write)
 - Modifies files in place (Read, Edit)
 
-Reference: `reference/claude-code-requirements.md` - Tool Access Patterns (lines 89-133)
+Reference: `../reference/claude-code-requirements.md` - "Tool Access Patterns"
 
 ---
 
@@ -411,9 +413,9 @@ Clear specification prevents ambiguous behavior.
 
 ---
 
-### Summary
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 **Must Fix (IMPORTANT):**
 
@@ -422,112 +424,6 @@ Clear specification prevents ambiguous behavior.
 - Add comprehensive system prompt
 
 Formatting is a high-frequency operation. Wrong model selection will significantly impact cost and latency at scale.
-
----
-
-## Example 4: Agent Invocation Review
-
-**Context:** Reviewing a skill that invokes agents.
-
-### Skill Code
-
-**File:** `.claude/skills/code-reviewer/skill.md`
-
-```markdown
-## Step 3: Invoke Reviewer
-
-Use the code-reviewer agent.
-```
-
-### Review Comments
-
-**`.claude/skills/code-reviewer/skill.md:28`** - IMPORTANT: Agent invocation lacks specificity
-
-Current invocation is too vague and provides no context or expectations.
-
-Recommended:
-
-```markdown
-## Step 3: Invoke Security Analysis
-
-Invoke the security-scanner agent to analyze modified files for vulnerabilities:
-
-**Files to analyze:**
-{list of modified files from step 1}
-
-**Focus areas:**
-
-- Authentication and authorization logic
-- Database query construction
-- User input handling and validation
-- Output encoding and XSS prevention
-
-**Expected output:**
-
-- Inline comments with file:line references
-- CRITICAL priority for vulnerabilities
-- Specific fix recommendations with secure code examples
-- OWASP category for each finding
-
-**Context:**
-
-- Application uses JWT authentication
-- Database is PostgreSQL with SQLAlchemy ORM
-- Framework is Flask with Jinja2 templates
-```
-
-Specific invocations with context improve agent output quality by ~40%.
-
----
-
-## Example 5: Circular Agent Dependency (Anti-Pattern)
-
-**Context:** Reviewing agents that invoke each other circularly.
-
-### Configuration
-
-**Agent A:** `.claude/agents/code-analyzer.md`
-
-```markdown
-If issues found, invoke code-fixer agent.
-```
-
-**Agent B:** `.claude/agents/code-fixer.md`
-
-```markdown
-After fixing, invoke code-analyzer agent to verify.
-```
-
-### Review Comments
-
-**`.claude/agents/code-analyzer.md:45` + `.claude/agents/code-fixer.md:38`** - CRITICAL: Circular agent dependency
-
-These agents invoke each other, creating a potential infinite loop:
-
-- code-analyzer → code-fixer → code-analyzer → ...
-
-Fix:
-
-```markdown
-# code-analyzer.md
-
-Report issues found. Do NOT invoke other agents.
-
-# code-fixer.md
-
-After fixing, report completion. Do NOT invoke analyzer.
-
-# Create separate coordinator if needed:
-
-# code-improvement-workflow.md
-
-1. Invoke code-analyzer
-2. Review results
-3. If fixes needed, invoke code-fixer
-4. Verify results manually or with single analyzer invocation
-```
-
-Rationale: Circular dependencies cause unpredictable behavior and infinite loops. Use explicit workflow coordination instead.
 
 ---
 

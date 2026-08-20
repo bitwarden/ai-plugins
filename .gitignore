@@ -26,3 +26,9 @@ __pycache__/
 # Node
 node_modules
 pnpm-debug.log
+
+# Local AI review and validation output
+# .claude-pr is claude-code-action's snapshot of PR-authored config; never ours to commit
+.claude-pr/
+review-summary.md
+review-inline-comments.md
