@@ -5,6 +5,23 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-08-20
+
+### Added
+
+- Changed `SKILL.md` files route to `plugin-dev:skill-reviewer`: Agent 5 in `performing-multi-agent-code-review` Step 3, and a Task-tool delegation in the single-agent reviewer's Cross-Plugin Enrichment
+- `source_agent: "skill"` with `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent" in `report-template.md`
+- `plugin-dev` as a second optional enhancer alongside `claude-config-validator`, excluded from the prerequisite abort check
+- `Task` in the `bitwarden-code-reviewer` tool grant, scoped by the agent definition to the `plugin-dev:skill-reviewer` delegation
+
+### Changed
+
+- `SKILL.md` is out of the Claude-configuration bucket in both paths; skill support files under `reference/`, `examples/`, and `scripts/` stay in it
+
+### Fixed
+
+- Both paths no longer describe `reviewing-claude-config` as covering `SKILL.md` or progressive-disclosure structure, which it declines from `claude-config-validator` 2.0.0
+
 ## [1.13.1] - 2026-07-01
 
 ### Changed
