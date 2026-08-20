@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `SKILL.md` is out of the Claude-configuration bucket in both paths; skill support files under `reference/`, `examples/`, and `scripts/` stay in it
+- `SKILL.md` is out of the Claude-configuration bucket in both paths; skill support files under `reference/` or `references/`, `examples/`, and `scripts/` stay in it
 
 ### Fixed
 
