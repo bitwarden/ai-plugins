@@ -58,8 +58,8 @@ scripts, agents):
    - `plugins/<plugin-name>/agents/*/AGENT.md` (if agents exist)
 
    A helper script that updates all of these at once (`bump-plugin-version.sh`) is
-   maintained in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts),
-   which is also what CI uses. Run it from a gh-actions checkout and you MUST set
+   maintained in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts).
+   Run it from a gh-actions checkout and you MUST set
    `REPO_ROOT` to this repository: the script defaults `REPO_ROOT` to the parent of
    its own `scripts/` directory, which is `validate-ai/` inside gh-actions, so
    without the override it looks for plugins in gh-actions and exits with
@@ -87,7 +87,7 @@ scripts, agents):
 
 ### Validating Plugin Changes
 
-After making any plugin changes, run the same validations that CI enforces. This catches issues before pushing.
+After making any plugin changes, run these validations locally. This catches issues before pushing.
 
 #### 1. Run formatting and spell checks
 
@@ -103,19 +103,16 @@ pnpm run format
 
 If new domain-specific terms trip cspell, add them to `.cspell.json`. For deliberate test-fixture strings, use inline `// cspell:ignore <word>` comments rather than polluting the dictionary.
 
-#### 2. Structure, marketplace, and version-bump validation (runs in CI)
+#### 2. Structure, marketplace, and version-bump validation
 
-Plugin structure, marketplace consistency, and version-bump checks run automatically on
-every pull request through the **Validate AI** workflow, which calls the reusable workflow
-in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai).
-The validation scripts live there under `validate-ai/scripts/` (they accept either a plugin
-name or a `plugins/<name>` path, and validate all plugins when given no arguments). To run
-them locally, invoke them from a gh-actions checkout with `REPO_ROOT` set to this
-repository — each script defaults `REPO_ROOT` to the parent of its own `scripts/`
-directory (`validate-ai/` inside gh-actions), so without the override it inspects
-gh-actions and fails on a path that isn't there — `validate-plugin-structure.sh` reports
-"Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not
-found at". CI passes the same override as `github.workspace`.
+Plugin structure, marketplace consistency, and version-bump checks are covered by the
+validation scripts in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai),
+under `validate-ai/scripts/` (they accept either a plugin name or a `plugins/<name>` path, and
+validate all plugins when given no arguments). To run them locally, invoke them from a gh-actions
+checkout with `REPO_ROOT` set to this repository — each script defaults `REPO_ROOT` to the parent
+of its own `scripts/` directory (`validate-ai/` inside gh-actions), so without the override it
+inspects gh-actions and fails on a path that isn't there — `validate-plugin-structure.sh` reports
+"Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not found at".
 
 ```bash
 REPO_ROOT=/path/to/ai-plugins /path/to/gh-actions/validate-ai/scripts/validate-plugin-structure.sh <plugin-name>
@@ -205,6 +202,6 @@ This is a Bitwarden-maintained repository with high security standards. Enforce:
 ## Resources
 
 - Repository README: ./README.md
-- Validation scripts (run in CI): https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts
+- Validation scripts: https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts
 - Plugin development guide: https://docs.claude.com/en/docs/claude-code/plugins-reference
 - Bitwarden Contributing Guidelines: https://contributing.bitwarden.com

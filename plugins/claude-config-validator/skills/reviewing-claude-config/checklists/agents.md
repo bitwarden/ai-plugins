@@ -137,7 +137,7 @@ tools: Read, Write, Edit, Bash # Why does documentation need Bash?
 - Write/Edit access for analysis-only agents
 - Tool access mismatched to agent description
 
-**Reference:** `reference/claude-code-requirements.md` - Tool Access Security (lines 109-133)
+**Reference:** `../reference/claude-code-requirements.md` - "Tool Access Security"
 
 ---
 
@@ -254,7 +254,7 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 2. Analyze against security checklist
 3. Check performance patterns
 4. Verify architectural principles
-5. Provide inline comments with file:line references
+5. Report one finding per issue with file:line references
 
 ## Output Format
 
@@ -264,7 +264,7 @@ You are a specialized code reviewer focusing on security vulnerabilities, perfor
 
 ## Examples
 
-[Include 2-3 examples of good review comments]
+[Include 2-3 examples of good findings]
 ```
 
 ✅ **GOOD - Includes structured thinking:**
@@ -308,7 +308,7 @@ You're a code reviewer. Look at code and tell the user what's wrong with it. Che
 - [ ] No unnecessary verbosity
 - [ ] Direct language preferred
 
-**Reference:** Anthropic Chain of Thought documentation (40% error reduction with structured thinking)
+**Reference:** Anthropic Chain of Thought documentation (structured thinking reduces reasoning errors)
 
 ---
 
@@ -427,7 +427,7 @@ Marketplace quality considerations:
 
 ## Priority Classification
 
-Classify findings using `reference/priority-framework.md`:
+Classify findings using `../reference/priority-framework.md`:
 
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
@@ -490,3 +490,9 @@ Before completing review, verify:
 - [ ] Single responsibility principle followed
 - [ ] Security implications considered
 - [ ] Marketplace standards met (if applicable)
+
+---
+
+## Output Format
+
+Report findings using the standard format in `../SKILL.md` Step 5.

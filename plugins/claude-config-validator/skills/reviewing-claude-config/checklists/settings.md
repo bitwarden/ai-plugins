@@ -2,13 +2,15 @@
 
 Review checklist for changes to `.claude/settings.json` and `.claude/settings.local.json`.
 
+**If the settings file declares a `hooks` block, review that block against `hooks.md` as well.** Hooks run shell commands automatically on tool events, and none of the passes below cover what those commands do. A repository's hooks are more often declared here than in a separate `hooks.json`, so this is the common case rather than the exception.
+
 ---
 
 ## CRITICAL SECURITY CHECK
 
 <thinking>
 CRITICAL security considerations:
-1. Is settings.local.json committed to git?
+1. Does settings.local.json appear in the changeset?
 2. Are there hardcoded credentials or secrets?
 3. Are file permissions overly broad?
 4. Are command auto-approvals safe?
@@ -16,25 +18,25 @@ CRITICAL security considerations:
 
 **Before anything else, verify:**
 
-- [ ] **settings.local.json is NOT committed to git**
+- [ ] **settings.local.json does not appear in the changeset** (from the changed-files list; record as skipped when there is none)
 - [ ] **No hardcoded API keys, tokens, or passwords**
 - [ ] **No sensitive paths exposed in permissions**
 - [ ] **No dangerous command auto-approvals**
 
-**If ANY of these fail, FLAG IMMEDIATELY as CRITICAL and stop review.**
+**If ANY of these fail, FLAG IMMEDIATELY as CRITICAL, then finish the remaining passes** so the report can still say which checks ran.
 
 ---
 
 ## Multi-Pass Review Strategy
 
-### First Pass: Committed Settings Detection
+### First Pass: Local Settings in the Changeset
 
 **CRITICAL SECURITY ISSUE: settings.local.json in git**
 
 `settings.local.json` must NEVER be committed. It contains user-specific and potentially sensitive configuration.
 
 **Detection:**
-Check if `settings.local.json` appears in changed files list. If present in git diff or PR, this is CRITICAL.
+Check whether `settings.local.json` is added or modified in the changed-files list. If it is, this is CRITICAL. A changeset that deletes it is the remediation, not a finding. Record the check as skipped when no changed-files list is available.
 
 **Fix:**
 
@@ -247,7 +249,7 @@ Syntax validation:
 
 ## Priority Classification
 
-Classify findings using `reference/priority-framework.md`:
+Classify findings using `../reference/priority-framework.md`:
 
 - **CRITICAL** - Prevents functionality or exposes security vulnerabilities
 - **IMPORTANT** - Significantly impacts quality or maintainability
@@ -255,3 +257,7 @@ Classify findings using `reference/priority-framework.md`:
 - **OPTIONAL** - Personal preferences
 
 ---
+
+## Output Format
+
+Report findings using the standard format in `../SKILL.md` Step 5.

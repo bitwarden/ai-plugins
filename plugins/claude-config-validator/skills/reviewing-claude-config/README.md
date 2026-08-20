@@ -4,13 +4,15 @@ Comprehensive skill for reviewing Claude Code configuration files with security-
 
 ## Overview
 
-This skill provides systematic review guidance for Claude Code configuration files in `.claude` directories. It detects file types, applies appropriate review checklists, and enforces security best practices with executable detection scripts.
+This skill provides systematic review guidance for Claude Code configuration files in `.claude` directories. It detects file types, applies appropriate review checklists, and runs its security checks with `Grep`. Its own grant is `Read, Grep, Glob`, so it reads and reports rather than executing anything or posting anywhere.
 
 **Use this skill when:**
 
 - Reviewing changes to `CLAUDE.md` files
-- Reviewing skill files (`skill.md` and supporting files)
-- Reviewing prompts or commands (`.claude/prompts/*.md`, `.claude/commands/*.md`)
+- Reviewing skill files (`SKILL.md` and supporting files)
+- Reviewing agents (`.claude/agents/`, `plugins/*/agents/`)
+- Reviewing prompts or commands (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`)
+- Reviewing hooks (`hooks.json`, or a `hooks` block in a settings file)
 - Reviewing settings files (`.claude/settings.json`)
 - Validating Claude configuration security and quality
 
@@ -18,11 +20,11 @@ This skill provides systematic review guidance for Claude Code configuration fil
 
 ### Security-First Approach
 
-- Detects committed `settings.local.json` files
+- Flags `settings.local.json` appearing in a changeset, from the changed-files list when one is available, reported as skipped otherwise
 - Scans for hardcoded secrets and credentials
 - Validates permission scoping
 - Identifies dangerous command auto-approvals
-- Includes executable `security-scan.sh` script
+- Ships a `security-scan.sh` helper you can run yourself; the skill performs the same pattern checks with `Grep`
 
 ### Intelligent Routing
 
@@ -34,43 +36,53 @@ This skill provides systematic review guidance for Claude Code configuration fil
 ### Quality Enforcement
 
 - YAML frontmatter validation
-- Progressive disclosure enforcement (500 line limit)
+- Progressive disclosure checks (500-line guideline)
 - Prompt engineering quality checks
 - File reference integrity validation
 - Token efficiency optimization
 
 ### Comprehensive Coverage
 
-- **4 specialized checklists**: Skills, CLAUDE.md, Prompts, Settings
-- **3 reference guides**: Priority framework, security patterns, quality criteria
-- **4 review examples**: Demonstrating proper feedback format
-- **Executable security script**: Automated security scanning
+- **Specialized checklists**: Agents, Skills, CLAUDE.md, Prompts/Commands, Hooks, Settings
+- **Reference guides**: Priority framework, security patterns, Claude Code requirements, changeset scope
+- **Review examples**: One or more per configuration type, demonstrating proper feedback format
+- **Human-run security script**: `security-scan.sh`, which you run yourself; the skill applies the same patterns with `Grep`
 
 ## Installation
 
-### Option 1: Copy to Your Project
+### Install the plugin (recommended)
+
+The skill ships inside the `claude-config-validator` plugin, so installing the plugin is all it takes:
 
 ```bash
-# Copy the entire skill directory to your project's .claude/skills/ directory
+/plugin marketplace add bitwarden/ai-plugins
+/plugin install claude-config-validator@bitwarden-marketplace
+```
+
+Its files then live under the plugin root rather than in your project.
+
+### Standalone use
+
+To use the skill on its own, outside the plugin, copy the directory into a project's `.claude/skills/`:
+
+```bash
 cp -r reviewing-claude-config /path/to/your/project/.claude/skills/
 ```
 
-### Option 2: Clone from Repository
-
-```bash
-# In your project's .claude/skills/ directory
-cd .claude/skills/
-git clone [repository-url] reviewing-claude-config
-```
+Under this layout the skill's own directory is `.claude/skills/reviewing-claude-config`. A plugin install puts the same files under the plugin cache instead; see the paths below.
 
 ### Verify Installation
 
+For a plugin install, `/plugin list` inside Claude Code is the check that matters.
+
+To inspect the files from a terminal, note that `CLAUDE_PLUGIN_ROOT` is set by Claude Code only while it runs plugin-owned commands and hooks. It is unset in your shell, so use a real path:
+
 ```bash
-# Check that skill is recognized by Claude Code
+# Standalone layout, from the project root
 ls -la .claude/skills/reviewing-claude-config/SKILL.md
 
-# Optionally, make security script executable
-chmod +x .claude/skills/reviewing-claude-config/scripts/security-scan.sh
+# Plugin install: under the plugin cache, keyed by marketplace and version
+ls -la ~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/SKILL.md
 ```
 
 ## Usage
@@ -88,19 +100,23 @@ The skill will:
 1. Detect the file type (CLAUDE.md in this case)
 2. Execute security scan
 3. Load the appropriate checklist
-4. Provide structured review with inline comments
+4. Return a structured review, one finding per issue
 
 ### Manual Security Scan
 
 Run the executable security script directly:
 
-```bash
-# From the scripts directory
-cd .claude/skills/reviewing-claude-config/scripts
-./security-scan.sh
+With no argument it scans the `.claude` directory of the current working directory:
 
-# Or scan a specific directory
-./security-scan.sh /path/to/.claude
+```bash
+# Standalone layout
+.claude/skills/reviewing-claude-config/scripts/security-scan.sh
+
+# Plugin install
+~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh
+
+# Or scan a specific directory, from either layout
+.claude/skills/reviewing-claude-config/scripts/security-scan.sh /path/to/.claude
 ```
 
 The script checks for:
@@ -115,7 +131,7 @@ The script checks for:
 **Review a new skill:**
 
 ```
-Review .claude/skills/my-new-skill/skill.md
+Review .claude/skills/my-new-skill/SKILL.md
 ```
 
 **Review settings changes:**
@@ -134,77 +150,69 @@ Review .claude/CLAUDE.md for quality and security
 
 ```
 reviewing-claude-config/
-├── skill.md                          # Main orchestration file
+├── SKILL.md                          # Main orchestration file
 ├── checklists/                       # Specialized review checklists
-│   ├── skills.md                     # Skill review checklist
+│   ├── agents.md                     # Agent review checklist
 │   ├── claude-md.md                  # CLAUDE.md review checklist
+│   ├── hooks.md                      # Hooks schema and command safety
 │   ├── prompts.md                    # Prompts/commands checklist
-│   └── settings.md                   # Settings security checklist
+│   ├── settings.md                   # Settings security checklist
+│   └── skills.md                     # Skill review checklist
 ├── reference/                        # Reference materials (loaded on-demand)
+│   ├── claude-code-requirements.md   # YAML, tools, models, limits
 │   ├── priority-framework.md         # Issue classification system
 │   ├── security-patterns.md          # Security checks and remediation
-│   ├── prompt-engineering-quality.md # Quality criteria index (modular)
-│   ├── quality-clarity.md            # Clarity criteria
-│   ├── quality-specificity.md        # Specificity criteria
-│   ├── quality-examples.md           # Examples criteria
-│   ├── quality-emphasis.md           # Emphasis criteria
-│   ├── quality-structure.md          # Structure criteria
-│   ├── quality-context.md            # Context criteria
-│   ├── quality-actionability.md      # Actionability criteria
-│   ├── quality-structured-thinking.md # Structured thinking criteria
-│   ├── quality-checklist.md          # Comprehensive quality checklist
-│   └── quality-improvement-patterns.md # Common improvement patterns
+│   └── validate-ai-scope.md          # Changeset scope and report contract
 ├── examples/                         # Sample review outputs
-│   ├── README.md                     # Examples index and loading guide
-│   ├── example-skill-review.md       # Skill review example
+│   ├── example-agent-composition-review.md # Agent invocation and dependency review
+│   ├── example-agent-review.md       # Agent configuration review example
 │   ├── example-claude-md-review.md   # CLAUDE.md review example
+│   ├── example-hooks-review.md       # Hooks review example
+│   ├── example-prompts-review.md     # Prompts review example
 │   ├── example-settings-review.md    # Settings review example
-│   └── example-prompts-review.md     # Prompts review example
-├── scripts/                          # Executable automation
+│   └── example-skill-review.md       # Skill review example
+├── scripts/                          # Human-run helpers
 │   └── security-scan.sh              # Comprehensive security scanner
-├── docs/                             # Historical documentation
-│   ├── CHANGELOG.md                  # Version history
-│   ├── IMPLEMENTATION_PLAN.md        # Original implementation plan
-│   └── FINAL_REPORT.md               # Implementation completion report
-├── README.md                         # This file
-└── LICENSE                           # MIT License
+└── README.md                         # This file
 ```
 
 ## Review Process
 
 The skill follows a systematic 5-step review process:
 
-1. **Detect File Type**: Determines whether reviewing skills, CLAUDE.md, prompts, or settings
+1. **Detect File Type**: Determines whether reviewing agents, skills, CLAUDE.md, prompts and commands, hooks, or settings
 2. **Execute Security Scan**: Always performs critical security checks first
 3. **Load Appropriate Checklist**: Routes to specialized review guidance
 4. **Consult References**: Loads detailed criteria only when needed
-5. **Document Findings**: Provides inline comments with specific fixes
+5. **Document Findings**: Returns one finding per issue, anchored to `file:line`, with a specific fix
 
 ### Security Checks (Always First)
 
 Regardless of file type, these checks are performed:
 
-- ✅ settings.local.json NOT in git
+- ✅ No `settings.local.json` in the changeset, from the changed-files list when one is available and reported as skipped otherwise
 - ✅ No hardcoded credentials
 - ✅ Permissions appropriately scoped
 - ✅ No dangerous command auto-approvals
 
-If any security check fails, it's flagged as **CRITICAL** immediately.
+If any security check fails, it's flagged as **CRITICAL** immediately and the review then finishes the remaining checks, so the report can still say which ones ran.
 
 ### Priority Levels
 
-Issues are classified into four priority levels:
+Issues are classified into four priority levels, defined in
+[`reference/priority-framework.md`](reference/priority-framework.md):
 
 - **CRITICAL**: Prevents functionality, exposes security vulnerabilities (must fix)
 - **IMPORTANT**: Significantly impacts quality or maintainability (should fix)
-- **SUGGESTED**: Nice-to-have improvements (optional)
-- **OPTIONAL**: Personal preferences (author decides)
+- **SUGGESTED**: Nice-to-have improvements (could fix)
+- **OPTIONAL**: Personal preferences, alternatives (consider)
 
 ## Requirements
 
 - Claude Code (tested with latest version)
-- Git (for committed file detection in security scan)
-- Bash (for security-scan.sh script)
+
+The optional `security-scan.sh` helper additionally needs Git, for committed-file detection,
+and Bash to run it. The skill itself needs neither: its grant is `Read, Grep, Glob`.
 
 ## Configuration
 
@@ -222,19 +230,24 @@ If you want to customize for your organization:
 
 ## Examples
 
-This skill includes 5 comprehensive review examples demonstrating proper feedback format:
+Review examples per configuration type, each demonstrating the feedback format:
 
 - `examples/example-agent-review.md` - Agent review with security and quality issues
+- `examples/example-agent-composition-review.md` - Agent invocation patterns and a circular-dependency anti-pattern
 - `examples/example-skill-review.md` - Skill review with multiple issues
 - `examples/example-claude-md-review.md` - CLAUDE.md review with duplication
+- `examples/example-hooks-review.md` - Hooks review with shell injection and prompt-hook findings
 - `examples/example-settings-review.md` - Settings review with security concerns
 - `examples/example-prompts-review.md` - Prompts review with quality improvements
 
 ### Review Output Format
 
-Each review follows this structure:
+Each review follows this structure. The skill produces findings and never delivers them, so
+where they go is decided by the invoking context, in the order `SKILL.md` step 5 sets out:
+the two `validate-ai` commands write the single-document report contract in
+`reference/validate-ai-scope.md`; anything else gets the findings back as text to route.
 
-**Inline Comments:**
+**Findings**, one per issue:
 
 ```
 **file:line** - PRIORITY: Issue description
@@ -244,20 +257,13 @@ Each review follows this structure:
 [Rationale explaining why this matters]
 ```
 
-**Summary Comment:**
+**Overall assessment**, stated once:
 
 ```
-**Overall Assessment:** APPROVE / REQUEST CHANGES
+Pass / Issues found
 
 [Findings grouped by priority: CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL]
 ```
-
-### Priority Levels
-
-- **CRITICAL** - Prevents functionality, security vulnerabilities (must fix)
-- **IMPORTANT** - Significant quality/maintainability impact (should fix)
-- **SUGGESTED** - Nice-to-have improvements (could fix)
-- **OPTIONAL** - Personal preferences, alternatives (consider)
 
 ### Best Practices
 
@@ -279,12 +285,12 @@ Each review follows this structure:
 
 This skill incorporates research-backed best practices:
 
-- **Chain of Thought prompting**: 40% error reduction (Anthropic)
+- **Chain of Thought prompting**: reduces reasoning errors (Anthropic)
 - **Progressive disclosure**: <500 line main files (Anthropic)
 - **Structured thinking**: Systematic analysis before feedback
 - **Security-first approach**: Critical checks before quality review
 
-See `docs/IMPLEMENTATION_PLAN.md` for detailed research sources.
+See `reference/claude-code-requirements.md` for the requirements these criteria are drawn from.
 
 ## Troubleshooting
 
@@ -294,18 +300,19 @@ See `docs/IMPLEMENTATION_PLAN.md` for detailed research sources.
 
 **Solutions:**
 
-1. Verify YAML frontmatter exists in `skill.md`
+1. Verify YAML frontmatter exists in `SKILL.md`
 2. Check skill name is `reviewing-claude-config`
-3. Ensure file is in `.claude/skills/reviewing-claude-config/`
+3. Confirm the skill is available: run `/plugin list` for a plugin install, or check that the
+   files sit in `.claude/skills/reviewing-claude-config/` for a standalone copy
 4. Try invoking explicitly: "Use reviewing-claude-config skill"
 
 ### Security Script Fails
 
-**Issue**: `./security-scan.sh` returns errors
+**Issue**: `./scripts/security-scan.sh` returns errors
 
 **Solutions:**
 
-1. Make executable: `chmod +x security-scan.sh`
+1. Make executable: `chmod +x scripts/security-scan.sh`
 2. Verify you're in a git repository (for git commands)
 3. Check script has access to `.claude` directory
 4. Review error messages for specific issues
@@ -328,8 +335,8 @@ This skill is designed for internal team use but follows open-source best practi
 
 1. Test changes in your project first
 2. Ensure changes remain 100% generic (no project-specific references)
-3. Update CHANGELOG.md with changes
-4. Increment version in `skill.md` YAML frontmatter (semver)
+3. Update the plugin's [`CHANGELOG.md`](../../CHANGELOG.md) with your changes
+4. Bump the plugin version across the files the repository's `.claude/CLAUDE.md` lists. The skill has no version of its own
 
 ## Versioning
 
@@ -339,16 +346,15 @@ This skill follows [Semantic Versioning](https://semver.org/):
 - **MINOR**: New features, new checklists, backward-compatible changes
 - **PATCH**: Bug fixes, documentation updates, minor improvements
 
-Current version: **1.0.0**
-
-See CHANGELOG.md for version history.
+The skill ships with the plugin and carries the plugin's version. See
+[`../../CHANGELOG.md`](../../CHANGELOG.md) for version history.
 
 ## Support
 
 For issues, questions, or feedback:
 
 1. Check troubleshooting section above
-2. Review examples in `examples/review-outputs.md`
+2. Review the examples in `examples/`
 3. Consult reference files for detailed guidance
 4. Contact your team's Claude Code administrator
 

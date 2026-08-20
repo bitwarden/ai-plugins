@@ -2,9 +2,9 @@
 
 **Context:** Reviewing a new skill with structural and quality issues.
 
-### Review Comments
+### Findings
 
-**`.claude/skills/my-new-skill/skill.md:1`** - CRITICAL: Missing YAML frontmatter
+**`.claude/skills/my-new-skill/SKILL.md:1`** - CRITICAL: Missing YAML frontmatter
 
 Skills require YAML frontmatter to be discoverable by Claude Code:
 
@@ -22,7 +22,7 @@ Reference: Anthropic Skills Documentation - YAML Requirements
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:1-650`** - IMPORTANT: File exceeds 500 line limit
+**`.claude/skills/my-new-skill/SKILL.md:1-650`** - IMPORTANT: File exceeds 500-line guideline
 
 Main skill file is 650 lines, exceeding Anthropic's 500-line progressive disclosure recommendation.
 
@@ -30,7 +30,7 @@ Suggested structure:
 
 ```
 my-new-skill/
-├── skill.md (≤500 lines - routing logic only)
+├── SKILL.md (≤500 lines - routing logic only)
 ├── checklists/
 │   ├── type-a.md
 │   └── type-b.md
@@ -46,7 +46,7 @@ Reference: Progressive disclosure best practices
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:45`** - IMPORTANT: Missing structured thinking blocks
+**`.claude/skills/my-new-skill/SKILL.md:45`** - IMPORTANT: Missing structured thinking blocks
 
 Add `<thinking>` blocks before major decision points:
 
@@ -63,18 +63,18 @@ Key questions to determine type:
 Analyze the changeset...
 ```
 
-Research shows structured thinking reduces logic errors by 40% (Anthropic Chain of Thought study).
+Structured thinking reduces logic errors (Anthropic Chain of Thought guidance).
 
 Reference: Anthropic Prompt Engineering - Structured Thinking
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:120`** - SUGGESTED: Add concrete examples
+**`.claude/skills/my-new-skill/SKILL.md:120`** - SUGGESTED: Add concrete examples
 
-This section describes the expected comment format but doesn't show an example. Consider adding:
+This section describes the expected finding format but doesn't show an example. Consider adding:
 
 ````markdown
-**Example inline comment:**
+**Example finding:**
 
 \```
 **file.kt:123** - CRITICAL: Issue description
@@ -89,7 +89,7 @@ Examples improve clarity significantly, especially for complex output formats.
 
 ---
 
-**`.claude/skills/my-new-skill/skill.md:200`** - OPTIONAL: Alternative phrasing
+**`.claude/skills/my-new-skill/SKILL.md:200`** - OPTIONAL: Alternative phrasing
 
 Current: "You should check for these patterns..."
 
@@ -99,9 +99,9 @@ More direct phrasing slightly improves token efficiency, but current version is 
 
 ---
 
-### Summary Comment
+### Overall Assessment
 
-**Overall Assessment:** REQUEST CHANGES
+Issues found
 
 This skill has strong potential but requires fixes before approval:
 
