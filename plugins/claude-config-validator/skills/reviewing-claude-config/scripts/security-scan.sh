@@ -38,18 +38,29 @@ CHECKS_SKIPPED=0
 # ============================================================================
 echo "[1/4] Checking for committed settings.local.json..."
 
-if git ls-files 2>/dev/null | grep -q "settings.local.json"; then
-    echo "  ❌ CRITICAL: settings.local.json is committed to git"
-    echo "     Files found:"
-    git ls-files | grep "settings.local.json" | sed 's/^/     - /'
-    echo ""
-    echo "     Remediation:"
-    echo "     git rm --cached .claude/settings.local.json"
-    echo "     echo '.claude/settings.local.json' >> .gitignore"
-    echo ""
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+if ! git -C "${CLAUDE_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
+    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+    echo "  ⚠️  SKIPPED: ${CLAUDE_DIR} is not inside a git repository"
 else
-    echo "  ✅ OK: settings.local.json not in git"
+    # Ask git directly. Piping it to `grep -q` loses matches under `pipefail`:
+    # grep exits on the first hit, git dies of SIGPIPE, and the pipeline reports
+    # failure, so a committed file reads as absent whenever git's output is long
+    # enough that grep finishes first.
+    LOCAL_SETTINGS=$(git -C "${CLAUDE_DIR}" ls-files -- '*settings.local.json') || LOCAL_SETTINGS=""
+
+    if [ -n "${LOCAL_SETTINGS}" ]; then
+        echo "  ❌ CRITICAL: settings.local.json is committed to git"
+        echo "     Files found:"
+        echo "${LOCAL_SETTINGS}" | sed 's/^/     - /'
+        echo ""
+        echo "     Remediation:"
+        echo "     git rm --cached .claude/settings.local.json"
+        echo "     echo '.claude/settings.local.json' >> .gitignore"
+        echo ""
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    else
+        echo "  ✅ OK: settings.local.json not in git"
+    fi
 fi
 echo ""
 
@@ -268,7 +279,8 @@ if [ -f "${SETTINGS_FILE}" ]; then
         ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
 else
-    echo "  ℹ️  No settings.json found (OK)"
+    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+    echo "  ⚠️  SKIPPED: no settings.json at ${CLAUDE_DIR}"
 fi
 echo ""
 
@@ -311,7 +323,8 @@ if [ -f "${SETTINGS_FILE}" ]; then
         fi
     fi
 else
-    echo "  ℹ️  No settings.json found (OK)"
+    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+    echo "  ⚠️  SKIPPED: no settings.json at ${CLAUDE_DIR}"
 fi
 echo ""
 
