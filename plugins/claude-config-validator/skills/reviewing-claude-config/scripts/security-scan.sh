@@ -31,6 +31,7 @@ echo "Scanning: ${CLAUDE_DIR}"
 echo ""
 
 ISSUES_FOUND=0
+CHECKS_SKIPPED=0
 
 # ============================================================================
 # Check 1: Committed settings.local.json
@@ -139,6 +140,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     else
         echo "  ⚠️  SKIPPED: bare-tool-rule check needs jq to tell allow from deny"
         echo ""
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
     fi
 
     if grep -qE '"(autoApprovedTools|autoApproved)"' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
@@ -153,7 +155,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     # Sensitive paths, in allow only. The same path in deny is the control, not a defect,
     # so this needs the array the rule sits in and is recorded as skipped without jq.
     if command -v jq >/dev/null 2>&1; then
-        SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" "id_rsa" "credentials")
+        SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" ".config" "/etc" "id_rsa" "credentials")
         for path in "${SENSITIVE_PATHS[@]}"; do
             if jq -e --arg p "$path" \
                 '(.permissions.allow // [])[] | select(contains($p))' \
@@ -168,6 +170,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     else
         echo "  ⚠️  SKIPPED: sensitive-path check needs jq to tell allow from deny"
         echo ""
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
     fi
 
     if [ $PERM_ISSUES -eq 0 ]; then
@@ -201,22 +204,31 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         "git push -f"
         "chmod 777"
         "chmod 666"
-        "curl.*| sh"
-        "curl.*| bash"
-        "wget.*| sh"
-        "wget.*| bash"
+        "curl.*\\| *sh"
+        "curl.*\\| *bash"
+        "wget.*\\| *sh"
+        "wget.*\\| *bash"
         "dd if="
         "mkfs"
         "> /dev/sd"
     )
 
-    for pattern in "${DANGEROUS_PATTERNS[@]}"; do
-        if grep -qE "\".*${pattern}.*\"" "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-            echo "  ❌ CRITICAL: Dangerous command auto-approved: ${pattern}"
-            echo "     File: ${CLAUDE_DIR}/settings.json"
-            DANGEROUS_FOUND=1
-        fi
-    done
+    # allow only: the same command in deny is the control, not an auto-approval.
+    if command -v jq >/dev/null 2>&1; then
+        for pattern in "${DANGEROUS_PATTERNS[@]}"; do
+            if jq -e --arg p "$pattern" \
+                '(.permissions.allow // [])[] | select(test($p))' \
+                "${CLAUDE_DIR}/settings.json" >/dev/null 2>&1; then
+                echo "  ❌ CRITICAL: Dangerous command auto-approved: ${pattern}"
+                echo "     File: ${CLAUDE_DIR}/settings.json"
+                DANGEROUS_FOUND=1
+            fi
+        done
+    else
+        echo "  ⚠️  SKIPPED: dangerous-command check needs jq to tell allow from deny"
+        echo ""
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+    fi
 
     if [ $DANGEROUS_FOUND -eq 0 ]; then
         echo "  ✅ OK: No dangerous command auto-approvals"
@@ -245,7 +257,14 @@ echo ""
 echo "=== Scan Complete ==="
 echo ""
 
-if [ $ISSUES_FOUND -eq 0 ]; then
+if [ $ISSUES_FOUND -eq 0 ] && [ $CHECKS_SKIPPED -ne 0 ]; then
+    echo "⚠️  INCOMPLETE: no issues found, but ${CHECKS_SKIPPED} check(s) could not run"
+    echo ""
+    echo "The skipped checks are listed above and were not verified,"
+    echo "so this is not a clean bill of health."
+    echo ""
+    exit 2
+elif [ $ISSUES_FOUND -eq 0 ]; then
     echo "✅ All security checks passed"
     echo ""
     echo "Claude configuration appears secure:"

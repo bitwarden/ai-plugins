@@ -145,7 +145,8 @@ Runs whenever any component changed. This is the primary review for a repository
 
 Invoke `Skill(claude-config-validator:reviewing-claude-config)` over every changed
 `CLAUDE.md` and everything under `.claude/` — agents, commands, hooks, settings — plus the
-component files inside changed plugins. It owns secrets and hardcoded credentials, permission
+component files inside changed plugins, plus any skill support files under `reference/`,
+`examples/`, or `scripts/` those plugins changed. It owns secrets and hardcoded credentials, permission
 scoping and dangerous auto-approvals, agent tool grants, malformed component definitions, and
 `CLAUDE.md` structure, routing each file type to a targeted review skill.
 

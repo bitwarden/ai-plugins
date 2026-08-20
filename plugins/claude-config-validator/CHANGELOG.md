@@ -28,8 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Permission examples use `Tool` or `Tool(specifier)` rules under `permissions.allow` / `deny`, replacing a top-level `autoApprovedTools` array Claude Code does not read
 - `//` documented as the absolute path prefix, against a single leading `/` as relative to the settings file
-- `security-scan.sh` and the documented detectors match the real schema, discriminate `allow` from `deny`, and anchor placeholder exclusions to the value rather than the file path
-- Checks that cannot run are recorded as skipped rather than passed
+- `security-scan.sh` and the documented detectors match the real schema, read `permissions.allow` rather than the whole file so a hardening `deny` is not reported as a defect, and anchor placeholder exclusions to the value rather than the file path
+- Checks that cannot run are counted and reported as skipped; a run with no findings but a skipped check exits 2 rather than claiming a pass
 
 ### Removed
 

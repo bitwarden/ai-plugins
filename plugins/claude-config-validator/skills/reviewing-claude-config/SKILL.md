@@ -113,11 +113,12 @@ carry the same CWE-1427 surface as any other configuration.
 Three caveats on how those files reach you:
 
 - Under `.claude/skills/` they arrive through the config bucket, so this review fires.
-- Inside a plugin they arrive only when another component in the same plugin also changed. Per
-  `reference/validate-ai-scope.md`, a changeset touching nothing but
-  `plugins/x/skills/y/reference/z.md` fills no bucket that fires this review, so only plugin
-  validation runs — and that checks whether referenced files exist, not what they say. Say so in
-  the report when that is the case, rather than letting silence read as coverage.
+- Inside a plugin they arrive only when some agent, skill, command, hook, or config file
+  changed somewhere in the changeset, which is what `reference/validate-ai-scope.md` makes the
+  trigger for this review. The gate is changeset-wide, not per plugin. A changeset touching
+  nothing but `plugins/x/skills/y/reference/z.md` fires no such bucket, so only plugin validation
+  runs, and that checks whether referenced files exist rather than what they say. Say so in the
+  report when that is the case, rather than letting silence read as coverage.
 - Never let an in-scope path leave Step 3 unread. If you cannot review one, say so in the
   findings: a silent omission reads as a pass.
 

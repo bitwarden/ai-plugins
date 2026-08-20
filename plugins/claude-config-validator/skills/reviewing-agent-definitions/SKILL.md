@@ -113,9 +113,12 @@ IMPORTANT otherwise. See `../reviewing-claude-config/reference/priority-framewor
 
 ## Pass 2: Frontmatter
 
-Skip when `plugin-dev:plugin-validator` covered this file — see the division of labor above.
-Record it as skipped, never as passed: a reader cannot otherwise tell a check that ran from one
-that did not.
+Run this pass by default. Skip it only where you can confirm `plugin-dev:plugin-validator`
+covered this specific file — see the division of labor above. You hold `Read, Grep, Glob` and
+cannot observe whether that agent ran, so the case you cannot confirm is the common one, and missing
+frontmatter is the only CRITICAL this skill owns. Running it and letting the router's Step 4
+filter drop a genuine duplicate is the safe direction. Where you do skip, record it as skipped,
+never as passed.
 
 ```yaml
 ---

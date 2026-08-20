@@ -148,7 +148,8 @@ produces duplicate findings a reader cannot tell from independent confirmation.
 
 Invoke `Skill(claude-config-validator:reviewing-claude-config)` over every changed
 `CLAUDE.md` and everything under `.claude/` — agents, commands, hooks, settings — plus the
-component files inside changed plugins. These are exactly the paths step 3 covers, so read
+component files inside changed plugins, plus any skill support files under `reference/`,
+`examples/`, or `scripts/` those plugins changed. These are exactly the paths step 3 covers, so read
 them from `.claude-pr/` when it exists.
 
 It owns secrets and hardcoded credentials, permission scoping and dangerous auto-approvals,

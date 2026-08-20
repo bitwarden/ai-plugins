@@ -165,7 +165,7 @@ needs and cope when it is missing.
 ```markdown
 **Usage:** /review-file path/to/file.kt
 
-If no PR number is provided, analyze the current git diff.
+If no file path is provided, analyze the current git diff.
 If no files changed, report a clean working directory.
 ```
 

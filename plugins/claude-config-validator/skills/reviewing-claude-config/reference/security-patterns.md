@@ -136,7 +136,7 @@ grep -nE '"(Read|Edit)\(//[^"]*/\.(ssh|aws|gnupg)/' .claude/settings.json
 - `Write(//**)` - Write access to entire filesystem
 - A bare `Bash` rule in `allow` - auto-approves every shell command
 - `Read(//Users/username/.ssh/**)` - access to SSH keys
-- `Read(//etc/**)` - access to system config
+- `Read(//etc/**)` - access to system config, when it sits in `allow`
 
 A bare rule in `deny` is the opposite: `"deny": ["WebFetch"]` is the strongest form of that
 control, not a defect.
@@ -172,10 +172,18 @@ elif jq -e '.permissions.allow[]? | select(. == "Bash")' .claude/settings.json >
     ISSUES=1
 fi
 
-# Check for sensitive paths
-if grep -rE '(\.ssh|/etc|\.aws|\.config)' .claude/settings.json 2>/dev/null; then
-    echo "WARNING: Permissions reference sensitive directories"
-    ISSUES=1
+# Sensitive paths, in allow only. The same path in deny is the control, not a defect.
+if ! command -v jq >/dev/null 2>&1; then
+    echo "SKIPPED: sensitive-path check needs jq to tell allow from deny"
+    SKIPPED=$((SKIPPED + 1))
+else
+    for p in .ssh .aws .gnupg .config /etc id_rsa credentials; do
+        if jq -e --arg p "$p" '(.permissions.allow // [])[] | select(contains($p))' \
+            .claude/settings.json >/dev/null 2>&1; then
+            echo "WARNING: permissions.allow references a sensitive path: $p"
+            ISSUES=1
+        fi
+    done
 fi
 
 if [ $ISSUES -ne 0 ]; then
@@ -225,9 +233,10 @@ DANGEROUS_PATTERNS=(
     "git push -f"
     "chmod 777"
     "chmod 666"
-    "curl.*| sh"
-    "curl.*| bash"
-    "wget.*| sh"
+    "curl.*\\| *sh"
+    "curl.*\\| *bash"
+    "wget.*\\| *sh"
+    "wget.*\\| *bash"
     "dd if="
     "mkfs"
     "> /dev/sd"
@@ -235,12 +244,19 @@ DANGEROUS_PATTERNS=(
 
 FOUND_DANGEROUS=0
 
-for pattern in "${DANGEROUS_PATTERNS[@]}"; do
-    if grep -qE "$pattern" .claude/settings.json 2>/dev/null; then
-        echo "CRITICAL: Dangerous command auto-approved: $pattern"
-        FOUND_DANGEROUS=1
-    fi
-done
+# allow only: the same command in deny is the control, not an auto-approval. An unescaped
+# pipe in a pattern would become ERE alternation and match any quoted string containing curl.
+if ! command -v jq >/dev/null 2>&1; then
+    echo "SKIPPED: dangerous-command check needs jq to tell allow from deny"
+else
+    for pattern in "${DANGEROUS_PATTERNS[@]}"; do
+        if jq -e --arg p "$pattern" '(.permissions.allow // [])[] | select(test($p))' \
+            .claude/settings.json >/dev/null 2>&1; then
+            echo "CRITICAL: Dangerous command auto-approved: $pattern"
+            FOUND_DANGEROUS=1
+        fi
+    done
+fi
 
 if [ $FOUND_DANGEROUS -eq 0 ]; then
     echo "OK: No dangerous command auto-approvals"
