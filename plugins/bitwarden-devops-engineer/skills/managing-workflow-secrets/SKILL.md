@@ -179,13 +179,13 @@ boundary:
   - uses: bitwarden/gh-actions/azure-logout@main
   - name: Generate GH App token
     id: app-token
-    uses: actions/create-github-app-token@<sha> # SHA-pinned, third-party
+    uses: actions/create-github-app-token@<full-40-char-sha> # vX.Y.Z — replace both with the real values
     with:
       app-id: ${{ steps.secrets.outputs.GH-APP-ID }}
       private-key: ${{ steps.secrets.outputs.GH-APP-KEY }}
       owner: ${{ github.repository_owner }}
       repositories: self-host # narrow the token's scope when possible
-  - uses: actions/checkout@<sha>
+  - uses: actions/checkout@<full-40-char-sha> # vX.Y.Z — replace both with the real values
     with:
       token: ${{ steps.app-token.outputs.token }}
   ```
@@ -193,6 +193,9 @@ boundary:
   `KEY-VAULT`, `GH-APP-ID`, and `GH-APP-KEY` are placeholders — use the vault and App-credential
   secret names given for the task. Whether the App credentials live in an org-wide vault or a
   repo-scoped one is a per-task detail; if you do not have it, ask rather than assuming.
+  `<full-40-char-sha>` is a placeholder too: never emit it literally and never guess a SHA. Look up
+  the real commit SHA for the version you want and replace both the ref and the `# vX.Y.Z` comment,
+  per golden rule 1.
 
   A second job that also needs GitHub access repeats this whole block. Do not try to shorten it by
   routing `steps.app-token.outputs.token` through a job `output:` — it is masked, so the downstream
@@ -261,7 +264,9 @@ When asked to add or correct secret retrieval in a job:
 4. **Ensure `id-token: write`** is on the job, and keep the surrounding `permissions:` minimal.
 5. **Place `azure-logout` correctly** — right after retrieval, unless a later step needs the live
    session, and matching any `if:` on the login.
-6. **Use `@main` for the internal actions**; SHA-pin any third-party action you add.
+6. **Use `@main` for the internal actions**; SHA-pin any third-party action you add. Resolve the
+   real full-length SHA and its version comment — never guess one, and never leave a
+   `<full-40-char-sha>` placeholder in a workflow you hand back.
 7. **If the secret must reach another job or a reusable workflow**, use the mechanism above —
    re-retrieve per job, mint an App token for GitHub access, or forward the OIDC triad to the
    reusable workflow. If a reusable workflow is involved, **edit both sides**: match the caller's
