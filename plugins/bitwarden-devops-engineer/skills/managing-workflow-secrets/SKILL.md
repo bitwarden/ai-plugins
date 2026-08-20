@@ -284,8 +284,12 @@ Because an exposed token is a critical failure, verify each of these on any job 
 | External service integration   | API keys, connection strings, third-party tokens                 |
 | Failure / status notifications | Notification webhook URLs (e.g. Slack) retrieved from AKV        |
 
-For pure CI capabilities with no external interaction, AKV steps are typically unnecessary — and
-fork PRs cannot access secrets at all, so `secrets.AZURE_CLIENT_ID` is empty for them.
+For pure CI capabilities with no external interaction, AKV steps are typically unnecessary — and on
+a `pull_request` run from a fork, `secrets.AZURE_CLIENT_ID` is empty, so `azure-login` cannot
+succeed. That is not a blanket guarantee: `pull_request_target` and `workflow_run` run in the base
+repository's context and **do** receive secrets. Which trigger a workflow should use for fork
+contributions is a fork-PR access gate — out of scope here; confirm it with the user rather than
+assuming secrets are unreachable.
 
 ## References
 
