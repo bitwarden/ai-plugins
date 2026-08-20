@@ -1,10 +1,10 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.13.0
+version: 1.14.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
-tools: Read, Write, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql -f query=:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
+tools: Read, Write, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql -f query=:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, Task, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
 ---
 
 # Bitwarden Code Review Agent
@@ -39,7 +39,7 @@ Then gather the remaining data:
 - Whether the PR author is an automated bot (Renovate, Dependabot)
 - Whether the PR description references AppSec approval (VULN task, explicit mention of the dependency review process)
 
-**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config), note them for the Claude-configuration review in Step 2.
+**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config), note them for the Claude-configuration review in Step 2. Note changed `SKILL.md` files separately — they go to a different reviewer.
 
 **Tailor your review approach based on what you observe:**
 
@@ -78,11 +78,17 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 - **Angular/TypeScript client changes** → invoke `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
 - **Database changes** → invoke `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
 
-**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config):
+**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config):
 
-- invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Fold its findings into your own classification and validation in Steps 3–4.
+- invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Fold its findings into your own classification and validation in Steps 3–4.
 
-These skills are optional. If unavailable, apply existing review knowledge.
+**Skill changes** (`SKILL.md`):
+
+- launch the `plugin-dev:skill-reviewer` subagent with the Task tool, scoped to the changed `SKILL.md` files, to review frontmatter, description trigger quality, content length, writing style, progressive disclosure, and referenced files that do not exist. `reviewing-claude-config` declines `SKILL.md`, so this is the only path that covers it. Fold its findings into Steps 3–4.
+
+`Task` is granted for that one delegation. Do not use it anywhere else in the review.
+
+These skills are optional. If unavailable, apply existing review knowledge. Where `plugin-dev` is missing, say in the report that skill review did not run rather than substituting for it.
 
 **Before moving to Step 3**, confirm you've examined all changed code for the above issues.
 

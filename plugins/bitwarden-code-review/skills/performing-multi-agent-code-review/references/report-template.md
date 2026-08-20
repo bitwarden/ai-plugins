@@ -26,6 +26,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 | `bug`          | Bug analysis agent            |
 | `security`     | Security & logic agent        |
 | `config`       | Claude configuration agent    |
+| `skill`        | Skill review agent            |
 | `validation`   | Validation agent (collateral) |
 
 ## Template
