@@ -4,7 +4,7 @@ description: >-
   Bitwarden's canonical pattern for using a secret inside a GitHub Actions job: authenticate to
   Azure with the OIDC triad, pull the secret from an Azure Key Vault via the bitwarden/gh-actions
   composite actions (azure-login → get-keyvault-secrets → azure-logout), consume it safely, and get
-  it beyond the job when needed (per-job re-retrieval, a short-lived GitHub App token, or
+  it beyond the job when needed (per-job re-retrieval, a per-job GitHub App token, or
   reusable-workflow secret hand-off). Use whenever secret retrieval comes up for a workflow job.
   Example triggers: "add a step to pull the DockerHub token from Key Vault before we push the
   image", "do I need id-token: write on this job that logs in to Azure", or "my deploy job can't see
@@ -154,13 +154,20 @@ distance the secret has to travel.
 in the lifecycle above). This is the only case where a raw value is passed around, and it never
 leaves the job.
 
-**A subsequent job** — do **not** pass the value across the boundary. Job outputs are **not**
-secret-masked, so never put a secret in a job `output:`. Only two things legitimately cross a job
+**A subsequent job** — do **not** pass the value across the boundary. GitHub redacts masked values
+out of job `outputs:` — the runner logs `Skip output <key> since it may contain secret` — and
+`get-keyvault-secrets` registers every value it retrieves as masked. So a secret placed in an
+output arrives **empty** downstream; a value that was never masked would cross in the clear.
+Either way, never put a secret in a job `output:`. Only two things legitimately cross a job
 boundary:
 
-- **A short-lived GitHub App token**, when the real need is GitHub access (cross-repo checkout,
-  dispatch, `gh api`). Retrieve the App id/key from AKV, mint a token, and hand _that_ around — it
-  is already scoped and expires on its own:
+- **The ability to mint a short-lived GitHub App token**, when the real need is GitHub access
+  (cross-repo checkout, dispatch, `gh api`). The minted token is itself masked, so it cannot
+  travel through `outputs:` either — **mint it in the job that consumes it**. What crosses the
+  boundary is the capability, not a token: each job retrieves the App id/key from AKV and mints
+  its own.
+
+  In the job that needs GitHub access:
 
   ```yaml
   - name: Get Azure Key Vault secrets
@@ -186,6 +193,10 @@ boundary:
   `KEY-VAULT`, `GH-APP-ID`, and `GH-APP-KEY` are placeholders — use the vault and App-credential
   secret names given for the task. Whether the App credentials live in an org-wide vault or a
   repo-scoped one is a per-task detail; if you do not have it, ask rather than assuming.
+
+  A second job that also needs GitHub access repeats this whole block. Do not try to shorten it by
+  routing `steps.app-token.outputs.token` through a job `output:` — it is masked, so the downstream
+  job receives an empty string and the failure looks like a permissions error.
 
 - **Non-secret derived values** via job `outputs:` — a version string, a boolean, or even the
   _name_ of a secret key for the next job to look up (never the value). If the downstream job just
