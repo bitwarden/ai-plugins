@@ -177,7 +177,7 @@ if ! command -v jq >/dev/null 2>&1; then
     echo "SKIPPED: sensitive-path check needs jq to tell allow from deny"
     SKIPPED=$((SKIPPED + 1))
 else
-    for p in .ssh .aws .gnupg .config /etc id_rsa credentials; do
+    for p in .ssh .aws .gnupg .config/ /etc id_rsa credentials; do
         if jq -e --arg p "$p" '(.permissions.allow // [])[] | select(contains($p))' \
             .claude/settings.json >/dev/null 2>&1; then
             echo "WARNING: permissions.allow references a sensitive path: $p"
@@ -204,8 +204,11 @@ fi
 **Dangerous Command Patterns:**
 
 ```bash
-# Check for dangerous commands
-grep -E "(rm -rf|chmod 777|mkfs|dd|curl.*\| sh)" .claude/settings.json
+# Dangerous commands. A hit here is a candidate, not a finding: this is line-oriented, so it
+# cannot tell permissions.allow from deny or ask. Read the array the hit sits in before
+# reporting, and report only rules in allow. Bare `dd` would match "add" and "middleware",
+# so it is anchored as `dd if=`.
+grep -nE "(rm -rf|chmod 777|mkfs|dd if=|curl.*\| *sh)" .claude/settings.json
 ```
 
 **Dangerous Commands List:**
@@ -243,11 +246,13 @@ DANGEROUS_PATTERNS=(
 )
 
 FOUND_DANGEROUS=0
+SKIPPED=0
 
 # allow only: the same command in deny is the control, not an auto-approval. An unescaped
 # pipe in a pattern would become ERE alternation and match any quoted string containing curl.
 if ! command -v jq >/dev/null 2>&1; then
     echo "SKIPPED: dangerous-command check needs jq to tell allow from deny"
+    SKIPPED=1
 else
     for pattern in "${DANGEROUS_PATTERNS[@]}"; do
         if jq -e --arg p "$pattern" '(.permissions.allow // [])[] | select(test($p))' \
@@ -258,11 +263,14 @@ else
     done
 fi
 
-if [ $FOUND_DANGEROUS -eq 0 ]; then
+if [ $FOUND_DANGEROUS -ne 0 ]; then
+    exit 1
+elif [ $SKIPPED -ne 0 ]; then
+    echo "INCOMPLETE: nothing found, but ${SKIPPED} check(s) could not run"
+    exit 2
+else
     echo "OK: No dangerous command auto-approvals"
     exit 0
-else
-    exit 1
 fi
 ```
 

@@ -155,7 +155,7 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     # Sensitive paths, in allow only. The same path in deny is the control, not a defect,
     # so this needs the array the rule sits in and is recorded as skipped without jq.
     if command -v jq >/dev/null 2>&1; then
-        SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" ".config" "/etc" "id_rsa" "credentials")
+        SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" ".config/" "/etc" "id_rsa" "credentials")
         for path in "${SENSITIVE_PATHS[@]}"; do
             if jq -e --arg p "$path" \
                 '(.permissions.allow // [])[] | select(contains($p))' \
