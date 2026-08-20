@@ -35,7 +35,7 @@ reference, both commands, and all four targeted skills — edit them together.)_
       Record the check as skipped when no changed-files list is available
 - [ ] No hardcoded API keys, tokens, or passwords
 - [ ] No sensitive paths exposed in permissions
-- [ ] No dangerous command auto-approvals
+- [ ] Every auto-approved rule and executed command has been read and judged
 - [ ] `permissions.defaultMode` is not `bypassPermissions`, and
       `disableBypassPermissionsMode` has not been removed. CRITICAL: `bypassPermissions` in a
       committed settings file turns off the permission prompt for everyone who opens the repo,
@@ -50,8 +50,11 @@ reference, both commands, and all four targeted skills — edit them together.)_
       input into a nested shell (`bash -c`, `eval`, `ssh`) quoted or not. See Command safety
       below for the case that is safe and why
 
-A failure here is CRITICAL. Report it first, then finish the remaining passes so the caller
-can still say which checks ran.
+Severity comes from the per-field tables in
+`../reviewing-claude-config/reference/priority-framework.md` — Security Issues, Settings
+Issues, and Hook Issues — not from having failed here.
+Report the most severe first, then finish the remaining passes so the caller can still say
+which checks ran.
 
 The router's Step 2 covers the first four with a shallow `Grep` sweep. Run the passes below
 regardless: they carry the analysis a grep cannot do, including `allow` versus `deny`
@@ -240,10 +243,10 @@ because in a pull request that is exactly the threat.
 - [ ] Commands fail closed: a blocking hook that errors should block, not silently pass
 - [ ] Exit codes match intent — a `PreToolUse` hook blocks with exit code 2
 
-Use the dangerous-command patterns in
-`../reviewing-claude-config/reference/security-patterns.md`. Its detection commands hardcode
-`.claude/settings.json`, so reuse the patterns and retarget the greps at the hooks file you are
-reviewing.
+Read each hook command and judge it. `../reviewing-claude-config/reference/security-patterns.md`
+lists the shapes worth recognizing and says why a pattern list cannot do this for you. Its
+detection commands hardcode `.claude/settings.json`, so retarget them at the hooks file you are
+reviewing. Judgement here is the point: you have the surrounding context, and a regex does not.
 
 Quoting is worth more here than it is for a slash command, and still not enough. Three cases,
 which is why the rule cannot be stated as one:

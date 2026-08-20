@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filter step before reporting, dropping findings that are pre-existing, unspecific, unverified, already covered, or have no remediation
 - Four targeted review skills: `reviewing-agent-definitions`, `reviewing-command-definitions`, `reviewing-runtime-configuration`, `reviewing-project-guidance`
 - Settings pass for fields that execute or bypass: `defaultMode`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, `enableAllProjectMcpServers`, `env`
+- `security-scan.sh` Check 4 lists every string the configuration runs or auto-approves, with its location, instead of matching a pattern list against them
 - Shell-execution pass for slash commands, covering `` !`cmd` `` blocks and argument interpolation
 - Hook and settings severity tables in `priority-framework.md`
 
@@ -28,8 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Permission examples use `Tool` or `Tool(specifier)` rules under `permissions.allow` / `deny`, replacing a top-level `autoApprovedTools` array Claude Code does not read
 - `//` documented as the absolute path prefix, against a single leading `/` as relative to the settings file
-- `security-scan.sh` and the documented detectors match the real schema, read `permissions.allow` rather than the whole file so a hardening `deny` is not reported as a defect, and anchor placeholder exclusions to the value rather than the file path
-- Checks that cannot run are counted and reported as skipped; a run with no findings but a skipped check exits 2 rather than claiming a pass
+- `security-scan.sh` and the documented detectors match the real schema and read `permissions.allow` rather than the whole file, so a hardening `deny` is not reported as a defect; placeholder exclusions anchor to the value rather than the file path
+- The permission checks and the Check 4 inventory are counted and reported as skipped when they cannot run; a run with no findings but a skipped check exits 2 rather than claiming a pass
 - A `settings.json` that does not parse is CRITICAL rather than silently emptying the checks that read it
 
 ### Removed

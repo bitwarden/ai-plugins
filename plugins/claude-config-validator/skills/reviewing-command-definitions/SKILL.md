@@ -226,9 +226,10 @@ to a nested shell such as `bash -c`, because the inner shell re-parses it. A sla
 no safe quoted form at all, since substitution here is textual and pre-shell. That skill states
 all three cases.
 
-See `../reviewing-claude-config/reference/security-patterns.md` for the dangerous-command
-patterns. Its detection commands hardcode `.claude/settings.json`, so reuse the patterns and
-retarget the greps at the file you are reviewing.
+See `../reviewing-claude-config/reference/security-patterns.md` for the shapes worth
+recognizing in a command, and why they are listed rather than matched. Its Check 3 and Check 4
+detection commands grep JSON keys and do not apply to a Markdown command file; its Check 2
+secret patterns do, and are worth running here.
 
 ## Pass 8: Tool grants match the work
 

@@ -67,10 +67,14 @@ skipped when there is none.
 - [ ] No hardcoded credentials in any modified file (API keys, tokens, passwords,
       connection strings)
 - [ ] Permissions scoped appropriately (if a settings file changed)
-- [ ] No dangerous command auto-approvals (if a settings file changed)
+- [ ] Every auto-approved rule and executed command read (if a settings file changed)
 
-A security issue found here is CRITICAL. Lead the returned findings with it, then finish the
-remaining checks — abandoning them leaves the caller unable to say what was looked at.
+Severity comes from the per-field tables in `reference/priority-framework.md` rather than from
+having been found here: a committed `settings.local.json`, a hardcoded credential, and a
+filesystem-wide or sensitive-path rule in `allow` are CRITICAL, while a permission merely
+broader than it needs to be is IMPORTANT. Lead the returned findings with the most severe,
+then finish the remaining checks — abandoning them leaves the caller unable to say what was
+looked at.
 
 `reference/security-patterns.md` has the detection patterns. This skill's tools are
 read-only, so neither `scripts/security-scan.sh` nor that reference's shell commands can run
@@ -102,8 +106,8 @@ A `hooks` block declared inside a settings file routes to
 
 The command row matches any `commands/` directory at any depth, which is what
 `reference/validate-ai-scope.md` puts in the command bucket. It excludes `README.md`, since a
-command's sibling documentation is not a command definition and would otherwise be judged for
-absent frontmatter.
+command's sibling documentation is not a command definition and would otherwise be reviewed
+against the argument, body and tool-grant passes as though it were one.
 
 The last row is the fallback, and it matters most for skill support files (`reference/`,
 `examples/`, `scripts/`), which have no targeted skill of their own. Read them here for
@@ -226,7 +230,10 @@ holds:
 - any **CRITICAL** finding, or
 - any finding that **weakens security**, at whatever severity it carries. That covers a
   permission, tool grant, or hook capability wider than what the changeset justifies, and any
-  new path by which contributor-controlled input reaches a shell.
+  new path by which contributor-controlled input reaches a shell. Hook input is the one
+  exception: quoted and consumed directly by the command it is passed to, it is not such a
+  path. A slash command has no safe quoted form, so any interpolation into a `` !`...` ``
+  block is one.
 
 A widening the changeset justifies is not a finding at all, so it never reaches this rule.
 "Ask why rather than blocking" is what settles that, and it happens before severity is
@@ -243,8 +250,9 @@ without failing. Security is the exception, and it needs its own clause rather t
 severity threshold: `reference/priority-framework.md` rates some real security regressions IMPORTANT,
 such as an over-broad agent tool grant that stops short of credentials or a permission broader
 than needed, and a severity-only rule would merge every one of them under a green check. The
-shell-execution clause is a floor of the same kind: the sub-skills rate every interpolation
-into a shell CRITICAL today, and the verdict does not rest on their continuing to.
+shell-execution clause is a floor of the same kind: the sub-skills rate every slash-command
+interpolation CRITICAL today, quoted or not, along with every hook interpolation a nested
+shell re-parses, and the verdict does not rest on their continuing to.
 
 ## Reference material
 

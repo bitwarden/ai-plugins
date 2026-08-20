@@ -30,7 +30,7 @@ Every review **always** includes critical security checks:
 - ✅ No hardcoded credentials (API keys, passwords, tokens)
 - ✅ Appropriate permission scoping
 - ✅ Principle of least privilege for agent tool access
-- ✅ Detection of dangerous command patterns in hooks/scripts
+- ✅ An inventory of every string the configuration runs or auto-approves, for a reviewer to read
 
 ### Evidence-Based Quality Standards
 
@@ -48,7 +48,7 @@ The skill works through five steps:
 1. **Settle Scope** - Only what the changeset introduced or worsened; a changed file is not a changed line
 2. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
 3. **Route** - Invokes the targeted review skill for the detected type
-4. **Filter** - Drops candidates that are pre-existing, unspecific, have no remediation, or duplicate another checker
+4. **Filter** - Drops candidates that are pre-existing, unspecific, have no remediation, or are already covered by a checker outside this pipeline; duplicates from two checkers inside it are merged at the higher severity
 5. **Document Findings** - One finding per issue, anchored to `file:line`
 
 Each targeted skill then runs its own multi-pass strategy over the file under review.
@@ -127,7 +127,7 @@ The skill will automatically:
 Review my new agent configuration in .claude/agents/code-analyzer.md
 ```
 
-**Output**: One finding per issue with specific improvements, security concerns flagged as CRITICAL, quality suggestions as IMPORTANT/SUGGESTED.
+**Output**: One finding per issue with specific improvements. Security concerns are CRITICAL where they reach credentials or destructive commands and IMPORTANT otherwise; quality suggestions are SUGGESTED or OPTIONAL.
 
 ---
 
@@ -319,8 +319,20 @@ Reference: `reviewing-project-guidance` - Pass 4: Clarity
 ## Running the security scanner directly
 
 `security-scan.sh` is a human-run helper, not something the skills execute: their grants are
-read-only. It checks for a committed `settings.local.json`, hardcoded secrets, sensitive paths
-in `permissions.allow`, and bare tool rules in `allow`.
+read-only. Check 4 and check 3's sensitive-path scan read every string in `settings.json` except the
+rules in `permissions.deny` and `permissions.ask`, which are controls rather than grants. That
+covers `permissions.allow`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, hook
+commands and `env` values without enumerating them. Check 3's rule-form test additionally reads
+`deny` and `ask`, since a colon-separated rule fails open in any array.
+
+The four checks are: a committed `settings.local.json`; hardcoded secrets; permission scoping,
+covering filesystem-wide, bare and sensitive-path grants, rule forms Claude Code does not read,
+and `defaultMode: bypassPermissions`; and an inventory of every string the configuration runs
+or auto-approves, each with its location in the file.
+
+Check 4 lists rather than classifies. Pattern-matching shell strings traded a false negative
+for a false positive every time it was tightened, so the script reports what will run and the
+reviewer judges it.
 
 ```bash
 # Scans the .claude directory of the current working directory
@@ -330,9 +342,11 @@ in `permissions.allow`, and bare tool rules in `allow`.
 ~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh /path/to/.claude
 ```
 
-Checks that cannot run are reported as skipped rather than passed. The allow-versus-deny checks
-need `jq` and say so when it is missing, since a rule in `deny` is the control rather than a
-defect.
+The permission checks and the inventory report themselves as skipped rather than passed when
+they cannot run. Check 3's four rule tests need `jq`, a `settings.json` that parses, and string
+rules in `permissions.allow`, since a rule in `deny` is the control rather than a defect and
+telling it from `allow` needs the array the rule sits in; the inventory needs the first two.
+The `settings.local.json` check does not yet report itself this way.
 
 ## Plugin Structure
 

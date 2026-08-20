@@ -214,7 +214,9 @@ plugin loading (malformed manifest, missing required file) and major otherwise
 - a critical finding, or
 - a finding that **weakens security** at whatever severity it carries, covering a permission,
   tool grant, or hook capability wider than what the changeset justifies, and any new path by
-  which contributor-controlled input reaches a shell, or
+  which contributor-controlled input reaches a shell. Hook input quoted and consumed directly
+  by the command it is passed to is the one exception; a slash command has no safe quoted
+  form, so any interpolation into a `` !`...` `` block counts, or
 - a failed script check.
 
 Everything else reports as `Pass` with its findings listed underneath.
