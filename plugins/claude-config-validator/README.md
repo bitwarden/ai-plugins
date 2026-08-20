@@ -319,11 +319,15 @@ Reference: `reviewing-project-guidance` - Pass 4: Clarity
 ## Running the security scanner directly
 
 `security-scan.sh` is a human-run helper, not something the skills execute: their grants are
-read-only. Check 4 and check 3's sensitive-path scan read every string in `settings.json` except the
-rules in `permissions.deny` and `permissions.ask`, which are controls rather than grants. That
-covers `permissions.allow`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, hook
-commands and `env` values without enumerating them. Check 3's rule-form test additionally reads
-`deny` and `ask`, since a colon-separated rule fails open in any array.
+read-only. Check 4 reads every string in `settings.json` except the rules in
+`permissions.deny` and `permissions.ask`, which are controls rather than grants. That covers
+`permissions.allow`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, hook
+commands and `env` values without enumerating them.
+
+Check 3 is narrower on purpose. Its sensitive-path scan reads `permissions.allow` and
+`additionalDirectories` only, since a path in a grant is the whole meaning of the rule, while a
+path a command merely mentions is a judgment call Check 4 hands to the reviewer. Its rule-form
+test additionally reads `deny` and `ask`, since a colon-separated rule fails open in any array.
 
 The four checks are: a committed `settings.local.json`; hardcoded secrets; permission scoping,
 covering filesystem-wide, bare and sensitive-path grants, rule forms Claude Code does not read,
