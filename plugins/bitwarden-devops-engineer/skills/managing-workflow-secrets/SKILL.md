@@ -134,7 +134,8 @@ Treat a deviation as a finding.
 
 3. **Only three GitHub secrets exist for auth — the OIDC triad.** `AZURE_SUBSCRIPTION_ID`,
    `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`. Everything else lives in Key Vault. The `client_id`
-   sometimes uses a purpose-specific identity; see `references/actions.md` for when to pick which.
+   sometimes uses a purpose-specific identity, and their scope (org, repo, or environment) is a
+   repo setting you cannot read from the workflow; see `references/actions.md` for both.
 
 4. **Always pair `azure-login` with `azure-logout`, and match their conditions.** Omitting logout
    leaves credentials active in the runner. If `azure-login` is gated with `if:`, `azure-logout`
@@ -284,12 +285,10 @@ Because an exposed token is a critical failure, verify each of these on any job 
 | External service integration   | API keys, connection strings, third-party tokens                 |
 | Failure / status notifications | Notification webhook URLs (e.g. Slack) retrieved from AKV        |
 
-For pure CI capabilities with no external interaction, AKV steps are typically unnecessary — and on
-a `pull_request` run from a fork, `secrets.AZURE_CLIENT_ID` is empty, so `azure-login` cannot
-succeed. That is not a blanket guarantee: `pull_request_target` and `workflow_run` run in the base
-repository's context and **do** receive secrets. Which trigger a workflow should use for fork
-contributions is a fork-PR access gate — out of scope here; confirm it with the user rather than
-assuming secrets are unreachable.
+For pure CI capabilities with no external interaction, AKV steps are typically unnecessary — and
+`azure-login` cannot succeed on a `pull_request` run from a fork. `pull_request_target` and
+`workflow_run` do receive secrets, but choosing a trigger is a fork-PR access gate — out of scope
+here; ask.
 
 ## References
 

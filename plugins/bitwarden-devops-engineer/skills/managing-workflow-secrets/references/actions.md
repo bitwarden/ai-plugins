@@ -35,6 +35,9 @@ Behavior worth knowing:
 - **It requires `id-token: write`** on the job. Without it the federated login cannot mint a
   token and the step fails. This is the most common cause of "login works locally / on one job but
   not another".
+- **The triad's scope is a repo setting, not a workflow fact.** If it is environment-scoped, a job
+  without `environment:` resolves the `secrets.AZURE_*` expressions to empty strings and the login
+  fails. You cannot read the scope from the workflow — ask rather than assume.
 - **No `subscription-id` needed for tenant-only auth.** With `allow_no_subscriptions: true`, drop
   `subscription_id` entirely (used only for Partner Center tenants with no subscription).
 
