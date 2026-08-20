@@ -12,7 +12,7 @@ Review checklist for changes to Claude Code skill files (`SKILL.md` and supporti
 Critical structural elements:
 1. Is YAML frontmatter present and valid?
 2. Is the skill file within the 500-line guideline?
-3. Are there any security issues (hardcoded secrets, committed settings)?
+3. Are there any security issues (hardcoded secrets, local settings in the changeset)?
 4. Do all file references point to existing files?
 5. Is progressive disclosure properly implemented?
 </thinking>
@@ -31,7 +31,7 @@ Critical structural elements:
 - File > 500 lines without progressive disclosure
 - Hardcoded API keys, tokens, or passwords
 - Broken file references
-- Committed settings.local.json
+- settings.local.json appearing in the changeset
 
 ---
 
@@ -268,4 +268,4 @@ Before completing review, verify:
 
 ## Output Format
 
-Report findings using the standard format in `SKILL.md` Step 5.
+Report findings using the standard format in `../SKILL.md` Step 5.

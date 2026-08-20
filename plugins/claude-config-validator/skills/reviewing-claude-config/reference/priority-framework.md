@@ -21,7 +21,7 @@ Classification system for prioritizing issues found in Claude configuration file
 
 **Action Required:** Must fix immediately before approval.
 
-**Review Comment Format:**
+**Finding Format:**
 
 ```
 **CRITICAL**: [Issue description]
@@ -49,7 +49,7 @@ This must be fixed before approval because [security/functionality reason].
 
 **Action Required:** Should fix in this PR/commit. If time-constrained, create follow-up issue.
 
-**Review Comment Format:**
+**Finding Format:**
 
 ```
 **IMPORTANT**: [Issue description]
@@ -76,7 +76,7 @@ This must be fixed before approval because [security/functionality reason].
 
 **Action Required:** Optional improvements. Consider for future work.
 
-**Review Comment Format:**
+**Finding Format:**
 
 ```
 **SUGGESTED**: [Improvement suggestion]
@@ -101,7 +101,7 @@ This would improve [aspect] but isn't required for approval.
 
 **Action Required:** Author decides. No expectation to change.
 
-**Review Comment Format:**
+**Finding Format:**
 
 ```
 **OPTIONAL**: [Observation or suggestion]
@@ -217,7 +217,7 @@ When multiple issues exist in a single review:
    - Security issues first
    - Functionality issues second
    - Quality issues third
-3. **Focus review comments on highest priorities**
+3. **Focus findings on highest priorities**
 4. **May skip OPTIONAL issues if many higher-priority issues exist**
 
 ---

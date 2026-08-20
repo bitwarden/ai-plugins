@@ -77,7 +77,7 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 
 ## Permissions
 
-The command pre-approves read-only inspection only — `git diff`, `git fetch`,
+The command pre-approves read-only inspection only — `git diff`, `git fetch origin`,
 `git rev-parse`, `git symbolic-ref`, `git ls-files`, `date`, `ls` — plus an `Edit` rule
 scoped to `~/.claude/plugins/data/claude-config-validator*/ai-validation/`, the only
 directory it writes to. Cloning
