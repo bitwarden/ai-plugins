@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `SKILL.md` files route to `plugin-dev:skill-reviewer`: Agent 5 in `performing-multi-agent-code-review` Step 3, and a Task-tool delegation in the single-agent reviewer's Cross-Plugin Enrichment
 - `source_agent: "skill"` with `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent" in `report-template.md`
 - `plugin-dev` as a second optional enhancer alongside `claude-config-validator`, excluded from the prerequisite abort check
+- `**Not covered:**` line in the report Summary, rendered when a conditional agent had files to review but its plugin was missing
 - `Task` in the `bitwarden-code-reviewer` tool grant, scoped by the agent definition to the `plugin-dev:skill-reviewer` delegation
 
 ### Changed

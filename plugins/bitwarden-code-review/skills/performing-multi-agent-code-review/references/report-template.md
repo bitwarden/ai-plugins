@@ -46,6 +46,10 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 {1-5 sentences for overall assessment.}
 
+<!-- Only when a conditional agent was skipped for a missing plugin. Omit entirely otherwise. -->
+
+**Not covered:** {What the review did not look at, and why. E.g. "Skill review did not run — `plugin-dev` is not installed, so the 2 changed `SKILL.md` files were read as ordinary diff only."}
+
 ## Findings
 
 ### 🛑 Blockers
