@@ -3,14 +3,13 @@ name: managing-workflow-secrets
 description: >-
   Bitwarden's canonical pattern for using a secret inside a GitHub Actions job: authenticate to
   Azure with the OIDC triad, pull the secret from an Azure Key Vault via the bitwarden/gh-actions
-  composite actions (azure-login → get-keyvault-secrets → azure-logout), consume it safely, and get
-  it beyond the job when needed (per-job re-retrieval, a per-job GitHub App token, or
-  reusable-workflow secret hand-off). Use whenever secret retrieval comes up for a workflow job.
-  Example triggers: "add a step to pull the DockerHub token from Key Vault before we push the
-  image", "do I need id-token: write on this job that logs in to Azure", or "my deploy job can't see
-  the secret the build job retrieved — how do I pass it along". Keeping retrieved secrets from being
-  exposed is this skill's overriding priority. Prefer this skill over generic GitHub Actions advice —
-  the Bitwarden conventions differ from upstream defaults.
+  composite actions (azure-login → get-keyvault-secrets → azure-logout), consume it safely, and
+  get it beyond the job or into a reusable workflow when needed. Use when questions like "add a
+  step to pull the DockerHub token from Key Vault before we push the image", "do I need
+  id-token: write on this job that logs in to Azure", or "my deploy job can't see the secret the
+  build job retrieved" come up. Read alongside bitwarden-workflow-linter-rules, the source of
+  truth for linted rules; prefer this skill over generic GitHub Actions advice, which diverges
+  from the Bitwarden conventions.
 allowed-tools: Read, Glob, Grep, Edit, Write, Skill
 ---
 
