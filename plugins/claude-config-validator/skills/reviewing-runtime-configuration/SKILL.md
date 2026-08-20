@@ -41,7 +41,6 @@ reference, both commands, and all four targeted skills — edit them together.)_
       committed settings file turns off the permission prompt for everyone who opens the repo,
       which is broader than any single over-broad rule. `acceptEdits` is narrower and often
       deliberate, so it belongs with the other non-rule fields below rather than here
-- [ ] `permissions.additionalDirectories` does not reach outside the project
 - [ ] No hook command sends repository, prompt, or environment content off the machine
 - [ ] No hook command destroys state without a guard
 - [ ] No hook command reads credentials or secrets — `.env`, `~/.aws`, `~/.ssh`, the

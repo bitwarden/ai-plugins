@@ -316,6 +316,24 @@ Specific, actionable instructions improve AI behavior (Anthropic prompt engineer
 Reference: `reviewing-project-guidance` - Pass 4: Clarity
 ```
 
+## Running the security scanner directly
+
+`security-scan.sh` is a human-run helper, not something the skills execute: their grants are
+read-only. It checks for a committed `settings.local.json`, hardcoded secrets, sensitive paths
+in `permissions.allow`, and bare tool rules in `allow`.
+
+```bash
+# Scans the .claude directory of the current working directory
+~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh
+
+# Or a specific directory
+~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh /path/to/.claude
+```
+
+Checks that cannot run are reported as skipped rather than passed. The allow-versus-deny checks
+need `jq` and say so when it is missing, since a rule in `deny` is the control rather than a
+defect.
+
 ## Plugin Structure
 
 ```
@@ -329,7 +347,6 @@ plugins/claude-config-validator/
 ├── skills/
 │   ├── reviewing-claude-config/        # Entry point: scope, security scan, routing, filtering
 │   │   ├── SKILL.md
-│   │   ├── README.md                   # Skill-specific documentation
 │   │   ├── reference/                  # Priority framework, security patterns, requirements, changeset scope
 │   │   └── scripts/                    # Security scan helper (human-run)
 │   ├── reviewing-agent-definitions/    # Tool access, triggers, system prompts

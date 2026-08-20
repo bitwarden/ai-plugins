@@ -61,7 +61,7 @@ SECRET_FOUND=0
 TEMP_FILE=$(mktemp)
 
 # OpenAI API keys (sk-...)
-if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -v "sk-EXAMPLE" > "${TEMP_FILE}"; then
+if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -vE '(^|[:=[:space:]"'\''])sk-EXAMPLE' > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: OpenAI API key pattern detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'
@@ -70,7 +70,7 @@ if grep -rE "sk-[a-zA-Z0-9]{32,}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "securit
 fi
 
 # GitHub tokens (ghp_..., gho_...)
-if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -v "examples/" | grep -v "ghp_EXAMPLE" > "${TEMP_FILE}"; then
+if grep -rE "gh[po]_[a-zA-Z0-9]{36}" "${CLAUDE_DIR}" 2>/dev/null | grep -v "security-scan.sh" | grep -v "security-patterns.md" | grep -vE '(^|[:=[:space:]"'\''])ghp_EXAMPLE' > "${TEMP_FILE}"; then
     echo "  ❌ CRITICAL: GitHub token pattern detected"
     echo "     Locations:"
     cat "${TEMP_FILE}" | sed 's/^/     /'
@@ -150,17 +150,25 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         PERM_ISSUES=1
     fi
 
-    # Check for sensitive paths
-    SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" "/etc" "id_rsa" "credentials")
-    for path in "${SENSITIVE_PATHS[@]}"; do
-        if grep -q "$path" "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
-            echo "  ⚠️ WARNING: Permissions reference sensitive path: $path"
-            echo "     File: ${CLAUDE_DIR}/settings.json"
-            echo "     Review manually to ensure appropriate scoping"
-            echo ""
-            PERM_ISSUES=1
-        fi
-    done
+    # Sensitive paths, in allow only. The same path in deny is the control, not a defect,
+    # so this needs the array the rule sits in and is recorded as skipped without jq.
+    if command -v jq >/dev/null 2>&1; then
+        SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" "id_rsa" "credentials")
+        for path in "${SENSITIVE_PATHS[@]}"; do
+            if jq -e --arg p "$path" \
+                '(.permissions.allow // [])[] | select(contains($p))' \
+                "${CLAUDE_DIR}/settings.json" >/dev/null 2>&1; then
+                echo "  ⚠️  WARNING: permissions.allow references a sensitive path: $path"
+                echo "     File: ${CLAUDE_DIR}/settings.json"
+                echo "     Review manually to ensure appropriate scoping"
+                echo ""
+                PERM_ISSUES=1
+            fi
+        done
+    else
+        echo "  ⚠️  SKIPPED: sensitive-path check needs jq to tell allow from deny"
+        echo ""
+    fi
 
     if [ $PERM_ISSUES -eq 0 ]; then
         echo "  ✅ OK: Permissions appropriately scoped"

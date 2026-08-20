@@ -189,7 +189,7 @@ sends every command path here.
 
 - [ ] `` !`cmd` `` blocks are read as executable code. They run at prompt-expansion time,
       before the model sees anything, so a `PreToolUse` hook never fires on them
-- [ ] `$ARGUMENTS`, `$1`, `$2` do not reach a shell string inside `` !`...` `` at all.
+- [ ] No `$ARGUMENTS`, `$1`, or `$2` is interpolated into a shell string inside `` !`...` ``.
       **Quoting is not a fix.** Any interpolation is a finding: CRITICAL unquoted, IMPORTANT
       quoted
 - [ ] Where the command needs its arguments, they arrive on stdin, or are validated against an
