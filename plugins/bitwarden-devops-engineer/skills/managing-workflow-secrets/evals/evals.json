@@ -12,7 +12,7 @@
       "id": 1,
       "name": "downstream-job-handoff",
       "prompt": "In this release.yml, the `deploy` job references `steps.secrets.outputs.NPM-DEPLOY-TOKEN`, but that step is in the `build` job so it resolves to empty and `npm publish` fails with no auth. How do I get the npm token to the deploy job? Fix the workflow.",
-      "expected_output": "Explains that a secret value must NOT cross a job boundary (job outputs are not masked). The fix is to re-run azure-login -> get-keyvault-secrets (NPM-DEPLOY-TOKEN) -> azure-logout inside the deploy job and consume via step-scoped env, adding id-token: write to the deploy job. Does NOT pass the secret via a job `outputs:`.",
+      "expected_output": "Explains that a secret value must NOT cross a job boundary via `outputs:` — the runner redacts masked values out of job outputs, so the token arrives empty downstream. The fix is to re-run azure-login -> get-keyvault-secrets (NPM-DEPLOY-TOKEN) -> azure-logout inside the deploy job and consume via step-scoped env, adding id-token: write to the deploy job. Does NOT pass the secret via a job `outputs:`.",
       "files": ["files/deploy-cant-see-secret.yml"]
     },
     {
@@ -40,7 +40,7 @@
       "id": 5,
       "name": "app-token-cross-job",
       "prompt": "In this sync.yml the `prepare` job retrieves a GitHub App key from Key Vault and exposes it as a job output (`gh_key`), and the `sync` job uses it to check out `myorg/platform` and call `gh api`. The token arrives empty. How should I give the `sync` job GitHub access? Fix the workflow.",
-      "expected_output": "Explains that a secret value (the App private key) must NOT cross a job boundary via `outputs:` — job outputs are not secret-masked, so this both fails to resolve and leaks the key. The fix is to mint a short-lived GitHub App token: retrieve GH-APP-ID/GH-APP-KEY from AKV (azure-login -> get-keyvault-secrets -> azure-logout, id-token: write) and mint the token with actions/create-github-app-token (SHA-pinned third-party), scoping it with `repositories:` where possible. The minted token — already scoped and self-expiring — is what legitimately crosses the boundary or is minted in the `sync` job; the raw App key is never placed in a job output. App-token step outputs consumed via step-scoped env/`with:`, not echoed.",
+      "expected_output": "Explains that a secret value (the App private key) must NOT cross a job boundary via `outputs:` — the runner redacts masked values out of job outputs, so `gh_key` arrives empty. The fix is to mint a short-lived GitHub App token inside the `sync` job itself: retrieve GH-APP-ID/GH-APP-KEY from AKV (azure-login -> get-keyvault-secrets -> azure-logout, id-token: write) and mint the token with actions/create-github-app-token (SHA-pinned third-party), scoping it with `repositories:` where possible. Neither the App private key nor the minted token is routed through a job `outputs:` — the minted token is masked too and would also arrive empty. App-token step outputs consumed via step-scoped env/`with:`, not echoed.",
       "files": ["files/app-token-cross-job.yml"]
     },
     {
