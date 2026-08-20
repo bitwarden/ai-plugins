@@ -2,8 +2,8 @@
 """Trigger-rate evaluator that checks for the real plugin-registered skill.
 
 The skill-creator harness registers a temp copy named
-`creating-pull-request-skill-<uuid>` and only counts invocations of that name
-as triggers. When the real `bitwarden-delivery-tools:creating-pull-request`
+`filing-breakdown-tasks-skill-<uuid>` and only counts invocations of that name
+as triggers. When the real `bitwarden-delivery-tools:filing-breakdown-tasks`
 skill is already installed in the environment running the eval, the model
 invokes the real one and the harness records a false negative.
 
@@ -28,18 +28,17 @@ from pathlib import Path
 TARGET_SKILL_TOKEN = "filing-breakdown-tasks"
 
 
-def run_query(query: str, timeout: int, model: str, plugin_dir: str = None) -> dict:
+def run_query(query: str, timeout: int, model: str, plugin_dirs=()) -> dict:
     cmd = [
         "claude",
         "-p", query,
         "--output-format", "stream-json",
         "--verbose",
         "--include-partial-messages",
-        "--permission-mode", "plan",
         "--model", model,
     ]
-    if plugin_dir:
-        cmd += ["--plugin-dir", plugin_dir]
+    for d in plugin_dirs:
+        cmd += ["--plugin-dir", d]
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
     process = subprocess.Popen(
         cmd,
@@ -93,9 +92,7 @@ def run_query(query: str, timeout: int, model: str, plugin_dir: str = None) -> d
                         delta = se.get("delta", {})
                         if delta.get("type") == "input_json_delta":
                             accum += delta.get("partial_json", "")
-                            if (pending == "Skill" and TARGET_SKILL_TOKEN in accum) or (
-                                pending == "Read" and f"{TARGET_SKILL_TOKEN}/SKILL.md" in accum
-                            ):
+                            if TARGET_SKILL_TOKEN in accum:
                                 return {"triggered": True, "first_skill": accum}
                     elif se.get("type") == "content_block_stop" and pending:
                         if first_skill_seen is None:
@@ -114,9 +111,7 @@ def run_query(query: str, timeout: int, model: str, plugin_dir: str = None) -> d
                         inp = item.get("input", {})
                         if name == "Skill" and TARGET_SKILL_TOKEN in inp.get("skill", ""):
                             return {"triggered": True, "first_skill": inp.get("skill")}
-                        if name == "Read" and inp.get("file_path", "").endswith(
-                            f"{TARGET_SKILL_TOKEN}/SKILL.md"
-                        ):
+                        if name == "Read" and TARGET_SKILL_TOKEN in inp.get("file_path", ""):
                             return {"triggered": True, "first_skill": inp.get("file_path")}
                 elif event.get("type") == "result":
                     return {"triggered": triggered, "first_skill": first_skill_seen}
@@ -127,11 +122,11 @@ def run_query(query: str, timeout: int, model: str, plugin_dir: str = None) -> d
     return {"triggered": triggered, "first_skill": first_skill_seen}
 
 
-def runs_for(query, should_trigger, runs, timeout, model, plugin_dir=None):
+def runs_for(query, should_trigger, runs, timeout, model, plugin_dirs=()):
     triggers = 0
     samples = []
     for _ in range(runs):
-        r = run_query(query, timeout, model, plugin_dir)
+        r = run_query(query, timeout, model, plugin_dirs)
         if r["triggered"]:
             triggers += 1
         samples.append(r.get("first_skill"))
@@ -158,15 +153,17 @@ def main():
     parser.add_argument("--runs-per-query", type=int, default=3)
     parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--timeout", type=int, default=60)
-    parser.add_argument("--model", default="claude-opus-4-7")
-    parser.add_argument("--plugin-dir", default=None)
+    parser.add_argument("--model", default="claude-opus-5")
+    # Repeatable: every plugin whose skills compete for these queries must be
+    # loaded, or a near-miss scores as a pass against a skill that wasn't there.
+    parser.add_argument("--plugin-dir", action="append", default=[], dest="plugin_dirs")
     args = parser.parse_args()
 
     eval_set = json.loads(Path(args.eval_set).read_text())
     results = [None] * len(eval_set)
     with ProcessPoolExecutor(max_workers=args.num_workers) as pool:
         futures = {
-            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model, args.plugin_dir): i
+            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model, tuple(args.plugin_dirs)): i
             for i, e in enumerate(eval_set)
         }
         for fut in as_completed(futures):
@@ -181,7 +178,13 @@ def main():
     no_trigger_pass = sum(1 for r in results if not r["should_trigger"] and r["trigger_rate"] < 0.5)
     no_trigger_total = sum(1 for r in results if not r["should_trigger"])
 
+    # Run-invariant only — a timestamp here would make every regression diff
+    # non-empty. A model or plugin-set change SHOULD fail the diff: the run it
+    # produced is not comparable to the baseline.
     summary = {
+        "model": args.model,
+        "plugin_dirs": sorted(str(Path(d).resolve().name) for d in args.plugin_dirs),
+        "runs_per_query": args.runs_per_query,
         "should_trigger_pass_rate": triggers_pass / triggers_total if triggers_total else None,
         "should_not_trigger_pass_rate": no_trigger_pass / no_trigger_total if no_trigger_total else None,
         "should_trigger_pass": f"{triggers_pass}/{triggers_total}",

@@ -33,14 +33,14 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Mechanics
 
-| Skill                    | Triggers                                                                                                 | Purpose                                                                                                                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `committing-changes`     | "commit", "stage changes"                                                                                | Default-branch check, commit message format, staging best practices                                                                                         |
-| `creating-pull-request`  | "create PR", "open PR"                                                                                   | PR title/body format, draft workflow, AI review labels                                                                                                      |
-| `filing-breakdown-tasks` | "create the tickets from tasks.md", "turn this breakdown into Jira tickets", "file the epic and stories" | Turn a `tasks.md` decomposition into epic + child ticket drafts, then hand off to `filing-jira-tickets` to file them. Requires `bitwarden-atlassian-tools`. |
-| `force-multiplier`       | "across all repos", "in bulk"                                                                            | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs                                                                        |
-| `labeling-changes`       | "label", "change type"                                                                                   | Conventional commit type keywords, CI label mapping                                                                                                         |
-| `perform-preflight`      | "preflight", "self review"                                                                               | Pre-commit quality gate checklist                                                                                                                           |
+| Skill                    | Triggers                                             | Purpose                                                                                         |
+| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `committing-changes`     | "commit", "stage changes"                            | Default-branch check, commit message format, staging best practices                             |
+| `creating-pull-request`  | "create PR", "open PR"                               | PR title/body format, draft workflow, AI review labels                                          |
+| `filing-breakdown-tasks` | "tickets from tasks.md", "file the epic and stories" | Turn a breakdown's `tasks.md` into epic + child ticket drafts for `filing-jira-tickets` to file |
+| `force-multiplier`       | "across all repos", "in bulk"                        | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs            |
+| `labeling-changes`       | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                             |
+| `perform-preflight`      | "preflight", "self review"                           | Pre-commit quality gate checklist                                                               |
 
 ## Design Principle
 

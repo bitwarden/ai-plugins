@@ -2,7 +2,7 @@
 name: filing-breakdown-tasks
 description: Turn a tech breakdown's tasks.md into Jira ticket drafts — an epic parent plus one child story/task per task entry, each a real ticket with acceptance criteria and mapped Blocked-by/Depends-on links — then hand off to filing-jira-tickets to file them.
 when_to_use: Use only when starting from a finished tasks.md (a tech breakdown's task decomposition) to create a set of new Jira tickets — phrasings like "create the tickets from tasks.md", "make Jira tickets for these tasks", "file the epic and stories", "turn this breakdown into Jira tickets". Also use when a tech breakdown in bitwarden/tech-breakdowns hands off a finished tasks.md. Do not use to edit or update an existing ticket's fields such as description, acceptance criteria, status, or labels (there's no tasks.md involved); to read or research existing issues (that is researching-jira-issues); or to move, organize, or otherwise manage breakdown files and folders.
-allowed-tools: Read, Glob, Skill, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue
+allowed-tools: Read, Glob, Skill(bitwarden-atlassian-tools:filing-jira-tickets), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue
 ---
 
 # Filing Breakdown Tasks into Jira
@@ -13,7 +13,9 @@ Tickets are read outside the breakdown's context, so translate each task entry i
 
 ## Step 1 — Build the ticket tree
 
-Read `tasks.md` and its sibling `breakdown.md`. Establish the hierarchy before drafting any fields:
+Read `tasks.md` and its sibling `breakdown.md`. The pair lives in one breakdown folder (`<team>/<JIRA-KEY>-<short-slug>/`) in a `bitwarden/tech-breakdowns` checkout — `Glob` for it when the user gave no path, and ask which one when more than one matches. If `breakdown.md` is missing or names no epic key, ask for the key.
+
+Establish the hierarchy before drafting any fields:
 
 - The breakdown's **epic is the parent**. Take its key from `breakdown.md`. If no epic exists, ask whether to create one or attach children to an existing key — do not guess a key. Confirm the key is an Epic (`get_issue`, check `issuetype`) before parenting under it.
 - Each task entry becomes **one child** — Story by default; Task or Bug only if the entry says so.
@@ -46,7 +48,9 @@ From each task's **Blocked by** / **Depends on**, build the link map filing-jira
 
 ## Step 4 — Hand off to filing-jira-tickets
 
-Hand the drafted tickets (Step 2) and the link map (Step 3) to **`Skill(filing-jira-tickets)`**. It owns the rest: reading the project's create screen, dry-run previews, per-ticket approval, live creation, and link verification.
+Hand the drafted tickets (Step 2) and the link map (Step 3) to **`Skill(bitwarden-atlassian-tools:filing-jira-tickets)`**. It owns the rest: reading the project's create screen, dry-run previews, per-ticket approval, live creation, and link verification.
+
+That skill ships in `bitwarden-atlassian-tools`. If it is unavailable, stop and prompt the user to install the plugin (`/plugin install bitwarden-atlassian-tools@bitwarden-marketplace`), then hand off. Never file the drafts by another route, and never drop them silently.
 
 If an epic is being created rather than reused, file it first so the children have a parent key to reference.
 

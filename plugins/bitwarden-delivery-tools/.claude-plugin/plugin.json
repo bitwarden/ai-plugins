@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-delivery-tools",
   "version": "3.1.0",
-  "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, commits, pull requests, preflight checks, and change labeling.",
+  "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, commits, pull requests, preflight checks, change labeling, and Jira ticket filing.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
@@ -16,6 +16,7 @@
     "commit",
     "pull-request",
     "preflight",
-    "labeling"
+    "labeling",
+    "jira"
   ]
 }

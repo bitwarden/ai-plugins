@@ -32,7 +32,7 @@
     "should_trigger": true
   },
   {
-    "query": "let's get these tasks into Jira now that the plan's approved",
+    "query": "the breakdown's approved — let's get its tasks.md tasks into Jira",
     "should_trigger": true
   },
   {
@@ -70,6 +70,14 @@
   },
   {
     "query": "move the finished breakdown into its team's complete folder",
+    "should_trigger": false
+  },
+  {
+    "query": "file a bug for the crash I just fixed",
+    "should_trigger": false
+  },
+  {
+    "query": "create a story for this work and link it to PM-XXXX",
     "should_trigger": false
   }
 ]
