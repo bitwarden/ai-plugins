@@ -19,7 +19,7 @@ Establish the hierarchy before drafting any fields:
 
 - The breakdown's **epic is the parent**. Take its key from `breakdown.md`. If no epic exists, ask whether to create one or attach children to an existing key — do not guess a key. Confirm the key is an Epic (`get_issue`, check `issuetype`) before parenting under it.
 - Each task entry becomes **one child** — Story by default; Task or Bug only if the entry says so.
-- For each child, capture its **Owner**, **Blocked by**, and **Depends on**.
+- For each child, capture its **Blocked by** and **Depends on**.
 
 **Completion criterion:** an echoed tree — epic key, then the ordered children with type and parent — where the child count matches the task count in `tasks.md`.
 
