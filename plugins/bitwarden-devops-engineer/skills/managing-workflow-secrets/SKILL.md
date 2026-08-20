@@ -226,9 +226,12 @@ login/retrieve inside each job. This is a **two-sided change — never edit only
   ```
 
   The callee must agree, or the values arrive empty: it declares each secret under
-  `on.workflow_call.secrets:` (with `required: true` where it cannot run without them), and every
-  job in it that logs in needs its **own** `id-token: write` — permissions are not inherited from
-  the caller.
+  `on.workflow_call.secrets:` (with `required: true` where it cannot run without them). The
+  **caller** job must grant `id-token: write` — a callee can only narrow the caller's permissions,
+  never widen them — and every callee job that declares its own `permissions:` block must list
+  `id-token: write` explicitly, because declaring a block replaces the inherited set rather than
+  adding to it. Since Bitwarden workflows default to `permissions: {}` at the workflow level, in
+  practice both sides need it spelled out.
 
   ```yaml
   on:
