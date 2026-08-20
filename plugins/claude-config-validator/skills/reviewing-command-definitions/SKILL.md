@@ -190,8 +190,8 @@ sends every command path here.
 - [ ] `` !`cmd` `` blocks are read as executable code. They run at prompt-expansion time,
       before the model sees anything, so a `PreToolUse` hook never fires on them
 - [ ] No `$ARGUMENTS`, `$1`, or `$2` is interpolated into a shell string inside `` !`...` ``.
-      **Quoting is not a fix.** Any interpolation is a finding: CRITICAL unquoted, IMPORTANT
-      quoted
+      **Quoting is not a fix.** Any interpolation is CRITICAL, quoted or not: a slash command
+      has no safe quoted form
 - [ ] Where the command needs its arguments, they arrive on stdin, or are validated against an
       allowlist such as `^[0-9]+$` before use
 - [ ] The `allowed-tools` grant names the exact commands any `` !`...` `` block runs
@@ -211,8 +211,9 @@ clauses. Adding quotes stops that particular payload and two others still work:
 - `/review-pr 1" ; rm -rf ~ ; "` expands to `gh pr view "1" ; rm -rf ~ ; ""`. The argument
   closes the quote the author wrote and opens a new command.
 
-So treat the unquoted form as CRITICAL and the quoted form as IMPORTANT, and in both cases
-recommend stdin or a validated allowlist rather than better quoting.
+Both forms are CRITICAL, and the remedy in both is stdin or a validated allowlist rather than
+better quoting. The sibling rates a quoted hook interpolation lower only because hook input
+arrives as a shell variable, which has a genuinely safe direct form. A slash command has none.
 
 The sibling at `../reviewing-runtime-configuration/SKILL.md` deliberately does **not** apply an
 identical rule, and the difference is real rather than an oversight. Hook input arrives as a

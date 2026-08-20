@@ -167,6 +167,9 @@ fi
 if ! command -v jq >/dev/null 2>&1; then
     echo "SKIPPED: bare-rule check needs jq to tell allow from deny"
     SKIPPED=1
+elif ! jq empty .claude/settings.json >/dev/null 2>&1; then
+    echo "CRITICAL: settings.json is not valid JSON, so Claude Code does not load it"
+    ISSUES=1
 elif jq -e '.permissions.allow[]? | select(. == "Bash")' .claude/settings.json >/dev/null 2>&1; then
     echo "CRITICAL: Bare Bash rule in allow auto-approves every shell command"
     ISSUES=1
@@ -253,6 +256,9 @@ SKIPPED=0
 if ! command -v jq >/dev/null 2>&1; then
     echo "SKIPPED: dangerous-command check needs jq to tell allow from deny"
     SKIPPED=1
+elif ! jq empty .claude/settings.json >/dev/null 2>&1; then
+    echo "CRITICAL: settings.json is not valid JSON, so Claude Code does not load it"
+    FOUND_DANGEROUS=1
 else
     for pattern in "${DANGEROUS_PATTERNS[@]}"; do
         if jq -e --arg p "$pattern" '(.permissions.allow // [])[] | select(test($p))' \

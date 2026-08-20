@@ -48,8 +48,8 @@ worst band unchecked. Work out which case you are in, and say in the finding whi
 covered a given file.
 
 Nothing in `plugin-dev` reviews tool access, trigger quality, or prompt specificity: it checks
-that those fields are present, not that they are any good. Passes 1 and 3 to 5 are always yours;
-Pass 2 is yours only in the case above.
+that those fields are present, not that they are any good. Passes 1 and 3 to 5 are always yours.
+Pass 2 is yours too, unless you can confirm the validator covered that specific file.
 
 ## Pass 1: Tool access
 

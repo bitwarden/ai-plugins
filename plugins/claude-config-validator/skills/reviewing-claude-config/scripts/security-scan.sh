@@ -125,10 +125,20 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         PERM_ISSUES=1
     fi
 
+    if command -v jq >/dev/null 2>&1 && ! jq empty "${CLAUDE_DIR}/settings.json" >/dev/null 2>&1; then
+        echo "  ❌ CRITICAL: settings.json is not valid JSON, so Claude Code does not load it"
+        echo "     File: ${CLAUDE_DIR}/settings.json"
+        echo ""
+        PERM_ISSUES=1
+        SETTINGS_PARSE_FAILED=1
+    fi
+
     # A bare tool rule matches every use of the tool. In allow that is the broadest grant
     # available; in deny it is the strongest control. Telling them apart needs the array the
     # rule sits in, so this check requires jq and is recorded as skipped without it.
-    if command -v jq >/dev/null 2>&1; then
+    if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
+        :
+    elif command -v jq >/dev/null 2>&1; then
         if jq -e '.permissions.allow[]? | select(test("^(Bash|Write|Edit|WebFetch|WebSearch)$"))' \
             "${CLAUDE_DIR}/settings.json" >/dev/null 2>&1; then
             echo "  ❌ CRITICAL: Bare tool rule in permissions.allow"
@@ -154,7 +164,9 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
 
     # Sensitive paths, in allow only. The same path in deny is the control, not a defect,
     # so this needs the array the rule sits in and is recorded as skipped without jq.
-    if command -v jq >/dev/null 2>&1; then
+    if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
+        :
+    elif command -v jq >/dev/null 2>&1; then
         SENSITIVE_PATHS=(".ssh" ".aws" ".gnupg" ".config/" "/etc" "id_rsa" "credentials")
         for path in "${SENSITIVE_PATHS[@]}"; do
             if jq -e --arg p "$path" \
@@ -214,7 +226,9 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
     )
 
     # allow only: the same command in deny is the control, not an auto-approval.
-    if command -v jq >/dev/null 2>&1; then
+    if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
+        :
+    elif command -v jq >/dev/null 2>&1; then
         for pattern in "${DANGEROUS_PATTERNS[@]}"; do
             if jq -e --arg p "$pattern" \
                 '(.permissions.allow // [])[] | select(test($p))' \
