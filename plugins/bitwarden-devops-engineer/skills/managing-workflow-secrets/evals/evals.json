@@ -33,7 +33,7 @@
       "id": 4,
       "name": "multi-secret-folded-list",
       "prompt": "This deploy.yml's `./deploy.sh` needs three secrets that are never provided: the Fastly API token, the Fastly service ID, and the Cloudflare API token. Pull all three from Key Vault before the deploy step and wire them in. The vault is `ci-shared-kv` and the secrets are named `FASTLY-API-TOKEN`, `FASTLY-SERVICE-ID`, and `CLOUDFLARE-API-TOKEN`. Edit the file.",
-      "expected_output": "azure-login -> get-keyvault-secrets (id: secrets, keyvault ci-shared-kv) -> azure-logout wired before the deploy step. Because there are three (>=2) secrets, the `secrets:` input is a folded block scalar (`>-`) with one secret name per line, not an inline quoted comma string. id-token: write added to the job's permissions. All three values consumed through a step-scoped env: on the deploy step (not inlined into run/args), no echo/cat of any secret. Internal actions on @main; the checkout action stays SHA-pinned.",
+      "expected_output": "azure-login -> get-keyvault-secrets (id: secrets, keyvault ci-shared-kv) -> azure-logout wired before the deploy step. Because there are three (>=3) secrets, the `secrets:` input is a folded block scalar (`>-`) with one secret name per line, not an inline quoted comma string. id-token: write added to the job's permissions. All three values consumed through a step-scoped env: on the deploy step (not inlined into run/args), no echo/cat of any secret. Internal actions on @main; the checkout action stays SHA-pinned.",
       "files": ["files/multi-secret-deploy.yml"]
     },
     {
