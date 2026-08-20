@@ -128,6 +128,11 @@ grep -nE '"(Read|Write|Edit)\(//\*\*\)"' .claude/settings.json
 grep -nE '"(Bash|WebFetch|WebSearch|Write|Edit)"' .claude/settings.json
 # Credential directories
 grep -nE '"(Read|Edit)\(//[^"]*/\.(ssh|aws|gnupg)/' .claude/settings.json
+# Rule forms Claude Code does not read, so the file looks configured and is not. Both are
+# CRITICAL per ../../reviewing-runtime-configuration/SKILL.md. The colon form fails open in
+# either array: in allow it grants nothing, and in deny it is a restriction that never applies.
+grep -nE '"(autoApprovedTools|autoApproved)"' .claude/settings.json
+grep -nE '"(Bash|Read|Write|Edit|WebFetch|WebSearch|Glob|Grep|Task|NotebookEdit):' .claude/settings.json
 ```
 
 **Red Flags:**
@@ -157,6 +162,18 @@ fi
 
 if grep -qE '"Write\(//\*\*\)"' .claude/settings.json 2>/dev/null; then
     echo "CRITICAL: Overly broad Write permissions (Write(//**))"
+    ISSUES=1
+fi
+
+# Rule forms Claude Code does not read. Line-oriented on purpose: the colon form fails open in
+# either array, so it is a finding wherever it sits.
+if grep -qE '"(autoApprovedTools|autoApproved)"' .claude/settings.json 2>/dev/null; then
+    echo "CRITICAL: autoApprovedTools is not read; use permissions.allow/deny/ask"
+    ISSUES=1
+fi
+
+if grep -qE '"(Bash|Read|Write|Edit|WebFetch|WebSearch|Glob|Grep|Task|NotebookEdit):' .claude/settings.json 2>/dev/null; then
+    echo "CRITICAL: colon-separated Tool:specifier rule is not read; use Tool(specifier)"
     ISSUES=1
 fi
 

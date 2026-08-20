@@ -167,6 +167,16 @@ if [ -f "${CLAUDE_DIR}/settings.json" ]; then
         PERM_ISSUES=1
     fi
 
+    # The colon form fails open in either array: in allow it grants nothing, and in deny it is
+    # a restriction that never applies, so it is reported wherever it sits.
+    if grep -qE '"(Bash|Read|Write|Edit|WebFetch|WebSearch|Glob|Grep|Task|NotebookEdit):' "${CLAUDE_DIR}/settings.json" 2>/dev/null; then
+        echo "  ❌ CRITICAL: Unread permission rule form"
+        echo "     File: ${CLAUDE_DIR}/settings.json"
+        echo "     Issue: a colon-separated \"Tool:specifier\" rule is not read. Use Tool(specifier)."
+        echo ""
+        PERM_ISSUES=1
+    fi
+
     # Sensitive paths, in allow only. The same path in deny is the control, not a defect,
     # so this needs the array the rule sits in and is recorded as skipped without jq.
     if [ "${SETTINGS_PARSE_FAILED:-0}" -eq 1 ]; then
