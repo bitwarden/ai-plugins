@@ -46,8 +46,8 @@ yours. Pass 2 is yours too, unless you can confirm the validator covered that sp
 
 Also run the router's credential scan over any command you review directly, using the patterns
 in `../reviewing-claude-config/reference/security-patterns.md`. A bearer token inside a
-`` !`curl -H ...` `` block is the shape to look for; Pass 7 reads those blocks for injection,
-not for embedded credentials.
+bash-execution block running `curl -H ...` is the shape to look for; Pass 7 defines the term
+and reads those blocks for injection, not for embedded credentials.
 
 ## Pass 1: Purpose and usage
 
@@ -190,24 +190,29 @@ use. Verify with `Glob` rather than from memory; skill names change.
 This is the security surface of a slash command, and no sibling skill covers it: the router
 sends every command path here.
 
-- [ ] `` !`cmd` `` blocks are read as executable code. They run at prompt-expansion time,
+A **bash-execution block** is an exclamation mark placed immediately before a backtick-quoted
+command. This file never writes that form out, and neither should any other file Claude loads:
+the expansion happens on the raw text, so inline code spans and fenced code blocks are both
+expanded, and a file that quotes the syntax fails to load with a shell error. Name the
+construct instead, and show the command on its own.
+
+- [ ] Bash-execution blocks are read as executable code. They run at prompt-expansion time,
       before the model sees anything, so a `PreToolUse` hook never fires on them
-- [ ] No `$ARGUMENTS`, `$1`, or `$2` is interpolated into a shell string inside `` !`...` ``.
+- [ ] No `$ARGUMENTS`, `$1`, or `$2` is interpolated into a shell string inside one.
       **Quoting is not a fix.** Any interpolation is CRITICAL, quoted or not: a slash command
       has no safe quoted form
 - [ ] Where the command needs its arguments, they arrive on stdin, or are validated against an
       allowlist such as `^[0-9]+$` before use
-- [ ] The `allowed-tools` grant names the exact commands any `` !`...` `` block runs
+- [ ] The `allowed-tools` grant names the exact commands any bash-execution block runs
 
 Substitution is textual and happens before the shell parses the line, which is why quoting
-narrows the hole without closing it. A command containing:
+narrows the hole without closing it. Take a command whose body holds a bash-execution block
+around:
 
-```markdown
-!`gh pr view $ARGUMENTS`
-```
+    gh pr view $ARGUMENTS
 
-invoked as `/review-pr 1; rm -rf ~` expands to `gh pr view 1; rm -rf ~`, and the shell runs both
-clauses. Adding quotes stops that particular payload and two others still work:
+Invoked as `/review-pr 1; rm -rf ~` it expands to `gh pr view 1; rm -rf ~`, and the shell runs
+both clauses. Adding quotes stops that particular payload and two others still work:
 
 - `/review-pr $(rm -rf ~)` expands to `gh pr view "$(rm -rf ~)"`. Command substitution runs
   inside double quotes.
