@@ -1,6 +1,6 @@
 # Finding Shape
 
-Every finding and every Step 4/5 return object follows the JSON schema below. Subagents emit JSON arrays; the main orchestrator parses by field.
+Every finding and every Step 4/5 return object follows the JSON schema below. Subagents emit JSON arrays and the main orchestrator parses by field. Agent 5 is the exception: it returns prose, which the orchestrator translates into this schema per `agent-5-skill-review.md`.
 
 ## Finding object (created in Steps 2 and 3)
 
@@ -84,6 +84,6 @@ One entry per incoming finding, keyed by `id`:
 
 - Maintains a master finding map keyed by `id`.
 - Each step's return merges into the master object by `id`.
-- Creation-time fields — `severity`, `confidence`, `source_agent`, `title`, `detail`, `file`, `line` — are set by the Step 2/3 agent and **MUST NOT** be rewritten in Step 4, Step 5, or Step 6 merge. Step 4 and Step 5 returns carry only `id`, `status`, and disposition fields by design; the merge MUST preserve all creation-time fields from the original Step 2/3 finding.
+- Creation-time fields — `severity`, `confidence`, `source_agent`, `title`, `detail`, `file`, `line` — are set by the Step 2/3 agent, or for `skl` findings by the orchestrator during Step 3 translation, and **MUST NOT** be rewritten in Step 4, Step 5, or Step 6 merge. Step 4 and Step 5 returns carry only `id`, `status`, and disposition fields by design; the merge MUST preserve all creation-time fields from the original Step 2/3 finding.
 - For dismissed findings, the orchestrator records a `dismissal_stage` field on the master-map entry: `"Step 4 validation"` if Step 4 set the dismissal status, or `"Step 5 severity audit"` if Step 5 did. This field is rendered in the final report as `**Dismissed at:**`.
 - Step 6 partitions the master map by final status (validated vs dismissed); Steps 7–9 format, print, and write the report.

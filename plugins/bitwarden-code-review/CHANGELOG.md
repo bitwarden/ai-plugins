@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Agent 5 in `performing-multi-agent-code-review` Step 3, routing changed `SKILL.md` to `plugin-dev:skill-reviewer`
 - Review Rules carve-out for Agent 5, with the orchestrator translating its prose report into Finding Shape objects
+- `references/agent-5-skill-review.md`, holding Agent 5's two verbatim prompt blocks and the translation procedure
 - `source_agent: "skill"` and `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent"
 - `**Not covered:**` line in the report Summary when Agent 5 does not run for a missing `plugin-dev`
 - `plugin-dev` as a second optional enhancer, detected by resolvability and excluded from the abort check
