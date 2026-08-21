@@ -16,7 +16,7 @@ It offers two complementary lenses. The autonomous `bitwarden-code-reviewer` age
 - **Security-First Approach**: Prioritizes security vulnerabilities, data exposure, and authentication issues
 - **Structured Thinking**: Uses explicit reasoning blocks to improve review quality and consistency
 - **Confidence Scoring**: Pre-filters findings with a 0-100 confidence score (≥75 threshold) before validation to reduce false positives
-- **Multi-Agent Review Pipeline**: A separate `performing-multi-agent-code-review` skill runs six specialized sub-agents — architecture compliance, code quality, bug analysis, security & logic, validation, and severity audit — for depth on complex changes
+- **Multi-Agent Review Pipeline**: A separate `performing-multi-agent-code-review` skill runs six specialized sub-agents — architecture compliance, code quality, bug analysis, security & logic, validation, and severity audit — for depth on complex changes, plus two that fire only when the diff calls for them: Claude configuration and skill review
 
 ## Skills
 
