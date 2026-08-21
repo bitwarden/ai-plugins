@@ -5,6 +5,18 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2026-08-21
+
+### Fixed
+
+- `security-scan.sh` reported a pass for the committed `settings.local.json` check whenever `git`'s output was long enough that `grep -q` exited first: under `pipefail` the pipeline took `git`'s SIGPIPE status. Load-dependent, so a small `.claude/` never showed it
+- `security-scan.sh` ran `git ls-files` without `-C`, so the check read whatever repository the shell was in and reported a pass when the target sat outside one. It records the check as skipped now
+- `README.md` said the `settings.local.json` check does not report itself as skipped, which check 1 now does when the target is not inside a git repository
+
+### Added
+
+- `scripts/security-scan.test.sh`, covering each of the above plus a clean configuration and an absent `settings.json`. Six of its sixteen assertions fail without these fixes. Credential fixtures are assembled at run time, so the file holds no string a secret scanner should flag, and the suite adapts its expectation when `jq` is absent rather than failing
+
 ## [2.0.1] - 2026-08-21
 
 ### Fixed
