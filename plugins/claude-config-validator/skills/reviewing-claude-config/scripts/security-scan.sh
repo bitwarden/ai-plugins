@@ -279,8 +279,9 @@ if [ -f "${SETTINGS_FILE}" ]; then
         ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
 else
-    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
-    echo "  ⚠️  SKIPPED: no settings.json at ${CLAUDE_DIR}"
+    # A determinate answer, not a check that could not run: no file means no rules in force
+    # from this directory. Rules from elsewhere are outside what this scan sees.
+    echo "  ℹ️  No settings.json at ${CLAUDE_DIR}, so no rules are set here"
 fi
 echo ""
 
@@ -323,8 +324,9 @@ if [ -f "${SETTINGS_FILE}" ]; then
         fi
     fi
 else
-    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
-    echo "  ⚠️  SKIPPED: no settings.json at ${CLAUDE_DIR}"
+    # A determinate answer, not a check that could not run: no file means no rules in force
+    # from this directory. Rules from elsewhere are outside what this scan sees.
+    echo "  ℹ️  No settings.json at ${CLAUDE_DIR}, so no rules are set here"
 fi
 echo ""
 
