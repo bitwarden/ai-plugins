@@ -1,6 +1,6 @@
 # Evaluation Standards
 
-Loaded by the orchestrator in Step 1. **Severity Levels**, **Do Not Flag**, and **Confidence Scoring** below are propagated verbatim into every Step 2–5 subagent prompt. The **Finding Shape** schema lives in `finding-shape.md` and is propagated the same way.
+Loaded by the orchestrator in Step 1. **Severity Levels**, **Do Not Flag**, and **Confidence Scoring** below are propagated verbatim into every Step 2–5 subagent prompt except Agent 5, which takes the carve-out subset in `agent-5-skill-review.md`. The **Finding Shape** schema lives in `finding-shape.md` and is propagated the same way.
 
 ## Severity Levels
 
@@ -37,4 +37,4 @@ Rate each potential finding on a 0–100 scale:
 
 ## Finding Shape
 
-Every finding and every Step 4/5 return object follows the JSON schema in `finding-shape.md`. The main orchestrator loads that file in Step 1 and propagates its contents verbatim to every subagent.
+Every finding and every Step 4/5 return object follows the JSON schema in `finding-shape.md`. The main orchestrator loads that file in Step 1 and propagates its contents verbatim to every subagent except Agent 5, which returns prose the orchestrator translates.
