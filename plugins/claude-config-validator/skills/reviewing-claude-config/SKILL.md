@@ -232,7 +232,7 @@ holds:
   permission, tool grant, or hook capability wider than what the changeset justifies, and any
   new path by which contributor-controlled input reaches a shell. Hook input is the one
   exception: quoted and consumed directly by the command it is passed to, it is not such a
-  path. A slash command has no safe quoted form, so any interpolation into a `` !`...` ``
+  path. A slash command has no safe quoted form, so any interpolation into a bash-execution
   block is one.
 
 A widening the changeset justifies is not a finding at all, so it never reaches this rule.

@@ -18,7 +18,7 @@
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Routes CLAUDE.md, agents, commands, hooks, and settings to targeted review skills, reporting only what a changeset introduced."
     },
     {

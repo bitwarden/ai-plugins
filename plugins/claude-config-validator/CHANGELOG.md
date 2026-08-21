@@ -5,6 +5,13 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-08-21
+
+### Fixed
+
+- `reviewing-claude-config` and `reviewing-command-definitions` failed to load: both quoted the literal bash-execution syntax, which Claude Code expands in any file it loads, in inline code spans and fenced blocks alike
+- `reviewing-command-definitions` names the construct rather than reproducing it, and says why, so the syntax is not reintroduced
+
 ## [2.0.0] - 2026-08-19
 
 ### Added
