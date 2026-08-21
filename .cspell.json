@@ -102,6 +102,7 @@
     "openxmlformats",
     "otlp",
     "owasp",
+    "pathspec",
     "pipefail",
     "PKCE",
     "pushback",

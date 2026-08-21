@@ -92,7 +92,10 @@ echo ""
 echo "[1] committed settings.local.json, large repository"
 CLAUDE_DIR="$(fixture large-repo)"
 printf 'x\n' > "${CLAUDE_DIR}/aaa-settings.local.json"
-(cd "${CLAUDE_DIR}/.." && seq 1 20000 | sed 's|^|filler-|' | xargs -n1 touch)
+# The filler has to match the pathspec and sit under the scanned directory, or git
+# writes a single line and the pipe never fills. 20k paths is roughly 500 KB, well
+# past the 64 KB buffer, so a reintroduced `| grep -q` takes SIGPIPE here.
+(cd "${CLAUDE_DIR}" && seq 1 20000 | sed 's|$|-settings.local.json|' | xargs touch)
 git_fixture "${CLAUDE_DIR}"
 OUT="$(bash "${SCAN}" "${CLAUDE_DIR}" 2>&1)"
 assert "detects the committed file" expect "CRITICAL: settings.local.json is committed to git" "${OUT}"
