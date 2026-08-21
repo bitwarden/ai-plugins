@@ -12,7 +12,7 @@
 
 The rename is structurally sound — the new manifest, marketplace entry, and AGENT.md are internally consistent and correctly wired together. One issue holds it back: the renamed README retains the old plugin identity throughout its body (title, install command, usage examples), so users following it will reference a plugin name that no longer exists.
 
-**Not covered:** Skill review did not run — `plugin-dev` is not installed, so the 2 changed `SKILL.md` files were not checked for description quality, length, or progressive disclosure.
+**Not covered:** Skill review did not run — `plugin-dev` is not installed, so the changed `SKILL.md` was not checked for description quality, length, or progressive disclosure.
 
 ## Findings
 

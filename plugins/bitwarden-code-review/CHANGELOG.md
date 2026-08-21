@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Review Rules carve-out for Agent 5, with the orchestrator translating its prose report into Finding Shape objects
 - `references/agent-5-skill-review.md`, holding Agent 5's two verbatim prompt blocks and the translation procedure
 - `source_agent: "skill"` and `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent"
-- `**Not covered:**` line in the report Summary when Agent 5 does not run for a missing `plugin-dev`
+- `**Not covered:**` line in both report formats, rendered whenever a lens the diff called for returns no usable review, and owned by the orchestrator so one gap is reported once
+- CWE-1427 observations survive Agent 5's scope fence, so an injection on a line the diff did not touch still reaches the report
 - `plugin-dev` as a second optional enhancer, detected by resolvability and excluded from the abort check
 
 ### Changed
