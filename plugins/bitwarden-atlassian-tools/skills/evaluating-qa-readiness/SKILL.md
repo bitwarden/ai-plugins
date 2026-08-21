@@ -1,6 +1,7 @@
 ---
 name: evaluating-qa-readiness
-description: Use whenever someone wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", or any request to validate that a story or bug has what a tester needs before testing starts. Reports which pieces are present or missing and drafts a comment for the developer. Use proactively when someone says they are moving a ticket to Ready for QA, even without the words "QA readiness."
+description: Use whenever the user wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", or any request to validate that a story or bug has what a tester needs before testing starts. Reports which pieces are present or missing and drafts a comment for the developer. Use proactively when the user says they are moving a ticket to Ready for QA, even without the words "QA readiness."
+allowed-tools: Read, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links
 ---
 
 # Evaluating QA Readiness
@@ -86,7 +87,7 @@ If nothing is missing, say so plainly and skip the draft comment — no need to 
 - The Atlassian MCP here is **read-only**. You cannot post the comment or change the ticket — you produce the draft for a human to post. Say so if the user expects it to be posted.
 - If `get_issue` fails or the key doesn't exist, report that plainly rather than guessing at contents.
 - Never infer that a criterion is satisfied from the issue _type_ or _status_ alone. A ticket marked "Ready for QA" is exactly the case where you should still check — that status is the claim you're verifying, not evidence.
-- If a custom field name suggests it holds relevant info (anything mentioning "flag", "test", "QA", "implementation", "platform") but it's empty, that's a Missing signal worth noting by name.
+- If a custom field name suggests it holds relevant info (anything mentioning "flag", "test", "QA", "implementation", "platform") but it's empty, note it by name. A clearly-relevant field left empty is Unclear rather than Missing — the ticket neither answers the question nor disclaims it.
 
 ## Examples
 

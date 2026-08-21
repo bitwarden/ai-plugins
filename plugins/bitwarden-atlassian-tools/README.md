@@ -175,6 +175,28 @@ Features:
 
 Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can still draft and preview.
 
+### `assessing-jira-issue-relevance`
+
+Determines whether a Jira issue still applies to the current codebase by fetching the ticket, locating the code path it describes, and comparing current behavior against the ticket's description. Triggered by questions about whether a ticket is still relevant (e.g., "Is PM-123 still pending?", "Has this been fixed?", "Can we close this?").
+
+Features:
+
+- Fetches ticket, comments, and remote links as evidence, then verifies against the current codebase rather than trusting ticket status
+- Returns a verdict (still applicable / fixed / stale) backed by cited evidence
+- Assesses one ticket at a time; invoke iteratively for multiple tickets
+
+### `evaluating-qa-readiness`
+
+Checks a Jira ticket for the concrete, objectively-verifiable information QA needs before testing starts — testing instructions, implementation notes, feature-flag state, acceptance criteria, affected clients, and a linked PR/build — then drafts a developer comment for any gaps. Triggered by requests to check QA readiness (e.g., "Is PROJ-123 ready for QA?", "QA-check PROJ-123") or proactively when a ticket is being moved to Ready for QA.
+
+Features:
+
+- Reads description, custom fields, comments, and remote links as evidence, since developers often drop testing notes or flag names in a comment rather than the description
+- Distinguishes blocking gaps (testing instructions, implementation notes, feature flag) from non-blocking ones (acceptance criteria, affected clients, linked PR/build) so the verdict reflects how stuck a tester actually is
+- Drafts a targeted, collegial ask addressing only the gaps found
+
+This skill is read-only: it drafts the developer comment but cannot post it to the ticket.
+
 ## Requirements
 
 - Claude Code with MCP support

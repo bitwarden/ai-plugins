@@ -28,6 +28,7 @@ Blocking criteria: testing instructions (pass), implementation notes (fail), fea
 
 ## Output
 
+```
 ## QA Readiness: PM-4821 — Add per-item reprompt toggle to vault item edit view
 
 **Verdict:** Not ready — 2 blocking gaps
@@ -40,10 +41,11 @@ Blocking criteria: testing instructions (pass), implementation notes (fail), fea
 | Acceptance criteria        | ✅ Present | Stated and testable in description.                                                                     |
 | Affected clients/platforms | ✅ Present | Web, Browser Extension (custom field).                                                                  |
 | Linked PR/build            | ✅ Present | GitHub PR linked via remote links.                                                                      |
+```
 
 **Draft comment for the developer:**
 
-> Nearly there — before this moves to Ready for QA, could you add:
+> Before this is ready for QA, could you add:
 >
 > - **Feature flag:** the "Feature Flag" field is empty. Is the reprompt toggle behind a flag? If so, which flag and what state should QA set it to? If it's not flagged, a quick "not behind a flag" works.
 > - **Implementation notes:** a one-line summary of what changed and which areas it touches, so QA knows the surface to exercise (the PR link alone means reading the diff).
