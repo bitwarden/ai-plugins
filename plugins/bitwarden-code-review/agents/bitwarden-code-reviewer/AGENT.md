@@ -86,7 +86,7 @@ These skills are optional. If unavailable, apply existing review knowledge.
 
 **Skill changes** (`SKILL.md`) are the exception to that fallback:
 
-- content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Record it on the `**Not covered:**` line of the Step 6 summary, per the Not Covered section of `Skill(posting-review-summary)`: say that description quality, length, and progressive disclosure went unreviewed, and name `performing-multi-agent-code-review` as the path that covers them. Do not fall back to your own idea of skill quality — a substituted opinion reads as coverage.
+- content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Record it on the `**Not covered:**` line of the Step 6 summary, per the Not Covered section of `Skill(posting-review-summary)`: say that description quality, length, and progressive disclosure went unreviewed, and name `performing-multi-agent-code-review` as the path that covers them. That line owns the gap, so drop any `reviewing-claude-config` finding that only reports absent skill coverage — it offers to flag exactly this, and both firing reports one gap twice. Do not fall back to your own idea of skill quality — a substituted opinion reads as coverage.
 
 **Before moving to Step 3**, confirm you've examined all changed code for the above issues.
 
