@@ -4,7 +4,7 @@ version: 1.14.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
-tools: Read, Write, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql -f query=:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, Task, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
+tools: Read, Write, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh api graphql -f query=:*), Bash(git log:*), Bash(git diff:*), Grep, Glob, Skill, mcp__github_inline_comment__create_inline_comment, mcp__github_comment__update_claude_comment
 ---
 
 # Bitwarden Code Review Agent
@@ -39,7 +39,7 @@ Then gather the remaining data:
 - Whether the PR author is an automated bot (Renovate, Dependabot)
 - Whether the PR description references AppSec approval (VULN task, explicit mention of the dependency review process)
 
-**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config), note them for the Claude-configuration review in Step 2. Note changed `SKILL.md` files separately: they go to a different reviewer for content, and into the Claude-configuration scope as well for the credential scan.
+**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config), note them for the Claude-configuration review in Step 2. Changed `SKILL.md` files belong in that scope too, for the credential scan; their content review is out of reach on this path, per Step 2.
 
 **Tailor your review approach based on what you observe:**
 
@@ -78,17 +78,15 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 - **Angular/TypeScript client changes** → invoke `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
 - **Database changes** → invoke `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
 
-**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config):
+**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, `SKILL.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config):
 
 - invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Include any changed `SKILL.md` files in the scope you hand it: its credential scan covers every file whatever the type, and it declines `SKILL.md` only for the quality review. Fold its findings into your own classification and validation in Steps 3–4.
 
 **Skill changes** (`SKILL.md`):
 
-- launch the `plugin-dev:skill-reviewer` subagent with the Task tool, scoped to the changed `SKILL.md` files, to review frontmatter, description trigger quality, content length, writing style, progressive disclosure, and referenced files that do not exist. `reviewing-claude-config` declines `SKILL.md`, so this is the only path that covers it. It returns a prose report grouped under `Critical` / `Major` / `Minor`, not structured findings; take those entries into Steps 3–4 and classify them yourself, and drop its `Positive Aspects` and `Overall Rating` sections.
+- content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Note in the Step 6 summary comment that description quality, length, and progressive disclosure were not reviewed, and name `performing-multi-agent-code-review` as the path that does cover them. Do not review the file against your own idea of skill quality instead — a substituted opinion reads as coverage.
 
-`Task` is granted for that one delegation. Nothing enforces the limit — frontmatter has no per-subagent scoping for `Task` the way `Bash` rules scope commands — so treat it as a rule you follow, and do not delegate anything else.
-
-These skills are optional. If unavailable, apply existing review knowledge. Where `plugin-dev` is missing, say in the report that skill review did not run rather than substituting for it.
+These skills are optional. If unavailable, apply existing review knowledge.
 
 **Before moving to Step 3**, confirm you've examined all changed code for the above issues.
 
@@ -178,7 +176,7 @@ Clean PRs with no findings: skip this step entirely.
 
 Invoke `Skill(posting-review-summary)` to post or update the summary comment. This skill handles routing to the correct output (agent mode sticky comment, tag mode MCP tool, or local file).
 
-Clean PRs: brief approval only.
+Clean PRs: brief approval only, plus any coverage note Step 2 called for. An approval that hides what went unreviewed reads as a pass on it.
 
 ## Professional Standards
 

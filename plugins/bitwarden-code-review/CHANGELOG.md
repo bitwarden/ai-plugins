@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Changed `SKILL.md` files route to `plugin-dev:skill-reviewer`: Agent 5 in `performing-multi-agent-code-review` Step 3, and a Task-tool delegation in the single-agent reviewer's Cross-Plugin Enrichment
+- Changed `SKILL.md` files route to `plugin-dev:skill-reviewer` as Agent 5 in `performing-multi-agent-code-review` Step 3
 - `source_agent: "skill"` with `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent" in `report-template.md`
 - `plugin-dev` as a second optional enhancer alongside `claude-config-validator`, excluded from the prerequisite abort check
 - `**Not covered:**` line in the report Summary, rendered when changed `SKILL.md` files were detected but Agent 5 did not run for a missing `plugin-dev`
-- `Task` in the `bitwarden-code-reviewer` tool grant. Frontmatter has no per-subagent scoping for `Task`, so the limit to the `plugin-dev:skill-reviewer` delegation is a documented convention rather than an enforced boundary
-- Review Rules carve-out for Agent 5, which holds `Read, Grep, Glob` and so cannot run the security-context or Tool Discipline blocks; the orchestrator translates its prose report into Finding Shape objects in Step 3
+- Review Rules carve-out for Agent 5, which holds `Read, Grep, Glob` and so cannot run the security-context block; the orchestrator translates its prose report into Finding Shape objects in Step 3, applying the scope fence and the pipeline's own severity criteria rather than the reviewer's
+- Resolvability detection for the two optional enhancers, stated in Prerequisites rather than left implicit at each launch condition
+- The single-agent reviewer states that skill content review did not run and names the multi-agent pipeline as the path that covers it. Reaching `plugin-dev:skill-reviewer` needs `Task`, and that grant would put unrestricted `Bash` one delegation from an agent reading contributor diffs unattended, since a subagent's tools come from its own definition
 
 ### Changed
 
