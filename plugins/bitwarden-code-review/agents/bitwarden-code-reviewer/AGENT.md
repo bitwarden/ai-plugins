@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 1.13.0
+version: 1.14.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
@@ -39,7 +39,7 @@ Then gather the remaining data:
 - Whether the PR author is an automated bot (Renovate, Dependabot)
 - Whether the PR description references AppSec approval (VULN task, explicit mention of the dependency review process)
 
-**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config), note them for the Claude-configuration review in Step 2.
+**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config), note them for the Claude-configuration review in Step 2. Changed `SKILL.md` files belong in that scope too, for the credential scan; their content review is out of reach on this path, per Step 2.
 
 **Tailor your review approach based on what you observe:**
 
@@ -78,11 +78,15 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 - **Angular/TypeScript client changes** → invoke `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
 - **Database changes** → invoke `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
 
-**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, skill `SKILL.md`, hook definitions, slash commands, `.claude/` settings, or MCP config):
+**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, `SKILL.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config):
 
-- invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, progressive-disclosure structure, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Fold its findings into your own classification and validation in Steps 3–4.
+- invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Include any changed `SKILL.md` files in the scope you hand it: its credential scan covers every file whatever the type, and it declines `SKILL.md` only for the quality review. Fold its findings into your own classification and validation in Steps 3–4.
 
 These skills are optional. If unavailable, apply existing review knowledge.
+
+**Skill changes** (`SKILL.md`) are the exception to that fallback:
+
+- content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Record it on the `**Not covered:**` line of the Step 6 summary, per the Not Covered section of `Skill(posting-review-summary)`: say that description quality, length, and progressive disclosure went unreviewed, and name `performing-multi-agent-code-review` as the path that covers them. Do not fall back to your own idea of skill quality — a substituted opinion reads as coverage.
 
 **Before moving to Step 3**, confirm you've examined all changed code for the above issues.
 
@@ -172,7 +176,7 @@ Clean PRs with no findings: skip this step entirely.
 
 Invoke `Skill(posting-review-summary)` to post or update the summary comment. This skill handles routing to the correct output (agent mode sticky comment, tag mode MCP tool, or local file).
 
-Clean PRs: brief approval only.
+Clean PRs: brief approval only, plus the `**Not covered:**` line where Step 2 called for one. An approval that hides what went unreviewed reads as a pass on it.
 
 ## Professional Standards
 
