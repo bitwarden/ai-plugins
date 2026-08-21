@@ -12,12 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `SKILL.md` files route to `plugin-dev:skill-reviewer`: Agent 5 in `performing-multi-agent-code-review` Step 3, and a Task-tool delegation in the single-agent reviewer's Cross-Plugin Enrichment
 - `source_agent: "skill"` with `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent" in `report-template.md`
 - `plugin-dev` as a second optional enhancer alongside `claude-config-validator`, excluded from the prerequisite abort check
-- `**Not covered:**` line in the report Summary, rendered when a conditional agent had files to review but its plugin was missing
-- `Task` in the `bitwarden-code-reviewer` tool grant, scoped by the agent definition to the `plugin-dev:skill-reviewer` delegation
+- `**Not covered:**` line in the report Summary, rendered when changed `SKILL.md` files were detected but Agent 5 did not run for a missing `plugin-dev`
+- `Task` in the `bitwarden-code-reviewer` tool grant. Frontmatter has no per-subagent scoping for `Task`, so the limit to the `plugin-dev:skill-reviewer` delegation is a documented convention rather than an enforced boundary
+- Review Rules carve-out for Agent 5, which holds `Read, Grep, Glob` and so cannot run the security-context or Tool Discipline blocks; the orchestrator translates its prose report into Finding Shape objects in Step 3
 
 ### Changed
 
-- `SKILL.md` is out of the Claude-configuration bucket in both paths; skill support files under `reference/` or `references/`, `examples/`, and `scripts/` stay in it
+- `SKILL.md` leaves the Claude-configuration bucket for content review in both paths but stays in the scope handed to `reviewing-claude-config`, whose credential scan runs before its routing declines the file; skill support files under `reference/` or `references/`, `examples/`, and `scripts/` are unchanged
 
 ### Fixed
 
