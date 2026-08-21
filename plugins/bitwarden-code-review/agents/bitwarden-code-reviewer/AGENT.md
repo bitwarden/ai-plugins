@@ -86,7 +86,7 @@ These skills are optional. If unavailable, apply existing review knowledge.
 
 **Skill changes** (`SKILL.md`) are the exception to that fallback:
 
-- content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Note in the Step 6 summary comment that description quality, length, and progressive disclosure were not reviewed, and name `performing-multi-agent-code-review` as the path that does cover them. Do not fall back to your own idea of skill quality — a substituted opinion reads as coverage.
+- content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Record it on the `**Not covered:**` line of the Step 6 summary, per the Not Covered section of `Skill(posting-review-summary)`: say that description quality, length, and progressive disclosure went unreviewed, and name `performing-multi-agent-code-review` as the path that covers them. Do not fall back to your own idea of skill quality — a substituted opinion reads as coverage.
 
 **Before moving to Step 3**, confirm you've examined all changed code for the above issues.
 
@@ -176,7 +176,7 @@ Clean PRs with no findings: skip this step entirely.
 
 Invoke `Skill(posting-review-summary)` to post or update the summary comment. This skill handles routing to the correct output (agent mode sticky comment, tag mode MCP tool, or local file).
 
-Clean PRs: brief approval only, plus any coverage note Step 2 called for. An approval that hides what went unreviewed reads as a pass on it.
+Clean PRs: brief approval only, plus the `**Not covered:**` line where Step 2 called for one. An approval that hides what went unreviewed reads as a pass on it.
 
 ## Professional Standards
 

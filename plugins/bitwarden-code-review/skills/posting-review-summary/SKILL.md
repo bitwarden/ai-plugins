@@ -59,6 +59,8 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 
 [Up to 4 neutral sentences describing what was reviewed]
 
+[Optional **Not covered:** line - only when a lens the diff called for did not run]
+
 <details>
 <summary>Code Review Details</summary>
 
@@ -68,6 +70,24 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 
 </details>
 ```
+
+## Not Covered
+
+A coverage note is not a finding: it has no `file:line` to cite and it says what was _not_
+reviewed, which is the opposite of the assessment sentences above it. So it gets its own line,
+outside the `<details>` block, where an approval cannot bury it.
+
+Render it when the diff called for a lens that did not run. Name what went unreviewed, why, and
+what covers it:
+
+```markdown
+**Not covered:** Skill review did not run — `plugin-dev` is not installed, so the changed
+`SKILL.md` was not checked for description quality, length, or progressive disclosure.
+`performing-multi-agent-code-review` is the path that covers them.
+```
+
+Omit the line entirely when every applicable lens ran. An approval that hides what went
+unreviewed reads as a pass on it.
 
 ## Dependency Changes Table
 

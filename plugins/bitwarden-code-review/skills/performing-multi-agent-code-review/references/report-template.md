@@ -46,7 +46,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 {1-5 sentences for overall assessment.}
 
-<!-- Only when Agent 5 did not run for a missing plugin-dev. Omit entirely otherwise. -->
+<!-- Only when changed SKILL.md files were detected and Agent 5 returned no usable review, for any reason. Omit entirely otherwise. -->
 
 **Not covered:** {What the review did not look at, and why. E.g. "Skill review did not run — `plugin-dev` is not installed, so the 2 changed `SKILL.md` files were not checked for description quality, length, or progressive disclosure."}
 

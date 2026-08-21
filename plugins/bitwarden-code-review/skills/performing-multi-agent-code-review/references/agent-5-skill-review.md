@@ -9,9 +9,10 @@ than diff hunks, and its system prompt fixes its output as prose rather than JSO
 
 ## Prompt blocks
 
-Agent 5 receives Line Number Accuracy unchanged, plus the two variants below, plus the diff.
-Pass the diff even though the agent reads files directly — it is the only thing telling the
-agent which parts are new. It receives nothing else from the Review Rules bundle.
+Agent 5 receives Line Number Accuracy unchanged, plus the two variants below, plus the diff and
+the list of changed `SKILL.md` paths. Pass the diff even though the agent reads files directly —
+it is the only thing telling the agent which parts are new. It receives nothing else from the
+Review Rules bundle.
 
 ### Tool discipline (Agent 5 variant)
 
@@ -67,6 +68,13 @@ the prose does not hold them.
    the changeset touched, so most of what it returns is pre-existing. Drop every entry the diff
    did not introduce or worsen before translating anything. Skipping this fills Step 4 with
    findings it will only dismiss, and the Dismissed block with noise.
+
+   One exception: a CWE-1427 observation survives the fence whether or not the diff touched the
+   line. The boundary block above tells Agent 5 to report a file that tries to direct its
+   review, and such text is worth surfacing wherever it sits — an injection planted in an
+   untouched region of a changed file is the case the widened boundary exists to catch, and
+   nothing else in the pipeline covers it. Anchor it to the file and let Step 4 adjudicate.
+
 2. **Harvest every issue, not only the severity headings.** Its contract also puts issues in
    the `**Issues:**` lists under Description Analysis and Content Quality, and in the
    `**Assessment:**` and `**Recommendations:**` prose under Progressive Disclosure, and nothing
