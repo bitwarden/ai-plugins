@@ -32,31 +32,23 @@ which has a shell the skill does not.
 **Manual Detection:**
 
 ```bash
-# Check if file is tracked by git
-git ls-files | grep "settings.local.json"
+# Confirm the directory is inside a repository first: outside one, git errors and an
+# unguarded check reads as a pass.
+git -C /path/to/.claude rev-parse --git-dir >/dev/null 2>&1 || echo "cannot tell: not a repository"
 
-# If output exists, file is incorrectly committed
+# Ask git directly rather than piping it to grep. Under `pipefail` a matching `grep -q`
+# exits first, git takes SIGPIPE, and the pipeline reports failure, so a committed file
+# reads as absent whenever git's output is long enough.
+git -C /path/to/.claude ls-files -- '*settings.local.json'
 ```
 
 **Expected Output:**
 
-- **Empty:** File not tracked (GOOD)
-- **File path:** File is tracked (CRITICAL)
+- **Empty:** File not committed (GOOD)
+- **File path:** File is committed (CRITICAL)
 
-**Automated Detection:**
-
-```bash
-#!/bin/bash
-# detect-committed-local-settings.sh
-
-if git ls-files | grep -q "settings.local.json"; then
-    echo "CRITICAL: settings.local.json is committed to git"
-    exit 1
-else
-    echo "OK: settings.local.json not in git"
-    exit 0
-fi
-```
+For the scripted form, run [`../scripts/security-scan.sh`](../scripts/security-scan.sh). It
+is not reproduced here, for the reason recorded at the end of this file.
 
 ---
 
