@@ -5,25 +5,24 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.14.0] - 2026-08-20
+## [1.14.0] - 2026-08-21
 
 ### Added
 
-- Changed `SKILL.md` files route to `plugin-dev:skill-reviewer` as Agent 5 in `performing-multi-agent-code-review` Step 3
-- `source_agent: "skill"` with `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent" in `report-template.md`
-- `plugin-dev` as a second optional enhancer alongside `claude-config-validator`, excluded from the prerequisite abort check
-- `**Not covered:**` line in the report Summary, rendered when changed `SKILL.md` files were detected but Agent 5 did not run for a missing `plugin-dev`
-- Review Rules carve-out for Agent 5, which holds `Read, Grep, Glob` and so cannot run the security-context block; the orchestrator translates its prose report into Finding Shape objects in Step 3, applying the scope fence and the pipeline's own severity criteria rather than the reviewer's
-- Resolvability detection for the two optional enhancers, stated in Prerequisites rather than left implicit at each launch condition
-- The single-agent reviewer states that skill content review did not run and names the multi-agent pipeline as the path that covers it. Reaching `plugin-dev:skill-reviewer` needs `Task`, and that grant would put unrestricted `Bash` one delegation from an agent reading contributor diffs unattended, since a subagent's tools come from its own definition
+- Agent 5 in `performing-multi-agent-code-review` Step 3, routing changed `SKILL.md` to `plugin-dev:skill-reviewer`
+- Review Rules carve-out for Agent 5, with the orchestrator translating its prose report into Finding Shape objects
+- `source_agent: "skill"` and `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent"
+- `**Not covered:**` line in the report Summary when Agent 5 does not run for a missing `plugin-dev`
+- `plugin-dev` as a second optional enhancer, detected by resolvability and excluded from the abort check
 
 ### Changed
 
-- `SKILL.md` leaves the Claude-configuration bucket for content review in both paths but stays in the scope handed to `reviewing-claude-config`, whose credential scan runs before its routing declines the file; skill support files under `reference/` or `references/`, `examples/`, and `scripts/` are unchanged
+- `SKILL.md` leaves the Claude-configuration bucket for content review, but stays in scope for its credential scan
+- The single-agent reviewer reports that skill content review did not run, rather than delegating to it
 
 ### Fixed
 
-- Both paths no longer describe `reviewing-claude-config` as covering `SKILL.md` or progressive-disclosure structure, which it declines from `claude-config-validator` 2.0.0
+- Neither path describes `reviewing-claude-config` as covering `SKILL.md` or progressive-disclosure structure
 
 ## [1.13.1] - 2026-07-01
 
