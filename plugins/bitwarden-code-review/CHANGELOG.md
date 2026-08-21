@@ -5,6 +5,27 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-08-21
+
+### Added
+
+- Agent 5 in `performing-multi-agent-code-review` Step 3, routing changed `SKILL.md` to `plugin-dev:skill-reviewer`
+- Review Rules carve-out for Agent 5, with the orchestrator translating its prose report into Finding Shape objects
+- `references/agent-5-skill-review.md`, holding Agent 5's two verbatim prompt blocks and the translation procedure
+- `source_agent: "skill"` and `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent"
+- `**Not covered:**` line in both report formats, rendered whenever a lens the diff called for returns nothing reviewable, and owned by the orchestrator so one gap is reported once
+- CWE-1427 observations survive Agent 5's scope fence, so an injection on a line the diff did not touch still reaches the report
+- `plugin-dev` as a second optional enhancer, detected by resolvability and excluded from the abort check
+
+### Changed
+
+- `SKILL.md` leaves the Claude-configuration bucket for content review, but stays in scope for its credential scan
+- The single-agent reviewer reports that skill content review did not run, rather than delegating to it
+
+### Fixed
+
+- Neither path describes `reviewing-claude-config` as covering `SKILL.md` or progressive-disclosure structure
+
 ## [1.13.1] - 2026-07-01
 
 ### Changed

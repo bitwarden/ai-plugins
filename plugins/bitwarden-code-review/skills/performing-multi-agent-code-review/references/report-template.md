@@ -26,6 +26,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 | `bug`          | Bug analysis agent            |
 | `security`     | Security & logic agent        |
 | `config`       | Claude configuration agent    |
+| `skill`        | Skill review agent            |
 | `validation`   | Validation agent (collateral) |
 
 ## Template
@@ -44,6 +45,10 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 | ♻️ Refactor  | {n}   |
 
 {1-5 sentences for overall assessment.}
+
+<!-- Only when changed SKILL.md files were detected and Agent 5 returned nothing reviewable. A review that translated to zero findings is a pass, not a gap. Omit entirely otherwise. -->
+
+**Not covered:** {What the review did not look at, and why. E.g. "Skill review did not run — `plugin-dev` is not installed, so the 2 changed `SKILL.md` files were not checked for description quality, length, or progressive disclosure."}
 
 ## Findings
 
