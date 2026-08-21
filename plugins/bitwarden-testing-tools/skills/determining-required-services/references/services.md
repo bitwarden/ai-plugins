@@ -14,7 +14,7 @@
 - **Technology**: Angular (NX/Webpack)
 - **Repo**: `<bitwarden git root>/clients/`
 - **Health check**: `https://localhost:8080` (200 response)
-- **Required by**: any change to `clients/apps/web/**` or `clients/libs/**`, and any server-side API change that surfaces in the web UI
+- **Required by**: any change to `clients/apps/web/**` or `clients/libs/**`, any server-side API change that surfaces in the web UI, and any test whose routes include a web vault URL (`https://localhost:8080`)
 
 ### Api Service
 
