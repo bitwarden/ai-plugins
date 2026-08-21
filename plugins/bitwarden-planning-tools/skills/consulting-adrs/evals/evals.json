@@ -1,0 +1,107 @@
+{
+  "skill_name": "consulting-adrs",
+  "notes": "Structure + behavior eval set. Offline cases point the skill at the synthetic fixture ADR catalog at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr (treated as a local bitwarden/contributing-docs checkout). The source-call case provides no local checkout so the skill must reach contributing.bitwarden.com; its assertions are graded on output content, not the run's tool-call log. Prompts are intentionally blind: they state the change neutrally and never name the expected classification.",
+  "fixtures_dir": "plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr",
+  "evals": [
+    {
+      "id": 1,
+      "name": "conflict-throws-instead-of-result",
+      "type": ["structure", "behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: OrganizationService methods will throw a NotFoundException when an entity is missing and throw a ValidationException on bad input, instead of returning a result object.",
+      "assertions": [
+        "Each finding is labeled with its type (conflict, gap, stale-reference, or aligned); how the label is rendered does not matter.",
+        "Output ends with a roll-up line giving counts per finding type or stating no in-force ADR was relevant.",
+        "Emits a CONFLICT finding.",
+        "Cites ADR-9001 (Result types for expected service errors) as the conflicting decision.",
+        "Does not classify this change as Aligned."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "gap-new-event-bus",
+      "type": ["behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: introduce a new cross-service event bus built on Redis pub/sub to broadcast domain events between the API and background workers.",
+      "assertions": [
+        "Emits a GAP finding for the event bus decision.",
+        "Explains why it is significant (new cross-service pattern / precedent / blast radius).",
+        "Does not invent or cite a specific ADR number, title, or URL for the event bus."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "aligned-returns-result",
+      "type": ["behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: a new BillingService returns a Result<T> carrying a typed error for expected validation failures, and reserves exceptions for unrecoverable states.",
+      "assertions": [
+        "Classifies the change as Aligned with ADR-9001 (or otherwise reports no conflict/gap).",
+        "Does not emit a CONFLICT or GAP finding for this change.",
+        "Keeps the aligned note brief (does not manufacture findings)."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "stale-reference-superseded-adr",
+      "type": ["behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: our updated testing guide tells engineers to write all new client unit tests in Vitest, citing ADR-9002.",
+      "assertions": [
+        "Emits a STALE-REFERENCE finding (or flags that ADR-9002 is superseded).",
+        "Points to ADR-9005 (Jest) as the in-force decision.",
+        "Does not treat ADR-9002 (Vitest) as a current, binding constraint."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "skip-no-architectural-surface",
+      "type": ["behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: fix a typo in a log message and correct an off-by-one error in a loop bound in the export routine.",
+      "assertions": [
+        "Reports no relevant in-force ADR / no architectural surface.",
+        "Does not manufacture a CONFLICT, GAP, or STALE-REFERENCE finding.",
+        "Does not invent an ADR."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "no-adr-found-do-not-invent",
+      "type": ["behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: adjust the sync client retry backoff constant from 200ms to 500ms.",
+      "assertions": [
+        "Reports that no in-force ADR governs the change (none found).",
+        "Does not invent an ADR number, title, or URL.",
+        "Does not fabricate a conflict."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "not-governed-suboptimal-is-not-a-conflict",
+      "type": ["behavior"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr. Proposed change: add a single 400-line BillingManager class that handles billing, invoicing, tax calculation, and email receipts together.",
+      "assertions": [
+        "Does not classify this as an ADR CONFLICT (no fixture ADR governs class size or separation of concerns).",
+        "If mentioned at all, frames it as not ADR-governed rather than a recorded-decision conflict."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "source-call-live-contributing-site",
+      "type": ["behavior", "source"],
+      "prompt": "Validate this proposed change against Bitwarden's ADRs. No local checkout of bitwarden/contributing-docs is available. Proposed change: adopt npm as the package manager for the client monorepo.",
+      "assertions": [
+        "Output references the real package-manager ADR (adopt-pnpm / ADR-0030).",
+        "Cites a contributing.bitwarden.com ADR path.",
+        "Does not fabricate an ADR: any cited ADR path resolves under contributing.bitwarden.com/architecture/adr/."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "summarize-adr-catalog",
+      "type": ["behavior"],
+      "prompt": "Summarize the accepted ADRs for onboarding. A local checkout of the bitwarden/contributing-docs ADR catalog is at plugins/bitwarden-planning-tools/skills/consulting-adrs/evals/fixtures/adr.",
+      "assertions": [
+        "Returns a summary/list of ADRs (title + status), not a conflict/gap/stale finding report.",
+        "Correctly reflects statuses: 9001, 9004, 9005 accepted; 9002 superseded; 9003 deprecated.",
+        "Does not fabricate an ADR that is not in the catalog."
+      ]
+    }
+  ]
+}
