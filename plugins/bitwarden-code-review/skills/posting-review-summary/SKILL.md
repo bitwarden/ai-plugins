@@ -78,12 +78,14 @@ reviewed, which is the opposite of the assessment sentences above it. So it gets
 outside the `<details>` block, where an approval cannot bury it.
 
 Render it when the diff called for a lens that did not run. Name what went unreviewed, why, and
-what covers it:
+what covers it. Give the reason that actually applies on your path — do not assert an install
+state you cannot check, and do not point at a remedy the stated reason would also block:
 
 ```markdown
-**Not covered:** Skill review did not run — `plugin-dev` is not installed, so the changed
-`SKILL.md` was not checked for description quality, length, or progressive disclosure.
-`performing-multi-agent-code-review` is the path that covers them.
+**Not covered:** Skill review did not run — this review path cannot launch
+`plugin-dev:skill-reviewer`, so the changed `SKILL.md` was not checked for description quality,
+length, or progressive disclosure. `performing-multi-agent-code-review` covers them where
+`plugin-dev` is installed.
 ```
 
 Omit the line entirely when every applicable lens ran. An approval that hides what went
