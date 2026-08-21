@@ -113,17 +113,19 @@ assert "verdict reports the run as incomplete" expect "INCOMPLETE" "${OUT}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# An absent settings.json means checks 3 and 4 did not run. They used to print
-# "(OK)" and the verdict counted them as passed.
+# An absent settings.json is a determinate answer, not a check that could not run: no file
+# means no rules are set in the scanned directory. It must not drive the run to
+# INCOMPLETE, which would overstate the doubt.
 # ---------------------------------------------------------------------------
 echo "[3] no settings.json to inspect"
 CLAUDE_DIR="$(fixture no-settings)"
 git_fixture "${CLAUDE_DIR}"
 OUT="$(bash "${SCAN}" "${CLAUDE_DIR}" 2>&1)"
 STATUS=$?
-assert "records the permission checks as skipped" expect "SKIPPED: no settings.json" "${OUT}"
-assert "verdict reports the run as incomplete" expect "INCOMPLETE" "${OUT}"
-assert "does not claim the checks passed" reject "The deterministic checks passed" "${OUT}"
+assert "says no rules are set here" expect "No settings.json at ${CLAUDE_DIR}" "${OUT}"
+assert "does not record it as skipped" reject "SKIPPED: no settings.json" "${OUT}"
+assert "verdict is not incomplete on this account" reject "INCOMPLETE" "${OUT}"
+assert_status "exits 0" 0 "${STATUS}"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -153,7 +155,9 @@ assert "no false positive (absolute path)" reject "CRITICAL" "${OUT}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# A clean configuration reports every check as run, and exits 0.
+# A clean configuration reports every check as run, and exits 0. Check 3's rule
+# tests need jq to tell an allow rule from a deny one, so without it the run is
+# legitimately incomplete and the expectation flips.
 # ---------------------------------------------------------------------------
 echo "[6] clean configuration"
 CLAUDE_DIR="$(fixture clean)"
@@ -161,9 +165,16 @@ printf '{"permissions": {"allow": ["Read(./src/**)"]}}\n' > "${CLAUDE_DIR}/setti
 git_fixture "${CLAUDE_DIR}"
 OUT="$(bash "${SCAN}" "${CLAUDE_DIR}" 2>&1)"
 STATUS=$?
-assert "reports the checks passed" expect "The deterministic checks passed" "${OUT}"
-assert "nothing recorded as skipped" reject "SKIPPED" "${OUT}"
-assert_status "exits 0" 0 "${STATUS}"
+if command -v jq >/dev/null 2>&1; then
+    assert "reports the checks passed" expect "The deterministic checks passed" "${OUT}"
+    assert "nothing recorded as skipped" reject "SKIPPED" "${OUT}"
+    assert_status "exits 0" 0 "${STATUS}"
+else
+    echo "  ℹ️  jq not installed: expecting the run to report as incomplete"
+    assert "reports the jq-gated checks as skipped" expect "SKIPPED" "${OUT}"
+    assert "verdict reports the run as incomplete" expect "INCOMPLETE" "${OUT}"
+    assert_status "exits 2" 2 "${STATUS}"
+fi
 echo ""
 
 echo "=== ${PASSED} passed, ${FAILED} failed ==="
