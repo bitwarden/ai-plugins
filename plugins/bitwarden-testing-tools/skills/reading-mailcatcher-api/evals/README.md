@@ -11,9 +11,9 @@ Reproducible trigger-rate test for the `bitwarden-testing-tools:reading-mailcatc
 
 This is an on-demand diagnostic, not a committed regression control. See "Why no committed baseline" below.
 
-Last run 2026-08-01, model `claude-opus-4-8`, against the installed ten-skill inventory (`assessing-test-coverage`, `build-test-cases`, `compiling-test-report`, `determining-required-services`, `executing-web-tests`, `exploring-application-context`, `reading-mailcatcher-api`, `test-web-changes`, `using-stripe-cli`, `verifying-environment-health`): should_trigger 10/10, should_not_trigger 9/10. These numbers predate the addition of `Agent` to `scripts/eval_harness.py`'s `exec_tools` set, so the should_trigger figure is a ceiling and the should_not_trigger figure is a floor.
+Last run 2026-08-21, model `claude-opus-4-8`, 20 queries at `--runs-per-query 3`, against the installed ten-skill inventory (`assessing-test-coverage`, `build-test-cases`, `compiling-test-report`, `determining-required-services`, `executing-web-tests`, `exploring-application-context`, `reading-mailcatcher-api`, `test-web-changes`, `using-stripe-cli`, `verifying-environment-health`): should_trigger 10/10, should_not_trigger 10/10. Taken after the TTM-06 negative-scope clause was added to the description; the runs-per-query differs from the earlier 7-run readings by TTM-06 design, so the figures are read on their own, not diffed against them.
 
-Known misfire: the near-miss "start the mailcatcher container for me" triggered 7/7. Starting a container is not reading a message under any reading of this skill's scope, so this is a genuine over-fire rather than eval noise. Narrowing the description to fix it is owned by TTM-06 in Spec 5, whose run supersedes this reading; the description is not changed here.
+Resolved misfire: the near-miss "start the mailcatcher container for me" previously triggered 7/7 against a description with no negative scope. After the TTM-06 clause was added (the skill reads messages only and does not start, stop, or health-check the Mailcatcher container or any other service), it now reads should-not-trigger (0/3 this run). Service lifecycle is the user's responsibility outside the pipeline.
 
 ## Why no committed baseline
 
