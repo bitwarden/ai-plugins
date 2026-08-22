@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Policy-guarded Stripe CLI access for the bitwarden-testing-tools
-pipeline. The ONLY sanctioned way for the test-runner to reach Stripe.
+pipeline. The ONLY sanctioned way for the playwright-test-runner to reach Stripe.
 
 A Bash grant of the shape Bash(stripe get:*) cannot exclude a flag, so it can
 never block --live; the official permissions documentation calls
