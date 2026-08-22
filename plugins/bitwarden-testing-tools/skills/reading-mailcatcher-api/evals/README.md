@@ -13,7 +13,7 @@ Reproducible trigger-rate test for the `bitwarden-testing-tools:reading-mailcatc
 A trigger eval measures whether the model auto-selects a skill from a natural-language query, and that outcome depends on which sibling skills are installed alongside it, since the model is choosing among all of them. The `baseline.json` committed here was recorded on 2026-08-01 against a plugin containing exactly these four skills:
 
 - `assessing-test-coverage`
-- `compiling-test-report`
+- `compiling-playwright-report`
 - `reading-mailcatcher-api`
 - `using-stripe-cli`
 
