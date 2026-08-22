@@ -1,9 +1,9 @@
 ---
-name: service-mapper
-description: Planning-phase agent for the test-web-changes pipeline. Reads the app-context artifact, calls determining-required-services, and returns the service list as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
+name: services-under-test-mapper
+description: Planning-phase agent for the start-playwright-test pipeline. Reads the app-context artifact, calls mapping-services-under-test, and returns the service list as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:
-  - determining-required-services
+  - mapping-services-under-test
 color: blue
 tools: Read, Skill, Bash(git diff *)
 ---
@@ -18,8 +18,8 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 
 Your task prompt includes:
 
-- **Context artifact path**: path to `context-<timestamp>.md` from context-gatherer
-- **App-context artifact path**: path to `app-context-<timestamp>.md` from code-explorer
+- **Context artifact path**: path to `context-<timestamp>.md` from playwright-test-context-gatherer
+- **App-context artifact path**: path to `app-context-<timestamp>.md` from playwright-test-case-scoper
 
 ## Step 1 — Read the app-context artifact
 
@@ -29,7 +29,7 @@ Also read the context artifact and extract the affected repos from its `## Affec
 
 ## Step 2 — Determine required services
 
-Invoke `Skill(bitwarden-testing-tools:determining-required-services)`. Pass the routes collected in Step 1 and the affected repos. The skill runs its own `git diff --name-only` internally, consults the service dependency map at `references/services.md`, and returns a structured list of required services (name, URL, port) plus a primary test URL.
+Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)`. Pass the routes collected in Step 1 and the affected repos. The skill runs its own `git diff --name-only` internally, consults the service dependency map at `references/services.md`, and returns a structured list of required services (name, URL, port) plus a primary test URL.
 
 ## Step 3 — Return the services list as markdown
 

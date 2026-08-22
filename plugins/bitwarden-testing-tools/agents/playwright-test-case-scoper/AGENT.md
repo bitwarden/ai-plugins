@@ -1,9 +1,9 @@
 ---
-name: code-explorer
-description: Planning-phase agent for the test-web-changes pipeline. Reads the context markdown from context-gatherer, calls exploring-application-context, and returns the Application Context as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
+name: playwright-test-case-scoper
+description: Planning-phase agent for the start-playwright-test pipeline. Reads the context markdown from playwright-test-context-gatherer, calls scoping-playwright-test-cases, and returns the Application Context as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:
-  - exploring-application-context
+  - scoping-playwright-test-cases
 color: orange
 tools: Read, Skill, Grep, Glob, Bash(git diff *), Bash(git log *)
 ---
@@ -18,7 +18,7 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 
 Your task prompt includes:
 
-- **Context artifact path**: path to `context-<timestamp>.md` from context-gatherer
+- **Context artifact path**: path to `context-<timestamp>.md` from playwright-test-context-gatherer
 
 ## Step 1 — Read context artifact
 
@@ -30,7 +30,7 @@ Read the context markdown file. Extract these sections by their headers:
 
 ## Step 2 — Explore application context
 
-Invoke `Skill(bitwarden-testing-tools:exploring-application-context)`. Pass the text below with no angle-bracket placeholders remaining in the actual call:
+Invoke `Skill(bitwarden-testing-tools:scoping-playwright-test-cases)`. Pass the text below with no angle-bracket placeholders remaining in the actual call:
 
 ```
 The working directory is the bitwarden root. Each repo is a subdirectory.

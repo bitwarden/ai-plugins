@@ -1,9 +1,9 @@
 ---
-name: exploring-application-context
+name: scoping-playwright-test-cases
 description: Explore the Bitwarden codebase (clients and server) to build a state-centric Application Context for test planning. Use before building test cases whenever a Jira ticket or plan is provided. Returns a markdown document with two sections — ## States (real-user-reachable, observable UI conditions with their verification points) and ## Flows (sequences that transition between states) — grounded in real client and server code.
 ---
 
-Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what `build-test-cases` consumes to generate grounded, accurate test cases.
+Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what `writing-playwright-test-cases` consumes to generate grounded, accurate test cases.
 
 The artifact is a contract: every state the planner can ask the application to be in, the flows that put it there, and the UI projections it can assert. Information that does not serve that contract is out of scope.
 
