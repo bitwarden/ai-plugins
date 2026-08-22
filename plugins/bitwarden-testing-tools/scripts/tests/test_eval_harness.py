@@ -191,33 +191,33 @@ class TestAgentDispatchDetection(unittest.TestCase):
             return eval_harness.run_query("dummy query", 30, "claude-opus-4-8", cfg)
 
     def test_agent_dispatch_naming_the_target_is_a_trigger(self):
-        result = self._run("context-gatherer", [_agent_event("context-gatherer")])
+        result = self._run("playwright-test-context-gatherer", [_agent_event("playwright-test-context-gatherer")])
         self.assertTrue(result["triggered"])
-        self.assertEqual(result["first_skill"], "context-gatherer")
+        self.assertEqual(result["first_skill"], "playwright-test-context-gatherer")
 
     def test_legacy_task_dispatch_naming_the_target_is_a_trigger(self):
-        result = self._run("context-gatherer", [_agent_event("context-gatherer", name="Task")])
+        result = self._run("playwright-test-context-gatherer", [_agent_event("playwright-test-context-gatherer", name="Task")])
         self.assertTrue(result["triggered"])
 
     def test_read_of_agent_md_containing_the_token_is_a_trigger(self):
-        result = self._run("context-gatherer", [
-            _read_event("/plugins/bitwarden-testing-tools/agents/context-gatherer/AGENT.md"),
+        result = self._run("playwright-test-context-gatherer", [
+            _read_event("/plugins/bitwarden-testing-tools/agents/playwright-test-context-gatherer/AGENT.md"),
         ])
         self.assertTrue(result["triggered"])
 
     def test_agent_dispatch_not_naming_the_target_bails_as_real_work(self):
-        result = self._run("context-gatherer", [_agent_event("service-mapper")])
+        result = self._run("playwright-test-context-gatherer", [_agent_event("services-under-test-mapper")])
         self.assertFalse(result["triggered"])
         self.assertEqual(result["first_skill"], "Agent (bailed: real-work tool)")
 
     def test_skill_target_is_inert_to_agent_dispatch(self):
-        result = self._run("assessing-test-coverage", [_agent_event("context-gatherer")])
+        result = self._run("assessing-test-coverage", [_agent_event("playwright-test-context-gatherer")])
         self.assertFalse(result["triggered"])
         self.assertEqual(result["first_skill"], "Agent (bailed: real-work tool)")
 
     def test_skill_target_is_inert_to_agent_md_read(self):
         result = self._run("assessing-test-coverage", [
-            _read_event("/plugins/bitwarden-testing-tools/agents/context-gatherer/AGENT.md"),
+            _read_event("/plugins/bitwarden-testing-tools/agents/playwright-test-context-gatherer/AGENT.md"),
         ])
         self.assertFalse(result["triggered"])
 

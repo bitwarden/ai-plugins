@@ -18,7 +18,7 @@ the most recent message for the recipient.
 Defaults:
   --link-filter: verify|confirm|signup|token|trial|login|finish-signup
 
-Designed to be called via the Bash tool from the test-runner. The skill body in
+Designed to be called via the Bash tool from the playwright-test-runner. The skill body in
 ../SKILL.md documents the underlying Mailcatcher REST API this wraps.
 """
 import argparse
