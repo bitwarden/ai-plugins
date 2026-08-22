@@ -1,6 +1,6 @@
 # Known Bitwarden States and Flows — Admin
 
-Curated reference of validated, reusable test states and UI flows for the Bitwarden Admin portal — consumed verbatim by `exploring-application-context` and `build-test-cases`.
+Curated reference of validated, reusable test states and UI flows for the Bitwarden Admin portal — consumed verbatim by `scoping-playwright-test-cases` and `writing-playwright-test-cases`.
 
 ---
 

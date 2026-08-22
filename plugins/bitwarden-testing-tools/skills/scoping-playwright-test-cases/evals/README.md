@@ -1,10 +1,10 @@
-# exploring-application-context evals
+# scoping-playwright-test-cases evals
 
-Behavior test cases for the `exploring-application-context` skill, in the `skill-creator` schema.
+Behavior test cases for the `scoping-playwright-test-cases` skill, in the `skill-creator` schema.
 
 `behavior-eval.json` holds five cases covering the skill's substantive decisions: producing a state-centric decomposition rather than a changed-file inventory, discriminating a state that fails the observability validity gate (dropped silently) from a state that is observable but unreachable by playwright alone (disclosed explicitly), grounding selectors in real client code including the text-versus-structural selector rule, recording a `[HUMAN]` verification point when a check the tool policy disallows is the only way to confirm a state, and preserving the admin-email placeholder token rather than resolving it from local secrets.
 
-Untrusted-content handling from a Jira ticket or its comments is deliberately out of scope for this suite. That behavior is owned by the agents that wrap this skill in the pipeline (`context-gatherer` and `code-explorer`), not by this skill itself: this skill's documented input is already-extracted feature description and acceptance criteria, not raw ticket content, and its `SKILL.md` never mentions Jira, tickets, or untrusted source content. A case exercising that boundary belongs in those agents' own eval suites.
+Untrusted-content handling from a Jira ticket or its comments is deliberately out of scope for this suite. That behavior is owned by the agents that wrap this skill in the pipeline (`playwright-test-context-gatherer` and `playwright-test-case-scoper`), not by this skill itself: this skill's documented input is already-extracted feature description and acceptance criteria, not raw ticket content, and its `SKILL.md` never mentions Jira, tickets, or untrusted source content. A case exercising that boundary belongs in those agents' own eval suites.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
 

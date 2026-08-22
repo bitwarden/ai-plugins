@@ -1,6 +1,6 @@
 # Known Bitwarden States and Flows — Billing
 
-Curated reference of validated, reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations — consumed verbatim by `exploring-application-context` and `build-test-cases`.
+Curated reference of validated, reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations — consumed verbatim by `scoping-playwright-test-cases` and `writing-playwright-test-cases`.
 
 ---
 
@@ -113,8 +113,8 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 ### flow:purchase-premium-subscription
 
-- **Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `build-test-cases/references/billing-test-data.md`), etc.
-- **Parameters:** none (uses defaults documented in `build-test-cases/references/billing-test-data.md`)
+- **Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `writing-playwright-test-cases/references/billing-test-data.md`), etc.
+- **Parameters:** none (uses defaults documented in `writing-playwright-test-cases/references/billing-test-data.md`)
 - **Precondition state:** state:authenticated-free-user
 - **Steps:**
   1. Navigate to `https://localhost:8080/#/settings/subscription/premium`
@@ -133,7 +133,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 ### flow:create-paid-org
 
-- **Use when:** Testing features that require a paid organization (Teams, Enterprise, Families, etc.) — including discount badge display on a Families organization (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `build-test-cases/references/billing-test-data.md` for the discount mechanism).
+- **Use when:** Testing features that require a paid organization (Teams, Enterprise, Families, etc.) — including discount badge display on a Families organization (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `writing-playwright-test-cases/references/billing-test-data.md` for the discount mechanism).
 - **Parameters:** `orgName`, `billingEmail`, `planTier`
 - **Precondition state:** state:authenticated-free-user
 - **Steps:**
@@ -160,7 +160,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 - **Steps:**
   1. **EXTERNAL TRIGGER** — simulate the marketing site call via the external-trigger wrapper (canonical path in references/playwright-testing-pipeline/tool-policy.md):
      ```bash
-     ${CLAUDE_PLUGIN_ROOT}/skills/executing-web-tests/scripts/external_trigger.py \
+     ${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/scripts/external_trigger.py \
        --url http://localhost:33656/accounts/trial/send-verification-email \
        --rationale "marketing-site trial verification email; no Bitwarden service initiates this" \
        --data '{

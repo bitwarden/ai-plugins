@@ -1,5 +1,5 @@
 ---
-name: determining-required-services
+name: mapping-services-under-test
 description: Determine which Bitwarden local development services are required for a given set of routes and the current branch diff. Use this skill when given the routes the tests will navigate to (extracted from an Application Context's ## States section). The skill runs its own `git diff --name-only`, consults references/services.md, and returns the union of services required by route-based dependencies and file-path-based dependencies. Returns service names with their URLs and ports.
 ---
 
@@ -8,7 +8,7 @@ Given the routes the tests will navigate to AND the affected repos, determine wh
 ## Inputs
 
 - **Routes:** list of URLs the tests will navigate to (typically extracted from an Application Context's `## States` section by the calling agent).
-- **Affected repos:** the same repos passed to `exploring-application-context` — used as scope for `git diff`.
+- **Affected repos:** the same repos passed to `scoping-playwright-test-cases` — used as scope for `git diff`.
 
 ## Procedure
 
@@ -23,7 +23,7 @@ Given the routes the tests will navigate to AND the affected repos, determine wh
 
 Return the output as a markdown block whose first non-empty line is the literal heading `## Required Services`. Below that heading, list each required service as a bullet with name, URL, and port. Clearly note the **primary test URL** since it drives the render verification step.
 
-The leading token of each bullet MUST be the entry's **Health-check name** from `references/services.md`, not its heading. `service-manager` passes that token straight to `health-check.sh`, which accepts exactly this closed set and exits 1 on anything else:
+The leading token of each bullet MUST be the entry's **Health-check name** from `references/services.md`, not its heading. `localhost-web-health-checker` passes that token straight to `health-check.sh`, which accepts exactly this closed set and exits 1 on anything else:
 
 `Api`, `Identity`, `Billing`, `billing-pricing`, `Web`, `Admin`, `Notifications`, `Events`, `Icons`
 

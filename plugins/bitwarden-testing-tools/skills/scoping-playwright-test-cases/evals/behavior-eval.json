@@ -1,5 +1,5 @@
 {
-  "skill_name": "exploring-application-context",
+  "skill_name": "scoping-playwright-test-cases",
   "eval_type": "behavior",
   "purpose": "Prove the skill changes the output in the five places it is load-bearing: (a) it produces a state-centric decomposition with `## States` and `## Flows` rather than a changed-file inventory; (b) it distinguishes a state that fails the observability validity gate, which must be silently dropped with no disclaimer, from a state that is observable but unreachable by playwright alone, which must be disclosed with `Reachable by playwright: no` and a `Reach via:` recipe; (c) it grounds selectors in real client and server code, using `Selector type: text` with a distinctive substring for text-content assertions rather than a structural selector; (d) it records a `[HUMAN]` verification point when confirming a state requires a check the tool policy disallows, rather than proposing an automated database query or refusing to verify at all; and (e) it preserves the `<bitwarden-portal-admin-email>` placeholder token verbatim rather than resolving it from local secrets. Each case is written so a plausible-looking but incorrect answer would look reasonable.",
   "evals": [
