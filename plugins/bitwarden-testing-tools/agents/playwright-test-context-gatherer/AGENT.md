@@ -1,6 +1,6 @@
 ---
-name: context-gatherer
-description: Planning-phase agent for the test-web-changes pipeline. Receives a Jira ticket ID, plan file path, or free-form feature description and returns structured context (affected repos, feature description, acceptance criteria) as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the test-web-changes skill.
+name: playwright-test-context-gatherer
+description: Planning-phase agent for the start-playwright-test pipeline. Receives a Jira ticket ID, plan file path, or free-form feature description and returns structured context (affected repos, feature description, acceptance criteria) as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:
   - bitwarden-atlassian-tools:researching-jira-issues

@@ -8,11 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `exploring-application-context`, exploring the clients and server repositories to build a state-centric Application Context with a `## States` section of real-user-reachable UI conditions and their verification points, and a `## Flows` section of the sequences that transition between them.
-- `determining-required-services`, resolving the union of route-based and file-path-based service dependencies from the Application Context and the branch diff, returning service names with URLs and ports.
-- Three planning-phase agents: `context-gatherer`, which acquires the feature source; `code-explorer`, which produces the Application Context; and `service-mapper`, which produces the service list. Each returns its artifact as its response for the orchestrator to persist.
-- Behavior evals for `exploring-application-context`, five advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
-- Behavior evals for `determining-required-services`, four advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
+- `scoping-playwright-test-cases`, exploring the clients and server repositories to build a state-centric Application Context with a `## States` section of real-user-reachable UI conditions and their verification points, and a `## Flows` section of the sequences that transition between them.
+- `mapping-services-under-test`, resolving the union of route-based and file-path-based service dependencies from the Application Context and the branch diff, returning service names with URLs and ports.
+- Three planning-phase agents: `playwright-test-context-gatherer`, which acquires the feature source; `playwright-test-case-scoper`, which produces the Application Context; and `services-under-test-mapper`, which produces the service list. Each returns its artifact as its response for the orchestrator to persist.
+- Behavior evals for `scoping-playwright-test-cases`, five advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
+- Behavior evals for `mapping-services-under-test`, four advice-only cases. The with-skill versus without-skill baseline is recorded in a later pass.
 
 ## [1.2.0] - 2026-08-31
 
