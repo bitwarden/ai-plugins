@@ -1,5 +1,5 @@
 ---
-name: test-web-changes
+name: start-playwright-test
 description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services but never starts them. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions. Add --confirm to review the test cases before execution begins.
 argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions] [--confirm]"
 allowed-tools: [Agent, Read, Write, Bash(mkdir *)]
@@ -33,20 +33,20 @@ If the raw input is empty, show the user the usage line from this skill's `argum
 
 Dispatch each with the `Agent` tool, using the agent type in the right column. Each returns its whole artifact as its final response; none of them persist anything themselves.
 
-| Agent              | Agent type                                 |
-| ------------------ | ------------------------------------------ |
-| `context-gatherer` | `bitwarden-testing-tools:context-gatherer` |
-| `code-explorer`    | `bitwarden-testing-tools:code-explorer`    |
-| `service-mapper`   | `bitwarden-testing-tools:service-mapper`   |
-| `test-planner`     | `bitwarden-testing-tools:test-planner`     |
-| `service-manager`  | `bitwarden-testing-tools:service-manager`  |
-| `test-runner`      | `bitwarden-testing-tools:test-runner`      |
+| Agent                              | Agent type                                                 |
+| ---------------------------------- | ---------------------------------------------------------- |
+| `playwright-test-context-gatherer` | `bitwarden-testing-tools:playwright-test-context-gatherer` |
+| `playwright-test-case-scoper`      | `bitwarden-testing-tools:playwright-test-case-scoper`      |
+| `services-under-test-mapper`       | `bitwarden-testing-tools:services-under-test-mapper`       |
+| `playwright-test-case-writer`      | `bitwarden-testing-tools:playwright-test-case-writer`      |
+| `localhost-web-health-checker`     | `bitwarden-testing-tools:localhost-web-health-checker`     |
+| `playwright-test-runner`           | `bitwarden-testing-tools:playwright-test-runner`           |
 
 ---
 
 ## Task 1: Gather context
 
-Dispatch `context-gatherer` with:
+Dispatch `playwright-test-context-gatherer` with:
 
 ```
 Input type: <jira-ticket | plan-file | description>
@@ -73,7 +73,7 @@ Then sanitize it. The slug is used as a path segment, as a CLI argument, and in 
 
 ## Task 2: Explore codebase
 
-Dispatch `code-explorer` with:
+Dispatch `playwright-test-case-scoper` with:
 
 ```
 Context artifact path: <artifacts-output-dir>/context-<timestamp>.md
@@ -87,9 +87,9 @@ Wait for completion. The agent returns the Application Context as a markdown res
 
 ## Task 3: Determine required services
 
-Tasks 3 and 4 both need only the artifacts from Task 2, so dispatch `service-mapper` and `test-planner` in the same message and let them run concurrently. Wait for both before starting Task 5.
+Tasks 3 and 4 both need only the artifacts from Task 2, so dispatch `services-under-test-mapper` and `playwright-test-case-writer` in the same message and let them run concurrently. Wait for both before starting Task 5.
 
-Dispatch `service-mapper` with:
+Dispatch `services-under-test-mapper` with:
 
 ```
 Context artifact path: <artifacts-output-dir>/context-<timestamp>.md
@@ -106,7 +106,7 @@ Wait for completion. The agent returns the services list as a markdown response.
 
 Dispatched together with Task 3, see above.
 
-Dispatch `test-planner` with:
+Dispatch `playwright-test-case-writer` with:
 
 ```
 Context artifact path: <artifacts-output-dir>/context-<timestamp>.md
@@ -141,7 +141,7 @@ This is pure orchestrator work, no agent dispatch. Read both planning artifacts 
 
 ## Optional review gate _(only if `--confirm` was set)_
 
-When `--confirm` was passed, present the plan for approval. Do not show only the case count and names: those labels exist in the plan precisely so the approver can see them, and `build-test-cases` marks external trigger steps for this purpose.
+When `--confirm` was passed, present the plan for approval. Do not show only the case count and names: those labels exist in the plan precisely so the approver can see them, and `writing-playwright-test-cases` marks external trigger steps for this purpose.
 
 Show, in this order:
 
@@ -163,7 +163,7 @@ If `--confirm` was not set, print: "Test plan complete — proceeding to test ex
 
 ## Task 6: Verify environment health
 
-Dispatch `service-manager` with:
+Dispatch `localhost-web-health-checker` with:
 
 ```
 Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
@@ -173,9 +173,9 @@ Artifacts output dir: <artifacts-output-dir>
 Wait for completion. The agent will return either:
 
 - A one-line success of the form `Environment verified: <N> services healthy, render OK.`
-- Or an error block from the verifying-environment-health skill (preflight failure, health-check timeout, or render failure).
+- Or an error block from the checking-localhost-web-health skill (preflight failure, health-check timeout, or render failure).
 
-If the response is **not** the success confirmation, paste the response to the user and halt the run. Do not dispatch `test-runner` and do not write any artifact. If it is the success confirmation, proceed to Task 7.
+If the response is **not** the success confirmation, paste the response to the user and halt the run. Do not dispatch `playwright-test-runner` and do not write any artifact. If it is the success confirmation, proceed to Task 7.
 
 No artifact is written for this task.
 
@@ -185,21 +185,21 @@ No artifact is written for this task.
 
 Track a segment counter `K`, starting at 1.
 
-Dispatch `test-runner` with:
+Dispatch `playwright-test-runner` with:
 
 ```
 Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
 Artifacts output dir: <artifacts-output-dir>
 ```
 
-Wait for the test-runner to return a JSON object. Then, on every response:
+Wait for the playwright-test-runner to return a JSON object. Then, on every response:
 
 1. Write the response verbatim to `<artifacts-output-dir>/segment-<K>-<timestamp>.json` using the `Write` tool.
-2. Invoke `Skill(compiling-test-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
+2. Invoke `Skill(compiling-playwright-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
 3. Run the merge script over all segment files so far, writing the canonical results file:
 
    ```
-   <plugin>/skills/compiling-test-report/scripts/merge_results.py \
+   <plugin>/skills/compiling-playwright-report/scripts/merge_results.py \
      <artifacts-output-dir>/segment-1-<timestamp>.json \
      ... \
      <artifacts-output-dir>/segment-<K>-<timestamp>.json \
@@ -212,13 +212,13 @@ Wait for the test-runner to return a JSON object. Then, on every response:
 
 ### paused
 
-Read `need_user_input` from `<artifacts-output-dir>/test-results-<timestamp>.json`. Surface it to the user and capture the answer. Increment `K`, then re-dispatch `test-runner` with:
+Read `need_user_input` from `<artifacts-output-dir>/test-results-<timestamp>.json`. Surface it to the user and capture the answer. Increment `K`, then re-dispatch `playwright-test-runner` with:
 
 ```
 Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
 Checkpoint path: <artifacts-output-dir>/test-results-<timestamp>.json
 Artifacts output dir: <artifacts-output-dir>
-Resume: A prior test-runner agent paused at a [HUMAN] step. The user has now completed that action.
+Resume: A prior playwright-test-runner agent paused at a [HUMAN] step. The user has now completed that action.
   Paused at: <the need_user_input text>
   User's answer: <user's answer>
 ```
@@ -244,14 +244,14 @@ Capture the totals from the merge stdout line for the final summary, and proceed
 
 This is pure orchestrator work, no agent dispatch.
 
-Invoke `Skill(compiling-test-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
+Invoke `Skill(compiling-playwright-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
 
 Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
 
 ```
-<plugin>/skills/compiling-test-report/scripts/render_report.py \
+<plugin>/skills/compiling-playwright-report/scripts/render_report.py \
   --results <artifacts-output-dir>/test-results-<timestamp>.json \
-  --template-dir <plugin>/skills/compiling-test-report/templates \
+  --template-dir <plugin>/skills/compiling-playwright-report/templates \
   --output <artifacts-output-dir>/report-<timestamp>.html \
   --plan-name "<input value>" \
   --date "<timestamp>" \

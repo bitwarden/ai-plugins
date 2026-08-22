@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Non-trigger evaluator for the six agents `test-web-changes` dispatches.
+"""Non-trigger evaluator for the six agents `start-playwright-test` dispatches.
 
 Every one of those agent descriptions claims "Do not invoke directly". This
 measures whether that holds: run it once per agent name and expect zero
@@ -18,12 +18,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 from eval_harness import EvalConfig, main  # noqa: E402
 
 AGENTS = (
-    "context-gatherer",
-    "code-explorer",
-    "service-mapper",
-    "test-planner",
-    "service-manager",
-    "test-runner",
+    "playwright-test-context-gatherer",
+    "playwright-test-case-scoper",
+    "services-under-test-mapper",
+    "playwright-test-case-writer",
+    "localhost-web-health-checker",
+    "playwright-test-runner",
 )
 
 if __name__ == "__main__":

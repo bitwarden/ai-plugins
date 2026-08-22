@@ -17,15 +17,15 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 A trigger eval measures whether the model auto-selects a skill from a natural-language query, and that outcome depends on which sibling skills are installed alongside it, since the model is choosing among all of them. The `baseline.json` committed here was recorded on 2026-08-01 against the plugin's final ten-skill inventory:
 
 - `assessing-test-coverage`
-- `build-test-cases`
-- `compiling-test-report`
-- `determining-required-services`
-- `executing-web-tests`
-- `exploring-application-context`
+- `writing-playwright-test-cases`
+- `compiling-playwright-report`
+- `mapping-services-under-test`
+- `running-playwright-tests`
+- `scoping-playwright-test-cases`
 - `reading-mailcatcher-api`
-- `test-web-changes`
+- `start-playwright-test`
 - `using-stripe-cli`
-- `verifying-environment-health`
+- `checking-localhost-web-health`
 
 An earlier baseline for this skill was recorded on 2026-07-29 against a plugin containing only `assessing-test-coverage` itself, and read `should_trigger_pass=10/10`, `should_not_trigger_pass=10/10`. That baseline is stale now that the inventory is final: `should_not_trigger_pass` moved to **7/10** in this run. This is not a regression. Three should-not-trigger queries began firing once the nine sibling testing skills were installed, because the model now has real work-adjacent skills to reach for on queries that ask about testing strategy or scope rather than existing coverage, and it sometimes reaches for one of them instead of correctly declining to trigger anything:
 

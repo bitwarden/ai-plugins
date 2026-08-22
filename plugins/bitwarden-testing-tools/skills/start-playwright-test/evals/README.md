@@ -1,6 +1,6 @@
-# test-web-changes evals
+# start-playwright-test evals
 
-Two suites for the `bitwarden-testing-tools:test-web-changes` orchestrator and the six agents it dispatches.
+Two suites for the `bitwarden-testing-tools:start-playwright-test` orchestrator and the six agents it dispatches.
 
 ## `trigger-eval.json`
 
@@ -10,7 +10,7 @@ Two of those near-misses deliberately target sibling tooling. `assessing-test-co
 
 ## `agent-non-trigger-eval.json`
 
-6 queries, all `should_trigger: false`, testing a claim every one of the six agent descriptions makes: "Do not invoke directly; dispatched by the `test-web-changes` skill." Each query is phrased to tempt one specific agent with exactly the work it does, without naming any agent, so a trigger means the model reached for an internal agent on its own.
+6 queries, all `should_trigger: false`, testing a claim every one of the six agent descriptions makes: "Do not invoke directly; dispatched by the `start-playwright-test` skill." Each query is phrased to tempt one specific agent with exactly the work it does, without naming any agent, so a trigger means the model reached for an internal agent on its own.
 
 Run `run_agent_eval.py --agent <name>` once per agent. A pass is zero triggers across all six queries for all six agents.
 
@@ -25,17 +25,17 @@ One residual caveat: direct-dispatch detection depends on the CLI surfacing a di
 These readings were recorded against the final, ten-skill plugin inventory (each reading below notes its own run date):
 
 - `assessing-test-coverage`
-- `build-test-cases`
-- `compiling-test-report`
-- `determining-required-services`
-- `executing-web-tests`
-- `exploring-application-context`
+- `writing-playwright-test-cases`
+- `compiling-playwright-report`
+- `mapping-services-under-test`
+- `running-playwright-tests`
+- `scoping-playwright-test-cases`
 - `reading-mailcatcher-api`
-- `test-web-changes`
+- `start-playwright-test`
 - `using-stripe-cli`
-- `verifying-environment-health`
+- `checking-localhost-web-health`
 
-plus all six agents (`context-gatherer`, `code-explorer`, `service-mapper`, `test-planner`, `service-manager`, `test-runner`). A trigger eval measures whether the model auto-selects a skill or agent from a natural-language query among everything installed alongside it, so the recorded numbers are only meaningful against this exact inventory.
+plus all six agents (`playwright-test-context-gatherer`, `playwright-test-case-scoper`, `services-under-test-mapper`, `playwright-test-case-writer`, `localhost-web-health-checker`, `playwright-test-runner`). A trigger eval measures whether the model auto-selects a skill or agent from a natural-language query among everything installed alongside it, so the recorded numbers are only meaningful against this exact inventory.
 
 ### Orchestrator trigger suite: last observed reading
 
@@ -47,12 +47,12 @@ On-demand diagnostic, not a committed regression control. Last run 2026-08-10, m
 
 should_not_trigger result per agent:
 
-- context-gatherer: 6/6
-- code-explorer: 6/6
-- service-mapper: 6/6
-- test-planner: 6/6
-- service-manager: 6/6
-- test-runner: 6/6
+- playwright-test-context-gatherer: 6/6
+- playwright-test-case-scoper: 6/6
+- services-under-test-mapper: 6/6
+- playwright-test-case-writer: 6/6
+- localhost-web-health-checker: 6/6
+- playwright-test-runner: 6/6
 
 No agent triggered on any of the six work requests; the convention held across the suite.
 
@@ -86,7 +86,7 @@ Keep `--num-workers` at 5 or below. The should-not-trigger queries are adversari
 For the agent suite, run once per agent name at `--runs-per-query 3`. Three runs are enough here because the expectation is zero triggers, and a zero-versus-nonzero signal does not need seven samples to establish. Install from a local marketplace pointing at the worktree checkout (`/Users/kyle/code/bitwarden/worktrees/testing-tools`), not the `ai-plugins` checkout, which is on the frozen source branch and holds a differently named plugin; reinstall after any harness edit so the run measures the current harness:
 
 ```bash
-for a in context-gatherer code-explorer service-mapper test-planner service-manager test-runner; do
+for a in playwright-test-context-gatherer playwright-test-case-scoper services-under-test-mapper playwright-test-case-writer localhost-web-health-checker playwright-test-runner; do
   python3 run_agent_eval.py --agent "$a" --eval-set agent-non-trigger-eval.json \
     --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 \
     > "/tmp/agent-$a.json"
