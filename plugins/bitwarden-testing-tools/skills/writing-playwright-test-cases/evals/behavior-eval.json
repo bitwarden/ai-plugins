@@ -1,5 +1,5 @@
 {
-  "skill_name": "build-test-cases",
+  "skill_name": "writing-playwright-test-cases",
   "eval_type": "behavior",
   "purpose": "Prove the skill changes the generated plan in the places it is load-bearing: (a) every generated step falls into one of the tool policy's four categories; (b) Category 3 steps carry the EXTERNAL TRIGGER label in its exact documented punctuation, with a rationale for why no Bitwarden service can initiate them; (c) the Category 3 qualifying test is applied, so an action the Admin portal or web vault could perform is routed there rather than simulated; (d) setup for a state with no named Flow in the Application Context still runs through the browser rather than the database; (e) billing steps bake the Stripe test card values into web UI payment-form steps rather than calling Stripe directly; and (f) a state that is Reachable by playwright: no carries its Reach via: recipe's [HUMAN] marker into the test case verbatim. Every prompt below embeds the ## Application Context section the skill requires as a precondition, because the skill returns an error and builds nothing without one.",
   "evals": [

@@ -1,19 +1,19 @@
 ---
-name: build-test-cases
+name: writing-playwright-test-cases
 description: Build structured Playwright test cases for Bitwarden web changes. Use when you have plan context (file paths, acceptance criteria, UI flows) and need to define starting URLs, interaction sequences, and screenshot checkpoints. Labels external trigger steps (flows initiated by external systems like the marketing website) so they are visible to the user approving the plan. Returns a test case list.
 ---
 
-Given the plan context and Application Context (from `exploring-application-context`), build concrete test cases for Playwright execution.
+Given the plan context and Application Context (from `scoping-playwright-test-cases`), build concrete test cases for Playwright execution.
 
 ## Prerequisite: Application Context
 
-This skill must receive an `## Application Context` section in the prompt, produced by the `exploring-application-context` skill. The Application Context contains exactly two top-level sections: `## States` and `## Flows`. Use it to ground every test case in the actual codebase:
+This skill must receive an `## Application Context` section in the prompt, produced by the `scoping-playwright-test-cases` skill. The Application Context contains exactly two top-level sections: `## States` and `## Flows`. Use it to ground every test case in the actual codebase:
 
 - **Starting URLs** come from a state's `UI projection > Route` line. Do not infer URLs from Jira descriptions.
 - **Setup sequences** come from `## Flows` entries — each flow declares a `Precondition state:` and `Post-condition state:`, and the planner chains flows by matching post-conditions to required preconditions.
 - **Assertions** come from a state's `UI projection > Verification points`. Each verification point identifies the state; assert it exactly as the Application Context records it — a text-content point by its resolved text (not a container class or `data-testid`), a structure/state point by its selector.
 
-If no Application Context is present, return an error asking the caller to run `exploring-application-context` first.
+If no Application Context is present, return an error asking the caller to run `scoping-playwright-test-cases` first.
 
 ## Tool Policy
 
