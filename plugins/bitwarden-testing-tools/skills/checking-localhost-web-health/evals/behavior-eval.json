@@ -1,5 +1,5 @@
 {
-  "skill_name": "verifying-environment-health",
+  "skill_name": "checking-localhost-web-health",
   "eval_type": "behavior",
   "purpose": "Prove the skill changes the stated decision in the three places it is load-bearing: (a) it halts on the first failure rather than continuing through the remaining checks or into test execution; (b) it verifies only and never starts, builds, or stops services, however convenient that would be; and (c) it treats the Angular bootstrap render check as a distinct gate from the /alive endpoint check, so a service answering /alive with a broken frontend is still a failure. Graded on the stated plan and refusal, not on live execution.",
   "evals": [

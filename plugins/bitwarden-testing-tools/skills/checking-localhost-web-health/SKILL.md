@@ -1,5 +1,5 @@
 ---
-name: verifying-environment-health
+name: checking-localhost-web-health
 description: Verify the Bitwarden local dev environment is ready for testing — Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure. Use after determining required services and before executing tests. Requires the `playwright-cli` skill for render verification.
 allowed-tools: >
   Bash(${CLAUDE_SKILL_DIR}/scripts/preflight-check.sh *),

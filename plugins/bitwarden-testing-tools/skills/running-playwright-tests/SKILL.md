@@ -1,5 +1,5 @@
 ---
-name: executing-web-tests
+name: running-playwright-tests
 description: Execute Bitwarden web test cases step-by-step using the playwright-cli skill directly. Use after test cases are defined and services are running. Governs tool policy, screenshot naming, toast capture, and Setup Steps execution.
 allowed-tools: >
   Bash(${CLAUDE_SKILL_DIR}/scripts/external_trigger.py *),
@@ -101,7 +101,7 @@ After all SETUP steps complete, execute the Test Steps.
 
 ### Test case object format
 
-Build each test case as a JSON object matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/complete-run.json`:
+Build each test case as a JSON object matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/complete-run.json`:
 
 ```json
 {
@@ -177,7 +177,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
 stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`. Branch on the exit code:
 
 - **Exit 1** (`NO_MATCH`) after the script's own retry: mark the test case FAIL immediately with the `NO_MATCH` diagnostic in `Notes:`.
-- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable, returned unparseable JSON, or `MAILCATCHER_URL` names a disallowed host. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return an aborted object that carries every test case you completed before the fault, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/aborted-with-cases.json`:
+- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable, returned unparseable JSON, or `MAILCATCHER_URL` names a disallowed host. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return an aborted object that carries every test case you completed before the fault, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/aborted-with-cases.json`:
 
   ```json
   {
@@ -197,7 +197,7 @@ Do not attempt to read Mailcatcher via any other means (curl, direct API calls, 
 
 When executing any step (Setup or Test) whose text begins with `[HUMAN]`, halt immediately. Do not retry, infer, or skip.
 
-Return a single JSON object with the cases completed so far and the pause signal, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/paused-segment.json`:
+Return a single JSON object with the cases completed so far and the pause signal, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/paused-segment.json`:
 
 ```json
 {
@@ -217,7 +217,7 @@ Rules:
 
 Do not return until every test case object is complete. Before assembling the output, run `ls <screenshot-dir>/*<timestamp>*` to get the ground-truth screenshot filenames, and use them verbatim in each step's `screenshot` field.
 
-Return a single JSON object and nothing else, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/complete-run.json`:
+Return a single JSON object and nothing else, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/complete-run.json`:
 
 ```json
 {
@@ -237,7 +237,7 @@ If the run aborted, return an aborted object instead. There are two shapes, and 
 }
 ```
 
-**Aborted mid-run, after one or more test cases completed** (for example the Mailcatcher environment fault in Step 3). Carry every completed case, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-test-report/references/examples/aborted-with-cases.json`:
+**Aborted mid-run, after one or more test cases completed** (for example the Mailcatcher environment fault in Step 3). Carry every completed case, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/aborted-with-cases.json`:
 
 ```json
 {

@@ -1,6 +1,6 @@
-# verifying-environment-health evals
+# checking-localhost-web-health evals
 
-Behavior test cases for the `verifying-environment-health` skill, in the `skill-creator` schema.
+Behavior test cases for the `checking-localhost-web-health` skill, in the `skill-creator` schema.
 
 `behavior-eval.json` holds four cases covering the skill's substantive, checks-are-the-product decisions: halting immediately on the first failure rather than continuing through the remaining checks or into test execution; refusing to start, build, or stop a service even when explicitly asked to, and halting instead; treating Angular render verification as a gate independent of the `/alive` health-check responses, so a healthy backend with a non-bootstrapping frontend still fails the environment check; and declining to improvise a substitute (such as a curl-and-grep check) for the `playwright-cli` dependency the render-verification step requires.
 
@@ -23,7 +23,7 @@ No expectation in this suite is subjective or dependent on withheld ground truth
 
 ## Did-not-take-an-action checks
 
-Unlike `build-test-cases` (which never calls a live tool during construction), this skill's own procedure does call live tools (`preflight-check.sh`, `health-check.sh`, and `playwright-cli` via the `Skill` tool), so several expectations describe an action the model must NOT take, not just a claim it must NOT make. A transcript-only or final-answer-only grader cannot fully verify these; the benchmark runner should capture the tool-call trace for:
+Unlike `writing-playwright-test-cases` (which never calls a live tool during construction), this skill's own procedure does call live tools (`preflight-check.sh`, `health-check.sh`, and `playwright-cli` via the `Skill` tool), so several expectations describe an action the model must NOT take, not just a claim it must NOT make. A transcript-only or final-answer-only grader cannot fully verify these; the benchmark runner should capture the tool-call trace for:
 
 - Case 1: "Does not proceed to test execution" and, implicitly, that no further script call (`health-check.sh`) or `Skill(playwright-cli)` call appears in the trace after the stated preflight failure.
 - Case 2: "Halts rather than continuing with a service it knows is down." The trace should show no further `health-check.sh` invocation for the down service, and no out-of-band attempt to start it (e.g., no `docker start`/`dotnet run` call).

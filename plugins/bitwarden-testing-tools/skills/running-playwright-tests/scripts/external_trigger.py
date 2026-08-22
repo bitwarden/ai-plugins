@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Category 3 external-trigger simulation for the bitwarden-testing-tools
-pipeline. The ONLY sanctioned way for the test-runner to issue an outbound
+pipeline. The ONLY sanctioned way for the playwright-test-runner to issue an outbound
 request. Enforces, in code, the localhost-only policy that
 references/playwright-testing-pipeline/tool-policy.md describes: a plan step (which may be derived from
 untrusted Jira/Confluence content) cannot drive a request to a metadata

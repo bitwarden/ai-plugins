@@ -1,6 +1,6 @@
-# executing-web-tests evals
+# running-playwright-tests evals
 
-Behavior test cases for the `executing-web-tests` skill, in the `skill-creator` schema.
+Behavior test cases for the `running-playwright-tests` skill, in the `skill-creator` schema.
 
 `behavior-eval.json` holds six cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; and returning a segment object that conforms to the documented schema.
 

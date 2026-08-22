@@ -1,5 +1,5 @@
 {
-  "skill_name": "executing-web-tests",
+  "skill_name": "running-playwright-tests",
   "eval_type": "behavior",
   "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; and (f) the returned object matches the documented segment schema. Graded on the stated plan and refusal, not on live execution.",
   "evals": [
