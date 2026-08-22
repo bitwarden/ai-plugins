@@ -1,6 +1,6 @@
 # Known Bitwarden States and Flows — Auth
 
-Curated reference of validated, reusable test states and UI flows for Bitwarden authentication — consumed verbatim by `exploring-application-context` and `build-test-cases`.
+Curated reference of validated, reusable test states and UI flows for Bitwarden authentication — consumed verbatim by `scoping-playwright-test-cases` and `writing-playwright-test-cases`.
 
 ---
 
