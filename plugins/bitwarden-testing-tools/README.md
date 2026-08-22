@@ -14,16 +14,16 @@ A set of skills that support Bitwarden's testing and quality work with evidence 
 | `writing-manual-test-cases`     | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`. |
 | `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and OTP codes. Directly invocable.                                                                                                                                                                                                                                                                                           |
 | `using-stripe-cli`              | Queries read-only Stripe test data and advances an already-attached test clock via the `stripe_cli.py` wrapper.                                                                                                                                                                                                                                                                                                       |
-| `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories into a States and Flows document.                                                                                                                                                                                                                                                                                      |
-| `determining-required-services` | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                           |
+| `scoping-playwright-test-cases` | Surveys changed files, routes, selectors, and verification points across affected repositories into a States and Flows document.                                                                                                                                                                                                                                                                                      |
+| `mapping-services-under-test`   | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                           |
 
 ## Agents
 
-| Agent              | Description                                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
-| `code-explorer`    | Reads the context, explores the affected codebases, and produces the Application Context.                           |
-| `service-mapper`   | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
+| Agent                              | Description                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `playwright-test-context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
+| `playwright-test-case-scoper`      | Reads the context, explores the affected codebases, and produces the Application Context.                           |
+| `services-under-test-mapper`       | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
 
 ## Cross-Plugin Integration
 

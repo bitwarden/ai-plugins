@@ -1,5 +1,5 @@
 {
-  "skill_name": "determining-required-services",
+  "skill_name": "mapping-services-under-test",
   "eval_type": "behavior",
   "purpose": "Prove the skill changes the output in the four places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `git diff --name-only origin/main...HEAD -- <repo-path>` rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; and (d) it returns a minimal set matched by the documented rules rather than a defensively padded list.",
   "evals": [
