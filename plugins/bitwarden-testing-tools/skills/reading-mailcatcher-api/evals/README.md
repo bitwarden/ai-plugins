@@ -6,28 +6,22 @@ Reproducible trigger-rate test for the `bitwarden-testing-tools:reading-mailcatc
 
 - `trigger-eval.json`: 20-query test set. 10 should-trigger phrasings covering the flows the skill names (account verification, magic link, trial activation, OTP, password reset, org invite, emergency access) addressed by recipient and by subject. 10 should-not-trigger near-misses that share the words "email", "mail", and "mailcatcher" but want something the skill does not do: debugging mail delivery, configuring SMTP, starting containers, writing or reviewing email-template code, explaining the server-side flow, or inventorying test coverage.
 - `run_real_eval.py`: a thin configuration wrapper over the plugin's shared runner at `scripts/eval_harness.py`, setting only the target skill token. The harness spawns parallel `claude -p` subprocesses, parses streamed tool-use events, and computes per-query trigger rates.
-- `baseline.json`: last known-good run. Diff against this to spot regressions on future description changes.
 
-## Baseline provenance (provisional)
+## Last observed reading
 
-A trigger eval measures whether the model auto-selects a skill from a natural-language query, and that outcome depends on which sibling skills are installed alongside it, since the model is choosing among all of them. The `baseline.json` committed here was recorded on 2026-08-01 against a plugin containing exactly these four skills:
+This is an on-demand diagnostic, not a committed regression control. See "Why no committed baseline" below.
 
-- `assessing-test-coverage`
-- `compiling-playwright-report`
-- `reading-mailcatcher-api`
-- `using-stripe-cli`
+Last run 2026-08-21, model `claude-opus-4-8`, 20 queries at `--runs-per-query 3`, against the installed ten-skill inventory (`assessing-test-coverage`, `writing-playwright-test-cases`, `compiling-playwright-report`, `mapping-services-under-test`, `running-playwright-tests`, `scoping-playwright-test-cases`, `reading-mailcatcher-api`, `start-playwright-test`, `using-stripe-cli`, `checking-localhost-web-health`): should_trigger 10/10, should_not_trigger 10/10. Taken after the TTM-06 negative-scope clause was added to the description; the runs-per-query differs from the earlier 7-run readings by TTM-06 design, so the figures are read on their own, not diffed against them.
 
-This plugin is still growing (ten skills are planned for the full stack), so this baseline is provisional. It will be re-recorded against the final skill inventory before the stack completes, and the number here should not be read as a final regression gate until then.
+Resolved misfire: the near-miss "start the mailcatcher container for me" previously triggered 7/7 against a description with no negative scope. After the TTM-06 clause was added (the skill reads messages only and does not start, stop, or health-check the Mailcatcher container or any other service), it now reads should-not-trigger (0/3 this run). Service lifecycle is the user's responsibility outside the pipeline.
 
-## Known consistent misfire (follow-up, not fixed here)
+## Why no committed baseline
 
-The near-miss query "start the mailcatcher container for me" triggers the skill on every recorded run (7/7). Starting a container is not reading a message under any reading of the skill's scope, so this is a genuine over-fire rather than eval noise or an ambiguous query. The description most likely attracts on the bare word "mailcatcher" beyond the message-reading scope it actually documents.
-
-This is intentionally left as a documented follow-up rather than fixed in this eval task: `reading-mailcatcher-api` is migrated, already-working content, and this project's premise is that migrated skills stay byte-identical through the eval-authoring pass. Narrowing the description to satisfy an eval set written after the fact would invert that premise. Whoever owns the skill's `description` going forward should treat this as a known, reproducible case to weigh when next touching that frontmatter.
+A trigger rate depends on the skill description, the harness, the model, and the full set of installed skills competing for selection. Three of those four are outside this skill, so a committed `baseline.json` goes stale whenever the model is bumped or the plugin's skill set changes, neither of which is a change to this skill. Nothing re-runs these evals, so a committed file cannot act as a live regression control regardless. We keep the query set and the shared harness, record the last observed reading above as a dated diagnostic, and re-run on demand when editing this skill's description, comparing a fresh before and after in the same session. This diverges deliberately from skill-creator's baseline-oriented methodology, which assumes the description can be tuned in response to the number. Do not restore a committed baseline here.
 
 ## Running
 
-Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The eval reads the **installed** copy of the plugin, not this working tree. The `bitwarden-marketplace` entry already tracks this working directory, so reinstalling picks up any local edit:
+Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The eval reads the **installed** copy of the plugin, not this working tree. Install from a marketplace entry that points at this working directory (`bitwarden-marketplace` tracks GitHub, so use a local marketplace added separately for this purpose), then reinstall to pick up any local edit:
 
 ```bash
 claude plugin uninstall bitwarden-testing-tools
@@ -48,16 +42,16 @@ python3 run_real_eval.py \
 
 20 queries times 7 runs is 140 `claude -p` invocations. Keep `--num-workers` at 5 or below: each worker is a full agent, and the should-not-trigger queries are adversarial real-work prompts.
 
-## Regression check
+## On-demand comparison
 
-Diff each query's PASS/FAIL verdict, not the raw `trigger_rate` values, which are stochastic.
+There is no committed baseline to diff against. When editing this skill's `description`, run the eval once before the edit and once after, in the same session so the model and installed inventory match, and diff the two by PASS/FAIL verdict rather than the raw `trigger_rate` values, which are stochastic:
 
 ```bash
 project='{
   should_trigger_pass, should_not_trigger_pass,
   results: [.results[] | {query, should_trigger, pass: ((.trigger_rate >= 0.5) == .should_trigger)}]
 }'
-diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
+diff <(jq -S "$project" before.json) <(jq -S "$project" after.json)
 ```
 
-Empty diff means no regression. If a new failure appears, fix the skill description rather than the eval set. If the change is intentional, replace `baseline.json` with `result.json` in the same PR as the description change.
+An empty diff means the edit changed no verdict. Fix the skill description rather than the eval set if an edit regresses a verdict, and update the "Last observed reading" prose above when you record a new run.
