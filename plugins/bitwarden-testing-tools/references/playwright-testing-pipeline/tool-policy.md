@@ -7,7 +7,7 @@ Four categories of steps are permitted during web test planning and execution. E
 Reference these scripts by these exact paths; do not duplicate the paths elsewhere in prose.
 
 - Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py`
-- External trigger: `${CLAUDE_PLUGIN_ROOT}/skills/executing-web-tests/scripts/external_trigger.py`
+- External trigger: `${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/scripts/external_trigger.py`
 
 ## Category 1 — Web UI Interactions (default)
 
@@ -39,14 +39,14 @@ Use the external-trigger wrapper (see Canonical script paths) only when the acti
 EXTERNAL TRIGGER: POST <endpoint> — <one-line rationale for why no Bitwarden service can initiate this>
 
 **Execution:** Category 3 steps are issued ONLY through the external-trigger wrapper (see Canonical script paths), never via raw curl:
-${CLAUDE_PLUGIN_ROOT}/skills/executing-web-tests/scripts/external_trigger.py --url <endpoint> --rationale "<rationale>" --data '<json body>'
+${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/scripts/external_trigger.py --url <endpoint> --rationale "<rationale>" --data '<json body>'
 `external_trigger.py` restricts destinations to `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test` by default. An operator may extend that set through the comma-separated `PLAYWRIGHT_TESTING_ALLOWED_HOSTS` environment variable; the defaults are never replaced, only added to. TLS verification is bypassed only for the four built-in hosts, whose dev certs are self-signed. Any host an operator adds gets normal certificate verification. The wrapper enforces POST-only method; a destination that is not an allowed host is rejected by the wrapper; do not attempt to work around it.
 
 ## Category 4 — Stripe Data Queries (read-only)
 
 Use the `using-stripe-cli` skill only to query Stripe data that cannot be obtained through the web UI — for example, listing coupon IDs needed for an Admin portal import flow.
 
-`using-stripe-cli` ships with this plugin and is preloaded into the test-runner through its `skills:` frontmatter, so it is always available. It is the only sanctioned path to Stripe. The test-runner holds no grant for the `stripe` binary itself, only for the wrapper script that skill documents.
+`using-stripe-cli` ships with this plugin and is preloaded into the playwright-test-runner through its `skills:` frontmatter, so it is always available. It is the only sanctioned path to Stripe. The playwright-test-runner holds no grant for the `stripe` binary itself, only for the wrapper script that skill documents.
 
 Do not use Stripe calls to set up state that the application's own flows can create.
 
@@ -71,4 +71,4 @@ Two constraints in this document are instructions to the agent, not boundaries t
 
 **Navigation targets and eval payloads (Category 1) are unenforced.** `Bash(playwright-cli:*)` grants every subcommand with every argument. Narrowing it would not help: the subcommands that carry egress risk (`goto`, `eval`, `run-code`) are exactly the ones the pipeline needs. The enforcement point for this is a `PreToolUse` hook on `Bash`, which the official documentation names as the reliable alternative to argument-constraining permission patterns. That hook is not yet implemented.
 
-**Script grants are not anchored to this plugin's install directory.** The `Bash(...)` entries in `agents/test-runner/AGENT.md` are leading-wildcard path suffixes, so they match any file whose path ends the same way, not only the copy under this plugin. No path placeholder expands inside an agent's `tools:` frontmatter, and a hardcoded absolute path is not portable because a plugin's install directory changes when the plugin updates. The same `PreToolUse` hook would close this, because hook commands do resolve `${CLAUDE_PLUGIN_ROOT}` at runtime.
+**Script grants are not anchored to this plugin's install directory.** The `Bash(...)` entries in `agents/playwright-test-runner/AGENT.md` are leading-wildcard path suffixes, so they match any file whose path ends the same way, not only the copy under this plugin. No path placeholder expands inside an agent's `tools:` frontmatter, and a hardcoded absolute path is not portable because a plugin's install directory changes when the plugin updates. The same `PreToolUse` hook would close this, because hook commands do resolve `${CLAUDE_PLUGIN_ROOT}` at runtime.
