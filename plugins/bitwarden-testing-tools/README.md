@@ -16,14 +16,16 @@ A set of skills that support Bitwarden's testing and quality work with evidence 
 | `using-stripe-cli`              | Queries read-only Stripe test data and advances an already-attached test clock via the `stripe_cli.py` wrapper.                                                                                                                                                                                                                                                                                                       |
 | `scoping-playwright-test-cases` | Surveys changed files, routes, selectors, and verification points across affected repositories into a States and Flows document.                                                                                                                                                                                                                                                                                      |
 | `mapping-services-under-test`   | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                           |
+| `writing-playwright-test-cases` | Builds Playwright test cases with a web-first policy from plan context, labeling external-trigger steps so the approver can see them.                                                                                                                                                                                                                                                                                 |
 
 ## Agents
 
-| Agent                              | Description                                                                                                         |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `playwright-test-context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
-| `playwright-test-case-scoper`      | Reads the context, explores the affected codebases, and produces the Application Context.                           |
-| `services-under-test-mapper`       | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
+| Agent                              | Description                                                                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `playwright-test-context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context.     |
+| `playwright-test-case-scoper`      | Reads the context, explores the affected codebases, and produces the Application Context.                               |
+| `services-under-test-mapper`       | Reads the Application Context and maps changed file paths to the local services that need to be running.                |
+| `playwright-test-case-writer`      | Reads the context and Application Context artifacts and builds grounded test cases via `writing-playwright-test-cases`. |
 
 ## Cross-Plugin Integration
 
