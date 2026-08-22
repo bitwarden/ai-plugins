@@ -1,6 +1,6 @@
-# determining-required-services evals
+# mapping-services-under-test evals
 
-Behavior test cases for the `determining-required-services` skill, in the `skill-creator` schema.
+Behavior test cases for the `mapping-services-under-test` skill, in the `skill-creator` schema.
 
 `behavior-eval.json` holds four cases covering the skill's substantive decisions: taking the union of route-based and file-path-based dependencies rather than one alone, running its own `git diff --name-only origin/main...HEAD -- <repo-path>` rather than relying on the caller, sourcing names, URLs, and ports from `references/services.md` rather than recall, and returning a minimal set matched by the documented rules rather than a defensively padded one.
 

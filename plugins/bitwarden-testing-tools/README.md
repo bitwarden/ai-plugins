@@ -8,27 +8,27 @@ A set of skills that support Bitwarden's testing and quality work with evidence 
 
 ## Skills
 
-| Skill | What It Does |
-| --- | --- |
-| `assessing-test-coverage` | Determines what a change is **already tested by**. From a PR, Jira key, Tech Breakdown, or Testmo CSV, resolves the change surface, finds the existing tests PRs-first, buckets each by layer (unit / integration / E2E), cites it as a stable GitHub permalink, and records untested behaviors as gaps — writing a self-contained markdown report under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`. |
-| `writing-manual-test-cases` | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`. |
-| `reading-mailcatcher-api` | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and tokens. Directly invocable. |
-| `using-stripe-cli` | Queries read-only Stripe test data and advances an already-attached test clock via the `stripe_cli.py` wrapper. |
-| `exploring-application-context` | Surveys changed files, routes, selectors, and verification points across affected repositories into a States and Flows document. |
-| `determining-required-services` | Maps routes and the branch diff to the local services that must be running. |
+| Skill                           | What It Does                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assessing-test-coverage`       | Determines what a change is **already tested by**. From a PR, Jira key, Tech Breakdown, or Testmo CSV, resolves the change surface, finds the existing tests PRs-first, buckets each by layer (unit / integration / E2E), cites it as a stable GitHub permalink, and records untested behaviors as gaps — writing a self-contained markdown report under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`.                   |
+| `writing-manual-test-cases`     | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`. |
+| `reading-mailcatcher-api`       | Reads Bitwarden emails via the Mailcatcher REST API for verification links, magic links, and tokens. Directly invocable.                                                                                                                                                                                                                                                                                              |
+| `using-stripe-cli`              | Queries read-only Stripe test data and advances an already-attached test clock via the `stripe_cli.py` wrapper.                                                                                                                                                                                                                                                                                                       |
+| `scoping-playwright-test-cases` | Surveys changed files, routes, selectors, and verification points across affected repositories into a States and Flows document.                                                                                                                                                                                                                                                                                      |
+| `mapping-services-under-test`   | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                           |
 
 ## Agents
 
-| Agent | Description |
-| --- | --- |
-| `context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
-| `code-explorer` | Reads the context, explores the affected codebases, and produces the Application Context. |
-| `service-mapper` | Reads the Application Context and maps changed file paths to the local services that need to be running. |
+| Agent                              | Description                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `playwright-test-context-gatherer` | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
+| `playwright-test-case-scoper`      | Reads the context, explores the affected codebases, and produces the Application Context.                           |
+| `services-under-test-mapper`       | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
 
 ## Cross-Plugin Integration
 
-| Plugin | How It's Used |
-| --- | --- |
+| Plugin                      | How It's Used                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bitwarden-atlassian-tools` | **Recommended** — the primary way to drive analysis from Jira tickets and linked Confluence requirements, via its `researching-jira-issues` skill and Atlassian MCP tools. Optional by design: if absent, drive the analysis from the PR / CSV / tech-breakdown / description instead. A Jira ticket input, however, requires the plugin — without it, stop and ask the user to install and configure it. |
 
 ## Installation
