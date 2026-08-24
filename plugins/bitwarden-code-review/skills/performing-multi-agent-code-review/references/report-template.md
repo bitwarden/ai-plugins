@@ -48,7 +48,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 <!-- Only when a changed SKILL.md went unreviewed; name just the files not covered. A review that translated to zero findings is a pass, not a gap. Omit entirely otherwise. -->
 
-**Not covered:** {What the review did not look at, and why. E.g. "Skill review did not run — `plugin-dev` is not installed, so the 2 changed `SKILL.md` files were not checked for description quality, length, or progressive disclosure."}
+**Not covered:** {What the review did not look at, and why, naming each file. E.g. "Skill review did not run — `plugin-dev` is not installed, so `plugins/example/skills/doing-a-thing/SKILL.md` and `plugins/example/skills/doing-another/SKILL.md` were not checked for description quality, length, or progressive disclosure."}
 
 ## Findings
 

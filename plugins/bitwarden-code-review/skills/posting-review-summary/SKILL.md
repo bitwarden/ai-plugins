@@ -59,7 +59,7 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 
 [Up to 4 neutral sentences describing what was reviewed]
 
-[Optional **Not covered:** line - only when a lens the diff called for did not run]
+[Optional **Not covered:** line - only when a review step the diff called for did not run]
 
 <details>
 <summary>Code Review Details</summary>
@@ -77,9 +77,14 @@ A coverage note is not a finding: it has no `file:line` to cite and it says what
 reviewed, which is the opposite of the assessment sentences above it. So it gets its own line,
 outside the `<details>` block, where an approval cannot bury it.
 
-Render it when the diff called for a lens that did not run. Name what went unreviewed, why, and
-what covers it. Give the reason that actually applies on your path — do not assert an install
-state you cannot check, and do not point at a remedy the stated reason would also block:
+Render it when a review step the diff called for did not run — a skill or agent you were
+directed to invoke was unavailable, errored, or returned nothing usable. Name the files that
+went unreviewed, why, and what covers them. Give the reason that actually applies on your path
+— do not assert an install state you cannot check, and do not point at a remedy the stated
+reason would also block.
+
+Example, agent mode, where `Task` is unavailable so `plugin-dev:skill-reviewer` cannot be
+launched whatever is installed:
 
 ```markdown
 **Not covered:** Skill review did not run — this review path cannot launch
@@ -88,8 +93,8 @@ length, or progressive disclosure. `performing-multi-agent-code-review` covers t
 `plugin-dev` is installed.
 ```
 
-Omit the line entirely when every applicable lens ran. An approval that hides what went
-unreviewed reads as a pass on it.
+Omit the line entirely when every review step the diff called for ran. An approval that hides
+what went unreviewed reads as a pass on it.
 
 ## Dependency Changes Table
 

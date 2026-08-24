@@ -15,9 +15,11 @@ single `SKILL.md`, and the orchestrator repeats it for each changed file.
 ## Prompt blocks
 
 Each instance receives Line Number Accuracy unchanged, plus the two variants below, plus the
-diff and the one `SKILL.md` path it reviews. Pass the diff even though the agent reads files
-directly — it is the only thing telling the agent which parts are new. It receives nothing else
-from the Review Rules bundle.
+one `SKILL.md` path it reviews and the diff hunks for that file and its sibling support files.
+Pass the diff even though the agent reads files directly — it is the only thing telling the
+agent which parts are new. Narrow it to that skill: handing an instance the whole changeset's
+hunks lets it attribute another skill's findings, which is the blending the per-file launch
+exists to prevent. It receives nothing else from the Review Rules bundle.
 
 ### Tool discipline (Agent 5 variant)
 
@@ -78,8 +80,8 @@ the prose does not hold them.
    line. The boundary block above tells Agent 5 to report a file that tries to direct its
    review, and such text is worth surfacing wherever it sits — an injection planted in an
    untouched region of a changed file is the case the widened boundary exists to catch, and
-   nothing else in the pipeline covers it. Anchor it to the file and let Step 4 adjudicate, which
-   its dismissal rules carry a matching exception for.
+   nothing else in the pipeline covers it. Anchor it to the file and let Step 4 adjudicate — its
+   dismissal rules carry a matching exception.
 
 2. **Harvest every issue, not only the severity headings.** Its contract also puts issues in
    the `**Issues:**` lists under Description Analysis and Content Quality, and in the
