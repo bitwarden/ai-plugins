@@ -1,6 +1,7 @@
 ---
 name: using-stripe-cli
-description: Query read-only Stripe test data and advance an already-attached test clock using the Stripe CLI. Invoked by the playwright-test-runner during Category 4 steps of the Bitwarden web test pipeline when data cannot be obtained through the web UI (for example listing coupon IDs for an Admin portal import). Read-only, except the single permitted write of advancing an existing test clock.
+description: Query read-only Stripe test-mode data and advance an already-attached Stripe test clock through the Stripe CLI. Use when a local test or debugging task needs Stripe data the web UI cannot show, for example listing coupon or price IDs, checking a subscription's status or attached test clock, or tracing why a test-mode payment failed. Read-only, with the single exception of advancing an existing test clock. Do NOT use it to write or modify Stripe integration code, to create, update, or delete any Stripe object, or to query live or production Stripe data.
+argument-hint: read --path /v1/<resource> [--param k=v] | advance-clock --clock <clock_id> --days <n>
 allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py *)
 ---
 
@@ -17,7 +18,7 @@ ${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py read --path /v1/<resource> [--param k=
 ${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py advance-clock --clock <clock_id> --days <n>
 ```
 
-The wrapper builds every command from scratch and never forwards a caller-supplied flag, so `--live` cannot appear in anything it issues. The CLI defaults to test mode without that flag. This is enforcement in code, not an instruction. Do not invoke `stripe` directly; the playwright-test-runner holds no grant for it.
+The wrapper builds every command from scratch and never forwards a caller-supplied flag, so `--live` cannot appear in anything it issues. The CLI defaults to test mode without that flag. This is enforcement in code, not an instruction. Do not invoke `stripe` directly; this skill grants only the wrapper script.
 
 Nothing needs to be configured beyond `stripe login`. The wrapper uses the CLI's own test mode credentials.
 
@@ -78,4 +79,4 @@ ${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py advance-clock --clock <clock_id> --day
 
 Eight days is the number that matters for driving a subscription to `unpaid`: Stripe's smart retry policy fires one payment retry per simulated day, and after eight failed attempts the subscription transitions to `unpaid` and fires `customer.subscription.updated`. Advancing fewer days will not reach that state.
 
-The wrapper is the only granted path to this operation; the playwright-test-runner holds no grant for the `stripe` binary itself.
+The wrapper is the only granted path to this operation; the `stripe` binary itself is not granted.
