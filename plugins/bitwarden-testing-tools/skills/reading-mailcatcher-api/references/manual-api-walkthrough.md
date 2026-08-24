@@ -1,6 +1,6 @@
 # Manual Mailcatcher API walkthrough (debugging only)
 
-The pipeline forbids this transport. `running-playwright-tests` states that the co-located script is the only sanctioned way to read Mailcatcher, and that curl, direct API calls, and sub-agents must not be used instead. This file exists for interactive debugging when the script itself is misbehaving.
+This skill sanctions only the co-located `read_mailcatcher.py` script for reading Mailcatcher; its `allowed-tools` grants that script alone, and curl, direct API calls, and sub-agents are not sanctioned transports. This file exists for interactive debugging when the script itself is misbehaving.
 
 Every command here needs a fresh permission prompt. This skill's `allowed-tools` grants only the co-located script.
 

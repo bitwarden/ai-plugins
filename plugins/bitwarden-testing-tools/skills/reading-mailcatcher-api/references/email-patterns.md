@@ -18,7 +18,7 @@ curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
 ## Admin Portal Magic Link Login
 
 **Subject:** `[Admin] Continue Logging In` or `Continue Logging In`
-**Recipient:** Admin email (find in `server/dev/secrets.json`, key `"admins"`)
+**Recipient:** Admin email (read only the `admins` key of `server/dev/secrets.json`; do not load the rest of the file)
 **Link format:** `http://localhost:62911/login/confirm?email=<admin>&token=<token>&returnUrl=/`
 
 **Extraction:**
@@ -92,7 +92,7 @@ curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
 | Get HTML body       | `curl -s http://localhost:1080/messages/{id}.html`  |
 | Get JSON metadata   | `curl -s http://localhost:1080/messages/{id}.json`  |
 
-> These two commands are destructive and irreversible. Clearing the inbox mid-run destroys verification tokens that earlier test steps depend on. They are not covered by this skill's `allowed-tools`, so each requires a fresh permission prompt.
+> The two commands in the table below are destructive and irreversible. Clearing the inbox mid-run destroys verification tokens that earlier test steps depend on. They are not covered by this skill's `allowed-tools`, so each requires a fresh permission prompt.
 
 | Operation               | Command                                                                                   |
 | ----------------------- | ----------------------------------------------------------------------------------------- |
