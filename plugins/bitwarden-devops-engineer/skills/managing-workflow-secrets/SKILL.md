@@ -13,17 +13,13 @@ description: >-
 allowed-tools: Read, Glob, Grep, Edit
 ---
 
-## What this skill covers
+## Boundaries
 
-Bitwarden retrieves workflow secrets through **Azure Key Vault (AKV) with OIDC federated
-authentication**, using three centralized composite actions from the `bitwarden/gh-actions`
-repository: `azure-login`, `get-keyvault-secrets`, and `azure-logout`. This is the standard across
-Bitwarden's CI, CD, and operational workflows.
+The three-action pattern is the standard across Bitwarden's CI, CD, and operational workflows —
+treat any other retrieval mechanism in a Bitwarden workflow as a finding.
 
-It covers **retrieving and consuming a secret within a job, and getting that secret beyond the
-job** — per-job re-retrieval, a short-lived GitHub App token, and reusable-workflow hand-off (see
-"Getting a secret to a downstream job or reusable workflow" below). For anything the workflow
-linter enforces (e.g. `permissions_exist`, `step_pinned`, `step_approved`), invoke
+**Defer to the linter skill.** For anything the workflow linter enforces (e.g.
+`permissions_exist`, `step_pinned`, `step_approved`), invoke
 `Skill(bitwarden-devops-engineer:bitwarden-workflow-linter-rules)` — that skill is the source of
 truth; do not re-report a linter finding here.
 
