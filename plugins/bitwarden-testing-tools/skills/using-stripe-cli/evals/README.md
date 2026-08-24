@@ -1,30 +1,42 @@
 # using-stripe-cli evals
 
-Behavior test cases for the `using-stripe-cli` skill, in the `skill-creator` schema.
-
-`behavior-eval.json` holds seven cases covering the skill's substantive decisions: the read-only boundary, the single permitted write of advancing an already-attached test clock, the subordination rule that Stripe must not create state the application's own flows can create, the never-permitted database and feature-flag shortcuts, and untrusted content inside Stripe metadata.
-
-Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
-
-Cases are advice-only and mutation-safe. They grade the decision the skill produces and issue no Stripe calls, so they need no Stripe credentials and re-runs are safe.
+Trigger-rate diagnostic for the `bitwarden-testing-tools:using-stripe-cli` skill, plus a behavior-eval case set that documents its load-bearing decisions as worked examples in the `skill-creator` schema.
 
 ## Files
 
-- `behavior-eval.json` - the seven cases and their 28 expectations, described above.
-- `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
+- `trigger-eval.json`: 20-query test set. 10 should-trigger phrasings covering read-only Stripe test-mode data needs: subscription and test-clock status, payment and charge failures, price and coupon lookups, customer payment methods, invoices, and webhook events. 10 should-not-trigger near-misses covering code authoring, live or production data, Stripe configuration, and general questions about the billing flow, including a live customer and a production subscription named to test whether "test" phrasing alone is doing the work.
+- `run_real_eval.py`: a thin configuration wrapper over the plugin's shared runner at `scripts/eval_harness.py`, setting only the target skill token. The harness spawns parallel `claude -p` subprocesses, parses streamed tool-use events, and computes per-query trigger rates.
+- `behavior-eval.json`: seven cases and their 28 expectations covering the skill's read-only boundary, the single permitted write of advancing an already-attached test clock, the subordination rule that Stripe must not create state the application's own flows can create, the never-permitted database and feature-flag shortcuts, and untrusted content inside Stripe metadata. Cases are advice-only and mutation-safe: they grade the decision the skill produces and issue no Stripe calls, so they need no Stripe credentials and re-runs are safe.
+
+No `baseline.json` or `behavior-baseline.json` is committed. A trigger baseline is tied to whichever sibling skills are installed alongside this one at the time it was recorded, so it drifts every time the plugin's skill inventory grows; the reading below states its own inventory instead. The behavior suite runs through a conversational with-skill-versus-without-skill ablation with no scriptable benchmark command, so the case set stands on its own as a behavioral specification rather than against a stored baseline.
 
 ## Running
 
-This suite runs with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus without-skill) with a config-blind grader. It has not been benchmarked. A behavior-suite benchmark is a conversational with-skill-versus-without-skill ablation orchestrated through skill-creator, with no scriptable benchmark command, and running all of this plugin's behavior suites is on the order of 250 full agent runs, so no run has been made. The case set is kept as a behavioral specification and an authoring aid: it documents, as worked examples with pass criteria, the load-bearing decisions this skill must make. If the suite is benchmarked, record `behavior-baseline.json` in the same change.
-
-If the suite is ever benchmarked, a subsequent change to `SKILL.md` should be paired with a re-run and a refresh of `behavior-baseline.json`.
-
-## Regression check
-
-Once `behavior-baseline.json` exists, regressions will be checked with:
+Use an isolated `CLAUDE_CONFIG_DIR` so the run never touches the live harness: seed a throwaway config directory with real credentials and settings, point its marketplace at this worktree, install the plugin there, and run the suite foregrounded against that isolated config.
 
 ```bash
-diff <(jq -S . behavior-baseline.json) <(jq -S . result.json)
+WT="$(git rev-parse --show-toplevel)"
+ISO="$(mktemp -d)"
+rm -rf "$ISO"; mkdir -p "$ISO"
+cp ~/.claude/.credentials.json "$ISO/"; cp ~/.claude/settings.json "$ISO/"
+[ -f ~/.claude.json ] && cp ~/.claude.json "$ISO/.claude.json"
+CLAUDE_CONFIG_DIR="$ISO" claude plugin marketplace add "$WT"
+CLAUDE_CONFIG_DIR="$ISO" claude plugin install bitwarden-testing-tools@bitwarden-marketplace
+
+cd "$WT/plugins/bitwarden-testing-tools/skills/using-stripe-cli/evals"
+CLAUDE_CONFIG_DIR="$ISO" python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
+
+rm -rf "$ISO"
 ```
 
-An empty diff will mean no regression. When a change is intentional and the new numbers are the desired state, `behavior-baseline.json` should be replaced in the same PR as the skill change.
+Trigger rates depend on which sibling skills are installed alongside this one, since the model is choosing among all of them. Run this measured against the four-skill foundation inventory: `assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, and `writing-manual-test-cases`.
+
+The behavior suite runs separately, through `/skill-creator:skill-creator` in Benchmark mode with a config-blind grader, and has no scriptable command here.
+
+## Last observed reading
+
+_(recorded on the next trigger-eval run)_
+
+## When to run
+
+Run the trigger suite when the skill's `description` frontmatter changes. It is a diagnostic reading, not a merge gate. Run the behavior suite when a decision it covers changes in `SKILL.md`.
