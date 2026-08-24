@@ -18,8 +18,8 @@ the most recent message for the recipient.
 Defaults:
   --link-filter: verify|confirm|signup|token|trial|login|finish-signup
 
-Designed to be called via the Bash tool from the playwright-test-runner. The skill body in
-../SKILL.md documents the underlying Mailcatcher REST API this wraps.
+Designed to be called via the Bash tool. ../references/manual-api-walkthrough.md
+documents the underlying Mailcatcher REST API this wraps.
 """
 import argparse
 import json
@@ -33,10 +33,8 @@ import urllib.request
 
 DEFAULT_MAILCATCHER_URL = "http://localhost:1080"
 DEFAULT_LINK_FILTER = "verify|confirm|signup|token|trial|login|finish-signup"
-# Local dev hosts allowed for extracted URLs. Defaults match
-# scripts/external_trigger.py; extend (never replace) via the comma-separated
-# env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS, exactly as that script does, so an
-# operator override applies to both.
+# Local dev hosts allowed for extracted URLs. Extend (never replace) via the
+# comma-separated env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS.
 DEFAULT_ALLOWED_HOSTS = ("localhost", "127.0.0.1", "::1", "bitwarden.test")
 # Whitespace terminates a URL. grep is line-based, so the bash original could
 # never match across a newline; excluding all whitespace preserves that.
