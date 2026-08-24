@@ -5,6 +5,67 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-08-21
+
+### Fixed
+
+- `reviewing-claude-config` and `reviewing-command-definitions` failed to load: both quoted the literal bash-execution syntax, which Claude Code expands in any file it loads, in inline code spans and fenced blocks alike
+- `reviewing-command-definitions` names the construct rather than reproducing it, and says why, so the syntax is not reintroduced
+
+## [2.0.0] - 2026-08-19
+
+### Added
+
+- Scope fence: findings are limited to what a changeset introduced or worsened
+- Filter step before reporting, dropping findings that are pre-existing, unspecific, unverified, already covered, or have no remediation
+- Four targeted review skills: `reviewing-agent-definitions`, `reviewing-command-definitions`, `reviewing-runtime-configuration`, `reviewing-project-guidance`
+- Settings pass for fields that execute or bypass: `defaultMode`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, `enableAllProjectMcpServers`, `env`
+- `security-scan.sh` Check 4 lists every string the configuration runs or auto-approves, with its location, instead of matching a pattern list against them
+- Shell-execution pass for slash commands, covering `` !`cmd` `` blocks and argument interpolation
+- Hook and settings severity tables in `priority-framework.md`
+
+### Changed
+
+- **Breaking**: `reviewing-claude-config` is a router; the `checklists/` and `examples/` directories are gone
+- **Breaking**: `reviewing-claude-config` no longer reviews `SKILL.md` — `plugin-dev:skill-reviewer` owns it
+- A run fails only on a CRITICAL finding or one that weakens security; other severities report without blocking
+- IMPORTANT narrowed to functional defects and security regressions; readability moved to SUGGESTED
+- Both commands state that the report is the deliverable and that re-validation pins the original baseline
+
+### Fixed
+
+- Permission examples use `Tool` or `Tool(specifier)` rules under `permissions.allow` / `deny`, replacing a top-level `autoApprovedTools` array Claude Code does not read
+- `//` documented as the absolute path prefix, against a single leading `/` as relative to the settings file
+- `security-scan.sh` and the documented detectors match the real schema and read `permissions.allow` rather than the whole file, so a hardening `deny` is not reported as a defect; placeholder exclusions anchor to the value rather than the file path
+- The permission checks and the Check 4 inventory are counted and reported as skipped when they cannot run; a run with no findings but a skipped check exits 2 rather than claiming a pass
+- A `settings.json` that does not parse is CRITICAL rather than silently emptying the checks that read it
+
+### Removed
+
+- Six `checklists/*.md` files, seven `examples/example-*-review.md` files, and the skill-level `README.md`
+
+### Migration
+
+- `bitwarden-code-review` routes changed `SKILL.md` files to `Skill(claude-config-validator:reviewing-claude-config)`, which declines them from 2.0.0. That pipeline does not invoke `plugin-dev:skill-reviewer`, so skill-only changesets get a stated omission rather than a review. Updating it needs its own version bump and is tracked as a follow-up
+
+## [1.2.2] - 2026-08-17
+
+### Fixed
+
+- `reviewing-claude-config` returns per-issue findings for the caller to route, instead of requiring inline pull request comments its `Read, Grep, Glob` grant cannot post and its callers classify before posting
+- Cross-plugin secret-detection enrichment is conditioned on the `Skill` grant, which the skill does not hold on the direct-invocation path
+- Skill and plugin docs no longer describe executable scripts or inline comments as things the skill does
+- Ten broken relative references across the six checklists and two examples, which pointed one directory level off
+
+### Changed
+
+- `Bash(git fetch:*)` on `/validate-ai-local` narrowed to `Bash(git fetch origin:*)`
+- `/validate-ai`'s README notes the shared-host caveat for its fixed `/tmp` report path
+- Verdict vocabulary is `Pass` or `Issues found`, replacing `APPROVE`, `REQUEST CHANGES`, and `BLOCK`, which the report contract cannot consume
+- A security finding no longer stops the settings or hooks review; both now finish the remaining passes so the caller's report can say which ran
+- `security-patterns.md` points at the shipped `security-scan.sh` instead of embedding a copy that had drifted 134 lines from it
+- The verdict has a threshold: any CRITICAL or IMPORTANT finding makes it `Issues found`, and a review with only SUGGESTED or OPTIONAL findings is `Pass`
+
 ## [1.2.1] - 2026-08-14
 
 ### Changed

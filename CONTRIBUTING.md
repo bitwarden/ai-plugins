@@ -6,7 +6,7 @@ For general Bitwarden contribution practices, see our [Contributing Guidelines](
 
 ## Where Does Your Claude Tooling Belong?
 
-Plugins in this marketplace fall into three families. Repo-specific patterns usually belong closer to the code — see each repo's `.claude/CONTRIBUTING.md` for that. If your work is cross-repo and fits one of the families below, you're in the right place. If you're still unsure after reading them, raise a draft PR and maintainers will help find the right home.
+Plugins in this marketplace fall into three families. Repo-specific patterns usually belong closer to the code, in that repo's `.claude/` directory. If your work is cross-repo and fits one of the families below, you're in the right place. If you're still unsure after reading them, raise a draft PR and maintainers will help find the right home.
 
 ### Persona Plugins
 

@@ -133,6 +133,15 @@ calls that create or edit the sticky comment in interactive mode are left out on
 so writing to a pull request is a decision you see and approve. Allowlist them yourself if
 you run this often.
 
+`/tmp/validation-summary.md` is a fixed path in a world-writable directory, and the `Edit`
+rule pre-approves writing it. That is the right trade for the workflow this command serves,
+where the `bitwarden/gh-actions` steps read that exact path and the runner is ephemeral and
+single-tenant. On a shared host, the report is world-readable while it sits there. A
+pre-planted symlink is not the same exposure: an allow rule applies only when the symlink
+and its target both match, so one pointing anywhere else prompts rather than being followed.
+Prefer `/validate-ai-local` on a multi-user machine; it writes under your own
+`${CLAUDE_PLUGIN_DATA}`.
+
 Reviewing a pull request means reading contributor-authored configuration, which is why
 the grants stay narrow: a broad `Bash(gh api:*)` would prefix-match a `DELETE` just as
 happily as a comment update.

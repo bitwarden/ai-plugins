@@ -10,12 +10,12 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 ### Comprehensive Configuration Coverage
 
-Validates these configuration file types, each with its own checklist except where noted:
+Validates these configuration file types, each routed to its own targeted skill except where noted:
 
 | Configuration Type                                                                    | What Gets Validated                                                                                                                                   |
 | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity                                                   |
-| **Skills** (skill directories)                                                        | Progressive disclosure, file organization, YAML validation, structured thinking patterns, token efficiency                                            |
+| **Skills** (`SKILL.md`)                                                               | Not validated here. The commands delegate this to `plugin-dev:skill-reviewer`; support files under a skill are read by `reviewing-claude-config`      |
 | **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                                                                     |
 | **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                                                                     |
 | **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                                                             |
@@ -26,33 +26,34 @@ Validates these configuration file types, each with its own checklist except whe
 
 Every review **always** includes critical security checks:
 
-- ✅ No committed `settings.local.json` files
+- ✅ No `settings.local.json` in the changeset, checked from the changed-files list when one is available and reported as skipped otherwise
 - ✅ No hardcoded credentials (API keys, passwords, tokens)
 - ✅ Appropriate permission scoping
 - ✅ Principle of least privilege for agent tool access
-- ✅ Detection of dangerous command patterns in hooks/scripts
+- ✅ An inventory of every string the configuration runs or auto-approves, for a reviewer to read
 
 ### Evidence-Based Quality Standards
 
-All validation criteria sourced from **official Anthropic documentation** and enterprise best practices (Microsoft Azure AI patterns):
+All validation criteria sourced from **official Anthropic documentation**:
 
 - Agent tool access security matrices
-- Progressive disclosure guidelines (500-line target per file)
 - Model selection decision trees (haiku/sonnet/opus)
 - System prompt engineering patterns
-- Token efficiency optimization
+- Hook command safety and event-name currency
 
 ### Multi-Pass Review Strategy
 
-Uses structured, systematic validation approach:
+The skill works through five steps:
 
-1. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
-2. **Structure Validation** - YAML frontmatter, file organization, required fields
-3. **Functionality Review** - Logic, completeness, integration points
-4. **Quality Assessment** - Best practices, prompt engineering, documentation
-5. **Marketplace Standards** - Elevated requirements for public plugins
+1. **Settle Scope** - Only what the changeset introduced or worsened; a changed file is not a changed line
+2. **Security Scan** - Critical checks first (prevents wasted effort on insecure configs)
+3. **Route** - Invokes the targeted review skill for the detected type
+4. **Filter** - Drops candidates that are pre-existing, unspecific, have no remediation, or are already covered by a checker outside this pipeline; duplicates from two checkers inside it are merged at the higher severity
+5. **Document Findings** - One finding per issue, anchored to `file:line`
 
-### Inline, Actionable Feedback
+Each targeted skill then runs its own multi-pass strategy over the file under review.
+
+### Specific, Actionable Feedback
 
 Provides specific, file:line referenced feedback with:
 
@@ -62,6 +63,11 @@ Provides specific, file:line referenced feedback with:
 - **References** to official documentation
 
 ## Installation
+
+Requires Claude Code 2.1.210 or later. Both commands scope their report write with an
+`Edit(<path>)` rule, and consulting that rule for the `Write` tool is behavior that release
+introduced. On an older CLI the report write falls back to a permission prompt, which in a
+headless workflow run means no report and a failed check.
 
 ### Add Bitwarden Marketplace (if not already added)
 
@@ -104,10 +110,10 @@ Or describe the review in your own words, which is how the skill's triggers are 
 
 The skill will automatically:
 
-1. Detect which configuration files were recently modified
-2. Select appropriate validation checklists
+1. Detect the type of each configuration file you name
+2. Route it to the targeted review skill for that type
 3. Execute security-first review
-4. Provide inline feedback with file:line references
+4. Return one finding per issue with file:line references
 
 ### Use Cases
 
@@ -121,7 +127,7 @@ The skill will automatically:
 Review my new agent configuration in .claude/agents/code-analyzer.md
 ```
 
-**Output**: Inline comments with specific improvements, security concerns flagged as CRITICAL, quality suggestions as IMPORTANT/SUGGESTED.
+**Output**: One finding per issue with specific improvements. Security concerns are CRITICAL where they reach credentials or destructive commands and IMPORTANT otherwise; quality suggestions are SUGGESTED or OPTIONAL.
 
 ---
 
@@ -135,21 +141,21 @@ Review my new agent configuration in .claude/agents/code-analyzer.md
 Review my plugin configuration in plugins/my-plugin/ for marketplace readiness
 ```
 
-**Output**: Comprehensive validation against marketplace standards, documentation completeness checks, security validation, example quality assessment.
+**Output**: The component files inside `plugins/my-plugin/` reviewed by the targeted skills for agents, commands, hooks, and settings, with security findings first. Two things are deliberately not this skill's: `SKILL.md` review, which `plugin-dev:skill-reviewer` owns, and manifest and marketplace-standard checks, which `plugin-dev:plugin-validator` owns. `/validate-ai-local` runs all three together.
 
 ---
 
-#### 3. Skill Architecture Review
+#### 3. Runtime Configuration Review
 
-**Scenario**: You've created a complex skill with multiple reference files and want to ensure proper progressive disclosure.
+**Scenario**: A pull request changes `.claude/settings.json` and adds a hook.
 
 **Usage**:
 
 ```markdown
-Review my skill at .claude/skills/my-skill/ for progressive disclosure and token efficiency
+Review the settings and hook changes in this branch
 ```
 
-**Output**: File size analysis (500-line guideline), reference organization recommendations, auto-loaded vs on-demand content optimization.
+**Output**: Permission scoping against least privilege, auto-approval safety, and every hook command read as executable code: egress, destructive operations, credential access, and hook input routed into a shell.
 
 ---
 
@@ -171,118 +177,66 @@ Security audit all Claude configuration files in this project
 
 **Description**: Reviews Claude configuration files for security, structure, and prompt engineering quality, wherever they live: a repository's `.claude/` directory, a root `CLAUDE.md`, or a plugin's own components.
 
-**Validates**:
+**Validates**, by routing each type to a targeted skill:
 
-- CLAUDE.md files
-- Skills (SKILL.md)
-- Agents
-- Prompts
-- Commands
-- Hooks
-- Settings
+| Type                 | Skill                             |
+| -------------------- | --------------------------------- |
+| Agents               | `reviewing-agent-definitions`     |
+| Prompts and commands | `reviewing-command-definitions`   |
+| Settings and hooks   | `reviewing-runtime-configuration` |
+| CLAUDE.md files      | `reviewing-project-guidance`      |
+
+`SKILL.md` files are reviewed by `plugin-dev:skill-reviewer`, not here — it already covers frontmatter, trigger quality, word count, progressive disclosure, and broken references, and both `validate-ai` commands route every changed skill to it.
 
 **Capabilities**:
 
 - YAML frontmatter validation
-- Progressive disclosure pattern analysis
-- Token efficiency assessment
+- Verbosity of `CLAUDE.md`, which is re-read every turn in its scope
+- Instruction-content review of skill support files that have no targeted reviewer
 - Security best practice enforcement
-- Detection of critical issues (committed secrets, malformed YAML, broken references, oversized files, insecure tool access, unsafe hook commands)
+- Detection of critical issues (committed secrets, malformed YAML, broken references, insecure tool access, unsafe hook commands)
 
 **Validation Strategy**:
 
 - Multi-pass review (structure → security → functionality → quality)
 - Evidence-based recommendations (all criteria from official docs)
 - Priority-classified feedback (CRITICAL → IMPORTANT → SUGGESTED → OPTIONAL)
-- Inline comments with specific fixes and rationale
+- Per-issue findings with specific fixes and rationale
 
 ## Validation Coverage Details
 
-### Agent Validation (6-Pass Strategy)
+### Agent Validation (`reviewing-agent-definitions`)
 
-**Pass 1: Structure and YAML Frontmatter**
+Five passes, ordered so the security question comes first.
 
-- Valid YAML syntax (no tabs, proper structure)
-- Required fields: `name`, `description`
-- Optional fields validated: `tools`, `model`
-- System prompt presence and non-empty
+**Pass 1: Tool access** — least privilege; analysis-only agents holding `Write`, `Edit`, or `Bash`; `Bash` unexplained by the description; unexplained `WebFetch` or `WebSearch` egress alongside read access; unexplained `Task` or `Skill`, both of which escape the grant rather than widening it; tool names exact and case-sensitive, since a misspelled entry is silently not a grant; a grant that contradicts what the description claims.
 
-**Pass 2: Security and Tool Access**
+**Pass 2: Frontmatter** — valid YAML, required `name` and `description`, `<example>` blocks, valid `color`, non-empty system prompt. Skipped only where `plugin-dev:plugin-validator` actually ran, and recorded as skipped rather than passed; a bare `.claude/agents/*.md`, or any agent when `plugin-dev` is not installed, is checked here.
 
-- Principle of least privilege verification
-- Tool access appropriateness (Read/Grep/Glob for analysis, Write/Edit for modification, Bash justification required)
-- Over-privileged agent detection
-- Dangerous tool combination identification
+**Pass 3: Description and activation triggers** — states both what the agent does and when to reach for it; single responsibility rather than a catch-all.
 
-**Pass 3: Description and Activation Triggers**
+**Pass 4: System prompt** — role, capabilities, boundaries, and output format where the agent produces a structured artifact; decision criteria rather than bare instructions.
 
-- Specificity (clear purpose statement)
-- Activation triggers ("Use when...", "PROACTIVELY invoke...")
-- Single responsibility principle
-- Appropriate scope
+**Pass 5: Model selection** — flagged only on a clear mismatch, such as `opus` for formatting or `haiku` for deep analysis.
 
-**Pass 4: System Prompt Quality**
+### Skill Validation
 
-- Role clarity
-- Capability definition
-- Structured thinking guidance (`<thinking>` blocks)
-- Examples provided
-- Output format specification
-- Token efficiency
+Not performed by this plugin. `plugin-dev:skill-reviewer` owns `SKILL.md` review — frontmatter, description and trigger quality, word count and writing style, progressive disclosure, and referenced files that do not exist — and both `validate-ai` commands route every changed skill to it. Reviewing the same file against a second rule set produces duplicate findings a reader cannot tell from independent confirmation.
 
-**Pass 5: Model Selection**
-
-- Appropriate model for task complexity (haiku/sonnet/opus/inherit)
-- Cost/performance optimization
-- Justification for selection
-
-**Pass 6: Marketplace Standards** (if applicable)
-
-- Elevated documentation requirements
-- Production readiness
-- Error handling
-- Example quality
-
-### Skill Validation (4-Pass Strategy)
-
-**Pass 1: Structure and YAML**
-
-- Valid YAML frontmatter with required fields
-- SKILL.md presence
-- Proper file organization
-
-**Pass 2: Progressive Disclosure**
-
-- File size limits (500-line guideline for references)
-- On-demand vs auto-loaded content
-- Token efficiency optimization
-
-**Pass 3: Quality and Clarity**
-
-- Clear instructions
-- Structured thinking blocks
-- Example inclusion
-- Proper emphasis
-
-**Pass 4: Integration and Completeness**
-
-- No broken file references
-- Checklist completeness
-- Reference accuracy
+Skill support files (`reference/`, `examples/`, `scripts/`) have no targeted reviewer, so `reviewing-claude-config` reads them directly for instruction content.
 
 ### Security Validation (Always Executed)
 
 **Critical Checks** (all configuration types):
 
-- settings.local.json NOT committed to git
+- No `settings.local.json` in the changeset, from the changed-files list when one is available and reported as skipped otherwise
 - No hardcoded credentials (passwords, API keys, tokens)
 - Permissions appropriately scoped
 - No secrets in plaintext
 
 **Detection Methods**:
 
-- Git status checks
-- Pattern matching for common secret formats
+- Pattern matching for common secret formats, applied with `Grep`
 - Permission validation against least privilege principle
 
 ## Examples
@@ -316,26 +270,26 @@ Security principle: Grant minimum necessary tools only.
 Reference: `reference/claude-code-requirements.md` - Tool Access Security
 ```
 
-### Example 2: Skill Progressive Disclosure Violation
+### Example 2: Hook Credential Access
 
-**Input**: Skill with 690-line reference file
+**Input**: A pull request adding a `PostToolUse` hook
 
 **Output**:
 
 ```
-**.claude/skills/my-skill/reference/patterns.md:1** - IMPORTANT: File exceeds 500-line progressive disclosure guideline
+**.claude/settings.json:14** - CRITICAL: Hook command reads SSH private keys
 
-Current: 690 lines (38% over recommended limit)
-Guideline: 500 lines maximum for on-demand loading
+Current:
 
-Impact: Loads extra 190 lines into context unnecessarily, reducing token efficiency by 38%.
+"command": "cat ~/.ssh/id_rsa >> .build-cache/audit.log"
 
-Recommended: Split into focused files:
-- patterns-security.md (tool access, permissions)
-- patterns-configuration.md (model selection, naming)
-- patterns-prompts.md (system prompt engineering)
+Hooks run automatically on tool events with no permission prompt, from a file a
+contributor can edit in a pull request. This command exfiltrates nothing by itself,
+so it clears an egress check — but it stages key material in a file a later step can
+ship. Read now, send later is the usual shape.
 
-Reference: Progressive Disclosure Best Practices
+Remove the command. If the hook needs to know a key exists, test for the path rather
+than reading its contents.
 ```
 
 ### Example 3: CLAUDE.md Clarity Issue
@@ -345,7 +299,7 @@ Reference: Progressive Disclosure Best Practices
 **Output**:
 
 ```
-**.claude/CLAUDE.md:42** - IMPORTANT: Instruction lacks specificity
+**.claude/CLAUDE.md:42** - SUGGESTED: Instruction lacks specificity
 
 Current: "Always write good code"
 Issue: "Good code" is subjective and non-actionable.
@@ -357,10 +311,46 @@ Recommended:
 - Add inline comments explaining 'why', not 'what'
 - Follow project's established patterns in `docs/architecture.md`"
 
-Specific, actionable instructions improve AI behavior by 60% (Anthropic research).
+Specific, actionable instructions improve AI behavior (Anthropic prompt engineering guidance).
 
-Reference: `checklists/claude-md.md` - Clarity and Specificity
+Reference: `reviewing-project-guidance` - Pass 4: Clarity
 ```
+
+## Running the security scanner directly
+
+`security-scan.sh` is a human-run helper, not something the skills execute: their grants are
+read-only. Check 4 reads every string in `settings.json` except the rules in
+`permissions.deny` and `permissions.ask`, which are controls rather than grants. That covers
+`permissions.allow`, `additionalDirectories`, `apiKeyHelper`, `statusLine.command`, hook
+commands and `env` values without enumerating them.
+
+Check 3 is narrower on purpose. Its sensitive-path scan reads `permissions.allow` and
+`additionalDirectories` only, since a path in a grant is the whole meaning of the rule, while a
+path a command merely mentions is a judgment call Check 4 hands to the reviewer. Its rule-form
+test additionally reads `deny` and `ask`, since a colon-separated rule fails open in any array.
+
+The four checks are: a committed `settings.local.json`; hardcoded secrets; permission scoping,
+covering filesystem-wide, bare and sensitive-path grants, rule forms Claude Code does not read,
+and `defaultMode: bypassPermissions`; and an inventory of every string the configuration runs
+or auto-approves, each with its location in the file.
+
+Check 4 lists rather than classifies. Pattern-matching shell strings traded a false negative
+for a false positive every time it was tightened, so the script reports what will run and the
+reviewer judges it.
+
+```bash
+# Scans the .claude directory of the current working directory
+~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh
+
+# Or a specific directory
+~/.claude/plugins/cache/*/claude-config-validator/*/skills/reviewing-claude-config/scripts/security-scan.sh /path/to/.claude
+```
+
+The permission checks and the inventory report themselves as skipped rather than passed when
+they cannot run. Check 3's four rule tests need `jq`, a `settings.json` that parses, and string
+rules in `permissions.allow`, since a rule in `deny` is the control rather than a defect and
+telling it from `allow` needs the array the rule sits in; the inventory needs the first two.
+The `settings.local.json` check does not yet report itself this way.
 
 ## Plugin Structure
 
@@ -373,13 +363,14 @@ plugins/claude-config-validator/
 │   ├── validate-ai/         # /validate-ai - pull request validation (command + README)
 │   └── validate-ai-local/   # /validate-ai-local - local checkout validation (command + README)
 ├── skills/
-│   └── reviewing-claude-config/
-│       ├── SKILL.md         # Main skill instructions
-│       ├── README.md        # Skill-specific documentation
-│       ├── checklists/      # One per configuration type (agents, skills, CLAUDE.md, prompts, hooks, settings)
-│       ├── reference/       # Priority framework, security patterns, requirements, changeset scope
-│       ├── examples/        # Sample reviews, one or more per configuration type
-│       └── scripts/         # Security scan helper (human-run)
+│   ├── reviewing-claude-config/        # Entry point: scope, security scan, routing, filtering
+│   │   ├── SKILL.md
+│   │   ├── reference/                  # Priority framework, security patterns, requirements, changeset scope
+│   │   └── scripts/                    # Security scan helper (human-run)
+│   ├── reviewing-agent-definitions/    # Tool access, triggers, system prompts
+│   ├── reviewing-command-definitions/  # Slash commands and prompts
+│   ├── reviewing-runtime-configuration/ # Settings and hooks
+│   └── reviewing-project-guidance/     # CLAUDE.md
 └── README.md               # This file
 ```
 
