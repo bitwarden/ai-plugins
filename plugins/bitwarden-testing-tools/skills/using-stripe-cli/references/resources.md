@@ -4,6 +4,8 @@ Only read operations are listed. Creating, updating, deleting, attaching, detach
 
 Every operation below is a `stripe_cli.py read --path <path>` call. The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
 
+Search paths (`.../search`) require a `query` parameter, for example `read --path /v1/customers/search --param query="email:'qa@example.com'"`.
+
 ## customers
 
 - **Base path**: `/v1/customers` (append `/<id>` to retrieve, `/search` to search, `/<id>/payment_methods` to list payment methods)
@@ -15,7 +17,7 @@ Every operation below is a `stripe_cli.py read --path <path>` call. The base pat
 
 - **Base path**: `/v1/subscriptions` (append `/<id>` to retrieve, `/search` to search)
 - **Read operations**: retrieve, list, search
-- **Key fields**: id, customer, status, current_period_start, current_period_end, items, default_payment_method, cancel_at_period_end, canceled_at, latest_invoice, test_clock, metadata
+- **Key fields**: id, customer, status, items (each with current_period_start, current_period_end), default_payment_method, cancel_at_period_end, canceled_at, latest_invoice, test_clock, metadata
 - **Common queries**: "What's the status of this subscription?", "When does it renew?", "What plan/price is on this subscription?", "Is a test clock attached?"
 
 ## invoices
