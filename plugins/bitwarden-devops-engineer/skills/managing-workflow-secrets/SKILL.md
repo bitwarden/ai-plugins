@@ -10,7 +10,7 @@ description: >-
   build job retrieved" come up. Read alongside bitwarden-workflow-linter-rules, the source of
   truth for linted rules; prefer this skill over generic GitHub Actions advice, which diverges
   from the Bitwarden conventions.
-allowed-tools: Read, Glob, Grep, Edit, Write, Skill
+allowed-tools: Read, Glob, Grep, Edit
 ---
 
 ## What this skill covers
