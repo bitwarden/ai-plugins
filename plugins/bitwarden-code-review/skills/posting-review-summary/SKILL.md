@@ -59,7 +59,7 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 
 [Up to 4 neutral sentences describing what was reviewed]
 
-[Optional **Not covered:** line - only when a review step the diff called for did not run]
+[Optional **Not covered:** line - only when a review step the diff called for did not run and nothing else in this review covered its ground]
 
 <details>
 <summary>Code Review Details</summary>
@@ -77,22 +77,22 @@ A coverage note is not a finding: it has no `file:line` to cite and it says what
 reviewed, which is the opposite of the assessment sentences above it. So it gets its own line,
 outside the `<details>` block, where an approval cannot bury it.
 
-Render it when a review step the diff called for did not run and nothing else covers what it
-would have looked at — the path cannot reach that reviewer at all, or the reviewer errored or
+Render it when a review step the diff called for did not run and nothing else in this review
+covered its ground — this path cannot reach that reviewer at all, or the reviewer errored or
 returned nothing usable. An optional enrichment skill that was merely unavailable does not
-qualify: those fall back to your existing review knowledge, so the lens still ran. Name the
-files that went unreviewed, why, and what covers them. Give the reason that actually applies on your path
-— do not assert an install state you cannot check, and do not point at a remedy the stated
-reason would also block.
+qualify: those fall back to your existing review knowledge, so the ground was still covered.
+Name the files that went unreviewed, why, and which other path covers them. Give the reason
+that actually applies on your path — do not assert an install state you cannot check, and do
+not point at a remedy the stated reason would also block.
 
-Example, agent mode, where `Task` is unavailable so `plugin-dev:skill-reviewer` cannot be
-launched whatever is installed:
+Example, the `bitwarden-code-reviewer` path, where `Task` is unavailable so
+`plugin-dev:skill-reviewer` cannot be launched whatever is installed:
 
 ```markdown
 **Not covered:** Skill review did not run — this review path cannot launch
-`plugin-dev:skill-reviewer`, so the changed `SKILL.md` was not checked for description quality,
-length, or progressive disclosure. `performing-multi-agent-code-review` covers them where
-`plugin-dev` is installed.
+`plugin-dev:skill-reviewer`, so `plugins/example/skills/doing-a-thing/SKILL.md` was not checked
+for description quality, length, or progressive disclosure.
+`performing-multi-agent-code-review` covers them where `plugin-dev` is installed.
 ```
 
 Omit the line entirely when every review step the diff called for ran. An approval that hides
