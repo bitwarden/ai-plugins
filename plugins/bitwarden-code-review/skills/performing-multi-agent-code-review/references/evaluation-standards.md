@@ -21,7 +21,7 @@ The following are not valid findings under any tier. Subagents must not emit the
 - Pedantic nit-picks a senior engineer would not raise in code review.
 - Issues a linter would catch.
 - Speculative issues that depend on specific inputs or runtime state without evidence those inputs occur in practice.
-- Pre-existing issues not introduced or worsened by this change.
+- Pre-existing issues not introduced or worsened by this change. Exception: a CWE-1427 observation in a changed file stands whether or not the diff touched the line it sits on.
 
 ## Confidence Scoring
 
