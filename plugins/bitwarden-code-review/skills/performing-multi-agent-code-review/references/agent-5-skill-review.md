@@ -7,12 +7,17 @@ Agent 5 runs on the `plugin-dev:skill-reviewer` subagent type. It differs from e
 agent in the pipeline on two counts, and both drive what follows: it reads whole files rather
 than diff hunks, and its system prompt fixes its output as prose rather than JSON.
 
+It is also the one agent launched per file rather than per pipeline. Its output contract is one
+skill's report — a single `## Skill Review:` header, one description, one word count, one
+progressive-disclosure structure — so everything below describes a single instance reviewing a
+single `SKILL.md`, and the orchestrator repeats it for each changed file.
+
 ## Prompt blocks
 
-Agent 5 receives Line Number Accuracy unchanged, plus the two variants below, plus the diff and
-the list of changed `SKILL.md` paths. Pass the diff even though the agent reads files directly —
-it is the only thing telling the agent which parts are new. It receives nothing else from the
-Review Rules bundle.
+Each instance receives Line Number Accuracy unchanged, plus the two variants below, plus the
+diff and the one `SKILL.md` path it reviews. Pass the diff even though the agent reads files
+directly — it is the only thing telling the agent which parts are new. It receives nothing else
+from the Review Rules bundle.
 
 ### Tool discipline (Agent 5 variant)
 
@@ -90,7 +95,8 @@ the prose does not hold them.
    line the diff touched. Length, progressive disclosure, and description quality are whole-file
    properties with no natural line: cite the added block responsible. Drop only what you cannot
    place in a changed file at all.
-5. **Set `source_agent: "skill"` and `id` prefix `skl`.**
+5. **Set `source_agent: "skill"` and `id` prefix `skl`.** Number `skl` ids across every
+   instance's translated output, not per instance, so Step 6's merge by `id` cannot collide.
 6. **Write `title` and `detail`** from the entry's issue and recommendation text, per the field
    constraints in `finding-shape.md`.
 7. **Assign `confidence`**, since the agent does not score. Apply the ≥ 80 threshold as usual.
