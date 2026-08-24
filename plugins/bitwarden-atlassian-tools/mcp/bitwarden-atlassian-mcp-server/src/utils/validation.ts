@@ -159,6 +159,73 @@ export const ListSpacesSchema = z.object({
 
 export type ListSpacesInput = z.infer<typeof ListSpacesSchema>;
 
+// ── Confluence Write Schemas (opt-in, require ATLASSIAN_CONFLUENCE_WRITE_TOKEN) ─
+
+/**
+ * A Confluence page id is a numeric string. Unlike the read tools' `min(1)`,
+ * the write tools interpolate the id into a REST path, so an unconstrained
+ * string would let a caller redirect the request to a different path.
+ */
+const ConfluencePageId = z
+  .string()
+  .regex(/^\d+$/, "Must be a numeric Confluence page id (e.g. 2923724969)");
+
+/**
+ * A parsed ADF document. Validated only as far as `type: "doc"` with a `content`
+ * array; the node tree itself is passed through untouched, since the caller is
+ * expected to have edited a body previously fetched with get_confluence_page_adf.
+ */
+const AdfDocument = z
+  .record(z.string(), z.unknown())
+  .refine(
+    (v) =>
+      v.type === "doc" && Array.isArray((v as Record<string, unknown>).content),
+    'ADF body must be a document node with type "doc" and a content array',
+  );
+
+export const GetConfluencePageAdfSchema = z.object({
+  pageId: ConfluencePageId,
+});
+
+export type GetConfluencePageAdfInput = z.infer<
+  typeof GetConfluencePageAdfSchema
+>;
+
+export const ListConfluenceAnchorsSchema = z.object({
+  pageId: ConfluencePageId,
+});
+
+export type ListConfluenceAnchorsInput = z.infer<
+  typeof ListConfluenceAnchorsSchema
+>;
+
+export const ReplaceConfluenceTextSchema = z.object({
+  pageId: ConfluencePageId,
+  oldText: z.string().min(1, "oldText cannot be empty"),
+  newText: z.string(),
+  message: z.string().optional(),
+  /**
+   * Defaults to true. A live edit requires an explicit `dryRun: false`, so a
+   * forgotten flag previews the change instead of writing it.
+   */
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type ReplaceConfluenceTextInput = z.infer<
+  typeof ReplaceConfluenceTextSchema
+>;
+
+export const UpdateConfluencePageSchema = z.object({
+  pageId: ConfluencePageId,
+  adfBody: AdfDocument,
+  message: z.string().optional(),
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type UpdateConfluencePageInput = z.infer<
+  typeof UpdateConfluencePageSchema
+>;
+
 export const DownloadAttachmentSchema = z.object({
   attachmentUrl: z
     .string()

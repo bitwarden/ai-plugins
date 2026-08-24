@@ -3,6 +3,7 @@ import {
   loadConfluenceConfig,
   getAuthHeader,
   getConfluenceHeaders,
+  hasConfluenceWriteToken,
 } from "./auth.js";
 
 describe("loadConfluenceConfig", () => {
@@ -164,5 +165,53 @@ describe("getConfluenceHeaders", () => {
 
     const headers = getConfluenceHeaders(config);
     expect(headers.Authorization).toBe(getAuthHeader(config));
+  });
+});
+
+describe("Confluence write mode", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    process.env.ATLASSIAN_CLOUD_ID = "test-cloud-id";
+    process.env.ATLASSIAN_EMAIL = "user@example.com";
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("hasConfluenceWriteToken reflects whether the write token is set", () => {
+    delete process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN;
+    expect(hasConfluenceWriteToken()).toBe(false);
+
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN = "write-token";
+    expect(hasConfluenceWriteToken()).toBe(true);
+  });
+
+  it("treats an unexpanded write-token template as not set", () => {
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN =
+      "${ATLASSIAN_CONFLUENCE_WRITE_TOKEN}";
+    expect(hasConfluenceWriteToken()).toBe(false);
+  });
+
+  it('mode "write" loads the write token', () => {
+    process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN = "read-token";
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN = "write-token";
+    expect(loadConfluenceConfig("write").apiToken).toBe("write-token");
+  });
+
+  it('mode "write" throws with the write var named when it is missing', () => {
+    process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN = "read-token";
+    delete process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN;
+    expect(() => loadConfluenceConfig("write")).toThrow(
+      /ATLASSIAN_CONFLUENCE_WRITE_TOKEN/,
+    );
+  });
+
+  it("defaults to the read token when no mode is given", () => {
+    process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN = "read-token";
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN = "write-token";
+    expect(loadConfluenceConfig().apiToken).toBe("read-token");
   });
 });

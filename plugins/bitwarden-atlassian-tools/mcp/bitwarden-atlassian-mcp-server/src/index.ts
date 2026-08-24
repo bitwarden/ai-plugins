@@ -3,8 +3,8 @@
 /**
  * Atlassian MCP Server
  * MCP server for Jira and Confluence integration with Claude Code.
- * Confluence is read-only; Jira read is always on, and Jira write is opt-in
- * per install via ATLASSIAN_JIRA_WRITE_TOKEN.
+ * Read is always on. Write is opt-in per install: Jira write via
+ * ATLASSIAN_JIRA_WRITE_TOKEN, Confluence write via ATLASSIAN_CONFLUENCE_WRITE_TOKEN.
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -32,9 +32,21 @@ import getChildPages from "./tools/get-child-pages.js";
 import searchConfluence from "./tools/search-confluence.js";
 import searchConfluenceCql from "./tools/search-confluence-cql.js";
 import listSpaces from "./tools/list-spaces.js";
+import getConfluencePageAdf from "./tools/get-confluence-page-adf.js";
+import listConfluenceAnchors from "./tools/list-confluence-anchors.js";
 
 // Cross-domain tools
 import downloadAttachment from "./tools/download-attachment.js";
+
+// Confluence write tools
+//
+// Gated the same way as the Jira write tools below: always listed so their
+// dry-run preview works on a read-only install, with live execution gated inside
+// each handler on ATLASSIAN_CONFLUENCE_WRITE_TOKEN. They edit page bodies as ADF
+// so inline-comment anchors survive, which the markdown-based updateConfluencePage
+// path drops. get_confluence_page_adf and list_confluence_anchors are read-only.
+import replaceConfluenceText from "./tools/replace-confluence-text.js";
+import updateConfluencePage from "./tools/update-confluence-page.js";
 
 // Jira write tools
 //
@@ -70,10 +82,14 @@ const tools: ToolDefinition[] = [
   searchConfluence,
   searchConfluenceCql,
   listSpaces,
+  getConfluencePageAdf,
+  listConfluenceAnchors,
   downloadAttachment,
   getCreateFields,
   createIssue,
   linkIssues,
+  replaceConfluenceText,
+  updateConfluencePage,
 ];
 
 async function main() {

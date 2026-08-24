@@ -4,7 +4,11 @@
  */
 
 import axios, { AxiosInstance, AxiosError } from "axios";
-import { loadConfluenceConfig, getConfluenceHeaders } from "./auth.js";
+import {
+  loadConfluenceConfig,
+  getConfluenceHeaders,
+  ConfluenceAccessMode,
+} from "./auth.js";
 import {
   ConfluenceConfig,
   ConfluencePage,
@@ -19,6 +23,8 @@ import {
   ConfluenceChildPagesResult,
   ConfluenceCqlSearchParams,
   ConfluenceCqlSearchResult,
+  ConfluencePageAdf,
+  ConfluenceUpdatePageParams,
 } from "./types.js";
 
 export class ConfluenceClient {
@@ -27,8 +33,14 @@ export class ConfluenceClient {
   private readonly API_BASE = "/wiki/api/v2";
   private readonly API_V1_BASE = "/wiki/rest/api";
 
-  constructor() {
-    this.config = loadConfluenceConfig();
+  /**
+   * @param mode - "read" (default) authenticates with the read-only token that
+   *   every install sets. "write" authenticates with the optional write token
+   *   and throws if it is absent, so a missing token fails at construction
+   *   rather than midway through a fetch-edit-push sequence.
+   */
+  constructor(mode: ConfluenceAccessMode = "read") {
+    this.config = loadConfluenceConfig(mode);
     this.client = axios.create({
       baseURL: this.config.gatewayBaseUrl,
       headers: getConfluenceHeaders(this.config),
@@ -99,6 +111,72 @@ export class ConfluenceClient {
     const response = await this.client.get<ConfluencePage>(
       `${this.API_BASE}/pages/${params.pageId}`,
       { params: queryParams },
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Fetch a page as ADF (Atlas Document Format), with the body parsed from the
+   * JSON-string wire form the v2 API returns.
+   *
+   * ADF is the only representation that round-trips inline-comment anchors: the
+   * markdown/storage conversions the other tools use drop the `annotation` marks
+   * that anchor comments to text. Fetch, edit, and push all stay in ADF so those
+   * marks survive.
+   */
+  async getPageAdf(pageId: string): Promise<ConfluencePageAdf> {
+    const page = await this.getPage({
+      pageId,
+      includeBody: true,
+      bodyFormat: "atlas_doc_format",
+    });
+
+    const raw = page.body?.atlas_doc_format?.value;
+    if (!raw) {
+      throw new Error(
+        `Confluence page ${pageId} returned no ADF body. It may be a live-edit ` +
+          "draft or a content type that has no atlas_doc_format representation.",
+      );
+    }
+
+    return {
+      id: page.id,
+      title: page.title,
+      version: page.version?.number ?? 0,
+      spaceId: page.spaceId,
+      body: JSON.parse(raw),
+      webui: page._links?.webui,
+    };
+  }
+
+  /**
+   * Overwrite a page's body with a new ADF document, incrementing its version.
+   *
+   * Requires a client constructed with mode "write". The caller passes the
+   * current version; this method sends `currentVersion + 1`, which the API
+   * rejects with a conflict if the page changed underneath us.
+   */
+  async updatePage(
+    params: ConfluenceUpdatePageParams,
+  ): Promise<ConfluencePage> {
+    const payload = {
+      id: params.pageId,
+      status: "current",
+      title: params.title,
+      body: {
+        representation: "atlas_doc_format",
+        value: JSON.stringify(params.adfBody),
+      },
+      version: {
+        number: params.currentVersion + 1,
+        message: params.message ?? "",
+      },
+    };
+
+    const response = await this.client.put<ConfluencePage>(
+      `${this.API_BASE}/pages/${params.pageId}`,
+      payload,
     );
 
     return response.data;
