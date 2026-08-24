@@ -1,6 +1,6 @@
 # Supported Stripe Resources (read-only)
 
-Only read operations are listed. Creating, updating, deleting, attaching, detaching, paying, voiding, finalizing, cancelling, refunding, or closing any resource is forbidden by tool-policy Category 4. The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
+Only read operations are listed. Creating, updating, deleting, attaching, detaching, paying, voiding, finalizing, cancelling, refunding, or closing any resource is out of scope for this read-only skill. The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
 
 Every operation below is a `stripe_cli.py read --path <path>` call. The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
 
