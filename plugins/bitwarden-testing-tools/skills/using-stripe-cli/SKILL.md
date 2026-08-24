@@ -24,7 +24,7 @@ Nothing needs to be configured beyond `stripe login`. The wrapper uses the CLI's
 
 If a step would require live data, STOP and report it as an obstacle.
 
-If the wrapper exits 21, the environment has `STRIPE_API_KEY` set to a live key, which the Stripe CLI reads in preference to its own configuration. Report that as an obstacle rather than working around it. If it exits 1 with a "not installed" message, report that the Stripe CLI needs installing and `stripe login`.
+If the wrapper exits 20, the requested path was not an allowed read path or the `--clock` id was malformed; fix the request rather than retrying. If it exits 2, the invocation was malformed (for example `--days` below 1); fix the arguments. If it exits 21, the environment has `STRIPE_API_KEY` set to a live key, which the Stripe CLI reads in preference to its own configuration; report that as an obstacle rather than working around it. If it exits 1 with a "not installed" message, report that the Stripe CLI needs installing and `stripe login`.
 
 ## How the CLI works (read queries)
 
@@ -65,7 +65,7 @@ See `references/resources.md` for the read operations and key fields of the reso
 - **Payment failures:** check the payment intent's `last_payment_error` and the charge's `outcome` / `failure_message` (expand the charge on the payment intent).
 - **Subscription issues:** check `status`, the expanded `latest_invoice`, and recent `customer.subscription.*` events.
 - **Event tracing:** `/v1/events` filters by type, not object ID; list by type and filter client-side. Events carry the object snapshot at event time.
-- **Customer state:** expand `subscriptions` and use `list_payment_methods` for the full picture.
+- **Customer state:** expand `subscriptions` and read `--path /v1/customers/<id>/payment_methods` for the full picture.
 
 ## The one permitted write: advancing an already-attached test clock
 
@@ -77,6 +77,6 @@ Advance a clock by N days with a single wrapper call; it waits for the clock to 
 ${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py advance-clock --clock <clock_id> --days 8
 ```
 
-Eight days is the number that matters for driving a subscription to `unpaid`: Stripe's smart retry policy fires one payment retry per simulated day, and after eight failed attempts the subscription transitions to `unpaid` and fires `customer.subscription.updated`. Advancing fewer days will not reach that state.
+Eight days is the number that matters for driving a subscription to `unpaid` under Bitwarden's configured test-account dunning: a payment retry fires per simulated day, and after the configured retries are exhausted the subscription transitions to `unpaid` and fires `customer.subscription.updated`. Re-read the subscription `status` after advancing to confirm the state, since the exact retry count is a per-account setting.
 
 The wrapper is the only granted path to this operation; the `stripe` binary itself is not granted.
