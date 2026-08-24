@@ -39,7 +39,7 @@ Then gather the remaining data:
 - Whether the PR author is an automated bot (Renovate, Dependabot)
 - Whether the PR description references AppSec approval (VULN task, explicit mention of the dependency review process)
 
-**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config) **or any `SKILL.md` changed**, note them for the Claude-configuration review in Step 2. A `SKILL.md` is not itself a Claude-configuration detection, but it belongs in that scope for the credential scan; its content review is out of reach on this path, per Step 2.
+**If Claude configuration files are in the diff** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config) **or any `SKILL.md` changed and still present at the head of the change**, note them for the Claude-configuration review in Step 2. A deleted skill has nothing to review, and naming one in a coverage note asserts a gap the change deliberately closed. A `SKILL.md` is not itself a Claude-configuration detection, but it belongs in that scope for the credential scan; its content review is out of reach on this path, per Step 2.
 
 **Tailor your review approach based on what you observe:**
 
@@ -78,13 +78,13 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 - **Angular/TypeScript client changes** → invoke `Skill(writing-client-code)` to verify `tw-` prefix, `inject()` usage, standalone components, signal vs RxJS patterns
 - **Database changes** → invoke `Skill(writing-database-queries)` to verify dual-ORM parity, migration naming, and EDD phasing
 
-**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config) **or changed `SKILL.md` files**:
+**Claude configuration changes** (`CLAUDE.md`, agent `AGENT.md`, hook definitions, slash commands, `.claude/` settings, skill support files, or MCP config) **or changed `SKILL.md` files still present at the head of the change**:
 
 - invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Include any changed `SKILL.md` files in the scope you hand it: its credential scan covers every file whatever the type, and it declines `SKILL.md` only for the quality review. Fold its findings into your own classification and validation in Steps 3–4.
 
 These skills are optional. If unavailable, apply existing review knowledge.
 
-**Skill changes** (`SKILL.md`) are the exception to that fallback:
+**Skill changes** (a `SKILL.md` changed and still present at the head of the change) are the exception to that fallback:
 
 - content review belongs to `plugin-dev:skill-reviewer`, which is an agent rather than a skill, so this path cannot reach it: launching it needs `Task`, and granting `Task` here would put unrestricted `Bash` one delegation away from an agent that reads contributor-authored diffs unattended. Record it on the `**Not covered:**` line of the Step 6 summary, per the Not Covered section of `Skill(posting-review-summary)`: say that description quality, length, and progressive disclosure went unreviewed, and name `performing-multi-agent-code-review` as the path that covers them. That line owns the gap, so drop any `reviewing-claude-config` finding that only reports absent skill coverage — it offers to flag exactly this, and both firing reports one gap twice. Do not fall back to your own idea of skill quality — a substituted opinion reads as coverage.
 
