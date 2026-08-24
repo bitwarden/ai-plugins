@@ -77,9 +77,11 @@ A coverage note is not a finding: it has no `file:line` to cite and it says what
 reviewed, which is the opposite of the assessment sentences above it. So it gets its own line,
 outside the `<details>` block, where an approval cannot bury it.
 
-Render it when a review step the diff called for did not run — a skill or agent you were
-directed to invoke was unavailable, errored, or returned nothing usable. Name the files that
-went unreviewed, why, and what covers them. Give the reason that actually applies on your path
+Render it when a review step the diff called for did not run and nothing else covers what it
+would have looked at — the path cannot reach that reviewer at all, or the reviewer errored or
+returned nothing usable. An optional enrichment skill that was merely unavailable does not
+qualify: those fall back to your existing review knowledge, so the lens still ran. Name the
+files that went unreviewed, why, and what covers them. Give the reason that actually applies on your path
 — do not assert an install state you cannot check, and do not point at a remedy the stated
 reason would also block.
 
