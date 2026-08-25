@@ -42,11 +42,20 @@ if ! git -C "${CLAUDE_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
     CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
     echo "  ⚠️  SKIPPED: ${CLAUDE_DIR} is not inside a git repository"
 else
+    # Target the repository the scanned directory belongs to, not the shell's and not
+    # the subtree: `-C "${CLAUDE_DIR}"` alone would list only paths under .claude and
+    # print them relative to it, missing a committed file elsewhere in the repository.
+    REPO_ROOT=$(git -C "${CLAUDE_DIR}" rev-parse --show-toplevel)
+
     # Ask git directly. Piping it to `grep -q` loses matches under `pipefail`:
     # grep exits on the first hit, git dies of SIGPIPE, and the pipeline reports
     # failure, so a committed file reads as absent whenever git's output is long
     # enough that grep finishes first.
-    LOCAL_SETTINGS=$(git -C "${CLAUDE_DIR}" ls-files -- '*settings.local.json') || LOCAL_SETTINGS=""
+    if ! LOCAL_SETTINGS=$(git -C "${REPO_ROOT}" ls-files -- '*settings.local.json'); then
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        echo "  ⚠️  SKIPPED: git could not list files in ${REPO_ROOT}"
+        LOCAL_SETTINGS=""
+    fi
 
     if [ -n "${LOCAL_SETTINGS}" ]; then
         echo "  ❌ CRITICAL: settings.local.json is committed to git"
@@ -58,7 +67,7 @@ else
         echo "     echo '.claude/settings.local.json' >> .gitignore"
         echo ""
         ISSUES_FOUND=$((ISSUES_FOUND + 1))
-    else
+    elif [ "${CHECKS_SKIPPED}" -eq 0 ]; then
         echo "  ✅ OK: settings.local.json not in git"
     fi
 fi

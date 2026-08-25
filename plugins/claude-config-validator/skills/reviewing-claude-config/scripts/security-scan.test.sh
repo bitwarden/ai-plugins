@@ -103,11 +103,26 @@ assert "does not claim it is absent" reject "OK: settings.local.json not in git"
 echo ""
 
 # ---------------------------------------------------------------------------
+# Check 1 covers the repository, not just the scanned subtree. Scoping git to
+# CLAUDE_DIR would list only paths under it, missing a committed file elsewhere
+# in the same repository and printing paths that do not match the remediation.
+# ---------------------------------------------------------------------------
+echo "[2] committed settings.local.json elsewhere in the repository"
+CLAUDE_DIR="$(fixture monorepo)"
+mkdir -p "${CLAUDE_DIR}/../apps/foo/.claude"
+printf 'x\n' > "${CLAUDE_DIR}/../apps/foo/.claude/settings.local.json"
+git_fixture "${CLAUDE_DIR}"
+OUT="$(bash "${SCAN}" "${CLAUDE_DIR}" 2>&1)"
+assert "detects it outside the scanned directory" expect "CRITICAL: settings.local.json is committed to git" "${OUT}"
+assert "reports a repository-relative path" expect "apps/foo/.claude/settings.local.json" "${OUT}"
+echo ""
+
+# ---------------------------------------------------------------------------
 # Outside a git repository the check cannot run. It used to report a pass,
 # because git ran against whatever repository the shell was in and its error
 # was discarded.
 # ---------------------------------------------------------------------------
-echo "[2] target outside any git repository"
+echo "[3] target outside any git repository"
 CLAUDE_DIR="$(fixture no-repo)"
 OUT="$(bash "${SCAN}" "${CLAUDE_DIR}" 2>&1)"
 assert "records the check as skipped" expect "SKIPPED: ${CLAUDE_DIR} is not inside a git repository" "${OUT}"
@@ -120,7 +135,7 @@ echo ""
 # means no rules are set in the scanned directory. It must not drive the run to
 # INCOMPLETE, which would overstate the doubt.
 # ---------------------------------------------------------------------------
-echo "[3] no settings.json to inspect"
+echo "[4] no settings.json to inspect"
 CLAUDE_DIR="$(fixture no-settings)"
 git_fixture "${CLAUDE_DIR}"
 OUT="$(bash "${SCAN}" "${CLAUDE_DIR}" 2>&1)"
@@ -136,7 +151,7 @@ echo ""
 # filters matched bare substrings over grep's path:line output and discarded
 # findings by path or by a placeholder fragment inside a real value.
 # ---------------------------------------------------------------------------
-echo "[4] real credentials in the scanned tree"
+echo "[5] real credentials in the scanned tree"
 CLAUDE_DIR="$(fixture real-secrets)"
 mkdir -p "${CLAUDE_DIR}/skills/demo/examples"
 printf '%s\n' "${OPENAI_KEY}" > "${CLAUDE_DIR}/skills/demo/examples/config.json"
@@ -150,10 +165,12 @@ echo ""
 # The scanner must not report this skill's own labelled-bad fixtures, whether
 # the target is given as a relative or an absolute path.
 # ---------------------------------------------------------------------------
-echo "[5] scanning this skill does not flag its own fixtures"
+echo "[6] scanning this skill does not flag its own fixtures"
 OUT="$(cd "${SCRIPT_DIR}/.." && bash "${SCAN}" . 2>&1)"
+assert "the scan actually ran (relative path)" expect "Scan Complete" "${OUT}"
 assert "no false positive (relative path)" reject "CRITICAL" "${OUT}"
 OUT="$(bash "${SCAN}" "${SCRIPT_DIR}/.." 2>&1)"
+assert "the scan actually ran (absolute path)" expect "Scan Complete" "${OUT}"
 assert "no false positive (absolute path)" reject "CRITICAL" "${OUT}"
 echo ""
 
@@ -162,7 +179,7 @@ echo ""
 # tests need jq to tell an allow rule from a deny one, so without it the run is
 # legitimately incomplete and the expectation flips.
 # ---------------------------------------------------------------------------
-echo "[6] clean configuration"
+echo "[7] clean configuration"
 CLAUDE_DIR="$(fixture clean)"
 printf '{"permissions": {"allow": ["Read(./src/**)"]}}\n' > "${CLAUDE_DIR}/settings.json"
 git_fixture "${CLAUDE_DIR}"
