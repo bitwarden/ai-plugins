@@ -35,7 +35,7 @@ The behavior suite runs separately, through `/skill-creator:skill-creator` in Be
 
 ## Last observed reading
 
-_(recorded on the next trigger-eval run)_
+Recorded 2026-08-25 with `claude-opus-4-8` at 3 runs per query, measured against the four-skill foundation inventory (`assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, `writing-manual-test-cases`): should-trigger 10/10, should-not-trigger 10/10.
 
 ## When to run
 
