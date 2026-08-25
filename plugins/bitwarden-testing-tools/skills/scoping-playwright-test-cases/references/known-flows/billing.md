@@ -113,8 +113,8 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 ### flow:purchase-premium-subscription
 
-- **Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `writing-playwright-test-cases/references/billing-test-data.md`), etc.
-- **Parameters:** none (uses defaults documented in `writing-playwright-test-cases/references/billing-test-data.md`)
+- **Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md`), etc.
+- **Parameters:** none (uses defaults documented in `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md`)
 - **Precondition state:** state:authenticated-free-user
 - **Steps:**
   1. Navigate to `https://localhost:8080/#/settings/subscription/premium`
@@ -133,7 +133,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 ### flow:create-paid-org
 
-- **Use when:** Testing features that require a paid organization (Teams, Enterprise, Families, etc.) — including discount badge display on a Families organization (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `writing-playwright-test-cases/references/billing-test-data.md` for the discount mechanism).
+- **Use when:** Testing features that require a paid organization (Teams, Enterprise, Families, etc.) — including discount badge display on a Families organization (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md` for the discount mechanism).
 - **Parameters:** `orgName`, `billingEmail`, `planTier`
 - **Precondition state:** state:authenticated-free-user
 - **Steps:**
@@ -158,22 +158,19 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 - **Parameters:** `email`, `productTier`, `products`, `trialLength`, `paymentOptional`
 - **Precondition state:** none
 - **Steps:**
-  1. **EXTERNAL TRIGGER** — simulate the marketing site call via the external-trigger wrapper (canonical path in references/playwright-testing-pipeline/tool-policy.md):
-     ```bash
-     ${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/scripts/external_trigger.py \
-       --url http://localhost:33656/accounts/trial/send-verification-email \
-       --rationale "marketing-site trial verification email; no Bitwarden service initiates this" \
-       --data '{
-         "email": "<email>",
-         "name": "Test User",
-         "receiveMarketingEmails": false,
-         "productTier": <productTier>,
-         "products": <products>,
-         "trialLength": <trialLength>,
-         "paymentOptional": <paymentOptional>
-       }'
+  1. **EXTERNAL TRIGGER**: POST to `http://localhost:33656/accounts/trial/send-verification-email`. This simulates the marketing-site trial verification email; no Bitwarden service initiates it. Request body:
+     ```json
+     {
+       "email": "<email>",
+       "name": "Test User",
+       "receiveMarketingEmails": false,
+       "productTier": <productTier>,
+       "products": <products>,
+       "trialLength": <trialLength>,
+       "paymentOptional": <paymentOptional>
+     }
      ```
-     Reference values — `productTier`: `0` = Free, `1` = Teams, `2` = Enterprise, `3` = Families. `products`: `1` = PasswordManager, `2` = SecretsManager. `paymentOptional`: `true` skips the payment step in the downstream completion flow; `false` requires payment.
+     Reference values. `productTier`: `0` = Free, `1` = Teams, `2` = Enterprise, `3` = Families. `products`: `1` = PasswordManager, `2` = SecretsManager. `paymentOptional`: `true` skips the payment step in the downstream completion flow; `false` requires payment.
   2. Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"` to read the verification email; stdout is the trial-initiation URL, so capture it for the next flow.
      - Feedback: trial-initiation URL is available on stdout
 - **Post-condition state(s):**
