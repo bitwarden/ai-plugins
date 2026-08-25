@@ -5,6 +5,24 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-08-25
+
+### Changed
+
+- `auditing-hackerone-vulns` skill: inverted the source of truth from Jira to HackerOne. The audit now enumerates open reports across **both** programs via the HackerOne MCP (`bitwarden` VDP and `bitwarden-bbp` Bug Bounty) and correlates outward to VULN tickets, child engineering items, fix PRs, and release state, rather than starting from a `project = VULN` JQL sweep. Reports that never got a VULN ticket created are no longer invisible to the audit.
+  - New action tokens: 🆕 **Create VULN Ticket** (open report with no linked VULN) and 🟣 **Close HackerOne Report** (VULN already Closed/Rejected while the report stayed open).
+  - New **Blocked** child-status category so `On Hold` work is reported as stalled instead of collapsing into ⚪ Waiting.
+  - New reconciliation sweep and 🗂️ Orphaned VULNs section catching open Jira tickets whose HackerOne report was already closed, which an H1-first traversal would otherwise miss.
+  - Output tables are keyed on the HackerOne report, carry program (VDP/BBP), submission date, and HackerOne severity, and sort oldest-first so aging reports surface at the top.
+  - Documented API constraints hit in practice: `search_reports` requires `program_handles` and returns HTTP 500 for the `open` and `needs-more-info` states, report IDs are base64 GIDs needing decode, the Jira reference lives in `get_report_activities` and not in `get_report`, Jira `search_issues` silently drops the `issuelinks` field so `linkedIssues()` is required, and VULN-project `status not in (Done, Verified)` fails to exclude `Rejected`/`Closed`.
+  - New edge cases for half-remediated VULNs (SRE child Done ahead of the PM code fix), duplicate-report clusters on one root cause, and work blocked on an upstream third-party fix.
+  - New 🏁 **Close Out** action token. `Verified` is no longer excluded from the audit query, so VULNs whose fix is confirmed in production but whose Jira ticket was never moved to `Closed` stop dropping out of the report. These skip the child-item and GitHub steps entirely.
+  - `Ready for Dev` and `In QA` added to the child-status categories, and the audit query exclusion list widened to `(Done, Closed, Rejected, Resolved, Canceled)`.
+  - Fixed the PR search `--jq` filter to read `.pull_request.merged_at`; the Search Issues API does not return a `mergedAt` field, so the previous filter reported every PR as unmerged.
+  - Release-inclusion checking reworked. The candidate release is now the earliest whose `publishedAt` postdates the PR merge, confirmed by grepping the tag-to-tag commit range for the PR number. A missing cherry-pick is reported as 🔵 Monitor with an engineering flag rather than being counted as shipped, and Jira's `Fix Version` "(Released)" annotation is explicitly called out as untrustworthy.
+  - Replaced `gh release list` (blocked by `allowed-tools`) with the Releases API, capped PR searches at two attempts, and gated the whole GitHub step behind having at least one Done child.
+  - New tool-usage guardrails: no interpreter pipes, no file writes or heredocs, no shell scripting to orchestrate the audit, no `2>/dev/null` error suppression, and never fetch release note body text.
+
 ## [1.3.0] - 2026-07-21
 
 ### Added
