@@ -169,4 +169,53 @@ describe("update_confluence_page handler", () => {
     expect(payload.version.number).toBe(6);
     expect(JSON.parse(payload.body.value)).toEqual(body);
   });
+
+  it("writes when expectedVersion matches the live version", async () => {
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN = "write-token";
+    mockGet.mockResolvedValueOnce(pageResponse(5));
+    mockPut.mockResolvedValueOnce({ data: { version: { number: 6 } } });
+
+    const out = await updateConfluencePageTool.handler({
+      pageId: "2923724969",
+      adfBody: bodyWithAnchor(),
+      expectedVersion: 5,
+      dryRun: false,
+    });
+
+    expect(out).toContain("Updated **Design Notes** to version 6");
+    expect(mockPut).toHaveBeenCalledOnce();
+  });
+
+  it("refuses a live write when the page moved past expectedVersion", async () => {
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN = "write-token";
+    // Live page is at 7; the body was fetched at 5 — someone edited in between.
+    mockGet.mockResolvedValueOnce(pageResponse(7));
+
+    const out = await updateConfluencePageTool.handler({
+      pageId: "2923724969",
+      adfBody: bodyWithAnchor(),
+      expectedVersion: 5,
+      dryRun: false,
+    });
+
+    expect(out).toContain("Refusing to overwrite");
+    expect(out).toContain("version 7");
+    expect(out).toContain("fetched at version 5");
+    expect(mockPut).not.toHaveBeenCalled();
+  });
+
+  it("warns on a dry run when the page moved past expectedVersion", async () => {
+    mockGet.mockResolvedValueOnce(pageResponse(7));
+
+    const out = await updateConfluencePageTool.handler({
+      pageId: "2923724969",
+      adfBody: bodyWithAnchor(),
+      expectedVersion: 5,
+      dryRun: true,
+    });
+
+    expect(out).toContain("body fetched at 5, live is 7");
+    expect(out).toContain("a live write would be refused");
+    expect(mockPut).not.toHaveBeenCalled();
+  });
 });

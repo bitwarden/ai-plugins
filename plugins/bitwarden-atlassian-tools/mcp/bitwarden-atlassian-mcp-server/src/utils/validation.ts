@@ -218,6 +218,15 @@ export type ReplaceConfluenceTextInput = z.infer<
 export const UpdateConfluencePageSchema = z.object({
   pageId: ConfluencePageId,
   adfBody: AdfDocument,
+  /**
+   * The page version `adfBody` was derived from, as reported by
+   * get_confluence_page_adf. This workflow spans two tool calls with model
+   * editing in between, so the live page can move underneath the edit; when
+   * given, the tool refuses to write if the live version no longer matches,
+   * turning a silent lost update into a re-fetch prompt. Omitting it keeps the
+   * old last-write-wins behavior.
+   */
+  expectedVersion: z.number().int().min(1).optional(),
   message: z.string().optional(),
   dryRun: z.boolean().optional().default(true),
 });

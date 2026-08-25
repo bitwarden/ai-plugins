@@ -60,10 +60,10 @@ All four are MCP tools on the `bitwarden-atlassian` server. The two edit tools r
 ### Larger surgical edit (rewrite a section, reorder blocks)
 
 1. `list_confluence_anchors` — baseline.
-2. `get_confluence_page_adf` — fetch the ADF body and version.
+2. `get_confluence_page_adf` — fetch the ADF body and note the version it reports.
 3. Edit the body. On any text node whose comment should stay anchored, change the `text` and **leave its `marks` array alone**.
-4. `update_confluence_page` with `dryRun: true` — read the anchor diff. If it reports anchors would be dropped, fix the body before writing.
-5. `update_confluence_page` with `dryRun: false` — apply.
+4. `update_confluence_page` with `dryRun: true` and `expectedVersion` set to the version from step 2 — read the anchor diff and the version guard. If it reports anchors would be dropped, or that the page has moved, fix the body (re-fetch if it moved) before writing.
+5. `update_confluence_page` with `dryRun: false` and the same `expectedVersion` — apply. If the page changed since step 2, the write is refused rather than clobbering the newer version; re-fetch and re-apply.
 
 ## Patterns
 
@@ -71,6 +71,7 @@ All four are MCP tools on the `bitwarden-atlassian` server. The two edit tools r
 - **Marks are per-text-node.** To change highlighted text (e.g. rename a function inside an anchored span), edit that node's `text` and keep its `marks`. The anchor moves with the new text.
 - **Don't delete an annotated text node** unless you accept the comment dangling. Splitting the node and keeping the mark on one side is fine.
 - **Trust the dry-run anchor diff.** `update_confluence_page`'s dry run tells you exactly which anchors a rewritten body would drop; treat a non-empty "would be dropped" list as a stop sign, not a warning to skip.
+- **Always pass `expectedVersion` to `update_confluence_page`.** A full-body overwrite spans two tool calls, so the page can change between the fetch and the write. Passing the fetched version makes the tool refuse a stale write instead of silently clobbering someone else's edit. `replace_confluence_text` reads and writes in one call, so it needs no such guard.
 
 ## Anti-patterns
 

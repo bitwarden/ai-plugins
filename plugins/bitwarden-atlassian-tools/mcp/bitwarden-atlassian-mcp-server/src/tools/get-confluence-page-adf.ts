@@ -31,11 +31,13 @@ async function handler(input: any): Promise<string> {
       `# ${page.title}`,
       "",
       `- **Page ID:** ${page.id}`,
-      `- **Version:** ${page.version} (update_confluence_page will write ${page.version + 1})`,
+      `- **Version:** ${page.version} (pass this as \`expectedVersion\` to update_confluence_page; it will write ${page.version + 1})`,
       `- **Inline-comment anchors:** ${anchors.length}`,
       "",
-      "Edit the `body` below and pass it to `update_confluence_page`. Keep the " +
-        "`marks` array on any text node whose inline comment should stay attached.",
+      "Edit the `body` below and pass it to `update_confluence_page`, along with " +
+        `\`expectedVersion: ${page.version}\` so a concurrent edit is refused ` +
+        "rather than overwritten. Keep the `marks` array on any text node whose " +
+        "inline comment should stay attached.",
       "",
       "```json",
       JSON.stringify(page.body, null, 2),
