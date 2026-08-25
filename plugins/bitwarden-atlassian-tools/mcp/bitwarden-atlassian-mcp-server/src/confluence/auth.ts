@@ -19,18 +19,45 @@ function resolveEnv(name: string): string | undefined {
 }
 
 /**
+ * Access mode for a Confluence client.
+ *
+ * "read" uses ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN, which every install already
+ * sets. "write" uses ATLASSIAN_CONFLUENCE_WRITE_TOKEN, which is optional: when
+ * it is absent, the write tools are still listed and their dry-run preview still
+ * works, but a live edit refuses to execute. Confluence write capability is
+ * therefore opt-in per install, exactly like Jira write.
+ */
+export type ConfluenceAccessMode = "read" | "write";
+
+const TOKEN_ENV_VAR: Record<ConfluenceAccessMode, string> = {
+  read: "ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN",
+  write: "ATLASSIAN_CONFLUENCE_WRITE_TOKEN",
+};
+
+/**
+ * Whether this install has been given a write-capable Confluence token.
+ */
+export function hasConfluenceWriteToken(): boolean {
+  return resolveEnv(TOKEN_ENV_VAR.write) !== undefined;
+}
+
+/**
  * Load Confluence configuration from environment variables
+ * @param mode - Which token to authenticate with. Defaults to read-only.
  * @throws {Error} If required environment variables are missing
  */
-export function loadConfluenceConfig(): ConfluenceConfig {
+export function loadConfluenceConfig(
+  mode: ConfluenceAccessMode = "read",
+): ConfluenceConfig {
   const cloudId = resolveEnv("ATLASSIAN_CLOUD_ID");
   const email = resolveEnv("ATLASSIAN_EMAIL");
-  const apiToken = resolveEnv("ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN");
+  const tokenVar = TOKEN_ENV_VAR[mode];
+  const apiToken = resolveEnv(tokenVar);
 
   if (!cloudId || !email || !apiToken) {
     throw new Error(
       "Missing required Confluence environment variables. " +
-        "Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN",
+        `Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ${tokenVar}`,
     );
   }
 

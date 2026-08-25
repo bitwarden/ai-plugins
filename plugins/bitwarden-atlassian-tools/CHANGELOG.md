@@ -5,6 +5,17 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-08-24
+
+### Added
+
+- **`editing-confluence-pages` skill** — edits a Confluence page while keeping its inline-comment anchors intact. Markdown round-trips (the default `updateConfluencePage` path) strip the `annotation` marks that anchor open inline comments, leaving them dangling; this skill edits the page as ADF so the anchor is the mark, not the text, and survives even when the highlighted text itself changes. Baselines anchors before an edit and verifies them after.
+- **`replace_confluence_text` MCP tool** (write, opt-in) — replaces every occurrence of a literal string across a page's text nodes, preserving marks. The low-bloat path for small edits: it never routes the whole document through the conversation. Defaults to a dry run that counts matches; a live edit requires an explicit `dryRun: false`.
+- **`update_confluence_page` MCP tool** (write, opt-in) — overwrites a page body with a full ADF document, for larger or structural edits. Its dry run diffs the inline-comment anchors in the submitted body against the live page and warns about any that would be dropped. Accepts an optional `expectedVersion` (the version the body was fetched at) and refuses the write if the live page has since moved, so a concurrent edit is not silently clobbered across the fetch-edit-push gap. Also defaults to a dry run.
+- **`get_confluence_page_adf` MCP tool** (read-only) — fetches a page as raw ADF JSON plus its current version, the fetch step before a full-body rewrite.
+- **`list_confluence_anchors` MCP tool** (read-only) — lists every inline-comment anchor id and the text it covers, to baseline the anchor set before an edit and verify it after.
+- **Optional `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`** — Confluence write capability is opt-in per install, mirroring `ATLASSIAN_JIRA_WRITE_TOKEN`. The write tools are always listed and their dry-run paths always work; without this variable, a live edit refuses to execute. Confluence read and the current-body fetch continue to use the existing read-only token.
+
 ## [2.6.0] - 2026-08-04
 
 ### Added

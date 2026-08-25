@@ -4,7 +4,10 @@
 
 Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
 
-Read access is the default and always available. Jira write access (creating work items and links) is **opt-in per install**: `create_issue` and `link_issues` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
+Read access is the default and always available. Write access is **opt-in per install** and gated the same way for both products: the write tools are always listed and their dry-run preview always works, but a live write refuses to execute without the matching write token.
+
+- **Jira write** (creating work items and links) requires `ATLASSIAN_JIRA_WRITE_TOKEN`.
+- **Confluence write** (anchor-preserving page edits) requires `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`. These tools edit pages as ADF (Atlas Document Format) so inline-comment anchors survive an edit, which the markdown-based update path drops. The current page body is always fetched with the read-only token; only the final write uses the write token.
 
 ## Installation
 
@@ -18,8 +21,12 @@ export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-jira-scoped-token"
 export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
 
 # Optional — enables the Jira write tools (create_issue, link_issues).
-# Omit to keep this install read-only.
+# Omit to keep Jira read-only.
 export ATLASSIAN_JIRA_WRITE_TOKEN="your-jira-write-scoped-token"
+
+# Optional — enables the Confluence write tools (replace_confluence_text,
+# update_confluence_page). Omit to keep Confluence read-only.
+export ATLASSIAN_CONFLUENCE_WRITE_TOKEN="your-confluence-write-scoped-token"
 ```
 
 API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
@@ -51,6 +58,16 @@ Use **scoped (granular) API tokens** for least-privilege access. Create them at 
 | `read:blogpost:confluence`             | Blog post content                                  |
 | `read:attachment:confluence`           | Attachment metadata and downloads                  |
 | `read:account`                         | User display names on content                      |
+
+#### Confluence write token scopes (optional)
+
+Only needed for `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`. The write tools also read the current page body before writing, so grant this write token the page read scopes above (at minimum `read:page:confluence`) in addition to:
+
+| Scope                   | Required for                                        |
+| ----------------------- | --------------------------------------------------- |
+| `write:page:confluence` | `replace_confluence_text`, `update_confluence_page` |
+
+Treat this token as higher-blast-radius than the read-only Confluence token: it can modify any page the user can edit. Rotate it accordingly.
 
 #### Jira token scopes
 
@@ -129,14 +146,27 @@ A leaked write token permits more than these two tools use: `write:comment:jira`
 
 ### Confluence
 
-| Tool                           | Purpose                              |
-| ------------------------------ | ------------------------------------ |
-| `get_confluence_page`          | Read a Confluence page by ID         |
-| `get_confluence_page_comments` | Get comments on a Confluence page    |
-| `get_child_pages`              | Get child pages of a Confluence page |
-| `search_confluence`            | Search Confluence by space/title     |
-| `search_confluence_cql`        | Search Confluence using CQL          |
-| `list_spaces`                  | List accessible Confluence spaces    |
+| Tool                           | Purpose                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `get_confluence_page`          | Read a Confluence page by ID                                                               |
+| `get_confluence_page_comments` | Get comments on a Confluence page                                                          |
+| `get_child_pages`              | Get child pages of a Confluence page                                                       |
+| `search_confluence`            | Search Confluence by space/title                                                           |
+| `search_confluence_cql`        | Search Confluence using CQL                                                                |
+| `list_spaces`                  | List accessible Confluence spaces                                                          |
+| `get_confluence_page_adf`      | Read a page as raw ADF JSON plus its current version (the fetch step for a full-body edit) |
+| `list_confluence_anchors`      | List a page's inline-comment anchor ids and the text each one covers                       |
+
+### Confluence (write, requires `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`)
+
+Both tools edit the page as ADF so inline-comment anchors survive, and both default to a dry run that previews without sending. A live edit requires an explicit `dryRun: false`. Dry runs need no write token.
+
+| Tool                      | Purpose                                                                                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `replace_confluence_text` | Replace every occurrence of a literal string across a page's text nodes, preserving marks. The low-bloat path for small edits; never routes the whole document through the conversation        |
+| `update_confluence_page`  | Overwrite a page body with a full ADF document, for larger or structural edits. Its dry run diffs the submitted body's anchors against the live page and warns about any that would be dropped |
+
+Anchors are the mechanism inline comments use to attach to text: Confluence stores each as an `annotation` mark on the covered text node. A markdown round-trip cannot represent that mark, so `updateConfluencePage` with `contentFormat: "markdown"` strips every anchor and leaves the comments dangling. Editing as ADF keeps the mark, so an anchored span keeps its comment even when its text changes.
 
 ## Usage
 
@@ -147,6 +177,7 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
 - Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
 - Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
+- Preview an anchor-preserving edit: `mcp__bitwarden-atlassian__replace_confluence_text` with `pageId: "123456789"`, `oldText: "old phrase"`, `newText: "new phrase"` — omit `dryRun` (defaults to `true`) to count matches and check anchors without writing
 
 ## Skills
 
@@ -174,6 +205,19 @@ Features:
 - Role-named link arguments (`blockerKey`, `blockedKey`) so dependency direction cannot be inverted
 
 Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can still draft and preview.
+
+### `editing-confluence-pages`
+
+Edits a Confluence page while keeping its inline-comment anchors intact. The default markdown update strips the `annotation` marks that anchor open inline comments; this skill edits the page as ADF so the anchor is the mark, not the text, and survives even when the highlighted text changes. Triggered by intent to edit a page while preserving comments or by a small surgical change (e.g., "update the doc but keep the comments", "fix this typo on the Confluence page", "resolve comment 3 by changing the text").
+
+Features:
+
+- Baselines the anchor set before an edit and verifies it after, so a dropped anchor is caught rather than silently shipped
+- `replace_confluence_text` for small edits, which never routes the whole document through the conversation
+- `update_confluence_page` for larger rewrites, whose dry run warns about anchors a submitted body would drop
+- Dry-run preview before every live write
+
+Live edits require `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`; without it the skill can still preview and verify anchors.
 
 ## Requirements
 

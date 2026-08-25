@@ -50,6 +50,11 @@ export interface ConfluencePageBody {
     value: string;
     representation: string;
   };
+  atlas_doc_format?: {
+    /** ADF document serialized as a JSON string, per the Confluence v2 API. */
+    value: string;
+    representation: string;
+  };
 }
 
 export interface ConfluencePage {
@@ -88,7 +93,32 @@ export interface ConfluenceSearchResult {
 export interface ConfluenceGetPageParams {
   pageId: string;
   includeBody?: boolean;
-  bodyFormat?: "storage" | "view" | "export_view";
+  bodyFormat?: "storage" | "view" | "export_view" | "atlas_doc_format";
+}
+
+/**
+ * A page fetched as ADF, with the body already parsed from its JSON-string
+ * wire form into a document object ready to walk and edit.
+ */
+export interface ConfluencePageAdf {
+  id: string;
+  title: string;
+  version: number;
+  spaceId?: string;
+  /** Parsed ADF document (the `doc` node). */
+  body: any;
+  webui?: string;
+}
+
+export interface ConfluenceUpdatePageParams {
+  pageId: string;
+  title: string;
+  /** The version number to increment from (the current version). */
+  currentVersion: number;
+  /** Parsed ADF document to store; serialized to a JSON string on the wire. */
+  adfBody: any;
+  /** Optional version message shown in the page history. */
+  message?: string;
 }
 
 export interface ConfluenceSearchParams {

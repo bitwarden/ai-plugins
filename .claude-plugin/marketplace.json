@@ -48,8 +48,8 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.6.0",
-      "description": "Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, attachments, and opt-in Jira write tools"
+      "version": "2.7.0",
+      "description": "Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, attachments, and opt-in Jira and Confluence write tools including anchor-preserving page edits"
     },
     {
       "name": "bitwarden-security-engineer",
