@@ -7,21 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.0] - 2026-08-25
 
+### Added
+
+- `auditing-hackerone-vulns` skill: new action tokens 🆕 **Create VULN Ticket** (open report with no linked VULN) and 🟣 **Close HackerOne Report** (VULN reached a terminal status while the report stayed open).
+- `auditing-hackerone-vulns` skill: new 🏁 **Close Out** token. `Verified` is no longer excluded from the audit query, so VULNs whose fix is confirmed in production but whose Jira ticket was never moved to `Closed` stop dropping out of the report. These skip the child-item and GitHub steps entirely.
+- `auditing-hackerone-vulns` skill: new **Blocked** child-status category, so an `On Hold` child is tracked separately from one that simply has not been picked up and is called out as stalled in both the child-status cell and the summary. `Ready for Dev` and `In QA` were also added to the status categories.
+- `auditing-hackerone-vulns` skill: new Step 7 reconciliation sweep and 🗂️ Orphaned VULNs section, catching open Jira tickets whose HackerOne report was already closed, which a HackerOne-first traversal would otherwise miss. VULNs with no report reference at all are excluded rather than filed as orphans, since they came from another source and this audit has no jurisdiction over them.
+- `auditing-hackerone-vulns` skill: new edge cases for half-remediated VULNs (an SRE child Done ahead of the PM code fix), duplicate-report clusters on one root cause, and work blocked on an upstream third-party fix.
+- `auditing-hackerone-vulns` skill: tool-usage guardrails against interpreter pipes, file writes and heredocs, shell scripting to orchestrate the audit, `2>/dev/null` error suppression, and fetching release note body text.
+- Plugin README now carries a Requirements section naming the operator-configured HackerOne MCP server and the `bitwarden-atlassian-tools` dependency, both of which `auditing-hackerone-vulns` hard-requires. The skill itself now says what to do when the HackerOne tools are unavailable instead of failing opaquely on the first call.
+
 ### Changed
 
 - `auditing-hackerone-vulns` skill: inverted the source of truth from Jira to HackerOne. The audit now enumerates open reports across **both** programs via the HackerOne MCP (`bitwarden` VDP and `bitwarden-bbp` Bug Bounty) and correlates outward to VULN tickets, child engineering items, fix PRs, and release state, rather than starting from a `project = VULN` JQL sweep. Reports that never got a VULN ticket created are no longer invisible to the audit.
-  - New action tokens: 🆕 **Create VULN Ticket** (open report with no linked VULN) and 🟣 **Close HackerOne Report** (VULN already Closed/Rejected while the report stayed open).
-  - New **Blocked** child-status category so `On Hold` work is reported as stalled instead of collapsing into ⚪ Waiting.
-  - New reconciliation sweep and 🗂️ Orphaned VULNs section catching open Jira tickets whose HackerOne report was already closed, which an H1-first traversal would otherwise miss.
-  - Output tables are keyed on the HackerOne report, carry program (VDP/BBP), submission date, and HackerOne severity, and sort oldest-first so aging reports surface at the top.
-  - Documented API constraints hit in practice: `search_reports` requires `program_handles` and returns HTTP 500 for the `open` and `needs-more-info` states, report IDs are base64 GIDs needing decode, the Jira reference lives in `get_report_activities` and not in `get_report`, Jira `search_issues` silently drops the `issuelinks` field so `linkedIssues()` is required, and VULN-project `status not in (Done, Verified)` fails to exclude `Rejected`/`Closed`.
-  - New edge cases for half-remediated VULNs (SRE child Done ahead of the PM code fix), duplicate-report clusters on one root cause, and work blocked on an upstream third-party fix.
-  - New 🏁 **Close Out** action token. `Verified` is no longer excluded from the audit query, so VULNs whose fix is confirmed in production but whose Jira ticket was never moved to `Closed` stop dropping out of the report. These skip the child-item and GitHub steps entirely.
-  - `Ready for Dev` and `In QA` added to the child-status categories, and the audit query exclusion list widened to `(Done, Closed, Rejected, Resolved, Canceled)`.
-  - Fixed the PR search `--jq` filter to read `.pull_request.merged_at`; the Search Issues API does not return a `mergedAt` field, so the previous filter reported every PR as unmerged.
-  - Release-inclusion checking reworked. The candidate release is now the earliest whose `publishedAt` postdates the PR merge, confirmed by grepping the tag-to-tag commit range for the PR number. A missing cherry-pick is reported as 🔵 Monitor with an engineering flag rather than being counted as shipped, and Jira's `Fix Version` "(Released)" annotation is explicitly called out as untrustworthy.
-  - Replaced `gh release list` (blocked by `allowed-tools`) with the Releases API, capped PR searches at two attempts, and gated the whole GitHub step behind having at least one Done child.
-  - New tool-usage guardrails: no interpreter pipes, no file writes or heredocs, no shell scripting to orchestrate the audit, no `2>/dev/null` error suppression, and never fetch release note body text.
+- `auditing-hackerone-vulns` skill: output tables are keyed on the HackerOne report, carry program (VDP/BBP), submission date, and HackerOne severity, and sort oldest-first so aging reports surface at the top.
+- `auditing-hackerone-vulns` skill: release-inclusion checking reworked. The candidate release is now the earliest whose `publishedAt` postdates the PR merge, confirmed by matching the PR number against the tag-to-tag commit range. A missing cherry-pick is reported as 🔵 Monitor with an engineering flag rather than being counted as shipped, and Jira's `Fix Version` "(Released)" annotation is explicitly called out as untrustworthy.
+- `auditing-hackerone-vulns` skill: `allowed-tools` tightened. `Bash(base64 *)` narrowed to `Bash(base64 -d)`, because the wildcard form also permitted reading an arbitrary file in a skill whose own rules forbid touching the filesystem. Unused `Bash(gh search prs *)` and `mcp__hackerone__get_current_user` grants were dropped, and `gh release list` was replaced with the Releases API. Commit-message matching moved from a `grep` pipe into the `gh api --jq` expression, so no `grep` grant is needed.
+- `auditing-hackerone-vulns` skill: documented API constraints hit in practice. `search_reports` requires `program_handles` and returns HTTP 500 for the `open` and `needs-more-info` states, report IDs are base64 GIDs needing decode, the Jira reference lives in `get_report_activities` and not in `get_report`, Jira `search_issues` silently drops the `issuelinks` field so `linkedIssues()` is required, and VULN-project `status not in (Done, Verified)` fails to exclude `Rejected` or `Closed`. The audit query exclusion list widened to `(Done, Closed, Rejected, Resolved, Canceled)`, and the 🟣 branch now names the same five statuses the queries exclude.
+
+### Fixed
+
+- `auditing-hackerone-vulns` skill: the PR search `--jq` filter now reads `.pull_request.merged_at`. The Search Issues API returns no `mergedAt` field, so the previous filter reported every PR as unmerged.
+- `auditing-hackerone-vulns` skill: cherry-pick verification no longer trusts a truncated commit range. GitHub's compare endpoint caps `.commits` at 250 and reports no error when it truncates, which a normal `clients` release range exceeds, so a fix shipped in the tail was reported as a missed cherry-pick. The check now compares `total_commits` against the returned count, paginates the remainder, and treats an unmatched truncated range as inconclusive rather than as proof the fix never shipped.
+- `auditing-hackerone-vulns` skill: restored `mergeCommit` to the `gh pr view` field list and made that call unconditional for direct-push repos. Dropping it left no step returning a commit SHA, so release state for `bitwarden/sm-action` and similar repos could not be determined at all.
+- `auditing-hackerone-vulns` skill: the Step 2 activity-thread fallback no longer dead-ends when it succeeds. Finding a Jira reference now routes to extracting the VULN key and continuing at Step 3, where previously only the negative case was handled and a VULN whose description had been reformatted could be silently dropped.
 
 ## [1.3.0] - 2026-07-21
 
