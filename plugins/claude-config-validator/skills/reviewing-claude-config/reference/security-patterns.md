@@ -38,8 +38,9 @@ git -C /path/to/.claude rev-parse --git-dir >/dev/null 2>&1 || echo "cannot tell
 
 # Ask git directly rather than piping it to grep. Under `pipefail` a matching `grep -q`
 # exits first, git takes SIGPIPE, and the pipeline reports failure, so a committed file
-# reads as absent whenever git's output is long enough.
-git -C /path/to/.claude ls-files -- '*settings.local.json'
+# reads as absent whenever git's output is long enough. Ask from the worktree root, since
+# `-C /path/to/.claude` lists only what sits under .claude, relative to it.
+git -C "$(git -C /path/to/.claude rev-parse --show-toplevel)" ls-files -- '*settings.local.json'
 ```
 
 **Expected Output:**
