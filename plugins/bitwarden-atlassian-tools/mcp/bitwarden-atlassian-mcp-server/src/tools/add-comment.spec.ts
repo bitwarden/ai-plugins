@@ -33,6 +33,15 @@ describe("AddCommentSchema", () => {
     ).toThrow(/Comment body cannot be empty/);
   });
 
+  it("rejects a whitespace-only body", () => {
+    expect(() =>
+      validateInput(AddCommentSchema, {
+        issueIdOrKey: "AI-27",
+        body: "   \n\t  ",
+      }),
+    ).toThrow(/Comment body cannot be empty/);
+  });
+
   it("rejects a malformed issue key", () => {
     expect(() =>
       validateInput(AddCommentSchema, { issueIdOrKey: "ai-27", body: "hi" }),

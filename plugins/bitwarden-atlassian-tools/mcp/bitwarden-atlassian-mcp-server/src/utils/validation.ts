@@ -332,7 +332,7 @@ export type LinkIssuesInput = z.infer<typeof LinkIssuesSchema>;
  */
 export const AddCommentSchema = z.object({
   issueIdOrKey: JiraIssueKey,
-  body: z.string().min(1, "Comment body cannot be empty"),
+  body: z.string().trim().min(1, "Comment body cannot be empty"),
   dryRun: z.boolean().optional().default(true),
 });
 
