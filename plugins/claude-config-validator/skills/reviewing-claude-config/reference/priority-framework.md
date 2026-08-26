@@ -14,9 +14,11 @@ Classification system for prioritizing issues found in Claude configuration file
 
 - settings.local.json committed to git
 - Hardcoded API keys, tokens, or passwords
-- Missing YAML frontmatter (skill won't be recognized)
+- Missing YAML frontmatter on an agent, which then never loads
 - Dangerous command auto-approvals (rm -rf, chmod 777)
 - Overly broad permissions exposing sensitive paths
+- An agent tool grant reaching credentials or destructive commands
+- A CLAUDE.md directive that loosens the harness (`--dangerously-skip-permissions`, `--no-verify`)
 - Broken file references preventing skill loading
 
 **Action Required:** Must fix immediately before approval.
@@ -35,19 +37,19 @@ This must be fixed before approval because [security/functionality reason].
 
 ### IMPORTANT
 
-**Definition:** Issues that significantly impact quality, maintainability, or user experience but don't prevent basic functionality.
+**Definition:** Functional defects and security regressions that do not stop the file loading. The configuration works, but it does the wrong thing, or does it less safely than it should.
+
+Quality, style, and readability observations are **not** IMPORTANT — they are SUGGESTED. The test is whether the behavior is wrong, not whether the prose could be better.
 
 **Examples:**
 
-- Duplicated documentation content
-- Poor progressive disclosure (file > 500 lines)
-- Missing structured thinking blocks
-- Vague activation triggers
-- Unclear purpose statements
-- Inefficient token usage patterns
-- Missing examples for complex concepts
+- Permissions broader than the stated purpose needs
+- Agent tool grant broader than its description justifies
+- Vague activation triggers, so the skill or agent never fires
+- Incorrect field names, or missing non-required fields the feature depends on
+- A documented behavior the configuration does not actually implement
 
-**Action Required:** Should fix in this PR/commit. If time-constrained, create follow-up issue.
+**Action Required:** Should fix in this PR/commit. If time-constrained, create follow-up issue. Does not block the review — see the verdict rule in `../SKILL.md` Step 5.
 
 **Finding Format:**
 
@@ -63,16 +65,18 @@ This must be fixed before approval because [security/functionality reason].
 
 ### SUGGESTED
 
-**Definition:** Improvements that enhance quality but aren't essential for approval.
+**Definition:** Improvements that enhance quality but aren't essential for approval. Most readability, structure, and documentation observations land here.
 
 **Examples:**
 
-- Additional examples for clarity
+- Duplicated documentation content
+- Poor progressive disclosure (file > 500 lines)
+- Missing structured thinking blocks
+- Unclear purpose statements
+- Missing examples for complex concepts
+- Inefficient token usage patterns
 - Better file organization
-- More specific guidance
-- Enhanced documentation
 - Alternative approaches
-- Stylistic improvements
 
 **Action Required:** Optional improvements. Consider for future work.
 
@@ -118,18 +122,21 @@ This is a personal preference - feel free to keep current approach.
 Use this structured thinking approach to classify issues:
 
 <thinking>
-1. Does this issue create security vulnerability or prevent functionality?
+1. Does this create a security vulnerability or stop the file loading?
    → YES: CRITICAL
    → NO: Continue
 
-2. Does this significantly impact quality, maintainability, or UX?
+2. Does the configuration behave wrongly or less safely than intended, while still loading?
    → YES: IMPORTANT
    → NO: Continue
 
-3. Would this improve quality but not essential?
+3. Would fixing it improve quality, readability, or structure?
    → YES: SUGGESTED
    → NO: OPTIONAL
-   </thinking>
+
+Behavior decides between CRITICAL, IMPORTANT, and SUGGESTED. "This reads badly" never
+reaches IMPORTANT, however strongly you feel it.
+</thinking>
 
 ---
 
@@ -139,17 +146,18 @@ Use this structured thinking approach to classify issues:
 
 In security-sensitive configurations (settings.json, permissions):
 
-- Elevate permission issues to CRITICAL
 - Elevate secret exposure to CRITICAL
-- Broad permissions: IMPORTANT → CRITICAL
 
-### Marketplace-Bound Skills
+Permission and settings severities are not adjusted here. The Security Issues and Settings
+Issues tables below are the single statement for those, per-field, and a blanket elevation
+would erase their IMPORTANT tier — including the row the verdict's security floor cites as its
+reason for existing.
 
-For skills intended for marketplace:
+### Marketplace-Bound Components
 
-- Elevate missing examples to IMPORTANT
-- Elevate unclear activation triggers to IMPORTANT
-- Elevate poor progressive disclosure to CRITICAL
+A component published to a marketplace is read and installed by people who did not write it. That raises the stakes of a discoverability defect, but it does not change any severity: unclear activation triggers are already IMPORTANT at baseline, because a component that never fires is functionally broken whoever installs it.
+
+So there is no marketplace escalation. Do not elevate readability or organization to CRITICAL for marketplace components — CRITICAL means broken or unsafe, and that bar does not move with the audience.
 
 ### Internal Tools
 
@@ -165,36 +173,72 @@ For internal-only configurations:
 
 ### Security Issues
 
-| Issue                                          | Priority  |
-| ---------------------------------------------- | --------- |
-| Committed settings.local.json                  | CRITICAL  |
-| Hardcoded API keys/tokens                      | CRITICAL  |
-| Dangerous auto-approved commands               | CRITICAL  |
-| Overly broad permissions (Read://_, Write://_) | CRITICAL  |
-| Permissions exposing ~/.ssh, /etc              | CRITICAL  |
-| Permissions broader than needed                | IMPORTANT |
+| Issue                                                                          | Priority                          |
+| ------------------------------------------------------------------------------ | --------------------------------- |
+| Committed settings.local.json                                                  | CRITICAL                          |
+| Hardcoded API keys/tokens                                                      | CRITICAL                          |
+| Dangerous auto-approved commands                                               | CRITICAL                          |
+| Overly broad permissions in `allow` (`Read(//**)`, `Write(//**)`, bare `Bash`) | CRITICAL                          |
+| A bare or sensitive-path rule in `deny`                                        | Not a finding — it is the control |
+| Permissions exposing ~/.ssh, /etc                                              | CRITICAL                          |
+| Permissions broader than needed                                                | IMPORTANT                         |
+| Agent tool grant reaching credentials or destructive commands                  | CRITICAL                          |
+| Agent tool grant otherwise broader than its description justifies              | IMPORTANT                         |
+
+### Hook Issues
+
+| Issue                                                               | Priority                     |
+| ------------------------------------------------------------------- | ---------------------------- |
+| Network egress carrying repository, prompt, or environment content  | CRITICAL                     |
+| Destructive command with no guard                                   | CRITICAL                     |
+| Reads credentials or secrets (`.env`, `~/.aws`, `~/.ssh`, keychain) | CRITICAL                     |
+| Hook input reaching a nested shell, quoted or not                   | CRITICAL                     |
+| Hook input interpolated unquoted into a shell string                | CRITICAL                     |
+| Hook input quoted and consumed directly by the command              | Not a finding                |
+| Misspelled event name                                               | IMPORTANT                    |
+| Unrecognized event name                                             | Confirm it, do not report it |
+| Plugin hook script path not using `${CLAUDE_PLUGIN_ROOT}`           | IMPORTANT                    |
+| Blocking hook that fails open on error                              | IMPORTANT                    |
+| Long-running work on a hot event                                    | SUGGESTED                    |
+| Chatty output on success                                            | SUGGESTED                    |
+
+### Settings Issues
+
+| Issue                                                                    | Priority                                                                              |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `permissions.defaultMode` set to `bypassPermissions`                     | CRITICAL                                                                              |
+| `permissions.defaultMode` set to `acceptEdits`                           | IMPORTANT, since some projects opt into it deliberately: ask why rather than blocking |
+| `disableBypassPermissionsMode` removed                                   | CRITICAL                                                                              |
+| `apiKeyHelper` or `statusLine.command` running a command nobody reviewed | CRITICAL                                                                              |
+| `permissions.additionalDirectories` reaching outside the project         | IMPORTANT                                                                             |
+| `enableAllProjectMcpServers` enabled                                     | IMPORTANT                                                                             |
 
 ### Structure Issues
 
-| Issue                                           | Priority  |
-| ----------------------------------------------- | --------- |
-| Missing YAML frontmatter                        | CRITICAL  |
-| Broken file references                          | CRITICAL  |
-| File > 500 lines without progressive disclosure | IMPORTANT |
-| Poor file organization                          | SUGGESTED |
-| Missing structured thinking blocks              | IMPORTANT |
+| Issue                                                                    | Priority                       |
+| ------------------------------------------------------------------------ | ------------------------------ |
+| Missing YAML frontmatter, agents                                         | CRITICAL                       |
+| YAML frontmatter that does not parse, any type                           | CRITICAL                       |
+| Missing YAML frontmatter, commands                                       | Not a finding — it is optional |
+| Broken reference preventing load, or a broken `CLAUDE.md` `@path` import | CRITICAL                       |
+| Broken plain-path pointer in guidance prose                              | IMPORTANT                      |
+| File > 500 lines without progressive disclosure                          | SUGGESTED                      |
+| Poor file organization                                                   | SUGGESTED                      |
+| Missing structured thinking blocks                                       | SUGGESTED                      |
 
 ### Quality Issues
 
 | Issue                                 | Priority  |
 | ------------------------------------- | --------- |
-| Vague or unclear instructions         | IMPORTANT |
-| Missing examples for complex concepts | IMPORTANT |
 | No activation triggers in description | IMPORTANT |
-| Duplicated documentation              | IMPORTANT |
+| Vague or unclear instructions         | SUGGESTED |
+| Missing examples for complex concepts | SUGGESTED |
+| Duplicated documentation              | SUGGESTED |
 | Inefficient token usage               | SUGGESTED |
 | Additional examples would help        | SUGGESTED |
 | Alternative phrasing                  | OPTIONAL  |
+
+Only the first is IMPORTANT, and only because a description with no triggers means the component never fires — a functional defect. The rest are readability, and readability does not fail a review.
 
 ### Syntax Issues
 
@@ -266,23 +310,23 @@ When multiple issues exist in a single review:
 
 **Example 2: Structure Issue**
 
-❌ **SKILL.md:1** - Missing YAML frontmatter
+❌ **.claude/agents/reviewer.md:1** - Missing YAML frontmatter
 **Priority:** CRITICAL
-**Rationale:** Skill won't be recognized by Claude Code without frontmatter.
+**Rationale:** The agent is not recognized by Claude Code without frontmatter, so nothing delegates to it.
 
 ---
 
 **Example 3: Quality Issue**
 
-❌ **SKILL.md:3** - Description lacks activation triggers
+❌ **.claude/agents/reviewer.md:3** - Description lacks activation triggers
 **Priority:** IMPORTANT
-**Rationale:** Users won't know when to invoke this skill. Reduces discoverability.
+**Rationale:** Claude cannot tell when to delegate, so the agent never fires.
 
 ---
 
 **Example 4: Improvement Suggestion**
 
-❌ **checklist.md:45** - Could add more examples
+❌ **commands/review-pr/review-pr.md:45** - Could add more examples
 **Priority:** SUGGESTED
 **Rationale:** Additional examples would clarify complex concept, but current instruction is functional.
 
@@ -290,6 +334,6 @@ When multiple issues exist in a single review:
 
 **Example 5: Style Preference**
 
-❌ **SKILL.md:12** - Alternative phrasing possible
+❌ **CLAUDE.md:12** - Alternative phrasing possible
 **Priority:** OPTIONAL
 **Rationale:** Current phrasing is clear, alternative is just personal preference.

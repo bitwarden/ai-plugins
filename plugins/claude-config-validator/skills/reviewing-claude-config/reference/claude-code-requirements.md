@@ -53,6 +53,31 @@ description: Reviews code # ❌ Too vague, no activation triggers
 
 ---
 
+### Commands (`commands/**/*.md` or `.claude/prompts/**/*.md`)
+
+Frontmatter is **optional** for a command. A file with none still loads and is invocable, so
+its absence is not a finding; YAML that does not parse is, because the file then fails to load.
+
+**Optional fields:**
+
+```yaml
+description: What the command does, shown by /help
+argument-hint: "[what the arguments are]"
+allowed-tools: Read, Grep, Bash(git status:*)
+model: sonnet
+disable-model-invocation: false
+```
+
+**Field requirements:**
+
+- `description`: without it `/help` has no text for the command
+- `argument-hint`: shown when completing the command; free-form
+- `allowed-tools`: each rule is `Tool` or `Tool(specifier)`, the same grammar as `permissions`
+- `model`: an alias or a full model identifier
+- An unrecognized key is a question to confirm, not a defect
+
+---
+
 ### Agents (`.claude/agents/*.md` or `plugins/*/agents/*.md`)
 
 **Required Fields:**
@@ -67,7 +92,7 @@ description: Clear description of agent purpose
 **Optional Fields:**
 
 ```yaml
-model: sonnet # haiku, sonnet, opus, or inherit
+model: sonnet # an alias, or a full model identifier; see Field Requirements
 tools: Read, Write, Grep, Glob, Bash # Specific tools only
 ```
 
@@ -75,8 +100,8 @@ tools: Read, Write, Grep, Glob, Bash # Specific tools only
 
 - `name`: kebab-case, unique within project
 - `description`: Clear purpose and activation context
-- `model`: One of: `haiku`, `sonnet`, `opus`, `inherit` (lowercase)
-- `tools`: Exact tool names (case-sensitive): `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Bash`, `WebFetch`, `WebSearch`
+- `model`: one of the aliases `haiku`, `sonnet`, `opus`, `inherit` (lowercase), or a full model identifier such as `claude-opus-4-5`. Treat an unfamiliar identifier as a question to confirm, not a defect
+- `tools`: exact tool names, case-sensitive. Commonly reviewed: `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Bash`, `WebFetch`, `WebSearch`, `Task`, `Skill`, `TodoWrite`, `NotebookEdit`. The set grows, so an unfamiliar name is a question to confirm rather than an unavailable tool
 - **Omit `tools` field** to inherit all tools (default)
 
 ---
@@ -84,6 +109,8 @@ tools: Read, Write, Grep, Glob, Bash # Specific tools only
 ## Model Selection
 
 ### Valid Model Values
+
+Both the aliases below and full model identifiers such as `claude-opus-4-5` are valid.
 
 | Model   | Value     | Use Case                                                   |
 | ------- | --------- | ---------------------------------------------------------- |
@@ -114,11 +141,18 @@ tools: Read, Write, Grep, Glob, Bash # Specific tools only
 **Execution Tools** (HIGH RISK):
 
 - `Bash` - Execute shell commands
+- `Task` - Spawns a subagent, which carries its own grant. Rank this at or above `Bash`: it
+  escapes the grant being reviewed rather than widening it
+- `Skill` - Invokes a skill, which may itself hold a wider grant
 
 **Network Tools** (MEDIUM-HIGH RISK):
 
 - `WebFetch` - Fetch URL content
 - `WebSearch` - Search web
+
+**Other** (LOW RISK): `TodoWrite`, `NotebookEdit`
+
+This list is not closed. An unfamiliar tool name is a question to confirm, not a defect.
 
 ### Tool Access Security
 
@@ -171,11 +205,14 @@ tools: Read, Grep, Glob, Write, Edit
 ```
 skill-name/
 ├── SKILL.md              # Main orchestration (aim for ≤500 lines)
-├── checklists/           # Task-specific procedures
 ├── reference/            # Detailed criteria (loaded as needed)
 ├── examples/             # Sample outputs
 └── scripts/              # Executable automation (if applicable)
 ```
+
+A skill whose body splits cleanly by subject is often better as several narrow skills than
+as one skill with a directory of procedure files. Routing between skills is visible to the
+reader; routing between files inside a skill is not.
 
 ### On-Demand Loading
 
@@ -194,13 +231,14 @@ skill-name/
 **Example routing:**
 
 ```markdown
-### Load Appropriate Checklist
+### Route to the targeted skill
 
-Based on detected type, read the relevant checklist:
+Based on detected type, invoke the relevant skill:
 
-- **Agents** → `checklists/agents.md`
-- **Skills** → `checklists/skills.md`
-- **Settings** → `checklists/settings.md`
+- **Agents** → `Skill(claude-config-validator:reviewing-agent-definitions)`
+- **Commands** → `Skill(claude-config-validator:reviewing-command-definitions)`
+- **Settings and hooks** → `Skill(claude-config-validator:reviewing-runtime-configuration)`
+- **CLAUDE.md** → `Skill(claude-config-validator:reviewing-project-guidance)`
 ```
 
 ---
@@ -224,25 +262,42 @@ git diff --cached | grep "settings.local.json"
 
 ---
 
-### Auto-Approved Tool Patterns
+### Permission Rule Patterns
 
-**Format** (in settings.json):
+**Format** (in settings.json). Rules live under `permissions`, in `allow`, `deny`, or `ask`. A
+rule is `Tool(specifier)`, or a bare `Tool` with no specifier, which matches every use of that
+tool:
 
 ```json
 {
-  "autoApproved": [
-    "Bash(git status:*)",
-    "Bash(git diff:*)",
-    "Read(/absolute/path/to/specific/dir/**)"
-  ]
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Read(//absolute/path/to/specific/dir/**)"
+    ],
+    "deny": ["Read(//absolute/path/to/.env)", "WebFetch"]
+  }
 }
 ```
 
+`deny` wins over `allow`, so it is the control to reach for when something must never happen.
+The bare `WebFetch` above is the maximal deny for that tool, and is the intended way to write
+it rather than an omission.
+
+A top-level `autoApproved` or `autoApprovedTools` array is not read by Claude Code, and neither
+is a colon-separated `Tool:specifier` rule with no parentheses.
+
+**Path prefixes**: `//` is absolute from the filesystem root. A single leading `/` resolves
+relative to the directory holding the settings file, so `Read(/etc/**)` matches
+`<settings-dir>/etc/**` and not `/etc`. Getting this wrong on a `deny` rule produces a
+restriction that silently never applies.
+
 **Guidelines**:
 
-- Use specific command patterns, not wildcards: `Bash(git status:*)` not `Bash(*)`
-- Use absolute paths for Read permissions: `Read(/full/path/**)` not `Read(**)`
-- Glob patterns for restricted access: `Read(/project/src/**/*.ts)` to limit file types
+- Use specific command patterns where a tool has them: `Bash(git status:*)` not a bare `Bash`
+- Use `//` for absolute Read paths: `Read(//full/path/**)` not `Read(**)`
+- Glob patterns for restricted access: `Read(//project/src/**/*.ts)` to limit file types
 
 ---
 
@@ -250,12 +305,12 @@ git diff --cached | grep "settings.local.json"
 
 ### YAML Errors
 
-| Issue                  | Detection            | Fix                                       |
-| ---------------------- | -------------------- | ----------------------------------------- |
-| Tabs instead of spaces | Malformed YAML error | Replace tabs with spaces                  |
-| Missing colon          | Parser error         | Add `:` after field name                  |
-| Wrong field name       | Skill not recognized | Check exact spelling: `name` not `Name`   |
-| Invalid model value    | Ignored or error     | Use: `haiku`, `sonnet`, `opus`, `inherit` |
+| Issue                  | Detection            | Fix                                                                   |
+| ---------------------- | -------------------- | --------------------------------------------------------------------- |
+| Tabs instead of spaces | Malformed YAML error | Replace tabs with spaces                                              |
+| Missing colon          | Parser error         | Add `:` after field name                                              |
+| Wrong field name       | Skill not recognized | Check exact spelling: `name` not `Name`                               |
+| Unfamiliar model value | Usually none         | Aliases and full identifiers are both valid; confirm rather than flag |
 
 ### Tool Access Errors
 
@@ -282,7 +337,7 @@ git diff --cached | grep "settings.local.json"
 - [ ] `name` field present and kebab-case
 - [ ] `description` field present with activation triggers
 - [ ] `version` follows semver (if present)
-- [ ] `model` is valid value: `haiku`/`sonnet`/`opus`/`inherit` (if present)
+- [ ] `model` is an alias (`haiku`/`sonnet`/`opus`/`inherit`) or a full model identifier (if present)
 - [ ] `tools` uses exact case-sensitive names (if present)
 - [ ] No tabs (spaces only)
 - [ ] Valid YAML syntax
@@ -312,9 +367,9 @@ git diff --cached | grep "settings.local.json"
 
 ## Quick Reference
 
-**Model Values**: `haiku` | `sonnet` | `opus` | `inherit`
+**Model Values**: `haiku` | `sonnet` | `opus` | `inherit` | a full model identifier
 
-**Tool Names**: `Read` | `Write` | `Edit` | `Grep` | `Glob` | `Bash` | `WebFetch` | `WebSearch`
+**Tool Names**: `Read` | `Write` | `Edit` | `Grep` | `Glob` | `Bash` | `WebFetch` | `WebSearch` | `Task` | `Skill` | `TodoWrite` | `NotebookEdit` | the set grows, so confirm an unfamiliar name rather than flagging it
 
 **Line Limit**: SKILL.md ≤500 lines (guideline)
 
