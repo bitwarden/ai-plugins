@@ -140,13 +140,13 @@ A leaked write token permits more than these two tools use: `write:comment:jira`
 
 ## Usage
 
-The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples:
+The MCP tools are available as `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__<tool_name>`. Examples:
 
-- Read an issue: `mcp__bitwarden-atlassian__get_issue` with `issueIdOrKey: "PROJ-123"`
-- Search with JQL: `mcp__bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
-- Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
-- Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
-- Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
+- Read an issue: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue` with `issueIdOrKey: "PROJ-123"`
+- Search with JQL: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
+- Read a Confluence page: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
+- Search Confluence: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
+- Preview a ticket before creating it: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
 
 ## Skills
 
