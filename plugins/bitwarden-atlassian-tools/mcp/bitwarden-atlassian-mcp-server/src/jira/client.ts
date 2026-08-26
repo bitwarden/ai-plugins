@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance, AxiosError } from "axios";
 import { loadJiraConfig, getJiraHeaders, JiraAccessMode } from "./auth.js";
+import type { AdfDoc } from "../utils/adf-build.js";
 import {
   JiraConfig,
   JiraSearchParams,
@@ -349,6 +350,24 @@ export class JiraClient {
       key: string;
       self: string;
     }>(`${this.API_BASE}/issue`, { fields });
+
+    return response.data;
+  }
+
+  /**
+   * Add a comment to an issue.
+   *
+   * @param body - A fully-formed ADF comment body. Built by the calling tool.
+   * @returns The created comment's id.
+   */
+  async addComment(
+    issueIdOrKey: string,
+    body: AdfDoc,
+  ): Promise<{ id: string; created: string }> {
+    const response = await this.client.post<{ id: string; created: string }>(
+      `${this.API_BASE}/issue/${issueIdOrKey}/comment`,
+      { body },
+    );
 
     return response.data;
   }

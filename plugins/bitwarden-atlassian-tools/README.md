@@ -4,7 +4,7 @@
 
 Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
 
-Read access is the default and always available. Jira write access (creating work items and links) is **opt-in per install**: `create_issue` and `link_issues` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
+Read access is the default and always available. Jira write access (creating work items, links, and comments) is **opt-in per install**: `create_issue`, `link_issues`, and `add_comment` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
 
 ## Installation
 
@@ -17,7 +17,7 @@ export ATLASSIAN_EMAIL="your-email@company.com"
 export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-jira-scoped-token"
 export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
 
-# Optional — enables the Jira write tools (create_issue, link_issues).
+# Optional — enables the Jira write tools (create_issue, link_issues, add_comment).
 # Omit to keep this install read-only.
 export ATLASSIAN_JIRA_WRITE_TOKEN="your-jira-write-scoped-token"
 ```
@@ -88,27 +88,28 @@ The Jira Agile (Software) endpoints behind `list_boards`, `get_sprints`, and `ge
 
 ### Jira (write, requires `ATLASSIAN_JIRA_WRITE_TOKEN`)
 
-Both tools default to a dry run that returns the exact payload without sending it. A live write requires an explicit `dryRun: false`. Dry runs need no write token.
+All three tools default to a dry run that returns the exact payload without sending it. A live write requires an explicit `dryRun: false`. Dry runs need no write token.
 
 | Tool           | Purpose                                                                                                                                                                             |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `create_issue` | Create one work item in any project. Carries no project-specific field knowledge: pass anything beyond the common core through `fields`, keyed by field id from `get_create_fields` |
 | `link_issues`  | Link two work items. For a dependency, takes `blockerKey` and `blockedKey` and maps them onto Jira's inward/outward sides internally so the direction cannot be inverted            |
+| `add_comment`  | Add a plain-text comment to an existing issue. Blank lines split the text into separate paragraphs                                                                                  |
 
 Write tokens need write scopes in addition to the read scopes above:
 
-| Scope                         | Required for                                                                      |
-| ----------------------------- | --------------------------------------------------------------------------------- |
-| `read:issue:jira`             | `create_issue`                                                                    |
-| `read:issue:jira-software`    | `create_issue`                                                                    |
-| `write:issue:jira`            | `create_issue`, `link_issues`                                                     |
-| `write:issue:jira-software`   | `create_issue`, `link_issues`                                                     |
-| `write:issue-link:jira`       | `link_issues`                                                                     |
-| `write:comment:jira`          | `create_issue`, `link_issues` (required even though neither tool sends a comment) |
-| `write:comment.property:jira` | `create_issue` (required even though it never sends a comment)                    |
-| `write:attachment:jira`       | `create_issue` (required even though it never sends an attachment)                |
+| Scope                         | Required for                                                       |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `read:issue:jira`             | `create_issue`                                                     |
+| `read:issue:jira-software`    | `create_issue`                                                     |
+| `write:issue:jira`            | `create_issue`, `link_issues`                                      |
+| `write:issue:jira-software`   | `create_issue`, `link_issues`                                      |
+| `write:issue-link:jira`       | `link_issues`                                                      |
+| `write:comment:jira`          | `create_issue`, `link_issues` (scope-only), `add_comment`          |
+| `write:comment.property:jira` | `create_issue` (required even though it never sends a comment)     |
+| `write:attachment:jira`       | `create_issue` (required even though it never sends an attachment) |
 
-Grant the **whole** set, not a subset — a token holding only some of them fails every write with `401 Unauthorized; scope does not match`. For a scoped write token covering both write tools, that's:
+Grant the **whole** set, not a subset — a token holding only some of them fails every write with `401 Unauthorized; scope does not match`. For a scoped write token covering all three write tools, that's:
 
 ```
 read:issue:jira
@@ -123,9 +124,9 @@ write:issue:jira
 
 `get_create_fields` needs no additional scope. It calls the createmeta endpoints, which the existing read-only token already satisfies.
 
-Token scope is separate from Jira project permission. Creating also requires the **Create Issues** permission in the target project, and linking requires **Link Issues**. In a project where the user lacks Create Issues, Jira answers `You cannot create issues in this project`, which `get_create_fields` reports as an ordinary result rather than an error.
+Token scope is separate from Jira project permission. Creating also requires the **Create Issues** permission in the target project, linking requires **Link Issues**, and commenting requires **Add Comments**. In a project where the user lacks Create Issues, Jira answers `You cannot create issues in this project`, which `get_create_fields` reports as an ordinary result rather than an error.
 
-A leaked write token permits more than these two tools use: `write:comment:jira`, `write:comment.property:jira`, and `write:attachment:jira` are granted only because Atlassian rejects a narrower scope set, so the token can also add comments and attachments across every project the user can reach. Treat this token as higher-blast-radius than the read-only token and rotate it accordingly.
+A leaked write token permits more than any one tool uses: `write:comment.property:jira` and `write:attachment:jira` are granted only because Atlassian rejects a narrower scope set, so the token can also set comment properties and add attachments across every project the user can reach, in addition to the comments `add_comment` itself sends. Treat this token as higher-blast-radius than the read-only token and rotate it accordingly.
 
 ### Confluence
 
@@ -147,6 +148,7 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
 - Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
 - Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
+- Preview a comment before posting it: `mcp__bitwarden-atlassian__add_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
 
 ## Skills
 

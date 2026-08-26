@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-08-26
+
+### Added
+
+- **`add_comment` MCP tool** (write, opt-in) — adds a plain-text comment to an existing Jira issue. Blank lines in the input split the text into separate ADF paragraphs. Defaults to a dry run that returns the exact payload without sending it; a live post requires an explicit `dryRun: false` and `ATLASSIAN_JIRA_WRITE_TOKEN`, matching the existing `create_issue`/`link_issues` write tools.
+
 ## [2.6.0] - 2026-08-04
 
 ### Added

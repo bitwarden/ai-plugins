@@ -327,6 +327,18 @@ export const LinkIssuesSchema = z.discriminatedUnion("linkType", [
 export type LinkIssuesInput = z.infer<typeof LinkIssuesSchema>;
 
 /**
+ * Add a plain-text comment to an existing issue. The body is converted to ADF
+ * by the tool, so only plain text is accepted here rather than pre-built ADF.
+ */
+export const AddCommentSchema = z.object({
+  issueIdOrKey: JiraIssueKey,
+  body: z.string().min(1, "Comment body cannot be empty"),
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type AddCommentInput = z.infer<typeof AddCommentSchema>;
+
+/**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against
  * @param input - Input data to validate
