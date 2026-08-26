@@ -5,6 +5,17 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-08-19
+
+### Added
+
+- **`filing-breakdown-tasks` skill** — turns a breakdown's `tasks.md` into Jira ticket drafts: an epic parent plus one child story/task per entry, with acceptance criteria and mapped dependency links, then hands off to `filing-jira-tickets` to file them. Requires `bitwarden-atlassian-tools`.
+- **`filing-breakdown-tasks` trigger eval** (`skills/filing-breakdown-tasks/evals/`) — a 20-query trigger eval (10 should-trigger, 10 near-miss) with a recorded baseline.
+
+### Changed
+
+- `plugin.json`: description and `jira` keyword added for the new skill. Marketplace description and README catalog entry follow suit.
+
 ## [3.0.0] - 2026-08-08
 
 ### Removed

@@ -4,7 +4,7 @@ Claude Code skills for GitHub Actions workflow compliance, action security audit
 
 ## Overview
 
-The skills work in pairs. Each audit skill is strictly read-only and produces a findings report; its remediation counterpart consumes those findings, applies the fixes, verifies, and opens draft PRs. `workflow-audit` → `workflow-fix` covers linter compliance inside a repo, and `action-audit` → `action-remediate` covers action references across the org. All four read `bitwarden-workflow-linter-rules` as the single source of truth for what compliant looks like and how each rule gets fixed. `auditing-workflow-conventions` is a second reference skill covering the naming standards the linter does not check — job IDs, step name casing, and workflow file names — and defers to the linter-rules skill wherever the two overlap.
+The skills work in pairs. Each audit skill is strictly read-only and produces a findings report; its remediation counterpart consumes those findings, applies the fixes, verifies, and opens draft PRs. `workflow-audit` → `workflow-fix` covers linter compliance inside a repo, and `action-audit` → `action-remediate` covers action references across the org. All four read `bitwarden-workflow-linter-rules` as the single source of truth for what compliant looks like and how each rule gets fixed. `auditing-workflow-conventions` is a second reference skill covering the naming standards the linter does not check — job IDs, step name casing, and workflow file names — and defers to the linter-rules skill wherever the two overlap. `managing-workflow-secrets` is a third reference skill (also an authoring guide) covering Bitwarden's Azure Key Vault + OIDC secret pattern — the centralized `azure-login` / `get-keyvault-secrets` / `azure-logout` actions, how to retrieve and safely consume a secret within a job, and how a secret reaches a downstream job or reusable workflow (per-job re-retrieval, a short-lived GitHub App token, and `secrets:` hand-off). Advanced patterns such as fork-PR gates, multi-vault jobs, and raw `az` CLI for certs and write-back are out of scope.
 
 ## Skills
 
@@ -16,6 +16,7 @@ The skills work in pairs. Each audit skill is strictly read-only and produces a 
 | `action-remediate`                | Applies hash pins or action replacements across selected repos and creates draft PRs based on audit findings.        |
 | `bitwarden-workflow-linter-rules` | Reference for all 10 `bwwl` linter rules — triggers, fix procedures, and mechanical vs. judgment categorization.     |
 | `auditing-workflow-conventions`   | Reference for naming standards `bwwl` does not enforce — job IDs, step names, and workflow file names.               |
+| `managing-workflow-secrets`       | Reference and authoring guide for Bitwarden's Azure Key Vault + OIDC secret pattern in workflows.                    |
 
 ## Installation
 

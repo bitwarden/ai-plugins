@@ -18,13 +18,13 @@
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "2.0.0",
+      "version": "2.0.2",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Routes CLAUDE.md, agents, commands, hooks, and settings to targeted review skills, reporting only what a changeset introduced."
     },
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.13.1",
+      "version": "1.14.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -60,7 +60,7 @@
     {
       "name": "bitwarden-devops-engineer",
       "source": "./plugins/bitwarden-devops-engineer",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "description": "GitHub Actions workflow compliance, action security auditing, and org-wide CI/CD remediation."
     },
     {
@@ -78,8 +78,8 @@
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "3.0.0",
-      "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, commits, pull requests, preflight checks, and change labeling."
+      "version": "3.1.0",
+      "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, commits, pull requests, preflight checks, change labeling, and Jira ticket filing."
     },
     {
       "name": "bitwarden-designer",
@@ -102,7 +102,7 @@
     {
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     }
   ]

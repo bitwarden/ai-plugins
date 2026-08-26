@@ -1,0 +1,61 @@
+{
+  "skill_name": "managing-workflow-secrets",
+  "evals": [
+    {
+      "id": 0,
+      "name": "add-secret-retrieval",
+      "prompt": "This build-and-push.yml workflow logs in to Docker Hub with `${{ env.DOCKERHUB_TOKEN }}`, but that env var is never set. Add a step to pull the DockerHub token from Key Vault before we push the image, and wire it into the login. The vault is `ci-shared-kv` and the secret is named `DOCKERHUB-TOKEN`. Edit the file.",
+      "expected_output": "azure-login -> get-keyvault-secrets (id: secrets, keyvault ci-shared-kv, secret DOCKERHUB-TOKEN) -> azure-logout wired before the docker login. id-token: write added to the job's permissions. Token consumed via a step-scoped env: (not inlined into run/args), no echo/cat of the secret. Internal actions on @main, third-party actions left SHA-pinned.",
+      "files": ["files/build-and-push.yml"]
+    },
+    {
+      "id": 1,
+      "name": "downstream-job-handoff",
+      "prompt": "In this release.yml, the `deploy` job references `steps.secrets.outputs.NPM-DEPLOY-TOKEN`, but that step is in the `build` job so it resolves to empty and `npm publish` fails with no auth. How do I get the npm token to the deploy job? Fix the workflow.",
+      "expected_output": "Explains that a secret value must NOT cross a job boundary via `outputs:` — the runner redacts masked values out of job outputs, so the token arrives empty downstream. The fix is to re-run azure-login -> get-keyvault-secrets (NPM-DEPLOY-TOKEN) -> azure-logout inside the deploy job and consume via step-scoped env, adding id-token: write to the deploy job. Does NOT pass the secret via a job `outputs:`.",
+      "files": ["files/deploy-cant-see-secret.yml"]
+    },
+    {
+      "id": 2,
+      "name": "flag-secret-exposure",
+      "prompt": "Can you review the last step of this notify.yml before I merge it? It sends a Slack notification using the webhook we pull from Key Vault. Looks fine to me but wanted a second set of eyes.",
+      "expected_output": "Flags the secret exposures as the top concern: the webhook URL is echoed to the log, written to notify.env (a file), and passed directly as a curl command-line argument. Explains masking is only a backstop and does not cover files/CLI args. Recommends consuming via a step-scoped env: and not printing/writing it. Does not bless the step as fine.",
+      "files": ["files/leaky-secret.yml"]
+    },
+    {
+      "id": 3,
+      "name": "reusable-workflow-triad",
+      "prompt": "I want this scan.yml to also call the shared code-review reusable workflow at `bitwarden/gh-actions/.github/workflows/_review-code.yml@main`, which needs to log in to Azure to pull secrets. Add the job that calls it and set up whatever secrets/permissions it needs.",
+      "expected_output": "Adds a job with `uses: bitwarden/gh-actions/.github/workflows/_review-code.yml@main`. Forwards the OIDC triad explicitly under `secrets:` (AZURE_SUBSCRIPTION_ID/TENANT_ID/CLIENT_ID) rather than `secrets: inherit` for a cross-repo call, and sets `id-token: write` on the calling job. Notes this is a two-sided contract: the callee must declare the secrets under on.workflow_call.secrets and each logging-in job needs its own id-token: write. Does not invent vault/secret names.",
+      "files": ["files/caller-workflow.yml"]
+    },
+    {
+      "id": 4,
+      "name": "multi-secret-folded-list",
+      "prompt": "This deploy.yml's `./deploy.sh` needs three secrets that are never provided: the Fastly API token, the Fastly service ID, and the Cloudflare API token. Pull all three from Key Vault before the deploy step and wire them in. The vault is `ci-shared-kv` and the secrets are named `FASTLY-API-TOKEN`, `FASTLY-SERVICE-ID`, and `CLOUDFLARE-API-TOKEN`. Edit the file.",
+      "expected_output": "azure-login -> get-keyvault-secrets (id: secrets, keyvault ci-shared-kv) -> azure-logout wired before the deploy step. Because there are three (>=3) secrets, the `secrets:` input is a folded block scalar (`>-`) with one secret name per line, not an inline quoted comma string. id-token: write added to the job's permissions. All three values consumed through a step-scoped env: on the deploy step (not inlined into run/args), no echo/cat of any secret. Internal actions on @main; the checkout action stays SHA-pinned.",
+      "files": ["files/multi-secret-deploy.yml"]
+    },
+    {
+      "id": 5,
+      "name": "app-token-cross-job",
+      "prompt": "In this sync.yml the `prepare` job retrieves a GitHub App key from Key Vault and exposes it as a job output (`gh_key`), and the `sync` job uses it to check out `myorg/platform` and call `gh api`. The token arrives empty. How should I give the `sync` job GitHub access? Fix the workflow.",
+      "expected_output": "Explains that a secret value (the App private key) must NOT cross a job boundary via `outputs:` — the runner redacts masked values out of job outputs, so `gh_key` arrives empty. The fix is to mint a short-lived GitHub App token inside the `sync` job itself: retrieve GH-APP-ID/GH-APP-KEY from AKV (azure-login -> get-keyvault-secrets -> azure-logout, id-token: write) and mint the token with actions/create-github-app-token (SHA-pinned third-party), scoping it with `repositories:` where possible. Neither the App private key nor the minted token is routed through a job `outputs:` — the minted token is masked too and would also arrive empty. App-token step outputs consumed via step-scoped env/`with:`, not echoed.",
+      "files": ["files/app-token-cross-job.yml"]
+    },
+    {
+      "id": 6,
+      "name": "logout-live-session",
+      "prompt": "This build.yml builds the image locally. We need to push it to our Azure Container Registry named `myregistry` — add the steps to authenticate to ACR using `az acr login` and push the image, then edit the file.",
+      "expected_output": "Adds azure-login (OIDC triad) with id-token: write on the build job. Uses `az acr login` (which requires the live Azure session) before `docker push`. Places azure-logout AFTER the ACR login/push step — not immediately after azure-login — because the push depends on the live session. No get-keyvault-secrets step is required, since `az acr login` authenticates against the active session directly. Internal bitwarden/gh-actions actions on @main; pre-existing third-party actions stay SHA-pinned. No credential is echoed or otherwise exposed.",
+      "files": ["files/build-acr.yml"]
+    },
+    {
+      "id": 7,
+      "name": "ask-for-names",
+      "prompt": "The deploy job runs notify-datadog.sh, which needs our Datadog API key from Key Vault to work. Add the Key Vault retrieval and wire the key into that step, then edit the file.",
+      "expected_output": "Wires azure-login -> get-keyvault-secrets (id: secrets) -> azure-logout with id-token: write in the deploy job. Does NOT invent a concrete vault or secret name presented as real (e.g. treating bw-prod-secrets / DATADOG-API-KEY as confirmed). Uses the KEY-VAULT / SECRET-NAME-1 placeholders, or otherwise clearly marks the vault/secret names as unconfirmed, and explicitly flags that the real names are needed — asking the user to confirm them. Consumes the key via a step-scoped env:, never echoed or written to a file.",
+      "files": ["files/deploy-datadog.yml"]
+    }
+  ]
+}
