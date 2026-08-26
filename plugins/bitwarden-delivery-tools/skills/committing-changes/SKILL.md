@@ -1,6 +1,6 @@
 ---
 name: committing-changes
-description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes".
+description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes". Not for planning, gating, submitting, or merging a stack of dependent pull requests (that is stacking-pull-requests).
 ---
 
 # Git Commit Conventions

@@ -9,8 +9,11 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger natural-language phrasings ("package this up into a PR", "ship a draft", "get this in front of reviewers", etc.) and 10 should-not-trigger near-misses against sibling delivery skills (`committing-changes`, `labeling-changes`, `perform-preflight`) and against existing-PR management queries.
+
+  The `stacking-pull-requests` boundary is **not** measurable here. Correct routing for a stack phrasing is `Skill(stacking-pull-requests)`, which then invokes this skill once per layer — and the runner counts a trigger when the token appears anywhere in the response, so a correctly-routed query scores as a false trigger. That boundary is measured from the other side, in `stacking-pull-requests/evals/`.
+
 - `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates.
-- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes.
+- `baseline.json` — last known-good run. **Stale**: the skill's `description` and `when_to_use` both changed without a re-run, so the recorded rates predate the current routing. Regenerate before relying on the diff below — and note this runner takes no `--plugin-dir`, so it loads the installed plugin cache. Record the baseline after this version ships, not before, or it captures the frontmatter the change replaced.
 
 ## Running
 
