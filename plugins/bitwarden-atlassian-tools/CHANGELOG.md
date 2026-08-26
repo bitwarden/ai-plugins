@@ -5,6 +5,14 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.1] - 2026-08-26
+
+### Fixed
+
+- `evaluating-qa-readiness` no longer reports "no PR or build is linked" as a settled fact. `get_issue_remote_links` cannot see Jira's native Development panel (the GitHub/Bitbucket integration that links most PRs via smart commits or branch naming), so an empty result is now reported as "not found in the sources this check can search" with a pointer to check the Development panel manually, instead of a confident negative.
+- `evaluating-qa-readiness`'s feature-flag criterion and developer-ask draft no longer demand an explicit on/off state when only one flag is named — "enable to test" is now the assumed default unless the ticket gives a real reason the state is ambiguous.
+- `evaluating-qa-readiness`'s drafted developer ask now names the gap without dictating exhaustive step-by-step detail (exact queries, seed data, timing) that a competent tester doesn't need.
+
 ## [2.7.0] - 2026-08-06
 
 ### Added

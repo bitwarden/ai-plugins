@@ -20,6 +20,8 @@ Then use `get_issue_comments` — developers frequently drop testing steps, flag
 
 If the description or comments reference a PR, build, or Confluence page, note it; use `get_issue_remote_links` to catch linked PRs and pages that aren't inline. The goal is _evidence that the information exists somewhere on the ticket_, wherever the developer put it.
 
+**Known blind spot:** `get_issue_remote_links` does not surface Jira's native Development panel — the PR/branch/commit links that Jira's GitHub integration attaches automatically via smart commits or branch naming, which is how most PRs actually get linked. Neither MCP tool here can see that panel. So absence of a result from `get_issue`/`get_issue_remote_links` is not evidence a PR isn't linked — it only means it isn't linked through the sources this check can search. Carry that caveat into Step 3.
+
 ### Step 2: Evaluate each criterion
 
 Judge each criterion against everything gathered — description, all custom fields, comments, and links. For each, decide one of:
@@ -34,7 +36,7 @@ Read the criteria definitions and what counts as satisfied in `references/criter
 
 1. **Testing instructions** — how to validate the change: setup/preconditions, steps, and expected result. For a bug, this includes what "fixed" looks like versus the original broken behavior.
 2. **Implementation notes** — what was changed and where, at enough detail for a tester to know what surface area to exercise.
-3. **Feature flag** — whether the change sits behind a flag. If it does, the flag's name/key **and** the state QA needs it in (on/off) to test. If it doesn't, the ticket should say so — "not behind a flag" is a valid, passing answer. Silence is the gap, because the tester otherwise can't tell whether they're testing the right thing.
+3. **Feature flag** — whether the change sits behind a flag. If it does, the flag's name/key **and** the state QA needs it in (on/off) to test. If it doesn't, the ticket should say so — "not behind a flag" is a valid, passing answer. Silence on whether a flag exists at all is the gap. Silence on _state_ is not automatically a gap: if exactly one flag is named, default to assuming "enable it to test" and only flag the state as unclear when something about the ticket makes the right state genuinely ambiguous (see `references/criteria.md`).
 
 **Non-blocking** (QA can usually start, but these save round-trips):
 
@@ -70,9 +72,15 @@ Rules for the verdict:
 
 In the Notes column, cite the evidence when something passes (where you found it — "steps in description", "flag name in comment by @dev") and state specifically what's absent when it doesn't. Vague notes ("needs more detail") aren't actionable; "no expected result given for the reset-password step" is.
 
+**Linked PR/build is the one exception to stating an absence as fact.** If no PR/build turns up in the description, comments, or `get_issue_remote_links`, don't write "Missing" as if that's settled. Write something like "⚠️ Not found in description/comments/remote links — check the ticket's Development panel in Jira, which this tool can't see" and don't count it toward the verdict as a confirmed gap the way a true Missing would be.
+
 ### Step 4: Draft the developer ask
 
-If there are any gaps, produce a short comment the QA (or the tool user) can paste onto the ticket to ping the developer. Address only the gaps — don't restate what's already there. Keep it collegial and specific; the goal is to make it trivial for the developer to fill the holes:
+If there are any gaps, produce a short comment the QA (or the tool user) can paste onto the ticket to ping the developer. Address only the gaps — don't restate what's already there. Keep it collegial and specific; the goal is to make it trivial for the developer to fill the holes.
+
+**Ask for the gap, not for exhaustive detail.** The ask should name what's missing, not dictate how thoroughly the developer must answer it. Don't demand step-by-step scripts, exact tool/table/query names, or timing specifics for testing instructions — a competent tester doesn't need a walkthrough of routine functionality, just a callout for anything non-obvious. And don't ask questions the ticket already lets you answer yourself — e.g. don't ask "what state should the flag be in?" when only one flag is named and "enable to test" is the obvious inference; ask about state only when it's genuinely ambiguous.
+
+**Don't phrase the PR/build gap as a fact.** Per the known limitation above, phrase it as "I couldn't find a linked PR or build in the description/comments/remote links — is there one linked elsewhere (e.g. the Development panel)?" rather than asserting none exists.
 
 ```
 Before this is ready for QA, could you add:

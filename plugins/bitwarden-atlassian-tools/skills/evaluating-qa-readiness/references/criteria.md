@@ -35,6 +35,8 @@ For a **bug**, this means both the original broken behavior and what "fixed" loo
 
 **Why silence is a gap**: without this, the tester can't tell whether the feature will even be visible in their environment, and a "passing" test against a flagged-off build is worse than no test. An explicit "not behind a flag" is a passing answer — the requirement is a clear answer, not a flag.
 
+**Inference is allowed for state.** If exactly one flag is named for the change and no explicit on/off state is given, the reasonable default is "enable it to exercise the new behavior" — don't flag the state as a gap just because it wasn't spelled out. Only treat the state as genuinely Unclear when there's a real reason the correct state isn't obvious: multiple flags or environments that could behave differently, a flag that gates removal/deprecation (where "off" is the interesting state), or the ticket itself raises a question about rollout (e.g., cloud vs. self-hosted needing different treatment). The bar is "would a competent tester actually be stuck," not "is every detail spelled out."
+
 ## Non-blocking criteria
 
 QA can usually begin without these, but each one that's missing tends to cause a round-trip mid-test. Flag them so they get fixed, but don't block the handoff on them alone.
@@ -56,6 +58,10 @@ QA can usually begin without these, but each one that's missing tends to cause a
 **Satisfied when** there's a link to the PR or a specific build/version where the change can be exercised. This is what lets QA actually get their hands on the change.
 
 **Partial credit**: a PR link is good; a link to an installable build or a named version QA can pull is better. Either satisfies the criterion.
+
+**Known limitation — read before reporting this criterion as failing.** The only sources this check can see are the description, comments, and whatever `get_issue_remote_links` returns (Confluence pages and any manually-added remote links). Jira's native **Development panel** — the one populated automatically by the GitHub/Bitbucket integration via smart commits or branch naming, which is how most PRs actually get linked to a ticket — is a separate data source that neither MCP tool exposes. That panel is invisible to this check.
+
+This means a PR can be linked on the ticket (visible in the Jira UI) while both tools report nothing. **Never state "no PR or build is linked" as a fact.** Report it as: not found in the sources this check can search (description, comments, remote links), and note explicitly that the ticket's Development panel isn't visible to this tool and should be checked manually in Jira before treating this as a real gap.
 
 ## Judgment notes
 
