@@ -49,7 +49,7 @@ describe("AddCommentSchema", () => {
   });
 });
 
-describe("add_comment handler", () => {
+describe("add_issue_comment handler", () => {
   const ENV_KEYS = [
     "ATLASSIAN_CLOUD_ID",
     "ATLASSIAN_EMAIL",

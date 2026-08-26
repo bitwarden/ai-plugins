@@ -5,17 +5,11 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.7.1] - 2026-08-26
-
-### Fixed
-
-- **`add_comment` input validation** — a whitespace-only comment body previously passed the `min(1)` check, so `buildCommentAdf` returned `undefined` behind an `as AdfDoc` cast and a live post sent an empty `{}` payload, yielding an opaque Jira 400. The body is now trimmed before the length check.
-
 ## [2.7.0] - 2026-08-26
 
 ### Added
 
-- **`add_comment` MCP tool** (write, opt-in) — adds a plain-text comment to an existing Jira issue. Blank lines in the input split the text into separate ADF paragraphs. Defaults to a dry run that returns the exact payload without sending it; a live post requires an explicit `dryRun: false` and `ATLASSIAN_JIRA_WRITE_TOKEN`, matching the existing `create_issue`/`link_issues` write tools.
+- **`add_issue_comment` MCP tool** (write, opt-in) — adds a plain-text comment to an existing Jira issue. Blank lines in the input split the text into separate ADF paragraphs. Defaults to a dry run that returns the exact payload without sending it; a live post requires an explicit `dryRun: false` and `ATLASSIAN_JIRA_WRITE_TOKEN`, matching the existing `create_issue`/`link_issues` write tools. Rejects a whitespace-only body so a live post can never send an empty comment payload.
 
 ## [2.6.0] - 2026-08-04
 

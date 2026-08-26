@@ -82,7 +82,7 @@ async function handler(input: any): Promise<string> {
 }
 
 const addCommentTool: ToolDefinition = {
-  name: "add_comment",
+  name: "add_issue_comment",
   description:
     "Add a plain-text comment to an existing Jira issue. Defaults to a dry run " +
     "that returns the exact payload without sending it; pass dryRun: false to " +
