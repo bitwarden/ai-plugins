@@ -116,6 +116,7 @@
     "pyproject",
     "pytest",
     "remotelink",
+    "reprompt",
     "Rescope",
     "resolutiondate",
     "retarget",
