@@ -4,7 +4,7 @@
     "should_trigger": true
   },
   {
-    "query": "what's the OTP code in the most recent login email for owner@bitwarden.test?",
+    "query": "grab the login link from the most recent sign-in email for owner@bitwarden.test",
     "should_trigger": true
   },
   {
@@ -64,7 +64,7 @@
     "should_trigger": false
   },
   {
-    "query": "configure the SMTP host and port for my local dev environment",
+    "query": "emails aren't showing up in mailcatcher at all, what's broken?",
     "should_trigger": false
   },
   {

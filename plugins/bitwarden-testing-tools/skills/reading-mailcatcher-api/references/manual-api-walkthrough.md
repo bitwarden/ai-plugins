@@ -109,3 +109,18 @@ curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
 curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
   grep -oE 'https://localhost:8080/#/[^ >)"]+' | head -1
 ```
+
+## Message metadata and deletion (debugging only)
+
+Fetch a message's raw JSON metadata (id, recipients, subject, available formats):
+
+```bash
+curl -s http://localhost:1080/messages/${MSG_ID}.json
+```
+
+The two commands below are destructive and irreversible. Clearing the inbox mid-run destroys verification tokens that earlier test steps depend on. They are not covered by this skill's `allowed-tools`, so each requires a fresh permission prompt.
+
+| Operation               | Command                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| Delete specific message | `curl -X DELETE http://localhost:1080/messages/{id}`                                      |
+| Clear all messages      | `curl -X DELETE http://localhost:1080/messages` — **ALWAYS ask user first; irreversible** |

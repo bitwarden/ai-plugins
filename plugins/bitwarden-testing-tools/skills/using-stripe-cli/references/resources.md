@@ -69,6 +69,20 @@ Search paths (`.../search`) require a `query` parameter, for example `read --pat
 - **Key fields**: id, name, description, active, default_price, metadata, created
 - **Common queries**: "What products do we have?", "Is this product active?"
 
+## coupons
+
+- **Base path**: `/v1/coupons` (append `/<id>` to retrieve)
+- **Read operations**: retrieve, list
+- **Key fields**: id, name, percent_off, amount_off, currency, duration, duration_in_months, max_redemptions, times_redeemed, valid, metadata, created
+- **Common queries**: "List the coupon IDs in our Stripe test account for the Admin portal import", "Is this coupon still valid?", "What discount does this coupon apply?"
+
+## promotion_codes
+
+- **Base path**: `/v1/promotion_codes` (append `/<id>` to retrieve)
+- **Read operations**: retrieve, list
+- **Key fields**: id, code, coupon, active, customer, expires_at, max_redemptions, times_redeemed, restrictions, metadata, created
+- **Common queries**: "What promotion codes map to this coupon?", "Is this promo code active?"
+
 ## subscription_schedules
 
 - **Base path**: `/v1/subscription_schedules` (append `/<id>` to retrieve)
