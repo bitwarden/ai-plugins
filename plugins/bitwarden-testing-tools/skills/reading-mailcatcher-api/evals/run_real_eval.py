@@ -17,5 +17,9 @@ from eval_harness import EvalConfig, main  # noqa: E402
 
 CONFIG = EvalConfig(target_skill_token="reading-mailcatcher-api")
 
+# These trigger evals are a diagnostic reading, not a merge gate (see README),
+# and `main` reports its result by printing JSON rather than by return code, so
+# call it bare: the process exits 0 regardless, and nothing reads the status as
+# pass/fail.
 if __name__ == "__main__":
-    sys.exit(main(CONFIG))
+    main(CONFIG)
