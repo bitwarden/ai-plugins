@@ -16,6 +16,10 @@
     "test-layers",
     "test-cases",
     "gherkin",
-    "qa"
+    "qa",
+    "stripe",
+    "billing",
+    "email",
+    "mailcatcher"
   ]
 }

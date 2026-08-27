@@ -2,6 +2,8 @@
 
 Each section gives the subject, recipient, and link format for a Bitwarden email, followed by the sanctioned `read_mailcatcher.py` invocation that extracts its link. Run the co-located script; curl and direct API calls are not sanctioned transports here (see `manual-api-walkthrough.md`, which exists for debugging the script itself).
 
+> **Substitute the skill directory before running.** The commands below are written with the `${CLAUDE_SKILL_DIR}/` placeholder for readability, but that variable is expanded only inside `SKILL.md` — when you read this reference as text, it stays literal. Before running a command, replace `${CLAUDE_SKILL_DIR}` with the absolute skill directory you already resolved from `SKILL.md`'s `allowed-tools`. Running the script by that absolute path is also what matches the grant without prompting; a relative path would not.
+
 ## Account Verification (New Registration)
 
 **Subject:** `Verify Your Email`
