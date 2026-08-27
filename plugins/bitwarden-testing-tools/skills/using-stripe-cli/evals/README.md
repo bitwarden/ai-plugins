@@ -27,6 +27,8 @@ cd "$WT/plugins/bitwarden-testing-tools/skills/using-stripe-cli/evals"
 CLAUDE_CONFIG_DIR="$ISO" python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
 ```
 
+`trap … EXIT` cleans up on a normal exit or Ctrl-C, but it does not fire on `SIGKILL` or a hard reset. If the run is killed that way, delete the throwaway config directory (`$ISO`, printed by `mktemp -d`) by hand afterward so a copy of your OAuth token is not left behind under `$TMPDIR`.
+
 Trigger rates depend on which sibling skills are installed alongside this one, since the model is choosing among all of them. Run this measured against the four-skill foundation inventory: `assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, and `writing-manual-test-cases`.
 
 The behavior suite runs separately, through `/skill-creator:skill-creator` in Benchmark mode with a config-blind grader, and has no scriptable command here.
