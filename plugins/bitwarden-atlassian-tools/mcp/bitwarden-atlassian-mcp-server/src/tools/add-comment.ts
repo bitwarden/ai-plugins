@@ -9,8 +9,8 @@ import { JiraClient } from "../jira/client.js";
 import { hasJiraWriteToken } from "../jira/auth.js";
 import {
   validateInput,
-  AddCommentSchema,
-  AddCommentInput,
+  AddIssueCommentSchema,
+  AddIssueCommentInput,
   ToolDefinition,
 } from "../utils/validation.js";
 import { buildCommentAdf } from "../utils/adf-build.js";
@@ -21,7 +21,7 @@ import {
   writeScopeHint,
 } from "../utils/write-guard.js";
 
-function renderDryRun(input: AddCommentInput, body: unknown): string {
+function renderDryRun(input: AddIssueCommentInput, body: unknown): string {
   const lines: string[] = [
     `# Dry run: add comment to ${input.issueIdOrKey}`,
     "",
@@ -51,7 +51,7 @@ function renderDryRun(input: AddCommentInput, body: unknown): string {
 }
 
 async function handler(input: any): Promise<string> {
-  const validated = validateInput(AddCommentSchema, input);
+  const validated = validateInput(AddIssueCommentSchema, input);
   const body = buildCommentAdf(validated.body);
 
   if (validated.dryRun) {
@@ -64,7 +64,7 @@ async function handler(input: any): Promise<string> {
 
   try {
     const client = new JiraClient("write");
-    const created = await client.addComment(validated.issueIdOrKey, body);
+    const created = await client.addIssueComment(validated.issueIdOrKey, body);
 
     return [
       `Added comment to **${validated.issueIdOrKey}**.`,
@@ -81,7 +81,7 @@ async function handler(input: any): Promise<string> {
   }
 }
 
-const addCommentTool: ToolDefinition = {
+const addIssueCommentTool: ToolDefinition = {
   name: "add_issue_comment",
   description:
     "Add a plain-text comment to an existing Jira issue. Defaults to a dry run " +
@@ -112,4 +112,4 @@ const addCommentTool: ToolDefinition = {
   handler,
 };
 
-export default addCommentTool;
+export default addIssueCommentTool;

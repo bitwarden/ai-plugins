@@ -330,13 +330,13 @@ export type LinkIssuesInput = z.infer<typeof LinkIssuesSchema>;
  * Add a plain-text comment to an existing issue. The body is converted to ADF
  * by the tool, so only plain text is accepted here rather than pre-built ADF.
  */
-export const AddCommentSchema = z.object({
+export const AddIssueCommentSchema = z.object({
   issueIdOrKey: JiraIssueKey,
   body: z.string().trim().min(1, "Comment body cannot be empty"),
   dryRun: z.boolean().optional().default(true),
 });
 
-export type AddCommentInput = z.infer<typeof AddCommentSchema>;
+export type AddIssueCommentInput = z.infer<typeof AddIssueCommentSchema>;
 
 /**
  * Validate input against a Zod schema

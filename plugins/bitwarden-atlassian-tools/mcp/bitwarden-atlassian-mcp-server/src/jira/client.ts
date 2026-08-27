@@ -360,7 +360,7 @@ export class JiraClient {
    * @param body - A fully-formed ADF comment body. Built by the calling tool.
    * @returns The created comment's id.
    */
-  async addComment(
+  async addIssueComment(
     issueIdOrKey: string,
     body: AdfDoc,
   ): Promise<{ id: string; created: string }> {

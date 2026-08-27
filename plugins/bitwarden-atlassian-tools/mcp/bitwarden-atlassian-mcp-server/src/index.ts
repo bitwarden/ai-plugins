@@ -54,7 +54,7 @@ import downloadAttachment from "./tools/download-attachment.js";
 import getCreateFields from "./tools/get-create-fields.js";
 import createIssue from "./tools/create-issue.js";
 import linkIssues from "./tools/link-issues.js";
-import addComment from "./tools/add-comment.js";
+import addIssueComment from "./tools/add-comment.js";
 
 const tools: ToolDefinition[] = [
   getIssue,
@@ -75,7 +75,7 @@ const tools: ToolDefinition[] = [
   getCreateFields,
   createIssue,
   linkIssues,
-  addComment,
+  addIssueComment,
 ];
 
 async function main() {

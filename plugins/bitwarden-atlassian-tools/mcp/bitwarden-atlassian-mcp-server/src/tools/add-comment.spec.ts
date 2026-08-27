@@ -14,12 +14,12 @@ vi.mock("axios", () => {
   return { default: mockAxios };
 });
 
-import addCommentTool from "./add-comment.js";
-import { validateInput, AddCommentSchema } from "../utils/validation.js";
+import addIssueCommentTool from "./add-comment.js";
+import { validateInput, AddIssueCommentSchema } from "../utils/validation.js";
 
-describe("AddCommentSchema", () => {
+describe("AddIssueCommentSchema", () => {
   it("defaults dryRun to true", () => {
-    const parsed = validateInput(AddCommentSchema, {
+    const parsed = validateInput(AddIssueCommentSchema, {
       issueIdOrKey: "AI-27",
       body: "Looks good.",
     });
@@ -29,13 +29,13 @@ describe("AddCommentSchema", () => {
 
   it("rejects an empty body", () => {
     expect(() =>
-      validateInput(AddCommentSchema, { issueIdOrKey: "AI-27", body: "" }),
+      validateInput(AddIssueCommentSchema, { issueIdOrKey: "AI-27", body: "" }),
     ).toThrow(/Comment body cannot be empty/);
   });
 
   it("rejects a whitespace-only body", () => {
     expect(() =>
-      validateInput(AddCommentSchema, {
+      validateInput(AddIssueCommentSchema, {
         issueIdOrKey: "AI-27",
         body: "   \n\t  ",
       }),
@@ -44,7 +44,10 @@ describe("AddCommentSchema", () => {
 
   it("rejects a malformed issue key", () => {
     expect(() =>
-      validateInput(AddCommentSchema, { issueIdOrKey: "ai-27", body: "hi" }),
+      validateInput(AddIssueCommentSchema, {
+        issueIdOrKey: "ai-27",
+        body: "hi",
+      }),
     ).toThrow(/valid Jira issue key/);
   });
 });
@@ -82,7 +85,7 @@ describe("add_issue_comment handler", () => {
   it("sends no request on a dry run, even with a write token set", async () => {
     process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
 
-    const out = await addCommentTool.handler({
+    const out = await addIssueCommentTool.handler({
       issueIdOrKey: "AI-27",
       body: "Looks good.",
       dryRun: true,
@@ -94,7 +97,7 @@ describe("add_issue_comment handler", () => {
   });
 
   it("refuses a live comment when no write token is set", async () => {
-    const out = await addCommentTool.handler({
+    const out = await addIssueCommentTool.handler({
       issueIdOrKey: "AI-27",
       body: "Looks good.",
       dryRun: false,
@@ -111,7 +114,7 @@ describe("add_issue_comment handler", () => {
       data: { id: "10050", created: "2026-08-26T12:00:00.000Z" },
     });
 
-    const out = await addCommentTool.handler({
+    const out = await addIssueCommentTool.handler({
       issueIdOrKey: "AI-27",
       body: "Looks good.",
       dryRun: false,
@@ -137,7 +140,7 @@ describe("add_issue_comment handler", () => {
     process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
     mockPost.mockRejectedValueOnce(new Error("JIRA API error (400): boom"));
 
-    const out = await addCommentTool.handler({
+    const out = await addIssueCommentTool.handler({
       issueIdOrKey: "AI-27",
       body: "Looks good.",
       dryRun: false,
@@ -154,7 +157,7 @@ describe("add_issue_comment handler", () => {
       new Error("JIRA authentication failed. Check your API token and email."),
     );
 
-    const out = await addCommentTool.handler({
+    const out = await addIssueCommentTool.handler({
       issueIdOrKey: "AI-27",
       body: "Looks good.",
       dryRun: false,
