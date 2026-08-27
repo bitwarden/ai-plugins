@@ -136,6 +136,37 @@ describe("add_issue_comment handler", () => {
     });
   });
 
+  it("posts a multi-paragraph comment body as separate ADF paragraphs", async () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
+    mockPost.mockResolvedValueOnce({
+      data: { id: "10051", created: "2026-08-26T12:00:00.000Z" },
+    });
+
+    const out = await addIssueCommentTool.handler({
+      issueIdOrKey: "AI-27",
+      body: "First paragraph.\n\nSecond paragraph.",
+      dryRun: false,
+    });
+
+    expect(out).toContain("Added comment to **AI-27**");
+    expect(mockPost).toHaveBeenCalledWith("/rest/api/3/issue/AI-27/comment", {
+      body: {
+        version: 1,
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "First paragraph." }],
+          },
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Second paragraph." }],
+          },
+        ],
+      },
+    });
+  });
+
   it("reports the API error rather than throwing on a failed live comment", async () => {
     process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
     mockPost.mockRejectedValueOnce(new Error("JIRA API error (400): boom"));
