@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Policy-guarded Stripe CLI access for the bitwarden-testing-tools
-pipeline. The ONLY sanctioned way for the playwright-test-runner to reach Stripe.
+"""Policy-guarded Stripe CLI access for the bitwarden-testing-tools plugin.
+The only sanctioned way for a skill or automated test run to reach Stripe.
 
 A Bash grant of the shape Bash(stripe get:*) cannot exclude a flag, so it can
 never block --live; the official permissions documentation calls
 argument-constraining patterns fragile for exactly this reason. This wrapper
 moves the control to the transport: every argv is built from scratch and no
-caller-supplied flag is ever forwarded, so --live cannot appear in a command
-this script issues.
+caller-supplied flag is ever forwarded, so a caller-supplied --live can never
+be interpreted as a flag by the CLI.
 
 No environment variable is required. The CLI's own credentials from
 `stripe login` are used, and the CLI defaults to test mode without --live.
@@ -74,7 +74,7 @@ def check_environment(env):
             EXIT_KEY,
             "STRIPE_API_KEY is set to a LIVE key. The Stripe CLI reads that "
             "variable in preference to its own configuration, so every command "
-            "would run against live data. Unset it and retry; this pipeline uses "
+            "would run against live data. Unset it and retry; this skill uses "
             "the test mode credentials from 'stripe login'.",
         )
 
