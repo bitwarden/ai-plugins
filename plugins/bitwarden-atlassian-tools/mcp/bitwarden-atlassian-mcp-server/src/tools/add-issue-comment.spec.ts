@@ -14,7 +14,7 @@ vi.mock("axios", () => {
   return { default: mockAxios };
 });
 
-import addIssueCommentTool from "./add-comment.js";
+import addIssueCommentTool from "./add-issue-comment.js";
 import { validateInput, AddIssueCommentSchema } from "../utils/validation.js";
 
 describe("AddIssueCommentSchema", () => {
