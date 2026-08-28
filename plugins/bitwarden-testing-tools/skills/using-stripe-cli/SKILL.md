@@ -2,7 +2,7 @@
 name: using-stripe-cli
 description: Query read-only Stripe test-mode data and advance an already-attached Stripe test clock through the Stripe CLI. Use when a local test or debugging task needs Stripe data the web UI cannot show, for example listing coupon or price IDs, checking a subscription's status or attached test clock, or tracing why a test-mode payment failed. Read-only, with the single exception of advancing an existing test clock. Do NOT use it to write or modify Stripe integration code, to create, update, or delete any Stripe object, or to query live or production Stripe data.
 argument-hint: "read --path /v1/<resource> [--param k=v] | advance-clock --clock <clock_id> --days <n>"
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py *)
+allowed-tools: Read, Bash(${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py:*)
 ---
 
 # Using the Stripe CLI
