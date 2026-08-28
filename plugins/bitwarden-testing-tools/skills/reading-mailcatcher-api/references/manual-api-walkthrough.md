@@ -77,14 +77,15 @@ print(best['id'])
 For link/token extraction, plain text is usually sufficient and easier to parse:
 
 ```bash
-MSG_ID=42
-curl -s http://localhost:1080/messages/${MSG_ID}.plain
+curl -s http://localhost:1080/messages/<message-id>.plain
 ```
+
+`<message-id>` is the numeric id from Step 2. Substitute it into each command below: every block runs in a fresh shell, so a value set in one does not carry into the next.
 
 Use `.html` only when the plain text body is empty or the link is only in the HTML part:
 
 ```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.html
+curl -s http://localhost:1080/messages/<message-id>.html
 ```
 
 ### Step 4 — Extract the link or token
@@ -92,21 +93,21 @@ curl -s http://localhost:1080/messages/${MSG_ID}.html
 **Extract any URL matching a keyword pattern:**
 
 ```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
+curl -s http://localhost:1080/messages/<message-id>.plain | \
   grep -oE 'https?://[^ >)"]+' | grep -i 'verify\|confirm\|signup\|token\|trial\|login' | head -1
 ```
 
 **Extract an admin magic link:**
 
 ```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
+curl -s http://localhost:1080/messages/<message-id>.plain | \
   grep -oE 'http://localhost:62911/login/confirm[^ >)"]+' | head -1
 ```
 
 **Extract a web vault verification/signup link:**
 
 ```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
+curl -s http://localhost:1080/messages/<message-id>.plain | \
   grep -oE 'https://localhost:8080/#/[^ >)"]+' | head -1
 ```
 
@@ -115,7 +116,7 @@ curl -s http://localhost:1080/messages/${MSG_ID}.plain | \
 Fetch a message's raw JSON metadata (id, recipients, subject, available formats):
 
 ```bash
-curl -s http://localhost:1080/messages/${MSG_ID}.json
+curl -s http://localhost:1080/messages/<message-id>.json
 ```
 
 The two commands below are destructive and irreversible. Clearing the inbox mid-run destroys verification tokens that earlier test steps depend on. They are not covered by this skill's `allowed-tools`, so each requires a fresh permission prompt.

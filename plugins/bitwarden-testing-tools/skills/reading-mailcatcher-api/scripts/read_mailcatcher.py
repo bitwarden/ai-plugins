@@ -28,6 +28,7 @@ Designed to be called via the Bash tool. ../references/manual-api-walkthrough.md
 documents the underlying Mailcatcher REST API this wraps.
 """
 import argparse
+import html
 import json
 import os
 import re
@@ -169,21 +170,34 @@ def fetch_body(base, message_id):
             "using HTML body for URL extraction",
             file=sys.stderr,
         )
-        body = _http_get_or_empty(f"{base}/messages/{message_id}.html")
+        # HTML href attributes carry entity-encoded ampersands (`&amp;`)
+        # between query params. Unescaping here, on the HTML branch only, keeps
+        # the plain path byte-exact while making the extracted link usable
+        # rather than corrupt from the first `&` onward. Whitespace-terminated
+        # URL matching is unaffected: `&amp;`/`%40` are not whitespace either way.
+        body = html.unescape(_http_get_or_empty(f"{base}/messages/{message_id}.html"))
     return body
 
 
-def extract_url(body, link_filter):
-    for candidate in URL_PATTERN.findall(body or ""):
-        try:
-            if re.search(link_filter, candidate, re.IGNORECASE):
-                return candidate
-        except re.error:
-            # Mirrors grep -iE with a malformed ERE: it errors out and
-            # yields no match rather than a stack trace, so this falls
-            # through to the caller's existing no-URL-found NO_MATCH branch.
-            return None
-    return None
+def matching_urls(body, link_filter):
+    """Every URL in body matching link_filter, in document order.
+
+    The caller (attempt) applies the local-host preference on top of this: an
+    earlier non-local link that happens to match the filter (a marketing or
+    help footer link, say) must not mask a later local action link, so the
+    caller walks the full ordered list rather than taking the first match here.
+    """
+    try:
+        return [
+            candidate
+            for candidate in URL_PATTERN.findall(body or "")
+            if re.search(link_filter, candidate, re.IGNORECASE)
+        ]
+    except re.error:
+        # Mirrors grep -iE with a malformed ERE: it errors out and yields no
+        # match rather than a stack trace, so this falls through to the
+        # caller's existing no-URL-found NO_MATCH branch.
+        return []
 
 
 def is_local(url, allowed):
@@ -209,16 +223,20 @@ def attempt(base, recipient, pattern, link_filter, allowed):
     message_id = select_message(messages, recipient, pattern)
     if message_id is None:
         return 1, None
-    url = extract_url(fetch_body(base, message_id), link_filter)
-    if url is None:
+    candidates = matching_urls(fetch_body(base, message_id), link_filter)
+    if not candidates:
         print(
             f"NO_MATCH: message {message_id} matched but contained no URL "
             f"filtered by '{link_filter}'",
             file=sys.stderr,
         )
         return 2, None
-    if not is_local(url, allowed):
-        print(f"NO_MATCH: extracted URL '{url}' is not a local dev host", file=sys.stderr)
+    url = next((c for c in candidates if is_local(c, allowed)), None)
+    if url is None:
+        print(
+            f"NO_MATCH: extracted URL '{candidates[0]}' is not a local dev host",
+            file=sys.stderr,
+        )
         return 2, None
     return 0, url
 

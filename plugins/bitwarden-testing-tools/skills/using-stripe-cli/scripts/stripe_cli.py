@@ -177,19 +177,33 @@ def advance_clock(clock_id, days, run, sleep):
             f"test clock {clock_id} response has no usable 'frozen_time': "
             f"{response!r}",
         )
+    completed = 0
     for _ in range(days):
         frozen += SECONDS_PER_DAY
-        run(build_advance_argv(clock_id, frozen))
-        for _attempt in range(CLOCK_POLL_LIMIT):
-            if _clock(clock_id, run).get("status") == "ready":
-                break
-            sleep(CLOCK_POLL_DELAY)
-        else:
+        try:
+            run(build_advance_argv(clock_id, frozen))
+            for _attempt in range(CLOCK_POLL_LIMIT):
+                if _clock(clock_id, run).get("status") == "ready":
+                    break
+                sleep(CLOCK_POLL_DELAY)
+            else:
+                raise GuardError(
+                    EXIT_CLI,
+                    f"test clock {clock_id} did not return to 'ready' after "
+                    f"{CLOCK_POLL_LIMIT * CLOCK_POLL_DELAY}s",
+                )
+        except GuardError as err:
+            # A multi-day advance can run long enough to be interrupted (see
+            # the Bash-timeout note in SKILL.md). Annotate whatever failed with
+            # how far it got, so the caller can re-read frozen_time and resume
+            # instead of reissuing the full day count, and preserve the
+            # original exit code.
             raise GuardError(
-                EXIT_CLI,
-                f"test clock {clock_id} did not return to 'ready' after "
-                f"{CLOCK_POLL_LIMIT * CLOCK_POLL_DELAY}s",
-            )
+                err.code,
+                f"{err.message} (advanced {completed} of {days} day(s) before "
+                f"failing; last attempted frozen_time={frozen})",
+            ) from err
+        completed += 1
     return frozen
 
 

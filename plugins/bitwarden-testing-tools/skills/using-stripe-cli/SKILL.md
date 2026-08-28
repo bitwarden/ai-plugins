@@ -47,7 +47,7 @@ Expand nested objects when the question needs them rather than making extra roun
 
 ```bash
 ${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py read --path /v1/subscriptions/sub_abc123 --param expand[]=default_payment_method
-${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py read --path /v1/invoices/in_abc123 --param expand[]=charge --param expand[]=subscription
+${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py read --path /v1/invoices/in_abc123 --param expand[]=parent.subscription_details.subscription --param expand[]=payments.data.payment.payment_intent
 ```
 
 See `${CLAUDE_SKILL_DIR}/references/resources.md` for the read operations and key fields of the resources you will most often query.
@@ -62,7 +62,7 @@ See `${CLAUDE_SKILL_DIR}/references/resources.md` for the read operations and ke
 
 ## Read-only debugging patterns
 
-- **Payment failures:** check the payment intent's `last_payment_error` and the charge's `outcome` / `failure_message` (expand the charge on the payment intent).
+- **Payment failures:** check the payment intent's `last_payment_error` and the latest charge's `outcome` / `failure_message` (inline it with `expand[]=latest_charge` on the payment intent).
 - **Subscription issues:** check `status`, the expanded `latest_invoice`, and recent `customer.subscription.*` events.
 - **Event tracing:** `/v1/events` filters by type, not object ID; list by type and filter client-side. Events carry the object snapshot at event time.
 - **Customer state:** expand `subscriptions` and read `--path /v1/customers/<id>/payment_methods` for the full picture.
@@ -76,6 +76,8 @@ Advance a clock by N days with a single wrapper call; it waits for the clock to 
 ```bash
 ${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py advance-clock --clock <clock_id> --days 8
 ```
+
+This call is long-running: the wrapper waits for the clock to return to `ready` after each simulated day, polling up to 120s per day, so an eight-day advance can run well past the Bash tool's default 120s timeout. Issue it with an extended timeout (for example `timeout: 600000`, ten minutes). If it is interrupted anyway, the clock may be left partially advanced: the error reports how many days completed and the last `frozen_time` it attempted, so re-read the clock's `frozen_time` (or the subscription `status`) and advance only the days that remain rather than reissuing the full count.
 
 Eight days is the number that has worked against Bitwarden's current test-account dunning configuration for driving a subscription to `unpaid`: a payment retry fires per simulated day, and after the configured retries are exhausted the subscription transitions to `unpaid` and fires `customer.subscription.updated`. Treat `--days 8` as a starting point, not a constant: the exact retry count is a per-account setting, so re-read the subscription `status` after advancing to confirm the state and advance further if it has not yet flipped.
 
