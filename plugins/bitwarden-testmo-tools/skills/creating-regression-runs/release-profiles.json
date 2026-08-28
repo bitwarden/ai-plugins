@@ -1,20 +1,32 @@
 {
-  "_comment": "Release profiles: which regression run specs belong to each release type. A profile may 'extends' another to inherit its specs (full is a superset of partial). Spec names are file names in specs/ without the .json extension.",
+  "_comment": "Release profiles: which regression run specs belong to each release type. A profile may 'extends' another to inherit its specs. 'common' is a shared base holding the specs every release runs — it is not meant to be run directly. 'full' is NOT a superset of 'partial': Directory Connector (BWDC) runs on partial releases only, so both profiles extend 'common' rather than full extending partial. Spec names are file names in specs/ without the .json extension.",
   "profiles": {
-    "partial": {
+    "common": {
       "specs": [
         "web-password-manager-regression",
         "web-admin-console-regression",
         "web-admin-portal-sm-providers-regression",
         "old-client-new-server-regression",
         "mobile-ios-regression",
-        "mobile-android-regression",
-        "directory-connector-regression"
+        "mobile-android-regression"
       ]
     },
+    "partial": {
+      "extends": "common",
+      "specs": ["directory-connector-regression"]
+    },
     "full": {
-      "extends": "partial",
-      "specs": []
+      "extends": "common",
+      "specs": [
+        "cli-regression",
+        "desktop-macos-regression",
+        "desktop-windows-regression",
+        "desktop-linux-regression",
+        "extension-macos-chrome-regression",
+        "extension-windows-edge-regression",
+        "extension-macos-safari-regression",
+        "extension-linux-firefox-regression"
+      ]
     }
   }
 }

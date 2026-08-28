@@ -121,9 +121,13 @@ def matches(case, spec, folder_ids):
         ids = {t["id"] for t in (case.get("custom_team") or [])}
         if not ids & set(spec["team_ids"]):
             return False
-    if "automation_type_ids" in spec and case.get("custom_automation_type") not in spec["automation_type_ids"]:
+    # custom_automation_type is a single {"id", "name"} object, or null when unset.
+    # Compare on the id so specs can list plain ints (and null for "no type set").
+    auto = case.get("custom_automation_type")
+    auto_id = auto["id"] if auto else None
+    if "automation_type_ids" in spec and auto_id not in spec["automation_type_ids"]:
         return False
-    if spec.get("exclude_automation_type_ids") and case.get("custom_automation_type") in spec["exclude_automation_type_ids"]:
+    if spec.get("exclude_automation_type_ids") and auto_id in spec["exclude_automation_type_ids"]:
         return False
     if spec.get("case_state_ids") and case.get("state_id") not in spec["case_state_ids"]:
         return False
@@ -178,15 +182,34 @@ def main():
         "cases": ids,
     }
     for k in ("milestone_id", "config_id", "tags", "note"):
-        if k in spec:
+        if k in spec and spec[k] is not None:
             payload[k] = spec[k]
+
+    # A spec may ship `"config_id": null` as an explicit placeholder when the run is one of
+    # several same-named variants distinguished only by Testmo Configuration (e.g. the three
+    # Desktop runs). Dry-runs still work so case counts can be validated, but creating the run
+    # would produce indistinguishable runs, so that is refused.
+    needs_config = "config_id" in spec and spec["config_id"] is None
 
     print("\n--- run payload (cases truncated) ---")
     print(json.dumps({**payload, "cases": f"[{len(ids)} ids]"}, indent=2))
 
+    if needs_config:
+        print(
+            f"\nWARNING: this spec has \"config_id\": null — a placeholder that must be filled in "
+            f"before the run can be created.\n"
+            f"         Look up the id via GET /projects/{project}/configs and set it in the spec."
+        )
+
     if not args.create:
         print("\nDRY RUN — no run created. Re-run with --create to POST.")
         return
+    if needs_config:
+        sys.exit(
+            "Refusing to create: \"config_id\" is null in this spec. This run is distinguished from "
+            f"its same-named siblings only by Configuration, so creating it without one would produce "
+            f"indistinguishable runs. Look it up via GET /projects/{project}/configs."
+        )
     if not ids:
         sys.exit("Refusing to create a run with 0 cases.")
     res = call("POST", f"/projects/{project}/runs", payload)

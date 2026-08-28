@@ -100,6 +100,51 @@ period in the name:
   Both mobile specs are therefore named just `"Mobile"` and distinguished by config
   (`config_id` 1 = Android, 3 = iOS). Look up config ids via `GET /projects/{id}/configs`.
 
+## Multi-configuration runs (Mobile, Desktop, Extension)
+
+Some platforms ship **several same-named runs distinguished only by Testmo Configuration**. Each variant
+is its own spec file with the same `run_name` and a different `config_id`.
+
+Testmo's `/cases` API **cannot filter by configuration** and exposes no per-case config assignment, so
+these are always **two-step runs**: the spec reproduces step 1, and removing the non-target
+configuration's cases is a manual UI pass. Each affected spec documents its own step 2 in `_comment`.
+
+- **Mobile** — 2 runs, both named `Mobile`. Same filters, differing only by which automation type is
+  excluded. `config_id` 1 = Android, 3 = iOS.
+
+Desktop and Extension instead use a **broad + narrow** split, where one variant covers the full folder and
+the rest are driven by an "essential" tag:
+
+- **Desktop** — 3 runs, all named `Desktop`. Broad = **macOS** (21); narrow = **Windows** (22), **Linux**
+  (20), driven by the `desktop-essential` tag (id 15999).
+- **Extension** — 4 runs, all named `Extension`. Broad = **`MacOS, Chrome`** (7); narrow =
+  **`Windows, Edge`** (15), **`MacOS, Safari`** (10), **`Linux, Firefox`** (5), driven by the
+  `extension-essential` tag (id 17190).
+
+Config and tag ids above verified 2026-08-28 via `GET /projects/1/configs` and `GET /projects/1/tags`.
+
+Every variant on both platforms — broad and narrow alike — takes a step 2. The two variant types differ
+only in how cases are selected:
+
+|            | Broad                               | Narrow                                       |
+| ---------- | ----------------------------------- | -------------------------------------------- |
+| Scope      | whole top-level folder + subfolders | the `<platform>-essential` tag (server-side) |
+| Test Type  | Smoke + Regression                  | **any** — the tag defines the scope          |
+| Case state | Active                              | Active                                       |
+| Automation | manual only (exclude 10, 23, 24)    | manual only (exclude 10, 23, 24)             |
+
+Narrow variants deliberately drop the **test-type** filter — a tagged case counts regardless of type — but
+they keep the **state** and **automation-type** filters so retired and already-automated cases stay out.
+
+Verify tag names against `GET /projects/1/tags` before trusting a narrow spec: it has no folder or type
+filter to constrain it, so a wrong or duplicated tag name silently yields the wrong case set rather than
+erroring.
+
+**`"config_id": null` is a deliberate placeholder** meaning "this run needs a Configuration that has not
+been looked up yet." Dry-runs still work so case counts can be validated, but `--create` is refused —
+otherwise the variants would be indistinguishable from each other. Fill it in from
+`GET /projects/{id}/configs`.
+
 ## Project 1 field reference (captured 2026-07-22 — re-verify via `/projects/1/fields`)
 
 - **Test Type** (`custom_test_type`, multiselect): 18=Functional, 19=Regression, 20=Smoke,
@@ -140,7 +185,14 @@ groups releases as a parent `YYYY.M.0 Release` milestone with `… Manual Regres
 
 Use `setup_release_runs.py` to create every run for a release in one pass, linked to a milestone.
 Release membership lives in `release-profiles.json` — each profile lists its specs, and a profile may
-`extends` another (`full` is a superset of `partial`).
+`extends` another.
+
+`full` is **not** a superset of `partial`. Both extend a shared `common` base; the difference is:
+
+- **`common`** — the specs every release runs (Web PM / Admin Console / Admin Portal, Old Client / New
+  Server, both Mobile). Not meant to be run directly.
+- **`partial`** — `common` + **Directory Connector (BWDC)**, which runs on partial releases only.
+- **`full`** — `common` + CLI + the 3 Desktop and 4 Extension configuration variants. No BWDC.
 
 ```bash
 # 1. Create the period's milestone in the Testmo UI, e.g. "2026.8.0 Manual Regression".
@@ -154,6 +206,21 @@ It resolves the milestone by name (fails if missing/ambiguous — the API can't 
 `--period` from the milestone name (override with `--period`), fetches cases/folders once for the whole
 set, and links every run to the milestone. Default project is 1; override with `--project` (e.g. 2 for
 sandbox testing).
+
+**Skipping a component for one release** — use `--exclude <spec-name>` (repeatable, or comma-separated)
+when a release does not need one of the profile's runs. Spec names are the file names in `specs/` without
+the `.json`:
+
+```bash
+python3 scripts/setup_release_runs.py --release partial \
+  --milestone-name "2026.8.1 Manual Regression" \
+  --exclude directory-connector-regression --create
+```
+
+The excluded specs are listed in the summary header. A name that is not in the profile is a hard error
+rather than a no-op, so a typo cannot silently create the run you meant to skip. Reach for `--exclude` for
+one-off omissions; if a set of runs is skipped every cycle, add a profile to `release-profiles.json`
+instead.
 
 For a single run, `testmo_create_run.py --spec <file> [--milestone-id N] [--period X]` still works.
 

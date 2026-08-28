@@ -11,6 +11,8 @@ in the UI first (e.g. "2026.8.0 Manual Regression"), then pass its name here.
 Example:
   python3 setup_release_runs.py --release full --milestone-name "2026.8.0 Manual Regression"
   python3 setup_release_runs.py --release full --milestone-name "2026.8.0 Manual Regression" --create
+  python3 setup_release_runs.py --release partial --milestone-name "2026.8.1 Manual Regression" \
+      --exclude directory-connector-regression --create
 """
 import argparse, json, os, re, sys
 from pathlib import Path
@@ -63,14 +65,29 @@ def main():
                     help="value for the <period> placeholder in run names; defaults to the version parsed "
                          "from the milestone name")
     ap.add_argument("--project", type=int, default=1, help="Testmo project id (default 1 = Bitwarden)")
+    ap.add_argument("--exclude", action="append", default=[], metavar="SPEC",
+                    help="spec to skip this release, by spec name (file name in specs/ without .json). "
+                         "Repeatable, or comma-separated. Must name a spec in the profile — a name that "
+                         "is not in it is an error, so a typo cannot silently create the run anyway.")
     ap.add_argument("--create", action="store_true", help="actually POST the runs (omit for dry-run)")
     args = ap.parse_args()
 
-    spec_names = load_profile(args.release)
+    profile_specs = load_profile(args.release)
+    excluded = [n.strip() for item in args.exclude for n in item.split(",") if n.strip()]
+    unknown = [n for n in excluded if n not in profile_specs]
+    if unknown:
+        sys.exit(f"--exclude name(s) not in the {args.release!r} profile: {', '.join(unknown)}\n"
+                 f"Profile specs: {', '.join(profile_specs)}")
+    spec_names = [n for n in profile_specs if n not in excluded]
+    if not spec_names:
+        sys.exit(f"Every spec in the {args.release!r} profile is excluded — nothing to do.")
+
     milestone_id = resolve_milestone(args.project, args.milestone_name)
     period = args.period or derive_period(args.milestone_name)
 
     print(f"Release profile : {args.release}  ({len(spec_names)} runs)")
+    if excluded:
+        print(f"Excluded        : {', '.join(dict.fromkeys(excluded))}")
     print(f"Milestone       : {args.milestone_name!r} -> id {milestone_id}")
     print(f"Period          : {period or '(none — <period> left as-is)'}")
     print(f"Project         : {args.project}")
@@ -101,7 +118,12 @@ def main():
             continue
         selected = [c for c in cases if core.matches(c, filters, folder_ids)]
         ids = [c["id"] for c in selected]
-        rows.append((spec.get("run_name", name), str(len(ids)), "ready"))
+        # "config_id": null is an explicit placeholder — the run needs a Testmo Configuration that
+        # has not been looked up yet. Surface it in the dry-run summary; block --create below.
+        if "config_id" in spec and spec["config_id"] is None:
+            rows.append((spec.get("run_name", name), str(len(ids)), "NEEDS CONFIG_ID"))
+        else:
+            rows.append((spec.get("run_name", name), str(len(ids)), "ready"))
         results.append((spec, ids))
 
     print(f"{'RUN NAME':<60}{'CASES':>7}  STATUS")
@@ -120,6 +142,16 @@ def main():
         print("\nDRY RUN — no runs created. Re-run with --create to POST all of the above.")
         return
 
+    needs_config = [r[0] for r in rows if r[2] == "NEEDS CONFIG_ID"]
+    if needs_config:
+        sys.exit(
+            f"\nRefusing to create: {len(needs_config)} spec(s) have \"config_id\": null — "
+            f"{', '.join(sorted(set(needs_config)))}.\nThese runs are distinguished from their "
+            f"same-named siblings only by Configuration, so creating them without one would produce "
+            f"indistinguishable runs.\nLook the ids up via GET /projects/"
+            f"{args.project}/configs and set them in the specs."
+        )
+
     print()
     for spec, ids in results:
         if not ids:
@@ -128,7 +160,7 @@ def main():
         payload = {"name": spec["run_name"], "state_id": spec.get("run_state_id", 7),
                    "include_all": False, "cases": ids, "milestone_id": milestone_id}
         for k in ("config_id", "tags", "note"):
-            if k in spec:
+            if k in spec and spec[k] is not None:
                 payload[k] = spec[k]
         res = core.call("POST", f"/projects/{args.project}/runs", payload)
         rid = res.get("result", {}).get("id")

@@ -5,6 +5,69 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-08-28
+
+### Added
+
+- `specs/cli-regression.json`: scopes to the whole `CLI` top-level folder and all descendants with the
+  established regression defaults (Test Type = Smoke/Regression, case state Active, manual only). Unlike
+  the Web specs it needs no enumerated subfolders, as the folder is a single product.
+- Desktop as **three** same-named `Desktop` runs distinguished only by Testmo Configuration:
+  `specs/desktop-macos-regression.json` (broad — whole `Desktop` folder + defaults),
+  `specs/desktop-windows-regression.json` and `specs/desktop-linux-regression.json` (narrow — driven by
+  the `desktop-essential` tag).
+- Extension as **four** same-named `Extension` runs on the same broad/narrow split:
+  `specs/extension-macos-chrome-regression.json` (broad, Configuration `MacOS, Chrome`), plus
+  `specs/extension-windows-edge-regression.json`, `specs/extension-macos-safari-regression.json`, and
+  `specs/extension-linux-firefox-regression.json` (narrow — driven by the `extension-essential` tag).
+- Every Desktop and Extension variant, broad and narrow alike, is a **two-step run**: removing the cases
+  belonging to non-target configurations is a manual UI pass, since Testmo's `/cases` API cannot filter
+  by configuration. Each spec documents its own step 2.
+- Narrow variants drop the test-type filter (a tagged case counts regardless of type) but keep the case
+  state and automation-type filters, so retired and already-automated cases are excluded. Measured effect
+  on 2026-08-28: `desktop-essential` 79 raw → 69, `extension-essential` 51 raw → 48.
+- All seven Desktop/Extension `config_id`s resolved and committed (Desktop: macOS 21, Windows 22, Linux
+  20; Extension: `MacOS, Chrome` 7, `Windows, Edge` 15, `MacOS, Safari` 10, `Linux, Firefox` 5), and both
+  tag names verified unique (`desktop-essential` 15999, `extension-essential` 17190). Verified against
+  project 1 on 2026-08-28.
+- Seeded the `full` release profile with all eight. They run only for full releases, not partial ones.
+- SKILL.md section documenting the multi-configuration run pattern for Mobile, Desktop, and Extension —
+  the broad/narrow split, why step 2 cannot be automated, and the resolved config and tag ids.
+- `--exclude <spec-name>` on `setup_release_runs.py` to skip one of a profile's runs for a single release
+  (repeatable or comma-separated). A name not in the profile is a hard error, so a typo cannot silently
+  create the run it was meant to skip. Use it for one-off omissions only — a run skipped every cycle
+  belongs in `release-profiles.json`.
+
+### Changed
+
+- Restructured `release-profiles.json` so `full` is no longer a superset of `partial`. Both now extend a
+  new shared `common` base (Web PM / Admin Console / Admin Portal, Old Client / New Server, both Mobile).
+  **Directory Connector (BWDC) belongs to `partial` only** and is no longer inherited by `full`. Done
+  declaratively — `load_profile()` already resolved arbitrary parents, so no code change was needed.
+  Reach for `--exclude` only for one-off omissions; a run skipped every cycle belongs in the profiles.
+- `testmo_create_run.py` now treats `"config_id": null` as an explicit "not yet looked up" placeholder:
+  the key is omitted from the run payload, dry-runs still print case counts (so a spec can be validated
+  before its Configuration is known), and `--create` is refused with a message pointing at
+  `GET /projects/{id}/configs`. Without this, creating a placeholder spec would produce several
+  indistinguishable same-named runs. A `null` `milestone_id`, `tags`, or `note` is likewise no longer
+  sent as a literal `null`.
+
+## [0.3.1] - 2026-08-26
+
+### Fixed
+
+- `exclude_automation_type_ids` and `automation_type_ids` were compared against the raw
+  `custom_automation_type` object returned by the API (`{"id": 10, "name": "Automated"}`) instead of its
+  `id`, so neither filter ever matched. `exclude_automation_type_ids` was a silent no-op — every run
+  created from a spec using it (all committed regression specs) included already-automated cases.
+  `automation_type_ids` had the inverse failure and would have matched zero cases. Both now compare on
+  the automation type id, with `null` still meaning "no type set". `setup_release_runs.py` reuses
+  `matches()` and is fixed by the same change.
+
+  Impact: re-run the dry-run for any spec relying on these filters — case counts will drop. For example
+  the VFO1 core-UX spec went from 321 matched cases to 95 once already-automated cases were correctly
+  excluded.
+
 ## [0.2.0] - 2026-07-27
 
 ### Changed
