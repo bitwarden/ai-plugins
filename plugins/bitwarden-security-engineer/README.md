@@ -16,7 +16,19 @@ This plugin provides specialized skills for security engineering tasks — from 
 | `reviewing-dependencies`          | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                            |
 | `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                 |
 | `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                       |
+| `auditing-hackerone-vulns`        | Audit open HackerOne reports across the VDP and Bug Bounty programs, correlate to VULN Jira tickets, child items, and release state. Emits a prioritized action table.       |
 | `perform-security-review`         | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence, and flexible output (chat, file, or GitHub Actions). |
+
+## Requirements
+
+Most skills here work with no external setup. `auditing-hackerone-vulns` is the exception, and it will fail on its first call without both of the following.
+
+| Dependency                                                                                                                          | Why it's needed                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **[HackerOne MCP server](https://docs.hackerone.com/en/articles/16069077-hackerone-mcp-server-setup-tool-reference)** (`hackerone`) | **Required, operator-configured.** No plugin in this marketplace ships it, so you must add it to your own MCP configuration and authenticate against hackerone.com. The audit enumerates open reports through `mcp__hackerone__*` in Step 1, and no other step can run without it. Program access is also needed, since the Jira references live in `is_internal` activity comments. |
+| `bitwarden-atlassian-tools`                                                                                                         | **Required.** Supplies the Jira MCP tools the audit correlates against (`search_issues`, `get_issue`, `get_issue_remote_links`) for VULN tickets and their engineering child items.                                                                                                                                                                                                  |
+
+The audit also expects an authenticated `gh` CLI for the PR and release lookups in Step 5.
 
 ## Usage
 
