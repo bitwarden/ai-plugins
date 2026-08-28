@@ -152,16 +152,12 @@ class IsLocalTest(unittest.TestCase):
         allowed = read_mailcatcher.allowed_hosts({"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "dev.local"})
         self.assertTrue(read_mailcatcher.is_local("http://dev.local/x", allowed))
 
-    def test_flag_extension_honored(self):
-        allowed = read_mailcatcher.allowed_hosts({}, ["dev.flag"])
-        self.assertTrue(read_mailcatcher.is_local("http://dev.flag/x", allowed))
-
-    def test_flag_and_env_extensions_stack(self):
+    def test_env_extension_accepts_multiple_hosts(self):
         allowed = read_mailcatcher.allowed_hosts(
-            {"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "env.host"}, ["flag.host"]
+            {"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "one.local, two.local"}
         )
-        self.assertTrue(read_mailcatcher.is_local("http://env.host/x", allowed))
-        self.assertTrue(read_mailcatcher.is_local("http://flag.host/x", allowed))
+        self.assertTrue(read_mailcatcher.is_local("http://one.local/x", allowed))
+        self.assertTrue(read_mailcatcher.is_local("http://two.local/x", allowed))
 
 
 class MainTest(unittest.TestCase):
@@ -266,78 +262,22 @@ class MainTest(unittest.TestCase):
         self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=z")
         self.assertIn("WARNING", err)
 
-    def test_mailcatcher_url_env_override(self):
-        base = "http://127.0.0.1:2080"
-        code, out, _err, _fake, _sleep = self._run(
-            {
-                f"{base}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
-                f"{base}/messages/1.plain": "https://localhost:8080/#/verify?t=q",
-            },
-            env={"MAILCATCHER_URL": base},
-        )
-        self.assertEqual(code, 0)
-        self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=q")
-
-    def test_mailcatcher_url_flag_override(self):
-        base = "http://127.0.0.1:3080"
-        code, out, _err, _fake, _sleep = self._run(
-            {
-                f"{base}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
-                f"{base}/messages/1.plain": "https://localhost:8080/#/verify?t=flag",
-            },
-            argv=[
-                "--recipient", "user@bitwarden.test", "--pattern", "verify",
-                "--mailcatcher-url", base,
-            ],
-        )
-        self.assertEqual(code, 0)
-        self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=flag")
-
-    def test_mailcatcher_url_flag_beats_env(self):
-        flag_base = "http://127.0.0.1:3080"
-        env_base = "http://127.0.0.1:2080"
+    def test_mailcatcher_url_env_is_ignored(self):
+        # The base URL is fixed at localhost:1080 and takes no override. A
+        # hostile MAILCATCHER_URL env var must have no effect: the script still
+        # queries localhost:1080 and never contacts the attacker host. This is
+        # the regression guard for the removed base-URL override.
         code, out, _err, fake, _sleep = self._run(
             {
-                f"{flag_base}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
-                f"{flag_base}/messages/1.plain": "https://localhost:8080/#/verify?t=flag",
+                f"{BASE}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
+                f"{BASE}/messages/1.plain": "Click https://localhost:8080/#/verify?t=safe to continue",
             },
-            argv=[
-                "--recipient", "user@bitwarden.test", "--pattern", "verify",
-                "--mailcatcher-url", flag_base,
-            ],
-            env={"MAILCATCHER_URL": env_base},
+            env={"MAILCATCHER_URL": "https://attacker.example/leak"},
         )
         self.assertEqual(code, 0)
-        self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=flag")
-        self.assertNotIn(f"{env_base}/messages", fake.calls)
-
-    def test_allowed_host_flag_permits_custom_base(self):
-        # A base on a non-default host is rejected by check_base unless the
-        # host is added; --allowed-host adds it inside the granted argv shape.
-        base = "http://mail.custom.test:1080"
-        code, out, _err, _fake, _sleep = self._run(
-            {
-                f"{base}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
-                f"{base}/messages/1.plain": "https://localhost:8080/#/verify?t=host",
-            },
-            argv=[
-                "--recipient", "user@bitwarden.test", "--pattern", "verify",
-                "--mailcatcher-url", base, "--allowed-host", "mail.custom.test",
-            ],
-        )
-        self.assertEqual(code, 0)
-        self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=host")
-
-    def test_custom_base_without_allowed_host_flag_exits_3(self):
-        err = io.StringIO()
-        with mock.patch("sys.stderr", err):
-            code = read_mailcatcher.main(
-                ["--recipient", "user@bitwarden.test",
-                 "--mailcatcher-url", "http://mail.custom.test:1080"],
-                {},
-            )
-        self.assertEqual(code, 3)
-        self.assertIn("not an allowed local dev host", err.getvalue())
+        self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=safe")
+        self.assertTrue(all(url.startswith(BASE) for url in fake.calls))
+        self.assertFalse(any("attacker.example" in url for url in fake.calls))
 
     def test_missing_recipient_exits_2(self):
         with mock.patch("sys.stderr", new_callable=io.StringIO):
@@ -353,41 +293,6 @@ class MainTest(unittest.TestCase):
             code = read_mailcatcher.main(["--recipient", ""], {})
         self.assertEqual(code, 2)
         self.assertIn("ERROR: --recipient is required", err.getvalue())
-
-
-class CheckBaseTest(unittest.TestCase):
-    def test_default_base_is_allowed(self):
-        allowed = read_mailcatcher.allowed_hosts({})
-        read_mailcatcher.check_base("http://localhost:1080", allowed)
-
-    def test_non_default_port_on_allowed_host_is_fine(self):
-        allowed = read_mailcatcher.allowed_hosts({})
-        read_mailcatcher.check_base("http://127.0.0.1:2080", allowed)
-
-    def test_remote_host_is_rejected(self):
-        allowed = read_mailcatcher.allowed_hosts({})
-        with self.assertRaises(read_mailcatcher.Unreachable):
-            read_mailcatcher.check_base("https://attacker.example/leak", allowed)
-
-    def test_non_http_scheme_is_rejected(self):
-        allowed = read_mailcatcher.allowed_hosts({})
-        with self.assertRaises(read_mailcatcher.Unreachable):
-            read_mailcatcher.check_base("file:///etc/passwd", allowed)
-
-    def test_operator_added_host_is_allowed(self):
-        allowed = read_mailcatcher.allowed_hosts(
-            {"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "mail.dev.internal"}
-        )
-        read_mailcatcher.check_base("http://mail.dev.internal:1080", allowed)
-
-
-class MainRejectsBadBaseTest(unittest.TestCase):
-    def test_disallowed_base_exits_3(self):
-        rc = read_mailcatcher.main(
-            ["--recipient", "x@example.com"],
-            {"MAILCATCHER_URL": "https://attacker.example/leak"},
-        )
-        self.assertEqual(rc, 3)
 
 
 class _QuietHandler(http.server.BaseHTTPRequestHandler):
