@@ -2,9 +2,11 @@
 
 Only read operations are listed. Creating, updating, deleting, attaching, detaching, paying, voiding, finalizing, cancelling, refunding, or closing any resource is out of scope for this read-only skill. The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
 
-Every operation below is a `stripe_cli.py read --path <path>` call. The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
+> **Substitute the skill directory before running.** These commands use the `${CLAUDE_SKILL_DIR}/` placeholder for readability. When the skill runs, `${CLAUDE_SKILL_DIR}` is already set in its environment and the shell expands it for you. If you run one by hand from a plain shell where that variable is not set, resolve it first with `printenv CLAUDE_SKILL_DIR` (or set it to this skill's absolute directory) and invoke the script by that absolute path, which is what matches the grant without prompting; a relative path would not.
 
-Search paths (`.../search`) require a `query` parameter, for example `read --path /v1/customers/search --param query="email:'qa@example.com'"`.
+Every operation below is a `${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py read --path <path>` call. The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
+
+Search paths (`.../search`) require a `query` parameter, for example `${CLAUDE_SKILL_DIR}/scripts/stripe_cli.py read --path /v1/customers/search --param query="email:'qa@example.com'"`.
 
 ## customers
 
@@ -24,14 +26,14 @@ Search paths (`.../search`) require a `query` parameter, for example `read --pat
 
 - **Base path**: `/v1/invoices` (append `/<id>` to retrieve, `/search` to search)
 - **Read operations**: retrieve, list, search
-- **Key fields**: id, customer, subscription, status, amount_due, amount_paid, amount_remaining, due_date, lines, payment_intent, hosted_invoice_url, metadata
+- **Key fields**: id, customer, parent.subscription_details.subscription (the related subscription; the top-level `subscription` field was removed in `2025-03-31.basil`), status, amount_due, amount_paid, amount_remaining, due_date, lines, payments (list; the top-level `payment_intent` field was removed in `2025-03-31.basil` — a payment intent is now reached at `payments.data.payment.payment_intent`), hosted_invoice_url, metadata
 - **Common queries**: "Show me recent invoices for this customer", "What's the payment status?"
 
 ## payment_intents
 
 - **Base path**: `/v1/payment_intents` (append `/<id>` to retrieve, `/search` to search)
 - **Read operations**: retrieve, list, search
-- **Key fields**: id, amount, currency, status, customer, payment_method, last_payment_error, charges, metadata, created
+- **Key fields**: id, amount, currency, status, customer, payment_method, last_payment_error, latest_charge (the `charges` list was replaced by this singular field in API `2022-11-15`), metadata, created
 - **Common queries**: "Why did this payment fail?", "What's the status of this payment?"
 
 ## payment_methods

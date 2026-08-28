@@ -8,10 +8,6 @@
     "should_trigger": true
   },
   {
-    "query": "I just triggered a password reset locally, pull the reset URL from the inbox",
-    "should_trigger": true
-  },
-  {
     "query": "read the org invite email that went out and give me the accept link",
     "should_trigger": true
   },

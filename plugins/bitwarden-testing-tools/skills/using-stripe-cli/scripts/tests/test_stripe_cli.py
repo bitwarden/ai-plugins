@@ -142,6 +142,49 @@ class AdvanceClockTest(unittest.TestCase):
             stripe_cli.advance_clock("clock_1", 1, run, lambda _s: None)
         self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
 
+    def test_poll_timeout_reports_partial_progress(self):
+        # Day 1 goes ready; day 2 never does, so the poll exhausts. The error
+        # must say how many days actually completed and the last frozen_time
+        # it tried, so an interrupted multi-day advance is diagnosable.
+        original_limit = stripe_cli.CLOCK_POLL_LIMIT
+        stripe_cli.CLOCK_POLL_LIMIT = 2
+        self.addCleanup(setattr, stripe_cli, "CLOCK_POLL_LIMIT", original_limit)
+        posts = {"n": 0}
+
+        def run(argv):
+            if argv[1] == "post":
+                posts["n"] += 1
+                return "{}"
+            status = "ready" if posts["n"] <= 1 else "advancing"
+            return json.dumps({"frozen_time": 1750000000, "status": status})
+
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.advance_clock("clock_1", 2, run, lambda _s: None)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
+        self.assertIn("advanced 1 of 2 day", cm.exception.message)
+        self.assertIn("1750172800", cm.exception.message)
+
+    def test_cli_failure_mid_advance_reports_partial_progress(self):
+        # A CLI failure on day 2's advance must preserve the original message
+        # and append how far the advance got before failing.
+        posts = {"n": 0}
+
+        def run(argv):
+            if argv[1] == "post":
+                posts["n"] += 1
+                if posts["n"] == 2:
+                    raise stripe_cli.GuardError(
+                        stripe_cli.EXIT_CLI, "stripe CLI failed (1): boom"
+                    )
+                return "{}"
+            return json.dumps({"frozen_time": 1750000000, "status": "ready"})
+
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.advance_clock("clock_1", 3, run, lambda _s: None)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
+        self.assertIn("boom", cm.exception.message)
+        self.assertIn("advanced 1 of 3 day", cm.exception.message)
+
 
 class MainGuardOrderingTest(unittest.TestCase):
     """The guards must run before any subprocess is spawned.
