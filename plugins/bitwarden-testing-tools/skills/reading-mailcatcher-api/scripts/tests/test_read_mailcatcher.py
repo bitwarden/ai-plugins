@@ -93,45 +93,61 @@ class SelectMessageTest(unittest.TestCase):
         self.assertEqual(read_mailcatcher.select_message(msgs, "a@b.test", "verify"), 2)
 
 
-class ExtractUrlTest(unittest.TestCase):
+class MatchingUrlsTest(unittest.TestCase):
     def setUp(self):
         self.link_filter = read_mailcatcher.DEFAULT_LINK_FILTER
 
-    def test_picks_first_url_matching_the_filter(self):
+    def test_keeps_only_urls_matching_the_filter(self):
         body = "Ignore https://localhost:8080/#/home then use https://localhost:8080/#/verify?t=1"
         self.assertEqual(
-            read_mailcatcher.extract_url(body, self.link_filter),
-            "https://localhost:8080/#/verify?t=1",
+            read_mailcatcher.matching_urls(body, self.link_filter),
+            ["https://localhost:8080/#/verify?t=1"],
         )
 
-    def test_returns_none_when_nothing_matches(self):
-        self.assertIsNone(
-            read_mailcatcher.extract_url("only https://localhost:8080/#/home here", self.link_filter)
+    def test_returns_all_matches_in_document_order(self):
+        # The caller (attempt) picks the first local one out of these, so the
+        # full ordered list must come back, not just the first match.
+        body = "first https://localhost:8080/#/login then https://localhost:8080/#/verify?t=1"
+        self.assertEqual(
+            read_mailcatcher.matching_urls(body, self.link_filter),
+            [
+                "https://localhost:8080/#/login",
+                "https://localhost:8080/#/verify?t=1",
+            ],
         )
 
-    def test_returns_none_for_empty_body(self):
-        self.assertIsNone(read_mailcatcher.extract_url("", self.link_filter))
+    def test_returns_empty_when_nothing_matches(self):
+        self.assertEqual(
+            read_mailcatcher.matching_urls("only https://localhost:8080/#/home here", self.link_filter),
+            [],
+        )
+
+    def test_returns_empty_for_empty_body(self):
+        self.assertEqual(read_mailcatcher.matching_urls("", self.link_filter), [])
 
     def test_multiline_body_does_not_glue_lines_together(self):
         # grep is line-based, so a newline can never land inside a match. The
         # regex must exclude all whitespace or these two lines would join.
-        body = "https://localhost:8080/#/verify?t=1\nhttps://localhost:8080/#/other"
+        body = "https://localhost:8080/#/verify?t=1\nhttps://localhost:8080/#/login"
         self.assertEqual(
-            read_mailcatcher.extract_url(body, self.link_filter),
-            "https://localhost:8080/#/verify?t=1",
+            read_mailcatcher.matching_urls(body, self.link_filter),
+            [
+                "https://localhost:8080/#/verify?t=1",
+                "https://localhost:8080/#/login",
+            ],
         )
 
     def test_custom_filter_is_honored(self):
         body = "https://localhost:8080/#/sso-landing"
-        self.assertEqual(read_mailcatcher.extract_url(body, "sso"), body)
+        self.assertEqual(read_mailcatcher.matching_urls(body, "sso"), [body])
 
-    def test_invalid_regex_returns_none_instead_of_raising(self):
+    def test_invalid_regex_returns_empty_instead_of_raising(self):
         # An unbalanced group is a malformed ERE. grep -iE would error out
-        # and yield no match rather than a match; extract_url must fall
-        # through to None (and thus the caller's NO_MATCH branch) the same
+        # and yield no match rather than a match; matching_urls must fall
+        # through to [] (and thus the caller's NO_MATCH branch) the same
         # way, instead of letting re.error propagate as a traceback.
         body = "https://localhost:8080/#/verify?t=1"
-        self.assertIsNone(read_mailcatcher.extract_url(body, "("))
+        self.assertEqual(read_mailcatcher.matching_urls(body, "("), [])
 
 
 class IsLocalTest(unittest.TestCase):
@@ -250,6 +266,24 @@ class MainTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("not a local dev host", err)
 
+    def test_external_footer_link_does_not_mask_a_later_local_link(self):
+        # A marketing/help footer link matches the default filter ("login")
+        # but is not a local host. It must not shadow the real local action
+        # link that follows it: the script walks every filter match and picks
+        # the first that is also local.
+        body = (
+            "Need help? https://bitwarden.com/help/login-with-device\n"
+            "Verify: https://localhost:8080/#/finish-signup?token=ABC"
+        )
+        code, out, _err, _fake, _sleep = self._run(
+            {
+                f"{BASE}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
+                f"{BASE}/messages/1.plain": body,
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(out.strip(), "https://localhost:8080/#/finish-signup?token=ABC")
+
     def test_empty_plain_body_falls_back_to_html_with_warning(self):
         code, out, err, _fake, _sleep = self._run(
             {
@@ -261,6 +295,25 @@ class MainTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(out.strip(), "https://localhost:8080/#/verify?t=z")
         self.assertIn("WARNING", err)
+
+    def test_html_fallback_unescapes_entities_in_the_link(self):
+        # The HTML body carries an href with an `&amp;` entity between query
+        # params. Extracting from raw HTML would emit the literal `&amp;` and
+        # corrupt every parameter after the first, so the HTML branch must
+        # unescape before the URL is returned.
+        href = "https://localhost:8080/#/finish-signup?token=ABC&amp;email=qa%40example.com"
+        code, out, _err, _fake, _sleep = self._run(
+            {
+                f"{BASE}/messages": messages_json(message(4, "user@bitwarden.test", "Verify your email")),
+                f"{BASE}/messages/4.plain": "",
+                f"{BASE}/messages/4.html": f'<a href="{href}">Verify</a>',
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            out.strip(),
+            "https://localhost:8080/#/finish-signup?token=ABC&email=qa%40example.com",
+        )
 
     def test_mailcatcher_url_env_is_ignored(self):
         # The base URL is fixed at localhost:1080 and takes no override. A
