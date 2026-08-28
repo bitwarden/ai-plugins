@@ -6,22 +6,20 @@ Exit 0 on success (prints the extracted URL on stdout).
 Exit 1: no matching message found, or a matched message had no local-host URL
         (diagnostic on stderr).
 Exit 2: usage error.
-Exit 3: Mailcatcher unreachable, returned invalid JSON, or MAILCATCHER_URL
-        names a host outside the local dev allowlist.
+Exit 3: Mailcatcher unreachable or returned invalid JSON.
 
 Usage:
   read_mailcatcher.py --recipient <email> [--pattern <subject-keyword>]
-                      [--link-filter <regex>] [--mailcatcher-url <url>]
-                      [--allowed-host <host> ...]
+                      [--link-filter <regex>]
 
 --pattern is optional. Omit (or pass empty) to match any subject and just take
 the most recent message for the recipient.
 
---mailcatcher-url overrides the base URL (default $MAILCATCHER_URL, else
-http://localhost:1080). --allowed-host (repeatable) adds a local dev host to
-the extracted-URL allowlist, extending $PLAYWRIGHT_TESTING_ALLOWED_HOSTS rather
-than replacing it. Both are flags so overrides stay inside the argv shape a
-leading-wildcard Bash grant matches, rather than a prompting env assignment.
+The Mailcatcher endpoint is the same across Bitwarden dev environments, so the
+base URL is fixed at http://localhost:1080 and cannot be overridden. Extracted
+URLs are still restricted to a local dev allowlist; extend it (never replace it)
+for a custom local hostname with the comma-separated PLAYWRIGHT_TESTING_ALLOWED_HOSTS
+env var.
 
 Defaults:
   --link-filter: verify|confirm|signup|token|trial|login|finish-signup
@@ -78,48 +76,21 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def allowed_hosts(env, extra=()):
+def allowed_hosts(env):
     """Local dev hosts allowed for extracted URLs.
 
-    The defaults are extended (never replaced) by both the comma-separated
-    PLAYWRIGHT_TESTING_ALLOWED_HOSTS env var and any --allowed-host flags,
-    which arrive here as `extra`. Flags and the env var stack; neither wins
-    over the other because both only ever add to the allowlist.
+    The defaults are extended (never replaced) by the comma-separated
+    PLAYWRIGHT_TESTING_ALLOWED_HOSTS env var. That var is operator-supplied
+    (a real environment assignment, not model-constructed argv), so it stays
+    outside the auto-approved `script:*` Bash grant and is a safe way to widen
+    the allowlist for a custom local hostname.
     """
     hosts = [host.lower() for host in DEFAULT_ALLOWED_HOSTS]
     for entry in env.get("PLAYWRIGHT_TESTING_ALLOWED_HOSTS", "").split(","):
         entry = entry.strip().lower()
         if entry:
             hosts.append(entry)
-    for entry in extra:
-        entry = (entry or "").strip().lower()
-        if entry:
-            hosts.append(entry)
     return tuple(hosts)
-
-
-def check_base(base, allowed):
-    """Validate the Mailcatcher base URL before the first request.
-
-    The extracted-URL allowlist was applied only to URLs found in message
-    bodies, never to the endpoint this script contacts. MAILCATCHER_URL is
-    operator-supplied, so this is defense in depth rather than a closed hole,
-    but it costs nothing and removes any dependence on how a leading-wildcard
-    Bash grant interacts with a leading env assignment. Port overrides still
-    work: the check is on host, not port.
-    """
-    parsed = urllib.parse.urlparse(base)
-    scheme = (parsed.scheme or "").lower()
-    host = (parsed.hostname or "").lower()
-    if scheme not in ("http", "https") or not host:
-        raise Unreachable(f"MAILCATCHER_URL is not a valid http(s) URL: {base}")
-    if host not in allowed:
-        raise Unreachable(
-            f"MAILCATCHER_URL host '{host}' is not an allowed local dev host. "
-            f"Allowed: {' '.join(allowed)}. "
-            "For a custom local hostname, set "
-            "PLAYWRIGHT_TESTING_ALLOWED_HOSTS=<host>[,<host>...]."
-        )
 
 
 def _http_get(url):
@@ -132,9 +103,9 @@ def _http_get(url):
     Unreachable, as does any transport failure.
 
     No TLS bypass here: the bash original used plain `curl -fsS` with no
-    `-k`, so an https base gets normal certificate verification. The base
-    itself is validated against the same host allowlist before any request
-    (see check_base).
+    `-k`, so an https base gets normal certificate verification. The base is
+    the fixed local http://localhost:1080 endpoint, not a caller-supplied
+    value, so there is no untrusted host to validate before the request.
     """
     opener = urllib.request.build_opener(_NoRedirectHandler)
     try:
@@ -260,14 +231,6 @@ def main(argv, env):
     parser.add_argument("--recipient", required=True)
     parser.add_argument("--pattern", default="")
     parser.add_argument("--link-filter", default=DEFAULT_LINK_FILTER)
-    # --mailcatcher-url / --allowed-host let the base-URL and allowlist
-    # overrides ride inside the granted `script *` argv shape. A leading
-    # `MAILCATCHER_URL=... read_mailcatcher.py` env assignment would move the
-    # command off the script path and miss the allowed-tools grant, prompting
-    # every run; a flag does not. Both default to the env vars, so the flag
-    # wins when given, the env var otherwise, the built-in default last.
-    parser.add_argument("--mailcatcher-url", default=None)
-    parser.add_argument("--allowed-host", action="append", default=[], metavar="HOST")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -277,15 +240,12 @@ def main(argv, env):
         print("ERROR: --recipient is required", file=sys.stderr)
         return EXIT_USAGE
 
-    base = (
-        args.mailcatcher_url or env.get("MAILCATCHER_URL") or DEFAULT_MAILCATCHER_URL
-    ).rstrip("/")
-    allowed = allowed_hosts(env, args.allowed_host)
-    try:
-        check_base(base, allowed)
-    except Unreachable as err:
-        print(f"ERROR: {err}", file=sys.stderr)
-        return EXIT_UNREACHABLE
+    # The Mailcatcher endpoint is identical across Bitwarden dev environments,
+    # so the base URL is fixed here rather than taken from argv or the
+    # environment. Keeping it out of the auto-approved `script:*` argv shape
+    # means a granted call can never point the fetch at an arbitrary host.
+    base = DEFAULT_MAILCATCHER_URL
+    allowed = allowed_hosts(env)
     settled = {3: EXIT_UNREACHABLE, 2: EXIT_NO_MATCH}
 
     code, url = attempt(base, args.recipient, args.pattern, args.link_filter, allowed)
