@@ -34,6 +34,7 @@ If MCP tools are not available (web app context), ask the user to paste the rele
 The #release Slack thread is posted weekly and specifies which feature flags are toggled for the release. This is critical for two reasons:
 
 - **Include**: Only user-facing changes whose feature flag is being enabled in this release (or that have no flag) should appear in the notes.
+- **Flags enabled with no matching issue in this release**: A flag being enabled is almost always because the feature it guards is going generally available. Often all the engineering work behind that flag already shipped in earlier releases, so this release's Jira list may contain zero issues for it — the enablement itself, not any ticket in the current `fixVersion`, is the user-facing event. Never let "no matching issue in this release" be a reason to drop a flag that the thread lists as enabled; instead resolve what it guards (see Step 3) and write a bullet for it.
 - **Server releases — flag removals**: When a feature flag is being fully removed from the server codebase, this signals that self-hosted users are gaining access to the feature. These must appear in the release notes.
 
 Ask the user to paste the thread content.
@@ -44,6 +45,8 @@ Parse the thread to extract:
 - List of flags being **enabled** for this release (per platform if specified)
 - List of flags being **removed** (for server releases — capture both the flag identifier and any associated feature description from the ticket or thread)
 - Any PM or engineering notes about what to highlight or suppress
+
+For every flag in the **enabled** list, check it against the issues gathered in Step 1a. If none of those issues reference the flag, do not assume there is nothing to report — flag this for the lookup described in Step 3 before writing the notes.
 
 ## Step 2: Determine Release Scope
 
@@ -69,6 +72,7 @@ Go through every issue in the release and classify it. Only items that pass the 
 - New onboarding flows, product tours, or setup wizards
 - Checkout, billing, or subscription flow changes
 - Items whose feature flag is confirmed **enabled** in this release's Slack thread
+- Flags confirmed **enabled** in the Slack thread even when no issue in this release's Jira list references them — resolve what the flag guards (see below) rather than skipping it
 
 ### Collapse into the catch-all line
 
@@ -83,6 +87,18 @@ Go through every issue in the release and classify it. Only items that pass the 
 ### Always include (never collapse) — server releases only
 
 Feature flags that are **fully removed** from the server codebase in this release. Flag removal is the moment self-hosted users gain access to a feature. Write each removal as a user-facing line describing what the feature does — not the internal flag identifier. See Step 4 for format.
+
+### Always include (never collapse) — flags enabled without a matching release issue
+
+For every flag the Slack thread lists as **enabled**, check whether any issue gathered in Step 1a references it. If none do, the work behind the flag almost certainly shipped in an earlier release and is only now going live — this is still a reportable, user-facing event and must not be silently dropped just because it has no ticket in the current release.
+
+Resolve what the flag guards, in this order:
+
+1. Search Jira for the flag identifier as free text, without restricting to this release's `fixVersion` (e.g. `text ~ "flag-identifier" ORDER BY created ASC`), to find the ticket(s) that originally implemented the feature.
+2. If a ticket is found, use its summary/description to write a plain-language, user-facing line about the feature going live.
+3. If nothing turns up, ask the user for a one-line description of what the flag enables — do not guess or invent functionality.
+
+Write the resulting line the same way any other named bullet is written (Step 4 format rules), and never include the flag identifier itself.
 
 ### Exclude entirely
 
@@ -125,6 +141,16 @@ Removed feature flag for organization vault collection management improvements
 
 Self-hosted users are the primary audience for this line — they are receiving the feature for the first time when the flag is removed, so the description should communicate the benefit clearly.
 
+### Flags enabled for previously-shipped work
+
+When a flag in the Slack thread's **enabled** list has no matching issue in this release (resolved per Step 3), write a normal named bullet describing the feature going live — phrased the same as any other `Added`/`Updated` line. Do not call out that it was "previously shipped" or reference the flag mechanics; users only care that the feature is now available to them.
+
+Example: the Slack thread lists `pm-40021-item-share-preview` as enabled, but every issue tagged with that flag shipped two releases ago and none appear in this release's Jira list. A Jira search for the flag identifier turns up the original ticket, "Add preview before sharing vault items." The resulting line:
+
+```
+Added a preview step before sharing vault items
+```
+
 ### Example output (clients release)
 
 ```
@@ -150,6 +176,7 @@ Various under-the-hood improvements and minor bug fixes
 Before presenting the final output, check:
 
 - [ ] Every named bullet has its corresponding feature flag enabled in the Slack thread (or has no flag)
+- [ ] Every flag in the Slack thread's enabled list has been checked against this release's Jira issues; any with no matching issue was resolved via lookup (not dropped) and has a bullet
 - [ ] No internal or infrastructure-only changes appear as named bullets
 - [ ] Server releases include a line for every flag removal mentioned in the Slack thread, written in user-facing language
 - [ ] No internal flag identifiers appear anywhere in the output

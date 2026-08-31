@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Product Analyst plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2026-08-31
+
+### Changed
+
+- `writing-release-notes` skill now treats every feature flag the Slack thread lists as **enabled** as a candidate release-notes bullet, even when this release's Jira list has no matching issue for it. Previously the skill only surfaced flags whose work shipped in the same release; in practice a flag is often enabled after its underlying work already shipped in earlier releases, so enabling those flags was being silently dropped from the notes. The skill now resolves what an unmatched flag guards (Jira search across all versions, then asking the user) and writes a normal user-facing bullet for it.
+
 ## [0.1.6] - 2026-08-04
 
 ### Added
