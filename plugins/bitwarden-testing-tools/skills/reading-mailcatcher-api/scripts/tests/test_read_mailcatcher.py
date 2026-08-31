@@ -165,12 +165,12 @@ class IsLocalTest(unittest.TestCase):
         self.assertFalse(read_mailcatcher.is_local("https://localhost@evil.com/x", self.allowed))
 
     def test_env_extension_honored(self):
-        allowed = read_mailcatcher.allowed_hosts({"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "dev.local"})
+        allowed = read_mailcatcher.allowed_hosts({"MAILCATCHER_ALLOWED_HOSTS": "dev.local"})
         self.assertTrue(read_mailcatcher.is_local("http://dev.local/x", allowed))
 
     def test_env_extension_accepts_multiple_hosts(self):
         allowed = read_mailcatcher.allowed_hosts(
-            {"PLAYWRIGHT_TESTING_ALLOWED_HOSTS": "one.local, two.local"}
+            {"MAILCATCHER_ALLOWED_HOSTS": "one.local, two.local"}
         )
         self.assertTrue(read_mailcatcher.is_local("http://one.local/x", allowed))
         self.assertTrue(read_mailcatcher.is_local("http://two.local/x", allowed))
@@ -264,7 +264,36 @@ class MainTest(unittest.TestCase):
             }
         )
         self.assertEqual(code, 1)
-        self.assertIn("not a local dev host", err)
+        self.assertIn("local dev host", err)
+        self.assertIn("evil.com", err)
+
+    def test_multiple_non_local_urls_report_all_rejected_hosts(self):
+        # Several external links all match the filter; the diagnostic must name
+        # every rejected host and the count, not just the first candidate.
+        body = "Login https://evil.com/login and verify https://bad.example/verify"
+        code, _out, err, _fake, _sleep = self._run(
+            {
+                f"{BASE}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
+                f"{BASE}/messages/1.plain": body,
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("2 filter-matched", err)
+        self.assertIn("evil.com", err)
+        self.assertIn("bad.example", err)
+
+    def test_unreachable_during_body_fetch_exits_3(self):
+        # Mailcatcher answers the message list, then goes down before the body
+        # fetch: both the .plain and .html fetches are unreachable. That is an
+        # outage (exit 3), not a link-filter miss (exit 1), and there is no retry.
+        code, _out, err, _fake, sleeper = self._run(
+            {
+                f"{BASE}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
+            }
+        )
+        self.assertEqual(code, 3)
+        self.assertIn("unreachable", err.lower())
+        sleeper.assert_not_called()
 
     def test_external_footer_link_does_not_mask_a_later_local_link(self):
         # A marketing/help footer link matches the default filter ("login")
