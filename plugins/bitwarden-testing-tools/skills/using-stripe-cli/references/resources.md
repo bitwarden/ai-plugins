@@ -91,3 +91,11 @@ Search paths (`.../search`) require a `query` parameter, for example `${CLAUDE_P
 - **Read operations**: retrieve, list
 - **Key fields**: id, customer, subscription, status, current_phase, phases (items, start_date, end_date), end_behavior, metadata, created
 - **Common queries**: "Does this subscription have a schedule?", "What phases are on this schedule?", "When does the next phase start?"
+
+## test_clocks
+
+- **Base path**: `/v1/test_helpers/test_clocks` (append `/<id>` to retrieve)
+- **Read operations**: retrieve, list
+- **Key fields**: id, status (one of `advancing`, `internal_failure`, `ready`), frozen_time (the simulated current time), name, created, deletes_after
+- **Common queries**: "What's the current `frozen_time` on this test clock?", "Is the clock `ready` or still `advancing`?", "Where did a partial advance leave the clock?"
+- **Note**: This is the read side of the one permitted write — advancing an already-attached clock — documented in the skill body. Get a subscription's clock id from its `test_clock` field, then read `/v1/test_helpers/test_clocks/<id>`.
