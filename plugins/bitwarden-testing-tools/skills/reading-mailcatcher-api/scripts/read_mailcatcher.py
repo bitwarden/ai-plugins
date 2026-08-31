@@ -18,7 +18,7 @@ the most recent message for the recipient.
 The Mailcatcher endpoint is the same across Bitwarden dev environments, so the
 base URL is fixed at http://localhost:1080 and cannot be overridden. Extracted
 URLs are still restricted to a local dev allowlist; extend it (never replace it)
-for a custom local hostname with the comma-separated PLAYWRIGHT_TESTING_ALLOWED_HOSTS
+for a custom local hostname with the comma-separated MAILCATCHER_ALLOWED_HOSTS
 env var.
 
 Defaults:
@@ -41,7 +41,7 @@ import urllib.request
 DEFAULT_MAILCATCHER_URL = "http://localhost:1080"
 DEFAULT_LINK_FILTER = "verify|confirm|signup|token|trial|login|finish-signup"
 # Local dev hosts allowed for extracted URLs. Extend (never replace) via the
-# comma-separated env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS.
+# comma-separated env var MAILCATCHER_ALLOWED_HOSTS.
 DEFAULT_ALLOWED_HOSTS = ("localhost", "127.0.0.1", "::1", "bitwarden.test")
 # Whitespace terminates a URL. grep is line-based, so the bash original could
 # never match across a newline; excluding all whitespace preserves that.
@@ -81,13 +81,13 @@ def allowed_hosts(env):
     """Local dev hosts allowed for extracted URLs.
 
     The defaults are extended (never replaced) by the comma-separated
-    PLAYWRIGHT_TESTING_ALLOWED_HOSTS env var. That var is operator-supplied
+    MAILCATCHER_ALLOWED_HOSTS env var. That var is operator-supplied
     (a real environment assignment, not model-constructed argv), so it stays
     outside the auto-approved `script:*` Bash grant and is a safe way to widen
     the allowlist for a custom local hostname.
     """
     hosts = [host.lower() for host in DEFAULT_ALLOWED_HOSTS]
-    for entry in env.get("PLAYWRIGHT_TESTING_ALLOWED_HOSTS", "").split(","):
+    for entry in env.get("MAILCATCHER_ALLOWED_HOSTS", "").split(","):
         entry = entry.strip().lower()
         if entry:
             hosts.append(entry)
@@ -118,14 +118,6 @@ def _http_get(url):
         raise Unreachable(str(err))
     except (urllib.error.URLError, OSError) as err:
         raise Unreachable(str(err))
-
-
-def _http_get_or_empty(url):
-    """curl -fsS ... || true: a failed body fetch yields empty, not an error."""
-    try:
-        return _http_get(url)
-    except Unreachable:
-        return ""
 
 
 def fetch_messages(base):
@@ -163,20 +155,39 @@ def select_message(messages, recipient, pattern):
 
 
 def fetch_body(base, message_id):
-    body = _http_get_or_empty(f"{base}/messages/{message_id}.plain")
-    if not body:
+    """Return the message body, preferring plain text and falling back to HTML.
+
+    Distinguishes a genuinely empty plain part (Mailcatcher reachable, no plain
+    body) from an outage that strikes between the message-list fetch and the
+    body fetch. If BOTH the plain and HTML fetches fail to reach Mailcatcher,
+    raise Unreachable so the caller reports EXIT_UNREACHABLE rather than
+    mislabeling an outage as a link-filter miss.
+    """
+    try:
+        plain = _http_get(f"{base}/messages/{message_id}.plain")
+    except Unreachable:
+        plain = None
+    if plain:
+        return plain
+    if plain is not None:
+        # Reached Mailcatcher, but the plain part was empty: fall back to HTML.
         print(
             f"WARNING: plain body empty for message {message_id}; "
             "using HTML body for URL extraction",
             file=sys.stderr,
         )
-        # HTML href attributes carry entity-encoded ampersands (`&amp;`)
-        # between query params. Unescaping here, on the HTML branch only, keeps
-        # the plain path byte-exact while making the extracted link usable
-        # rather than corrupt from the first `&` onward. Whitespace-terminated
-        # URL matching is unaffected: `&amp;`/`%40` are not whitespace either way.
-        body = html.unescape(_http_get_or_empty(f"{base}/messages/{message_id}.html"))
-    return body
+    # HTML href attributes carry entity-encoded ampersands (`&amp;`) between
+    # query params. Unescaping here, on the HTML branch only, keeps the plain
+    # path byte-exact while making the extracted link usable rather than corrupt
+    # from the first `&` onward. Whitespace-terminated URL matching is
+    # unaffected: `&amp;`/`%40` are not whitespace either way.
+    try:
+        return html.unescape(_http_get(f"{base}/messages/{message_id}.html"))
+    except Unreachable:
+        if plain is None:
+            # Neither part could be reached: an outage, not an empty body.
+            raise
+        return ""
 
 
 def matching_urls(body, link_filter):
@@ -200,12 +211,16 @@ def matching_urls(body, link_filter):
         return []
 
 
-def is_local(url, allowed):
+def _hostname(url):
+    """Lowercased hostname of url, or '' if it cannot be parsed."""
     try:
-        host = (urllib.parse.urlparse(url).hostname or "").lower()
+        return (urllib.parse.urlparse(url).hostname or "").lower()
     except ValueError:
-        return False
-    return host in allowed
+        return ""
+
+
+def is_local(url, allowed):
+    return _hostname(url) in allowed
 
 
 def attempt(base, recipient, pattern, link_filter, allowed):
@@ -223,7 +238,12 @@ def attempt(base, recipient, pattern, link_filter, allowed):
     message_id = select_message(messages, recipient, pattern)
     if message_id is None:
         return 1, None
-    candidates = matching_urls(fetch_body(base, message_id), link_filter)
+    try:
+        body = fetch_body(base, message_id)
+    except Unreachable as err:
+        print(f"ERROR: Mailcatcher unreachable at {base}: {err}", file=sys.stderr)
+        return 3, None
+    candidates = matching_urls(body, link_filter)
     if not candidates:
         print(
             f"NO_MATCH: message {message_id} matched but contained no URL "
@@ -233,8 +253,10 @@ def attempt(base, recipient, pattern, link_filter, allowed):
         return 2, None
     url = next((c for c in candidates if is_local(c, allowed)), None)
     if url is None:
+        rejected = sorted({_hostname(c) for c in candidates} - {""})
         print(
-            f"NO_MATCH: extracted URL '{candidates[0]}' is not a local dev host",
+            f"NO_MATCH: none of the {len(candidates)} filter-matched URL(s) is a "
+            f"local dev host; rejected host(s): {', '.join(rejected) or '(unparseable)'}",
             file=sys.stderr,
         )
         return 2, None
