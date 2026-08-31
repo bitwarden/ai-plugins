@@ -62,6 +62,14 @@ Write manual test cases for PM-35944, the free-user health upgrade banner.
 Turn these acceptance criteria into Gherkin test cases I can import into Testmo.
 ```
 
+```
+Grab the verification link from the email Mailcatcher just received for qa+trial@example.com.
+```
+
+```
+What's the status of test subscription sub_abc123, and is a test clock attached?
+```
+
 ## References
 
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
