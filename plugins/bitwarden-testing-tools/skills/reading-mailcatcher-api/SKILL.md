@@ -1,6 +1,6 @@
 ---
 name: reading-mailcatcher-api
-description: Read an email from the local Bitwarden Mailcatcher inbox and extract a URL or token from it. Use for account verification links, magic-link logins, trial activations, organization invites, emergency access, and other email-driven flows in local testing. Queries the Mailcatcher REST API at http://localhost:1080 by recipient and subject; preferred over the browser UI in automation because Playwright CORS blocks direct fetch. Do NOT use it to configure SMTP, start Mailcatcher, or debug delivery.
+description: This skill should be used when a local testing or debugging flow needs a link or token from an email, such as account verification links, magic-link logins, trial activations, organization invites, emergency access, and other email-driven flows. It reads an email from the local Bitwarden Mailcatcher inbox and extracts a URL or token, querying the Mailcatcher REST API at http://localhost:1080 by recipient and subject; preferred over the browser UI in automation because Playwright CORS blocks direct fetch. Do NOT use it to configure SMTP, start Mailcatcher, or debug delivery.
 argument-hint: "--recipient <email> [--pattern <subject-keyword>] [--link-filter <regex>]"
 allowed-tools: "Read, Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py:*), Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/get_admin_email.py:*)"
 ---
