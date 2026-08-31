@@ -71,6 +71,14 @@ Should I add integration tests for the SsoController change, or are unit tests e
 Recommend which tests to add and at which layer for PM-32009.
 ```
 
+```
+Grab the verification link from the email Mailcatcher just received for qa+trial@example.com.
+```
+
+```
+What's the status of test subscription sub_abc123, and is a test clock attached?
+```
+
 ## References
 
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
