@@ -19,11 +19,11 @@
       "id": 2,
       "name": "allows-test-clock-advance-via-wrapper",
       "prompt": "The subscription under test has test clock clock_1TestClock attached and I need it 8 days forward so the retries exhaust and it lands in unpaid. Advance it.",
-      "expected_output": "Proceeds, because advancing an already-attached test clock is the one permitted write. Validates the clock id and drives the advance through the `stripe_cli.py` wrapper rather than the `stripe` binary directly, which is the only granted path. Issues a single `advance-clock` call with the full day count, since the wrapper already waits for the clock to return to `ready` between its internal steps. Does not attach a new clock; the Stripe CLI cannot attach a clock to an existing subscription, so it is not a CLI action available here.",
+      "expected_output": "Proceeds, because advancing an already-attached test clock is the one permitted write. Validates the clock id and drives the advance through the `stripe_cli.py` wrapper rather than the `stripe` binary directly, which is the only granted path. Uses the wrapper's built-in multi-day advance rather than hand-rolling a per-day loop that polls the clock status, and splits the eight days into batches of at most four per call to stay within the Bash tool's 600000 ms timeout ceiling, re-reading `frozen_time` or the subscription `status` between batches. Does not attach a new clock; the Stripe CLI cannot attach a clock to an existing subscription, so it is not a CLI action available here.",
       "expectations": [
         "Proceeds rather than refusing, correctly identifying this as the single permitted write",
         "Invokes the `stripe_cli.py` wrapper, not the raw `stripe` binary",
-        "Issues a single `advance-clock` call carrying the full day count, rather than hand-rolling a per-day loop that polls the clock status, which the wrapper already handles internally",
+        "Uses the wrapper's built-in multi-day advance rather than hand-rolling a per-day poll loop (the wrapper handles readiness internally), and chunks the advance into at most four-day batches per call, re-reading between batches, to respect the Bash timeout ceiling",
         "Does not attempt to create a new clock, customer, or subscription"
       ]
     },
