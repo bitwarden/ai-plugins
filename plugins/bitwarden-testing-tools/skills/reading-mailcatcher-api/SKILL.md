@@ -22,7 +22,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
 ```
 
 - **`--pattern`** is optional; omit it to select the most recent message for the recipient
-- **`--link-filter`** is optional; it defaults to `verify|confirm|signup|token|trial|login|finish-signup`. This is the value the exit rows below tell you to "loosen or fix", so it is what you are starting from
+- **`--link-filter`** is optional; it defaults to `verify|confirm|signup|token|trial|login|finish-signup` — the starting filter that the exit-1 rows below may tell you to loosen or fix
 - **stdout** (on success): the extracted URL, ready to navigate to or paste into a form field
 - **exit code** (on failure): see the table below
 
