@@ -9,26 +9,15 @@ Trigger-rate diagnostic for the `bitwarden-testing-tools:reading-mailcatcher-api
 
 ## Running
 
-Run against an isolated `CLAUDE_CONFIG_DIR` seeded from your real one, never your live config: isolation pins the skill inventory the model is choosing among (so the reading is reproducible) and forces the install to come from this worktree rather than a published copy. Relocating the config root leaves it unauthenticated, so the credential file gets copied in too.
+See [the shared eval runbook](../../../scripts/running-evals.md) for prerequisites, pinning the plugin's skill inventory, and the `claude` shim. Then, from this directory with the shim on `PATH`:
 
 ```bash
-WT="$(git rev-parse --show-toplevel)"
-ISO="$(mktemp -d)"          # 0700; holds a copy of your OAuth token, so keep it private
-trap 'rm -rf "$ISO"' EXIT   # cleans up on normal exit or Ctrl-C, but not on SIGKILL
-cp ~/.claude/.credentials.json ~/.claude/settings.json "$ISO/"
-[ -f ~/.claude.json ] && cp ~/.claude.json "$ISO/.claude.json"
-CLAUDE_CONFIG_DIR="$ISO" claude plugin marketplace add "$WT"
-CLAUDE_CONFIG_DIR="$ISO" claude plugin install bitwarden-testing-tools@bitwarden-marketplace
-
-cd "$WT/plugins/bitwarden-testing-tools/skills/reading-mailcatcher-api/evals"
-CLAUDE_CONFIG_DIR="$ISO" python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
+python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
 ```
-
-Measure against the four-skill foundation inventory: `assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, and `writing-manual-test-cases`. If the run is `SIGKILL`ed (the trap won't fire), delete `$ISO` by hand so the token copy isn't left under `$TMPDIR`.
 
 ## Last observed reading
 
-Recorded 2026-08-25 with `claude-opus-4-8` at 3 runs per query, measured against the four-skill foundation inventory (`assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, `writing-manual-test-cases`): should-trigger 9/9, should-not-trigger 10/10. (The 2026-08-25 run passed all 10 should-trigger phrasings then in the set; the password-reset phrasing was removed afterward because the skill documents no password-reset pattern, leaving the 9 above.)
+Recorded 2026-09-01 with `claude-opus-4-8` at 3 runs per query, measured against the four-skill foundation inventory (`assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, `writing-manual-test-cases`): should-trigger 9/9, should-not-trigger 10/10. (An earlier 2026-08-25 run passed all 10 should-trigger phrasings then in the set; the password-reset phrasing was removed afterward because the skill documents no password-reset pattern, leaving the 9 above.)
 
 ## When to run
 
