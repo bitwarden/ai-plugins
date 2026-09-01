@@ -37,7 +37,7 @@ Every failure carries a documented exit code:
 
 ## When to refuse
 
-This is read-only Stripe access, not a way to set up test state. Refuse any request to create, update, cancel, or delete a Stripe object — the sole write exception is advancing an already-attached test clock — and refuse to manufacture state through Stripe, a direct database edit, or a feature-flag flip when Bitwarden's own product flows can produce it. Give the read-only rule and the "drive the real flow" rule as the reason, never a capability limit and never a raw `stripe` call as a workaround; driving the real flow is also the more faithful test, since it exercises the code under review. See `references/redirecting-writes.md` for the sanctioned flow each such request belongs to.
+This is read-only Stripe access, not a way to set up test state. Refuse any request to create, update, cancel, or delete a Stripe object — the sole write exception is advancing an already-attached test clock — and refuse to manufacture state through Stripe, a direct database edit, or a feature-flag flip when Bitwarden's own product flows can produce it. Give the read-only rule and the "drive the real flow" rule as the reason, never a capability limit and never a raw `stripe` call as a workaround; driving the real flow is also the more faithful test, since it exercises the code under review. See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/references/redirecting-writes.md` for the sanctioned flow each such request belongs to.
 
 Reading Stripe data to _drive_ one of those flows is the canonical permitted case — for example, listing the coupon ids that already exist in the test account so the Admin portal import has real values to use.
 
@@ -94,7 +94,7 @@ To read the clock object directly — for instance to check its `frozen_time` or
 ${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path /v1/test_helpers/test_clocks/clock_abc123
 ```
 
-See `references/resources.md` for its key fields and the meaning of each `status` value.
+See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/references/resources.md` for its key fields and the meaning of each `status` value.
 
 Advance a clock with a single wrapper call per batch; the wrapper waits for the clock to return to `ready` between its internal steps, so no per-day loop is needed:
 
@@ -102,7 +102,7 @@ Advance a clock with a single wrapper call per batch; the wrapper waits for the 
 ${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py advance-clock --clock <clock_id> --days 4
 ```
 
-This call is long-running: the wrapper polls for the clock to return to `ready` after each simulated day, up to 120s per day. The Bash tool's timeout caps at `600000` ms (10 minutes) — its hard maximum — which covers at most **four** days of _polling_ (4 × 120s = 480s), not the eight-day worst case (960s). That 480s counts only the poll sleeps; each simulated day also issues one advance plus up to 60 status reads, whose CLI round-trip latency is not included, so a slow four-day batch can still approach the ceiling. Advance in batches of at most four days per call at `timeout: 600000` — drop to three if a batch runs close to the limit: run one batch, re-read the clock's `frozen_time` (or the subscription `status`), then issue the next batch for the remaining days.
+This call is long-running: the wrapper polls for the clock to return to `ready` after each simulated day (up to ~120s per day). Because the Bash tool's timeout maxes out at `600000` ms (10 minutes, its hard ceiling), a single call reliably covers only about **four** simulated days. So advance in batches of at most four days per call at `timeout: 600000`, drop to three if a batch runs close to the limit, and re-read the clock's `frozen_time` (or the subscription `status`) between batches before issuing the next.
 
 A batch can fail two ways, and they look different on the output:
 
