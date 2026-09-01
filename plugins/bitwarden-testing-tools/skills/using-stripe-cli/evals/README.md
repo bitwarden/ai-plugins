@@ -12,30 +12,17 @@ No `baseline.json` or `behavior-baseline.json` is committed. A trigger baseline 
 
 ## Running
 
-Run against an isolated `CLAUDE_CONFIG_DIR` seeded from your real one, never your live config: isolation pins the skill inventory the model is choosing among (so the reading is reproducible) and forces the install to come from this worktree rather than a published copy. Relocating the config root leaves it unauthenticated, so the credential file gets copied in too.
+See [the shared eval runbook](../../../scripts/running-evals.md) for prerequisites, pinning the plugin's skill inventory, and the `claude` shim. Then, from this directory with the shim on `PATH`:
 
 ```bash
-WT="$(git rev-parse --show-toplevel)"
-ISO="$(mktemp -d)"          # 0700; holds a copy of your OAuth token, so keep it private
-trap 'rm -rf "$ISO"' EXIT   # cleans up on normal exit or Ctrl-C, but not on SIGKILL
-cp ~/.claude/.credentials.json ~/.claude/settings.json "$ISO/"
-[ -f ~/.claude.json ] && cp ~/.claude.json "$ISO/.claude.json"
-CLAUDE_CONFIG_DIR="$ISO" claude plugin marketplace add "$WT"
-CLAUDE_CONFIG_DIR="$ISO" claude plugin install bitwarden-testing-tools@bitwarden-marketplace
-
-cd "$WT/plugins/bitwarden-testing-tools/skills/using-stripe-cli/evals"
-CLAUDE_CONFIG_DIR="$ISO" python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
+python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
 ```
-
-Measure against the four-skill foundation inventory: `assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, and `writing-manual-test-cases`. If the run is `SIGKILL`ed (the trap won't fire), delete `$ISO` by hand so the token copy isn't left under `$TMPDIR`.
 
 The behavior suite runs separately, through `/skill-creator:skill-creator` in Benchmark mode with a config-blind grader, and has no scriptable command here.
 
 ## Last observed reading
 
-Recorded 2026-08-25 with `claude-opus-4-8` at 3 runs per query, measured against the four-skill foundation inventory (`assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, `writing-manual-test-cases`): should-trigger 10/10, should-not-trigger 10/10.
-
-This reading predates the 2026-09-01 `description` clarification ("data the web UI cannot show" → "data Bitwarden's own web vault and Admin portal cannot show") and has not been re-measured against it. Re-run the trigger suite to refresh the reading before relying on it.
+Recorded 2026-09-01 with `claude-opus-4-8` at 3 runs per query, measured against the four-skill foundation inventory (`assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, `writing-manual-test-cases`): should-trigger 10/10, should-not-trigger 10/10, every query unanimous. This reading reflects the current `description` ("Stripe data Bitwarden's own web vault and Admin portal cannot show").
 
 ## When to run
 
