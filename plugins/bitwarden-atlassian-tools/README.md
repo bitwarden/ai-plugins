@@ -96,7 +96,7 @@ All three tools default to a dry run that returns the exact payload without send
 | `link_issues`       | Link two work items. For a dependency, takes `blockerKey` and `blockedKey` and maps them onto Jira's inward/outward sides internally so the direction cannot be inverted            |
 | `add_issue_comment` | Add a plain-text comment to an existing issue. Blank lines split the text into separate paragraphs                                                                                  |
 
-The classic `write:jira-work` scope alone covers all three write tools — it grants creating and editing issues and posting comments as the user. For a **scoped (granular)** write token, add these instead, on top of the read scopes above:
+Write tokens need write scopes in addition to the read scopes above:
 
 | Scope                         | Required for                                                       |
 | ----------------------------- | ------------------------------------------------------------------ |
@@ -108,6 +108,8 @@ The classic `write:jira-work` scope alone covers all three write tools — it gr
 | `write:comment:jira`          | `create_issue`, `link_issues` (scope-only), `add_issue_comment`    |
 | `write:comment.property:jira` | `create_issue` (required even though it never sends a comment)     |
 | `write:attachment:jira`       | `create_issue` (required even though it never sends an attachment) |
+
+`write:jira-work` (the classic, non-granular scope) is also required to leave comments — it's an alternative to `write:comment:jira` for tokens that use classic scopes instead of granular ones.
 
 Grant the **whole** set, not a subset — a token holding only some of them fails every write with `401 Unauthorized; scope does not match`. For a scoped write token covering all three write tools, that's:
 
