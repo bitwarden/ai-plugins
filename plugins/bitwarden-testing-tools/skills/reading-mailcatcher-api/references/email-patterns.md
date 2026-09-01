@@ -2,8 +2,6 @@
 
 Each section gives the subject, recipient, and link format for a Bitwarden email, followed by the sanctioned `read_mailcatcher.py` invocation that extracts its link. Run the co-located script; curl and direct API calls are not sanctioned transports here (see `manual-api-walkthrough.md`, which exists for debugging the script itself).
 
-> **Substitute the plugin root before running.** The commands below use the `${CLAUDE_PLUGIN_ROOT}/` placeholder for readability. When the skill runs, `${CLAUDE_PLUGIN_ROOT}` is already set in its environment and the shell expands it for you, and it is the same variable the skill's `allowed-tools` grant is written against, so an expanded invocation auto-approves without a prompt. (`${CLAUDE_SKILL_DIR}` is deliberately not used here: it is not currently substituted inside `allowed-tools` permission matchers, so a grant written against it would prompt on every call.) If you run one of these commands by hand from a plain shell where the variable is not set, resolve it first with `printenv CLAUDE_PLUGIN_ROOT` (or set it to this plugin's absolute directory) and invoke the script by that absolute path; a relative path would not match the grant.
-
 ## Account Verification (New Registration)
 
 **Subject:** `Verify Your Email`
