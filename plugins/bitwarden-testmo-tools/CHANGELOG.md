@@ -5,6 +5,25 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-09-01
+
+### Fixed
+
+- Every runnable command in `SKILL.md` addressed the scripts and specs with a cwd-relative path
+  (`python3 scripts/testmo_create_run.py --spec specs/<run>.json`). An installed plugin lives in the plugin
+  cache while the working directory is the user's own repository, so both halves of that command resolved
+  to files that do not exist. All five invocations now go through `${CLAUDE_PLUGIN_ROOT}`, the convention
+  already used by `bitwarden-devops-engineer`, `bitwarden-security-engineer`, `bitwarden-delivery-tools`,
+  `bitwarden-init`, and `claude-config-validator`.
+
+### Added
+
+- `SKILL.md`: a "Locating the scripts and specs" section explaining why paths go through
+  `${CLAUDE_PLUGIN_ROOT}`, and noting that a user's own spec is passed by its real path. Each command block
+  sets a `SKILL` shorthand of its own, since shell state does not carry between commands.
+- `README.md`: a note that its examples are relative to the plugin directory and need a
+  `${CLAUDE_PLUGIN_ROOT}/` prefix when the plugin is installed.
+
 ## [0.4.3] - 2026-09-01
 
 ### Fixed

@@ -38,7 +38,9 @@ The `creating-regression-runs` skill drives the workflow. In Claude Code:
 
 > Create the bimonthly regression run for this period in Testmo.
 
-Or run the bundled script directly. It defaults to a **dry-run** and only writes when `--create` is passed:
+Or run the bundled script directly. It defaults to a **dry-run** and only writes when `--create` is passed.
+The paths below are relative to this plugin directory — from an installed plugin, prefix them with
+`${CLAUDE_PLUGIN_ROOT}/`, since the scripts live in the plugin cache rather than your working directory:
 
 ```bash
 # Dry-run: show matched case count and the run payload, create nothing

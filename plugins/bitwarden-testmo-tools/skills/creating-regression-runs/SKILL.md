@@ -17,6 +17,19 @@ filter spec, and — only when explicitly told to — creates the run via the Te
   commit, or pass the value as a command-line argument (argv is readable by other local users).
 - `python3` available on `PATH` (the scripts use only the standard library).
 
+## Locating the scripts and specs
+
+The scripts and the committed specs ship **inside the installed plugin**, not in the user's working
+directory. Always address them through `${CLAUDE_PLUGIN_ROOT}`; a bare `scripts/…` or `specs/…` path
+resolves against whatever repository the user happens to be in and will not exist. Every command below
+opens by setting a shorthand, because shell state does not carry over between commands:
+
+```bash
+SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
+```
+
+A user's own spec file is the exception — pass its real path, wherever it lives.
+
 ## API reference
 
 - **Base:** `https://bitwarden.testmo.net/api/v1`, auth header `Authorization: Bearer $TESTMO_API_KEY`.
@@ -36,12 +49,13 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
 ## Workflow
 
 1. **Define or load the filter spec** (see schema below). Start from
-   `specs/regression-run.template.json`. Commit one spec file per recurring run so it is reviewable and
-   reproducible.
+   `${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs/specs/regression-run.template.json`. Commit one
+   spec file per recurring run so it is reviewable and reproducible.
 2. **Dry-run the spec** and confirm the matched case count, the sample cases, and the run payload look
    right:
    ```bash
-   python3 scripts/testmo_create_run.py --spec specs/<run>.json
+   SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
+   python3 "$SKILL/scripts/testmo_create_run.py" --spec "$SKILL/specs/<run>.json"
    ```
    A dry-run reads live data but writes nothing, so this is the review step for a new spec as well as for
    each period's run. Compare the count against the previous cycle — a large swing usually means a
@@ -50,7 +64,8 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
    (`GET /projects/1/runs`) before creating another.
 4. **Create the run** only after the dry-run is reviewed:
    ```bash
-   python3 scripts/testmo_create_run.py --spec specs/<run>.json --create
+   SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
+   python3 "$SKILL/scripts/testmo_create_run.py" --spec "$SKILL/specs/<run>.json" --create
    ```
 
 ## Filter-spec schema
@@ -241,11 +256,12 @@ Release membership lives in `release-profiles.json` — each profile lists its s
 - **`full`** — `common` + CLI + the 3 Desktop and 4 Extension configuration variants. No BWDC.
 
 ```bash
+SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
 # 1. Create the period's milestone in the Testmo UI, e.g. "2026.8.0 Manual Regression".
 # 2. Dry-run the whole release (prints a run/case-count summary; creates nothing):
-python3 scripts/setup_release_runs.py --release full --milestone-name "2026.8.0 Manual Regression"
+python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "2026.8.0 Manual Regression"
 # 3. Create them all once the summary looks right:
-python3 scripts/setup_release_runs.py --release full --milestone-name "2026.8.0 Manual Regression" --create
+python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "2026.8.0 Manual Regression" --create
 ```
 
 It resolves the milestone by name (fails if missing/ambiguous — the API can't create milestones), derives
@@ -258,7 +274,8 @@ when a release does not need one of the profile's runs. Spec names are the file 
 the `.json`:
 
 ```bash
-python3 scripts/setup_release_runs.py --release partial \
+SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
+python3 "$SKILL/scripts/setup_release_runs.py" --release partial \
   --milestone-name "2026.8.1 Manual Regression" \
   --exclude directory-connector-regression --create
 ```
