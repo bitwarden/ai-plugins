@@ -2,8 +2,6 @@
 
 Only read operations are listed. Creating, updating, deleting, attaching, detaching, paying, voiding, finalizing, cancelling, refunding, or closing any resource is out of scope for this read-only skill. The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
 
-> **Substitute the plugin root before running.** These commands use the `${CLAUDE_PLUGIN_ROOT}/` placeholder for readability. When the skill runs, `${CLAUDE_PLUGIN_ROOT}` is already set in its environment and the shell expands it for you, and it is the same variable the skill's `allowed-tools` grant is written against, so an expanded invocation auto-approves without a prompt. (`${CLAUDE_SKILL_DIR}` is deliberately not used here: it is not currently substituted inside `allowed-tools` permission matchers, so a grant written against it would prompt on every call.) If you run one by hand from a plain shell where the variable is not set, resolve it first with `printenv CLAUDE_PLUGIN_ROOT` (or set it to this plugin's absolute directory) and invoke the script by that absolute path; a relative path would not match the grant.
-
 Every operation below is a `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path <path>` call. The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
 
 Search paths (`.../search`) require a `query` parameter, for example `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path /v1/customers/search --param query="email:'qa@example.com'"`.
