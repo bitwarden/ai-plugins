@@ -241,6 +241,30 @@ class MainGuardOrderingTest(unittest.TestCase):
         self.assertEqual(code, stripe_cli.EXIT_USAGE)
         self.assertEqual(self.invocations, [])
 
+    def test_over_max_days_is_a_usage_error_and_spawns_no_cli(self):
+        code, err = self._main(
+            [
+                "advance-clock", "--clock", "clock_1",
+                "--days", str(stripe_cli.MAX_ADVANCE_DAYS + 1),
+            ],
+            {},
+        )
+        self.assertEqual(code, stripe_cli.EXIT_USAGE)
+        self.assertEqual(self.invocations, [])
+        self.assertIn("at most", err)
+
+    def test_max_days_is_accepted(self):
+        # The cap is an upper *inclusive* bound: exactly MAX_ADVANCE_DAYS runs.
+        with contextlib.redirect_stdout(io.StringIO()):
+            code, _err = self._main(
+                [
+                    "advance-clock", "--clock", "clock_1",
+                    "--days", str(stripe_cli.MAX_ADVANCE_DAYS),
+                ],
+                {},
+            )
+        self.assertEqual(code, stripe_cli.EXIT_OK)
+
     def test_malformed_clock_id_spawns_no_cli(self):
         code, _err = self._main(
             ["advance-clock", "--clock", "clock_1/../../customers", "--days", "1"], {}
