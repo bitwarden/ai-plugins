@@ -48,6 +48,12 @@ CLOCK_ID_PATTERN = re.compile(r"clock_[A-Za-z0-9]+")
 CLOCK_POLL_DELAY = 2
 CLOCK_POLL_LIMIT = 60
 SECONDS_PER_DAY = 86400
+# A single advance polls up to CLOCK_POLL_LIMIT * CLOCK_POLL_DELAY seconds per
+# simulated day, so a batch larger than this cannot finish inside the Bash
+# tool's 600000 ms (10 minute) ceiling before it is killed mid-advance. Reject
+# the oversized batch up front rather than let it die partway in a state that
+# is hard to diagnose. See SKILL.md, "The one permitted write".
+MAX_ADVANCE_DAYS = 4
 
 
 class GuardError(Exception):
@@ -236,6 +242,15 @@ def main(argv, env):
             check_clock_id(args.clock)
             if args.days < 1:
                 raise GuardError(EXIT_USAGE, "--days must be at least 1")
+            if args.days > MAX_ADVANCE_DAYS:
+                raise GuardError(
+                    EXIT_USAGE,
+                    f"--days must be at most {MAX_ADVANCE_DAYS}: a single call "
+                    "cannot advance more simulated days than fit inside the Bash "
+                    "tool's 10-minute ceiling before it is killed mid-advance. "
+                    f"Split it into batches of at most {MAX_ADVANCE_DAYS} days, "
+                    "re-reading the clock status between them.",
+                )
             frozen = advance_clock(args.clock, args.days, run_cli, time.sleep)
             print(f"test clock {args.clock} advanced to frozen_time={frozen}")
     except GuardError as err:

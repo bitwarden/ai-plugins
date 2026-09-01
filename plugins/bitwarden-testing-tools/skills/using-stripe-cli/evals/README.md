@@ -12,13 +12,13 @@ No `baseline.json` or `behavior-baseline.json` is committed. A trigger baseline 
 
 ## Running
 
-Use an isolated `CLAUDE_CONFIG_DIR` so the run never touches the live harness: seed a throwaway config directory with real credentials and settings, point its marketplace at this worktree, install the plugin there, and run the suite foregrounded against that isolated config.
+Run against an isolated `CLAUDE_CONFIG_DIR` seeded from your real one, never your live config: isolation pins the skill inventory the model is choosing among (so the reading is reproducible) and forces the install to come from this worktree rather than a published copy. Relocating the config root leaves it unauthenticated, so the credential file gets copied in too.
 
 ```bash
 WT="$(git rev-parse --show-toplevel)"
-ISO="$(mktemp -d)"          # 0700 by default; keep it that way so the copied token stays private
-trap 'rm -rf "$ISO"' EXIT   # clean up even if the run is interrupted
-cp ~/.claude/.credentials.json "$ISO/"; cp ~/.claude/settings.json "$ISO/"
+ISO="$(mktemp -d)"          # 0700; holds a copy of your OAuth token, so keep it private
+trap 'rm -rf "$ISO"' EXIT   # cleans up on normal exit or Ctrl-C, but not on SIGKILL
+cp ~/.claude/.credentials.json ~/.claude/settings.json "$ISO/"
 [ -f ~/.claude.json ] && cp ~/.claude.json "$ISO/.claude.json"
 CLAUDE_CONFIG_DIR="$ISO" claude plugin marketplace add "$WT"
 CLAUDE_CONFIG_DIR="$ISO" claude plugin install bitwarden-testing-tools@bitwarden-marketplace
@@ -27,15 +27,15 @@ cd "$WT/plugins/bitwarden-testing-tools/skills/using-stripe-cli/evals"
 CLAUDE_CONFIG_DIR="$ISO" python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 5 --timeout 90 --model claude-opus-4-8 > result.json
 ```
 
-`trap … EXIT` cleans up on a normal exit or Ctrl-C, but it does not fire on `SIGKILL` or a hard reset. If the run is killed that way, delete the throwaway config directory (`$ISO`, printed by `mktemp -d`) by hand afterward so a copy of your OAuth token is not left behind under `$TMPDIR`.
-
-Trigger rates depend on which sibling skills are installed alongside this one, since the model is choosing among all of them. Run this measured against the four-skill foundation inventory: `assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, and `writing-manual-test-cases`.
+Measure against the four-skill foundation inventory: `assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, and `writing-manual-test-cases`. If the run is `SIGKILL`ed (the trap won't fire), delete `$ISO` by hand so the token copy isn't left under `$TMPDIR`.
 
 The behavior suite runs separately, through `/skill-creator:skill-creator` in Benchmark mode with a config-blind grader, and has no scriptable command here.
 
 ## Last observed reading
 
 Recorded 2026-08-25 with `claude-opus-4-8` at 3 runs per query, measured against the four-skill foundation inventory (`assessing-test-coverage`, `reading-mailcatcher-api`, `using-stripe-cli`, `writing-manual-test-cases`): should-trigger 10/10, should-not-trigger 10/10.
+
+This reading predates the 2026-09-01 `description` clarification ("data the web UI cannot show" → "data Bitwarden's own web vault and Admin portal cannot show") and has not been re-measured against it. Re-run the trigger suite to refresh the reading before relying on it.
 
 ## When to run
 

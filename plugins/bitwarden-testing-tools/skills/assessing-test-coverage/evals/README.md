@@ -9,8 +9,8 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change, spanning all four documented input types (a PR, a Jira key, a Tech Breakdown doc, and a Testmo CSV) plus branch/component/screen surfaces ("what's already tested for this PR", "which behaviors have no test today", "cross-reference this Testmo CSV against automated coverage", "inventory coverage for the surfaces in this Tech Breakdown"), and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
-- `run_real_eval.py` — thin config wrapper over the plugin's shared runner. The runner itself — spawning parallel `claude -p` subprocesses, parsing streamed tool-use events, computing per-query trigger rates, and killing each subprocess as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — now lives in `../../../scripts/eval_harness.py`, shared across the plugin's skills. See the memory note under "Running".
-- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-07-29 with `--model claude-opus-4-8` at `--runs-per-query 7`.
+- `run_real_eval.py` — thin config wrapper over the plugin's shared runner. The runner itself — spawning parallel `claude -p` subprocesses, parsing streamed tool-use events, computing per-query trigger rates, and killing each subprocess as soon as the model requests `Agent`/`Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — now lives in `../../../scripts/eval_harness.py`, shared across the plugin's skills. See the memory note under "Running".
+- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-07-29 with `--model claude-opus-4-8` at `--runs-per-query 7`, before the shared harness began bailing on an `Agent`/`Task` dispatch that does not name the target skill; a query that flips solely because of that bail is expected, not a regression, so re-record the baseline if it does.
 
 ## Running
 
@@ -28,7 +28,7 @@ python3 run_real_eval.py \
 
 20 queries × 7 runs = 140 `claude -p` invocations. With 5 workers the run takes several minutes.
 
-Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist — but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
+Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Agent`/`Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist — but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
 
 ## Regression check
 
