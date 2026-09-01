@@ -5,6 +5,26 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-09-01
+
+### Fixed
+
+- `SKILL.md`: the filter-spec schema no longer conflates the two meanings of `tags`. The example showed
+  `tags` only at the top level (where it labels the created run), while the key list beneath it — headed
+  "Every key under `filters`" — documented `tags` as a case filter. A reader following the prose to write a
+  tag-only spec would set the top-level key and leave `filters` empty, which selects **every** case in the
+  project; the zero-case guard catches only the opposite mistake. The section is now split into "Top-level
+  keys (the run payload)" and "Keys under `filters` (case selection)", with a dedicated note on `tags`
+  appearing in both and the shipped `old-client-new-server-regression.json` as the worked example.
+
+### Added
+
+- `SKILL.md`: a warning that an empty or missing `filters` block matches every case, and documentation for
+  the previously unlisted top-level keys `project_id`, `run_state_id`, `config_id`, and `note`.
+- `specs/regression-run.template.json`: a `_comment` explaining the two halves of a spec, the two meanings
+  of `tags`, the empty-`filters` hazard, and when to add a `config_id` — the template is what new specs are
+  copied from, so the distinction needs to be discoverable there.
+
 ## [0.4.2] - 2026-09-01
 
 ### Removed

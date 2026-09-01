@@ -55,6 +55,10 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
 
 ## Filter-spec schema
 
+A spec has two distinct halves. **Top-level keys describe the run that gets created**; **keys under
+`filters` select which cases go into it.** They are not interchangeable, and `tags` exists in both — see
+the warning below.
+
 ```json
 {
   "project_id": 1,
@@ -72,12 +76,32 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
 }
 ```
 
-Every key under `filters` is optional — omit a key to skip that dimension. A case must match **all**
-provided keys (keys are ANDed; multi-value lists within a key are ORed). Keys:
+### Top-level keys (the run payload)
 
-- `tags` — Testmo tag names or ids, applied **server-side** by the `/cases` API (`?tags=...`), then combined
-  with any other filters. A tag-only spec (e.g. `["oldnew"]`) needs nothing else. Prefer the tag **id** when
-  a name is ambiguous — several tag names in project 1 are duplicated.
+- `project_id` — **required.** The Testmo project the run is created in. `1` is the live Bitwarden
+  repository; every shipped spec pins it.
+- `run_name` — **required.** See [Run naming](#run-naming).
+- `run_state_id` — run state; `7` (In progress) is the default and what active runs use.
+- `milestone_id` — milestone to link the run to. Usually supplied at run time by `--milestone-id` or by
+  `setup_release_runs.py` instead of being committed.
+- `config_id` — Testmo Configuration, for platforms that ship several same-named runs (omit it otherwise).
+  See [Multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension).
+- `tags` — **labels applied to the created run.** These do _not_ select cases.
+- `note` — free-text note on the run.
+- `filters` — the case-selection block, below.
+
+### Keys under `filters` (case selection)
+
+Every key is optional — omit a key to skip that dimension. A case must match **all** provided keys (keys
+are ANDed; multi-value lists within a key are ORed).
+
+> **A spec with an empty or missing `filters` block matches every case in the project.** No filter means
+> no constraint, so `--create` would build a run of all ~13.7k project-1 cases. The zero-case guard catches
+> only the opposite mistake, so check the dry-run's case count before creating.
+
+- `tags` — **selects cases** carrying these Testmo tag names or ids, applied **server-side** by the
+  `/cases` API (`?tags=...`), then combined with any other filters. Prefer the tag **id** when a name is
+  ambiguous — several tag names in project 1 are duplicated.
 - `folder_paths` — folders by readable path, e.g. `"Web > Password Manager"`. Each expands to that folder
   **and all descendants** (set `include_subfolders: false` for exact-folder-only). Paths are OR'd. The
   script resolves paths against the live folder tree and **fails fast** if any path is unmatched, so specs
@@ -89,6 +113,23 @@ provided keys (keys are ANDed; multi-value lists within a key are ORed). Keys:
   (`[10, 23, 24]`) so newly-added _non-automated_ types are included by default.
 - `has_automation` — bool; matches the case flag. NOTE: as of 2026-07 every Regression-typed case in
   project 1 has `has_automation=false`, so this is rarely a useful filter for the manual suite.
+
+### `tags` in both halves
+
+A **tag-only spec** — one where membership in the run is defined purely by a Testmo tag — must set
+`filters.tags`. Setting only the top-level `tags` labels the run and selects nothing, which leaves the
+spec matching every case in the project. Shipped example
+(`specs/old-client-new-server-regression.json`), which sets both deliberately:
+
+```json
+{
+  "project_id": 1,
+  "run_name": "Old Client / New Server",
+  "run_state_id": 7,
+  "tags": ["oldnew"],
+  "filters": { "tags": ["oldnew"] }
+}
+```
 
 The script refuses to create a run matching zero cases.
 
