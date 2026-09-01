@@ -35,18 +35,9 @@ ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
 | 2    | usage error (bad or missing arguments)                                             | fix the invocation                                                                                                                                                     |
 | 3    | Mailcatcher unreachable or returned invalid JSON                                   | Mailcatcher is not running or unreachable; start it with `docker compose --profile mail up -d mail` from `server/dev/` in your `bitwarden/server` checkout, then retry |
 
-The script already retries once after a 3-second sleep on the first miss; callers don't need their own retry loop. See `references/manual-api-walkthrough.md` for the underlying Mailcatcher API the script wraps — consult it when modifying the script or debugging unexpected output.
+The script already retries once after a 3-second sleep on the first miss; callers don't need their own retry loop. See `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/references/manual-api-walkthrough.md` for the underlying Mailcatcher API the script wraps — consult it when modifying the script or debugging unexpected output.
 
-A second granted helper, `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/get_admin_email.py`, prints the Bitwarden dev admin address (read only from `adminSettings.admins` in your `bitwarden/server` checkout's `dev/secrets.json`). Use it to supply `--recipient` for the Admin Portal magic-link flow. Its exit codes differ from the table above: 2 = usage error; 3 = the secrets file is missing, unreadable, invalid JSON, or has no `adminSettings.admins` key. See `references/email-patterns.md` for the exact invocation, the `--secrets-file` override, and the `--all` flag.
-
-## When to Use
-
-Invoke this skill whenever a workflow needs to:
-
-- Click a verification link sent to a new account's email
-- Log into the Admin Portal via magic link
-- Activate a trial or invite via a link in a welcome/trial email
-- Extract a token embedded in a link from an email body
+A second granted helper, `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/get_admin_email.py`, prints the Bitwarden dev admin address (read only from `adminSettings.admins` in your `bitwarden/server` checkout's `dev/secrets.json`). Use it to supply `--recipient` for the Admin Portal magic-link flow. Its exit codes differ from the table above: 2 = usage error; 3 = the secrets file is missing, unreadable, invalid JSON, or has no `adminSettings.admins` key. See `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/references/email-patterns.md` for the exact invocation, the `--secrets-file` override, and the `--all` flag.
 
 ## Prerequisites
 
@@ -56,7 +47,7 @@ The script always reads Mailcatcher at `http://localhost:1080`, the fixed endpoi
 
 ## Common Email Types and Patterns
 
-See `references/email-patterns.md` for subject lines, link formats, and extraction commands for each email type: account verification, Admin Portal magic link, trial activation, organization invite, emergency access, and the welcome email.
+See `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/references/email-patterns.md` for subject lines, link formats, and extraction commands for each email type: account verification, Admin Portal magic link, trial activation, organization invite, emergency access, and the welcome email.
 
 ## Important Notes
 
