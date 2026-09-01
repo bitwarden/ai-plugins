@@ -13,9 +13,9 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 
 ## Prerequisites
 
-- `TESTMO_API_KEY` exported in the environment. Reference it only by variable — never print, echo, log, or
-  commit the value.
-- `python3` and `curl` available on `PATH`.
+- `TESTMO_API_KEY` exported in the environment. Reference it only by variable — never print, echo, log,
+  commit, or pass the value as a command-line argument (argv is readable by other local users).
+- `python3` available on `PATH` (the scripts use only the standard library).
 
 ## API reference
 

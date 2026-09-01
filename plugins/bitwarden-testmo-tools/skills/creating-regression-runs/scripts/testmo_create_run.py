@@ -2,7 +2,9 @@
 """Create a Testmo run from a reviewable JSON filter spec.
 
 Reproduces the manual "filter cases -> create run" workflow via the API so it is repeatable.
-Read-only unless --create is passed. Never prints the API key.
+Read-only unless --create is passed. The API key is read from the environment and only ever
+travels in an in-process request header — never printed, and never placed on a command line
+(argv is world-readable via `ps`).
 
 Filter model (all keys under "filters" are optional; a case must match every key present):
   tags                    list of Testmo tag names or ids. Applied server-side via the /cases API
@@ -21,24 +23,36 @@ Filter model (all keys under "filters" are optional; a case must match every key
                           (e.g. [10, 23, 24] = Automated / Automated-Android / Automated-iOS).
   has_automation          bool; case has_automation flag must equal this.
 """
-import argparse, json, os, subprocess, sys
+import argparse, json, os, sys, urllib.error, urllib.request
 
 BASE = "https://bitwarden.testmo.net/api/v1"
 KEY = os.environ.get("TESTMO_API_KEY")
+TIMEOUT = 60
 
 def call(method, path, body=None):
+    """Issue a Testmo API request and return the decoded JSON body.
+
+    Uses urllib rather than shelling out to curl so the Authorization header stays in this
+    process. Passing it as a curl argument would expose the key to any local user for the
+    life of the request (`ps auxww`, /proc/<pid>/cmdline).
+    """
     if not KEY:
         sys.exit("TESTMO_API_KEY not set")
-    cmd = ["curl", "-sS", "-m", "60", "-X", method, BASE + path,
-           "-H", f"Authorization: Bearer {KEY}",
-           "-H", "Accept: application/json"]
-    if body is not None:
-        cmd += ["-H", "Content-Type: application/json", "--data-binary", "@-"]
-    out = subprocess.run(cmd, input=json.dumps(body) if body is not None else None,
-                         capture_output=True, text=True)
-    if out.returncode != 0:
-        sys.exit(f"curl failed: {out.stderr.strip()}")
-    return json.loads(out.stdout)
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(BASE + path, data=data, method=method)
+    req.add_header("Authorization", f"Bearer {KEY}")
+    req.add_header("Accept", "application/json")
+    if data is not None:
+        req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        # e.read() is the API's error body; it echoes the request but not the auth header.
+        detail = e.read().decode(errors="replace").strip()
+        sys.exit(f"{method} {path} failed: HTTP {e.code} {e.reason}\n{detail}")
+    except urllib.error.URLError as e:
+        sys.exit(f"{method} {path} failed: {e.reason}")
 
 def fetch_all(project, resource, query=""):
     out, page = [], 1

@@ -29,8 +29,8 @@ Install from the Bitwarden AI Plugins marketplace:
 ### Prerequisites
 
 - A Testmo API key exported as `TESTMO_API_KEY` in your shell environment (e.g. `~/.zshrc`).
-  The key is read from the environment and never printed or committed.
-- `python3` and `curl` on your `PATH`.
+  The key is read from the environment and never printed, committed, or passed on a command line.
+- `python3` on your `PATH` (the scripts use only the standard library).
 
 ## Usage
 

@@ -5,6 +5,23 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-09-01
+
+### Security
+
+- `scripts/testmo_create_run.py` no longer shells out to `curl`, which received the Testmo API key as a
+  command-line argument (`-H "Authorization: Bearer $KEY"`). Process arguments are readable by any local
+  user for the life of the request — via `ps auxww` on macOS, and `ps` or `/proc/<pid>/cmdline` on Linux,
+  which does not enable `hidepid` by default. `setup_release_runs.py` issues one such request per page per
+  spec, so a release setup left the key exposed across dozens of requests. Requests now go through
+  `urllib.request` with the header set in-process, so the key never leaves the Python process.
+
+### Changed
+
+- Dropped the `curl` prerequisite: the scripts now use only the Python standard library, which also makes
+  them portable to Windows shells without `curl` on `PATH`. Documented in `README.md` and `SKILL.md`.
+- API errors now report the HTTP status, reason, and response body (previously only curl's stderr).
+
 ## [0.4.0] - 2026-08-28
 
 ### Added
