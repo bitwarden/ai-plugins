@@ -20,8 +20,10 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 ## API reference
 
 - **Base:** `https://bitwarden.testmo.net/api/v1`, auth header `Authorization: Bearer $TESTMO_API_KEY`.
-- **Projects:** `1` = **Bitwarden** (live: ~13.7k cases), `2` = **Pretend** (sandbox — safe for write
-  tests), `11` = Automation - Test, `14` = Archive.
+- **Projects:** `1` = **Bitwarden** (live: ~13.7k cases), `2` = **Pretend** (sandbox), `11` = Automation -
+  Test, `14` = Archive. Every shipped spec targets project `1`. Project `2` is safe for exercising the
+  script's write path, but it does **not** mirror project 1's folders, tags, or configurations, so a spec
+  cannot be validated there — a dry-run against it proves nothing about the case set the spec will select.
 - **Pagination quirk:** `per_page` only accepts specific values (100 works; 5/10 return HTTP 422). Omit
   `per_page` and page with `page=N`; responses carry `next_page`/`last_page`.
 - **Read endpoints (GET):** `/projects/{id}/cases`, `/projects/{id}/folders`, `/projects/{id}/milestones`,
@@ -36,15 +38,17 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
 1. **Define or load the filter spec** (see schema below). Start from
    `specs/regression-run.template.json`. Commit one spec file per recurring run so it is reviewable and
    reproducible.
-2. **Dry-run against the sandbox (project `2`) first** when validating a new spec or a script change:
+2. **Dry-run the spec** and confirm the matched case count, the sample cases, and the run payload look
+   right:
    ```bash
    python3 scripts/testmo_create_run.py --spec specs/<run>.json
    ```
-   Review the matched case count and the run payload it prints.
-3. **Dry-run against live (project `1`)** and confirm the case count and sample look right.
-4. **Idempotency check:** confirm a run for this period/milestone does not already exist
+   A dry-run reads live data but writes nothing, so this is the review step for a new spec as well as for
+   each period's run. Compare the count against the previous cycle — a large swing usually means a
+   renamed folder or a changed tag rather than real repository churn.
+3. **Idempotency check:** confirm a run for this period/milestone does not already exist
    (`GET /projects/1/runs`) before creating another.
-5. **Create the run** only after the dry-run is reviewed:
+4. **Create the run** only after the dry-run is reviewed:
    ```bash
    python3 scripts/testmo_create_run.py --spec specs/<run>.json --create
    ```
@@ -163,7 +167,8 @@ otherwise the variants would be indistinguishable from each other. Fill it in fr
 ## Guardrails
 
 - **Dry-run by default** — the script writes only with `--create`.
-- **Sandbox first** — validate new specs against project `2` before touching project `1`.
+- **Review the dry-run** — a dry-run reads live project `1` data and writes nothing, so it is the real
+  guardrail. Check the case count against the previous cycle before `--create`.
 - **Idempotent** — do not create a duplicate run for a period/milestone.
 - **Committed specs** — prefer a reviewed spec file over ad-hoc arguments.
 - **Never expose the key** — reference `TESTMO_API_KEY` only.
@@ -204,8 +209,8 @@ python3 scripts/setup_release_runs.py --release full --milestone-name "2026.8.0 
 
 It resolves the milestone by name (fails if missing/ambiguous — the API can't create milestones), derives
 `--period` from the milestone name (override with `--period`), fetches cases/folders once for the whole
-set, and links every run to the milestone. Default project is 1; override with `--project` (e.g. 2 for
-sandbox testing).
+set, and links every run to the milestone. Default project is 1; `--project` overrides it for the whole
+pass, ignoring each spec's `project_id`.
 
 **Skipping a component for one release** — use `--exclude <spec-name>` (repeatable, or comma-separated)
 when a release does not need one of the profile's runs. Spec names are the file names in `specs/` without

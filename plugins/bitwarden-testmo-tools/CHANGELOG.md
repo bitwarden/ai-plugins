@@ -5,6 +5,27 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-09-01
+
+### Removed
+
+- The "sandbox first" guardrail, which could not be followed as written. `SKILL.md` step 2 told the reader
+  to dry-run against project `2`, but `testmo_create_run.py` takes its project solely from the spec's
+  `project_id`, and every shipped spec — including the template — pins `1`. The documented command always
+  hit live project 1. It was dropped rather than made executable: the sandbox does not mirror project 1's
+  folders, tags, or configurations, so a dry-run there cannot validate the case set a spec selects. The
+  same instruction is removed from `SKILL.md`'s guardrail list and `README.md`'s safety list.
+
+### Changed
+
+- `SKILL.md`: the workflow is now four steps, with the (unchanged) live dry-run as the review step for new
+  specs as well as each period's run, and guidance to compare the case count against the previous cycle.
+- `SKILL.md`: the project list now records what project `2` is and is not good for, so the guardrail is not
+  reintroduced; the `setup_release_runs.py --project` note describes what the flag does instead of
+  suggesting sandbox testing.
+- `README.md`: the dry-run safety bullet notes that a dry-run only reads, and documents the fail-fast on
+  unresolved folder paths.
+
 ## [0.4.1] - 2026-09-01
 
 ### Security

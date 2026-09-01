@@ -14,8 +14,8 @@ repeatable and reviewable:
 - **Create regression runs** from a JSON filter spec (folders, test types, teams, automation type, case
   state, `has_automation`), with a mandatory dry-run before anything is written.
 
-Writes mutate the live Testmo instance, so the workflow is built around review: dry-run first, sandbox
-project for testing, idempotency checks, and a committed spec per run.
+Writes mutate the live Testmo instance, so the workflow is built around review: dry-run first,
+idempotency checks, and a committed spec per run.
 
 ## Installation
 
@@ -55,7 +55,7 @@ workflow, guardrails, and the filter-spec schema. A template lives at
 ## Safety
 
 - **Never commit credentials.** The API key is referenced only via `TESTMO_API_KEY`.
-- **Dry-run by default.** Runs are created only with an explicit `--create` flag, after review.
-- **Test against the sandbox first.** Project `2` (Pretend) is safe for write tests; project `1` is the
-  live Bitwarden repository.
-- The script refuses to create a run that matches zero cases.
+- **Dry-run by default.** Runs are created only with an explicit `--create` flag, after review. A dry-run
+  reads the live repository (project `1`) and writes nothing, so it is safe to repeat.
+- The script refuses to create a run that matches zero cases, and fails fast when a spec references a
+  folder that no longer exists rather than silently selecting fewer cases.
