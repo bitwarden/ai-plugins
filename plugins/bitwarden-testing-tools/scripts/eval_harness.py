@@ -8,7 +8,9 @@ installed skill and is portable across environments. Read-only `gh`/`git`
 lookups (see EvalConfig.read_only_bash) are scanned past, but any other
 real-work tool (see EvalConfig.exec_tools) bails to avoid the adversarial
 should-not-trigger queries cloning repos and spawning toolchains until they
-exhaust memory.
+exhaust memory. A direct sub-agent dispatch (`Agent`, or the legacy `Task`) is
+treated as real work the same way: if its `subagent_type` does not name the
+target skill, run_query bails on it ahead of the generic `exec_tools` check.
 
 Each skill's `evals/run_real_eval.py` is a thin wrapper that builds an
 `EvalConfig` for its own target skill token and calls `main(config)`.

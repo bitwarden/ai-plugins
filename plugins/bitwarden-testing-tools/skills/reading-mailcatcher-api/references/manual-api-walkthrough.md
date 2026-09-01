@@ -63,7 +63,7 @@ print(best['id'])
 
 **Handle both outcomes before proceeding:**
 
-- `NO_MATCH` — no matching email yet; wait 3–5 seconds and retry (up to ~30 s total before giving up)
+- `NO_MATCH` — no matching email yet; `read_mailcatcher.py` retries once after a 3 s sleep (`RETRY_DELAY`), so when stepping through by hand, wait ~3 s and retry once — if it is still missing, the message has most likely not been sent
 - A numeric ID — proceed to Step 3
 
 **When filtering:**
@@ -94,7 +94,7 @@ curl -s http://localhost:1080/messages/<message-id>.html
 
 ```bash
 curl -s http://localhost:1080/messages/<message-id>.plain | \
-  grep -oE 'https?://[^ >)"]+' | grep -i 'verify\|confirm\|signup\|token\|trial\|login' | head -1
+  grep -oE 'https?://[^ >)"]+' | grep -i 'verify\|confirm\|signup\|token\|trial\|login\|finish-signup' | head -1
 ```
 
 **Extract an admin magic link:**

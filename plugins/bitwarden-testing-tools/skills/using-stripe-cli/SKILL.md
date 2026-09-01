@@ -1,6 +1,6 @@
 ---
 name: using-stripe-cli
-description: Query read-only Stripe test-mode data and advance an already-attached test clock. Use when a local test or debugging task needs Stripe data the web UI cannot show, for example listing coupon or price IDs, checking a subscription's status or attached test clock, or tracing why a test-mode payment failed. Read-only except for advancing an existing test clock. Do NOT use it to write Stripe integration code, to create, update, or delete any Stripe object, or to query live or production data.
+description: Query read-only Stripe test-mode data and advance an already-attached test clock. Use when a local test or debugging task needs Stripe data Bitwarden's own web vault and Admin portal cannot show, for example listing coupon or price IDs, checking a subscription's status or attached test clock, or tracing why a test-mode payment failed. Read-only except for advancing an existing test clock. Do NOT use it to write Stripe integration code, to create, update, or delete any Stripe object, or to query live or production data.
 argument-hint: "read --path /v1/<resource> [--param k=v] | advance-clock --clock <clock_id> --days <n>"
 allowed-tools: "Read, Bash(${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py:*)"
 ---
@@ -26,14 +26,14 @@ If a step would require live data, STOP and report it as an obstacle.
 
 Every failure carries a documented exit code:
 
-| Exit | Meaning                                                                                             | Correct response                                                  |
-| ---- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 20   | malformed `--path` (not a `/v1/` resource) or `--clock` id                                          | fix the request; don't retry                                      |
-| 21   | `STRIPE_API_KEY` is set to a live key                                                               | report as an obstacle; don't work around it                       |
-| 2    | malformed invocation (e.g. `--days` below 1)                                                        | fix the arguments                                                 |
-| 1    | Stripe CLI not installed (per stderr)                                                               | report that it needs installing, then `stripe login`              |
-| 1    | `advance-clock` failed partway (CLI errored mid-loop; `ERROR:` line names `advanced N of M day(s)`) | resume — see "The one permitted write" below                      |
-| 1    | any other Stripe CLI failure (often a 404 from a mistyped `cus_`/`sub_` id)                         | report the stderr message and the path; don't retry or substitute |
+| Exit | Meaning                                                                                                                                                                               | Correct response                                                                        |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 20   | malformed `--path` (not a `/v1/` resource) or `--clock` id                                                                                                                            | fix the request; don't retry                                                            |
+| 21   | `STRIPE_API_KEY` is set to a live key                                                                                                                                                 | report as an obstacle; don't work around it                                             |
+| 2    | malformed invocation (e.g. `--days` below 1 or above 4)                                                                                                                               | fix the arguments                                                                       |
+| 1    | Stripe CLI not installed (per stderr)                                                                                                                                                 | report that it needs installing, then `stripe login`                                    |
+| 1    | `advance-clock` failed partway (the CLI errored mid-loop, or the clock never returned to `ready` within the poll window; either way the `ERROR:` line names `advanced N of M day(s)`) | resume by clock `status`, not `frozen_time` alone — see "The one permitted write" below |
+| 1    | any other Stripe CLI failure (often a 404 from a mistyped `cus_`/`sub_` id)                                                                                                           | report the stderr message and the path; don't retry or substitute                       |
 
 ## When to refuse
 
@@ -102,12 +102,13 @@ Advance a clock with a single wrapper call per batch; the wrapper waits for the 
 ${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py advance-clock --clock <clock_id> --days 4
 ```
 
-This call is long-running: the wrapper polls for the clock to return to `ready` after each simulated day (up to ~120s per day). Because the Bash tool's timeout maxes out at `600000` ms (10 minutes, its hard ceiling), a single call reliably covers only about **four** simulated days. So advance in batches of at most four days per call at `timeout: 600000`, drop to three if a batch runs close to the limit, and re-read the clock's `frozen_time` (or the subscription `status`) between batches before issuing the next.
+This call is long-running: the wrapper polls for the clock to return to `ready` after each simulated day (up to ~120s per day). Because the Bash tool's timeout maxes out at `600000` ms (10 minutes, its hard ceiling), a single call reliably covers only about **four** simulated days. So advance in batches of at most four days per call at `timeout: 600000` (the wrapper rejects `--days` above four for exactly this reason), drop to three if a batch runs close to the limit, and re-read the clock's `status` and `frozen_time` between batches before issuing the next.
 
-A batch can fail two ways, and they look different on the output:
+A batch can fail three ways, and they look different on the output:
 
-- **The Stripe CLI errors mid-loop.** The wrapper stops and its `ERROR:` line reports `advanced N of M day(s)` and the last attempted `frozen_time`. Resume from there, advancing only the days that remain.
-- **The Bash tool times out at the ceiling.** The wrapper process is killed outright, so it prints _neither_ an `advanced to frozen_time=` success line _nor_ an `ERROR:` line. Do not assume nothing happened — the clock may be partially advanced. Re-read its `frozen_time` first, then issue only the remaining days.
+- **The Stripe CLI errors mid-loop.** The wrapper stops and its `ERROR:` line reports `advanced N of M day(s)` and the last attempted `frozen_time`. Re-read the clock's `status`; once it is back to `ready`, resume, advancing only the days that remain.
+- **The poll window is exhausted.** The advance was accepted but the clock did not return to `ready` within ~120s, so the wrapper stops with an `ERROR:` line carrying the _same_ `advanced N of M day(s)` suffix as the CLI-error case. Do not mistake it for that case and resume blindly: re-read the clock and gate the resume on its `status`. If `status` is `advancing`, it is still working, so wait and re-read rather than issuing another advance (Stripe rejects an advance on a clock that is not `ready`). If `status` is `internal_failure`, the clock is dead and a retry can never succeed, so stop and report it (see the `status` values in `references/resources.md`).
+- **The Bash tool times out at the ceiling.** The wrapper process is killed outright, so it prints _neither_ an `advanced to frozen_time=` success line _nor_ an `ERROR:` line. Do not assume nothing happened — the clock may be partially advanced. Re-read its `status` and `frozen_time` first; resume only once `status` is `ready`, issuing only the remaining days.
 
 Reaching `unpaid` takes about eight simulated days against Bitwarden's current test-account dunning configuration: a payment retry fires per simulated day, and after the configured retries are exhausted the subscription transitions to `unpaid` and fires `customer.subscription.updated`. So run two four-day batches, re-reading the subscription `status` between them and after the last one. Treat eight as a starting point, not a constant: the exact retry count is a per-account setting, so confirm the state and advance further if it has not yet flipped.
 
