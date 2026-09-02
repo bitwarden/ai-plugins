@@ -91,6 +91,20 @@ def resolve_milestone(project, name):
         sys.exit(f"{len(hits)} milestones named {name!r} (ids: {ids}). Rename or use a unique name.")
     return hits[0]["id"]
 
+def existing_runs_for_milestone(project, milestone_id):
+    """Find runs already linked to this milestone, for the duplicate-release guard.
+
+    Returns (runs, checked). `checked` is False when the runs payload carries no milestone_id
+    field at all: the guard then cannot tell "no duplicates" from "cannot see the link", and the
+    caller must say so rather than report a clean result — a guardrail that quietly no-ops is
+    worse than none.
+    """
+    runs = core.fetch_all(project, "runs")
+    if runs and not any("milestone_id" in r for r in runs):
+        return [], False
+    return [r for r in runs if r.get("milestone_id") == milestone_id], True
+
+
 def derive_period(milestone_name):
     m = re.search(r"\d{4}\.\d+(?:\.\d+)?", milestone_name)
     return m.group(0) if m else None
@@ -108,6 +122,10 @@ def main():
                          "Repeatable, or comma-separated. Must name a spec in the profile — a name that "
                          "is not in it is an error, so a typo cannot silently create the run anyway.")
     ap.add_argument("--create", action="store_true", help="actually POST the runs (omit for dry-run)")
+    ap.add_argument("--allow-existing", action="store_true",
+                    help="create the runs even though this milestone already has some linked to it. "
+                         "Without this, --create refuses, so re-running the same command cannot quietly "
+                         "produce a second full set of runs.")
     args = ap.parse_args()
 
     profile_specs = load_profile(args.release)
@@ -132,6 +150,18 @@ def main():
     print(f"Period          : {period or '(none — <period> left as-is)'}")
     print(f"Project         : {project}  (from the specs)")
     print(f"Mode            : {'CREATE' if args.create else 'DRY RUN'}")
+
+    # Idempotency: a release is set up once per milestone. Check before doing any of the work, and
+    # report the result in dry-runs too, so a duplicate is visible at review time.
+    existing, checked = existing_runs_for_milestone(project, milestone_id)
+    if not checked:
+        print("Existing runs   : CANNOT CHECK — the runs API returned no milestone_id field, so a "
+              "duplicate release cannot be ruled out")
+    elif existing:
+        print(f"Existing runs   : {len(existing)} already linked to this milestone "
+              f"{'(--allow-existing given)' if args.allow_existing else '-- would refuse to create'}")
+    else:
+        print("Existing runs   : none linked to this milestone")
     print()
 
     # Fetch shared data once so N specs don't trigger N full downloads.
@@ -175,7 +205,24 @@ def main():
 
     if not args.create:
         print("\nDRY RUN — no runs created. Re-run with --create to POST all of the above.")
+        if existing:
+            print(f"NOTE: {len(existing)} run(s) are already linked to milestone {milestone_id}; "
+                  f"--create would refuse unless --allow-existing is passed.")
         return
+
+    if existing and not args.allow_existing:
+        listed = "\n".join(f"  {r.get('id')}  {r.get('name')}" for r in existing[:10])
+        more = f"\n  ... +{len(existing) - 10} more" if len(existing) > 10 else ""
+        sys.exit(
+            f"\nRefusing to create: {len(existing)} run(s) are already linked to milestone "
+            f"{milestone_id} ({args.milestone_name}):\n{listed}{more}\n"
+            f"A release is set up once per milestone, so this would produce a second full set. "
+            f"Re-run with --allow-existing if the duplicates are intended, or --exclude the specs "
+            f"that already have runs."
+        )
+    if not checked:
+        print("WARNING: could not verify whether this milestone already has runs — the runs API "
+              "returned no milestone_id field. Check the Testmo UI before continuing.")
 
     needs_config = [r[0] for r in rows if r[2] == "NEEDS CONFIG_ID"]
     if needs_config:

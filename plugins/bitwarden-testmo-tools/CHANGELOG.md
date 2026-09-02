@@ -5,6 +5,22 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-09-02
+
+### Added
+
+- `setup_release_runs.py` enforces the idempotency guardrail it documents. `SKILL.md` promised "do not
+  create a duplicate run for a period/milestone", but the manual check appeared only in the single-run
+  workflow — the "recommended" release path performed no lookup, so re-running `--create` with the same
+  `--milestone-name` silently produced a second full set of 14 runs against the live instance. The
+  orchestrator now lists the runs already linked to the resolved milestone before doing any work: a
+  dry-run reports the count, and `--create` refuses, naming up to ten of them.
+- `--allow-existing`, to create anyway when the duplicates are intended. `--exclude` remains the way to add
+  a single missing run to a milestone that is already set up.
+- The guard distinguishes "no duplicates" from "cannot tell". If the runs payload carries no
+  `milestone_id` field, it says the check was inconclusive and warns before creating, rather than
+  reporting a clean result — a guardrail that quietly no-ops is worse than none.
+
 ## [0.5.0] - 2026-09-02
 
 ### Removed

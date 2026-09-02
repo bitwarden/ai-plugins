@@ -61,7 +61,8 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
    each period's run. Compare the count against the previous cycle — a large swing usually means a
    renamed folder or a changed tag rather than real repository churn.
 3. **Idempotency check:** confirm a run for this period/milestone does not already exist
-   (`GET /projects/1/runs`) before creating another.
+   (`GET /projects/1/runs`) before creating another. This step is manual for a single run —
+   `setup_release_runs.py` performs it for you and refuses on a collision.
 4. **Create the run** only after the dry-run is reviewed:
    ```bash
    SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
@@ -225,7 +226,9 @@ otherwise the variants would be indistinguishable from each other. Fill it in fr
 - **Dry-run by default** — the script writes only with `--create`.
 - **Review the dry-run** — a dry-run reads live project `1` data and writes nothing, so it is the real
   guardrail. Check the case count against the previous cycle before `--create`.
-- **Idempotent** — do not create a duplicate run for a period/milestone.
+- **Idempotent** — do not create a duplicate run for a period/milestone. `setup_release_runs.py` enforces
+  this: it refuses to create when the milestone already has runs linked, unless `--allow-existing` is
+  passed. For a single run, check by hand (workflow step 3).
 - **Committed specs** — prefer a reviewed spec file over ad-hoc arguments.
 - **Never expose the key** — reference `TESTMO_API_KEY` only.
 
@@ -277,6 +280,12 @@ It creates as many runs as it can rather than stopping at the first failure, the
 `created / skipped / failed` tally. A partial failure names each run that did not make it — by run name
 **and** spec name, since multi-config runs share a run name — and exits non-zero, because the milestone is
 then only partly populated.
+
+**Duplicate protection.** Before doing anything, it lists the runs already linked to the resolved
+milestone. A dry-run reports the count; `--create` refuses outright, so running the same command twice
+cannot quietly produce a second full set of runs. Pass `--allow-existing` when the duplicates are
+intended, or `--exclude` the specs whose runs already exist — that is the normal way to add one missing
+run to a milestone that is already set up.
 
 **Skipping a component for one release** — use `--exclude <spec-name>` (repeatable, or comma-separated)
 when a release does not need one of the profile's runs. Spec names are the file names in `specs/` without
