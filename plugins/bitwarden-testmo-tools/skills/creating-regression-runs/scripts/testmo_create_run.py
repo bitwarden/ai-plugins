@@ -29,12 +29,23 @@ BASE = "https://bitwarden.testmo.net/api/v1"
 KEY = os.environ.get("TESTMO_API_KEY")
 TIMEOUT = 60
 
+class TestmoAPIError(Exception):
+    """A Testmo API request did not return a usable JSON response.
+
+    Raised rather than exiting so callers can decide: the single-run script aborts, while the
+    release orchestrator records the failed run and carries on to report a full tally.
+    Messages are built from the request line and the response body only, never the API key.
+    """
+
 def call(method, path, body=None):
     """Issue a Testmo API request and return the decoded JSON body.
 
     Uses urllib rather than shelling out to curl so the Authorization header stays in this
     process. Passing it as a curl argument would expose the key to any local user for the
     life of the request (`ps auxww`, /proc/<pid>/cmdline).
+
+    Any non-2xx status raises, so an expired key (401) or a rejected write (403) surfaces as an
+    error instead of an empty case list or a run "created" with id None.
     """
     if not KEY:
         sys.exit("TESTMO_API_KEY not set")
@@ -46,13 +57,21 @@ def call(method, path, body=None):
         req.add_header("Content-Type", "application/json")
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-            return json.loads(resp.read().decode())
+            raw = resp.read().decode(errors="replace")
     except urllib.error.HTTPError as e:
         # e.read() is the API's error body; it echoes the request but not the auth header.
         detail = e.read().decode(errors="replace").strip()
-        sys.exit(f"{method} {path} failed: HTTP {e.code} {e.reason}\n{detail}")
+        hint = "  (is TESTMO_API_KEY current?)" if e.code in (401, 403) else ""
+        raise TestmoAPIError(f"{method} {path} failed: HTTP {e.code} {e.reason}{hint}\n{detail[:500]}")
     except urllib.error.URLError as e:
-        sys.exit(f"{method} {path} failed: {e.reason}")
+        raise TestmoAPIError(f"{method} {path} failed: {e.reason}")
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        # A proxy or login-wall HTML page can arrive with a 200; don't let it become a traceback.
+        raise TestmoAPIError(
+            f"{method} {path} returned a non-JSON body ({e}). First 200 characters:\n{raw[:200]!r}"
+        )
 
 def fetch_all(project, resource, query=""):
     out, page = [], 1
@@ -227,8 +246,13 @@ def main():
     if not ids:
         sys.exit("Refusing to create a run with 0 cases.")
     res = call("POST", f"/projects/{project}/runs", payload)
-    rid = res.get("result", {}).get("id")
+    rid = (res.get("result") or {}).get("id")
+    if rid is None:
+        sys.exit(f"POST succeeded but the response carried no run id — nothing to link to. Response:\n{res}")
     print(f"\nCREATED run id={rid}  https://bitwarden.testmo.net/run/{rid}")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except TestmoAPIError as e:
+        sys.exit(str(e))

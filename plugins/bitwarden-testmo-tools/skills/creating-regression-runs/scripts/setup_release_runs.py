@@ -124,13 +124,13 @@ def main():
             rows.append((spec.get("run_name", name), str(len(ids)), "NEEDS CONFIG_ID"))
         else:
             rows.append((spec.get("run_name", name), str(len(ids)), "ready"))
-        results.append((spec, ids))
+        results.append((name, spec, ids))
 
     print(f"{'RUN NAME':<60}{'CASES':>7}  STATUS")
     print("-" * 86)
     for nm, cnt, status in rows:
         print(f"{nm[:59]:<60}{cnt:>7}  {status}")
-    total = sum(len(ids) for _, ids in results)
+    total = sum(len(ids) for _, _, ids in results)
     print("-" * 86)
     print(f"{'TOTAL':<60}{total:>7}  {len(results)}/{len(spec_names)} runs ready")
 
@@ -152,20 +152,57 @@ def main():
             f"{args.project}/configs and set them in the specs."
         )
 
+    # Create every run we can rather than aborting on the first failure: stopping midway through a
+    # 14-run release leaves a half-populated milestone and no record of which runs made it. Each
+    # failure is recorded and reported in the closing tally instead.
     print()
-    for spec, ids in results:
+    created, skipped, failed = [], [], []
+    for spec_name, spec, ids in results:
+        name = spec["run_name"]
+        # Multi-config runs share a run_name by design, so identify rows by spec file as well —
+        # otherwise a tally of three "Extension" failures says nothing about which ones.
+        label = f"{name}  [{spec_name}]"
         if not ids:
-            print(f"  SKIP (0 cases): {spec['run_name']}")
+            print(f"  SKIP (0 cases): {label}")
+            skipped.append(label)
             continue
-        payload = {"name": spec["run_name"], "state_id": spec.get("run_state_id", 7),
+        payload = {"name": name, "state_id": spec.get("run_state_id", 7),
                    "include_all": False, "cases": ids, "milestone_id": milestone_id}
         for k in ("config_id", "tags", "note"):
             if k in spec and spec[k] is not None:
                 payload[k] = spec[k]
-        res = core.call("POST", f"/projects/{args.project}/runs", payload)
-        rid = res.get("result", {}).get("id")
-        print(f"  CREATED run {rid}  ({len(ids)} cases)  {spec['run_name']}")
-    print(f"\nDone. All runs linked to milestone {milestone_id} ({args.milestone_name}).")
+        try:
+            res = core.call("POST", f"/projects/{args.project}/runs", payload)
+        except core.TestmoAPIError as e:
+            reason = str(e).splitlines()[0]
+            print(f"  FAILED: {label}\n           {reason}")
+            failed.append((label, reason))
+            continue
+        rid = (res.get("result") or {}).get("id")
+        if rid is None:
+            print(f"  FAILED: {label}\n           POST succeeded but the response carried no run id")
+            failed.append((label, "response carried no run id"))
+            continue
+        created.append((rid, label))
+        print(f"  CREATED run {rid}  ({len(ids)} cases)  {label}")
+
+    print(f"\n{len(created)} created, {len(skipped)} skipped (0 cases), {len(failed)} failed "
+          f"— of {len(results)} run(s) attempted.")
+    if failed:
+        print("\nNOT created:")
+        for name, reason in failed:
+            print(f"  {name} — {reason}")
+        sys.exit(
+            f"\n{len(failed)} run(s) were not created, so milestone {milestone_id} "
+            f"({args.milestone_name}) is only partially populated. Fix the cause and re-run — the "
+            f"{len(created)} run(s) above already exist, so exclude them or delete them first."
+        )
+    print(f"Done. All {len(created)} run(s) linked to milestone {milestone_id} ({args.milestone_name}).")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except core.TestmoAPIError as e:
+        # Reached only for the read phase (milestone/folder/case fetches); per-run write failures
+        # are caught in the create loop so the tally still prints.
+        sys.exit(str(e))

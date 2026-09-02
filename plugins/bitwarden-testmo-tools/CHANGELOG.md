@@ -5,6 +5,31 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2026-09-02
+
+### Fixed
+
+- A non-JSON response is no longer an unhandled traceback. `json.loads` on the response body was
+  unguarded, so a proxy or login-wall HTML page arriving with a 200 raised a bare `JSONDecodeError`. It now
+  raises `TestmoAPIError` naming the request and quoting the first 200 characters of the body.
+- `setup_release_runs.py` no longer claims success after a partial failure. A rejected POST aborted the
+  whole pass, and the final line still read "Done. All runs linked to milestone …" for runs that were never
+  created. The create loop now records each run's outcome, continues, and closes with a
+  `N created / N skipped / N failed` tally; a failure lists every run that did not make it and exits
+  non-zero, noting that the milestone is only partially populated.
+- `testmo_create_run.py` no longer reports a run it did not create. A response carrying no run id printed
+  `CREATED run id=None https://bitwarden.testmo.net/run/None`; it now exits with the response body.
+- Failure rows identify the spec file alongside the run name (`Extension [extension-linux-firefox-regression]`).
+  Multi-config runs share a `run_name` by design, so a tally of three failed `Extension` runs was
+  unactionable — the spec name is what `--exclude` takes.
+
+### Changed
+
+- API failures raise a new `TestmoAPIError` instead of calling `sys.exit` inside `call()`. The single-run
+  script still aborts on it, but the orchestrator can now catch a per-run failure and keep going. Error
+  messages are built from the request line and response body only, never the API key; HTTP 401/403 adds an
+  "is TESTMO_API_KEY current?" hint.
+
 ## [0.4.4] - 2026-09-01
 
 ### Fixed
