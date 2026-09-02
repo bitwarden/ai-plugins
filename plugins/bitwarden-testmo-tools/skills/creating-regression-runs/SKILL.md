@@ -266,8 +266,17 @@ python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "
 
 It resolves the milestone by name (fails if missing/ambiguous — the API can't create milestones), derives
 `--period` from the milestone name (override with `--period`), fetches cases/folders once for the whole
-set, and links every run to the milestone. Default project is 1; `--project` overrides it for the whole
-pass, ignoring each spec's `project_id`.
+set, and links every run to the milestone.
+
+**The target project comes from the specs.** There is no `--project` flag: the orchestrator reads
+`project_id` from every spec in the profile and refuses to run if they disagree, matching
+`testmo_create_run.py`, which has always treated the spec as authoritative. A flag that outranked each
+spec's own `project_id` could create a spec into a project it was never written for.
+
+It creates as many runs as it can rather than stopping at the first failure, then prints a
+`created / skipped / failed` tally. A partial failure names each run that did not make it — by run name
+**and** spec name, since multi-config runs share a run name — and exits non-zero, because the milestone is
+then only partly populated.
 
 **Skipping a component for one release** — use `--exclude <spec-name>` (repeatable, or comma-separated)
 when a release does not need one of the profile's runs. Spec names are the file names in `specs/` without

@@ -5,6 +5,32 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-09-02
+
+### Removed
+
+- **Breaking:** `setup_release_runs.py --project`. The flag defaulted to `1` and silently outranked every
+  spec's `project_id`, so the two entrypoints disagreed about the same file — `testmo_create_run.py` has
+  always treated `spec["project_id"]` as authoritative. A spec written for one project and run through the
+  orchestrator without a matching flag would be created into another. The flag also had no working use
+  case: project-1 folder paths do not resolve in the sandbox, so `--project 2` failed every spec at folder
+  resolution before creating anything.
+
+### Added
+
+- `resolve_project()`: the orchestrator now reads `project_id` from every spec in the profile and refuses
+  to run when they disagree, listing which specs target which project. A spec with no `project_id` is also
+  an error.
+- `load_specs()`: all specs are read and parsed up front, so a profile naming a spec with no file — or a
+  spec with malformed JSON — fails before any API call rather than mid-pass.
+
+### Changed
+
+- The run header prints `Project : N (from the specs)` in place of the flag's value.
+- A missing spec file is now a hard error at load time instead of a `MISSING SPEC` row in the summary
+  table; `FOLDER ERROR` rows still surface there.
+- Dropped an unused `os` import from `setup_release_runs.py`.
+
 ## [0.4.5] - 2026-09-02
 
 ### Fixed
