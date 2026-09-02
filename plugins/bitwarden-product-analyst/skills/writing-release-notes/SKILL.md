@@ -34,7 +34,7 @@ If MCP tools are not available (web app context), ask the user to paste the rele
 The #release Slack thread is posted weekly and specifies which feature flags are toggled for the release. This is critical for two reasons:
 
 - **Include**: Only user-facing changes whose feature flag is being enabled in this release (or that have no flag) should appear in the notes.
-- **Flags enabled with no matching issue in this release**: A flag being enabled is often a signal that the feature it guards is going generally available — but not always; some flags guard internal refactors or infrastructure work with no user-visible effect. Often all the engineering work behind an enabled flag already shipped in earlier releases, so this release's Jira list may contain zero issues for it. Don't assume "no matching issue in this release" means there's nothing to report — but don't assume it means a bullet is owed, either. Resolve what the flag guards (see Step 3) and only then decide whether it earns a bullet or the catch-all line.
+- **Flags enabled with no matching issue in this release**: don't assume there's nothing to report — see the Step 3 investigation.
 - **Server releases — flag removals**: When a feature flag is being fully removed from the server codebase, this signals that self-hosted users are gaining access to the feature. These must appear in the release notes.
 
 Ask the user to paste the thread content.
@@ -45,8 +45,6 @@ Parse the thread to extract:
 - List of flags being **enabled** for this release (per platform if specified)
 - List of flags being **removed** (for server releases — capture both the flag identifier and any associated feature description from the ticket or thread)
 - Any PM or engineering notes about what to highlight or suppress
-
-For every flag in the **enabled** list, check it against the issues gathered in Step 1a. If none of those issues reference the flag, don't assume there is nothing to report — but also don't assume a bullet is required. Flag it for the investigation described in Step 3, which decides whether it's a named bullet or the catch-all line.
 
 ## Step 2: Determine Release Scope
 
@@ -91,15 +89,15 @@ Feature flags that are **fully removed** from the server codebase in this releas
 
 ### Investigate — flags enabled without a matching release issue
 
-For every flag the Slack thread lists as **enabled**, check whether any issue gathered in Step 1a references it. If none do, don't conclude there's nothing to report and don't conclude a bullet is owed — the flag being enabled only means the underlying work is worth checking. That work may have shipped in an earlier release and is only now going live (reportable), or it may guard an internal refactor or infrastructure change that was never going to be user-facing (collapses like any other item in that category).
+For every flag the Slack thread lists as **enabled**, check whether any issue gathered in Step 1a references it. If none do, the underlying work may have shipped in an earlier release and is only now going live (reportable), or it may guard an internal refactor or infrastructure change that was never going to be user-facing (collapses like any other item in that category).
 
 Resolve what the flag guards, in this order:
 
 1. Search Jira for the flag identifier as free text, without restricting to this release's `fixVersion` (e.g. `text ~ "flag-identifier" ORDER BY created ASC`), to find the ticket(s) that originally implemented the feature.
-2. If a ticket is found, run its summary/description back through the Include / Collapse / Exclude filter above, exactly as if it were a ticket in this release.
-3. If nothing turns up, ask the user for a one-line description of what the flag enables, and classify that description the same way — do not guess or invent functionality.
+2. If a ticket is found, run its summary/description back through the Include / Collapse / Exclude filter above. Judge whether the guarded work itself is user-visible.
+3. If nothing turns up, or if `search_issues` is unavailable, ask the user for a one-line description of what the flag enables, and classify that description the same way — do not guess or invent functionality.
 
-If the filter says it's user-facing, write a plain-language line about the feature going live (Step 4 format rules), and never include the flag identifier itself. If the filter says it collapses or excludes, let it fall into the catch-all line or drop it, same as any other item in that category.
+If the filter says it's user-facing, write a plain-language line about the feature going live (Step 4 format rules). If the filter says it collapses or excludes, let it fall into the catch-all line or drop it, same as any other item in that category.
 
 ### Exclude entirely
 
@@ -179,7 +177,8 @@ Various under-the-hood improvements and minor bug fixes
 Before presenting the final output, check:
 
 - [ ] Every named bullet has its corresponding feature flag enabled in the Slack thread (or has no flag)
-- [ ] Every flag in the Slack thread's enabled list has been checked against this release's Jira issues; any with no matching issue was resolved via lookup (not dropped) and either has a bullet or was deliberately collapsed
+- [ ] Every flag in the Slack thread's enabled list has been checked against this release's Jira issues
+- [ ] Any flag with no matching issue was resolved by lookup or by asking the user, then given a bullet, collapsed, or excluded
 - [ ] No internal or infrastructure-only changes appear as named bullets
 - [ ] Server releases include a line for every flag removal mentioned in the Slack thread, written in user-facing language
 - [ ] No internal flag identifiers appear anywhere in the output
