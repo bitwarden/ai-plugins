@@ -32,4 +32,3 @@ pnpm-debug.log
 .claude-pr/
 review-summary.md
 review-inline-comments.md
-.claude/outputs/
