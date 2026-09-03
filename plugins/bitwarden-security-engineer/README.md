@@ -6,6 +6,10 @@ Claude Code skills for application security at Bitwarden. Generic AI coding assi
 
 This plugin provides specialized skills for security engineering tasks — from triaging scanner findings and threat modeling to conducting multi-agent security code reviews. Skills can be invoked individually or orchestrated together for comprehensive coverage across code, dependencies, secrets, and architecture.
 
+## Prerequisites
+
+`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin from the `claude-plugins-official` marketplace and requires an authenticated MCP session — install it and run `/aikido:setup` before using those skills.
+
 ## Skills
 
 | Skill                             | What It Does                                                                                                                                                                                               |

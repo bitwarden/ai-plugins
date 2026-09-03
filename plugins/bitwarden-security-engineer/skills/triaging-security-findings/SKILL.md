@@ -32,7 +32,7 @@ gh api /repos/{owner}/{repo}/secret-scanning/alerts --jq '.[] | {number, state, 
 
 ## Triaging Aikido Findings
 
-Aikido triage is handled through Jira, not through Aikido's own dismissal states or GitHub Advanced Security. Ticket sourcing (`Source = Aikido` tickets parented under epic `VULN-560`, excluding SCA/dependency findings which are handled separately under `VULN-564`), the five-label comment format (`Finding / Declaration / Effective severity / Status / Action`), the Team/Severity/CVSS-base-score field rules, the CVSS **v3.0** scoring convention for this flow, and the `New` → `In Review` transition — is documented as the methodology of record on **[VULN-665](https://bitwarden.atlassian.net/browse/VULN-665)**. Treat that ticket as the source of truth for the Jira mechanics and triage rubric.
+Aikido triage is handled through Jira, not through Aikido's own dismissal states or GitHub Advanced Security. Ticket sourcing (`Source = Aikido` tickets parented under epic `VULN-560`, excluding SCA/dependency findings which are handled separately under `VULN-564`), the five-label comment format (`Finding / Declaration / Effective severity / Status / Action`), the Team/Severity/CVSS-base-score field rules, the CVSS **v3.0** scoring convention for this flow, and the `New` → `In Review` transition are documented as the methodology of record on **[VULN-665](https://bitwarden.atlassian.net/browse/VULN-665)**. Treat that ticket as the source of truth for the Jira mechanics and triage rubric — use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` to read it.
 
 ### Comment Format
 
@@ -45,6 +45,17 @@ Write the Jira triage comment as five labeled paragraphs, in this exact order, n
 - **Action:** concrete next step and ownership/team routing (or "no fix needed").
 
 When one ticket bundles multiple distinct findings (e.g. several XSS sites), use a condensed markdown table with columns `Finding | Declaration | Severity/CWE | Owner | Action required` instead of repeating the five paragraphs per row.
+
+### False Positive Protocol
+
+Before writing a `NOT AFFECTED` **Declaration**, verify:
+
+1. **Trace the data flow.** Can untrusted input actually reach the flagged sink? Follow it from entry point through every transformation to the flagged location.
+2. **Check for existing sanitization.** Validation alone is insufficient — sanitizers (which replace threatening values) are preferred over encoding/escaping-free validators (which leave the original value in place). Don't declare `NOT AFFECTED` on the basis of a validation step alone.
+3. **Consider the full lifecycle.** Even if the code isn't deployed to a risky environment today, will it be? Private repos may go public. Local deployments may move to cloud. If deploying to production would make it exploitable, treat it as exploitable now.
+4. **Document the rationale in the Declaration paragraph.** Every `NOT AFFECTED` verdict needs a clear, reviewable explanation.
+
+If any step is uncertain, declare `unable to determine` rather than `NOT AFFECTED`, and route it through the **Action** field for team review.
 
 ### Severity Mapping (Jira → Aikido)
 

@@ -5,7 +5,7 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.0] - 2026-09-01
+## [1.4.0] - 2026-09-03
 
 ### Changed
 
@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Documents the group-vs-severity-filter trap for group-scoped Aikido actions (adjusting severity, ignoring, snoozing) — verify a group's true unfiltered membership via `aikido_issues_list` before acting on it compared to the scoped Jira ticket.
   - `triaging-security-findings` now pins a Jira ticket's scope to a group's membership as of ticket creation time.
 - `perform-security-review` skill's scan-evidence step now queries the `aikido:issues` skill for SAST/IaC findings instead of the GitHub code-scanning alerts API, which no longer receives these results post-transition. Secret scanning and Dependabot evidence gathering are unchanged (still GitHub-native). Updated the README description and the "NEVER re-fetch" agent constraints to match.
+  - Added the resolved Aikido MCP tool (`mcp__plugin_aikido_aikido-mcp__aikido_issues_list`) to the skill's `allowed-tools`, so the new evidence step can actually reach it instead of silently returning nothing.
+- Restored a Aikido/Jira-appropriate False Positive Protocol section to `triaging-security-findings` (data-flow tracing, sanitizer-vs-validator, full product lifecycle, and documented rationale) — the transition had dropped this tool-agnostic guidance entirely.
+- `reviewing-dependencies` no longer groups the `cloud_instance` Aikido issue type under "container images" — that's a distinct cloud VM/instance category from `docker_container` and out of scope for this skill.
+- Added a Prerequisites section to the plugin README noting that Aikido-backed skills require the separate `aikido` plugin (`claude-plugins-official` marketplace) and `/aikido:setup`.
 
 ## [1.3.0] - 2026-07-21
 

@@ -80,7 +80,7 @@ When evaluating whether to adopt or keep a dependency, assess:
 
 Aikido replaced Grype as Bitwarden's container/filesystem and open-source dependency scanner. It continuously scans connected repositories rather than running as an ad hoc CLI scan, and surfaces open-source (SCA) and container findings in the same feed as SAST, IaC, and secrets results.
 
-Use the `aikido:issues` skill (`aikido_issues_list`) to query findings, scoping to the relevant repo and filtering `issue_types` to `open_source` (dependency CVEs) and `docker_container` / `cloud_instance` (container images):
+Use the `aikido:issues` skill (`aikido_issues_list`) to query findings, scoping to the relevant repo and filtering `issue_types` to `open_source` (dependency CVEs) and `docker_container` (container image vulnerabilities). `cloud_instance` is a separate Aikido issue type for cloud VM/instance findings — out of scope for dependency and container review.
 
 ```bash
 # Use the aikido:issues skill, e.g.:
