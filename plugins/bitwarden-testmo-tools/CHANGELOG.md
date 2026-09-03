@@ -5,6 +5,25 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-09-03
+
+### Changed
+
+- The duplicate-run lookup filters server-side with `?milestone_id=`, verified against project 1 to work:
+  a busy milestone pages 4 times instead of 20, and a fresh one costs a single request. The client-side
+  filter is kept as well — the API ignores query parameters it does not recognize (`?milestone=240`
+  returned every run in the project), so if the parameter name ever changed, the guard would otherwise
+  silently widen to "every run is a duplicate".
+
+### Verified against the live instance (project 1, read-only)
+
+- Run objects do carry `milestone_id`, so the guard's central assumption holds; the "cannot check" branch
+  added in 0.6.0 stays as a safety net.
+- `existing_runs_for_milestone` returns 328 runs for milestone 240 and 0 for an unused id.
+- A `--release full` dry-run against `2026.8.1 Manual Regression` (id 263) resolved all 14 specs with no
+  folder errors, matched 1,532 cases, and correctly refused on the 6 runs already linked to that
+  milestone — the `common` specs, created when that release was set up as a partial.
+
 ## [0.6.0] - 2026-09-02
 
 ### Added

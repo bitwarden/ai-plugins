@@ -99,7 +99,11 @@ def existing_runs_for_milestone(project, milestone_id):
     caller must say so rather than report a clean result — a guardrail that quietly no-ops is
     worse than none.
     """
-    runs = core.fetch_all(project, "runs")
+    # ?milestone_id= is honoured server-side (verified 2026-09-02: project 1 pages from 20 down to 4
+    # for a busy milestone). The client-side filter below is kept regardless, because the API ignores
+    # query parameters it does not recognize — were the name ever to change, that would silently return
+    # every run in the project, and this guard must not widen into a false positive.
+    runs = core.fetch_all(project, "runs", f"milestone_id={milestone_id}")
     if runs and not any("milestone_id" in r for r in runs):
         return [], False
     return [r for r in runs if r.get("milestone_id") == milestone_id], True
