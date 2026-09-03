@@ -9,6 +9,8 @@ Bitwarden uses **Aikido** as its unified security platform. Aikido continuously 
 
 Findings are queried and triaged via the `aikido:issues` skill (`aikido_issues_list`), not through GitHub code-scanning alerts — Aikido triage does not flow through GitHub Advanced Security. See that skill for the full list of scope filters, `issue_types`, and SLA filters (`out_of_sla`, `sla_due_soon`).
 
+If the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data.
+
 ## GitHub-Native Alerts (Dependabot, Secret Scanning)
 
 Dependabot and GitHub secret scanning are unaffected by the Aikido transition — they remain GitHub-native and are queried separately from the Aikido feed.
@@ -32,7 +34,11 @@ gh api /repos/{owner}/{repo}/secret-scanning/alerts --jq '.[] | {number, state, 
 
 ## Triaging Aikido Findings
 
-Aikido triage is handled through Jira, not through Aikido's own dismissal states or GitHub Advanced Security. Ticket sourcing (`Source = Aikido` tickets parented under epic `VULN-560`, excluding SCA/dependency findings which are handled separately under `VULN-564`), the five-label comment format (`Finding / Declaration / Effective severity / Status / Action`), the Team/Severity/CVSS-base-score field rules, the CVSS **v3.0** scoring convention for this flow, and the `New` → `In Review` transition are documented as the methodology of record on **[VULN-665](https://bitwarden.atlassian.net/browse/VULN-665)**. Treat that ticket as the source of truth for the Jira mechanics and triage rubric — use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` to read it.
+Aikido triage is handled through Jira, not through Aikido's own dismissal states or GitHub Advanced Security.
+
+1. **Assess the finding** using the False Positive Protocol below.
+2. **Resolve the `Team` field** — CODEOWNERS first, then commit history. Flag for human follow-up if it can't be confidently determined.
+3. **Determine `Severity`** per the mapping table below, and record the CVSS base score using the **v3.0** convention — cite the full vector string in the comment for reproducibility.
 
 ### Comment Format
 
@@ -59,11 +65,11 @@ If any step is uncertain, declare `unable to determine` rather than `NOT AFFECTE
 
 ### Severity Mapping (Jira → Aikido)
 
-The Jira `Severity` field (Informative, Low, Medium, High, Critical) has one more value than Aikido's own severity scale (Critical, High, Medium, Low). When syncing a ticket's severity back to the Aikido issue:
+The Jira `Severity` field (Informative, Low, Medium, High, Hotfix) has one more value than Aikido's own severity scale (Critical, High, Medium, Low). When syncing a ticket's severity back to the Aikido issue:
 
 | Jira `Severity` | Aikido     |
 | --------------- | ---------- |
-| Critical        | Critical   |
+| Hotfix          | Critical   |
 | High            | High       |
 | Medium          | Medium     |
 | Low             | Low        |
