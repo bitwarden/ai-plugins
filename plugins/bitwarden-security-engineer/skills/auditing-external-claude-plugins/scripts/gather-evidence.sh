@@ -4,9 +4,17 @@
 # Prints the scratch directory path as the last line of output.
 set -euo pipefail
 
+if [ $# -lt 2 ]; then
+  echo "usage: gather-evidence.sh <repo-url> <commit-sha>" >&2
+  exit 2
+fi
+
 repo_url=$1
 commit_sha=$2
-scratch=$(mktemp -d)
+# A fixed, predictable prefix (rather than a bare `mktemp -d`) so the caller
+# can scope a cleanup command to exactly this script's output, not to /tmp
+# at large.
+scratch=$(mktemp -d /tmp/plugin-audit.XXXXXXXX)
 
 case "$repo_url" in
   https://*|git@*) ;;
@@ -19,16 +27,23 @@ git -C "$scratch/repo" log -1 --format='%H %aI %an <%ae> %s' > "$scratch/commit-
 git -C "$scratch/repo" shortlog -sne --all > "$scratch/authors.txt"
 
 mcp_json="$scratch/repo/.mcp.json"
+pkg_specs=""
 pkg_spec=""
 if [ -f "$mcp_json" ]; then
-  pkg_spec=$(grep -oE '@?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)?@[0-9][a-zA-Z0-9_.-]*' "$mcp_json" | head -1 || true)
+  pkg_specs=$(grep -oE '@?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)?@[0-9][a-zA-Z0-9_.-]*' "$mcp_json" || true)
+  pkg_spec=$(printf '%s\n' "$pkg_specs" | head -1)
+  if [ "$(printf '%s\n' "$pkg_specs" | grep -c '.')" -gt 1 ]; then
+    echo "MULTIPLE_NPM_PACKAGES_DETECTED: .mcp.json matched more than one name@version spec; only $pkg_spec was audited. Inspect the rest manually." >&2
+  fi
 fi
 
 if [ -n "$pkg_spec" ]; then
   pkg_dir="$scratch/pkg"
   mkdir -p "$pkg_dir"
-  (cd "$pkg_dir" && npm view "$pkg_spec" --registry https://registry.npmjs.org --json > "$pkg_dir/view.json") || true
-  (cd "$pkg_dir" && npm pack "$pkg_spec" --registry https://registry.npmjs.org) || true
+  (cd "$pkg_dir" && npm view --registry https://registry.npmjs.org --json -- "$pkg_spec" > "$pkg_dir/view.json") \
+    || echo "NPM_VIEW_FAILED: npm view could not resolve $pkg_spec." >&2
+  (cd "$pkg_dir" && npm pack --registry https://registry.npmjs.org -- "$pkg_spec") \
+    || echo "NPM_PACK_FAILED: npm pack could not fetch a tarball for $pkg_spec." >&2
   tgz=$(find "$pkg_dir" -maxdepth 1 -name '*.tgz' | head -1 || true)
   if [ -n "$tgz" ]; then
     openssl dgst -sha512 -binary "$tgz" | openssl base64 -A > "$pkg_dir/tarball.sha512" \
@@ -37,7 +52,8 @@ if [ -n "$pkg_spec" ]; then
     if tar -xzf "$tgz" -C "$pkg_dir"; then
       pkg_no_version=${pkg_spec%@*}
       encoded=$(printf '%s' "$pkg_no_version" | sed 's/\//%2F/')
-      curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" || true
+      curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" \
+        || echo "ATTESTATIONS_UNAVAILABLE: request for $pkg_spec's attestations failed (network error, not a 404)." >&2
 
       # A published tarball almost never ships its own lockfile, so `npm audit`
       # fails with ENOLOCK unless the package happens to bundle one. Generate a

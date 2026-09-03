@@ -35,6 +35,12 @@ Use the bitwarden-security-engineer:bitwarden-security-engineer agent to create 
 Use the bitwarden-security-engineer:bitwarden-security-engineer agent to review this code for OWASP Top 10 vulnerabilities.
 ```
 
+`auditing-external-claude-plugins` takes positional arguments instead:
+
+```
+/bitwarden-security-engineer:auditing-external-claude-plugins https://github.com/org/plugin <commit-sha>
+```
+
 ## References
 
 External resources that informed each skill. Useful for maintainers updating skill content when upstream sources change.
