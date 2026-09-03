@@ -8,22 +8,22 @@ This plugin provides specialized skills for security engineering tasks — from 
 
 ## Skills
 
-| Skill                             | What It Does                                                                                                                                                                 |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `triaging-security-findings`      | Triage Checkmarx, SonarCloud, and Grype findings via GitHub Advanced Security API. Includes finding state rules, false positive protocol, and fix patterns.                  |
-| `threat-modeling`                 | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                    |
-| `analyzing-code-security`         | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                        |
-| `reviewing-dependencies`          | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                            |
-| `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                 |
-| `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                       |
-| `perform-security-review`         | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence, and flexible output (chat, file, or GitHub Actions). |
+| Skill                             | What It Does                                                                                                                                                                                               |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `triaging-security-findings`      | Triage Aikido feed issues (SAST, IaC, secrets, cloud, container, and more), plus GitHub Dependabot and secret scanning alerts. Includes Jira-based triage flow, false positive protocol, and fix patterns. |
+| `threat-modeling`                 | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                                                  |
+| `analyzing-code-security`         | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                                                      |
+| `reviewing-dependencies`          | Dependabot triage, Aikido SCA/container scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                                           |
+| `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                                               |
+| `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                                                     |
+| `perform-security-review`         | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, Aikido/GHAS scan evidence, and flexible output (chat, file, or GitHub Actions).                        |
 
 ## Usage
 
 Install the plugin and invoke the agent:
 
 ```
-Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Checkmarx findings on this PR.
+Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Aikido findings on this PR.
 ```
 
 ```
@@ -49,10 +49,9 @@ External resources that informed each skill. Useful for maintainers updating ski
 
 ### triaging-security-findings
 
-- [Checkmarx Triage Documentation](https://docs.checkmarx.com/)
-- [SonarCloud Documentation](https://docs.sonarsource.com/sonarqube-cloud/)
-- [GitHub Code Scanning API](https://docs.github.com/en/rest/code-scanning)
+- [Aikido Documentation](https://help.aikido.dev/)
 - [GitHub Dependabot API](https://docs.github.com/en/rest/dependabot)
+- [GitHub Secret Scanning API](https://docs.github.com/en/rest/secret-scanning)
 
 ### analyzing-code-security
 
@@ -65,7 +64,7 @@ External resources that informed each skill. Useful for maintainers updating ski
 ### reviewing-dependencies
 
 - [GitHub Dependabot Documentation](https://docs.github.com/en/code-security/dependabot)
-- [Grype GitHub Repository](https://github.com/anchore/grype)
+- [Aikido Documentation](https://help.aikido.dev/)
 - [OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/)
 - [npm Security Best Practices](https://docs.npmjs.com/packages-and-modules/securing-your-code)
 
