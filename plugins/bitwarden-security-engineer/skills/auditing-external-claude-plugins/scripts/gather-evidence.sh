@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Clones the plugin at a pinned commit and, if it launches an npm-based MCP
+# server, pulls that package's registry metadata, tarball, and audit data.
+# Prints the scratch directory path as the last line of output.
+set -euo pipefail
+
+repo_url=$1
+commit_sha=$2
+scratch=$(mktemp -d)
+
+git clone "$repo_url" "$scratch/repo"
+git -C "$scratch/repo" checkout "$commit_sha"
+git -C "$scratch/repo" log -1 --format='%H %aI %an <%ae> %s' > "$scratch/commit-info.txt"
+git -C "$scratch/repo" shortlog -sne --all > "$scratch/authors.txt"
+
+mcp_json="$scratch/repo/.mcp.json"
+pkg_spec=""
+if [ -f "$mcp_json" ]; then
+  pkg_spec=$(grep -oE '@?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)?@[0-9][a-zA-Z0-9_.-]*' "$mcp_json" | head -1 || true)
+fi
+
+if [ -n "$pkg_spec" ]; then
+  pkg_dir="$scratch/pkg"
+  mkdir -p "$pkg_dir"
+  (cd "$pkg_dir" && npm view "$pkg_spec" --registry https://registry.npmjs.org --json > "$pkg_dir/view.json") || true
+  (cd "$pkg_dir" && npm pack "$pkg_spec" --registry https://registry.npmjs.org) || true
+  tgz=$(find "$pkg_dir" -maxdepth 1 -name '*.tgz' | head -1 || true)
+  if [ -n "$tgz" ]; then
+    openssl dgst -sha512 -binary "$tgz" | openssl base64 -A > "$pkg_dir/tarball.sha512"
+    tar -xzf "$tgz" -C "$pkg_dir"
+    pkg_no_version=${pkg_spec%@*}
+    encoded=$(printf '%s' "$pkg_no_version" | sed 's/\//%2F/')
+    curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" || true
+
+    # A published tarball almost never ships its own lockfile, so `npm audit`
+    # fails with ENOLOCK unless the package happens to bundle one. Generate a
+    # lockfile from package.json first so audit has a dependency tree to
+    # check; if that also fails, say so explicitly rather than leave an error
+    # object in audit.json that looks like a clean "no vulnerabilities" result.
+    if [ -f "$pkg_dir/package/npm-shrinkwrap.json" ] || [ -f "$pkg_dir/package/package-lock.json" ] \
+      || (cd "$pkg_dir/package" && npm install --package-lock-only --ignore-scripts --registry https://registry.npmjs.org > /dev/null 2>&1); then
+      (cd "$pkg_dir/package" && npm audit --registry https://registry.npmjs.org --json > "$pkg_dir/audit.json") || true
+    else
+      echo "NPM_AUDIT_UNAVAILABLE: could not produce or generate a lockfile for $pkg_spec, npm audit did not run." >&2
+    fi
+  fi
+else
+  # No single pinned npm@version spec found in .mcp.json (or no .mcp.json at
+  # all). This does not mean there is nothing to audit: the server may be
+  # declared via plugin.json's mcpServers field, use a semver range instead
+  # of a pin, run multiple servers, or not be npm-based at all. Say so
+  # explicitly so the caller investigates manually rather than assuming this
+  # script covered it.
+  echo "NO_NPM_PACKAGE_DETECTED: no pinned name@version spec found in .mcp.json. Check plugin.json's mcpServers field and inspect the server's dependency manifest directly." >&2
+fi
+
+echo "$scratch"
