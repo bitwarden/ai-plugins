@@ -1,6 +1,6 @@
 # Known Bitwarden States and Flows — Auth
 
-Curated reference of validated, reusable test states and UI flows for Bitwarden authentication — consumed verbatim by `scoping-playwright-test-cases` and `writing-playwright-test-cases`.
+Curated reference of validated, reusable test states and UI flows for Bitwarden authentication — consumed verbatim by `scoping-playwright-test-cases` and the downstream test-case authoring step.
 
 ---
 
@@ -33,7 +33,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 - **Use when:** Any test that requires a fresh authenticated user account with no prior subscription or organization state.
 - **Parameters:** `email`, `password` (the fixed dev master password `test-master-password-12`; see Note)
-- **Note:** The dev master password is fixed at `test-master-password-12` for every test account, so credentials can be reconstructed from the email alone. Any value of at least 12 characters is valid, but this is the convention. A test case needing a distinct password writes that value into its own SETUP step.
+- **Note:** The dev master password is fixed at `test-master-password-12` for every test account, so credentials can be reconstructed from the email alone. It is a local dev fixture, never a real account credential. Any value of at least 12 characters is valid, but this is the convention. A test case needing a distinct password writes that value into its own SETUP step.
 - **Precondition state:** none
 - **Steps:**
   1. Navigate to `https://localhost:8080/#/signup`
