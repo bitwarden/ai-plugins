@@ -25,6 +25,10 @@ Use the `playwright-cli` skill for all interactions a user would perform in the 
 
 Reading an email during a test step (verification links, magic links, OTP codes) is owned by the `reading-mailcatcher-api` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/SKILL.md` for the exit-code contract, the reason the browser cannot reach Mailcatcher, and the argument detail. Its reader script is listed under Canonical script paths above.
 
+## Category 3 - External Trigger Simulation
+
+Some flows begin with an action that a system _outside_ the Bitwarden application initiates — a marketing-site form post, a third-party webhook, a scheduled job — that no Bitwarden service fires on its own (for example, the trial verification email POST in the billing known-flows). Simulating that initiator with a direct request is permitted only when all of these hold: the trigger genuinely originates outside the application and is not a UI action a user could perform in the browser (those stay in Category 1); the target is a `localhost`, `127.0.0.1`, `::1`, or `bitwarden.test` origin; and the request only kicks off the flow under test rather than fabricating its result state. A flow step using it must be marked `**EXTERNAL TRIGGER**` and name the external system it stands in for. Anything that instead substitutes for a user's own browser action, or manufactures state the application's own flows can produce, is blocked under Never Permitted.
+
 ## Category 4 - Stripe Data Queries (read-only)
 
 Read-only Stripe test-mode queries, plus the single permitted write of advancing an already-attached test clock, are owned by the `using-stripe-cli` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/SKILL.md`. Stripe is never used to set up state the application's own flows can create, and never for any other write.
