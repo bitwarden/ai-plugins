@@ -8,8 +8,13 @@ repo_url=$1
 commit_sha=$2
 scratch=$(mktemp -d)
 
-git clone "$repo_url" "$scratch/repo"
-git -C "$scratch/repo" checkout "$commit_sha"
+case "$repo_url" in
+  https://*|git@*) ;;
+  *) echo "Refusing to clone unsupported URL scheme: $repo_url" >&2; exit 1 ;;
+esac
+
+git clone -- "$repo_url" "$scratch/repo"
+git -C "$scratch/repo" checkout --detach "$commit_sha" --
 git -C "$scratch/repo" log -1 --format='%H %aI %an <%ae> %s' > "$scratch/commit-info.txt"
 git -C "$scratch/repo" shortlog -sne --all > "$scratch/authors.txt"
 
@@ -26,22 +31,27 @@ if [ -n "$pkg_spec" ]; then
   (cd "$pkg_dir" && npm pack "$pkg_spec" --registry https://registry.npmjs.org) || true
   tgz=$(find "$pkg_dir" -maxdepth 1 -name '*.tgz' | head -1 || true)
   if [ -n "$tgz" ]; then
-    openssl dgst -sha512 -binary "$tgz" | openssl base64 -A > "$pkg_dir/tarball.sha512"
-    tar -xzf "$tgz" -C "$pkg_dir"
-    pkg_no_version=${pkg_spec%@*}
-    encoded=$(printf '%s' "$pkg_no_version" | sed 's/\//%2F/')
-    curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" || true
+    openssl dgst -sha512 -binary "$tgz" | openssl base64 -A > "$pkg_dir/tarball.sha512" \
+      || echo "TARBALL_HASH_UNAVAILABLE: could not hash $tgz." >&2
 
-    # A published tarball almost never ships its own lockfile, so `npm audit`
-    # fails with ENOLOCK unless the package happens to bundle one. Generate a
-    # lockfile from package.json first so audit has a dependency tree to
-    # check; if that also fails, say so explicitly rather than leave an error
-    # object in audit.json that looks like a clean "no vulnerabilities" result.
-    if [ -f "$pkg_dir/package/npm-shrinkwrap.json" ] || [ -f "$pkg_dir/package/package-lock.json" ] \
-      || (cd "$pkg_dir/package" && npm install --package-lock-only --ignore-scripts --registry https://registry.npmjs.org > /dev/null 2>&1); then
-      (cd "$pkg_dir/package" && npm audit --registry https://registry.npmjs.org --json > "$pkg_dir/audit.json") || true
+    if tar -xzf "$tgz" -C "$pkg_dir"; then
+      pkg_no_version=${pkg_spec%@*}
+      encoded=$(printf '%s' "$pkg_no_version" | sed 's/\//%2F/')
+      curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" || true
+
+      # A published tarball almost never ships its own lockfile, so `npm audit`
+      # fails with ENOLOCK unless the package happens to bundle one. Generate a
+      # lockfile from package.json first so audit has a dependency tree to
+      # check; if that also fails, say so explicitly rather than leave an error
+      # object in audit.json that looks like a clean "no vulnerabilities" result.
+      if [ -f "$pkg_dir/package/npm-shrinkwrap.json" ] || [ -f "$pkg_dir/package/package-lock.json" ] \
+        || (cd "$pkg_dir/package" && npm install --package-lock-only --ignore-scripts --registry https://registry.npmjs.org > /dev/null 2>&1); then
+        (cd "$pkg_dir/package" && npm audit --registry https://registry.npmjs.org --json > "$pkg_dir/audit.json") || true
+      else
+        echo "NPM_AUDIT_UNAVAILABLE: could not produce or generate a lockfile for $pkg_spec, npm audit did not run." >&2
+      fi
     else
-      echo "NPM_AUDIT_UNAVAILABLE: could not produce or generate a lockfile for $pkg_spec, npm audit did not run." >&2
+      echo "TARBALL_EXTRACT_FAILED: $tgz did not extract cleanly; inspect it manually." >&2
     fi
   fi
 else

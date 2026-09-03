@@ -10,7 +10,7 @@ background: false
 allowed-tools:
   - Bash(${CLAUDE_SKILL_DIR}/scripts/gather-evidence.sh *)
   - Bash(gh api --method GET *)
-  - Bash(npx -y js-beautify@*)
+  - Bash(npx -y js-beautify@1.15.1 *)
   - Bash(grep *)
   - Bash(jq *)
   - Bash(file *)
