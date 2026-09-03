@@ -1,0 +1,78 @@
+[
+  {
+    "query": "should I add integration tests for the SsoController change, or are unit tests enough?",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the right test strategy for the billing webhook handler, testing trophy or pyramid?",
+    "should_trigger": true
+  },
+  {
+    "query": "which layer should the passkey enrollment validation test live at: unit, component, or E2E?",
+    "should_trigger": true
+  },
+  {
+    "query": "PM-32009 is the item-types import/export work. recommend which tests to add and at which layer for it.",
+    "should_trigger": true
+  },
+  {
+    "query": "the coverage report for the org-vault export epic lists several behaviors with no automated tests. which layer should each new test target?",
+    "should_trigger": true
+  },
+  {
+    "query": "I've got a Testmo CSV of manual cases for the vault-unlock rework. which of these should be automated and at which layer?",
+    "should_trigger": true
+  },
+  {
+    "query": "the autofill refactor PR in bitwarden/clients has gaps. where should the new tests go to keep the pre-merge gate deterministic?",
+    "should_trigger": true
+  },
+  {
+    "query": "do we need an E2E for the billing upgrade flow, or can component tests cover it?",
+    "should_trigger": true
+  },
+  {
+    "query": "recommend a test layering for the emergency-access revamp so the pipeline can gate on it",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the lowest layer that can own the CipherService.RestoreAsync validation logic?",
+    "should_trigger": true
+  },
+  {
+    "query": "which behaviors in bitwarden/server PR 6001, the billing webhook handler, already have test coverage today?",
+    "should_trigger": false
+  },
+  {
+    "query": "write manual Gherkin test cases for PM-35944 that I can import into Testmo",
+    "should_trigger": false
+  },
+  {
+    "query": "write the unit tests for the new CipherService.RestoreAsync method",
+    "should_trigger": false
+  },
+  {
+    "query": "the sync E2E in bitwarden/test keeps timing out in CI, help me fix the flaky test",
+    "should_trigger": false
+  },
+  {
+    "query": "run the jest suite for bitwarden/clients and tell me which specs are failing",
+    "should_trigger": false
+  },
+  {
+    "query": "refactor these xUnit tests to use the new shared fixture pattern",
+    "should_trigger": false
+  },
+  {
+    "query": "review bitwarden/server PR 5821 for bugs and security issues before I approve it",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the overall code-coverage percentage on bitwarden/server right now?",
+    "should_trigger": false
+  },
+  {
+    "query": "what test coverage already exists for the surfaces in the emergency-access revamp Tech Breakdown doc (bitwarden/tech-breakdowns)?",
+    "should_trigger": false
+  }
+]

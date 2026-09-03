@@ -1,0 +1,141 @@
+{
+  "should_trigger_pass_rate": 1.0,
+  "should_not_trigger_pass_rate": 1.0,
+  "should_trigger_pass": "10/10",
+  "should_not_trigger_pass": "9/9",
+  "results": [
+    {
+      "query": "should I add integration tests for the SsoController change, or are unit tests enough?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "what's the right test strategy for the billing webhook handler, testing trophy or pyramid?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "which layer should the passkey enrollment validation test live at: unit, component, or E2E?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "PM-32009 is the item-types import/export work. recommend which tests to add and at which layer for it.",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "the coverage report for the org-vault export epic lists several behaviors with no automated tests. which layer should each new test target?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "I've got a Testmo CSV of manual cases for the vault-unlock rework. which of these should be automated and at which layer?",
+      "should_trigger": true,
+      "triggers": 5,
+      "runs": 7,
+      "trigger_rate": 0.7142857142857143
+    },
+    {
+      "query": "the autofill refactor PR in bitwarden/clients has gaps. where should the new tests go to keep the pre-merge gate deterministic?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "do we need an E2E for the billing upgrade flow, or can component tests cover it?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "recommend a test layering for the emergency-access revamp so the pipeline can gate on it",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "what's the lowest layer that can own the CipherService.RestoreAsync validation logic?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "which behaviors in bitwarden/server PR 6001, the billing webhook handler, already have test coverage today?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write manual Gherkin test cases for PM-35944 that I can import into Testmo",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write the unit tests for the new CipherService.RestoreAsync method",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "the sync E2E in bitwarden/test keeps timing out in CI, help me fix the flaky test",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "run the jest suite for bitwarden/clients and tell me which specs are failing",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "refactor these xUnit tests to use the new shared fixture pattern",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "review bitwarden/server PR 5821 for bugs and security issues before I approve it",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "what's the overall code-coverage percentage on bitwarden/server right now?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "what test coverage already exists for the surfaces in the emergency-access revamp Tech Breakdown doc (bitwarden/tech-breakdowns)?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    }
+  ]
+}

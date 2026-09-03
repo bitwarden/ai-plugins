@@ -8,10 +8,11 @@ A set of skills that support Bitwarden's testing and quality work with evidence 
 
 ## Skills
 
-| Skill                       | What It Does                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `assessing-test-coverage`   | Determines what a change is **already tested by**. From a PR, Jira key, Tech Breakdown, or Testmo CSV, resolves the change surface, finds the existing tests PRs-first, buckets each by layer (unit / integration / E2E), cites it as a stable GitHub permalink, and records untested behaviors as gaps — writing a self-contained markdown report under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`.                   |
-| `writing-manual-test-cases` | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`. |
+| Skill                       | What It Does                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assessing-test-coverage`   | Determines what a change is **already tested by**. From a PR, Jira key, Tech Breakdown, or Testmo CSV, resolves the change surface, finds the existing tests PRs-first, buckets each by layer (unit / integration / E2E), cites it as a stable GitHub permalink, and records untested behaviors as gaps — writing a self-contained markdown report under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`.                                                                   |
+| `writing-manual-test-cases` | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`.                                                 |
+| `recommending-test-layers`  | Recommends **which tests to add and at which layer**. From a Jira key, Testmo CSV, an `assessing-test-coverage` report, a PR, or a feature description, places each behavior at its lowest sufficient layer (static / unit / component / contract / integration / E2E), grades criticality against Bitwarden's Severity guide, and marks what can gate deployment — writing a markdown recommendation report under `${CLAUDE_PLUGIN_DATA}/recommending-test-layers/`. |
 
 ## Cross-Plugin Integration
 
@@ -53,6 +54,14 @@ Write manual test cases for PM-35944, the free-user health upgrade banner.
 
 ```
 Turn these acceptance criteria into Gherkin test cases I can import into Testmo.
+```
+
+```
+Should I add integration tests for the SsoController change, or are unit tests enough?
+```
+
+```
+Recommend which tests to add and at which layer for PM-32009.
 ```
 
 ## References
