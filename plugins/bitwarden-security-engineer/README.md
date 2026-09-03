@@ -8,7 +8,7 @@ This plugin provides specialized skills for security engineering tasks — from 
 
 ## Prerequisites
 
-`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin from the `claude-plugins-official` marketplace and requires an authenticated MCP session — install it and run `/aikido:setup` before using those skills.
+`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin from the `claude-plugins-official` marketplace and requires an authenticated MCP session — install it and run `/aikido:setup` before using those skills. `triaging-security-findings` additionally reads its Jira triage methodology from VULN-665 via the `bitwarden-atlassian-tools` plugin, so install that one too for the full triage flow.
 
 ## Skills
 
