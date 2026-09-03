@@ -5,6 +5,41 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2026-09-03
+
+### Fixed
+
+- The scripts work again on networks running TLS interception. Moving off `curl` in 0.4.1 lost `curl`'s
+  use of the OS trust store, and behind a Zscaler-style proxy every request failed with
+  `CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate`. Two independent causes, both
+  required: the proxy's root CA is in the macOS keychain but absent from `certifi`, and Python 3.13+
+  enables `VERIFY_X509_STRICT` by default, which rejects that root because its Basic Constraints are not
+  marked critical. Adding the root alone does not help; neither does relaxing strict alone. Verified both
+  on a live Zscaler-inspected connection.
+- The failure was total, not cosmetic: no read or write could complete on the affected Python. macOS
+  system `python3` (3.9, LibreSSL) and `curl` were unaffected, which is why 0.4.1 through 0.6.1 looked
+  fine — none of that work had been exercised against the live API until now.
+
+### Added
+
+- A `curl` fallback transport. `call()` tries `urllib` first and, only on a certificate verification
+  failure, prints a one-line note and uses `curl` for the remainder of the session. The key stays out of
+  argv on this path too: the Authorization header is passed via `curl --config -` on **stdin**, and any
+  request body goes to a `0600` temp file referenced by path, which keeps stdin free for the config. Temp
+  files are removed in a `finally` block.
+  Verified with `ps auxww` during an in-flight request: argv is exactly `curl --config -`, and the key
+  appears nowhere in it.
+- `_redact()`, applied to `curl` stderr before it is raised — a config parse error can otherwise echo the
+  offending line, which is the line holding the key.
+- Non-2xx handling on the `curl` path via `write-out`, so status codes surface there exactly as they do
+  through `urllib`, and a missing `curl` produces an actionable message rather than a bare TLS error.
+
+### Changed
+
+- `curl` is documented as a fallback prerequisite in `SKILL.md` and `README.md`, with a section on why
+  TLS interception breaks Python but not `curl`. The stdlib-only claim now reads as "normally", which is
+  accurate.
+
 ## [0.6.1] - 2026-09-03
 
 ### Changed

@@ -2,9 +2,10 @@
 """Create a Testmo run from a reviewable JSON filter spec.
 
 Reproduces the manual "filter cases -> create run" workflow via the API so it is repeatable.
-Read-only unless --create is passed. The API key is read from the environment and only ever
-travels in an in-process request header — never printed, and never placed on a command line
-(argv is world-readable via `ps`).
+Read-only unless --create is passed. The API key is read from the environment and never printed,
+and never placed on a command line: argv is world-readable via `ps`. Requests go through urllib
+in-process; on a network with TLS interception, where OpenSSL cannot verify the chain, they fall
+back to curl with the header passed on stdin.
 
 Filter model (all keys under "filters" are optional; a case must match every key present):
   tags                    list of Testmo tag names or ids. Applied server-side via the /cases API
@@ -23,11 +24,14 @@ Filter model (all keys under "filters" are optional; a case must match every key
                           (e.g. [10, 23, 24] = Automated / Automated-Android / Automated-iOS).
   has_automation          bool; case has_automation flag must equal this.
 """
-import argparse, json, os, sys, urllib.error, urllib.request
+import argparse, json, os, shutil, ssl, subprocess, sys, tempfile, urllib.error, urllib.request
 
 BASE = "https://bitwarden.testmo.net/api/v1"
 KEY = os.environ.get("TESTMO_API_KEY")
 TIMEOUT = 60
+
+# Set once a TLS verification failure proves this Python cannot validate the chain (see _curl_call).
+_USE_CURL = False
 
 class TestmoAPIError(Exception):
     """A Testmo API request did not return a usable JSON response.
@@ -37,18 +41,27 @@ class TestmoAPIError(Exception):
     Messages are built from the request line and the response body only, never the API key.
     """
 
-def call(method, path, body=None):
-    """Issue a Testmo API request and return the decoded JSON body.
+class _TLSVerificationError(Exception):
+    """Internal: the certificate chain did not verify. Triggers the curl fallback."""
 
-    Uses urllib rather than shelling out to curl so the Authorization header stays in this
-    process. Passing it as a curl argument would expose the key to any local user for the
-    life of the request (`ps auxww`, /proc/<pid>/cmdline).
+def _redact(text):
+    """Strip the API key from anything before it is printed or raised."""
+    return text.replace(KEY, "<redacted>") if KEY else text
 
-    Any non-2xx status raises, so an expired key (401) or a rejected write (403) surfaces as an
-    error instead of an empty case list or a run "created" with id None.
-    """
-    if not KEY:
-        sys.exit("TESTMO_API_KEY not set")
+def _decode(method, path, raw):
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        # A proxy or login-wall HTML page can arrive with a 200; don't let it become a traceback.
+        raise TestmoAPIError(
+            f"{method} {path} returned a non-JSON body ({e}). First 200 characters:\n{raw[:200]!r}"
+        )
+
+def _auth_hint(code):
+    return "  (is TESTMO_API_KEY current?)" if code in (401, 403) else ""
+
+def _urllib_call(method, path, body):
+    """Preferred transport: the Authorization header never leaves this process."""
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(BASE + path, data=data, method=method)
     req.add_header("Authorization", f"Bearer {KEY}")
@@ -61,17 +74,97 @@ def call(method, path, body=None):
     except urllib.error.HTTPError as e:
         # e.read() is the API's error body; it echoes the request but not the auth header.
         detail = e.read().decode(errors="replace").strip()
-        hint = "  (is TESTMO_API_KEY current?)" if e.code in (401, 403) else ""
-        raise TestmoAPIError(f"{method} {path} failed: HTTP {e.code} {e.reason}{hint}\n{detail[:500]}")
-    except urllib.error.URLError as e:
-        raise TestmoAPIError(f"{method} {path} failed: {e.reason}")
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError as e:
-        # A proxy or login-wall HTML page can arrive with a 200; don't let it become a traceback.
         raise TestmoAPIError(
-            f"{method} {path} returned a non-JSON body ({e}). First 200 characters:\n{raw[:200]!r}"
+            f"{method} {path} failed: HTTP {e.code} {e.reason}{_auth_hint(e.code)}\n{detail[:500]}"
         )
+    except urllib.error.URLError as e:
+        if isinstance(e.reason, ssl.SSLCertVerificationError):
+            raise _TLSVerificationError(str(e.reason))
+        raise TestmoAPIError(f"{method} {path} failed: {e.reason}")
+    return _decode(method, path, raw)
+
+def _curl_call(method, path, body):
+    """Fallback transport for networks running TLS interception.
+
+    A corporate proxy (Zscaler and friends) re-signs traffic with a root that is installed in the
+    OS trust store but is absent from certifi, and whose Basic Constraints are not marked
+    critical — which Python 3.13+ rejects outright, since it enables VERIFY_X509_STRICT by
+    default. curl uses the platform trust store and is not strict, so it succeeds where urllib
+    cannot.
+
+    The key is still kept out of argv: the Authorization header is fed to `curl --config -` on
+    stdin. Any request body goes to a 0600 temp file, referenced by path — the body is not
+    secret, and this keeps stdin free for the config.
+    """
+    marker = "__TESTMO_HTTP_STATUS__"
+    config = [
+        "silent", "show-error", f"max-time = {TIMEOUT}",
+        f'url = "{BASE + path}"',
+        f'request = "{method}"',
+        f'header = "Authorization: Bearer {KEY}"',
+        'header = "Accept: application/json"',
+        f'write-out = "\\n{marker}%{{http_code}}"',
+    ]
+    body_file = None
+    try:
+        if body is not None:
+            fd, body_file = tempfile.mkstemp(prefix="testmo-body-", suffix=".json")
+            with os.fdopen(fd, "w") as fh:
+                json.dump(body, fh)
+            config += ['header = "Content-Type: application/json"', f'data-binary = "@{body_file}"']
+        proc = subprocess.run(["curl", "--config", "-"], input="\n".join(config) + "\n",
+                              capture_output=True, text=True)
+    finally:
+        if body_file:
+            os.unlink(body_file)
+    if proc.returncode != 0:
+        # Redact: a config parse error can echo the offending line back on stderr.
+        raise TestmoAPIError(
+            f"{method} {path} failed: curl exited {proc.returncode}\n{_redact(proc.stderr.strip())}"
+        )
+    raw, found, status = proc.stdout.rpartition(marker)
+    if not found:
+        raise TestmoAPIError(f"{method} {path} failed: curl returned no status code")
+    try:
+        code = int(status.strip())
+    except ValueError:
+        raise TestmoAPIError(f"{method} {path} failed: unreadable status {status.strip()!r}")
+    if not 200 <= code < 300:
+        raise TestmoAPIError(
+            f"{method} {path} failed: HTTP {code}{_auth_hint(code)}\n{raw.strip()[:500]}"
+        )
+    return _decode(method, path, raw)
+
+def call(method, path, body=None):
+    """Issue a Testmo API request and return the decoded JSON body.
+
+    Prefers urllib, so the Authorization header stays in this process — passing it as a curl
+    argument would expose the key to any local user for the life of the request (`ps auxww`,
+    /proc/<pid>/cmdline). Falls back to curl only when the TLS chain will not verify, which on a
+    corporate network is not a fixable condition; that path keeps the key off argv too.
+
+    Any non-2xx status raises, so an expired key (401) or a rejected write (403) surfaces as an
+    error instead of an empty case list or a run "created" with id None.
+    """
+    global _USE_CURL
+    if not KEY:
+        sys.exit("TESTMO_API_KEY not set")
+    if _USE_CURL:
+        return _curl_call(method, path, body)
+    try:
+        return _urllib_call(method, path, body)
+    except _TLSVerificationError as e:
+        if not shutil.which("curl"):
+            raise TestmoAPIError(
+                f"{method} {path} failed: TLS certificate verification failed ({e}), and curl is "
+                f"not on PATH to fall back to.\nThis usually means a TLS-inspecting proxy whose "
+                f"root CA this Python does not trust. Try the system python3, or install curl."
+            )
+        print(f"NOTE: TLS verification failed ({e}).\n"
+              f"      A TLS-inspecting proxy is likely in the path. Falling back to curl, which "
+              f"uses the OS trust store, for this and all later requests.", file=sys.stderr)
+        _USE_CURL = True
+        return _curl_call(method, path, body)
 
 def fetch_all(project, resource, query=""):
     out, page = [], 1

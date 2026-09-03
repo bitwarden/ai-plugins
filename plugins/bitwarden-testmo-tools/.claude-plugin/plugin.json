@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-testmo-tools",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Testmo API access for Bitwarden QA — read and analyze the test-case repository and run history, and create regression test runs from reviewable filter specs with dry-run and milestone linkage.",
   "author": {
     "name": "Bitwarden",

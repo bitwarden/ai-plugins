@@ -16,6 +16,21 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 - `TESTMO_API_KEY` exported in the environment. Reference it only by variable — never print, echo, log,
   commit, or pass the value as a command-line argument (argv is readable by other local users).
 - `python3` available on `PATH` (the scripts use only the standard library).
+- `curl` is **not** normally needed, but is used as a fallback on networks running TLS interception —
+  see below. It ships with macOS, Windows 10+, and most Linux distributions.
+
+### TLS-inspecting proxies
+
+On a network behind a TLS-inspecting proxy (Zscaler and similar), Python may refuse the connection with
+`CERTIFICATE_VERIFY_FAILED`. Two things cause it, and both have to be true to break: the proxy's root CA
+is absent from `certifi`, and Python 3.13+ enables `VERIFY_X509_STRICT`, which rejects that root outright
+when its Basic Constraints are not marked critical. `curl` uses the OS trust store and is not strict, so
+it connects where Python cannot.
+
+The scripts handle this themselves: `call()` tries `urllib` first and, only on a verification failure,
+prints a one-line note and switches to `curl` for the rest of the session. The key stays out of `ps` on
+both paths — the `curl` path passes the header through `curl --config -` on stdin, never in argv. Nothing
+to configure; if `curl` is missing too, the error says so.
 
 ## Locating the scripts and specs
 

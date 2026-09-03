@@ -31,6 +31,8 @@ Install from the Bitwarden AI Plugins marketplace:
 - A Testmo API key exported as `TESTMO_API_KEY` in your shell environment (e.g. `~/.zshrc`).
   The key is read from the environment and never printed, committed, or passed on a command line.
 - `python3` on your `PATH` (the scripts use only the standard library).
+- `curl` only as a fallback, on networks running TLS interception — the scripts detect that case and
+  switch over on their own. It is already present on macOS, Windows 10+, and most Linux distributions.
 
 ## Usage
 
