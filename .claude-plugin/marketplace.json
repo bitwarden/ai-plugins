@@ -104,6 +104,21 @@
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.1.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+    },
+    {
+      "name": "aikido",
+      "description": "Aikido Security for Claude Code: scan code (SAST, secrets, IaC) and list all issues from your Aikido feed powered by the Aikido MCP server.",
+      "author": {
+        "name": "Aikido Security",
+        "url": "https://aikido.dev"
+      },
+      "category": "external",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/AikidoSec/aikido-claude-plugin.git",
+        "sha": "1353c9d54b387f259f0c04f0ed3408842203c29e"
+      },
+      "homepage": "https://github.com/AikidoSec/aikido-claude-plugin"
     }
   ]
 }
