@@ -1,9 +1,12 @@
 ---
 name: scoping-playwright-test-cases
-description: Explore the Bitwarden codebase (clients and server) to build a state-centric Application Context for test planning. Use before building test cases whenever a Jira ticket or plan is provided. Returns a markdown document with two sections — ## States (real-user-reachable, observable UI conditions with their verification points) and ## Flows (sequences that transition between states) — grounded in real client and server code.
+description: "Explore the Bitwarden codebase (clients and server) to build a state-centric Application Context for test planning. Use before building test cases whenever a Jira ticket or plan is provided. Returns a markdown document with two sections — ## States (real-user-reachable, observable UI conditions with their verification points) and ## Flows (sequences that transition between states) — grounded in real client and server code."
+allowed-tools: "Read, Grep, Glob, Bash(git diff:*)"
 ---
 
-Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what `writing-playwright-test-cases` consumes to generate grounded, accurate test cases.
+Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what the downstream test-case authoring step consumes to generate grounded, accurate test cases.
+
+Paths written `references/...` in this skill resolve relative to the skill directory (`${CLAUDE_SKILL_DIR}`); paths written `${CLAUDE_PLUGIN_ROOT}/...` resolve from the plugin root.
 
 The artifact is a contract: every state the planner can ask the application to be in, the flows that put it there, and the UI projections it can assert. Information that does not serve that contract is out of scope.
 
@@ -59,9 +62,9 @@ Before recording any state or verification point, confirm all three. If one fail
 For states with `Reachable by playwright: no`, the `Reach via:` recipe documents how the orchestrator or user can drive the application into the state using tools beyond playwright-cli. Free-form prose with these conventions:
 
 - **Reference flows by slug:** `Run flow:create-paid-org with orgName=…`
-- **Reference skills by name:** `Use the using-stripe-cli skill to advance the test clock by 14 days.`
+- **Reference skills by name:** `Use the using-stripe-cli skill to advance the test clock 8 days (two 4-day batches).`
 - **Mark human steps explicitly:** `[HUMAN] Attach a Stripe test clock to the subscription.` The bracketed `[HUMAN]` prefix is a structural marker — downstream consumers detect it deterministically.
-- **Mark `[HUMAN]` verification points the same way:** when confirming a state requires a check the tool policy disallows (a database-field inspection, or any verification playwright cannot perform), record it as a verification point prefixed with `[HUMAN]`.
+- **Mark `[HUMAN]` verification points the same way:** when confirming a state requires a check the tool policy (`${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`) disallows (a database-field inspection, or any verification playwright cannot perform), record it as a verification point prefixed with `[HUMAN]`.
 
 ### Gather `## Flows`
 
