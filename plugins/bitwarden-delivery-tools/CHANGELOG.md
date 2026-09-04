@@ -5,6 +5,37 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-09-04
+
+### Added
+
+- **`stacking-pull-requests` skill** — Bitwarden's per-PR conventions across a chain of dependent pull requests: layer planning, per-layer gates, a stack-level submission preview, lower-layer feedback, and merging. `gh stack` mechanics are delegated to GitHub's `gh-stack` skill and extension, with an availability check and a single-branch fallback
+- `references/submitting-a-stack.md` — the two paths that carry a title, body, and `t:` label onto every layer; `gh stack link` is passed `--base` so the bottom layer's base is not silently rewritten to the repository default branch
+- **`applying-pr-conventions` skill** — the title, template body, and `ai-review` label a Bitwarden pull request needs, composed for one PR and returning those three values only. `creating-pull-request`, `stacking-pull-requests`, and `force-multiplier` all invoke it instead of reaching into each other: the stack path calls it per layer, the fan-out once at its pilot
+- `references/installing-gh-stack.md`, holding the install detail out of the always-loaded file
+- `skills/stacking-pull-requests/evals/` — 20-case trigger eval, runner, and README. The runner denies the mutating tools, loads no MCP servers, and runs each subprocess in a temp directory, since the query set is imperative. No baseline is committed
+- `perform-preflight`: Stacked Branches section covering the current layer, with its own stack-detection test; a skipped section is reported rather than passing silently. It stops when the layer already has an open pull request, since that fix belongs to `stacking-pull-requests` Step 5 — the check sits here because `committing-changes` runs this checklist before staging, so a direct commit onto a lower layer passes through it
+- `stacking-pull-requests` Step 1 registers the planned layers with `gh stack init`, so submission does not fail after every layer has been gated and previewed
+- `stacking-pull-requests` Step 5 confirms before rebasing layers above a fix, and Step 6 confirms before both the draft flip and the merge
+- `perform-preflight`: a failed rebase checkbox on a layer with an open pull request is reported rather than auto-fixed, since the fix force-pushes every layer above; before submission it is fixed in place, rebasing the layer and restacking the layers above it
+
+### Changed
+
+- `creating-pull-request`: routes to `stacking-pull-requests` on the user's intent to open a chain, and never when that skill is the caller. Its title, body, and label steps moved to `applying-pr-conventions`, so the workflow is now gate → conventions → preview → submit and its steps renumber 1–6 to 1–4
+- `creating-pull-request`: Step 1b names the base ref instead of hardcoding `origin/HEAD`, and keys it on the same trunk-or-release-branch distinction its push step uses for `--base`, so a branch cut from `rc` is not reviewed against trunk with every already-merged release commit in the diff. Only the `Substantial` path can be scoped to one layer, or to an explicit range on a release-cut branch
+- `creating-pull-request`: the review gate has no exemption left. `force-multiplier` was the only caller that skipped it and no longer enters this workflow at all, so the gate runs on every entry; the single remaining caller edge is `stacking-pull-requests` running Step 1b alone, per layer
+- `creating-pull-request`: its push step passes `--base <branch>` for a branch cut from `rc`, `hotfix-rc`, or another release branch, which `gh pr create` would otherwise point at the repository default branch
+- `force-multiplier`: collects conventions from `applying-pr-conventions` at its pilot target rather than walking `creating-pull-request`, so there is no per-PR preview, no `gh pr create`, and no review gate to suppress mid-campaign
+- `committing-changes`: `description` gains a stack boundary so stack-level requests route to `stacking-pull-requests`. The body stays stack-agnostic — a layer is a branch, so the existing "first commit on a branch" rule already applies per layer — and the open-pull-request guard lives in `perform-preflight`, which this skill already runs before staging
+- Stack detection reads `gh stack view --json`'s exit code and requires a payload naming the current branch; `stacking-pull-requests` Step 0 owns what each status means
+- `creating-pull-request`: stack exclusion added to `description`; its eval baseline is stale and must be re-recorded after this version ships, since that runner takes no `--plugin-dir` and loads the installed cache
+- `committing-changes` gains a single-layer eval case guarding its new description boundary. The stack boundary cannot be measured from these skills' own eval sets — correct routing goes to `stacking-pull-requests`, which then invokes them per layer, and the runner matches its token anywhere in the response — so it is measured from `stacking-pull-requests/evals/` only. Its runner requires `--plugin-dir`, so that baseline can be recorded from the branch; the `committing-changes` and `creating-pull-request` baselines take no such flag and must wait until after this version ships
+- `stacking-pull-requests`: the stack root is `<stack base>` rather than `<trunk>` in `gh stack init`, the Step 4 preview, and both commands in `submitting-a-stack.md`, so a stack rooted on `rc` or a release branch is not registered and submitted against the default branch
+- `stacking-pull-requests` Step 0 gates on whether the tooling is usable in this run rather than on install status: a skill installed mid-session is on disk but unresolvable until Claude Code restarts, so that outcome reports the install and takes the single-branch fallback instead of continuing into the stack path
+- `creating-pull-request` no longer detects which skill is calling it. The three-signal protocol and the six-row caller table collapse to two documented edges on the review gate — run only that step (`stacking-pull-requests`, per layer) or skip it on a named caller that owns the review (`force-multiplier`) — plus the reverse-direction handoff when the stack path is unavailable for a run, which now covers a mid-session install as well as a decline. `references/caller-integration.md` is deleted
+- `stacking-pull-requests` Step 2 walks the layers bottom to top, the order under which a lower layer's rebase is re-gated on every layer above it
+- `plugin.json`: description and `stacked-pull-requests` keyword added; marketplace and README catalog entries follow
+
 ## [3.1.0] - 2026-08-19
 
 ### Added

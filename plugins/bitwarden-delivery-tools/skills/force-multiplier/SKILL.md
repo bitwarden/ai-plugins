@@ -3,7 +3,7 @@ name: force-multiplier
 description: Apply one intent across many targets at once — a fleet of repositories across the Bitwarden ecosystem, or many projects inside a monorepo — as N consistent, idempotent, reviewable draft PRs.
 when_to_use: Use when the user wants the same change made everywhere — phrasings like "across all repos", "every repo", "for every project", "fleet-wide", "org-wide", "enterprise-wide", "company-wide", "in bulk", "mass update", or "roll this out everywhere".
 argument-hint: "<natural-language intent> [--scope multi-repo|monorepo] [--dry-run] [--no-pilot]"
-allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Agent, Skill(perform-preflight), Skill(committing-changes), Skill(labeling-changes), Skill(creating-pull-request)"
+allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Agent, Skill(perform-preflight), Skill(committing-changes), Skill(labeling-changes), Skill(applying-pr-conventions)"
 ---
 
 # Force Multiplier
@@ -55,9 +55,9 @@ Force Multiplier is the **cross-target** layer. Per-target intelligence lives in
 - `Skill(perform-preflight)` — the quality gate before any commit.
 - `Skill(committing-changes)` — the commit message format.
 - `Skill(labeling-changes)` — the conventional type keyword that drives the `t:` label.
-- `Skill(creating-pull-request)` — the draft-PR workflow, template, and `ai-review` label.
+- `Skill(applying-pr-conventions)` — the title format, template body, and `ai-review` label.
 
-Of these, `creating-pull-request` is **interactive** — it prompts per PR, which you cannot answer dozens of times. Resolve it at **PILOT**: walk it once to lock the title format, body template, and labels, then replicate that confirmed pattern non-interactively across the fan-out as draft PRs.
+Of these, `applying-pr-conventions` is **interactive** — it proposes a title and asks the label question, which you cannot answer dozens of times. Resolve it at **PILOT**: invoke it once to lock the title format, body template, and label, then replicate that confirmed pattern non-interactively across the fan-out as draft PRs. It composes conventions and nothing else, so it neither reviews nor submits, and there is no gate to suppress. Do not invoke `Skill(creating-pull-request)` per target: it ends in a per-PR preview and its own `gh pr create`, and its review gate would stop mid-campaign to prompt for a review this workflow cannot answer.
 
 ## Safety defaults (non-negotiable unless explicitly overridden)
 
