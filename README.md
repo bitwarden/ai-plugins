@@ -25,7 +25,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 
 ### External plugins
 
-Sourced from outside Bitwarden and **pinned to a reviewed commit**, following the pattern Anthropic uses for third-party entries in its own marketplace. Their files are not copied into this repo; each entry references an upstream repository at a fixed commit.
+Sourced from outside Bitwarden and **pinned to a reviewed commit**, following the pattern Anthropic uses for third-party entries in its own marketplace. Their files are not copied into this repo; each entry references an upstream repository at a fixed commit. Renovate watches each pinned commit and opens a pull request when the upstream branch moves ahead of it.
 
 | Plugin                                                        | Author          | Description                                                                                                |
 | ------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
