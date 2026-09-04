@@ -1,0 +1,67 @@
+{
+  "run_status": "complete",
+  "cases": [
+    {
+      "number": 1,
+      "name": "Login and open Tools menu",
+      "status": "PASS",
+      "url": "https://localhost:8080/#/vault",
+      "setup_steps": [
+        {
+          "text": "Navigated to login page",
+          "outcome": "PASS",
+          "screenshot": "setup-tc-1-step-1-20260724-0930.png"
+        },
+        {
+          "text": "Attach a Stripe test clock to the subscription",
+          "outcome": "COMPLETED (User: done)",
+          "human": true
+        }
+      ],
+      "test_steps": [
+        {
+          "text": "Clicked Tools dropdown",
+          "outcome": "PASS",
+          "screenshot": "test-case-1-step-1-20260724-0930.png"
+        },
+        {
+          "text": "Assert import option visible",
+          "outcome": "PASS",
+          "observed": "Import link present"
+        }
+      ],
+      "notes": "Menu opened without delay."
+    },
+    {
+      "number": 2,
+      "name": "Export vault",
+      "status": "ERROR",
+      "url": "https://localhost:8080/#/tools/export",
+      "test_steps": [
+        {
+          "text": "Clicked Export",
+          "outcome": "FAIL",
+          "observed": "500 response"
+        }
+      ],
+      "notes": "Server returned 500 on export request."
+    },
+    {
+      "number": 3,
+      "name": "Subscription badge label",
+      "status": "PASS (adaptive)",
+      "url": "https://localhost:8080/#/settings/subscription",
+      "test_steps": [
+        {
+          "text": "Assert badge text 'Inactive'",
+          "outcome": "FAIL",
+          "observed": "badge text: 'Canceled'"
+        }
+      ],
+      "adaptive": {
+        "specified": "badge reads 'Inactive'",
+        "found": "badge reads 'Canceled'"
+      }
+    }
+  ]
+}
