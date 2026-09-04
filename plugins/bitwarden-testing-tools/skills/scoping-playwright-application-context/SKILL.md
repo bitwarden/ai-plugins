@@ -1,6 +1,6 @@
 ---
 name: scoping-playwright-application-context
-description: "Explore the Bitwarden codebase (clients and server) to build a state-centric Application Context — the scoping artifact that precedes Playwright test-case authoring. Use when scoping the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria (often from a Jira ticket or plan). Returns a markdown document with two sections — ## States (real-user-reachable, observable UI conditions with their verification points) and ## Flows (sequences that transition between states) — grounded in real client and server code. Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
+description: "Explore the Bitwarden codebase to build a state-centric Application Context for Playwright test-case authoring. Use when scoping the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria (often from a Jira ticket or plan). Returns a markdown document with ## States and ## Flows sections grounded in real client and server code. Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
 allowed-tools: "Read, Grep, Glob, Bash(git -C * diff:*)"
 ---
 
