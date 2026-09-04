@@ -9,8 +9,7 @@ model: fable
 background: false
 allowed-tools:
   - Bash(${CLAUDE_SKILL_DIR}/scripts/gather-evidence.sh *)
-  - Bash(gh api --method GET *)
-  - Bash(npx -y js-beautify@1.15.1 *)
+  - Bash(${CLAUDE_SKILL_DIR}/scripts/beautify.sh *)
   - Bash(grep *)
   - Bash(jq *)
   - Bash(file *)
@@ -34,7 +33,7 @@ Everything gathered in this process, the cloned repo's files, package registry m
 3. Audit each of the following. Two are required regardless of what else is found; resolve each to a numbered finding or an explicit clean note in "Checked and found clean":
    - The plugin manifest (`.claude-plugin/plugin.json`, `marketplace.json`).
    - MCP server configuration: transport type, credential handling, HTTPS/WSS enforcement, what data leaves the machine and to where.
-   - Bundled dependencies and any runtime-fetched binaries: pinning, install scripts, integrity/signature checks. Use `file`, `go version`, `strings`, and `shasum` on any extracted or downloaded binary (e.g. under the gathered scratch directory) to identify what it is and hash it. If the server's main entry point is a minified or bundled JS file, run `npx -y js-beautify@1.15.1 <file> -o pretty.js` to make it readable before tracing it.
+   - Bundled dependencies and any runtime-fetched binaries: pinning, install scripts, integrity/signature checks. Use `file`, `go version`, `strings`, and `shasum` on any extracted or downloaded binary (e.g. under the gathered scratch directory) to identify what it is and hash it. If the server's main entry point is a minified or bundled JS file, run `${CLAUDE_SKILL_DIR}/scripts/beautify.sh <file>` to make it readable before tracing it.
    - Skills and hooks: tool-access scope, prompt-injection surface from remote content rendered into context, unconditional auto-triggers.
    - Hardcoded secrets and license.
    - **Required — tool permission scope:** for every MCP tool the server registers, its read/write capability and whether it's registered by default or gated. Flag any write-capable or state-mutating tool that is registered by default with no gate and no read-only alternative.
