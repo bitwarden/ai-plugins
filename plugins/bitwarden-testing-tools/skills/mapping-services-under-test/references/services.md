@@ -55,7 +55,7 @@
 - **Technology**: .NET
 - **Repo**: `<bitwarden git root>/server/src/Billing/`
 - **Health check**: `http://localhost:44519/alive`
-- **Required by**: `server/src/Billing/**` changes, billing UI flows
+- **Required by**: `server/src/Billing/**` changes, and any test whose routes include `/billing/` or `/organizations/:id/billing/**` (e.g. `/organizations/:id/billing/subscription`)
 
 ### billing-pricing Service
 

@@ -1,7 +1,17 @@
 ---
 name: playwright-test-context-gatherer
 version: 1.3.0
-description: Planning-phase agent for the Bitwarden web test pipeline. Receives a Jira ticket ID, plan file path, or free-form feature description and returns structured context (affected repos, feature description, acceptance criteria) as a markdown response for the orchestrator to persist. Do not invoke directly; dispatched by the pipeline orchestrator.
+description: |
+  Planning-phase agent for Bitwarden web test planning. Given a Jira ticket ID, a plan file path, or a free-form feature description, it acquires the feature source and returns structured context — affected repositories, a feature description, acceptance criteria, and a raw source summary — as a markdown response. Use it to turn a feature reference into the structured context the rest of the Playwright test-planning work builds on.
+
+  <example>
+  Context: An engineer wants the structured planning context for a ticket before scoping Playwright coverage.
+  user: "Gather the web-test context for PM-40001."
+  assistant: "I'll use the playwright-test-context-gatherer agent to pull PM-40001, extract the affected repos, feature description, and acceptance criteria, and return them as a context artifact."
+  <commentary>
+  The task is acquiring and structuring feature source into planning context — exactly this agent's job.
+  </commentary>
+  </example>
 model: sonnet
 skills:
   - bitwarden-atlassian-tools:researching-jira-issues

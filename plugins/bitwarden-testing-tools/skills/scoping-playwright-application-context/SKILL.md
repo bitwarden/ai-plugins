@@ -1,7 +1,7 @@
 ---
-name: scoping-playwright-test-cases
-description: "Explore the Bitwarden codebase (clients and server) to build a state-centric Application Context for test planning. Use before building test cases whenever a Jira ticket or plan is provided. Returns a markdown document with two sections — ## States (real-user-reachable, observable UI conditions with their verification points) and ## Flows (sequences that transition between states) — grounded in real client and server code."
-allowed-tools: "Read, Grep, Glob, Bash(git diff:*)"
+name: scoping-playwright-application-context
+description: "Explore the Bitwarden codebase (clients and server) to build a state-centric Application Context — the scoping artifact that precedes Playwright test-case authoring. Use when scoping the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria (often from a Jira ticket or plan). Returns a markdown document with two sections — ## States (real-user-reachable, observable UI conditions with their verification points) and ## Flows (sequences that transition between states) — grounded in real client and server code. Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
+allowed-tools: "Read, Grep, Glob, Bash(git -C * diff:*)"
 ---
 
 Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what the downstream test-case authoring step consumes to generate grounded, accurate test cases.
@@ -21,7 +21,7 @@ Read all three catalogs under `${CLAUDE_SKILL_DIR}/references/known-flows/` (`au
 For each affected repo passed in by the calling agent, run:
 
 ```bash
-git diff origin/main...HEAD --name-only -- <repo-path>
+git -C <repo-path> diff origin/main...HEAD --name-only
 ```
 
 Read the change set. For each changed component, controller, command, or template, trace the handlers and templates it references to identify the **trace surface** — non-diff code you need to read to identify states and flows. The change set and trace surface together form the blast radius. The blast radius is working context only — do not emit it.
@@ -54,12 +54,12 @@ Before recording any state or verification point, confirm all three. If one fail
   - **Text content.** When the verification is that some _text_ renders correctly — a validation error, toast, banner/callout, a localized or runtime-computed term (e.g. `/ 年`), a relabeled control, any case where "is the right text on screen?" is the question — the verification point **must use `Selector type: text`**, with the text substring as the Selector value. A `text contains "..."` expectation may **not** be grounded on any structural selector (`data-testid`, `tag`, `role`, or `css`). Collision-safety comes from a **distinctive substring**, not a structural selector — assert the longest literal substring that excludes placeholder tokens and cannot match elsewhere on the page (e.g. `Churn-only cohorts cannot have a proactive discount coupon.`, not a short fragment). If no distinctive substring exists — a short localized unit or computed term like `/ 年` has none — keep `Selector type: text` and name its nearest stable container in `Source:` so the read can be scoped there; the container only bounds the search, it never becomes the assertion basis. Only assert text the change affects.
   - **Structure / state.** When the verification is a non-text property — element count, visible/hidden, enabled/disabled, the presence of a structural element — assert via the **selector + `Expectation`**. This is where a `data-testid`/role selector is the right assertion basis. A hyphenated tag (`bit-select`, `bit-input`, `bit-radio-*`) is a Bitwarden component, not native HTML, and does not render as its namesake — never ground on `<tag>#id` (e.g. `select#locale`); use its `role` (a `bit-select` renders as a combobox) or a stable `data-testid`.
 - **Reachability.** Every state declares `Reachable by playwright:`. Set it to `yes` if a producer flow or mechanism can drive the application into this state using only the playwright-cli skill. Otherwise set it to `no` and add an **`If no — why:`** one-liner and a **`Reach via:`** recipe describing the sanctioned out-of-band action (a `[HUMAN]` step, a database row a sanctioned tool inserts, or a non-playwright skill) that reaches it.
-- **Producers.** Leave `**Produced by:**` lines in place; fill them in after `## Flows` is gathered.
+- **Producers.** Leave `**Produced by:**` lines in place; fill them in after `## Flows` is gathered. A route-only setup state has no producing flow, so its `Produced by:` is `none` — but it is still reachable by direct navigation. `Produced by: none` is independent of reachability: set `Reachable by playwright:` from whether the browser can drive into the state (a route-only state is `yes`), never from the absence of a producer flow.
 - **Flag-conditional UI variants fan out into separate states** with distinct slugs, not one state with conditional verification points.
 
 #### Reach via conventions
 
-For states with `Reachable by playwright: no`, the `Reach via:` recipe documents how the orchestrator or user can drive the application into the state using tools beyond playwright-cli. Free-form prose with these conventions:
+For states with `Reachable by playwright: no`, the `Reach via:` recipe documents how the test executor or a human can drive the application into the state using tools beyond playwright-cli. Free-form prose with these conventions:
 
 - **Reference flows by slug:** `Run flow:create-paid-org with orgName=…`
 - **Reference skills by name:** `Use the using-stripe-cli skill to advance the test clock 8 days (two 4-day batches).`
@@ -94,7 +94,7 @@ For each state:
 
 **Produced by:**
 - flow:<slug>
-- <one or more producer flows; if none, the state is reachable out-of-band (see Reach via:), in which case write `none`>
+- <one or more producer flows, or `none` for a route-only setup state or a state reached out-of-band — `none` does not by itself imply `Reachable by playwright: no`>
 
 **Reachable by playwright:** yes | no
 **If no — why:** <one line>  (only when "no")
