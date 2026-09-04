@@ -1,6 +1,6 @@
 # Known Bitwarden States and Flows — Billing
 
-Curated reference of validated, reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations — consumed verbatim by `scoping-playwright-test-cases` and the downstream test-case authoring step.
+Curated reference of validated, reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations — consumed verbatim by `scoping-playwright-application-context` and the downstream test-case authoring step.
 
 ---
 
@@ -96,16 +96,16 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 **Reach via:**
 
 - Run flow:trigger-trial-verification-email (its external-trigger step sends the verification email).
-- Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"`; a trial-initiation URL printed on stdout confirms the state (exit 1 / `NO_MATCH` means the email has not arrived yet).
+- Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths); a trial-initiation URL printed on stdout confirms the state (exit 1 / `NO_MATCH` means the email has not arrived yet).
 
 **UI projection:**
 
 - Route: n/a
 - Verification points:
-  - Selector: trial-initiation URL on stdout from `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"`
+  - Selector: trial-initiation URL on stdout from `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths)
     - Selector type: text
     - Expectation: stdout contains a `https://localhost:8080/#/trial-initiation?...` URL
-    - Source: ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py
+    - Source: the Mailcatcher reader script (`read_mailcatcher.py`); path in the tool policy's Canonical script paths
 
 ---
 
@@ -171,7 +171,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
      }
      ```
      Reference values. `productTier`: `0` = Free, `1` = Teams, `2` = Enterprise, `3` = Families. `products`: `1` = PasswordManager, `2` = SecretsManager. `paymentOptional`: `true` skips the payment step in the downstream completion flow; `false` requires payment.
-  2. Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"` to read the verification email; stdout is the trial-initiation URL, so capture it for the next flow.
+  2. Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths) to read the verification email; stdout is the trial-initiation URL, so capture it for the next flow.
      - Feedback: trial-initiation URL is available on stdout
 - **Post-condition state(s):**
   - Default: state:trial-verification-email-received
