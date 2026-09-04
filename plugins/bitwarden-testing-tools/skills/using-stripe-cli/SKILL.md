@@ -26,14 +26,14 @@ If a step would require live data, STOP and report it as an obstacle.
 
 Every failure carries a documented exit code:
 
-| Exit | Meaning                                                                                                                                                                               | Correct response                                                                        |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 20   | malformed `--path` (not a `/v1/` resource) or `--clock` id                                                                                                                            | fix the request; don't retry                                                            |
-| 21   | `STRIPE_API_KEY` is set to a live key                                                                                                                                                 | report as an obstacle; don't work around it                                             |
-| 2    | malformed invocation (e.g. `--days` below 1 or above 4)                                                                                                                               | fix the arguments                                                                       |
-| 1    | Stripe CLI not installed (per stderr)                                                                                                                                                 | report that it needs installing, then `stripe login`                                    |
-| 1    | `advance-clock` failed partway (the CLI errored mid-loop, or the clock never returned to `ready` within the poll window; either way the `ERROR:` line names `advanced N of M day(s)`) | resume by clock `status`, not `frozen_time` alone — see "The one permitted write" below |
-| 1    | any other Stripe CLI failure (often a 404 from a mistyped `cus_`/`sub_` id)                                                                                                           | report the stderr message and the path; don't retry or substitute                       |
+| Exit | Meaning                                                                                                                                                                                | Correct response                                                                        |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 20   | malformed `--path` (not a `/v1/` resource) or `--clock` id                                                                                                                             | fix the request; don't retry                                                            |
+| 21   | `STRIPE_API_KEY` is set to a live key                                                                                                                                                  | report as an obstacle; don't work around it                                             |
+| 2    | malformed invocation (e.g. `--days` below 1 or above 4)                                                                                                                                | fix the arguments                                                                       |
+| 1    | Stripe CLI not installed (per stderr)                                                                                                                                                  | report that it needs installing, then `stripe login`                                    |
+| 1    | `advance-clock` failed partway (the CLI errored mid-loop, or the clock never returned to `ready` within the poll window; either way the `ERROR:` line names `advanced N of M day(s)`)  | resume by clock `status`, not `frozen_time` alone — see "The one permitted write" below |
+| 1    | any other Stripe CLI **process** failure (e.g. not logged in, network error); an API-level error such as a mistyped `cus_`/`sub_` id does NOT land here — see "Interpreting responses" | report the stderr message and the path; don't retry or substitute                       |
 
 ## When to refuse
 
@@ -69,6 +69,7 @@ See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/references/resources.md` for 
 
 ## Interpreting responses
 
+- A failed lookup is NOT signaled by the exit code: the Stripe CLI returns exit 0 and prints an `{"error": {...}}` object on stdout for API-level errors (a mistyped `cus_`/`sub_` id, an unknown endpoint, an invalid parameter). Before trusting any read, check for a top-level `error` key; if it is present, report its `message`/`type` and do not treat the payload as data.
 - Lead with the direct answer; include the relevant IDs so the user can cross-reference in the Dashboard.
 - Amounts are in the smallest currency unit, so divide by 100 for most currencies (an `amount` of `1250` with `currency: usd` is $12.50); zero-decimal currencies like JPY use the value as-is. Always check the `currency` field.
 - Timestamps are Unix epochs, so convert them to human-readable dates.

@@ -142,6 +142,24 @@ class AdvanceClockTest(unittest.TestCase):
             stripe_cli.advance_clock("clock_1", 1, run, lambda _s: None)
         self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
 
+    def test_error_payload_on_advance_is_not_a_false_success(self):
+        # The Stripe CLI returns exit 0 with an {"error": {...}} body on an
+        # API-level rejection, so run_cli does not raise. If advance_clock
+        # ignores the POST result it will see the clock still 'ready' at its old
+        # frozen_time, break the poll immediately, and report a success that
+        # never happened. It must detect the error payload and raise instead.
+        def run(argv):
+            if argv[1] == "post":
+                return json.dumps(
+                    {"error": {"type": "invalid_request_error",
+                               "message": "No such test clock"}}
+                )
+            return json.dumps({"frozen_time": 1750000000, "status": "ready"})
+
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.advance_clock("clock_1", 1, run, lambda _s: None)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
+
     def test_poll_timeout_reports_partial_progress(self):
         # Day 1 goes ready; day 2 never does, so the poll exhausts. The error
         # must say how many days actually completed and the last frozen_time
