@@ -90,8 +90,13 @@ if [ -n "$pkg_spec" ]; then
 
       pkg_no_version=${pkg_spec%@*}
       encoded=$(printf '%s' "$pkg_no_version" | sed 's/\//%2F/')
-      curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" \
-        || mark ATTESTATIONS_UNAVAILABLE "request for the package's attestations failed (network error, not a 404)."
+      # A missing attestation answers 404, which means the package is
+      # unsigned: a security-relevant result, not a transport error. -f turns
+      # it into a failure so the registry's error body is never saved as if
+      # it were attestation data, and --max-time keeps a stalled connection
+      # from hanging the audit indefinitely.
+      curl -fsS --max-time 60 "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" \
+        || { rm -f "$pkg_dir/attestations.json"; mark ATTESTATIONS_UNAVAILABLE "no attestations retrieved; treat the package as unsigned unless proven otherwise."; }
 
       # A published tarball almost never ships its own lockfile, so `npm audit`
       # fails with ENOLOCK unless the package happens to bundle one. Generate a
