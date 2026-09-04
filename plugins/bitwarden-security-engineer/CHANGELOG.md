@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Private Repository Notes section (SARIF billing and SonarCloud private-repo licensing no longer apply).
+### Added
+
+- `auditing-external-claude-plugins` skill: audits a third-party Claude Code plugin at a pinned commit before it's vendored, covering MCP config, dependency supply chain, tool permission scope, and prompt-injection surface. Runs as an isolated `fable` subagent and writes a report file rather than posting anywhere itself.
 
 ## [1.3.0] - 2026-07-21
 

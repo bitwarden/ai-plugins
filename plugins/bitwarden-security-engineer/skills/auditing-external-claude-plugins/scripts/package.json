@@ -1,0 +1,8 @@
+{
+  "name": "@bitwarden/auditing-external-claude-plugins-beautify",
+  "private": true,
+  "description": "Pinned js-beautify dependency for the auditing-external-claude-plugins skill's beautify.sh script",
+  "devDependencies": {
+    "js-beautify": "2.0.3"
+  }
+}

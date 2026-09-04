@@ -12,15 +12,16 @@ This plugin provides specialized skills for security engineering tasks — from 
 
 ## Skills
 
-| Skill                             | What It Does                                                                                                                                                                                               |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `triaging-security-findings`      | Triage Aikido feed issues (SAST, IaC, secrets, cloud, container, and more), plus GitHub Dependabot and secret scanning alerts. Includes Jira-based triage flow, false positive protocol, and fix patterns. |
-| `threat-modeling`                 | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                                                  |
-| `analyzing-code-security`         | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                                                      |
-| `reviewing-dependencies`          | Dependabot triage, Aikido SCA/container scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                                           |
-| `detecting-secrets`               | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                                               |
-| `reviewing-security-architecture` | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                                                     |
-| `perform-security-review`         | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, Aikido/GHAS scan evidence, and flexible output (chat, file, or GitHub Actions).                        |
+| Skill                              | What It Does                                                                                                                                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `triaging-security-findings`       | Triage Checkmarx, SonarCloud, and Grype findings via GitHub Advanced Security API. Includes finding state rules, false positive protocol, and fix patterns.                                                                        |
+| `threat-modeling`                  | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                                                                          |
+| `analyzing-code-security`          | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                                                                              |
+| `reviewing-dependencies`           | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                                                                                  |
+| `detecting-secrets`                | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                                                                       |
+| `reviewing-security-architecture`  | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                                                                             |
+| `perform-security-review`          | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence, and flexible output (chat, file, or GitHub Actions).                                                       |
+| `auditing-external-claude-plugins` | Security audit of a third-party Claude Code plugin before it's vendored, covering MCP config, dependency supply chain, tool permission scope, and prompt-injection surface. Runs as an isolated subagent and writes a report file. |
 
 ## Usage
 
@@ -36,6 +37,12 @@ Use the bitwarden-security-engineer:bitwarden-security-engineer agent to create 
 
 ```
 Use the bitwarden-security-engineer:bitwarden-security-engineer agent to review this code for OWASP Top 10 vulnerabilities.
+```
+
+`auditing-external-claude-plugins` takes positional arguments instead:
+
+```
+/bitwarden-security-engineer:auditing-external-claude-plugins https://github.com/org/plugin <commit-sha>
 ```
 
 ## References
