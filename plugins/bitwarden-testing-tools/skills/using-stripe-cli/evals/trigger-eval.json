@@ -1,0 +1,82 @@
+[
+  {
+    "query": "list the coupon IDs on our Stripe test account so I can import them in the Admin portal",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the status of test subscription sub_abc123 and is a test clock attached?",
+    "should_trigger": true
+  },
+  {
+    "query": "why did the test-mode payment on payment intent pi_abc123 fail?",
+    "should_trigger": true
+  },
+  {
+    "query": "advance the test clock on the QA subscription by 8 days",
+    "should_trigger": true
+  },
+  {
+    "query": "look up the price IDs for our test products in Stripe",
+    "should_trigger": true
+  },
+  {
+    "query": "read the latest customer.subscription.updated events for cus_abc123 in test mode",
+    "should_trigger": true
+  },
+  {
+    "query": "does the test customer qa@example.com have a default payment method?",
+    "should_trigger": true
+  },
+  {
+    "query": "show me the recent test invoices for this customer and their payment status",
+    "should_trigger": true
+  },
+  {
+    "query": "what plan is on the test subscription for billing-qa@bitwarden.test?",
+    "should_trigger": true
+  },
+  {
+    "query": "check the outcome details on the declined test charge ch_abc123",
+    "should_trigger": true
+  },
+  {
+    "query": "add Stripe webhook handling to the billing service",
+    "should_trigger": false
+  },
+  {
+    "query": "why is this production subscription past_due?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a unit test for our StripePaymentService",
+    "should_trigger": false
+  },
+  {
+    "query": "refund the customer's last charge",
+    "should_trigger": false
+  },
+  {
+    "query": "create a coupon in Stripe for the new promotion",
+    "should_trigger": false
+  },
+  {
+    "query": "update the default payment method on this live customer",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I configure the Stripe API keys in the server config?",
+    "should_trigger": false
+  },
+  {
+    "query": "explain how our subscription upgrade flow works on the server",
+    "should_trigger": false
+  },
+  {
+    "query": "cancel the subscription for this production customer",
+    "should_trigger": false
+  },
+  {
+    "query": "design the data model for a new Stripe integration",
+    "should_trigger": false
+  }
+]
