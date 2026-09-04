@@ -1,6 +1,6 @@
 ---
 name: playwright-test-runner
-version: 1.5.0
+version: 1.6.0
 description: Execution-phase agent for the start-playwright-test pipeline. Reads the test plan, runs Playwright tests via running-playwright-tests, and returns the test-run results JSON for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:

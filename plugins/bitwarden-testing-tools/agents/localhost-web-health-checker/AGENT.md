@@ -1,6 +1,6 @@
 ---
 name: localhost-web-health-checker
-version: 1.5.0
+version: 1.6.0
 description: Execution-phase agent for the start-playwright-test pipeline. Reads the test plan, verifies the Bitwarden local dev environment is ready via checking-localhost-web-health, and signals readiness (or surfaces a failure). Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:
