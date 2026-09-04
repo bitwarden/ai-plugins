@@ -1,8 +1,26 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>bitwarden/renovate-config"],
-  "enabledManagers": ["github-actions", "npm"],
+  "enabledManagers": ["github-actions", "npm", "custom.jsonata"],
+  "customManagers": [
+    {
+      "description": "Track the upstream branch of external Claude plugins pinned by commit in the marketplace manifest",
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/^\\.claude-plugin/marketplace\\.json$/"],
+      "matchStrings": [
+        "plugins[source.source = 'url'].{ 'depName': name, 'packageName': source.url, 'currentDigest': source.sha }"
+      ],
+      "datasourceTemplate": "git-refs",
+      "currentValueTemplate": "main"
+    }
+  ],
   "packageRules": [
+    {
+      "description": "An external plugin pin tracks a branch, which has no release timestamp to age against",
+      "matchManagers": ["custom.jsonata"],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
     {
       "groupName": "github-action minor",
       "matchManagers": ["github-actions"],
