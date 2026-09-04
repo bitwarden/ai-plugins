@@ -19,7 +19,7 @@ class TestEvalConfig(unittest.TestCase):
 
     def test_config_defaults_match_the_hardened_policy(self):
         cfg = eval_harness.EvalConfig(target_skill_token="x")
-        self.assertEqual(cfg.exec_tools, frozenset({"Bash", "Task"}))
+        self.assertEqual(cfg.exec_tools, frozenset({"Agent", "Bash", "Task"}))
         self.assertIn("gh pr view", cfg.read_only_bash)
         self.assertIn(";", cfg.shell_chains)
 

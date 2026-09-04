@@ -4,6 +4,20 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-08-24
+
+### Added
+
+- `start-playwright-test`, the pipeline entry point and the only orchestration skill. It accepts a Jira ticket id, a Jira browse URL, an implementation plan path, or a feature description, optionally followed by extra guidance, plus a `--confirm` flag that pauses for test-plan approval before execution. It runs an eight-task pipeline, dispatching six agents and persisting each response verbatim to `.playwright-testing-artifacts/<slug>/`, then renders an HTML report. Tasks 3 and 4 are dispatched together and run concurrently.
+- Trigger evals for `start-playwright-test`, a 20-query set covering all three input types, the `--confirm` review gate, and near-misses against `assessing-test-coverage` and the separate `qa-testing-notes` skill. Kept as an on-demand diagnostic with no committed baseline; the last observed reading is recorded as dated prose in the eval README.
+- A shared agent non-trigger suite, six queries covering the "do not invoke directly" convention that all six pipeline agents' descriptions carry. Kept as an on-demand diagnostic with no committed baseline; the last observed reading is recorded as dated prose in the eval README.
+- Untrusted-source trust boundary for the web test pipeline: the orchestrator generates a per-run fence token, wraps raw feature source in verified `UNTRUSTED-SOURCE-<nonce>` markers, and prepends a single guardrail to every agent dispatch; each agent carries a one-line backstop, and a `validate-guardrail.sh` check (run in `pnpm lint`) prevents drift.
+
+### Changed
+
+- The plugin README now describes two families of tooling: standalone analysis skills, and the web test pipeline whose components are composed rather than invoked.
+- `scripts/eval_harness.py` counts an `Agent` tool_use as real work alongside `Bash` and `Task`, so the agent non-trigger suite observes a direct agent dispatch.
+
 ## [1.5.0] - 2026-08-24
 
 ### Added
