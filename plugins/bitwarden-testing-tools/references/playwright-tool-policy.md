@@ -27,7 +27,23 @@ Reading an email during a test step (verification links, magic links, OTP codes)
 
 ## Category 3 - External Trigger Simulation
 
-Some flows begin with an action that a system _outside_ the Bitwarden application initiates — a marketing-site form post, a third-party webhook, a scheduled job — that no Bitwarden service fires on its own (for example, the trial verification email POST in the billing known-flows). Simulating that initiator with a direct request is permitted only when all of these hold: the trigger genuinely originates outside the application and is not a UI action a user could perform in the browser (those stay in Category 1); the target is a `localhost`, `127.0.0.1`, `::1`, or `bitwarden.test` origin; and the request only kicks off the flow under test rather than fabricating its result state. A flow step using it must be marked `**EXTERNAL TRIGGER**` and name the external system it stands in for. Anything that instead substitutes for a user's own browser action, or manufactures state the application's own flows can produce, is blocked under Never Permitted.
+Simulate an external trigger only when the action is initiated by a system outside the Bitwarden application, meaning a system that is not the web vault, Admin portal, or any Bitwarden server service (for example the bitwarden.com marketing site, a mobile app, or a third-party webhook).
+
+**The qualifying test:** Could a Bitwarden service (web vault, Admin portal, server API) initiate this action for the user? If yes, use that service instead. If no, because the initiator is truly external, then an external trigger is appropriate.
+
+**Canonical example:** `POST /accounts/trial/send-verification-email` is called by bitwarden.com's marketing site, not by the web vault, so simulating it is legitimate. If the Admin portal or the web vault purchase flow can perform the action, use those instead. Document every external-trigger step in the setup steps output with the rationale for why no Bitwarden service can initiate it.
+
+**Examples of what is NOT Category 3:**
+
+- Applying a coupon to a subscription: use the Admin portal or the web vault purchase flow.
+- Creating a subscription discount record: use the Admin portal.
+- Setting up a paid organization: use the web vault org creation flow with a test card.
+
+**Labeling:** Mark every Category 3 step explicitly in both the plan and the execution log, using this exact form:
+
+`EXTERNAL TRIGGER: POST <endpoint> — <rationale>`
+
+The `<rationale>` is a one-line explanation of why no Bitwarden service can initiate the step.
 
 ## Category 4 - Stripe Data Queries (read-only)
 
