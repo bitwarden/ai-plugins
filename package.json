@@ -24,9 +24,10 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint": "pnpm run lint:prettier && pnpm run lint:spelling",
+    "lint": "pnpm run lint:prettier && pnpm run lint:spelling && pnpm run lint:guardrail",
     "lint:prettier": "prettier --check .",
     "lint:spelling": "cspell lint --no-progress --no-summary --gitignore '**'",
+    "lint:guardrail": "bash plugins/bitwarden-testing-tools/scripts/validate-guardrail.sh",
     "format": "prettier --write ."
   },
   "devEngines": {

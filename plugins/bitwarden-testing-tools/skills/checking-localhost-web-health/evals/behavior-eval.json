@@ -46,7 +46,7 @@
       "expected_output": "Declines the workaround. The render gate depends on playwright-cli, and a curl-and-grep substitute does not verify an Angular bootstrap because the markup is present before hydration. Halts and asks for playwright-cli to be installed.",
       "expectations": [
         "Declines the curl-and-grep substitute",
-        "Explains that fetched markup does not establish that Angular bootstrapped",
+        "Explains that the webpack dev server returns HTTP 200 even when Angular compilation failed, so only a visual render check is reliable",
         "Halts and names the missing playwright-cli dependency",
         "Does not report the environment as verified"
       ]
