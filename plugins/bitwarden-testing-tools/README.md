@@ -84,7 +84,7 @@ What's the status of test subscription sub_abc123, and is a test clock attached?
 
 ## Path variables
 
-Skill and reference files in this plugin use two harness-substituted path variables, both officially supported by Claude Code. This is recorded here so reviewers do not flag `${CLAUDE_SKILL_DIR}` as undocumented — it is intentional, not a typo for `${CLAUDE_PLUGIN_ROOT}`:
+Skill and reference files in this plugin use two harness-substituted path variables, both officially supported by Claude Code:
 
 - `${CLAUDE_PLUGIN_ROOT}` — the plugin root. Used for plugin-shared paths, e.g. one skill referencing another skill's script.
 - `${CLAUDE_SKILL_DIR}` — the invoking skill's own directory. Used for a skill's own `references/…` files.
