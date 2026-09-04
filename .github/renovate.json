@@ -17,6 +17,11 @@
   ],
   "packageRules": [
     {
+      "description": "An external plugin pin tracks a branch, which has no release timestamp to age against",
+      "matchManagers": ["custom.jsonata"],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
       "groupName": "github-action minor",
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["minor", "patch"]
