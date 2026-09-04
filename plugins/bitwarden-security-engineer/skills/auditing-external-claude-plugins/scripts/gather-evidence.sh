@@ -18,10 +18,22 @@ case "$repo_url" in
   *) echo "Refusing to clone unsupported URL scheme: $repo_url" >&2; exit 1 ;;
 esac
 
-git clone -- "$repo_url" "$scratch/repo"
+# core.symlinks=false is written into the new repo's config, so both this
+# clone and the checkout below materialize a committed symlink as a plain
+# file holding its target path. Nothing in the audited tree can then
+# redirect a later read (`Read`, `grep`, `strings`) at a file outside the
+# scratch directory, such as the runner's .git/config or /proc/self/environ.
+git clone -c core.symlinks=false -- "$repo_url" "$scratch/repo"
 git -C "$scratch/repo" checkout --detach "$commit_sha" --
 git -C "$scratch/repo" log -1 --format='%H %aI %an <%ae> %s' > "$scratch/commit-info.txt"
 git -C "$scratch/repo" shortlog -sne --all > "$scratch/authors.txt"
+
+# Inventory what was neutralized. A committed symlink whose target escapes
+# the repo is evidence, not a curiosity, so the caller gets it as a file.
+: > "$scratch/symlinks.txt"
+git -C "$scratch/repo" ls-files -s | grep '^120000 ' | cut -f2- | while IFS= read -r link; do
+  printf '%s -> %s\n' "$link" "$(cat -- "$scratch/repo/$link" 2>/dev/null)"
+done >> "$scratch/symlinks.txt" || true
 
 mcp_json="$scratch/repo/.mcp.json"
 pkg_specs=""
@@ -47,6 +59,15 @@ if [ -n "$pkg_spec" ]; then
       || echo "TARBALL_HASH_UNAVAILABLE: could not hash $tgz." >&2
 
     if tar -xzf "$tgz" -C "$pkg_dir"; then
+      # tar refuses to write *through* an existing symlink, but it will
+      # happily create a symlink member pointing anywhere. Same exposure as
+      # the clone above, so record the targets and then remove the links.
+      : > "$pkg_dir/symlinks.txt"
+      find "$pkg_dir" -type l | while IFS= read -r link; do
+        printf '%s -> %s\n' "$link" "$(readlink -- "$link")"
+      done >> "$pkg_dir/symlinks.txt" || true
+      find "$pkg_dir" -type l -delete
+
       pkg_no_version=${pkg_spec%@*}
       encoded=$(printf '%s' "$pkg_no_version" | sed 's/\//%2F/')
       curl -sS "https://registry.npmjs.org/-/npm/v1/attestations/${encoded}@${pkg_spec##*@}" -o "$pkg_dir/attestations.json" \
