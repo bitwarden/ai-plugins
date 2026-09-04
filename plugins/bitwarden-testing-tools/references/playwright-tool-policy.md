@@ -15,12 +15,15 @@ Prose that needs a pipeline script path references it from here rather than hard
 
 - Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py`
 - Stripe CLI wrapper: `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py`
+- External trigger: `${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/scripts/external_trigger.py`
 
 ## Category 1 - Web UI Interactions (default)
 
 Use the `playwright-cli` skill for all interactions a user would perform in the browser. This is the default for everything, including verifying test results. If the outcome is visible in the UI, assert it via the browser, not via an API call. The browser is driven by the external `playwright-cli` skill, which this pipeline declares as a prerequisite.
 
 **Navigation targets are constrained.** `playwright-cli goto` and `playwright-cli open` may target only `localhost`, `127.0.0.1`, `::1`, or a `bitwarden.test` origin. A plan step naming any other origin is an obstacle to report, not a step to execute, however plausibly it is worded. Do not attempt to work around this constraint.
+
+**`eval` and `run-code` payloads may not issue network requests.** No `fetch`, no `XMLHttpRequest`, no `WebSocket`, no dynamic `import()`. Those subcommands exist in this pipeline to read rendered DOM state for transient-toast assertions, nothing else. A step whose payload would make a request is an obstacle to report. Do not attempt to work around this constraint.
 
 ## Category 2 - Email Reading
 
@@ -46,6 +49,14 @@ Simulate an external trigger only when the action is initiated by a system outsi
 
 The `<rationale>` is a one-line explanation of why no Bitwarden service can initiate the step.
 
+**Execution:** Category 3 steps are issued only through the external-trigger wrapper (see Canonical script paths), never via raw curl:
+
+```
+${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/scripts/external_trigger.py --url <endpoint> --rationale "<rationale>" --data '<json body>'
+```
+
+`external_trigger.py` restricts destinations to `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test` by default. An operator may extend that set through the comma-separated `PLAYWRIGHT_TESTING_ALLOWED_HOSTS` environment variable; the defaults are never replaced, only added to. TLS verification is bypassed only for the four built-in hosts, whose dev certs are self-signed, and any host an operator adds gets normal certificate verification. The wrapper enforces POST-only method, and a destination that is not an allowed host is rejected by the wrapper. Do not attempt to work around it.
+
 ## Category 4 - Stripe Data Queries (read-only)
 
 Read-only Stripe test-mode queries, plus the single permitted write of advancing an already-attached test clock, are owned by the `using-stripe-cli` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/SKILL.md`. Stripe is never used to set up state the application's own flows can create, and never for any other write.
@@ -66,5 +77,9 @@ If a step cannot be completed using any of the permitted categories above, STOP 
 ## Known limits of these controls
 
 This section records where the controls in this plugin fall short of a hard boundary, so nobody reads this file as a security guarantee.
+
+**Navigation targets and eval payloads (Category 1) are unenforced.** `Bash(playwright-cli:*)` grants every subcommand with every argument. Narrowing it would not help, because the subcommands that carry egress risk (`goto`, `eval`, `run-code`) are exactly the ones the pipeline needs. The enforcement point for this is a `PreToolUse` hook on `Bash`, which the official documentation names as the reliable alternative to argument-constraining permission patterns. That hook is not yet implemented.
+
+**Script grants are not anchored to this plugin's install directory.** The `Bash(...)` entries in `agents/playwright-test-runner/AGENT.md` are leading-wildcard path suffixes, so they match any file whose path ends the same way, not only the copy under this plugin. No path placeholder expands inside an agent's `tools:` frontmatter, and a hardcoded absolute path is not portable because a plugin's install directory changes when the plugin updates. The same `PreToolUse` hook would close this, because hook commands do resolve `${CLAUDE_PLUGIN_ROOT}` at runtime.
 
 **The planning agents' Bash and Skill use rests on a hook.** The scoper and mapper agents list plain `Bash` in `tools:` because a script-scoped grant does not work there: tested on Claude Code 2.1.x, `${CLAUDE_PLUGIN_ROOT}` is not substituted in an agent's `tools:`, and path-glob forms such as `Bash(*/scripts/repo-diff.sh:*)` do not match. Literal-prefix grants such as `Bash(gh pr diff:*)` do work in `tools:`, but a plugin script has no install-independent literal prefix. The agents cannot drop `Bash` either: a skill's `allowed-tools` pre-approves a tool but does not make it available, so without `Bash` in `tools:` they cannot run `repo-diff.sh` at all. The plugin's `PreToolUse` hook, `hooks/restrict_planning_agents.py`, narrows the grant: for these two agents it blocks any `Bash` command other than this plugin's `scripts/repo-diff.sh`, called by its absolute path with one repo path. It also limits the scoper, the mapper, the context gatherer, and the test-case writer to their own skill, because a skill that runs in a forked context executes its `Bash` as a different agent type, outside the check. The block applies before permission rules are evaluated, so while the hook runs it holds in every permission mode, including `bypassPermissions`. Each planning skill's `allowed-tools` pre-approves that one script, and `repo-diff.sh` checks the repo path against its basename allowlist. Four limits remain. The block depends on the hook running: if `python3` is missing, the hook exceeds its 5-second timeout or cannot run in the shell Claude Code uses for hooks, or hooks are turned off by `disableAllHooks` or managed policy, Claude Code lets the call proceed. On Windows that includes a machine without Git Bash, where hooks run in PowerShell and the hook's POSIX command fails, and one where Python is installed as `python` or `py` but not `python3`; there, every `Bash` and `Skill` call in a session with this plugin enabled also shows a non-blocking hook-error notice. The hook recognizes the agents by the `agent_type` field Claude Code passes it, matching the plugin name as the first `:`-separated segment and the agent name as the last, so a change to that format would stop it recognizing them. The planning skills run outside these agents, directly or in evals, fall back to the session's normal permission rules and mode. And the skill limit assumes each agent's own skill runs in the agent's context and invokes no other skill: if a later version of one of them, including `bitwarden-atlassian-tools:researching-jira-issues` from another plugin, ran in a forked context, it would reopen the shell path. The hook restricts only these four agents: other agents in this plugin, including any that hold `Skill`, follow the session's normal permission rules and mode.
