@@ -5,6 +5,15 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-04
+
+### Added
+
+- `avoiding-false-positives`: do-not-flag pattern for a confirmed layer of a stacked PR, gated on a four-condition check. Both the PR under review and the PR confirming it must be same-repository, so no one without push access can suppress a finding; draft status is not tested, since upper layers are normally drafts; the relaxation is scoped to the symbols the upper diff references
+- The gate resolves once per review in the agent's Step 1 rather than per finding
+- `references/stacked-pull-requests.md`, holding the rationale behind each condition and what the gate does not defend against
+- `Bash(gh pr list --base:*)` grant, used by the layer check
+
 ## [2.0.0] - 2026-09-04
 
 ### Added
