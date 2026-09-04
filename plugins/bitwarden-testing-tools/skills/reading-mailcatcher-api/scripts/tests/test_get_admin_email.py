@@ -55,6 +55,28 @@ class ExtractAdminsTest(unittest.TestCase):
             get_admin_email.extract_admins({"adminSettings": {"admins": ["a@b"]}})
 
 
+class StripJsoncTest(unittest.TestCase):
+    def test_strips_line_and_block_comments_and_trailing_commas(self):
+        text = """{
+            // a leading admin
+            "adminSettings": {
+                "admins": "admin@localhost", /* the portal login */
+            },
+        }"""
+        self.assertEqual(
+            json.loads(get_admin_email.strip_jsonc(text)),
+            {"adminSettings": {"admins": "admin@localhost"}},
+        )
+
+    def test_preserves_comment_markers_and_commas_inside_strings(self):
+        # A // in a URL value and a , before } inside a string must survive.
+        text = '{"url": "bitwarden://checkout,}", "n": 1,}'
+        self.assertEqual(
+            json.loads(get_admin_email.strip_jsonc(text)),
+            {"url": "bitwarden://checkout,}", "n": 1},
+        )
+
+
 class MainTest(unittest.TestCase):
     def _write_secrets(self, payload):
         fd, path = tempfile.mkstemp(suffix=".json")
@@ -82,6 +104,25 @@ class MainTest(unittest.TestCase):
         self.assertEqual(
             out.split(), ["admin@localhost", "owner@localhost", "cs@localhost"]
         )
+
+    def test_reads_jsonc_secrets_file(self):
+        # Mirrors Bitwarden's dev secrets.json: comments and a trailing comma.
+        jsonc = """{
+            // dev admin accounts
+            "adminSettings": {
+                "admins": "admin@localhost,owner@localhost", /* portal */
+            },
+            "globalSettings": {
+                "premiumCheckoutSuccessUrl": "bitwarden://result?ok=1",
+            },
+        }"""
+        fd, path = tempfile.mkstemp(suffix=".json")
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(jsonc)
+        self.addCleanup(os.unlink, path)
+        code, out, _err = self._run(["--secrets-file", path, "--all"])
+        self.assertEqual(code, 0)
+        self.assertEqual(out.split(), ["admin@localhost", "owner@localhost"])
 
     def test_output_never_contains_other_secrets(self):
         path = self._write_secrets(SECRETS)
