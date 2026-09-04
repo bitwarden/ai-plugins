@@ -154,12 +154,31 @@ def run_cli(argv):
     return completed.stdout
 
 
-def _clock(clock_id, run):
-    body = run(build_get_clock_argv(clock_id))
+def _run_json(argv, run):
+    """Run the CLI, parse its JSON, and surface an API-level error as GuardError.
+
+    The Stripe CLI returns exit 0 with a top-level {"error": {...}} body for
+    API-level failures (a bad id, a rejected advance), so run_cli does not raise
+    on them. Left unchecked on an internal clock call, a rejected advance would
+    masquerade as success: the loop would see the clock still 'ready' at its old
+    frozen_time and report an advance that never happened. Detect the error body
+    here and raise EXIT_CLI so the failure is loud. The read command keeps its
+    pass-through behavior on purpose (see SKILL.md, "Interpreting responses").
+    """
+    body = run(argv)
     try:
-        return json.loads(body)
+        data = json.loads(body)
     except ValueError as err:
-        raise GuardError(EXIT_CLI, f"unparseable test clock response: {err}")
+        raise GuardError(EXIT_CLI, f"unparseable Stripe response: {err}")
+    if isinstance(data, dict) and isinstance(data.get("error"), dict):
+        error = data["error"]
+        detail = error.get("message") or error.get("type") or "unknown error"
+        raise GuardError(EXIT_CLI, f"Stripe API error: {detail}")
+    return data
+
+
+def _clock(clock_id, run):
+    return _run_json(build_get_clock_argv(clock_id), run)
 
 
 def advance_clock(clock_id, days, run, sleep):
@@ -187,7 +206,7 @@ def advance_clock(clock_id, days, run, sleep):
     for _ in range(days):
         frozen += SECONDS_PER_DAY
         try:
-            run(build_advance_argv(clock_id, frozen))
+            _run_json(build_advance_argv(clock_id, frozen), run)
             for _attempt in range(CLOCK_POLL_LIMIT):
                 if _clock(clock_id, run).get("status") == "ready":
                     break
