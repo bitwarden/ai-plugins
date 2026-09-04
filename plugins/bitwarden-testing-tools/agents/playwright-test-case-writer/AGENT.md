@@ -1,26 +1,7 @@
 ---
 name: playwright-test-case-writer
-version: 1.5.0
-description: |
-  Planning-phase agent for Bitwarden web test planning. Given a context artifact and an Application Context artifact, it builds grounded Playwright test cases through writing-playwright-test-cases and returns them as a markdown response.
-
-  <example>
-  Context: An engineer has the context and Application Context artifacts for a change and needs Playwright test cases.
-  user: "Write the Playwright test cases for the past-due billing banner; the context is at ./context-web.md and the app context at ./app-context-web.md."
-  assistant: "I'll use the playwright-test-case-writer agent to read both artifacts and return the grounded test cases."
-  <commentary>
-  Turning the two planning artifacts into test cases is exactly this agent's job.
-  </commentary>
-  </example>
-
-  <example>
-  Context: An engineer just scoped the Application Context for an Admin portal change.
-  user: "Turn ./app-context-cohorts.md into a test plan. The context artifact is ./context-cohorts.md."
-  assistant: "I'll use the playwright-test-case-writer agent to build the test cases from the Application Context."
-  <commentary>
-  Asking for a test plan from an Application Context is a test-case writing request, even without the word "Playwright".
-  </commentary>
-  </example>
+version: 1.6.0
+description: Planning-phase agent for the start-playwright-test pipeline. Reads context and app-context artifacts, uses writing-playwright-test-cases, and returns test cases markdown for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:
   - bitwarden-testing-tools:writing-playwright-test-cases
