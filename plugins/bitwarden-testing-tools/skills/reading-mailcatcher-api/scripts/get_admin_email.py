@@ -7,6 +7,9 @@ Stripe, or other credentials the same file holds. This exists so the
 reading-mailcatcher-api skill can learn the local admin address deterministically
 without granting a broad file read over a secrets file.
 
+The secrets file is JSONC by convention (Bitwarden's dev secrets.json carries
+`//` and `/* */` comments and trailing commas), so it is parsed tolerantly.
+
 Exit 0 on success (prints one address per line on stdout).
 Exit 2: usage error (bad arguments).
 Exit 3: secrets file not found, unreadable, invalid JSON, or missing the
@@ -57,10 +60,75 @@ def extract_admins(data):
     return admins
 
 
+def strip_jsonc(text):
+    """Return `text` with JSONC extras removed so json.loads can parse it.
+
+    Removes `//` line comments, `/* */` block comments, and trailing commas
+    (a comma whose next non-space token is `}` or `]`). The scan is
+    string-aware: comment markers, commas, and braces inside string literals
+    are left untouched, and backslash escapes inside strings are honored. This
+    matters because Bitwarden's dev secrets.json holds values such as
+    "bitwarden://premium-checkout-result" that a naive `//` strip would corrupt.
+    """
+    out = []
+    i, n = 0, len(text)
+    in_string = False
+    pending_comma = None  # index in `out` of a comma awaiting its next token
+    while i < n:
+        char = text[i]
+        if in_string:
+            out.append(char)
+            if char == "\\" and i + 1 < n:
+                out.append(text[i + 1])
+                i += 2
+                continue
+            if char == '"':
+                in_string = False
+            i += 1
+            continue
+        if char == '"':
+            pending_comma = None
+            in_string = True
+            out.append(char)
+            i += 1
+            continue
+        if char == "/" and i + 1 < n and text[i + 1] == "/":
+            i += 2
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+        if char == "/" and i + 1 < n and text[i + 1] == "*":
+            i += 2
+            while i + 1 < n and not (text[i] == "*" and text[i + 1] == "/"):
+                i += 1
+            i += 2  # skip the closing */
+            continue
+        if char.isspace():
+            out.append(char)
+            i += 1
+            continue
+        if char == ",":
+            pending_comma = len(out)
+            out.append(char)
+            i += 1
+            continue
+        if char in "}]":
+            if pending_comma is not None:
+                out[pending_comma] = ""  # drop the trailing comma
+            pending_comma = None
+            out.append(char)
+            i += 1
+            continue
+        pending_comma = None
+        out.append(char)
+        i += 1
+    return "".join(out)
+
+
 def read_admins(path):
     try:
         with open(path, encoding="utf-8") as handle:
-            data = json.load(handle)
+            text = handle.read()
     except FileNotFoundError:
         raise SecretsError(
             f"secrets file not found: {path}. Pass --secrets-file to point at "
@@ -68,6 +136,8 @@ def read_admins(path):
         )
     except OSError as err:
         raise SecretsError(f"could not read {path}: {err}")
+    try:
+        data = json.loads(strip_jsonc(text))
     except ValueError as err:
         raise SecretsError(f"invalid JSON in {path}: {err}")
     return extract_admins(data)
