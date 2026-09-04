@@ -11,7 +11,11 @@ if [ $# -lt 1 ]; then
 fi
 
 input=$1
-output=${2:-pretty.js}
+# Default the output alongside the input rather than the caller's cwd, so an
+# unspecified output path still lands inside the scratch directory from
+# gather-evidence.sh and gets removed by step 7's cleanup.sh, instead of
+# leaking a de-minified copy of adversarial content into the working repo.
+output=${2:-$(dirname -- "$input")/pretty.js}
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 npm --prefix "$script_dir" install --registry https://registry.npmjs.org --no-audit --no-fund --silent
