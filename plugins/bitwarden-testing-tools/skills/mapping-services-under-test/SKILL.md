@@ -1,6 +1,6 @@
 ---
 name: mapping-services-under-test
-description: "Determine which Bitwarden local development services are required for a given set of routes and the current branch diff. Use this skill when given the routes the tests will navigate to (extracted from an Application Context's ## States section), or when asked 'which services do I need running' or 'what should I start for these tests'. The skill runs its own `git -C <repo-path> diff --name-only origin/main...HEAD`, consults references/services.md, and returns the union of services required by route-based dependencies and file-path-based dependencies. Returns service names with their URLs and ports."
+description: "Determine which Bitwarden local development services are required for a given set of routes and the current branch diff. Use this skill when given the routes the tests will navigate to (extracted from an Application Context's ## States section), or when asked 'which services do I need running' or 'what should I start for these tests'. Returns the union of route-based and file-path-based service dependencies as service names with their URLs and ports."
 allowed-tools: "Read, Grep, Glob, Bash(git -C * diff:*)"
 ---
 
