@@ -1,6 +1,6 @@
 # Known Bitwarden States and Flows — Auth
 
-Curated reference of validated, reusable test states and UI flows for Bitwarden authentication — consumed verbatim by `scoping-playwright-test-cases` and the downstream test-case authoring step.
+Curated reference of validated, reusable test states and UI flows for Bitwarden authentication — consumed verbatim by `scoping-playwright-application-context` and the downstream test-case authoring step.
 
 ---
 
@@ -41,7 +41,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
   3. (Optional) Fill the Name field
   4. Click Continue
      - Feedback: "Check your email" confirmation state appears
-  5. Run `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern "Verify"` to fetch the verification email; stdout is the magic-link URL
+  5. Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths) to fetch the verification email; stdout is the magic-link URL
   6. Navigate to the magic-link URL (it targets `https://localhost:8080/#/finish-signup?...`)
      - Feedback: finish-signup form appears
   7. Fill the Master Password field with `<password>` (the fixed dev master password `test-master-password-12`)

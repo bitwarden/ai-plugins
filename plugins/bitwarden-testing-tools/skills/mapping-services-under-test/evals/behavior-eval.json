@@ -1,7 +1,7 @@
 {
   "skill_name": "mapping-services-under-test",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the output in the four places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `git diff --name-only origin/main...HEAD -- <repo-path>` rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; and (d) it returns a minimal set matched by the documented rules rather than a defensively padded list.",
+  "purpose": "Prove the skill changes the output in the four places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `git -C <repo-path> diff --name-only origin/main...HEAD` rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; and (d) it returns a minimal set matched by the documented rules rather than a defensively padded list.",
   "evals": [
     {
       "id": 1,
@@ -19,9 +19,9 @@
       "id": 2,
       "name": "runs-its-own-diff",
       "prompt": "The tests hit /settings/security/two-step. Affected repos: clients and server. Tell me what to start. I have not given you the list of changed files.",
-      "expected_output": "Runs `git diff --name-only origin/main...HEAD -- <repo-path>` itself against each affected repo to obtain the changed paths, rather than asking the caller for a file list or proceeding on the route alone. Then returns the union of route-derived and path-derived services.",
+      "expected_output": "Runs `git -C <repo-path> diff --name-only origin/main...HEAD` itself against each affected repo to obtain the changed paths, rather than asking the caller for a file list or proceeding on the route alone. Then returns the union of route-derived and path-derived services.",
       "expectations": [
-        "Runs its own `git diff --name-only origin/main...HEAD -- <repo-path>` rather than requesting the changed-file list",
+        "Runs its own `git -C <repo-path> diff --name-only origin/main...HEAD` rather than requesting the changed-file list",
         "Does not proceed on route information alone while silently skipping the diff",
         "Returns a union that reflects both the route and the diff",
         "Names the diff as the source of the path-derived portion of the result"
