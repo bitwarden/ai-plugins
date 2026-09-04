@@ -101,13 +101,21 @@ if [ -n "$pkg_spec" ]; then
       # A published tarball almost never ships its own lockfile, so `npm audit`
       # fails with ENOLOCK unless the package happens to bundle one. Generate a
       # lockfile from package.json first so audit has a dependency tree to
-      # check; if that also fails, say so explicitly rather than leave an error
-      # object in audit.json that looks like a clean "no vulnerabilities" result.
+      # check.
       if [ -f "$pkg_dir/package/npm-shrinkwrap.json" ] || [ -f "$pkg_dir/package/package-lock.json" ] \
         || (cd "$pkg_dir/package" && npm install --package-lock-only --ignore-scripts --registry https://registry.npmjs.org > /dev/null 2>&1); then
         (cd "$pkg_dir/package" && npm audit --registry https://registry.npmjs.org --json > "$pkg_dir/audit.json") || true
-      else
-        mark NPM_AUDIT_UNAVAILABLE "could not produce or generate a lockfile, npm audit did not run."
+      fi
+
+      # npm audit exits non-zero both when it finds vulnerabilities, which is
+      # a real report, and when it fails outright, in which case it writes an
+      # error object to stdout that a later read would take for scan output.
+      # Only a real report carries auditReportVersion, so key off the payload
+      # rather than the exit status. This covers the missing-lockfile case too,
+      # where audit never ran and the file was never created.
+      if ! grep -q '"auditReportVersion"' "$pkg_dir/audit.json" 2>/dev/null; then
+        rm -f "$pkg_dir/audit.json"
+        mark NPM_AUDIT_UNAVAILABLE "no npm audit report was produced; treat the dependency tree as never having been scanned."
       fi
     else
       mark TARBALL_EXTRACT_FAILED "the published tarball did not extract cleanly; inspect it manually."
