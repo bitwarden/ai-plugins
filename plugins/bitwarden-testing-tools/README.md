@@ -17,15 +17,20 @@ A set of skills that support Bitwarden's testing and quality work with evidence 
 | `scoping-playwright-application-context` | Returns a state-centric Application Context — real-user-reachable UI states with grounded verification points, and the flows that transition between them — the scoping artifact that precedes Playwright test-case authoring. Working context (changed files, routes, selectors) is used to derive the states, not emitted.                                                                                          |
 | `mapping-services-under-test`            | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                           |
 | `writing-playwright-test-cases`          | Builds Playwright test cases with a web-first policy from plan context, labeling external-trigger steps so the approver can see them.                                                                                                                                                                                                                                                                                 |
+| `checking-localhost-web-health`          | Verifies Docker dev containers via preflight, application services via the health-check script, and Angular bootstrap via render verification. Halts on the first failure.                                                                                                                                                                                                                                            |
+| `running-playwright-tests`               | Calls the `playwright-cli` skill with guardrails and screenshots, governing tool policy, screenshot naming, toast capture, and setup-step execution.                                                                                                                                                                                                                                                                  |
+| `compiling-playwright-report`            | Home of the deterministic report scripts (`render_report.py`, `merge_results.py`), the report templates, and the results-schema reference.                                                                                                                                                                                                                                                                            |
 
 ## Agents
 
-| Agent                                   | Description                                                                                                             |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `playwright-test-context-gatherer`      | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context.     |
-| `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.                 |
-| `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.                |
-| `playwright-test-case-writer`           | Reads the context and Application Context artifacts and builds grounded test cases via `writing-playwright-test-cases`. |
+| Agent                                   | Description                                                                                                                       |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `playwright-test-context-gatherer`      | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context.               |
+| `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.                           |
+| `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.                          |
+| `playwright-test-case-writer`           | Reads the context and Application Context artifacts and builds grounded test cases via `writing-playwright-test-cases`.           |
+| `localhost-web-health-checker`          | Reads the test plan and dispatches `checking-localhost-web-health`. Halts the run on any failure. Never starts or stops services. |
+| `playwright-test-runner`                | Calls the `playwright-cli` skill to execute test cases with guardrails and screenshots, returning structured results.             |
 
 ## Cross-Plugin Integration
 
