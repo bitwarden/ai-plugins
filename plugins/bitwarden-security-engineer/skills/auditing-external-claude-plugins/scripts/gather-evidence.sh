@@ -11,9 +11,6 @@ fi
 
 repo_url=$1
 commit_sha=$2
-# A fixed, predictable prefix (rather than a bare `mktemp -d`) so the caller
-# can scope a cleanup command to exactly this script's output, not to /tmp
-# at large.
 scratch=$(mktemp -d /tmp/plugin-audit.XXXXXXXX)
 
 case "$repo_url" in

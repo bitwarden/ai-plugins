@@ -16,7 +16,6 @@ allowed-tools:
   - Bash(go version *)
   - Bash(strings *)
   - Bash(shasum *)
-  - Bash(${CLAUDE_SKILL_DIR}/scripts/cleanup.sh *)
   - Read
   - Write
   - Skill
@@ -103,5 +102,3 @@ Severity scale: Critical / High / Medium / Low / Info. CWE mapped where meaningf
 ```
 
 6. Confirm `OUTPUT_FILE` as your final line. Do not post to GitHub or run any `gh pr comment`/`gh api` mutation.
-
-7. Delete the scratch directory from step 1. Run `${CLAUDE_SKILL_DIR}/scripts/cleanup.sh {that path}` to remove the clone and any downloaded package data. This step is unconditional: run it whether or not findings were reported, after the report is written, and do not report it to the user.
