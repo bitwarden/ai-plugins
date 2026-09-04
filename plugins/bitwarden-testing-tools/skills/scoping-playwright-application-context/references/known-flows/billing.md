@@ -163,9 +163,9 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 ### flow:purchase-premium-subscription
 
-**Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout), etc.
+**Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md`), etc.
 
-**Parameters:** none (uses default billing values)
+**Parameters:** none (uses defaults documented in `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md`)
 
 **Precondition state:** state:authenticated-free-user
 
@@ -194,7 +194,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 ### flow:create-paid-org
 
-**Use when:** The default way to get a paid organization (Families, Teams, or Enterprise; annual or monthly). A newly created paid org starts in its trial (7 days unless `trialLength` says otherwise), so this is also the flow for any test that needs a trialing organization, unless a gated trial flow's `Select only when:` condition is met. Covers discount badge display on a Families organization too (any eligible Stripe coupon imported to Admin portal applies automatically at checkout).
+**Use when:** The default way to get a paid organization (Families, Teams, or Enterprise; annual or monthly). A newly created paid org starts in its trial (7 days unless `trialLength` says otherwise), so this is also the flow for any test that needs a trialing organization, unless a gated trial flow's `Select only when:` condition is met. Covers discount badge display on a Families organization too (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md` for the discount mechanism).
 
 **Parameters:** `orgName`, `billingEmail`, `planTier`, `cadence`, `seats`, `trialLength`
 

@@ -15,14 +15,16 @@ A set of skills and agents that support Bitwarden's testing and quality work wit
 | `recommending-test-layers`               | Recommends **which tests to add and at which layer**. From a Jira key, Testmo CSV, an `assessing-test-coverage` report, a PR, or a feature description, places each behavior at its lowest sufficient deterministic layer (static / unit / component / contract), then adds non-deterministic layers (integration, E2E, smoke, synthetic monitoring, exploratory) where each one's trigger is met, grading criticality against Bitwarden's Severity guide. Writes a markdown recommendation report under `${CLAUDE_PLUGIN_DATA}/recommending-test-layers/`. |
 | `mapping-services-under-test`            | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `scoping-playwright-application-context` | Returns a state-centric Application Context — real-user-reachable UI states with grounded verification points, and the flows that transition between them — the scoping artifact that precedes Playwright test-case authoring. Working context (changed files, routes, selectors) is used to derive the states, not emitted. Reusable states and flows live in curated per-domain catalogs under `references/known-flows/`; newly validated ones belong in the domain-appropriate catalog rather than being re-derived per run.                             |
+| `writing-playwright-test-cases`          | Builds Playwright test cases with a web-first policy from plan context, labeling external-trigger steps so the approver can see them.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Agents
 
-| Agent                                   | Description                                                                                                         |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `playwright-test-context-gatherer`      | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
-| `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.             |
-| `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
+| Agent                                   | Description                                                                                                             |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `playwright-test-context-gatherer`      | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context.     |
+| `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.                 |
+| `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.                |
+| `playwright-test-case-writer`           | Reads the context and Application Context artifacts and builds grounded test cases via `writing-playwright-test-cases`. |
 
 ## Hooks
 
