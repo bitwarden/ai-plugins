@@ -1,22 +1,34 @@
 ---
-argument-hint: [PR#] | [PR URL]
-allowed-tools: Read, Write(review-summary.md), Write(review-inline-comments.md), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr checks:*), Bash(git show:*), Bash(gh pr list:*), Bash(git log:*), Bash(git diff:*), Bash(git status:*), "Bash(gh api graphql -f query=:*)", Grep, Glob, Task, Skill
+argument-hint: "[PR#] | [PR URL] | (blank to choose interactively)"
+allowed-tools: AskUserQuestion, Task
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
 ---
 
-You must invoke the bitwarden-code-reviewer agent to perform a comprehensive code review of a GitHub pull request or local changes.
+**Resolve the target first, in this turn.** Two ways in:
+
+- `$ARGUMENTS` names a PR. Extract just the number — `123`, `https://github.com/org/repo/pull/456`, and `PR #789` all yield a bare integer.
+- `$ARGUMENTS` is empty, or names nothing that parses as a PR. Use `AskUserQuestion` to ask whether to review a pull request or the local changes, and settle it here; the agent runs as a subagent and cannot prompt mid-run, so a question left for it has no one to answer. This turn cannot list open PRs, so take the number as free text rather than offering a menu.
+
+**If the target is a pull request, the number must match `^[0-9]+$` before it goes into the `TARGET:` line.** (A local-changes target has no number; this check does not apply to it.) It is written verbatim into `gh pr view`, `gh pr diff`, and the GraphQL variable below, and `Bash(gh pr view:*)` is a prefix rule — `gh pr view 1 --repo attacker/repo` would match it and redirect the review. If the value does not match, **do not invoke the Task tool at all**: report what you were given and ask again. Never delegate without a resolved target.
+
+**Then invoke the Task tool** with `subagent_type: "bitwarden-code-review:bitwarden-code-reviewer"`. Begin the prompt with the resolved target on its own line, in exactly one of these forms, followed by everything from **CRITICAL INSTRUCTIONS FOR THE AGENT** onward — not this paragraph, which is addressed to the command turn and would tell the agent not to do its own job:
+
+```
+TARGET: PR #<number>
+TARGET: local changes
+```
+
+On the line after it, always add `OUTPUT: local files` — both targets. This command writes to local files and never posts, so that declaration, not the target, is what `Skill(posting-review-summary)` routes on.
+
+That line is the only carrier — `$ARGUMENTS` is empty on the interactive path, so an agent left to re-derive the target from it would find nothing. This command's own turn holds only `AskUserQuestion` and `Task`: it settles the target and delegates. Thread pre-fetching belongs to the workflow-driven `/bitwarden-code-review:code-review`, not here. Do not run the `gh`, `git`, `Skill`, or `Write` operations described below yourself — they are the agent's, and it carries its own grants for them.
+
+Invoke the bitwarden-code-reviewer agent now with the instructions below.
 
 **CRITICAL INSTRUCTIONS FOR THE AGENT:**
 
-1. **Pull Request Information**:
-   - If arguments are provided ($ARGUMENTS), extract the numeric PR number:
-     - Direct number: "123" → PR number is 123
-     - PR URL: "https://github.com/org/repo/pull/456" → PR number is 456
-     - Text reference: "PR #789" → PR number is 789
-   - If no arguments provided, ask the user if there is a related PR number or URL
-   - If user indicates no PR or requests local changes review, review the current git branch changes using `git diff` and `git status`
-   - For PRs: Use the extracted PR number when executing thread detection and fetching PR data with `gh pr view` commands
-   - For local changes: Skip thread detection (step 2), analyze uncommitted and committed changes on the current branch
+1. **Read the target from the `TARGET:` line at the top of this prompt.** It is already resolved — the command turn settled it before delegating. Do not ask and do not re-derive it: you hold no `AskUserQuestion` grant and no one is there to answer.
+   - `TARGET: PR #<number>` — use that number for thread detection and for fetching PR data with `gh pr view`
+   - `TARGET: local changes` — follow the local-mode procedure in your `AGENT.md`, which defines how the base is resolved and what to do when there is nothing to review. Skip thread detection (step 2). The scope is whatever that procedure resolves, not both scopes at once
 
 2. **Detect Existing Threads** (PR reviews only - skip for local changes):
 
@@ -86,7 +98,7 @@ You must invoke the bitwarden-code-reviewer agent to perform a comprehensive cod
 
 **File 1: `review-summary.md`**
 
-Uses same format as `Skill(posting-review-summary)`:
+Uses the same format as `Skill(posting-review-summary)`, including its `## No Verdict` form when nothing could be reviewed:
 
 ```markdown
 **Overall Assessment:** APPROVE / REQUEST CHANGES
@@ -126,5 +138,3 @@ Contains all inline review comments with file and line references (same format a
 
 ---
 ```
-
-Invoke the bitwarden-code-reviewer agent now with these instructions.

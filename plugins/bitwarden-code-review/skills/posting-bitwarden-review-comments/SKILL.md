@@ -1,13 +1,25 @@
 ---
 name: posting-bitwarden-review-comments
-description: Use this skill when posting inline comments to GitHub pull requests. Apply when formatting comments following Bitwarden engineering standards with severity emojis, clear explanations, and actionable suggestions. Use after findings are classified and ready to post. DO NOT USE when posting summary comments.
+description: Use this skill when emitting inline review comments, whether posted to a GitHub pull request or written to a local file under caller-declared local-file output. Apply when formatting comments following Bitwarden engineering standards with severity emojis, clear explanations, and actionable suggestions. Use after findings are classified and ready to emit. DO NOT USE when posting summary comments.
 ---
 
 # Posting Bitwarden Review Comments
 
-## GitHub Comment Posting Protocol
+## Destination Detection
 
-1. **MUST** Analyze all changes before posting anything
+Check destinations **in this order** — use the first match:
+
+| Destination                         | How to Detect                                                                                                                                                                                                         | Action                                                       |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Local output in effect**          | An `OUTPUT: local files` line in the prompt's leading directive block, **or** a caller that passes local files as the destination in effect. Check this first, and never key it on which tools happen to be available | Write to `review-inline-comments.md` in working directory    |
+| Local target, no GitHub destination | The review target is local changes and no caller declared a GitHub destination                                                                                                                                        | Write to `review-inline-comments.md` in working directory    |
+| GitHub pull request                 | Neither of the above                                                                                                                                                                                                  | Post via `mcp__github_inline_comment__create_inline_comment` |
+
+Under either local destination, format every finding exactly as below and write them all to the one file — do not post, whatever comment tools happen to be available.
+
+## Comment Posting Protocol
+
+1. **MUST** Analyze all changes before emitting anything
 2. **MUST** Use inline comments for code-specific findings
 3. **MUST** Use the Bitwarden finding format
 4. **FORBIDDEN**: Do NOT add "Strengths", "Highlights", or positive observations sections.

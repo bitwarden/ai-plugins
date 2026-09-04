@@ -5,6 +5,30 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-04
+
+### Added
+
+- `agents/bitwarden-code-reviewer/references/local-mode-diff.md`, holding the rationale behind each local-mode gate
+- A `## No Verdict` output form in `posting-review-summary`, used when nothing was reviewed. It replaces the standard template rather than adding a third assessment value
+
+### Changed
+
+- **`/code-review` no longer resolves a pull request from the checkout.** It takes the number from the pre-fetched threads file, the workflow-authored `PR NUMBER:` line, or `$ARGUMENTS`, in that order, and reports No Verdict when none yields one. Previously a blank invocation fell through to a bare `gh pr view`, which resolved whatever pull request the checkout belonged to — and which fails outright under the detached HEAD `actions/checkout` leaves on a `pull_request` event
+- Both commands pass the resolved target to the agent as a `TARGET: PR #<number>` or `TARGET: local changes` line, and the `^[0-9]+$` check on that number is stated on both sides of the delegation
+- `/code-review-local` additionally passes `OUTPUT: local files` on both targets, and the agent carries it into Steps 5 and 6 whether or not the prompt supplied it. `posting-review-summary` and `posting-bitwarden-review-comments` each gained routing rows ahead of their GitHub rows that key on that declaration rather than on which tools are available, so neither destination depends on the target resolving to local changes
+
+### Fixed
+
+- Local mode diffs against `origin/HEAD` instead of a hardcoded `main`, passing the symbolic ref to git rather than interpolating a resolved name
+- Local mode gates on content as well as exit status: a three-dot diff ignores the working tree, so it succeeds with no output when the branch is level with `origin/HEAD`, and that now falls through rather than producing a verdict over nothing
+- Where no reviewable diff can be produced at all, local mode aborts to the mode's summary destination with no verdict
+- `argument-hint` quoted in both commands; the unquoted `|` stopped their frontmatter parsing, so neither `allowed-tools` list was in effect
+- `code-review` cut to `Read(//tmp/pr-threads.json)` and `Task`, and `code-review-local` to `AskUserQuestion` and `Task`, since each only settles its target and delegates. This removes their `Bash(gh api graphql -f query=:*)` grant, which the frontmatter fix had just made live on the command turn. The reviewer agent keeps that grant, because thread detection needs GraphQL and a prefix rule cannot separate a query from a mutation
+- Two `Write(<path>)` rules dropped from `code-review-local`; Claude Code consults path rules for `Edit` and `Read` only
+- Agent `Write` left unscoped, since Claude Code consults path rules for `Edit` and `Read` only, so a `Write(<path>)` specifier confines nothing
+- Tool grants alphabetized in the agent and both commands, and `tools:` stays a comma-separated string in all three, matching the repo's other six agents; the block-sequence form loads correctly but `plugin-dev`'s `validate-agent.sh` reads it with `sed` and reports the agent as unscoped
+
 ## [1.14.1] - 2026-08-26
 
 ### Fixed

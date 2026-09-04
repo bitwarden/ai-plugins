@@ -5,6 +5,35 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-04
+
+### Added
+
+- `--base-ref <ref>` parameter for `perform-security-review`, usable in non-interactive contexts
+- `references/base-ref-resolution.md`, holding the rationale behind each base-ref gate
+- `references/tool-grants.md`, explaining why no permission rule can safely grant `gh api`
+- `Bash(git rev-parse:*)`, `Bash(git merge-base:*)`, and `Bash(printenv GITHUB_ACTIONS)` grants
+
+### Fixed
+
+- Branch comparison mode resolves the base ref instead of diffing against a hardcoded `main`
+- Base-ref resolution keys on exit status, not output; `git rev-parse` prints the ref it could not resolve
+- Every candidate passes a `git merge-base` gate, so a shallow clone cannot yield a zero-byte diff reviewed as clean
+- Every candidate passes an `^[A-Za-z0-9_][A-Za-z0-9._/-]*$` allowlist before reaching a command; a legal ref name can still be a shell payload or a leading-dash option
+- Step 1B checks exit status and content before launching agents, and clears the diff file's contents on every abort path
+- Step 1B and the step 1-A2 abort both write their reason to the resolved output destination, since stopping skips step 6
+- Step 5's branch comparison header reads `vs {base-ref}` instead of `vs main`
+
+### Removed
+
+- The `Bash(gh api --method GET *)` and `Bash(rm -f /tmp/security-review-*)` grants, with no replacement. Step 7 clears the temp diff with the granted `Write` tool instead, so cleanup still runs unattended. **Migration:** a deployment that needs GHAS evidence on the unattended path must add its own `gh api` allow rule and pair it with a read-only `GH_TOKEN`. Any `allowed-tools` wildcard absorbs an inserted `-X DELETE`, so no rule can constrain the verb — `references/tool-grants.md` shows the bypass. Step 1-C's three scan-evidence calls now prompt, and in CI they are denied and render as `Not checked (permission denied)` rather than `None`
+
+### Changed
+
+- Base-ref resolution moved into sub-step A2 as an ordered candidate list with one documented abort
+- `allowed-tools` rewritten from space-separated to comma-separated and alphabetized, so the grants parse for the first time; `Task` added, since steps 2 and 4 launch agents; the unused `Bash(gh pr list:*)` grant removed
+- The default-branch lookup uses `gh repo view` instead of `gh api`, so no grant can name an endpoint whose `DELETE` deletes the repository
+
 ## [1.4.0] - 2026-09-03
 
 ### Added
