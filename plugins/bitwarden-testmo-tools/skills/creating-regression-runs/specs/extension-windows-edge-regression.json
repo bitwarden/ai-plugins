@@ -1,0 +1,13 @@
+{
+  "_comment": "Extension Windows/Edge regression — 1 of 4 same-named 'Extension' runs distinguished only by Testmo Configuration. NARROW variant: case selection is driven by the Testmo tag 'extension-essential' (applied server-side by the /cases API), with no folder or test-type filter — the tag itself defines the scope, so any test type is eligible. State and automation filters still apply, so retired cases and already-automated ones are excluded. Configuration = 'Windows, Edge'. TWO-STEP RUN — the API only reproduces step 1. STEP 2 IS MANUAL: after creating this run, in the Testmo UI remove the cases whose configurations do not apply to Windows/Edge. Reason: Testmo's /cases API cannot filter by configuration and exposes no per-case config assignment. config_id 15 = 'Windows, Edge' (verified 2026-08-28). Tag id 17190.",
+  "project_id": 1,
+  "run_name": "Extension",
+  "run_state_id": 7,
+  "config_id": 15,
+  "tags": ["regression"],
+  "filters": {
+    "tags": ["extension-essential"],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 23, 24]
+  }
+}
