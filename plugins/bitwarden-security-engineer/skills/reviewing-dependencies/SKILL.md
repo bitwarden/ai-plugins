@@ -1,6 +1,6 @@
 ---
 name: reviewing-dependencies
-description: This skill should be used when the user asks to "review Dependabot alerts", "check for vulnerable dependencies", "audit third-party packages", "assess supply chain risk", "run Grype scan", or needs to evaluate dependency health, transitive risk, or supply chain security.
+description: This skill should be used when the user asks to "review Dependabot alerts", "check for vulnerable dependencies", "audit third-party packages", "assess supply chain risk", "run an Aikido scan", or needs to evaluate dependency health, transitive risk, or supply chain security.
 ---
 
 ## Dependency Vulnerability Workflow
@@ -24,7 +24,7 @@ For each alert, determine:
 
 1. **Is the vulnerable code path reachable?** — Does the application actually use the vulnerable function/feature of the dependency?
 2. **Is it a direct or transitive dependency?** — Transitive vulnerabilities may be harder to fix but still pose real risk.
-3. **What is the CVSS score and exploit availability?** — A high CVSS with a public exploit needs immediate action. A medium CVSS with no known exploit can be scheduled.
+3. **What is the CVSS score and exploit availability?** (Use CVSS v3.0.) A high CVSS with a public exploit needs immediate action. A medium CVSS with no known exploit can be scheduled.
 4. **What versions are affected and what versions fix it?** — Check if updating is a minor bump or a breaking change.
 
 ### Step 3: Decide on Action
@@ -76,29 +76,25 @@ When evaluating whether to adopt or keep a dependency, assess:
 | **License**               | Compatible with project (MIT, Apache-2.0) | Restrictive or ambiguous license             |
 | **Security Practices**    | Signed releases, security policy, 2FA     | No security policy, no signed releases       |
 
-## Grype Integration
+## Aikido Integration
 
-Grype scans container images and filesystems for known vulnerabilities:
+Aikido is Bitwarden's container and open-source dependency scanner. It continuously scans connected repositories, surfacing open-source (SCA) and container findings in the same feed as SAST, IaC, and secrets results.
+
+Use the `aikido:issues` skill (`aikido_issues_list`) to query findings, scoping to the relevant repo and filtering `issue_types` to `open_source` (dependency CVEs) and `docker_container` (container image vulnerabilities). `cloud_instance` is a separate Aikido issue type for cloud VM/instance findings — out of scope for dependency and container review.
+
+If the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data — Aikido is the only place these findings are tracked.
 
 ```bash
-# Scan a container image
-grype <image>:<tag>
-
-# Scan a directory
-grype dir:/path/to/project
-
-# Output as JSON for programmatic processing
-grype <image> -o json
-
-# Filter by severity
-grype <image> --only-fixed --fail-on high
+# Use the aikido:issues skill, e.g.:
+# issue_types: ["open_source"], repo_name: "<repo>"       -> dependency CVEs
+# issue_types: ["docker_container"], repo_name: "<repo>"  -> container image vulnerabilities
 ```
 
-**Interpreting Grype output:**
+**Interpreting Aikido output:**
 
-- Each finding includes: CVE ID, severity, package name, installed version, fixed version
-- `Fixed` column indicates whether an update is available
-- Use `--only-fixed` to focus on actionable items (vulnerabilities with available fixes)
+- Each finding includes: issue title, type, severity (and severity label), remediation guidance, and SLA due date
+- Use `out_of_sla: true` to focus on findings already past their remediation SLA
+- Triage follows the same Jira-based flow as other Aikido findings — see the `triaging-security-findings` skill
 
 ## Platform-Specific Guidance
 

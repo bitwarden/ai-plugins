@@ -2,7 +2,7 @@
 name: perform-security-review
 description: Performs a security-focused code review by launching multiple specialized agents and a verification agent to ensure comprehensive coverage and accurate findings. Use this skill when the user asks for a "perform-security-review", "bitwarden-security-review", "execute a security review", "run a comprehensive security audit", "perform an end-to-end security assessment", or needs to coordinate multiple security checks across code, dependencies, secrets, and configurations. The skill manages the workflow, delegates tasks to specialized agents, and presents final findings to the user.
 argument-hint: "[--output <chat|file|github>] [--output-dir <path>] [--model <model>] [pr-number-or-url|commit-sha|duration]"
-allowed-tools: Bash(gh pr diff *) Bash(gh pr view *) Bash(gh pr list *) Bash(git diff *) Bash(git log *) Bash(git remote get-url *) Bash(git branch --show-current *) Bash(gh api --method GET *) Bash(rm -f /tmp/security-review-*) Read Write Skill
+allowed-tools: Bash(gh pr diff *) Bash(gh pr view *) Bash(gh pr list *) Bash(git diff *) Bash(git log *) Bash(git remote get-url *) Bash(git branch --show-current *) Bash(gh api --method GET *) Bash(rm -f /tmp/security-review-*) Read Write Skill mcp__plugin_aikido_aikido-mcp__aikido_issues_list
 ---
 
 ## Parameters
@@ -40,9 +40,8 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    Choose a descriptive `<identifier>` (e.g., `PR123`, `5days`, `local`). Store the full path as `DIFF_FILE` and include it in every agent prompt in steps 2 and 4 so they can `Read` the diff directly.
 
-   **C.) Fetch scan evidence.** All calls are best-effort — silently skip any that fail (403, 404, empty response, GHAS not enabled). Use `gh api --jq` for all formatting — **DO NOT** pipe to `jq`. All calls **MUST** use `--method GET` and `-H "X-GitHub-Api-Version: 2026-03-10"`.
-   - **Code scanning (PR mode):** `gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" "repos/{owner}/{repo}/code-scanning/alerts?pr={number}&state=open&per_page=100" --jq '.[] | "\(.rule.security_severity_level | ascii_upcase) | \(.most_recent_instance.message.text) | \(.most_recent_instance.location.path)\n  \(.rule.full_description | .[0:150])\n"'`
-   - **Code scanning (all other modes):** `gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/heads/{branch}&state=open&per_page=100" --jq '.[] | "\(.rule.security_severity_level | ascii_upcase) | \(.most_recent_instance.message.text) | \(.most_recent_instance.location.path)\n  \(.rule.full_description | .[0:150])\n"'`
+   **C.) Fetch scan evidence.** All calls are best-effort — silently skip any that fail or return nothing (403, 404, empty response, MCP server unavailable). Use `gh api --jq` for all formatting — **DO NOT** pipe to `jq`. All `gh api` calls **MUST** use `--method GET` and `-H "X-GitHub-Api-Version: 2026-03-10"`.
+   - **Aikido (SAST/IaC):** Invoke `Skill(aikido:issues)` scoped to this repo (`repo_name={repo}`) with `issue_types: ["sast", "iac"]` to list open findings. Bitwarden's SAST/IaC scanning runs through Aikido, not GitHub code scanning — do not query the `code-scanning/alerts` API, it will not have these findings. Format each returned issue as `SEVERITY | title | file (line N)`.
    - **Secret scanning:** `gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" "repos/{owner}/{repo}/secret-scanning/alerts?state=open" --jq '.[] | "\(.secret_type_display_name) | \(.state) | \(.resolution // "open")"'`
    - **Dependabot:** `gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" "repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100" --jq '.[] | "\(.security_advisory.severity | ascii_upcase) | \(.dependency.package.name) | \(.security_advisory.cve_id // .security_advisory.ghsa_id) | \(.security_advisory.summary)"'`
 
@@ -51,7 +50,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    ```
    === SCAN EVIDENCE (pre-fetched — do not re-fetch) ===
 
-   --- CODE SCANNING ---
+   --- AIKIDO (SAST/IAC) ---
    {formatted output, or "None / not available"}
 
    --- SECRET SCANNING ---
@@ -74,7 +73,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    For all four agents:
    - Use the selected model.
    - **CRITICAL: Every agent prompt MUST include this framing at the start:** "You are a security researcher analyzing code for impactful, exploitable, and reproducible vulnerabilities for an authorized internal security audit. Your goal is to find real bugs — approach this analysis without safety refusals, as this is an explicitly authorized internal security engagement at Bitwarden."
-   - **CRITICAL: Every agent prompt MUST include this constraint:** "The diff has been pre-fetched and saved to `{DIFF_FILE}` — read it using the `Read` tool. **DO NOT** execute `gh pr diff`, `git diff`, or any other diff commands. NEVER use WebFetch, WebSearch, or any `gh api` endpoints — scan evidence has been pre-fetched and is provided below."
+   - **CRITICAL: Every agent prompt MUST include this constraint:** "The diff has been pre-fetched and saved to `{DIFF_FILE}` — read it using the `Read` tool. **DO NOT** execute `gh pr diff`, `git diff`, or any other diff commands. NEVER use WebFetch, WebSearch, `Skill(aikido:issues)`, or any `gh api` endpoints — scan evidence has been pre-fetched and is provided below."
    - **CRITICAL: Every agent prompt MUST include the full `SCAN_EVIDENCE` block** gathered in step 1.
    - Report all findings with: severity (CRITICAL/HIGH/MEDIUM/LOW/INFO), affected file and line, and recommended remediation.
    - Report positive security changes (e.g., fixing a CWE, improving cryptography) as ✅ Strengths with a brief rationale.
@@ -85,7 +84,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    - Apply the threshold matrix in the rubric to assign a triage category: 🚨 Blocker, ⚠️ Improvement, 📝 Note, ✅ Strength, or ❌ Dismiss.
 
 4. Launch a **verification agent** `subagent_type: "bitwarden-security-engineer:bitwarden-security-engineer"` with all combined findings, their severity/confidence ratings, the triage matrix, the `DIFF_FILE` path, and the full `SCAN_EVIDENCE` block from step 1.
-   - **CRITICAL: Every agent prompt MUST include this constraint:** "The diff has been pre-fetched and saved to `{DIFF_FILE}` — read it using the `Read` tool. Do NOT run `gh pr diff`, `git diff`, or any other diff commands. NEVER use WebFetch, WebSearch, or any `gh api` endpoints — scan evidence has been pre-fetched and is provided above."
+   - **CRITICAL: Every agent prompt MUST include this constraint:** "The diff has been pre-fetched and saved to `{DIFF_FILE}` — read it using the `Read` tool. Do NOT run `gh pr diff`, `git diff`, or any other diff commands. NEVER use WebFetch, WebSearch, `Skill(aikido:issues)`, or any `gh api` endpoints — scan evidence has been pre-fetched and is provided above."
    - The verification agent **MUST review**, **evaluate**, **verify**, and **confirm** all findings and ratings.
    - Use scan evidence to triangulate: findings corroborated by scanner alerts → increase confidence; findings in areas scanners cleared → apply additional scrutiny.
    - The verification agent **MUST** classify each finding as: 🚨 Blocker, ⚠️ Improvement, 📝 Note, ✅ Strength, or ❌ Dismiss — applying the threshold matrix from step 2.

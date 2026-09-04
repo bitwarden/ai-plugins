@@ -6,6 +6,10 @@ Claude Code skills for application security at Bitwarden. Generic AI coding assi
 
 This plugin provides specialized skills for security engineering tasks — from triaging scanner findings and threat modeling to conducting multi-agent security code reviews. Skills can be invoked individually or orchestrated together for comprehensive coverage across code, dependencies, secrets, and architecture.
 
+## Prerequisites
+
+`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin from the `claude-plugins-official` marketplace and requires an authenticated MCP session — install it and run `/aikido:setup` before using those skills. If it isn't installed, these skills stop and ask you to install it rather than silently returning no findings.
+
 ## Skills
 
 | Skill                              | What It Does                                                                                                                                                                                                                       |
@@ -24,7 +28,7 @@ This plugin provides specialized skills for security engineering tasks — from 
 Install the plugin and invoke the agent:
 
 ```
-Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Checkmarx findings on this PR.
+Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Aikido findings on this PR.
 ```
 
 ```
@@ -56,10 +60,9 @@ External resources that informed each skill. Useful for maintainers updating ski
 
 ### triaging-security-findings
 
-- [Checkmarx Triage Documentation](https://docs.checkmarx.com/)
-- [SonarCloud Documentation](https://docs.sonarsource.com/sonarqube-cloud/)
-- [GitHub Code Scanning API](https://docs.github.com/en/rest/code-scanning)
+- [Aikido Documentation](https://help.aikido.dev/)
 - [GitHub Dependabot API](https://docs.github.com/en/rest/dependabot)
+- [GitHub Secret Scanning API](https://docs.github.com/en/rest/secret-scanning)
 
 ### analyzing-code-security
 
@@ -72,7 +75,7 @@ External resources that informed each skill. Useful for maintainers updating ski
 ### reviewing-dependencies
 
 - [GitHub Dependabot Documentation](https://docs.github.com/en/code-security/dependabot)
-- [Grype GitHub Repository](https://github.com/anchore/grype)
+- [Aikido Documentation](https://help.aikido.dev/)
 - [OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/)
 - [npm Security Best Practices](https://docs.npmjs.com/packages-and-modules/securing-your-code)
 

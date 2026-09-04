@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.0] - 2026-09-03
 
+### Changed
+
+- Transitioned `triaging-security-findings`, `reviewing-dependencies`, `perform-security-review`, the agent, and the README from Checkmarx One, SonarCloud, and Grype to Aikido
+- Findings are now queried via the `aikido:issues` skill instead of GitHub Advanced Security's code-scanning API.
+- `triaging-security-findings` now documents the Jira-based Aikido triage flow.
+- `reviewing-dependencies` no longer groups `cloud_instance` under container images — it's a distinct cloud VM/instance category from `docker_container`.
+
+### Added
+
+- README Prerequisites section for the separate `aikido` plugin and `/aikido:setup`.
+
+### Removed
+
+- Private Repository Notes section (SARIF billing and SonarCloud private-repo licensing no longer apply).
 ### Added
 
 - `auditing-external-claude-plugins` skill: audits a third-party Claude Code plugin at a pinned commit before it's vendored, covering MCP config, dependency supply chain, tool permission scope, and prompt-injection surface. Runs as an isolated `fable` subagent and writes a report file rather than posting anywhere itself.
