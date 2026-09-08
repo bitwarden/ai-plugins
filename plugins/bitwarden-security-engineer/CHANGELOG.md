@@ -5,6 +5,26 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-08
+
+### Changed
+
+- Transitioned `triaging-security-findings`, `reviewing-dependencies`, `perform-security-review`, the agent, and the README from Checkmarx One, SonarCloud, and Grype to Aikido
+- Findings are now queried via the `aikido:issues` skill instead of GitHub Advanced Security's code-scanning API
+- `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS v3.0 convention, group-scoped action verification, and ticket-scope pinning
+- `reviewing-dependencies` no longer groups `cloud_instance` under container images
+- README Prerequisites and skills table now reflect Aikido instead of Checkmarx/SonarCloud/Grype/GHAS
+
+### Added
+
+- README Prerequisites section for the separate `aikido` plugin and `/aikido:setup`
+- Aikido MCP tool grant on the agent, so routed skills can reach the feed
+
+### Removed
+
+- Private Repository Notes section (SARIF billing and SonarCloud private-repo licensing no longer apply)
+- Checkmarx state table and SonarCloud finding-management section
+
 ## [2.0.0] - 2026-09-04
 
 ### Added
@@ -35,21 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The default-branch lookup uses `gh repo view` instead of `gh api`, so no grant can name an endpoint whose `DELETE` deletes the repository
 
 ## [1.4.0] - 2026-09-03
-
-### Changed
-
-- Transitioned `triaging-security-findings`, `reviewing-dependencies`, `perform-security-review`, the agent, and the README from Checkmarx One, SonarCloud, and Grype to Aikido
-- Findings are now queried via the `aikido:issues` skill instead of GitHub Advanced Security's code-scanning API.
-- `triaging-security-findings` now documents the Jira-based Aikido triage flow.
-- `reviewing-dependencies` no longer groups `cloud_instance` under container images — it's a distinct cloud VM/instance category from `docker_container`.
-
-### Added
-
-- README Prerequisites section for the separate `aikido` plugin and `/aikido:setup`.
-
-### Removed
-
-- Private Repository Notes section (SARIF billing and SonarCloud private-repo licensing no longer apply).
 
 ### Added
 
