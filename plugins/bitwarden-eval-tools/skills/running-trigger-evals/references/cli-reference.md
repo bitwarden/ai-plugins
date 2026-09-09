@@ -64,6 +64,7 @@ error rather than a traceback:
       "runs": 3,
       "trigger_rate": 1.0,
       "all_runs_agree": true,
+      "timeouts": 0,
       "sibling_fires": { "labeling-changes": 0 }, // present only with --exclude-skill
     },
     // ...one entry per eval case
@@ -83,6 +84,11 @@ error rather than a traceback:
 - `all_runs_agree` is `True` when `triggers == runs` (should_trigger case) or
   `triggers == 0` (should_not_trigger case). It is the pass^k-style reliability
   signal, distinct from the blended `trigger_rate`.
+- `timeouts` counts how many of this case's runs hit `--timeout` before the
+  session reached a decision. A timeout is scored as a non-trigger, so a
+  nonzero count on a `should_trigger` case means the reading understates the
+  description rather than indicting it, and it drags `all_runs_agree` down with
+  it. The runner also warns to stderr whenever this is nonzero.
 - `sibling_fires` maps each `--exclude-skill` token to how many of this case's
   runs also saw that sibling fire. It never affects pass/fail.
 - `regression.hard_regressions`: baseline blended pass was True, fresh is

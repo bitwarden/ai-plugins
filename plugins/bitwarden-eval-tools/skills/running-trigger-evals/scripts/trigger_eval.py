@@ -61,6 +61,70 @@ from pathlib import Path
 # existing creating-pull-request baseline.json for continuity.
 TRIGGER_THRESHOLD = 0.5
 
+# Requesting one of these means the model chose real work over the target
+# skill. The scan bails on it so the child dies before its tool_use spawns
+# anything: an adversarial should-not-trigger query left to run for the full
+# timeout will clone repositories and start toolchains until it exhausts memory.
+EXEC_TOOLS = frozenset({"Bash", "Task", "Agent"})
+
+# Cheap read-only lookups scanned past rather than counted as real work, since
+# the model may legitimately inspect the repository before choosing a skill.
+READ_ONLY_BASH = (
+    "gh pr view",
+    "gh pr list",
+    "gh search",
+    "gh api",
+    "git rev-parse",
+    "git remote",
+)
+
+# A read-only prefix only earns the carve-out as a single command; any shell
+# operator could chain heavy work onto it (`gh api ... && npm test`).
+SHELL_CHAINS = (";", "|", "&", "`", "$(", "\n")
+
+# A `Read` counts as a trigger only when it opens the component's own
+# definition, not any file that merely carries the token in its path: a skill's
+# own `references/` and `evals/` files sit under a path containing its token.
+DEFINITION_FILES = ("SKILL.md", "AGENT.md")
+
+
+def is_read_only_bash(command: str) -> bool:
+    """Is this a bare read-only lookup, with nothing chained onto it?"""
+    return command.startswith(READ_ONLY_BASH) and not any(
+        op in command for op in SHELL_CHAINS
+    )
+
+
+def names_target(name: str, inp: dict, target_token: str) -> bool:
+    """Does this completed tool_use name the component under test?
+
+    A sub-agent dispatch carries its target in `subagent_type`, so a dispatch
+    naming the component is as much a trigger as an explicit `Skill` call.
+    """
+    if name == "Skill":
+        return target_token in inp.get("skill", "")
+    if name in ("Agent", "Task"):
+        return target_token in inp.get("subagent_type", "")
+    if name == "Read":
+        path = inp.get("file_path", "").rstrip()
+        return target_token in path and path.endswith(DEFINITION_FILES)
+    return False
+
+
+def classify_tool_use(name: str, inp: dict, target_token: str) -> str:
+    """Return `trigger`, `bail`, or `continue` for one completed tool_use.
+
+    Order matters: a sub-agent dispatch that names the target is a trigger,
+    while one that names something else is real work like any other.
+    """
+    if names_target(name, inp, target_token):
+        return "trigger"
+    if name == "Bash" and is_read_only_bash(inp.get("command", "").strip()):
+        return "continue"
+    if name in EXEC_TOOLS:
+        return "bail"
+    return "continue"
+
 
 # ---------------------------------------------------------------------------
 # SKILL.md parsing (local implementation; not imported from skill-creator,
@@ -141,12 +205,17 @@ def _scan_process(
 ) -> dict:
     """Scan a `claude -p` stream for the target token, tolerantly.
 
-    Returns ``{"triggered", "first_skill", "sibling_fires"}``. ``sibling_fires``
-    maps each excluded token to whether it fired in this single run. The scan
-    keeps going past unrelated ``Skill`` / ``Read`` calls (the tolerance that
-    makes this eval portable across accounts) and returns as soon as the
-    target token is seen, for speed, carrying any sibling fires observed up to
-    that point.
+    Returns ``{"triggered", "first_skill", "sibling_fires", "timed_out"}``.
+    ``sibling_fires`` maps each excluded token to whether it fired in this
+    single run. The scan keeps going past unrelated ``Skill`` / ``Read`` calls
+    (the tolerance that makes this eval portable across accounts) and returns
+    as soon as the target token is seen, for speed, carrying any sibling fires
+    observed up to that point.
+
+    It stops early for the opposite reason too: once the model requests a
+    real-work tool without having reached the target, the answer is already
+    no, and letting the child keep running is what allows an adversarial
+    should-not-trigger query to clone repositories until memory runs out.
     """
     triggered = False
     first_skill_seen: str | None = None
@@ -155,11 +224,111 @@ def _scan_process(
     buffer = ""
     pending: str | None = None
     accum = ""
+    # Assume a timeout until a decisive event or a clean EOF says otherwise, so
+    # a slow run is distinguishable from a genuine non-trigger.
+    timed_out = True
 
     def note_siblings(text: str) -> None:
         for tok in exclude_skills:
             if tok in text:
                 sibling_fires[tok] = True
+
+    def bailed(name: str) -> dict:
+        nonlocal first_skill_seen
+        if first_skill_seen is None:
+            first_skill_seen = f"{name} (bailed: real-work tool)"
+        return {
+            "triggered": False,
+            "first_skill": first_skill_seen,
+            "sibling_fires": sibling_fires,
+        }
+
+    def hit(ref: str) -> dict:
+        return {
+            "triggered": True,
+            "first_skill": ref,
+            "sibling_fires": sibling_fires,
+        }
+
+    def scan() -> dict | None:
+        """Parse complete lines out of ``buffer``.
+
+        Returns a terminal result once the target triggers, a real-work tool is
+        reached, or the session ends, else ``None``. Mutates ``buffer``, leaving
+        any trailing partial line in place.
+        """
+        nonlocal buffer, pending, accum, first_skill_seen
+        while "\n" in buffer:
+            line, buffer = buffer.split("\n", 1)
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            if event.get("type") == "stream_event":
+                se = event.get("event", {})
+                se_type = se.get("type")
+                if se_type == "content_block_start":
+                    cb = se.get("content_block", {})
+                    if cb.get("type") == "tool_use":
+                        pending = cb.get("name")
+                        accum = ""
+                elif se_type == "content_block_delta" and pending:
+                    delta = se.get("delta", {})
+                    if delta.get("type") == "input_json_delta":
+                        accum += delta.get("partial_json", "")
+                        note_siblings(accum)
+                        # Only for tools whose whole payload is the target's
+                        # name. A `Read` needs its full path to apply the
+                        # definition-file rule, and a `Bash` command carrying
+                        # the token is not a trigger at all, so both wait for
+                        # content_block_stop.
+                        if pending in ("Skill", "Agent", "Task") and target_token in accum:
+                            return hit(accum)
+                elif se_type == "content_block_stop" and pending:
+                    note_siblings(accum)
+                    try:
+                        inp = json.loads(accum) if accum else {}
+                    except json.JSONDecodeError:
+                        inp = {}
+                    verdict = classify_tool_use(pending, inp, target_token)
+                    name, payload, pending, accum = pending, accum, None, ""
+                    if verdict == "trigger":
+                        return hit(payload or name)
+                    if verdict == "bail":
+                        return bailed(name)
+                    # Keep scanning past unrelated Skill/Read invocations so
+                    # the eval is portable across accounts that auto-fire
+                    # session-init or workflow skills before the task skill.
+                    if first_skill_seen is None and inp:
+                        first_skill_seen = json.dumps(inp)
+            elif event.get("type") == "assistant":
+                msg = event.get("message", {})
+                for item in msg.get("content", []):
+                    if item.get("type") != "tool_use":
+                        continue
+                    name = item.get("name")
+                    inp = item.get("input", {})
+                    ref = inp.get("skill") or inp.get("file_path") or inp.get("subagent_type") or ""
+                    if ref:
+                        note_siblings(ref)
+                    verdict = classify_tool_use(name, inp, target_token)
+                    if verdict == "trigger":
+                        return hit(ref)
+                    if verdict == "bail":
+                        return bailed(name)
+                    if ref and first_skill_seen is None:
+                        first_skill_seen = ref
+            elif event.get("type") == "result":
+                return {
+                    "triggered": triggered,
+                    "first_skill": first_skill_seen,
+                    "sibling_fires": sibling_fires,
+                }
+        return None
 
     try:
         while time.time() - start < timeout:
@@ -167,84 +336,27 @@ def _scan_process(
                 rest = process.stdout.read()
                 if rest:
                     buffer += rest.decode("utf-8", errors="replace")
+                # The child exited. Parse what is left before giving up, or a
+                # trigger event in the final chunk is discarded.
+                result = scan()
+                if result is not None:
+                    result["timed_out"] = False
+                    return result
+                timed_out = False
                 break
             ready, _, _ = select.select([process.stdout], [], [], 1.0)
             if not ready:
                 continue
             chunk = os.read(process.stdout.fileno(), 8192)
             if not chunk:
+                timed_out = False
                 break
             buffer += chunk.decode("utf-8", errors="replace")
 
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    event = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-
-                if event.get("type") == "stream_event":
-                    se = event.get("event", {})
-                    se_type = se.get("type")
-                    if se_type == "content_block_start":
-                        cb = se.get("content_block", {})
-                        if cb.get("type") == "tool_use" and cb.get("name") in ("Skill", "Read"):
-                            pending = cb.get("name")
-                            accum = ""
-                        # Other tool types are ignored; we only care whether
-                        # the target skill is invoked at some point.
-                    elif se_type == "content_block_delta" and pending:
-                        delta = se.get("delta", {})
-                        if delta.get("type") == "input_json_delta":
-                            accum += delta.get("partial_json", "")
-                            note_siblings(accum)
-                            if target_token in accum:
-                                return {
-                                    "triggered": True,
-                                    "first_skill": accum,
-                                    "sibling_fires": sibling_fires,
-                                }
-                    elif se_type == "content_block_stop" and pending:
-                        if first_skill_seen is None:
-                            first_skill_seen = accum
-                        note_siblings(accum)
-                        # Keep scanning past unrelated Skill/Read invocations so
-                        # the eval is portable across accounts that auto-fire
-                        # session-init or workflow skills before the task skill.
-                        pending = None
-                        accum = ""
-                elif event.get("type") == "assistant":
-                    msg = event.get("message", {})
-                    for item in msg.get("content", []):
-                        if item.get("type") != "tool_use":
-                            continue
-                        name = item.get("name")
-                        inp = item.get("input", {})
-                        ref = ""
-                        if name == "Skill":
-                            ref = inp.get("skill", "")
-                        elif name == "Read":
-                            ref = inp.get("file_path", "")
-                        if not ref:
-                            continue
-                        if first_skill_seen is None:
-                            first_skill_seen = ref
-                        note_siblings(ref)
-                        if target_token in ref:
-                            return {
-                                "triggered": True,
-                                "first_skill": ref,
-                                "sibling_fires": sibling_fires,
-                            }
-                elif event.get("type") == "result":
-                    return {
-                        "triggered": triggered,
-                        "first_skill": first_skill_seen,
-                        "sibling_fires": sibling_fires,
-                    }
+            result = scan()
+            if result is not None:
+                result["timed_out"] = False
+                return result
     finally:
         if process.poll() is None:
             process.kill()
@@ -254,6 +366,7 @@ def _scan_process(
         "triggered": triggered,
         "first_skill": first_skill_seen,
         "sibling_fires": sibling_fires,
+        "timed_out": timed_out,
     }
 
 
@@ -391,6 +504,7 @@ def runs_for_query(
       isolated  -> {"skill_name": str, "description": str, "project_root": Path}
     """
     triggers = 0
+    timeouts = 0
     samples: list[str | None] = []
     sibling_totals: dict[str, int] = {tok: 0 for tok in exclude_skills}
 
@@ -411,6 +525,8 @@ def runs_for_query(
             )
         if r["triggered"]:
             triggers += 1
+        if r.get("timed_out"):
+            timeouts += 1
         samples.append(r.get("first_skill"))
         for tok, fired in r.get("sibling_fires", {}).items():
             if fired:
@@ -430,6 +546,16 @@ def runs_for_query(
         for s in samples:
             print(f"    sample: {s}", file=sys.stderr)
 
+    # A timeout is scored as a non-trigger, so say so: without this a slow
+    # should-trigger run is indistinguishable from a description that never
+    # fires, and it silently drags `all_runs_agree` down with it.
+    if timeouts:
+        print(
+            f"    warning: {timeouts}/{runs} run(s) timed out (scored as non-trigger): "
+            f"{query[:80]}",
+            file=sys.stderr,
+        )
+
     result = {
         "query": query,
         "should_trigger": should_trigger,
@@ -437,6 +563,7 @@ def runs_for_query(
         "runs": runs,
         "trigger_rate": rate,
         "all_runs_agree": all_runs_agree,
+        "timeouts": timeouts,
     }
     if exclude_skills:
         result["sibling_fires"] = sibling_totals

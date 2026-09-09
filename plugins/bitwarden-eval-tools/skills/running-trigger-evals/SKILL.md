@@ -75,7 +75,10 @@ Before running, collect:
 3. **Read the reliability rate, not just the blended rate.** Judge
    production-facing triggering on the `reliability` block's `all_runs_agree`
    signal: a case firing three of five runs still passes the blended
-   threshold but is a real reliability problem.
+   threshold but is a real reliability problem. Check each case's `timeouts`
+   first, though: a timeout is scored as a non-trigger, so a low rate on a case
+   that timed out is a measurement problem to rerun with a longer `--timeout`,
+   not a description to rewrite.
 4. **Record or refresh the baseline.** For a net-new skill, the recorded
    report becomes the contract for future runs. For an edit, keep the
    existing baseline and compare against it. A case at a perfect rate across

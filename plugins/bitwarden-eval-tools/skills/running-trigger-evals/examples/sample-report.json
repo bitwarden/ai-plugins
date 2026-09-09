@@ -23,6 +23,7 @@
       "runs": 3,
       "trigger_rate": 1.0,
       "all_runs_agree": true,
+      "timeouts": 0,
       "sibling_fires": {
         "labeling-changes": 0
       }
@@ -34,6 +35,7 @@
       "runs": 3,
       "trigger_rate": 1.0,
       "all_runs_agree": true,
+      "timeouts": 0,
       "sibling_fires": {
         "labeling-changes": 0
       }
@@ -45,6 +47,7 @@
       "runs": 3,
       "trigger_rate": 0.3333333333333333,
       "all_runs_agree": false,
+      "timeouts": 0,
       "sibling_fires": {
         "labeling-changes": 0
       }
@@ -56,6 +59,7 @@
       "runs": 3,
       "trigger_rate": 0.0,
       "all_runs_agree": true,
+      "timeouts": 0,
       "sibling_fires": {
         "labeling-changes": 0
       }

@@ -12,6 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release of the `bitwarden-eval-tools` plugin: a reusable trigger-rate
   eval runner for Bitwarden skills. See the [README](README.md) for what it
   does and how to use it.
+- Real-work bail: a run ends once the model reaches for a real-work tool without
+  having reached the skill under test. Read-only `gh` and `git` lookups are
+  scanned past unless something is chained onto them.
+- A sub-agent dispatch naming the skill under test counts as a trigger.
+- Per-case `timeouts`.
+- `scripts/tests/test_trigger_eval.py`.
+
+### Fixed
+
+- Triggers in an exited child's final output chunk were discarded, scoring short
+  sessions as non-triggers regardless of what they did.
+- A `Read` counts only on the component's own `SKILL.md` or `AGENT.md`, not any
+  path containing the token.
 
 ### Notes
 
