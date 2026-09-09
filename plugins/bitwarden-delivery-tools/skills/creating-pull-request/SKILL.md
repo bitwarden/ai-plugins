@@ -1,6 +1,6 @@
 ---
 name: creating-pull-request
-description: 'Open a pull request from a branch in a Bitwarden repository. Use whenever the user wants a branch turned into a pull request, however they phrase it — "create a PR", "open a PR", "ship a draft", "ship it", "ready for review", "put it up for review", "get this in front of reviewers", "send it over to the team", "throw together a pull request", "wrap this branch up". Use it too when the user says the title and body are already settled and only the PR needs opening — the gate, the preview, and the submission still apply. Runs the required local code-review gate, takes the title, template body, and ai-review label from applying-pr-conventions, confirms a full submission preview, then pushes and runs gh pr create. Not for composing a title, body, or label when no PR is being opened (that is applying-pr-conventions), conceptual questions ("how do PRs work"), or managing existing PRs (status, merging, addressing comments).'
+description: 'Open a pull request from a branch in a Bitwarden repository. Use whenever the user wants a branch turned into a pull request, however they phrase it — "create a PR", "open a PR", "ship a draft", "ship it", "ready for review", "put it up for review", "get this in front of reviewers", "send it over to the team", "throw together a pull request", "wrap this branch up". Use it too when the user says the title and body are already settled and only the PR needs opening — the gate, the preview, and the submission still apply. Runs the required local code-review gate, takes the title, template body, and ai-review label from applying-pr-conventions, confirms a full submission preview, then pushes and runs gh pr create. Not for composing a title, body, or label when no PR is being opened (that is applying-pr-conventions), a chain of dependent pull requests (stacking-pull-requests), conceptual questions ("how do PRs work"), or managing existing PRs (status, merging, addressing comments).'
 ---
 
 # Creating a Pull Request
@@ -12,6 +12,11 @@ Neither is cheap to undo. A PR opened on unreviewed work buries the real problem
 ## Workflow
 
 Follow these steps in order. Each one produces information the next step needs, and the preview in Step 3 depends on all of them.
+
+**First, is this one pull request or a stack?** A **user-originated** request for a chain of dependent pull requests belongs to `Skill(stacking-pull-requests)` — hand off. Two invocations come from that skill rather than from the user, and neither is handed back; handing either one back is the loop this question exists to prevent:
+
+- **The stack path was tried and is unavailable for this run.** That skill is handing a single ordinary pull request _here_, so run the whole workflow, gate included.
+- **A single layer's gate, once per layer.** That skill runs Step 1b alone and returns — see the note under Step 1. It names itself when it calls; run 1b and stop there rather than routing the layer back.
 
 ### Step 1 — Confirm preflight, then run the code-review gate
 
@@ -33,6 +38,8 @@ If preflight cannot be made to pass, stop and report the failure rather than ope
   - `Standard` — a typical feature, fix, docs, or config change: run `/bitwarden-code-review:code-review-local` (tell it to review the current branch's changes; there is no PR yet)
   - `Substantial` — architectural, cross-cutting, or security-touching: run `Skill(performing-multi-agent-code-review)`, telling it to review the full branch diff against `origin/HEAD` (not just uncommitted changes); there is no PR yet
 
+**Scoping to one layer of a stack.** When `stacking-pull-requests` drives this per layer, scope the review to that layer or it re-reviews every layer below. Only `Substantial` can be scoped: use its commit-range mode with `<parent-branch>..<layer-head>`. Name `Substantial` as the layer-scoped option when asking, and if the user picks `Standard` anyway, report back to the caller that the review was not layer-scoped — the per-layer entry returns after 1b and never reaches Step 2, so there is no body here to write it into. `stacking-pull-requests` carries it into that layer's body itself.
+
 Present only these two options; do not add a skip option. Honor a skip only if the user volunteers one unprompted, then record it in the PR body's AI-assisted review section (Step 2) and surface it in the Step 3 preview. Never skip on your own initiative.
 
 After the review:
@@ -42,6 +49,10 @@ After the review:
 - If a review path wrote output into the repo, remove it before pushing so it never lands in a commit — but only files this run created (a `??` in `git status --porcelain`). For example, `code-review-local` writes `review-summary.md` and `review-inline-comments.md` to the working-directory root; the multi-agent path writes outside the repo and needs no cleanup. Never delete a tracked file of the same name.
 
 Each review path checks its own prerequisites and reports what to install if something is missing. If a path can't run, install what it reports or fall back to the other path and note the limitation in the PR body. If neither path is available, stop and prompt the user to install `bitwarden-code-review` (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing. Never silently skip the review.
+
+**One thing another delivery skill may do with this step:** run 1b alone. `stacking-pull-requests` does, once per layer, because the review gate is per pull request and a stack has N of them. It runs `perform-preflight` itself per layer, so do not also run 1a, and return after 1b rather than continuing into Step 2.
+
+Otherwise the gate runs on every entry, including the stack-fallback case above, which bailed before its own gate.
 
 ### Step 2 — Compose the title, body, and label
 

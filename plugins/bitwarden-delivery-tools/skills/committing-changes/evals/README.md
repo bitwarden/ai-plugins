@@ -9,7 +9,7 @@ Two eval sets. Run the one that matches what changed.
 
 ## Trigger eval
 
-Does the skill activate on the right phrasings and stay silent on near-misses? `trigger-eval.json` holds 13 queries; `run_real_eval.py` runs them (see `../../creating-pull-request/evals/run_real_eval.py` for why this runner exists instead of the skill-creator harness); `baseline.json` is the last known-good run. Requires Python 3.10+ and an authenticated `claude` CLI.
+Does the skill activate on the right phrasings and stay silent on near-misses? `trigger-eval.json` holds 14 queries; the `stacking-pull-requests` boundary is not measurable from here, since a correctly-routed stack phrasing invokes this skill per layer and the runner matches its token anywhere in the response; `run_real_eval.py` runs them (see `../../creating-pull-request/evals/run_real_eval.py` for why this runner exists instead of the skill-creator harness); `baseline.json` is the last known-good run — **stale as of the stack-scope description change**: it holds 13 results against the current 14 queries. Regenerate before relying on the diff below — and note this runner takes no `--plugin-dir`, so it loads the installed plugin cache. Record the baseline after this version ships, not before, or it captures the description the change replaced. Requires Python 3.10+ and an authenticated `claude` CLI.
 
 ```bash
 python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 \
