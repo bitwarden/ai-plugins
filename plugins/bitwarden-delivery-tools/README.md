@@ -1,6 +1,6 @@
 # Bitwarden Delivery Tools
 
-Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, down to the day-to-day mechanics of committing, opening pull requests, running preflight checks, and labeling changes.
+Delivery lifecycle skills for Bitwarden initiatives — from routing work through the Software Initiative Funnel and running cross-team work transitions, down to the day-to-day mechanics of committing, opening pull requests and stacks of them, running preflight checks, and labeling changes.
 
 ## Overview
 
@@ -41,7 +41,8 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | `filing-breakdown-tasks`  | "tickets from tasks.md", "file the epic and stories" | Turn a breakdown's `tasks.md` into epic + child ticket drafts for `filing-jira-tickets` to file    |
 | `force-multiplier`        | "across all repos", "in bulk"                        | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs               |
 | `labeling-changes`        | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                                |
-| `perform-preflight`       | "preflight", "self review"                           | Pre-commit quality gate checklist                                                                  |
+| `perform-preflight`       | "preflight", "self review"                           | Pre-commit quality gate checklist, plus per-layer checks for a stacked branch                      |
+| `stacking-pull-requests`  | "stack these PRs", "stacked diffs"                   | Bitwarden conventions across a chain of dependent PRs; mechanics delegated to `gh-stack`           |
 
 ## Design Principle
 
@@ -55,7 +56,8 @@ Several skills in this plugin reference tools or skills provided by sibling plug
 
 - **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel`, and the `filing-jira-tickets` skill plus its opt-in Jira write tools that `filing-breakdown-tasks` hands off to.
 - **`bitwarden-security-engineer`** — provides `Skill(bitwarden-security-context)`, referenced from `architecting-solutions`.
-- **`bitwarden-code-review`** — provides `/bitwarden-code-review:code-review-local` and `Skill(performing-multi-agent-code-review)`, the code-review gate `creating-pull-request` runs before opening a PR. If it is absent, `creating-pull-request` prompts you to install it rather than skip the review.
+- **`gh-stack`** — GitHub's [`gh-stack`](https://github.com/github/gh-stack) owns the `gh stack` surface that `stacking-pull-requests` delegates to. It needs both the extension (`gh extension install github/gh-stack`) and the `gh-stack` skill from that repo's `skills/gh-stack/`, since the extension install places only the binary. Missing either, stack requests fall back to a single-branch PR.
+- **`bitwarden-code-review`** — provides `/bitwarden-code-review:code-review-local` and `Skill(performing-multi-agent-code-review)`, the code-review gate `creating-pull-request` runs before opening a PR. If it is absent, `creating-pull-request` prompts you to install it rather than skip the review. Also supplies `Skill(addressing-code-review-comments)`, which `stacking-pull-requests` uses for lower-layer feedback and treats as optional.
 
 ## Installation
 
@@ -81,6 +83,10 @@ Commit these changes
 
 ```
 Create a PR for this branch
+```
+
+```
+Split this into a stack of dependent PRs
 ```
 
 ```
