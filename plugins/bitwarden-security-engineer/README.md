@@ -8,7 +8,7 @@ This plugin provides specialized skills for security engineering tasks — from 
 
 ## Prerequisites
 
-`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin from the `claude-plugins-official` marketplace and requires an authenticated MCP session — install it and run `/aikido:setup` before using those skills. For `triaging-security-findings` and `reviewing-dependencies`, Aikido is the primary data source: if it isn't installed, these skills stop and ask you to install it rather than silently returning no findings. `perform-security-review` treats Aikido SAST/IaC evidence as one of several best-effort corroborating sources rather than a hard requirement — if it's unavailable, the review continues using whichever sources it could reach.
+`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin — Aikido Security's own Claude Code plugin, pinned to a reviewed commit as an external entry in this marketplace — and requires an authenticated MCP session. Install it with `/plugin install aikido@bitwarden-marketplace` and run `/aikido:setup` before using those skills. For `triaging-security-findings` and `reviewing-dependencies`, Aikido is the primary data source: if it isn't installed, these skills stop and ask you to install it rather than silently returning no findings. `perform-security-review` treats Aikido SAST/IaC evidence as one of several best-effort corroborating sources rather than a hard requirement — if it's unavailable, the review continues using whichever sources it could reach.
 
 ## Skills
 
@@ -25,7 +25,7 @@ This plugin provides specialized skills for security engineering tasks — from 
 
 ## Usage
 
-Install the plugin and invoke the agent:
+Install the plugin, then ask for what you want in natural language. Example prompts:
 
 ```
 Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Aikido findings on this PR.
