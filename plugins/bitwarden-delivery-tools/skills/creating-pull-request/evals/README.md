@@ -8,9 +8,9 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 
 ## Files
 
-- `trigger-eval.json` — 21-query test set: 9 should-trigger natural-language phrasings ("package this up into a PR", "ship a draft", "get this in front of reviewers", etc.) and 12 should-not-trigger near-misses against sibling delivery skills (`committing-changes`, `labeling-changes`, `perform-preflight`, `applying-pr-conventions`) and against existing-PR management queries. A request for a title, body, or label alone belongs to `applying-pr-conventions`; this skill wins only when the request is to open the PR. Queries that ask for both at once are out of scope for this set: they are not a boundary between the two skills, since opening the PR is what pulls the conventions in.
+- `trigger-eval.json` — 23-query test set: 9 should-trigger natural-language phrasings ("package this up into a PR", "ship a draft", "get this in front of reviewers", etc.) and 14 should-not-trigger near-misses against sibling delivery skills (`committing-changes`, `labeling-changes`, `perform-preflight`, `applying-pr-conventions`, `stacking-pull-requests`) and against existing-PR management queries. Two of the near-misses pair a stack request with this skill's own trigger phrasing ("put them up for review", "open the whole chain"), which is where the `description`'s chain boundary has to hold. A request for a title, body, or label alone belongs to `applying-pr-conventions`; this skill wins only when the request is to open the PR. Queries that ask for both at once are out of scope for this set: they are not a boundary between the two skills, since opening the PR is what pulls the conventions in.
 - `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates.
-- `baseline.json` — last known-good run. Records the `model`, `plugin_dirs`, and `runs_per_query` that produced it; a run under different conditions fails the diff.
+- `baseline.json` — last known-good run. Records the `model`, `plugin_dirs`, and `runs_per_query` that produced it; a run under different conditions fails the diff. **Stale as of the chain-boundary description change**: it holds 21 results against the current 23 queries, and its rates were recorded against a `description` that did not yet exclude a chain of dependent pull requests. Regenerate before relying on the diff below. This runner takes `--plugin-dir`, so the baseline can be recorded against the working tree rather than waiting on a release.
 
 ## Running
 
@@ -50,7 +50,7 @@ python3 <evals>/run_real_eval.py \
 
 `baseline.json` was recorded under exactly this setup. A run in a different environment will diff for reasons unrelated to the skill.
 
-21 queries × 3 runs = 63 `claude -p` invocations. With 8 workers the run takes a few minutes.
+23 queries × 3 runs = 69 `claude -p` invocations. With 8 workers the run takes a few minutes.
 
 ## Regression check
 

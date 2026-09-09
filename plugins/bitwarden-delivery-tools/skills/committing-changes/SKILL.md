@@ -1,6 +1,6 @@
 ---
 name: committing-changes
-description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes".
+description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes". Not for planning, submitting, or merging a stack of dependent pull requests, or for committing onto a layer that already has an open pull request with layers above it (that is stacking-pull-requests, which commits there and restacks). Building up a layer that has not been submitted yet still belongs here.
 allowed-tools: Skill(labeling-changes)
 ---
 

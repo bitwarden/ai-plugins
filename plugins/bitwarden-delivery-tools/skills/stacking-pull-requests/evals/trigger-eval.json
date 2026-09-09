@@ -1,0 +1,82 @@
+[
+  {
+    "query": "stack these PRs so each one reviews on its own",
+    "should_trigger": true
+  },
+  {
+    "query": "this branch is way too big \u2014 split it into dependent PRs, models at the bottom and the UI on top",
+    "should_trigger": true
+  },
+  {
+    "query": "I want stacked diffs for PM-31007 instead of one 2000-line review",
+    "should_trigger": true
+  },
+  {
+    "query": "put the API change under the UI change and get both up for review",
+    "should_trigger": true
+  },
+  {
+    "query": "break this into reviewable layers before anyone looks at it",
+    "should_trigger": true
+  },
+  {
+    "query": "submit the stack \u2014 all three branches are green and preflight passed on each",
+    "should_trigger": true
+  },
+  {
+    "query": "reviewer left a comment on the bottom PR of my chain, how do I fix it without breaking the ones above",
+    "should_trigger": true
+  },
+  {
+    "query": "the whole chain is approved, what's the right way to land all four together",
+    "should_trigger": true
+  },
+  {
+    "query": "each of these branches depends on the one before it and I need PRs for all of them with the right bases",
+    "should_trigger": true
+  },
+  {
+    "query": "what does each layer of my stack need for the t: label and the PR template",
+    "should_trigger": true
+  },
+  {
+    "query": "open a draft pr for fix/sync-crash, it tracks origin already",
+    "should_trigger": false
+  },
+  {
+    "query": "I finished PM-23456, put together a pull request with the usual template",
+    "should_trigger": false
+  },
+  {
+    "query": "what t: label does a refactor PR get",
+    "should_trigger": false
+  },
+  {
+    "query": "roll this workflow change out across all our repos as separate draft PRs",
+    "should_trigger": false
+  },
+  {
+    "query": "every repo in the org needs the same pnpm bump \u2014 fan it out",
+    "should_trigger": false
+  },
+  {
+    "query": "commit these changes with the right ticket prefix",
+    "should_trigger": false
+  },
+  {
+    "query": "run preflight before I commit this",
+    "should_trigger": false
+  },
+  {
+    "query": "rebase my branch onto main and force push",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I resolve the merge conflict in package.json",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the status of PR 12345 and are its checks green",
+    "should_trigger": false
+  }
+]
