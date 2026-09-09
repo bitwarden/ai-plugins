@@ -73,7 +73,7 @@ Execute these steps in order. Do not skip, reorder, or combine them. Three place
    Choose a descriptive `<identifier>` (e.g., `PR123`, `5days`, `local`). Store the full path as `DIFF_FILE` and include it in every agent prompt in steps 2 and 4 so they can `Read` the diff directly.
 
    **C.) Fetch scan evidence.** None of these three calls stops the review if it fails — scan evidence corroborates findings in steps 2 and 4, it is not required for them to run. Aikido evidence uses the pre-approved MCP tool grant and runs without a prompt. The secret scanning and Dependabot `gh api` calls below are reads, and neither is pre-approved (`references/tool-grants.md` says why), so each prompts; in CI nobody answers and both are denied. Treat anything other than a successful response as a failure. Record each scanner's outcome as one of: its formatted output; `None` when it ran and returned nothing; `Not available` when the scanner is off, unreachable, or the repo has no data for it (403, 404, empty response, MCP server unavailable, GHAS not enabled); `Errored (<status>)` when the call ran and failed (malformed response); or, for the two `gh api` scanners only, `Not checked (permission denied)` when it never ran — Aikido's grant is pre-approved, so that state cannot occur for it. Only `None` means the scanner looked and found nothing; conflating it with `Not available` risks a missing Aikido session reading as a clean SAST/IaC scan. Use `gh api --jq` for all formatting — **DO NOT** pipe to `jq`. Both `gh api` calls **MUST** use `--method GET` and `-H "X-GitHub-Api-Version: 2026-03-10"`.
-   - **Aikido (SAST/IaC):** Invoke `Skill(aikido:issues)` scoped to this repo (`repo_name={repo}`) with `issue_types: ["sast", "iac"]` to list open findings. Bitwarden's SAST/IaC scanning runs through Aikido, not GitHub code scanning — do not query the `code-scanning/alerts` API, it will not have these findings. Format each returned issue as `SEVERITY | title | file (line N)`.
+   - **Aikido (SAST/IaC/SCA/Container):** Invoke `Skill(aikido:issues)` scoped to this repo (`repo_name={repo}`) with `issue_types: ["sast", "iac", "open_source", "docker_container"]` to list open findings. Bitwarden's SAST/IaC scanning runs through Aikido, not GitHub code scanning — do not query the `code-scanning/alerts` API, it will not have these findings. Format each returned issue as `SEVERITY | title | file (line N)`, and split the results into the two `SCAN_EVIDENCE` blocks below by issue type.
    - **Secret scanning:** `gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" "repos/{owner}/{repo}/secret-scanning/alerts?state=open" --jq '.[] | "\(.secret_type_display_name) | \(.state) | \(.resolution // "open")"'`
    - **Dependabot:** `gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" "repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100" --jq '.[] | "\(.security_advisory.severity | ascii_upcase) | \(.dependency.package.name) | \(.security_advisory.cve_id // .security_advisory.ghsa_id) | \(.security_advisory.summary)"'`
 
@@ -83,6 +83,9 @@ Execute these steps in order. Do not skip, reorder, or combine them. Three place
    === SCAN EVIDENCE (pre-fetched — do not re-fetch) ===
 
    --- AIKIDO (SAST/IAC) ---
+   {one of: formatted output | None | Not available | Errored (<status>)}
+
+   --- AIKIDO (SCA/CONTAINER) ---
    {one of: formatted output | None | Not available | Errored (<status>)}
 
    --- SECRET SCANNING ---
@@ -96,7 +99,7 @@ Execute these steps in order. Do not skip, reorder, or combine them. Three place
 
    **Agent 1 — Code Security**: Focus exclusively on injection flaws (SQL, XSS, command), cryptographic weaknesses, insecure coding patterns, and OWASP A01–A05. Invoke `Skill(bitwarden-security-context)` and `Skill(analyzing-code-security)` to guide your analysis. Do not evaluate secrets, dependencies, architecture, or threat modeling.
 
-   **Agent 2 — Secrets & Dependencies**: Focus exclusively on hardcoded credentials, exposed secrets, vulnerable packages, and supply chain risk. Invoke `Skill(bitwarden-security-context)`, `Skill(detecting-secrets)`, and `Skill(reviewing-dependencies)` to guide your analysis. Do not evaluate code patterns, architecture, or threat modeling.
+   **Agent 2 — Secrets & Dependencies**: Focus exclusively on hardcoded credentials, exposed secrets, vulnerable packages, and supply chain risk. Invoke `Skill(bitwarden-security-context)`, `Skill(detecting-secrets)`, and `Skill(reviewing-dependencies)` to guide your analysis, but for Aikido SCA/container data use the pre-fetched `--- AIKIDO (SCA/CONTAINER) ---` block from `SCAN_EVIDENCE` instead of querying `aikido:issues` live — that tool is off-limits here, see the constraint below. Do not evaluate code patterns, architecture, or threat modeling.
 
    **Agent 3 — Security Architecture**: Focus exclusively on authentication, authorization, encryption implementation, trust boundaries, and Bitwarden's zero-knowledge invariant (encryption and decryption happen client-side only — the server must never have access to plaintext vault data). Invoke `Skill(reviewing-security-architecture)` and `Skill(bitwarden-security-context)` to guide your analysis. Do not evaluate injection flaws, secrets, or threat modeling.
 

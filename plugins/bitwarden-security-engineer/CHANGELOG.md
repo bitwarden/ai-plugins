@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Findings are now queried via the `aikido:issues` skill instead of GitHub Advanced Security's code-scanning API
 - `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS v3.0 convention, group-scoped action verification, and ticket-scope pinning
 - `reviewing-dependencies` no longer groups `cloud_instance` under container images
+- `perform-security-review` step 1-C now pre-fetches Aikido `open_source` and `docker_container` findings alongside SAST/IaC, and Agent 2 uses that pre-fetched SCA/container evidence instead of calling the `aikido:issues` skill it's barred from using
 - README Prerequisites and skills table now reflect Aikido instead of Checkmarx/SonarCloud/Grype/GHAS
 - README now labels the Usage blocks as example prompts and points `aikido` installs at the `claude-plugins-official` marketplace, since `aikido` is not vendored in this marketplace
 
