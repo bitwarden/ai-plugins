@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS v3.0 convention, group-scoped action verification, and ticket-scope pinning
 - `reviewing-dependencies` no longer groups `cloud_instance` under container images
 - README Prerequisites and skills table now reflect Aikido instead of Checkmarx/SonarCloud/Grype/GHAS
-- README now labels the Usage blocks as example prompts and points `aikido` installs at this marketplace's pinned external entry
+- README now labels the Usage blocks as example prompts and points `aikido` installs at the `claude-plugins-official` marketplace, since `aikido` is not vendored in this marketplace
 
 ### Added
 
