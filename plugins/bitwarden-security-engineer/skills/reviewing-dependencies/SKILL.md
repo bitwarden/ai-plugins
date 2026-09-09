@@ -82,7 +82,7 @@ Aikido is Bitwarden's container and open-source dependency scanner. It continuou
 
 Use the `aikido:issues` skill (`aikido_issues_list`) to query findings, scoping to the relevant repo and filtering `issue_types` to `open_source` (dependency CVEs) and `docker_container` (container image vulnerabilities). `cloud_instance` is a separate Aikido issue type for cloud VM/instance findings — out of scope for dependency and container review.
 
-If the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data — Aikido is the only place these findings are tracked.
+If a caller has already supplied pre-fetched Aikido SCA/container evidence (for example, `perform-security-review` hands its Agent 2 a `SCAN_EVIDENCE` block and bars a live `aikido:issues` call), use that evidence instead of querying — do not call the skill, and do not stop. Otherwise, if the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data — Aikido is the only place these findings are tracked.
 
 ```bash
 # Use the aikido:issues skill, e.g.:
