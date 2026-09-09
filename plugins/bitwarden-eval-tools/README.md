@@ -1,18 +1,26 @@
 # Bitwarden Eval Tools Plugin
 
-A reusable trigger-rate eval runner for Bitwarden skills. Genericizes the
-hand-rolled "trigger eval" pattern (does a skill fire on the right prompts and
-stay silent on the wrong ones) into a single tool any plugin can invoke.
+Evidence that a skill works. Two skills answer the two questions worth asking
+about one: does it fire when it should, and does it change what the model
+produces.
 
 ## Overview
 
-Trigger evals answer one narrow question about a skill's `description` /
-`when_to_use` text: does the model reach for the skill on the real phrasings it
-is meant to catch, and does it stay silent on near-misses? This plugin is the
-standard runner for that question. Use `/skill-creator:skill-creator` for
-Structure and Behavior evals; use this for Triggering.
+`running-trigger-evals` answers the first. It genericizes the hand-rolled
+trigger-eval pattern, asking whether the model reaches for a skill on the real
+phrasings its `description` and `when_to_use` are meant to catch, and stays
+silent on near-misses.
 
-## Features
+`running-behavioral-evals` answers the second. Skills accrete instructions over
+time and few are ever tested in isolation, so nobody knows which ones change
+behavior and which only cost tokens. It compares two variants on real inputs in
+blind paired runs and grades them against ground truth verified against the
+live system.
+
+Use `/skill-creator:skill-creator` for structural review of a skill's wording
+and layout.
+
+## `running-trigger-evals`
 
 - **Two modes**
   - **installed**: evaluate a skill whose plugin is already registered in the
@@ -35,12 +43,27 @@ Structure and Behavior evals; use this for Triggering.
   sibling tokens also fired, for catching triggering overlap between skills,
   without changing pass/fail semantics.
 
+## `running-behavioral-evals`
+
+Run a behavioral A/B evaluation of a skill. You compare two variants (for example a stripped-down "min" against a rich original) on real inputs, in isolated blind sessions that cannot see each other, then grade their outputs against ground truth you verified against the live system. The result is an evidence-backed verdict on which variant is better, and a documented experiment anyone can pick up and continue.
+
+What it carries:
+
+- **The six-phase loop:** scaffold, design the blinded run, run in isolation, taint-check and quarantine, grade against ground truth, decide or accrete.
+- **Isolation and blinding** (`references/isolation-and-blinding.md`): why decisive runs need separate top-level sessions rather than subagents, how to avoid priming the subject, and how to prove the blind held.
+- **Grading** (`references/grading.md`): why the original skill is not a stable oracle, how to establish ground truth from the live system, and how to measure the run-to-run noise floor before trusting a difference.
+- **Ablation-accretion** (`references/ablation-accretion.md`): strip a skill to its skeleton, then add a directive back only when a run reproduces the failure it prevents. Includes the trap where two individually-earned directives combine into a loophole.
+- **Conventions** (`references/conventions.md`): experiment directory layout, run-artifact naming, the version ledger and directive table, and known environment gotchas.
+- **Templates** (`assets/`): copy-paste starting points for the session-state doc, the directive ledger, and the blinded run prompts.
+
+**When to use it:** "eval this skill", "which of these two skill versions is better", "is the stripped-down version as good as the original", "prove this instruction earns its place". It is not for static/structural review of a skill's wording, for trigger-rate evaluation (whether a skill fires), or for evaluating agents.
+
 ## Installation
 
 ### Add the Bitwarden Marketplace (if not already added)
 
 ```bash
-/plugin marketplace add bitwarden/ai-marketplace
+/plugin marketplace add bitwarden/ai-plugins
 ```
 
 ### Install the plugin
@@ -87,23 +110,35 @@ plugins/bitwarden-eval-tools/
 ├── README.md                       # This file
 ├── CHANGELOG.md
 └── skills/
-    └── running-trigger-evals/
-        ├── SKILL.md                # Main skill instructions
-        ├── README.md               # Skill-specific documentation
-        ├── scripts/
-        │   └── trigger_eval.py     # The runner (stdlib-only)
+    ├── running-trigger-evals/
+    │   ├── SKILL.md                # Main skill instructions
+    │   ├── README.md               # Skill-specific documentation
+    │   ├── scripts/
+    │   │   └── trigger_eval.py     # The runner (stdlib-only)
+    │   ├── references/
+    │   │   ├── cli-reference.md    # Flags, report schema, exit codes
+    │   │   └── authoring-eval-sets.md
+    │   └── examples/
+    │       ├── sample-eval-set.json
+    │       └── sample-report.json
+    └── running-behavioral-evals/
+        ├── SKILL.md                # The six-phase loop
         ├── references/
-        │   ├── cli-reference.md     # Flags, report schema, exit codes
-        │   └── authoring-eval-sets.md
-        └── examples/
-            ├── sample-eval-set.json
-            └── sample-report.json
+        │   ├── ablation-accretion.md
+        │   ├── conventions.md
+        │   ├── grading.md
+        │   └── isolation-and-blinding.md
+        └── assets/                 # Experiment scaffold templates
 ```
 
 ## Requirements
 
 - Python 3.10+ (uses PEP 604 `X | None` type hints; stdlib only).
 - The `claude` CLI available on `PATH`.
+
+## Relationship to skill-creator
+
+`running-behavioral-evals` reuses Anthropic's `skill-creator` for the mechanics: its eval viewer, the `grading.json` field shape, its rubric template, its benchmark aggregator, and its optional blind comparator agent. It owns what skill-creator does not have: separate-session isolation, the taint check, quarantine, the naming convention, ground truth verified against the live system rather than against the other variant, the noise floor, and the ablation-accretion ledger.
 
 ## Contributing
 
@@ -114,5 +149,5 @@ Contributions welcome. Please follow:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-marketplace/issues)
-- **Marketplace**: [Bitwarden AI Marketplace](https://github.com/bitwarden/ai-marketplace)
+- **Issues**: [GitHub Issues](https://github.com/bitwarden/ai-plugins/issues)
+- **Marketplace**: [Bitwarden AI Plugins](https://github.com/bitwarden/ai-plugins)

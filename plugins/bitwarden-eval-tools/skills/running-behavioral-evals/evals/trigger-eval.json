@@ -1,0 +1,82 @@
+[
+  {
+    "query": "i stripped assessing-test-coverage down to a bare min version and i want to know if it's actually as good as the original rich one before i ship it. can you set up a proper comparison?",
+    "should_trigger": true
+  },
+  {
+    "query": "let's A/B the two versions of the creating-pull-request skill on some real branches and see which one produces better PR bodies",
+    "should_trigger": true
+  },
+  {
+    "query": "run an ablation on this skill - i think half these instructions aren't doing anything and i want to find out which ones actually change the output",
+    "should_trigger": true
+  },
+  {
+    "query": "does the researching-jira-issues skill actually help, or would claude do just as well without it? i want evidence, not a guess",
+    "should_trigger": true
+  },
+  {
+    "query": "prove that the 'verify coverage still exists on the default branch' directive earns its place - show me a run where the skill gets it wrong without that instruction",
+    "should_trigger": true
+  },
+  {
+    "query": "i want to test whether my trimmed-down skill behaves the same as the full one on real jira issues, in a way that isn't just me eyeballing two markdown files",
+    "should_trigger": true
+  },
+  {
+    "query": "set up a repeatable experiment to trim the coverage skill to its minimum and only add instructions back when a run demonstrates they're needed",
+    "should_trigger": true
+  },
+  {
+    "query": "compare the min and rich variants on PM-40636 and PM-32062, run them blind so neither can see what the other did, then tell me which one actually got the facts right against the repo",
+    "should_trigger": true
+  },
+  {
+    "query": "i have two versions of this skill and i keep getting different answers depending on which one i use. i need a real head-to-head to know which prompt is better",
+    "should_trigger": true
+  },
+  {
+    "query": "i keep tweaking this skill based on a single run and i'm not even sure the differences are real. help me eval it properly, including how noisy a single run is",
+    "should_trigger": true
+  },
+  {
+    "query": "review the wording and structure of my assessing-test-coverage SKILL.md - is it too long, are the sections in a sensible order, any obvious LLM tells to clean up?",
+    "should_trigger": false
+  },
+  {
+    "query": "check whether my skill is actually firing on the right prompts - i think it's under-triggering. can you run the trigger-rate eval against the query set?",
+    "should_trigger": false
+  },
+  {
+    "query": "i want to evaluate how well the bitwarden-security-engineer agent does on threat models before we roll it out to the team",
+    "should_trigger": false
+  },
+  {
+    "query": "help me create a new skill for summarizing our standup notes into a weekly digest",
+    "should_trigger": false
+  },
+  {
+    "query": "assess the test coverage for PM-40636 using the assessing-test-coverage skill and give me the report",
+    "should_trigger": false
+  },
+  {
+    "query": "write unit tests for SubscriptionUpdatedHandler and make sure our line coverage stays above 80 percent",
+    "should_trigger": false
+  },
+  {
+    "query": "optimize the description field on my skill so it triggers more reliably - it's competing with a similar skill and losing",
+    "should_trigger": false
+  },
+  {
+    "query": "benchmark opus against sonnet on our internal coding tasks and tell me which one is faster and cheaper",
+    "should_trigger": false
+  },
+  {
+    "query": "we're adding a RAG feature to the app and i need to set up evals for retrieval quality on our support docs",
+    "should_trigger": false
+  },
+  {
+    "query": "the plugin-validator flagged my plugin.json - can you check the manifest and skill files are structurally valid before i open the PR?",
+    "should_trigger": false
+  }
+]
