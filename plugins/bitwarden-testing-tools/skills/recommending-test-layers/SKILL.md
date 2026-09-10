@@ -73,9 +73,9 @@ Deterministic tests that double external systems gate the pipeline; non-determin
 
 ## Recommendations
 
-| Behavior   | Criticality                | Recommended layer                                | Why this layer | Gates deploy | Existing coverage            |
-| ---------- | -------------------------- | ------------------------------------------------ | -------------- | ------------ | ---------------------------- |
-| <behavior> | <Critical/High/Medium/Low> | <static/unit/component/contract/integration/E2E> | <reason>       | <yes/no>     | <covered / gap / mis-placed> |
+| Behavior   | Criticality                | Recommended layer                                | Why this layer | Gates deploy | Existing coverage                         |
+| ---------- | -------------------------- | ------------------------------------------------ | -------------- | ------------ | ----------------------------------------- |
+| <behavior> | <Critical/High/Medium/Low> | <static/unit/component/contract/integration/E2E> | <reason>       | <yes/no>     | <covered / gap / mis-placed / unverified> |
 
 ## Re-placement notes
 

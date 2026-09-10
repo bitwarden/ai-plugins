@@ -28,7 +28,7 @@ python3 run_real_eval.py \
 
 20 queries × 7 runs = 140 `claude -p` invocations. With 5 workers the run takes several minutes.
 
-Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 9 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
+Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
 
 The first recorded run is also the baseline: redirect it to `baseline.json` and commit it alongside the skill.
 
