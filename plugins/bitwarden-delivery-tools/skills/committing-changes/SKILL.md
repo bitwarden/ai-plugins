@@ -1,6 +1,7 @@
 ---
 name: committing-changes
-description: Git commit conventions and workflow for Bitwarden repositories, including how to word a commit for a security-sensitive change. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes", "security fix", "security commit", "VULN".
+description: Git commit conventions and workflow for Bitwarden repositories, including detecting security-sensitive changes and applying Bitwarden's disclosure policy to the commit message. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes", "commit a security fix", "security commit", "commit message for a VULN ticket".
+allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
 ---
 
 # Git Commit Conventions
@@ -8,6 +9,12 @@ description: Git commit conventions and workflow for Bitwarden repositories, inc
 ## Branch Check
 
 Resolve the repository's default branch from the remote rather than assuming `main`. If the current branch is the default, ask for a branch name before staging or committing. Offer to suggest one and confirm before switching. If the default branch cannot be resolved, say so and confirm the current branch is intended before staging.
+
+## Security-Sensitive Changes
+
+Before writing the message, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md` (which covers when to treat a change as security-relevant outright vs. ask the author). If it is, retrieve the canonical policy named there and apply it to how the summary, body, and any ticket reference are worded, then show the proposed message to the author for approval before committing. If a security-relevant change's policy can't be fetched, honor the stop condition that reference defines — stop rather than writing a security-fix message from memory.
+
+---
 
 ## Commit Message Format
 
@@ -48,12 +55,6 @@ Only the first commit on a branch needs the full format (ticket prefix, type key
 ```
 Update error handling in login flow
 ```
-
----
-
-## Security-Sensitive Changes
-
-Before writing the message, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`. If it is, retrieve the canonical policy named there and apply it to how the summary, body, and any ticket reference are worded — don't write the message the way you otherwise would. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines: stop rather than writing a security-fix message from memory.
 
 ---
 
