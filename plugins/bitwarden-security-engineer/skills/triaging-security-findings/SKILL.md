@@ -9,7 +9,7 @@ Bitwarden uses **Aikido** as its unified security platform. Aikido continuously 
 
 Findings are queried and triaged via the `aikido:issues` skill (`aikido_issues_list`), not through GitHub code-scanning alerts — Aikido triage does not flow through GitHub Advanced Security. See that skill for the full list of scope filters, `issue_types`, and SLA filters (`out_of_sla`, `sla_due_soon`).
 
-If the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data.
+If the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data. This applies to Aikido feed triage only — the Dependabot and secret-scanning paths below are GitHub-native and run without Aikido.
 
 ## GitHub-Native Alerts (Dependabot, Secret Scanning)
 
