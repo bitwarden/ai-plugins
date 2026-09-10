@@ -91,6 +91,10 @@ If no template exists, fall back to:
 <!-- Required for UI changes; delete if not applicable. -->
 ```
 
+**Security-sensitive changes.** Before drafting the body, check whether this is a security fix. The primary signal is a linked `VULN-*` Jira ticket: resolve the branch/ticket and, when `bitwarden-atlassian-tools` is available, use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` to see whether the tracking ticket is — or links to — a `VULN-*`. A missing `VULN-*` link does **not** clear it: also treat it as security-relevant when it is `security`-labeled, when the diff touches authentication, authorization, session handling, cryptography, input validation, access control, or secret handling, or when the author says so. When in doubt, treat it as security-relevant.
+
+If it is security-relevant, the canonical policy governs how the title, body, and Tracking reference must be written — read and apply it before drafting: [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages). The author owns the final wording, and the Step 5 preview is where they confirm it. If you are unable to fetch the full policy, treat that as a stop condition that needs to be fixed before you continue — do not draft a security-fix PR body from memory.
+
 ### Step 4 — Ask about the AI review label
 
 Use the `AskUserQuestion` tool to ask:
@@ -117,6 +121,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Security fix:   <No | Yes — canonical policy applied (see Step 3 link)>
 
 Body:
 ---
@@ -165,5 +170,6 @@ These are what the Step 5 preview is built to prevent. Recognizing them helps wh
 - **Generic body replacing the template** → reviewers expect the template's sections. Read the template even when the body feels obvious.
 - **Label answer dropped between Step 4 and Step 6** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 5.
+- **Security fix not in line with policy** → the body doesn't follow the canonical policy read in Step 3. Apply it; the Step 5 preview is the last catch.
 
 If any of these slip past the preview, recovery is awkward — the title is permanent in the merge commit, and labels feed downstream filtering and automation.

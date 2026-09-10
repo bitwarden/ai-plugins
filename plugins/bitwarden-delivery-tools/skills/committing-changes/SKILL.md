@@ -51,6 +51,17 @@ Update error handling in login flow
 
 ---
 
+## Security-Sensitive Changes
+
+Before writing the message, check whether the change is a security fix.
+
+**Detect it.** The primary signal is a linked `VULN-*` Jira ticket: resolve the branch/ticket and, when `bitwarden-atlassian-tools` is available, use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` to see whether the ticket is — or links to — a `VULN-*`. A missing `VULN-*` link does **not** clear the change: also treat it as security-relevant when it is `security`-labeled, when the diff touches authentication, authorization, session handling, cryptography, input validation, access control, or secret handling, or when the author says so. When in doubt, treat it as security-relevant.
+
+Full policy (canonical): [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages)
+If you are unable to fetch the full policy treat that as a stop condition that needs to be fixed before you continue.
+
+---
+
 ## Pre-Commit Quality Gate
 
 Before staging, run the `perform-preflight` skill for the full quality gate checklist (tests, lint, security, architecture). Consult the repo's CLAUDE.md for platform-specific build and lint commands.
