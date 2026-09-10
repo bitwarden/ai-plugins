@@ -1,0 +1,22 @@
+name: Audit External Claude Plugin
+
+on:
+  pull_request:
+    paths:
+      - ".claude-plugin/marketplace.json"
+
+permissions: {}
+
+jobs:
+  audit:
+    name: Audit External Claude Plugin
+    uses: bitwarden/gh-actions/.github/workflows/_audit-external-claude-plugin.yml@main
+    secrets:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      pull-requests: write
