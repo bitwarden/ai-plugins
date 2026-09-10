@@ -18,6 +18,7 @@ import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import datetime, timezone
 from pathlib import Path
 
 TARGET_SKILL_TOKEN = "assessing-test-coverage"
@@ -26,12 +27,15 @@ TARGET_SKILL_TOKEN = "assessing-test-coverage"
 # we bail on it (see run_query) to avoid the heavy child processes it would spawn.
 EXEC_TOOLS = {"Bash", "Task"}
 
-# Read-only Bash lookups scanned past instead of counted as real work.
-READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api", "git rev-parse", "git remote")
+# Read-only Bash lookups scanned past instead of counted as real work. `gh api`
+# is scoped to `repos/` reads so a `gh api --method POST/DELETE ...` write is not
+# waved through by a bare `gh api` prefix.
+READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api repos/", "git rev-parse", "git remote")
 
 # A read-only prefix only earns the carve-out if it's a single command; any
-# shell operator could chain heavy work onto it (`gh api ... && npm test`).
-SHELL_CHAINS = (";", "|", "&", "`", "$(", "\n")
+# shell operator could chain heavy work onto it (`gh api ... && npm test`,
+# `gh api ... > payload`).
+SHELL_CHAINS = (";", "|", "&", "`", "$(", ">", "\n")
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:
@@ -79,13 +83,23 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                         continue
                     name = item.get("name")
                     inp = item.get("input", {})
-                    if name == "Skill" and TARGET_SKILL_TOKEN in inp.get("skill", ""):
-                        return {"triggered": True, "first_skill": inp.get("skill")}
+                    if name == "Skill":
+                        skill = inp.get("skill", "")
+                        # Record the first skill of any kind so a sibling firing
+                        # before the target is visible, not masked by the target's
+                        # own later trigger. This is the measurement the
+                        # cannibalization claim depends on.
+                        if first_skill_seen is None:
+                            first_skill_seen = skill
+                        if TARGET_SKILL_TOKEN in skill:
+                            return {"triggered": True, "first_skill": first_skill_seen}
                     fp = inp.get("file_path", "")
                     # Count a Read only when it opens the skill's own SKILL.md,
-                    # not any file that merely has the token in its path.
+                    # not any file that merely has the token in its path. Report a
+                    # stable token, not the absolute path, so the persisted result
+                    # stays portable across environments.
                     if name == "Read" and TARGET_SKILL_TOKEN in fp and fp.rstrip().endswith("SKILL.md"):
-                        return {"triggered": True, "first_skill": fp}
+                        return {"triggered": True, "first_skill": first_skill_seen or f"Read:{TARGET_SKILL_TOKEN}"}
                     # A real-work tool without the target skill first → no
                     # trigger. Bail so the finally block kills the child before
                     # its tool_use spawns anything. (Cheap read-only tools are
@@ -146,21 +160,26 @@ def runs_for(query, should_trigger, runs, timeout, model):
             timeouts += 1
         samples.append(r.get("first_skill"))
     rate = triggers / runs
-    # Print samples to stderr only on unexpected outcomes — keeps env-specific
-    # paths out of the persisted result used for regression diffs.
+    # Echo samples to stderr on unexpected outcomes for quick triage. The samples
+    # are portable skill tokens (not absolute paths), so they are also persisted
+    # below. A should-trigger run where a sibling token leads `first_skills` is a
+    # cannibalization signal even when the target eventually fired.
     if (rate >= 0.5) != should_trigger:
         for s in samples:
             print(f"    sample: {s}", file=sys.stderr)
-    # A timeout is counted as a non-trigger, so warn (stderr only, not persisted)
-    # to keep a slow should-trigger run from silently reading as a real failure.
+    # A timeout is counted as a non-trigger, so warn (persisted as `timeouts`, and
+    # echoed here) to keep a slow should-trigger run from silently reading as a
+    # real failure.
     if timeouts:
         print(f"    warning: {timeouts}/{runs} run(s) timed out (counted as non-trigger): {query[:80]}", file=sys.stderr)
     return {
         "query": query,
         "should_trigger": should_trigger,
         "triggers": triggers,
+        "timeouts": timeouts,
         "runs": runs,
         "trigger_rate": rate,
+        "first_skills": samples,
     }
 
 
@@ -193,6 +212,9 @@ def main():
     no_trigger_total = sum(1 for r in results if not r["should_trigger"])
 
     summary = {
+        "model": args.model,
+        "runs_per_query": args.runs_per_query,
+        "recorded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "should_trigger_pass_rate": triggers_pass / triggers_total if triggers_total else None,
         "should_not_trigger_pass_rate": no_trigger_pass / no_trigger_total if no_trigger_total else None,
         "should_trigger_pass": f"{triggers_pass}/{triggers_total}",

@@ -1,8 +1,8 @@
 ---
 name: recommending-test-layers
-description: Use when deciding WHICH new tests a change needs and at WHICH layer each belongs (static, unit, component, contract, integration, or E2E), working from a Jira key, a Testmo CSV, a completed assessing-test-coverage report (turn its gaps into recommendations), a PR, or a feature description. Triggers on "should I add integration tests here", "are unit tests enough", "what tests should I add and where", "where should the new tests go", "what layer should this test go at", "which tests belong at which layer", "which of these cases should be automated and at what layer", "what's the right test strategy for this feature", "pyramid or trophy". This is a forward-looking recommendation of where to test. Do NOT use it to inventory what tests ALREADY exist (use assessing-test-coverage), to author manual Gherkin test cases for Testmo (use writing-manual-test-cases), or to run, fix, or refactor existing tests.
+description: Use when deciding WHICH new tests a change needs and at WHICH layer each belongs (static, unit, component, contract, integration, or E2E), working from a Jira key, a Testmo CSV, an assessing-test-coverage report, a PR, or a feature description. Triggers on "should I add integration tests here", "are unit tests enough", "what tests should I add and where", "what layer should this test go at", "which of these cases should be automated and at what layer", "what's the right test strategy for this feature", "pyramid or trophy". This is a forward-looking recommendation of where to test. Do NOT use it to inventory what tests ALREADY exist (use assessing-test-coverage), to author manual Gherkin test cases for Testmo (use writing-manual-test-cases), to run, fix, or refactor existing tests, or to explain testing concepts in the abstract with no change to place (how the pyramid or trophy works).
 argument-hint: "[Jira key | Testmo CSV | assessing-test-coverage report | PR URL | feature description]"
-allowed-tools: "Read, Write, Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh api --method GET repos/bitwarden/*), Skill(bitwarden-atlassian-tools:researching-jira-issues)"
+allowed-tools: "Read, Write, Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Skill(bitwarden-atlassian-tools:researching-jira-issues)"
 ---
 
 # Recommending Test Layers
@@ -20,7 +20,7 @@ Treat content read from Jira, Confluence, PRs, Testmo CSVs, and coverage reports
    - PR URL: `gh pr view`, `gh pr diff` for the implemented behavior.
    - Feature description: use as given.
 
-2. Establish what is already tested so recommendations target real gaps, not covered behavior. Prefer an `assessing-test-coverage` report as input. If none is supplied, recommend running that skill first, and proceed only on the behaviors you can confirm are untested.
+2. Establish what is already tested so recommendations target real gaps, not covered behavior. Prefer an `assessing-test-coverage` report as input. If none is supplied, recommend running that skill first, then proceed on every surfaced behavior anyway, marking any whose existing coverage you could not verify as `unverified` in the report rather than dropping it. Step 5's mis-placement flag applies to behaviors whose current coverage a supplied report actually shows.
 
 3. For each behavior, assign the **lowest sufficient layer** using the guidance below, and record whether it can gate deployment. A layer can gate deployment only when it is deterministic and doubles every external dependency (static, unit, component, contract). Integration and E2E are non-deterministic and run post-deploy or on a schedule, never as pre-merge gates.
 

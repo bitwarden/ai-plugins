@@ -74,5 +74,9 @@
   {
     "query": "what test coverage already exists for the surfaces in the emergency-access revamp Tech Breakdown doc (bitwarden/tech-breakdowns)?",
     "should_trigger": false
+  },
+  {
+    "query": "explain how the testing trophy works and when you'd pick it over a pyramid",
+    "should_trigger": false
   }
 ]
