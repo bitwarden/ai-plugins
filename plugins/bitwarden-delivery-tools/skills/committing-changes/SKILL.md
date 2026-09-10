@@ -1,6 +1,6 @@
 ---
 name: committing-changes
-description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes".
+description: Git commit conventions and workflow for Bitwarden repositories, including how to word a commit for a security-sensitive change. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes", "security fix", "security commit", "VULN".
 ---
 
 # Git Commit Conventions
@@ -53,12 +53,7 @@ Update error handling in login flow
 
 ## Security-Sensitive Changes
 
-Before writing the message, check whether the change is a security fix.
-
-**Detect it.** The primary signal is a linked `VULN-*` Jira ticket: resolve the branch/ticket and, when `bitwarden-atlassian-tools` is available, use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` to see whether the ticket is — or links to — a `VULN-*`. A missing `VULN-*` link does **not** clear the change: also treat it as security-relevant when it is `security`-labeled, when the diff touches authentication, authorization, session handling, cryptography, input validation, access control, or secret handling, or when the author says so. When in doubt, treat it as security-relevant.
-
-Full policy (canonical): [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages)
-If you are unable to fetch the full policy treat that as a stop condition that needs to be fixed before you continue.
+Before writing the message, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`. If it is, retrieve the canonical policy named there and apply it to how the summary, body, and any ticket reference are worded — don't write the message the way you otherwise would. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines: stop rather than writing a security-fix message from memory.
 
 ---
 

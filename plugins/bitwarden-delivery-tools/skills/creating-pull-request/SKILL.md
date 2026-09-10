@@ -62,9 +62,11 @@ The `<type>:` prefix is what CI scans (lowercased) to assign the `t:` label. Wit
 
 If the Jira ticket key isn't in the branch name or recent conversation, ask the user. Don't leave `PM-XXXXX` as a placeholder — a real ticket key is required for tracking links to resolve.
 
+Before proposing the title, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`. If it is, the canonical policy named there also governs the title wording — apply it so the title you propose is already compliant, and carry the determination into Step 3 for the body. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines.
+
 **Show the proposed title to the user before continuing.** This is the first chance for them to catch typos, a missing prefix, or the wrong ticket key.
 
-### Step 3 — Read the repo's PR template
+### Step 3 — Read the repo's PR template and apply security handling
 
 Always read `.github/PULL_REQUEST_TEMPLATE.md` from the target repo before drafting the body. Even when you have a body draft in mind, the template's sections are what other reviewers expect to scan. Skipping this is a common failure mode — PRs ship with improvised bodies that miss sections reviewers depend on.
 
@@ -91,9 +93,7 @@ If no template exists, fall back to:
 <!-- Required for UI changes; delete if not applicable. -->
 ```
 
-**Security-sensitive changes.** Before drafting the body, check whether this is a security fix. The primary signal is a linked `VULN-*` Jira ticket: resolve the branch/ticket and, when `bitwarden-atlassian-tools` is available, use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` to see whether the tracking ticket is — or links to — a `VULN-*`. A missing `VULN-*` link does **not** clear it: also treat it as security-relevant when it is `security`-labeled, when the diff touches authentication, authorization, session handling, cryptography, input validation, access control, or secret handling, or when the author says so. When in doubt, treat it as security-relevant.
-
-If it is security-relevant, the canonical policy governs how the title, body, and Tracking reference must be written — read and apply it before drafting: [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages). The author owns the final wording, and the Step 5 preview is where they confirm it. If you are unable to fetch the full policy, treat that as a stop condition that needs to be fixed before you continue — do not draft a security-fix PR body from memory.
+**Security-sensitive changes.** If Step 2 flagged this change as security-relevant (per `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`), apply the canonical policy retrieved there to the body and the Tracking reference as well as the title. The author owns the final wording, and the Step 5 preview is where they confirm it. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines — do not draft a security-fix PR body from memory.
 
 ### Step 4 — Ask about the AI review label
 
@@ -121,7 +121,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
-Security fix:   <No | Yes — canonical policy applied (see Step 3 link)>
+Security fix:   <No | Yes — canonical policy applied>
 
 Body:
 ---
