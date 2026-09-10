@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Transitioned `triaging-security-findings`, `reviewing-dependencies`, `perform-security-review`, the agent, and the README from Checkmarx One, SonarCloud, and Grype to Aikido
-- Findings are now queried via the `aikido:issues` skill instead of GitHub Advanced Security's code-scanning API
-- `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS v3.0 convention, group-scoped action verification, and ticket-scope pinning
-- `reviewing-dependencies` no longer groups `cloud_instance` under container images
-- `perform-security-review` step 1-C now pre-fetches Aikido `open_source` and `docker_container` findings alongside SAST/IaC, and Agent 2 uses that pre-fetched SCA/container evidence instead of calling the `aikido:issues` skill it's barred from using
-- README Prerequisites and skills table now reflect Aikido instead of Checkmarx/SonarCloud/Grype/GHAS
-- README now labels the Usage blocks as example prompts and points `aikido` installs at the `claude-plugins-official` marketplace, since `aikido` is not vendored in this marketplace
+- Transitioned `triaging-security-findings`, `reviewing-dependencies`, `perform-security-review`, the agent, and the READMEs from Checkmarx One, SonarCloud, and Grype to Aikido
+- Findings are queried via the `aikido:issues` skill instead of the GHAS code-scanning API
+- `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS convention, group-scoped action verification, and ticket-scope pinning; its `gh api` examples pin the API version for stable `--jq` output
+- `reviewing-dependencies` no longer groups `cloud_instance` under container images, and defers to `triaging-security-findings` for the CVSS convention
+- `perform-security-review` step 1-C pre-fetches Aikido SAST/IaC/SCA/container findings; steps 2 and 4 reuse that evidence and are barred from re-fetching it via either `Skill(aikido:issues)` or the MCP tool. `tool-grants.md` documents the split and why the MCP grant is safe to pre-approve
+- Agent post-fix verification reports the Jira ticket update for an engineer to apply, rather than claiming to confirm it
+- READMEs reflect Aikido; Usage blocks are labeled as example prompts, and `aikido` installs point at the `claude-plugins-official` marketplace
 
 ### Added
 
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- The `Bash(gh api --method GET *)` and `Bash(rm -f /tmp/security-review-*)` grants, with no replacement. Step 7 clears the temp diff with the granted `Write` tool instead, so cleanup still runs unattended. **Migration:** a deployment that needs GHAS evidence on the unattended path must add its own `gh api` allow rule and pair it with a read-only `GH_TOKEN`. Any `allowed-tools` wildcard absorbs an inserted `-X DELETE`, so no rule can constrain the verb — `references/tool-grants.md` shows the bypass. The secret scanning and Dependabot calls in step 1-C now prompt, and in CI they are denied and render as `Not checked (permission denied)` rather than `None`; Aikido evidence is unaffected since it runs through the pre-approved MCP tool grant
+- The `Bash(gh api --method GET *)` and `Bash(rm -f /tmp/security-review-*)` grants, with no replacement. Step 7 clears the temp diff with the granted `Write` tool instead, so cleanup still runs unattended. **Migration:** a deployment that needs GHAS evidence on the unattended path must add its own `gh api` allow rule and pair it with a read-only `GH_TOKEN`. Any `allowed-tools` wildcard absorbs an inserted `-X DELETE`, so no rule can constrain the verb — `references/tool-grants.md` shows the bypass. Step 1-C's three scan-evidence calls now prompt, and in CI they are denied and render as `Not checked (permission denied)` rather than `None`
 
 ### Changed
 

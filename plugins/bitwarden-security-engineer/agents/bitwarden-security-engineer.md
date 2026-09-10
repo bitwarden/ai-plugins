@@ -46,7 +46,7 @@ After completing security work, verify before declaring done:
 
 ### After fixing scanner findings
 
-- Confirm the linked Jira ticket reflects the resolution (fixed, false positive with rationale, or scheduled)
+- Report the Jira ticket update the resolution calls for (fixed, false positive with rationale, or scheduled) for the engineer to apply
 - Verify the fix addresses the root cause (sanitization, not just suppression)
 - Check that no new vulnerabilities were introduced by the fix
 

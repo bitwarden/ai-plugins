@@ -19,17 +19,17 @@ Dependabot and GitHub secret scanning are unaffected by the Aikido transition â€
 
 ```bash
 # List open Dependabot alerts
-gh api /repos/{owner}/{repo}/dependabot/alerts --jq '.[] | {number, state, severity: .security_vulnerability.severity, package: .security_vulnerability.package.name, ecosystem: .security_vulnerability.package.ecosystem}'
+gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" /repos/{owner}/{repo}/dependabot/alerts --jq '.[] | {number, state, severity: .security_vulnerability.severity, package: .security_vulnerability.package.name, ecosystem: .security_vulnerability.package.ecosystem}'
 
 # Get specific alert details
-gh api /repos/{owner}/{repo}/dependabot/alerts/{alert_number}
+gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" /repos/{owner}/{repo}/dependabot/alerts/{alert_number}
 ```
 
 ### Secret Scanning Alerts
 
 ```bash
 # List secret scanning alerts
-gh api /repos/{owner}/{repo}/secret-scanning/alerts --jq '.[] | {number, state, secret_type, created_at}'
+gh api --method GET -H "X-GitHub-Api-Version: 2026-03-10" /repos/{owner}/{repo}/secret-scanning/alerts --jq '.[] | {number, state, secret_type, created_at}'
 ```
 
 ## Triaging Aikido Findings

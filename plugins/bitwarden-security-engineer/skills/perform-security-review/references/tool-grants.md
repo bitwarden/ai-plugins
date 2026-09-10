@@ -43,8 +43,9 @@ deletes the repository.
 
 There is no `gh api` rule in `allowed-tools`. No pattern could be written that constrains the
 verb, and this skill's entire input is a diff an attacker may have influenced, so a rule the
-model is merely asked to follow is not a control. The step-1-C scan-evidence calls therefore
-prompt, and in CI they are denied.
+model is merely asked to follow is not a control. Step 1-C's two `gh api` scan-evidence calls
+(secret scanning and Dependabot) therefore prompt, and in CI they are denied. Step 1-C's Aikido
+call does not go through `gh api`; see "Why the Aikido MCP grant is pre-approved" below.
 
 That is a real capability loss: GHAS evidence is unavailable on the unattended path unless the
 deployment grants it. **The control at that level is the token, not a permission rule** — run
@@ -52,9 +53,36 @@ the workflow with a read-only `GH_TOKEN` and minimal `permissions:`, and the des
 is unavailable no matter what command is composed. A deployment that has done that can add its
 own narrow allow rules with the residual risk understood.
 
-Step 1-C is written to degrade rather than fail: each scanner records its own outcome, and a
-denial is recorded as `Not checked (permission denied)` so it never reads as `None`, which
-would say the scanner ran and found nothing.
+Step 1-C is written to degrade rather than fail: each scanner records its own outcome, and for
+the two `gh api` scanners a denial is recorded as `Not checked (permission denied)` so it never
+reads as `None`, which would say the scanner ran and found nothing. Aikido cannot reach that
+state — its grant is pre-approved, so the call never prompts and is never denied.
+
+## Why the Aikido MCP grant is pre-approved
+
+`mcp__plugin_aikido_aikido-mcp__aikido_issues_list` is granted outright, which looks
+inconsistent with refusing every `gh api` rule. The reason it is safe is tool scoping, not the
+absence of a wildcard.
+
+The Aikido MCP server exposes four tools: `aikido_full_scan` and `aikido_issues_list` (both
+read-only), `aikido_login` (auth), and `aikido_ignore_issue` — a **mutation** that dismisses a
+finding from the feed given an `issue_id` and a reason. Only `aikido_issues_list` is granted, so
+`aikido_ignore_issue` is not reachable. That is the whole argument, and it is why this grant
+**must stay an exact tool name and never become a wildcard**: `mcp__plugin_aikido_aikido-mcp__*`
+would pre-approve `aikido_ignore_issue` as well, and this skill's input is an attacker-influenced
+diff — a run steered that way could silently dismiss a real security finding.
+
+Flag absorption, the concern that killed the `gh api` rules, does not apply within the granted
+tool: an MCP call's arguments are structured parameters validated by the server, not a matched
+shell string, so there is no `.*` for an inserted flag to hijack and no last-wins verb to flip.
+But that is a footnote next to the scoping point above — naming one read tool and no others is
+what makes the grant safe.
+
+The residual risk the grant does carry: `aikido_issues_list` returns third-party content
+(finding titles, descriptions) into a context that also holds `Write`, and on the step-1-C
+unattended path it runs without a prompt. That is the same exposure the diff itself already
+carries, so it adds no new class of risk — and it is why steps 2 and 4 are handed pre-fetched
+evidence instead of the tool.
 
 ## Why the default-branch lookup does not use `gh api`
 

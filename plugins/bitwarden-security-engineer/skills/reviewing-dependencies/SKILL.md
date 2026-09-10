@@ -24,7 +24,7 @@ For each alert, determine:
 
 1. **Is the vulnerable code path reachable?** — Does the application actually use the vulnerable function/feature of the dependency?
 2. **Is it a direct or transitive dependency?** — Transitive vulnerabilities may be harder to fix but still pose real risk.
-3. **What is the CVSS score and exploit availability?** (Use CVSS v3.0.) A high CVSS with a public exploit needs immediate action. A medium CVSS with no known exploit can be scheduled.
+3. **What is the CVSS score and exploit availability?** (Score with the CVSS convention `triaging-security-findings` defines for effective severity.) A high CVSS with a public exploit needs immediate action. A medium CVSS with no known exploit can be scheduled.
 4. **What versions are affected and what versions fix it?** — Check if updating is a minor bump or a breaking change.
 
 ### Step 3: Decide on Action
@@ -82,7 +82,7 @@ Aikido is Bitwarden's container and open-source dependency scanner. It continuou
 
 Use the `aikido:issues` skill (`aikido_issues_list`) to query findings, scoping to the relevant repo and filtering `issue_types` to `open_source` (dependency CVEs) and `docker_container` (container image vulnerabilities). `cloud_instance` is a separate Aikido issue type for cloud VM/instance findings — out of scope for dependency and container review.
 
-If a caller has already supplied pre-fetched Aikido SCA/container evidence (for example, `perform-security-review` hands its Agent 2 a `SCAN_EVIDENCE` block and bars a live `aikido:issues` call), use that evidence instead of querying — do not call the skill, and do not stop. Otherwise, if the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data — Aikido is the only place these findings are tracked.
+If a caller has already supplied pre-fetched Aikido SCA/container evidence (for example, `perform-security-review` hands its Agent 2 a `SCAN_EVIDENCE` block and bars a live `aikido:issues` call), use that evidence instead of querying — do not call the skill or `mcp__plugin_aikido_aikido-mcp__aikido_issues_list` directly, and do not stop. Otherwise, if the `aikido:issues` skill is unavailable (the `aikido` plugin isn't installed or `/aikido:setup` hasn't run), stop and tell the user rather than proceeding without this data — Aikido is the only place these findings are tracked.
 
 ```bash
 # Use the aikido:issues skill, e.g.:
