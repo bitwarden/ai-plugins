@@ -42,9 +42,9 @@
     {
       "query": "I've got a Testmo CSV of manual cases for the vault-unlock rework. which of these should be automated and at which layer?",
       "should_trigger": true,
-      "triggers": 5,
+      "triggers": 6,
       "runs": 7,
-      "trigger_rate": 0.7142857142857143
+      "trigger_rate": 0.8571428571428571
     },
     {
       "query": "the autofill refactor PR in bitwarden/clients has gaps. where should the new tests go to keep the pre-merge gate deterministic?",

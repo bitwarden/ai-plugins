@@ -10,7 +10,7 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 
 - `trigger-eval.json` — 19-query test set: 10 should-trigger phrasings asking a forward-looking question about which tests to add and at which layer, spanning the documented input types (a Jira key, a Testmo CSV, an `assessing-test-coverage` report, a PR, and a feature description) and phrasings like "are unit tests enough", "trophy or pyramid", "which layer should this live at", and "do we need an E2E or can component cover it"; and 9 should-not-trigger near-misses that share the words "test"/"coverage"/"layer" but want something the skill deliberately does not do: inventorying coverage that already exists (`assessing-test-coverage`), authoring manual Gherkin cases (`writing-manual-test-cases`), writing or refactoring automated test code, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
 - `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. Each subprocess is killed as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — so the adversarial should-not-trigger queries never actually clone repos or run build/test toolchains. See the note under "Running".
-- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-09-03 with `--model sonnet` at `--runs-per-query 7`; use the same model when re-running so verdicts are comparable.
+- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-09-10 with `--model claude-opus-4-8` at `--runs-per-query 7`; use the same model when re-running so verdicts are comparable, and so results line up with the sibling `assessing-test-coverage` eval.
 
 ## Running
 
@@ -22,7 +22,7 @@ python3 run_real_eval.py \
   --runs-per-query 7 \
   --num-workers 5 \
   --timeout 90 \
-  --model sonnet \
+  --model claude-opus-4-8 \
   > result.json
 ```
 
