@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Trigger-rate evaluator for the installed `assessing-test-coverage` skill.
+"""Trigger-rate evaluator for the installed `recommending-test-layers` skill.
 
 Unlike the skill-creator harness (which only counts a temp `*-skill-<uuid>`
 copy), this runs `claude -p` per query and counts a trigger when any Skill or
@@ -21,7 +21,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
-TARGET_SKILL_TOKEN = "assessing-test-coverage"
+TARGET_SKILL_TOKEN = "recommending-test-layers"
 
 # Requesting one of these means the model chose real work over the target skill;
 # we bail on it (see run_query) to avoid the heavy child processes it would spawn.
