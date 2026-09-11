@@ -27,15 +27,33 @@ TARGET_SKILL_TOKEN = "recommending-test-layers"
 # we bail on it (see run_query) to avoid the heavy child processes it would spawn.
 EXEC_TOOLS = {"Bash", "Task"}
 
-# Read-only Bash lookups scanned past instead of counted as real work. `gh api`
-# is scoped to `repos/` reads so a `gh api --method POST/DELETE ...` write is not
-# waved through by a bare `gh api` prefix.
+# Read-only Bash lookups scanned past instead of counted as real work. The
+# `gh api` entry is scoped to `repos/` to bound the target, but that prefix alone
+# does not enforce a read — see `is_read_only_bash`, which also rejects a non-GET
+# method or a request body so a `gh api repos/... -X POST` write still bails.
 READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api repos/", "git rev-parse", "git remote")
 
 # A read-only prefix only earns the carve-out if it's a single command; any
 # shell operator could chain heavy work onto it (`gh api ... && npm test`,
 # `gh api ... > payload`).
 SHELL_CHAINS = (";", "|", "&", "`", "$(", ">", "\n")
+
+
+def is_read_only_bash(cmd: str) -> bool:
+    """Wave through a `gh api repos/...` call only when it is a plain read. The
+    `repos/` prefix bounds the target but not the HTTP method: `gh` accepts the
+    endpoint as the first positional with `-X`/`--method` placed after it, so
+    `gh api repos/OWNER/REPO/issues -X POST` matches the prefix yet writes. A
+    non-GET method or any request-body flag disqualifies the carve-out."""
+    if not cmd.startswith(READ_ONLY_BASH) or any(op in cmd for op in SHELL_CHAINS):
+        return False
+    tokens = cmd.split()
+    for flag in ("-X", "--method"):
+        if flag in tokens:
+            i = tokens.index(flag)
+            if i + 1 >= len(tokens) or tokens[i + 1].upper() != "GET":
+                return False
+    return not any(f in tokens for f in ("-f", "-F", "--field", "--raw-field", "--input"))
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:
@@ -106,7 +124,7 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                     # scanned past; the model may inspect files first.)
                     if name == "Bash":
                         cmd = inp.get("command", "").strip()
-                        if cmd.startswith(READ_ONLY_BASH) and not any(op in cmd for op in SHELL_CHAINS):
+                        if is_read_only_bash(cmd):
                             continue
                     if name in EXEC_TOOLS:
                         if first_skill_seen is None:
