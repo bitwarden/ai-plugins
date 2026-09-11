@@ -46,11 +46,17 @@ WRITE_FLAGS = frozenset({"-X", "--method", "-f", "-F", "--field", "--raw-field",
 
 
 def _flag_names(cmd: str):
-    """Yield the normalized flag name of each token, collapsing pflag spellings:
-    `--method=POST` -> `--method`, `-XPOST` -> `-X`, `-fbody=hi` -> `-f`."""
+    """Yield candidate flag names from each token. A long flag yields its name up
+    to `=` (`--method=POST` -> `--method`). A short-flag cluster is expanded per
+    character (`-XPOST` -> -X -P -O ..., `-iX` -> -i -X) so a write flag hidden
+    inside combined pflag shorthand is still caught."""
     for token in cmd.split():
         name = token.split("=", 1)[0]
-        yield name if name.startswith("--") else name[:2]
+        if name.startswith("--"):
+            yield name
+        elif name.startswith("-") and len(name) > 1:
+            for ch in name[1:]:
+                yield "-" + ch
 
 
 def is_read_only_bash(cmd: str) -> bool:
