@@ -112,6 +112,7 @@
     "otlp",
     "owasp",
     "pathspec",
+    "pflag",
     "pipefail",
     "PKCE",
     "pushback",

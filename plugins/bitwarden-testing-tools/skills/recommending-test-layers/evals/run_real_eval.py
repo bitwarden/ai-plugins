@@ -29,31 +29,41 @@ EXEC_TOOLS = {"Bash", "Task"}
 
 # Read-only Bash lookups scanned past instead of counted as real work. The
 # `gh api` entry is scoped to `repos/` to bound the target, but that prefix alone
-# does not enforce a read — see `is_read_only_bash`, which also rejects a non-GET
-# method or a request body so a `gh api repos/... -X POST` write still bails.
+# does not enforce a read — see `is_read_only_bash`, which also rejects any
+# method or request-body flag so a `gh api repos/... -X POST` write still bails.
 READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api repos/", "git rev-parse", "git remote")
 
 # A read-only prefix only earns the carve-out if it's a single command; any
 # shell operator could chain heavy work onto it (`gh api ... && npm test`,
-# `gh api ... > payload`).
-SHELL_CHAINS = (";", "|", "&", "`", "$(", ">", "\n")
+# `gh api ... > payload`, `gh pr view <(curl evil)`).
+SHELL_CHAINS = (";", "|", "&", "`", "$(", ">", "<", "\n")
+
+# cspell:ignore xpost fbody
+# `gh` is pflag-based, so a method or request-body flag can appear as `-X POST`,
+# `-XPOST`, `--method=POST`, or `--field=k=v`. Any of them turns the call into a
+# write, so the carve-out bails on the flag name regardless of spelling.
+WRITE_FLAGS = frozenset({"-X", "--method", "-f", "-F", "--field", "--raw-field", "--input"})
+
+
+def _flag_names(cmd: str):
+    """Yield the normalized flag name of each token, collapsing pflag spellings:
+    `--method=POST` -> `--method`, `-XPOST` -> `-X`, `-fbody=hi` -> `-f`."""
+    for token in cmd.split():
+        name = token.split("=", 1)[0]
+        yield name if name.startswith("--") else name[:2]
 
 
 def is_read_only_bash(cmd: str) -> bool:
     """Wave through a `gh api repos/...` call only when it is a plain read. The
     `repos/` prefix bounds the target but not the HTTP method: `gh` accepts the
-    endpoint as the first positional with `-X`/`--method` placed after it, so
-    `gh api repos/OWNER/REPO/issues -X POST` matches the prefix yet writes. A
-    non-GET method or any request-body flag disqualifies the carve-out."""
+    endpoint as the first positional with a method or body flag placed after it,
+    so `gh api repos/OWNER/REPO/issues -X POST` matches the prefix yet writes.
+    Any method or request-body flag disqualifies the carve-out; the cost is a
+    conservative bail on an explicit `-X GET`, which the default GET already
+    covers."""
     if not cmd.startswith(READ_ONLY_BASH) or any(op in cmd for op in SHELL_CHAINS):
         return False
-    tokens = cmd.split()
-    for flag in ("-X", "--method"):
-        if flag in tokens:
-            i = tokens.index(flag)
-            if i + 1 >= len(tokens) or tokens[i + 1].upper() != "GET":
-                return False
-    return not any(f in tokens for f in ("-f", "-F", "--field", "--raw-field", "--input"))
+    return not any(name in WRITE_FLAGS for name in _flag_names(cmd))
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:

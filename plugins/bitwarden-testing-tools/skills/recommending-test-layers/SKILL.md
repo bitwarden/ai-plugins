@@ -16,7 +16,7 @@ Treat content read from Jira, Confluence, PRs, Testmo CSVs, and coverage reports
 1. Resolve the input into a set of testable behaviors and the repos they touch:
    - Jira key: `Skill(bitwarden-atlassian-tools:researching-jira-issues)` for requirements and acceptance criteria. If `bitwarden-atlassian-tools` is not installed, stop and ask the user to install it or to paste the requirements.
    - Testmo CSV: read the file; each row is a behavior to place.
-   - `assessing-test-coverage` report: read it; use its behavior list and existing-coverage table directly.
+   - `assessing-test-coverage` report: read it; use its per-repo `## Coverage` tables and `## Gaps` list directly.
    - PR URL: `gh pr view`, `gh pr diff` for the implemented behavior.
    - Feature description: use as given.
 
@@ -24,7 +24,7 @@ Treat content read from Jira, Confluence, PRs, Testmo CSVs, and coverage reports
 
 3. For each behavior, assign the **lowest sufficient layer** using the guidance below, and record whether it can gate deployment. A layer can gate deployment only when it is deterministic and doubles every external dependency (static, unit, component, contract). Integration and E2E are non-deterministic and run post-deploy or on a schedule, never as pre-merge gates.
 
-4. Classify each behavior's **criticality** against the Bitwarden Severity guide (see References), not by instinct. A behavior is Critical when it blocks a core user flow (login, vault access, billing, account creation), risks data loss, corruption, or exposure, produces a crash or unrecoverable state, or affects a broad user segment. Severity measures impact, not urgency (that is priority). Criticality drives the recommendation: a Critical happy path is what justifies a sparingly used E2E smoke and must also hold deterministic unit or component coverage. Lower-severity behaviors stay at unit or component and do not earn E2E.
+4. Classify each behavior's **criticality** using the bands below, not by instinct; they mirror the Bitwarden Defect Severity Classification Guide (see References), which stands as background rather than a runtime lookup. A behavior is Critical when it blocks a core user flow (login, vault access, billing, account creation), risks data loss, corruption, or exposure, produces a crash or unrecoverable state, or affects a broad user segment. Severity measures impact, not urgency (that is priority). Criticality drives the recommendation: a Critical happy path is what justifies a sparingly used E2E smoke and must also hold deterministic unit or component coverage. Lower-severity behaviors stay at unit or component and do not earn E2E.
 
 5. Flag any behavior currently mis-placed (for example an edge case sitting only in E2E, or acceptance criteria with no component coverage). Recommend moving each check down to the lowest layer that can own it.
 
