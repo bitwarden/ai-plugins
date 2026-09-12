@@ -1,0 +1,172 @@
+{
+  "claude-opus-4-8": {
+    "mode": "isolated",
+    "skill_token": null,
+    "skill_name": "consulting-adrs",
+    "runs_per_query": 3,
+    "model": "claude-opus-4-8",
+    "balance_warning": null,
+    "should_trigger_pass_rate": 0.875,
+    "should_not_trigger_pass_rate": 1.0,
+    "should_trigger_pass": "7/8",
+    "should_not_trigger_pass": "4/4",
+    "reliability": {
+      "all_runs_agree_rate": 0.9166666666666666,
+      "should_trigger_reliable": "7/8",
+      "should_not_trigger_reliable": "4/4"
+    },
+    "results": [
+      {
+        "query": "Before I merge this new sync endpoint, does it conflict with any of our architecture decision records?",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "Check this design doc against our ADRs \u2014 I want to know if we're contradicting a decision we already made.",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "I'm about to change how client-side key derivation works. Is there an accepted ADR that governs it that I'd be violating?",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "We're adding a separate data store for audit logs. Does that break any accepted ADR, or is it a gap we should record?",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "Review my PR for alignment with our recorded architecture decisions.",
+        "should_trigger": true,
+        "triggers": 1,
+        "runs": 3,
+        "trigger_rate": 0.3333333333333333,
+        "all_runs_agree": false,
+        "failure_mode": {
+          "silent": 2,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "Does this threat model line up with our accepted ADRs, or does it assume something we've already decided against?",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "I think this approach contradicts one of our ADRs but I'm not sure which \u2014 can you check?",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "Architect a solution for multi-region sync and walk me through the trade-offs.",
+        "should_trigger": false,
+        "triggers": 0,
+        "runs": 3,
+        "trigger_rate": 0.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {
+            "superpowers:brainstorming": 3
+          }
+        }
+      },
+      {
+        "query": "Create a threat model for the new item-sharing feature.",
+        "should_trigger": false,
+        "triggers": 0,
+        "runs": 3,
+        "trigger_rate": 0.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {
+            "bitwarden-security-engineer:threat-modeling": 3
+          }
+        }
+      },
+      {
+        "query": "Update ADR-0012's status to superseded and link it to its replacement.",
+        "should_trigger": false,
+        "triggers": 0,
+        "runs": 3,
+        "trigger_rate": 0.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 3,
+          "competitor": {}
+        }
+      },
+      {
+        "query": "Review this PR for bugs and missing test coverage.",
+        "should_trigger": false,
+        "triggers": 0,
+        "runs": 3,
+        "trigger_rate": 0.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {
+            "bitwarden-code-review:code-review-local": 3
+          }
+        }
+      },
+      {
+        "query": "Summarize all our accepted ADRs into a one-page overview for onboarding.",
+        "should_trigger": true,
+        "triggers": 3,
+        "runs": 3,
+        "trigger_rate": 1.0,
+        "all_runs_agree": true,
+        "failure_mode": {
+          "silent": 0,
+          "competitor": {}
+        }
+      }
+    ],
+    "_notes": "Clean isolated run on a de-contaminated environment (no duplicate-copy competitors). 'Review my PR for alignment with our recorded architecture decisions' under-triggers at 1/3 (goes silent, not to a competitor)."
+  }
+}
