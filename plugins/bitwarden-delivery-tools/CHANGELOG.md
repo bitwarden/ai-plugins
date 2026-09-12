@@ -5,6 +5,19 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-09-09
+
+### Added
+
+- **`stacking-pull-requests` skill** — carries Bitwarden's per-PR conventions across a chain of dependent pull requests: layer planning, per-layer gates walked bottom to top, one whole-stack submission preview, lower-layer feedback, and merging. `gh stack` mechanics are delegated to GitHub's `gh-stack` skill and extension, and Step 0 falls back to a single-branch PR whenever either is unusable for the current run.
+- `perform-preflight`: a Stacked Branches section covering the current layer, with its own stack detection. It stops when a commit is about to land on a layer that already has an open pull request, since that rebase belongs to `stacking-pull-requests` Step 5.
+- `committing-changes`: `description` gains a stack boundary so stack-level requests route to `stacking-pull-requests`. The body stays stack-agnostic, since a layer is a branch and the existing "first commit on a branch" rule already applies per layer.
+
+### Changed
+
+- `creating-pull-request`: routes chain requests to `stacking-pull-requests`, and accepts a single pull request back from it when the stack path is unavailable. Its review gate runs per layer when that skill drives it.
+- `applying-pr-conventions`: invoked once per layer by the stack path.
+
 ## [3.2.0] - 2026-09-09
 
 ### Added

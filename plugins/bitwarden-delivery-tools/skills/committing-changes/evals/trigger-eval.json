@@ -50,5 +50,9 @@
   {
     "query": "create a new branch for the PM-33210 work before I start coding, nothing to commit yet",
     "should_trigger": false
+  },
+  {
+    "query": "commit what I have on this layer before I start the next one",
+    "should_trigger": true
   }
 ]

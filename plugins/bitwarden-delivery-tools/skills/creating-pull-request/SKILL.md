@@ -1,6 +1,6 @@
 ---
 name: creating-pull-request
-description: 'Open a pull request from a branch in a Bitwarden repository. Use whenever the user wants a branch turned into a pull request, however they phrase it — "create a PR", "open a PR", "ship a draft", "ship it", "ready for review", "put it up for review", "get this in front of reviewers", "send it over to the team", "throw together a pull request", "wrap this branch up". Use it too when the request asks to open the PR and also asks what the title or t: label should be, and when the user says the title and body are already settled and only the PR needs opening — the gate, the preview, and the submission still apply. Runs the required local code-review gate, resolves the base branch, takes the title, template body, and ai-review label from applying-pr-conventions, confirms a full submission preview, then pushes and runs gh pr create. Not for composing a title, body, or label when no PR is being opened (that is applying-pr-conventions), conceptual questions ("how do PRs work"), or managing existing PRs (status, merging, addressing comments).'
+description: 'Open a pull request from a branch in a Bitwarden repository. Use whenever the user wants a branch turned into a pull request, however they phrase it — "create a PR", "open a PR", "ship a draft", "ship it", "ready for review", "put it up for review", "get this in front of reviewers", "send it over to the team", "throw together a pull request", "wrap this branch up". Use it too when the request asks to open the PR and also asks what the title or t: label should be, and when the user says the title and body are already settled and only the PR needs opening — the gate, the preview, and the submission still apply. Runs the required local code-review gate, resolves the base branch, takes the title, template body, and ai-review label from applying-pr-conventions, confirms a full submission preview, then pushes and runs gh pr create. Not for composing a title, body, or label when no PR is being opened (that is applying-pr-conventions), a chain of dependent pull requests (stacking-pull-requests), conceptual questions ("how do PRs work"), or managing existing PRs (status, merging, addressing comments).'
 ---
 
 # Creating a Pull Request
@@ -12,6 +12,8 @@ None of the three is cheap to undo. A PR opened on unreviewed work buries the re
 ## Workflow
 
 Follow these steps in order. Each one produces information the next step needs, and the preview in Step 3 depends on all of them.
+
+**First, is this one pull request or a stack?** A request for a chain of dependent pull requests belongs to `Skill(stacking-pull-requests)` — hand off. The reverse direction is the exception: an invocation stating the stack path was already tried and is unavailable for this run is that skill handing a single ordinary pull request _here_, so run the whole workflow, gate included. Handing it back is the loop that exception exists to prevent.
 
 ### Step 1 — Confirm preflight, then run the code-review gate
 
@@ -38,6 +40,8 @@ If preflight cannot be made to pass, stop and report the failure rather than ope
   - `Standard` — a typical feature, fix, docs, or config change: run `/bitwarden-code-review:code-review-local` (tell it to review the current branch's changes; there is no PR yet)
   - `Substantial` — architectural, cross-cutting, or security-touching: run `Skill(performing-multi-agent-code-review)`, telling it to review the full branch diff against the base branch resolved in 1b (not just uncommitted changes); there is no PR yet
 
+**Scoping to one layer of a stack.** When `stacking-pull-requests` drives this per layer, scope the review to that layer or it re-reviews every layer below. Only `Substantial` can be scoped: use its commit-range mode with `<parent-branch>..<layer-head>`. Name `Substantial` as the layer-scoped option when asking, and if the user picks `Standard` anyway, record in that layer's PR body that the review was not layer-scoped.
+
 Present only these two options; do not add a skip option. Honor a skip only if the user volunteers one unprompted, then record it in the PR body's AI-assisted review section (Step 2) and surface it in the Step 3 preview. Never skip on your own initiative.
 
 After the review:
@@ -48,7 +52,9 @@ After the review:
 
 Each review path checks its own prerequisites and reports what to install if something is missing. If a path can't run, install what it reports or fall back to the other path and note the limitation in the PR body. If neither path is available, stop and prompt the user to install `bitwarden-code-review` (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing. Never silently skip the review.
 
-**This gate runs on every entry.** There is no caller exemption. A skill that wants the title, body, and label rather than this whole workflow should invoke `Skill(applying-pr-conventions)` directly, which is what `force-multiplier` does; `force-multiplier` is therefore a peer of this workflow rather than a caller of it.
+**One thing another delivery skill may do with this step:** run 1b alone. `stacking-pull-requests` does, once per layer, because the review gate is per pull request and a stack has N of them. It runs `perform-preflight` itself per layer, so do not also run 1a, and return after 1b rather than continuing into Step 2.
+
+Otherwise the gate runs on every entry, including the stack-fallback case above, which bailed before its own gate. A skill that wants the title, body, and label rather than this whole workflow should invoke `Skill(applying-pr-conventions)` directly, which is what `force-multiplier` does; `force-multiplier` is therefore a peer of this workflow rather than a caller of it.
 
 ### Step 2 — Compose the title, body, and label
 
@@ -121,7 +127,7 @@ Defaults that hold unless the user said otherwise:
 - create as **draft** — only skip `--draft` if the user explicitly asked for a ready-for-review PR,
 - include `--label` only if a label was picked in Step 2 (omit it for "No label"),
 - multiple labels can be passed by repeating `--label`,
-- omit `--base` for a branch cut from trunk, and pass `--base <branch>` when the branch was cut from `rc`, `hotfix-rc`, or another release branch — with no `--base`, `gh pr create` targets the repository default branch and silently points the PR at trunk.
+- omit `--base` for a branch cut from trunk, and pass `--base <branch>` when the branch was cut from `rc`, `hotfix-rc`, or another release branch — with no `--base`, `gh pr create` targets the repository default branch and silently points the PR at trunk. Stack layers are submitted by `Skill(stacking-pull-requests)`, which passes each layer's `--base` itself; this step does not run per layer.
 
 After `gh pr create` returns, post the PR URL back to the user.
 
