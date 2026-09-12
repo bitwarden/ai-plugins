@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-testing-tools",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories.",
   "author": {
     "name": "Bitwarden",
