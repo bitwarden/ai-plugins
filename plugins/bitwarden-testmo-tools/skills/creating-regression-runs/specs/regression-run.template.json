@@ -1,0 +1,14 @@
+{
+  "_comment": "Template for a new regression run spec. Top-level keys describe the run that gets created; keys under 'filters' select which cases go into it. NOTE that 'tags' means different things in each half: the top-level one labels the run, while filters.tags selects cases. A spec with an empty 'filters' block matches EVERY case in the project — always check the dry-run's case count before --create. Add a 'config_id' when the platform ships several same-named runs distinguished only by Testmo Configuration.",
+  "project_id": 1,
+  "run_name": "<Domain>",
+  "run_state_id": 7,
+  "tags": ["regression"],
+  "filters": {
+    "folder_paths": ["Web > <Domain Area>"],
+    "include_subfolders": true,
+    "test_type_ids": [19, 20],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 23, 24]
+  }
+}
