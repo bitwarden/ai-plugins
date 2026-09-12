@@ -1,0 +1,12 @@
+{
+  "run_status": "paused",
+  "cases": [
+    {
+      "number": 1,
+      "name": "First case",
+      "status": "PASS",
+      "test_steps": [{ "text": "did a thing", "outcome": "PASS" }]
+    }
+  ],
+  "need_user_input": "Test Case 2, Setup Step 3: Attach a Stripe test clock to the subscription."
+}
