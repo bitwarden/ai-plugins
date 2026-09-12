@@ -5,6 +5,28 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-08
+
+### Changed
+
+- Transitioned `triaging-security-findings`, `reviewing-dependencies`, `perform-security-review`, the agent, and the READMEs from Checkmarx One, SonarCloud, and Grype to Aikido
+- Findings are queried via the `aikido:issues` skill instead of the GHAS code-scanning API
+- `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS convention, group-scoped action verification, and ticket-scope pinning; its `gh api` examples pin the API version for stable `--jq` output
+- `reviewing-dependencies` no longer groups `cloud_instance` under container images, and defers to `triaging-security-findings` for the CVSS convention
+- `perform-security-review` step 1-C pre-fetches Aikido SAST/IaC/SCA/container findings; steps 2 and 4 reuse that evidence and are barred from re-fetching it via either `Skill(aikido:issues)` or the MCP tool. `tool-grants.md` documents the split and why the MCP grant is safe to pre-approve
+- Agent post-fix verification reports the Jira ticket update for an engineer to apply, rather than claiming to confirm it
+- READMEs reflect Aikido; Usage blocks are labeled as example prompts, and `aikido` installs point at the `claude-plugins-official` marketplace
+
+### Added
+
+- README Prerequisites section for the separate `aikido` plugin and `/aikido:setup`
+- Aikido MCP tool grant on the agent, so routed skills can reach the feed
+
+### Removed
+
+- Private Repository Notes section (SARIF billing and SonarCloud private-repo licensing no longer apply)
+- Checkmarx state table and SonarCloud finding-management section
+
 ## [2.0.0] - 2026-09-04
 
 ### Added

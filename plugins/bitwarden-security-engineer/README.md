@@ -6,25 +6,29 @@ Claude Code skills for application security at Bitwarden. Generic AI coding assi
 
 This plugin provides specialized skills for security engineering tasks — from triaging scanner findings and threat modeling to conducting multi-agent security code reviews. Skills can be invoked individually or orchestrated together for comprehensive coverage across code, dependencies, secrets, and architecture.
 
+## Prerequisites
+
+`triaging-security-findings`, `reviewing-dependencies`, and `perform-security-review` query the Aikido feed via the `aikido:issues` skill. That skill ships in the separate `aikido` plugin — Aikido Security's own Claude Code plugin — and requires an authenticated MCP session. Install it with `/plugin install aikido@claude-plugins-official` and run `/aikido:setup` before using those skills. For `triaging-security-findings` and `reviewing-dependencies`, Aikido is the primary data source: if it isn't installed, these skills stop and ask you to install it rather than silently returning no findings. `perform-security-review` treats Aikido SAST/IaC/SCA/container evidence as one of several best-effort corroborating sources rather than a hard requirement — if it's unavailable, the review continues using whichever sources it could reach.
+
 ## Skills
 
-| Skill                              | What It Does                                                                                                                                                                                                                                                                                                            |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `triaging-security-findings`       | Triage Checkmarx, SonarCloud, and Grype findings via GitHub Advanced Security API. Includes finding state rules, false positive protocol, and fix patterns.                                                                                                                                                             |
-| `threat-modeling`                  | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                                                                                                                                                               |
-| `analyzing-code-security`          | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                                                                                                                                                                   |
-| `reviewing-dependencies`           | Dependabot triage, Grype scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                                                                                                                                                                       |
-| `detecting-secrets`                | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                                                                                                                                                            |
-| `reviewing-security-architecture`  | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                                                                                                                                                                  |
-| `perform-security-review`          | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, GHAS scan evidence (interactive only — the API calls are not pre-approved, so CI records them as not checked), `--base-ref <ref>` to pick the comparison base, and flexible output (chat, file, or GitHub Actions). |
-| `auditing-external-claude-plugins` | Security audit of a third-party Claude Code plugin before it's vendored, covering MCP config, dependency supply chain, tool permission scope, and prompt-injection surface. Runs as an isolated subagent and writes a report file.                                                                                      |
+| Skill                              | What It Does                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `triaging-security-findings`       | Triage Aikido feed findings (SAST, IaC, SCA, secrets, cloud, container, malware, EOL, license) via Jira, plus GitHub Dependabot and secret scanning alerts. Includes severity mapping, group-scope verification, false positive protocol, and fix patterns.                                                                                                                               |
+| `threat-modeling`                  | Generate security definitions, data flow diagrams, and threat catalogs using STRIDE. Follows Bitwarden's 4-phase AppSec engagement model.                                                                                                                                                                                                                                                 |
+| `analyzing-code-security`          | Security code review against OWASP Web/API/Mobile Top 10, CWE Top 25. Step-by-step review workflow with adversarial mindset guidance.                                                                                                                                                                                                                                                     |
+| `reviewing-dependencies`           | Dependabot triage, Aikido open-source and container scanning, transitive dependency risk analysis. NuGet and npm platform-specific guidance.                                                                                                                                                                                                                                              |
+| `detecting-secrets`                | Hardcoded credential detection with context-aware analysis. GitHub secret scanning integration, Azure Key Vault remediation.                                                                                                                                                                                                                                                              |
+| `reviewing-security-architecture`  | Architecture-level review for authentication, authorization, encryption, trust boundaries, and cryptographic patterns.                                                                                                                                                                                                                                                                    |
+| `perform-security-review`          | Multi-agent security code review with 4 specialized agents, two-axis Severity × Confidence scoring, Aikido SAST/IaC/SCA/container evidence plus secret scanning and Dependabot evidence (the latter two are interactive only — not pre-approved, so CI records them as not checked), `--base-ref <ref>` to pick the comparison base, and flexible output (chat, file, or GitHub Actions). |
+| `auditing-external-claude-plugins` | Security audit of a third-party Claude Code plugin before it's vendored, covering MCP config, dependency supply chain, tool permission scope, and prompt-injection surface. Runs as an isolated subagent and writes a report file.                                                                                                                                                        |
 
 ## Usage
 
-Install the plugin and invoke the agent:
+Install the plugin, then ask for what you want in natural language. Example prompts:
 
 ```
-Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Checkmarx findings on this PR.
+Use the bitwarden-security-engineer:bitwarden-security-engineer agent to triage the open Aikido findings on this PR.
 ```
 
 ```
@@ -56,10 +60,9 @@ External resources that informed each skill. Useful for maintainers updating ski
 
 ### triaging-security-findings
 
-- [Checkmarx Triage Documentation](https://docs.checkmarx.com/)
-- [SonarCloud Documentation](https://docs.sonarsource.com/sonarqube-cloud/)
-- [GitHub Code Scanning API](https://docs.github.com/en/rest/code-scanning)
+- [Aikido Documentation](https://help.aikido.dev/)
 - [GitHub Dependabot API](https://docs.github.com/en/rest/dependabot)
+- [GitHub Secret Scanning API](https://docs.github.com/en/rest/secret-scanning)
 
 ### analyzing-code-security
 
@@ -72,7 +75,7 @@ External resources that informed each skill. Useful for maintainers updating ski
 ### reviewing-dependencies
 
 - [GitHub Dependabot Documentation](https://docs.github.com/en/code-security/dependabot)
-- [Grype GitHub Repository](https://github.com/anchore/grype)
+- [Aikido Documentation](https://help.aikido.dev/)
 - [OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/)
 - [npm Security Best Practices](https://docs.npmjs.com/packages-and-modules/securing-your-code)
 
