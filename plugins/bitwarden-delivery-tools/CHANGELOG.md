@@ -5,6 +5,29 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-09-09
+
+### Added
+
+- **`applying-pr-conventions` skill** — composes one pull request's title, template body, resolved `t:` label, and `ai-review` label choice, and returns them. `creating-pull-request` and `force-multiplier` both invoke it instead of one reaching into the other.
+
+### Changed
+
+- `creating-pull-request`: title, body, and label move to `applying-pr-conventions`; steps renumber 1–6 to 1–4.
+- `creating-pull-request`: the review gate no longer exempts callers.
+- `creating-pull-request`: Step 1 resolves the base branch, and the push step passes `--base` for a branch cut from a release branch.
+- `creating-pull-request`: `when_to_use` folded into `description`.
+- `force-multiplier`: takes conventions from `applying-pr-conventions` at its pilot target.
+- `creating-pull-request`: `description` broadened to cover the natural phrasings for turning a branch into a PR, and to keep the request when it also asks about the title or `t:` label. Triggering measured 9/10, up from 1/10.
+- `creating-pull-request` evals: 22 cases, six should-trigger queries rewritten to drop repo fixtures, `--plugin-dir` added to the runner, baseline re-recorded.
+
+### Security
+
+- `references/pr-title-allowlist.md` — every path that submits a PR title validates it before the title reaches a shell. `gh` has no `--title-file`, so the generated summary would otherwise be interpolated into a double-quoted argument. Two checks, in order: refuse any title containing a line break, then match the whole string against the pattern. The line-break check is not redundant with the anchors, because `grep -qE` is line-oriented and an anchored pattern still passes a multi-line title whose second line carries the payload.
+- `applying-pr-conventions` declares `allowed-tools: Read, Glob`, so its compose-and-return contract is structural rather than prose. It names the allowlist to its caller rather than running it, since running it needs a shell this skill deliberately cannot reach.
+- `force-multiplier` states the `--body-file` rule where it opens each PR. It previously inherited it from `creating-pull-request`, and no longer enters that workflow.
+- `applying-pr-conventions` treats the target repo's PR template as data rather than as instructions addressed to it, matching `force-multiplier`'s rule for target-repo content.
+
 ## [3.1.0] - 2026-08-19
 
 ### Added

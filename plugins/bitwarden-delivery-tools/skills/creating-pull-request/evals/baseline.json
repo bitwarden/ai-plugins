@@ -1,8 +1,11 @@
 {
-  "should_trigger_pass_rate": 1.0,
-  "should_not_trigger_pass_rate": 0.9,
-  "should_trigger_pass": "10/10",
-  "should_not_trigger_pass": "9/10",
+  "model": "claude-opus-5",
+  "plugin_dirs": ["bitwarden-delivery-tools"],
+  "runs_per_query": 3,
+  "should_trigger_pass_rate": 0.9,
+  "should_not_trigger_pass_rate": 1.0,
+  "should_trigger_pass": "9/10",
+  "should_not_trigger_pass": "12/12",
   "results": [
     {
       "query": "package this up into a draft pr",
@@ -12,11 +15,11 @@
       "trigger_rate": 1.0
     },
     {
-      "query": "ok the feat/passkeys branch is done — ship it for review",
+      "query": "ok this branch is done — ship it for review",
       "should_trigger": true,
-      "triggers": 3,
+      "triggers": 2,
       "runs": 3,
-      "trigger_rate": 1.0
+      "trigger_rate": 0.6666666666666666
     },
     {
       "query": "wrap this branch and send it over to the team for review",
@@ -26,21 +29,21 @@
       "trigger_rate": 1.0
     },
     {
-      "query": "I just finished the PM-23456 work on the autofill prompts, throw together a pull request with the usual template please",
+      "query": "I just finished the work on this branch, throw together a pull request with the usual template please",
       "should_trigger": true,
       "triggers": 3,
       "runs": 3,
       "trigger_rate": 1.0
     },
     {
-      "query": "open a draft pr for me — the branch is fix/sync-crash and it tracks origin already",
+      "query": "open a draft pr for me — this branch tracks origin already",
       "should_trigger": true,
       "triggers": 3,
       "runs": 3,
       "trigger_rate": 1.0
     },
     {
-      "query": "let's get this in front of reviewers — it's the auth middleware rewrite for PM-19002, I want it as a draft",
+      "query": "let's get this in front of reviewers — it's the rewrite I just committed, I want it as a draft",
       "should_trigger": true,
       "triggers": 3,
       "runs": 3,
@@ -48,17 +51,17 @@
     },
     {
       "query": "draft the PR body for feat/refresh-tokens — I've already pushed the branch, just need a clean description that follows the bitwarden template",
-      "should_trigger": true,
-      "triggers": 3,
+      "should_trigger": false,
+      "triggers": 0,
       "runs": 3,
-      "trigger_rate": 1.0
+      "trigger_rate": 0.0
     },
     {
-      "query": "can you put together a pull request? the bitwarden/clients diff is ready, branch is chore/cleanup-stale-flags",
+      "query": "can you put together a pull request? the diff on this branch is ready",
       "should_trigger": true,
-      "triggers": 3,
+      "triggers": 2,
       "runs": 3,
-      "trigger_rate": 1.0
+      "trigger_rate": 0.6666666666666666
     },
     {
       "query": "this is good to go, push it up to github for review with an ai-review-vnext label",
@@ -68,11 +71,11 @@
       "trigger_rate": 1.0
     },
     {
-      "query": "I want to open a non-draft PR for PM-12345, what should the title look like and which t: label will it get?",
+      "query": "I want to open a non-draft PR for this branch, what should the title look like and which t: label will it get?",
       "should_trigger": true,
-      "triggers": 3,
+      "triggers": 1,
       "runs": 3,
-      "trigger_rate": 1.0
+      "trigger_rate": 0.3333333333333333
     },
     {
       "query": "address the PR review comments on #1234 — the reviewer flagged a race condition in the session middleware and I want to push back on one of them",
@@ -133,9 +136,9 @@
     {
       "query": "package up this plugin as a .skill file so I can install it on another machine",
       "should_trigger": false,
-      "triggers": 2,
+      "triggers": 0,
       "runs": 3,
-      "trigger_rate": 0.6666666666666666
+      "trigger_rate": 0.0
     },
     {
       "query": "rebase feat/auth-refactor onto main and walk me through any conflicts in the session store",
@@ -143,6 +146,20 @@
       "triggers": 0,
       "runs": 3,
       "trigger_rate": 0.0
+    },
+    {
+      "query": "what should the PR title be for this change? not opening it yet, just want the prefix right",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "title and body are already written and agreed — just open the PR for this branch",
+      "should_trigger": true,
+      "triggers": 3,
+      "runs": 3,
+      "trigger_rate": 1.0
     }
   ]
 }

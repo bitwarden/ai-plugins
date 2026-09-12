@@ -28,7 +28,7 @@ from pathlib import Path
 TARGET_SKILL_TOKEN = "creating-pull-request"
 
 
-def run_query(query: str, timeout: int, model: str) -> dict:
+def run_query(query: str, timeout: int, model: str, plugin_dirs=()) -> dict:
     cmd = [
         "claude",
         "-p", query,
@@ -37,6 +37,8 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         "--include-partial-messages",
         "--model", model,
     ]
+    for d in plugin_dirs:
+        cmd += ["--plugin-dir", d]
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
     process = subprocess.Popen(
         cmd,
@@ -120,11 +122,11 @@ def run_query(query: str, timeout: int, model: str) -> dict:
     return {"triggered": triggered, "first_skill": first_skill_seen}
 
 
-def runs_for(query, should_trigger, runs, timeout, model):
+def runs_for(query, should_trigger, runs, timeout, model, plugin_dirs=()):
     triggers = 0
     samples = []
     for _ in range(runs):
-        r = run_query(query, timeout, model)
+        r = run_query(query, timeout, model, plugin_dirs)
         if r["triggered"]:
             triggers += 1
         samples.append(r.get("first_skill"))
@@ -151,14 +153,17 @@ def main():
     parser.add_argument("--runs-per-query", type=int, default=3)
     parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--timeout", type=int, default=60)
-    parser.add_argument("--model", default="claude-opus-4-7")
+    parser.add_argument("--model", default="claude-opus-5")
+    # Repeatable: every plugin whose skills compete for these queries must be
+    # loaded, or a near-miss scores as a pass against a skill that wasn't there.
+    parser.add_argument("--plugin-dir", action="append", default=[], dest="plugin_dirs")
     args = parser.parse_args()
 
     eval_set = json.loads(Path(args.eval_set).read_text())
     results = [None] * len(eval_set)
     with ProcessPoolExecutor(max_workers=args.num_workers) as pool:
         futures = {
-            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model): i
+            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model, tuple(args.plugin_dirs)): i
             for i, e in enumerate(eval_set)
         }
         for fut in as_completed(futures):
@@ -173,7 +178,13 @@ def main():
     no_trigger_pass = sum(1 for r in results if not r["should_trigger"] and r["trigger_rate"] < 0.5)
     no_trigger_total = sum(1 for r in results if not r["should_trigger"])
 
+    # Run-invariant only — a timestamp here would make every regression diff
+    # non-empty. A model or plugin-set change SHOULD fail the diff: the run it
+    # produced is not comparable to the baseline.
     summary = {
+        "model": args.model,
+        "plugin_dirs": sorted(str(Path(d).resolve().name) for d in args.plugin_dirs),
+        "runs_per_query": args.runs_per_query,
         "should_trigger_pass_rate": triggers_pass / triggers_total if triggers_total else None,
         "should_not_trigger_pass_rate": no_trigger_pass / no_trigger_total if no_trigger_total else None,
         "should_trigger_pass": f"{triggers_pass}/{triggers_total}",
