@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Findings are queried via the `aikido:issues` skill instead of the GHAS code-scanning API
 - `triaging-security-findings` documents the Jira-based Aikido triage flow, CVSS convention, group-scoped action verification, and ticket-scope pinning; its `gh api` examples pin the API version for stable `--jq` output
 - `reviewing-dependencies` no longer groups `cloud_instance` under container images, and defers to `triaging-security-findings` for the CVSS convention
-- `perform-security-review` step 1-C pre-fetches Aikido SAST/IaC/SCA/container findings; steps 2 and 4 reuse that evidence and are barred from re-fetching it via either `Skill(aikido:issues)` or the MCP tool. `tool-grants.md` documents the split and why the MCP grant is safe to pre-approve
+- `perform-security-review` step 1-C pre-fetches Aikido SAST/IaC/SCA/container findings; steps 2 and 4 reuse that evidence and are barred from re-fetching it via either `Skill(aikido:issues)` or the MCP tool. `tool-grants.md` documents the split
 - Agent post-fix verification reports the Jira ticket update for an engineer to apply, rather than claiming to confirm it
 - READMEs reflect Aikido; Usage blocks are labeled as example prompts, and `aikido` installs point at the `claude-plugins-official` marketplace
 
