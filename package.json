@@ -14,10 +14,10 @@
   },
   "homepage": "https://bitwarden.com",
   "devDependencies": {
-    "cspell": "10.0.0",
+    "cspell": "10.2.2",
     "husky": "9.1.7",
-    "lint-staged": "17.0.5",
-    "prettier": "3.8.3"
+    "lint-staged": "17.5.0",
+    "prettier": "3.9.6"
   },
   "lint-staged": {
     "*": "prettier --cache --write --ignore-unknown"
