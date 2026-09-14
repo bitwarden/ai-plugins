@@ -1,24 +1,10 @@
 #!/usr/bin/env python3
-"""Trigger-rate evaluator that checks for the real plugin-registered skill.
+"""Trigger-rate evaluator: runs `claude -p` per eval query and counts a trigger
+only on a plugin-qualified Skill invocation (`<plugin>:<skill>`) or a Read of the
+skill's own `SKILL.md`.
 
-Shared by every skill under `bitwarden-testing-tools`. Each skill ships only its
-own eval data (`trigger-eval.json` + `baseline.json`); this one engine runs them
-all. The target skill token is not hardcoded — it is resolved from `--skill`, or
-inferred from the eval-set path (the eval file's grandparent directory is the
-skill directory), so adding evals for a new skill never means copying this file.
-
-The skill-creator harness registers a temp copy named `<skill>-skill-<uuid>` and
-only counts invocations of that name as triggers. When the real plugin-registered
-skill is already installed in the environment running the eval, the model invokes
-the real one and the harness records a false negative.
-
-This script runs `claude -p` for each eval query and counts a "trigger" only when
-a Skill call invokes the plugin-qualified skill (`<plugin>:<skill>`) or a Read
-opens the skill's own `SKILL.md` — not any tool input that merely has the token
-somewhere in its path. The scan continues past unrelated Skill invocations (some
-accounts auto-fire session-init skills before the model selects a task skill), so
-the eval is portable across environments rather than tied to any specific set of
-installed plugins.
+Shared by every skill under `bitwarden-testing-tools`. See evals/README.md for the
+rationale, arguments, and how to add evals for a new skill.
 """
 
 import argparse
@@ -91,6 +77,7 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
     buffer = ""
     pending = None
     accum = ""
+    timed_out = True
 
     def scan(line: str):
         nonlocal pending, accum, first_skill_seen
@@ -171,19 +158,23 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
                     result = scan(buffer)
                     if result is not None:
                         return result
+                timed_out = False
                 break
     finally:
         _terminate(process)
-    return {"triggered": triggered, "first_skill": first_skill_seen}
+    return {"triggered": triggered, "first_skill": first_skill_seen, "timed_out": timed_out}
 
 
 def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
     triggers = 0
+    timeouts = 0
     samples = []
     for _ in range(runs):
         r = run_query(query, timeout, model, skill_token, plugin)
         if r["triggered"]:
             triggers += 1
+        if r.get("timed_out"):
+            timeouts += 1
         samples.append(r.get("first_skill"))
     rate = triggers / runs
     # Surface samples to stderr only when the per-query outcome disagrees with
@@ -193,6 +184,10 @@ def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
     if (rate >= 0.5) != should_trigger:
         for s in samples:
             print(f"    sample: {s}", file=sys.stderr)
+    # A timeout counts as a non-trigger, so warn (stderr only, not persisted) to
+    # keep a slow should-trigger run from silently reading as a real failure.
+    if timeouts:
+        print(f"    warning: {timeouts}/{runs} run(s) timed out (counted as non-trigger): {query[:80]}", file=sys.stderr)
     return {
         "query": query,
         "should_trigger": should_trigger,
