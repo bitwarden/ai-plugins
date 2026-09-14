@@ -1,7 +1,7 @@
 {
   "model": "claude-opus-4-8",
   "runs_per_query": 7,
-  "recorded_utc": "2026-09-11T01:39:46Z",
+  "recorded_utc": "2026-09-14T12:11:38Z",
   "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
   "should_trigger_pass": "10/10",
@@ -27,17 +27,17 @@
     {
       "query": "does the autofill refactor PR in bitwarden/clients have tests, and which layers do they land at \u2014 unit, integration, E2E?",
       "should_trigger": true,
-      "triggers": 6,
+      "triggers": 5,
       "timeouts": 0,
       "runs": 7,
-      "trigger_rate": 0.8571428571428571,
+      "trigger_rate": 0.7142857142857143,
       "first_skills": [
-        null,
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
+        "Bash (bailed: real-work tool)",
         "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
+        "Bash (bailed: real-work tool)",
         "bitwarden-testing-tools:assessing-test-coverage"
       ]
     },
@@ -68,9 +68,9 @@
       "first_skills": [
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
+        "bitwarden-testing-tools:assessing-test-coverage",
+        "bitwarden-testing-tools:assessing-test-coverage",
         "Bash (bailed: real-work tool)",
-        "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage"
       ]
@@ -105,8 +105,8 @@
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
-        "Bash (bailed: real-work tool)",
-        "bitwarden-testing-tools:assessing-test-coverage"
+        "bitwarden-testing-tools:assessing-test-coverage",
+        "Bash (bailed: real-work tool)"
       ]
     },
     {
@@ -287,13 +287,13 @@
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
-        "Bash (bailed: real-work tool)",
         null,
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
+        null,
         "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        null
+        null,
+        "Bash (bailed: real-work tool)"
       ]
     },
     {
@@ -306,10 +306,10 @@
       "first_skills": [
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
-        null,
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
-        null,
+        "Bash (bailed: real-work tool)",
+        "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)"
       ]
     },
@@ -323,11 +323,11 @@
       "first_skills": [
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
-        "bitwarden-code-review:code-review-local",
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
-        "bitwarden-code-review:code-review-local"
+        "Bash (bailed: real-work tool)",
+        "Bash (bailed: real-work tool)"
       ]
     },
     {
