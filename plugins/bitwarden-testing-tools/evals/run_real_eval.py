@@ -85,67 +85,85 @@ def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
     pending = None
     accum = ""
 
+    def scan(line: str):
+        nonlocal pending, accum, first_skill_seen
+        line = line.strip()
+        if not line:
+            return None
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            return None
+
+        if event.get("type") == "stream_event":
+            se = event.get("event", {})
+            if se.get("type") == "content_block_start":
+                cb = se.get("content_block", {})
+                if cb.get("type") == "tool_use" and cb.get("name") in ("Skill", "Read"):
+                    pending = cb.get("name")
+                    accum = ""
+                # Other tool types are ignored — we only care whether the
+                # target skill is invoked at some point in the response.
+            elif se.get("type") == "content_block_delta" and pending:
+                delta = se.get("delta", {})
+                if delta.get("type") == "input_json_delta":
+                    accum += delta.get("partial_json", "")
+                    if skill_token in accum:
+                        return {"triggered": True, "first_skill": accum}
+            elif se.get("type") == "content_block_stop" and pending:
+                if first_skill_seen is None:
+                    first_skill_seen = accum
+                # Keep scanning past unrelated Skill/Read invocations so
+                # the eval is portable across accounts that auto-fire
+                # session-init or workflow skills before the task skill.
+                pending = None
+                accum = ""
+        elif event.get("type") == "assistant":
+            msg = event.get("message", {})
+            for item in msg.get("content", []):
+                if item.get("type") != "tool_use":
+                    continue
+                name = item.get("name")
+                inp = item.get("input", {})
+                if name == "Skill" and skill_token in inp.get("skill", ""):
+                    return {"triggered": True, "first_skill": inp.get("skill")}
+                if name == "Read" and skill_token in inp.get("file_path", ""):
+                    return {"triggered": True, "first_skill": inp.get("file_path")}
+        elif event.get("type") == "result":
+            return {"triggered": triggered, "first_skill": first_skill_seen}
+        return None
+
     try:
         while time.time() - start < timeout:
-            if process.poll() is not None:
+            exited = process.poll() is not None
+            if exited:
                 rest = process.stdout.read()
                 if rest:
                     buffer += rest.decode("utf-8", errors="replace")
-                break
-            ready, _, _ = select.select([process.stdout], [], [], 1.0)
-            if not ready:
-                continue
-            chunk = os.read(process.stdout.fileno(), 8192)
-            if not chunk:
-                break
-            buffer += chunk.decode("utf-8", errors="replace")
+            else:
+                ready, _, _ = select.select([process.stdout], [], [], 1.0)
+                if not ready:
+                    continue
+                chunk = os.read(process.stdout.fileno(), 8192)
+                if not chunk:
+                    exited = True
+                else:
+                    buffer += chunk.decode("utf-8", errors="replace")
 
             while "\n" in buffer:
                 line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    event = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+                result = scan(line)
+                if result is not None:
+                    return result
 
-                if event.get("type") == "stream_event":
-                    se = event.get("event", {})
-                    if se.get("type") == "content_block_start":
-                        cb = se.get("content_block", {})
-                        if cb.get("type") == "tool_use" and cb.get("name") in ("Skill", "Read"):
-                            pending = cb.get("name")
-                            accum = ""
-                        # Other tool types are ignored — we only care whether the
-                        # target skill is invoked at some point in the response.
-                    elif se.get("type") == "content_block_delta" and pending:
-                        delta = se.get("delta", {})
-                        if delta.get("type") == "input_json_delta":
-                            accum += delta.get("partial_json", "")
-                            if skill_token in accum:
-                                return {"triggered": True, "first_skill": accum}
-                    elif se.get("type") == "content_block_stop" and pending:
-                        if first_skill_seen is None:
-                            first_skill_seen = accum
-                        # Keep scanning past unrelated Skill/Read invocations so
-                        # the eval is portable across accounts that auto-fire
-                        # session-init or workflow skills before the task skill.
-                        pending = None
-                        accum = ""
-                elif event.get("type") == "assistant":
-                    msg = event.get("message", {})
-                    for item in msg.get("content", []):
-                        if item.get("type") != "tool_use":
-                            continue
-                        name = item.get("name")
-                        inp = item.get("input", {})
-                        if name == "Skill" and skill_token in inp.get("skill", ""):
-                            return {"triggered": True, "first_skill": inp.get("skill")}
-                        if name == "Read" and skill_token in inp.get("file_path", ""):
-                            return {"triggered": True, "first_skill": inp.get("file_path")}
-                elif event.get("type") == "result":
-                    return {"triggered": triggered, "first_skill": first_skill_seen}
+            # On process exit the last event can arrive without a trailing
+            # newline; scan the leftover so a trigger there is not dropped.
+            if exited:
+                if buffer:
+                    result = scan(buffer)
+                    if result is not None:
+                        return result
+                break
     finally:
         _terminate(process)
     return {"triggered": triggered, "first_skill": first_skill_seen}
