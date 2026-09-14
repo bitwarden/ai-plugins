@@ -28,11 +28,12 @@ TARGET_SKILL_TOKEN = "recommending-test-layers"
 # we bail on it (see run_query) to avoid the heavy child processes it would spawn.
 EXEC_TOOLS = {"Bash", "Task"}
 
-# Read-only Bash lookups scanned past instead of counted as real work. The
-# `gh api` entry is scoped to `repos/` to bound the target, but that prefix alone
-# does not enforce a read — see `is_read_only_bash`, which also rejects any
-# method or request-body flag so a `gh api repos/... -X POST` write still bails.
-READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api repos/", "git rev-parse", "git remote")
+# Read-only Bash lookups scanned past instead of counted as real work. `gh api`
+# is matched broadly (it also covers `gh api graphql`, `gh api /repos/...`, and
+# `gh api user`) because the prefix does not enforce a read on its own — see
+# `is_read_only_bash`, which rejects any method or request-body flag so a
+# `gh api repos/... -X POST` write still bails.
+READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api", "git rev-parse", "git remote")
 
 # A read-only prefix only earns the carve-out if it's a single command; any
 # shell operator could chain heavy work onto it (`gh api ... && npm test`,
@@ -41,10 +42,6 @@ READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api repos/", "git
 # quoted argument (`gh search code "Task<Cipher>"`) is literal text, not a chain,
 # and must not disqualify an otherwise read-only lookup.
 SHELL_PUNCTUATION = set("();<>|&")
-# Command substitution and newlines that the `shlex` punctuation tokens don't
-# separate on their own; matched against the raw string, deliberately quote-blind
-# since `"$(...)"` still executes in a real shell.
-RAW_SHELL_CHARS = ("`", "$(", "\n")
 
 # cspell:ignore xpost fbody
 # `gh` is pflag-based, so a method or request-body flag can appear as `-X POST`,
@@ -55,16 +52,39 @@ WRITE_FLAGS = frozenset({"-X", "--method", "-f", "-F", "--field", "--raw-field",
 
 def _flag_names(cmd: str):
     """Yield candidate flag names from each token. A long flag yields its name up
-    to `=` (`--method=POST` -> `--method`). A short-flag cluster is expanded per
-    character (`-XPOST` -> -X -P -O ..., `-iX` -> -i -X) so a write flag hidden
-    inside combined pflag shorthand is still caught."""
+    to `=` (`--method=POST` -> `--method`). A short-flag token yields only its
+    first letter (`-XPOST` -> -X, `-fkey=v` -> -f): every WRITE_FLAGS short flag
+    takes a value, so in a getopt cluster it can only lead with its value attached,
+    never sit buried after other flag letters. Expanding per character instead
+    would misread a benign cluster like `-sf` as the write flag `-f`."""
     for token in cmd.split():
         name = token.split("=", 1)[0]
         if name.startswith("--"):
             yield name
         elif name.startswith("-") and len(name) > 1:
-            for ch in name[1:]:
-                yield "-" + ch
+            yield name[:2]
+
+
+def _has_raw_shell_op(cmd: str) -> bool:
+    """True if command substitution or a newline appears outside single quotes.
+    A single-quoted span suppresses `$(...)`, backticks, and newlines in a real
+    shell, so `gh search code '$(rm -rf x)'` is a literal argument, not a chain;
+    double quotes do NOT suppress substitution, so `"$(...)"` still counts."""
+    in_single = in_double = False
+    i, n = 0, len(cmd)
+    while i < n:
+        ch = cmd[i]
+        if ch == "'" and not in_double:
+            in_single = not in_single
+        elif ch == '"' and not in_single:
+            in_double = not in_double
+        elif not in_single:
+            if ch in "\n`":
+                return True
+            if ch == "$" and i + 1 < n and cmd[i + 1] == "(":
+                return True
+        i += 1
+    return False
 
 
 def _has_shell_chain(cmd: str) -> bool:
@@ -73,7 +93,9 @@ def _has_shell_chain(cmd: str) -> bool:
     tokens, so an operator character inside a quoted argument
     (`gh search code "Task<Cipher>"`) stays part of that token and reads as
     literal text; only a bare unquoted operator token (`>`, `&&`, `|`, `<(`)
-    counts. Command substitution and newlines are matched on the raw string."""
+    counts. Command substitution and newlines are matched quote-aware (see
+    `_has_raw_shell_op`) so a single-quoted `$(...)` literal does not disqualify
+    an otherwise read-only lookup."""
     try:
         lexer = shlex.shlex(cmd, posix=False, punctuation_chars=True)
         lexer.whitespace_split = True
@@ -83,12 +105,12 @@ def _has_shell_chain(cmd: str) -> bool:
         return True
     if any(tok and set(tok) <= SHELL_PUNCTUATION for tok in tokens):
         return True
-    return any(seq in cmd for seq in RAW_SHELL_CHARS)
+    return _has_raw_shell_op(cmd)
 
 
 def is_read_only_bash(cmd: str) -> bool:
-    """Wave through a `gh api repos/...` call only when it is a plain read. The
-    `repos/` prefix bounds the target but not the HTTP method: `gh` accepts the
+    """Wave through a read-only prefix (e.g. `gh api ...`) only when it is a plain
+    read. Matching the prefix does not enforce the HTTP method: `gh` accepts the
     endpoint as the first positional with a method or body flag placed after it,
     so `gh api repos/OWNER/REPO/issues -X POST` matches the prefix yet writes.
     Any method or request-body flag disqualifies the carve-out; the cost is a
