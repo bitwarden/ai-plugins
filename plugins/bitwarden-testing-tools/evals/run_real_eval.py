@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 """Trigger-rate evaluator that checks for the real plugin-registered skill.
 
-The skill-creator harness registers a temp copy named
-`recommending-test-layers-skill-<uuid>` and only counts invocations of that
-name as triggers. When the real `bitwarden-testing-tools:recommending-test-layers`
-skill is already installed in the environment running the eval, the model
-invokes the real one and the harness records a false negative.
+Shared by every skill under `bitwarden-testing-tools`. Each skill ships only its
+own eval data (`trigger-eval.json` + `baseline.json`); this one engine runs them
+all. The target skill token is not hardcoded — it is resolved from `--skill`, or
+inferred from the eval-set path (the eval file's grandparent directory is the
+skill directory), so adding evals for a new skill never means copying this file.
 
-This script runs `claude -p` for each eval query and counts a "trigger" when
-any Skill or Read tool call references the real skill token, anywhere in the
-response. The scan continues past unrelated Skill invocations (some accounts
-auto-fire session-init skills before the model selects a task skill), so the
-eval is portable across environments rather than tied to any specific set of
-installed plugins.
+The skill-creator harness registers a temp copy named `<skill>-skill-<uuid>` and
+only counts invocations of that name as triggers. When the real plugin-registered
+skill is already installed in the environment running the eval, the model invokes
+the real one and the harness records a false negative.
+
+This script runs `claude -p` for each eval query and counts a "trigger" when any
+Skill or Read tool call references the real skill token, anywhere in the response.
+The scan continues past unrelated Skill invocations (some accounts auto-fire
+session-init skills before the model selects a task skill), so the eval is
+portable across environments rather than tied to any specific set of installed
+plugins.
 """
 
 import argparse
@@ -25,8 +30,6 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-TARGET_SKILL_TOKEN = "recommending-test-layers"
 
 
 def _terminate(process) -> None:
@@ -52,7 +55,7 @@ def _terminate(process) -> None:
         pass
 
 
-def run_query(query: str, timeout: int, model: str) -> dict:
+def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
     # Restrict the subprocess to the only tools trigger detection observes. The
     # should-not-trigger queries are adversarial real-work prompts ("run the jest
     # suite", "write the unit tests"); without this, the child agents clone repos
@@ -120,7 +123,7 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                         delta = se.get("delta", {})
                         if delta.get("type") == "input_json_delta":
                             accum += delta.get("partial_json", "")
-                            if TARGET_SKILL_TOKEN in accum:
+                            if skill_token in accum:
                                 return {"triggered": True, "first_skill": accum}
                     elif se.get("type") == "content_block_stop" and pending:
                         if first_skill_seen is None:
@@ -137,9 +140,9 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                             continue
                         name = item.get("name")
                         inp = item.get("input", {})
-                        if name == "Skill" and TARGET_SKILL_TOKEN in inp.get("skill", ""):
+                        if name == "Skill" and skill_token in inp.get("skill", ""):
                             return {"triggered": True, "first_skill": inp.get("skill")}
-                        if name == "Read" and TARGET_SKILL_TOKEN in inp.get("file_path", ""):
+                        if name == "Read" and skill_token in inp.get("file_path", ""):
                             return {"triggered": True, "first_skill": inp.get("file_path")}
                 elif event.get("type") == "result":
                     return {"triggered": triggered, "first_skill": first_skill_seen}
@@ -148,11 +151,11 @@ def run_query(query: str, timeout: int, model: str) -> dict:
     return {"triggered": triggered, "first_skill": first_skill_seen}
 
 
-def runs_for(query, should_trigger, runs, timeout, model):
+def runs_for(query, should_trigger, runs, timeout, model, skill_token):
     triggers = 0
     samples = []
     for _ in range(runs):
-        r = run_query(query, timeout, model)
+        r = run_query(query, timeout, model, skill_token)
         if r["triggered"]:
             triggers += 1
         samples.append(r.get("first_skill"))
@@ -173,9 +176,18 @@ def runs_for(query, should_trigger, runs, timeout, model):
     }
 
 
+def resolve_skill_token(args) -> str:
+    if args.skill:
+        return args.skill
+    # The eval file lives at skills/<skill>/evals/<file>; the skill directory is
+    # its grandparent, so a run from a skill's evals/ dir needs no --skill flag.
+    return Path(args.eval_set).resolve().parents[1].name
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-set", required=True)
+    parser.add_argument("--skill", help="Target skill token; inferred from --eval-set path when omitted.")
     parser.add_argument("--runs-per-query", type=int, default=3)
     # Each worker holds one ~1GB `claude -p` Node process open at a time; cap the
     # default low so a full run fits in memory on a typical machine.
@@ -184,11 +196,12 @@ def main():
     parser.add_argument("--model", default="claude-sonnet-5")
     args = parser.parse_args()
 
+    skill_token = resolve_skill_token(args)
     eval_set = json.loads(Path(args.eval_set).read_text())
     results = [None] * len(eval_set)
     with ProcessPoolExecutor(max_workers=args.num_workers) as pool:
         futures = {
-            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model): i
+            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model, skill_token): i
             for i, e in enumerate(eval_set)
         }
         for fut in as_completed(futures):

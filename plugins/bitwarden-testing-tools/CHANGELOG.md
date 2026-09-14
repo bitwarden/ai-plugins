@@ -4,6 +4,12 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-09-14
+
+### Changed
+
+- Consolidated the per-skill eval runners into a single shared engine at `evals/run_real_eval.py`. The `assessing-test-coverage` and `recommending-test-layers` skills previously each shipped a byte-identical copy of the runner that differed only in a hardcoded skill token, so every engine fix had to be hand-applied to both. The shared runner resolves the target skill token from `--skill`, or infers it from the eval-set path when the flag is omitted, so a skill's `evals/` directory now holds only its data (`trigger-eval.json`, `baseline.json`) and a short README. Adding evals for a new skill no longer requires copying the engine. Runtime behavior and the recorded baselines are unchanged.
+
 ## [1.2.0] - 2026-09-11
 
 ### Added

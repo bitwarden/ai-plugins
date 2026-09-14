@@ -4,12 +4,12 @@ Reproducible trigger-rate test for the `bitwarden-testing-tools:assessing-test-c
 
 ## Why a custom runner
 
-The upstream `skill-creator` harness measures triggering by registering a temporary copy of the skill under a UUID-suffixed name and watching whether the model invokes that exact name. When the real plugin-registered skill is already installed in the test environment, the model invokes the real one and the harness records a false negative. `run_real_eval.py` instead watches `claude -p` stream events for any invocation of the real `assessing-test-coverage` skill, ignoring unrelated session-init or workflow skills that may fire first.
+The upstream `skill-creator` harness measures triggering by registering a temporary copy of the skill under a UUID-suffixed name and watching whether the model invokes that exact name. When the real plugin-registered skill is already installed in the test environment, the model invokes the real one and the harness records a false negative. The shared runner (`../../../evals/run_real_eval.py`) instead watches `claude -p` stream events for any invocation of the real `assessing-test-coverage` skill, ignoring unrelated session-init or workflow skills that may fire first.
 
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change, spanning all four documented input types (a PR, a Jira key, a Tech Breakdown doc, and a Testmo CSV) plus branch/component/screen surfaces ("what's already tested for this PR", "which behaviors have no test today", "cross-reference this Testmo CSV against automated coverage", "inventory coverage for the surfaces in this Tech Breakdown"), and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
-- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. A trigger is detected the moment the target skill token streams in a `Skill` or `Read` tool input. Each subprocess is launched with `--allowedTools Skill Read` so the adversarial should-not-trigger queries can't clone repos or run build/test toolchains, and `--timeout` bounds anything that stalls.
+- The runner is the shared engine at `../../../evals/run_real_eval.py` (see `evals/README.md` at the plugin root); it is not copied here. It spawns parallel `claude -p` subprocesses, parses streamed tool-use events, and computes per-query trigger rates, detecting a trigger the moment the target skill token streams into a `Skill` or `Read` tool input.
 - `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded with `--model claude-sonnet-5` at `--runs-per-query 7`.
 
 ## Running
@@ -17,7 +17,7 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The plugin must be installed and enabled (`claude plugin install bitwarden-testing-tools@bitwarden-marketplace`), or every query records a false non-trigger. The eval reads the installed copy, not this working tree, so **reinstall after editing the skill** (uninstall + install) before running.
 
 ```bash
-python3 run_real_eval.py \
+python3 ../../../evals/run_real_eval.py \
   --eval-set trigger-eval.json \
   --runs-per-query 7 \
   --num-workers 3 \
