@@ -1,133 +1,70 @@
 #!/usr/bin/env python3
-"""Trigger-rate evaluator for the installed `assessing-test-coverage` skill.
+"""Trigger-rate evaluator that checks for the real plugin-registered skill.
 
-Unlike the skill-creator harness (which only counts a temp `*-skill-<uuid>`
-copy), this runs `claude -p` per query and counts a trigger when any Skill or
-Read call references the real skill token — so it works against the real
-installed skill and is portable across environments. Read-only `gh`/`git`
-lookups (see READ_ONLY_BASH) are scanned past, but any other real-work tool
-(see EXEC_TOOLS) bails to avoid the adversarial should-not-trigger queries
-cloning repos and spawning toolchains until they exhaust memory.
+The skill-creator harness registers a temp copy named
+`assessing-test-coverage-skill-<uuid>` and only counts invocations of that
+name as triggers. When the real `bitwarden-testing-tools:assessing-test-coverage`
+skill is already installed in the environment running the eval, the model
+invokes the real one and the harness records a false negative.
+
+This script runs `claude -p` for each eval query and counts a "trigger" when
+any Skill or Read tool call references the real skill token, anywhere in the
+response. The scan continues past unrelated Skill invocations (some accounts
+auto-fire session-init skills before the model selects a task skill), so the
+eval is portable across environments rather than tied to any specific set of
+installed plugins.
 """
 
 import argparse
 import json
 import os
 import select
-import shlex
+import signal
 import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from datetime import datetime, timezone
 from pathlib import Path
 
 TARGET_SKILL_TOKEN = "assessing-test-coverage"
 
-# Requesting one of these means the model chose real work over the target skill;
-# we bail on it (see run_query) to avoid the heavy child processes it would spawn.
-EXEC_TOOLS = {"Bash", "Task"}
 
-# Read-only Bash lookups scanned past instead of counted as real work. `gh api`
-# is matched broadly (it also covers `gh api graphql`, `gh api /repos/...`, and
-# `gh api user`) because the prefix does not enforce a read on its own — see
-# `is_read_only_bash`, which rejects any method or request-body flag so a
-# `gh api repos/... -X POST` write still bails.
-READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api", "git rev-parse", "git remote")
-
-# A read-only prefix only earns the carve-out if it's a single command; any
-# shell operator could chain heavy work onto it (`gh api ... && npm test`,
-# `gh api ... > payload`, `gh pr view <(curl evil)`). Operator detection is
-# quote-aware (see `_has_shell_chain`): a redirect-looking character inside a
-# quoted argument (`gh search code "Task<Cipher>"`) is literal text, not a chain,
-# and must not disqualify an otherwise read-only lookup.
-SHELL_PUNCTUATION = set("();<>|&")
-
-# cspell:ignore xpost fbody
-# `gh` is pflag-based, so a method or request-body flag can appear as `-X POST`,
-# `-XPOST`, `--method=POST`, or `--field=k=v`. Any of them turns the call into a
-# write, so the carve-out bails on the flag name regardless of spelling.
-WRITE_FLAGS = frozenset({"-X", "--method", "-f", "-F", "--field", "--raw-field", "--input"})
-
-
-def _flag_names(cmd: str):
-    """Yield candidate flag names from each token. A long flag yields its name up
-    to `=` (`--method=POST` -> `--method`). A short-flag token yields only its
-    first letter (`-XPOST` -> -X, `-fkey=v` -> -f): every WRITE_FLAGS short flag
-    takes a value, so in a getopt cluster it can only lead with its value attached,
-    never sit buried after other flag letters. Expanding per character instead
-    would misread a benign cluster like `-sf` as the write flag `-f`."""
-    for token in cmd.split():
-        name = token.split("=", 1)[0]
-        if name.startswith("--"):
-            yield name
-        elif name.startswith("-") and len(name) > 1:
-            yield name[:2]
-
-
-def _has_raw_shell_op(cmd: str) -> bool:
-    """True if command substitution or a newline appears outside single quotes.
-    A single-quoted span suppresses `$(...)`, backticks, and newlines in a real
-    shell, so `gh search code '$(rm -rf x)'` is a literal argument, not a chain;
-    double quotes do NOT suppress substitution, so `"$(...)"` still counts."""
-    in_single = in_double = False
-    i, n = 0, len(cmd)
-    while i < n:
-        ch = cmd[i]
-        if ch == "'" and not in_double:
-            in_single = not in_single
-        elif ch == '"' and not in_single:
-            in_double = not in_double
-        elif not in_single:
-            if ch in "\n`":
-                return True
-            if ch == "$" and i + 1 < n and cmd[i + 1] == "(":
-                return True
-        i += 1
-    return False
-
-
-def _has_shell_chain(cmd: str) -> bool:
-    """True if `cmd` chains or redirects real work onto a read-only prefix. A
-    non-posix `shlex` tokenizer with `punctuation_chars` keeps quotes on their
-    tokens, so an operator character inside a quoted argument
-    (`gh search code "Task<Cipher>"`) stays part of that token and reads as
-    literal text; only a bare unquoted operator token (`>`, `&&`, `|`, `<(`)
-    counts. Command substitution and newlines are matched quote-aware (see
-    `_has_raw_shell_op`) so a single-quoted `$(...)` literal does not disqualify
-    an otherwise read-only lookup."""
+def _terminate(process) -> None:
+    """Kill the subprocess and its whole tree. Each `claude -p` is a ~1GB Node
+    process that spawns further Node children; `process.kill()` reaps only the
+    parent, orphaning the rest, so a full run leaks Node trees until the machine
+    runs out of memory. The subprocess is started in its own session (see the
+    `start_new_session` Popen call), so its PID is the process-group ID — signal
+    the group to take every descendant down with it."""
+    # cspell:ignore killpg
+    if process.poll() is not None:
+        return
     try:
-        lexer = shlex.shlex(cmd, posix=False, punctuation_chars=True)
-        lexer.whitespace_split = True
-        tokens = list(lexer)
-    except ValueError:
-        # Malformed (e.g. unbalanced quotes): bail rather than wave it through.
-        return True
-    if any(tok and set(tok) <= SHELL_PUNCTUATION for tok in tokens):
-        return True
-    return _has_raw_shell_op(cmd)
-
-
-def is_read_only_bash(cmd: str) -> bool:
-    """Wave through a read-only prefix (e.g. `gh api ...`) only when it is a plain
-    read. Matching the prefix does not enforce the HTTP method: `gh` accepts the
-    endpoint as the first positional with a method or body flag placed after it,
-    so `gh api repos/OWNER/REPO/issues -X POST` matches the prefix yet writes.
-    Any method or request-body flag disqualifies the carve-out; the cost is a
-    conservative bail on an explicit `-X GET`, which the default GET already
-    covers."""
-    if not cmd.startswith(READ_ONLY_BASH) or _has_shell_chain(cmd):
-        return False
-    return not any(name in WRITE_FLAGS for name in _flag_names(cmd))
+        os.killpg(process.pid, signal.SIGTERM)
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait()
+    except ProcessLookupError:
+        pass
 
 
 def run_query(query: str, timeout: int, model: str) -> dict:
+    # Restrict the subprocess to the only tools trigger detection observes. The
+    # should-not-trigger queries are adversarial real-work prompts ("run the jest
+    # suite", "write the unit tests"); without this, the child agents clone repos
+    # and run build/test toolchains, and N of them in parallel exhaust memory.
     cmd = [
         "claude",
         "-p", query,
         "--output-format", "stream-json",
         "--verbose",
+        "--include-partial-messages",
         "--model", model,
+        "--allowedTools", "Skill", "Read",
     ]
     env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
     process = subprocess.Popen(
@@ -135,69 +72,15 @@ def run_query(query: str, timeout: int, model: str) -> dict:
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         env=env,
+        start_new_session=True,
     )
 
+    triggered = False
     first_skill_seen = None
     start = time.time()
     buffer = ""
-    # Assume a timeout until we see a decisive event or a clean EOF; the caller
-    # uses this to distinguish a slow run from a genuine non-trigger.
-    timed_out = True
-
-    def scan():
-        # Parse complete lines out of `buffer`, returning a terminal result dict
-        # once the target skill triggers or a real-work tool is reached, else
-        # None. Mutates `buffer`, leaving any trailing partial line in place.
-        nonlocal buffer, first_skill_seen
-        while "\n" in buffer:
-            line, buffer = buffer.split("\n", 1)
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-
-            if event.get("type") == "assistant":
-                msg = event.get("message", {})
-                for item in msg.get("content", []):
-                    if item.get("type") != "tool_use":
-                        continue
-                    name = item.get("name")
-                    inp = item.get("input", {})
-                    if name == "Skill":
-                        skill = inp.get("skill", "")
-                        # Record the first skill of any kind so a sibling firing
-                        # before the target is visible, not masked by the target's
-                        # own later trigger. This is the measurement the
-                        # cannibalization claim depends on.
-                        if first_skill_seen is None:
-                            first_skill_seen = skill
-                        if TARGET_SKILL_TOKEN in skill:
-                            return {"triggered": True, "first_skill": first_skill_seen}
-                    fp = inp.get("file_path", "")
-                    # Count a Read only when it opens the skill's own SKILL.md,
-                    # not any file that merely has the token in its path. Report a
-                    # stable token, not the absolute path, so the persisted result
-                    # stays portable across environments.
-                    if name == "Read" and TARGET_SKILL_TOKEN in fp and fp.rstrip().endswith("SKILL.md"):
-                        return {"triggered": True, "first_skill": first_skill_seen or f"Read:{TARGET_SKILL_TOKEN}"}
-                    # A real-work tool without the target skill first → no
-                    # trigger. Bail so the finally block kills the child before
-                    # its tool_use spawns anything. (Cheap read-only tools are
-                    # scanned past; the model may inspect files first.)
-                    if name == "Bash":
-                        cmd = inp.get("command", "").strip()
-                        if is_read_only_bash(cmd):
-                            continue
-                    if name in EXEC_TOOLS:
-                        if first_skill_seen is None:
-                            first_skill_seen = f"{name} (bailed: real-work tool)"
-                        return {"triggered": False, "first_skill": first_skill_seen, "bailed": True}
-            elif event.get("type") == "result":
-                return {"triggered": False, "first_skill": first_skill_seen}
-        return None
+    pending = None
+    accum = ""
 
     try:
         while time.time() - start < timeout:
@@ -205,77 +88,88 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                 rest = process.stdout.read()
                 if rest:
                     buffer += rest.decode("utf-8", errors="replace")
-                # Child exited — parse the final buffer before giving up so a
-                # trigger event in the last chunk isn't dropped as a non-trigger.
-                result = scan()
-                if result is not None:
-                    return result
-                timed_out = False
                 break
             ready, _, _ = select.select([process.stdout], [], [], 1.0)
             if not ready:
                 continue
             chunk = os.read(process.stdout.fileno(), 8192)
             if not chunk:
-                timed_out = False
                 break
             buffer += chunk.decode("utf-8", errors="replace")
 
-            result = scan()
-            if result is not None:
-                return result
+            while "\n" in buffer:
+                line, buffer = buffer.split("\n", 1)
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                if event.get("type") == "stream_event":
+                    se = event.get("event", {})
+                    if se.get("type") == "content_block_start":
+                        cb = se.get("content_block", {})
+                        if cb.get("type") == "tool_use" and cb.get("name") in ("Skill", "Read"):
+                            pending = cb.get("name")
+                            accum = ""
+                        # Other tool types are ignored — we only care whether the
+                        # target skill is invoked at some point in the response.
+                    elif se.get("type") == "content_block_delta" and pending:
+                        delta = se.get("delta", {})
+                        if delta.get("type") == "input_json_delta":
+                            accum += delta.get("partial_json", "")
+                            if TARGET_SKILL_TOKEN in accum:
+                                return {"triggered": True, "first_skill": accum}
+                    elif se.get("type") == "content_block_stop" and pending:
+                        if first_skill_seen is None:
+                            first_skill_seen = accum
+                        # Keep scanning past unrelated Skill/Read invocations so
+                        # the eval is portable across accounts that auto-fire
+                        # session-init or workflow skills before the task skill.
+                        pending = None
+                        accum = ""
+                elif event.get("type") == "assistant":
+                    msg = event.get("message", {})
+                    for item in msg.get("content", []):
+                        if item.get("type") != "tool_use":
+                            continue
+                        name = item.get("name")
+                        inp = item.get("input", {})
+                        if name == "Skill" and TARGET_SKILL_TOKEN in inp.get("skill", ""):
+                            return {"triggered": True, "first_skill": inp.get("skill")}
+                        if name == "Read" and TARGET_SKILL_TOKEN in inp.get("file_path", ""):
+                            return {"triggered": True, "first_skill": inp.get("file_path")}
+                elif event.get("type") == "result":
+                    return {"triggered": triggered, "first_skill": first_skill_seen}
     finally:
-        if process.poll() is None:
-            process.kill()
-            process.wait()
-    return {"triggered": False, "first_skill": first_skill_seen, "timed_out": timed_out}
+        _terminate(process)
+    return {"triggered": triggered, "first_skill": first_skill_seen}
 
 
 def runs_for(query, should_trigger, runs, timeout, model):
     triggers = 0
-    timeouts = 0
-    bails = 0
     samples = []
     for _ in range(runs):
         r = run_query(query, timeout, model)
         if r["triggered"]:
             triggers += 1
-        if r.get("timed_out"):
-            timeouts += 1
-        if r.get("bailed"):
-            bails += 1
         samples.append(r.get("first_skill"))
-    # `bails` stays in the denominator: a bail means the model reached a real-work
-    # tool instead of the target skill, which is a genuine non-trigger (the
-    # intended pass for the adversarial should-not-trigger queries and a real miss
-    # for a should-trigger one). It is recorded separately only so a harness bail
-    # is greppable during triage rather than indistinguishable from a clean
-    # non-trigger; the quote-aware `is_read_only_bash` is what keeps read-only
-    # lookups from bailing spuriously in the first place.
     rate = triggers / runs
-    # Echo samples to stderr on unexpected outcomes for quick triage. The samples
-    # are portable skill tokens (not absolute paths), so they are also persisted
-    # below. A should-trigger run where a sibling token leads `first_skills` is a
-    # cannibalization signal even when the target eventually fired.
+    # Surface samples to stderr only when the per-query outcome disagrees with
+    # `should_trigger`, so debugging info is available without baking
+    # environment-specific tool inputs (absolute paths, etc.) into the
+    # persisted result that the README diffs for regression checks.
     if (rate >= 0.5) != should_trigger:
         for s in samples:
             print(f"    sample: {s}", file=sys.stderr)
-    # A timeout is counted as a non-trigger, so warn (persisted as `timeouts`, and
-    # echoed here) to keep a slow should-trigger run from silently reading as a
-    # real failure.
-    if timeouts:
-        print(f"    warning: {timeouts}/{runs} run(s) timed out (counted as non-trigger): {query[:80]}", file=sys.stderr)
-    if bails:
-        print(f"    note: {bails}/{runs} run(s) bailed on a real-work tool (counted as non-trigger): {query[:80]}", file=sys.stderr)
     return {
         "query": query,
         "should_trigger": should_trigger,
         "triggers": triggers,
-        "timeouts": timeouts,
-        "bails": bails,
         "runs": runs,
         "trigger_rate": rate,
-        "first_skills": samples,
     }
 
 
@@ -283,9 +177,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-set", required=True)
     parser.add_argument("--runs-per-query", type=int, default=3)
-    parser.add_argument("--num-workers", type=int, default=5)
-    parser.add_argument("--timeout", type=int, default=45)
-    parser.add_argument("--model", default="claude-opus-4-8")
+    # Each worker holds one ~1GB `claude -p` Node process open at a time; cap the
+    # default low so a full run fits in memory on a typical machine.
+    parser.add_argument("--num-workers", type=int, default=3)
+    parser.add_argument("--timeout", type=int, default=90)
+    parser.add_argument("--model", default="claude-sonnet-5")
     args = parser.parse_args()
 
     eval_set = json.loads(Path(args.eval_set).read_text())
@@ -308,9 +204,6 @@ def main():
     no_trigger_total = sum(1 for r in results if not r["should_trigger"])
 
     summary = {
-        "model": args.model,
-        "runs_per_query": args.runs_per_query,
-        "recorded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "should_trigger_pass_rate": triggers_pass / triggers_total if triggers_total else None,
         "should_not_trigger_pass_rate": no_trigger_pass / no_trigger_total if no_trigger_total else None,
         "should_trigger_pass": f"{triggers_pass}/{triggers_total}",

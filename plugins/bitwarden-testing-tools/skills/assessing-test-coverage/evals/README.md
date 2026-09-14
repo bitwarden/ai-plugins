@@ -9,8 +9,8 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking for an inventory of coverage that _already exists_ for a change, spanning all four documented input types (a PR, a Jira key, a Tech Breakdown doc, and a Testmo CSV) plus branch/component/screen surfaces ("what's already tested for this PR", "which behaviors have no test today", "cross-reference this Testmo CSV against automated coverage", "inventory coverage for the surfaces in this Tech Breakdown"), and 10 should-not-trigger near-misses that share the words "test"/"coverage" but want something the skill deliberately does not do — writing new tests, recommending a test strategy or layer, generating a test plan, running or fixing existing tests, reading an overall coverage percentage, or a general PR review.
-- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. Each subprocess is killed as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — so the adversarial should-not-trigger queries never actually clone repos or run build/test toolchains. See the memory note under "Running".
-- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-09-14 with `--model claude-opus-4-8` at `--runs-per-query 7`, and records the run's `model`, `runs_per_query`, and `recorded_utc`, plus per-query `timeouts`, `bails`, and `first_skills`.
+- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. A trigger is detected the moment the target skill token streams in a `Skill` or `Read` tool input. Each subprocess is launched with `--allowedTools Skill Read` so the adversarial should-not-trigger queries can't clone repos or run build/test toolchains, and `--timeout` bounds anything that stalls.
+- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded with `--model claude-sonnet-5` at `--runs-per-query 7`.
 
 ## Running
 
@@ -20,15 +20,15 @@ Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The plugin mu
 python3 run_real_eval.py \
   --eval-set trigger-eval.json \
   --runs-per-query 7 \
-  --num-workers 5 \
+  --num-workers 3 \
   --timeout 90 \
-  --model claude-opus-4-8 \
+  --model claude-sonnet-5 \
   > result.json
 ```
 
-20 queries × 7 runs = 140 `claude -p` invocations. With 5 workers the run takes several minutes.
+20 queries × 7 runs = 140 `claude -p` invocations. With 3 workers the run takes several minutes.
 
-Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist — but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
+Each `claude -p` subprocess is a full Node agent holding ~1GB of RAM while it runs, so `--num-workers` is the memory knob: the default of 3 keeps a full run comfortably in memory on a typical machine, and each subprocess (with its whole Node child tree) is reaped as soon as it triggers, finishes, or times out. `--allowedTools Skill Read` additionally stops the adversarial should-not-trigger prompts from cloning repos or running build/test toolchains.
 
 ## Regression check
 
@@ -43,6 +43,8 @@ diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
 ```
 
 Empty diff means no regression; a non-empty diff means a query flipped PASS↔FAIL (the changed `pass` field names it). If a new failure appears, fix the skill description rather than the eval set — the eval set encodes intent, not implementation. If the change is intentional and the new run is the new desired behavior, replace `baseline.json` with `result.json` and commit alongside the description change.
+
+**Known gap on `claude-sonnet-5`:** `which behaviors of the passkey enrollment flow we just merged already have tests` triggers below threshold (baseline records it at 2/7); sonnet answers the phrasing directly instead of invoking the skill, where `claude-opus-4-8` fired it 7/7. The baseline records it as a should-trigger miss, so a run that leaves it below threshold diffs clean — the query is worth revisiting if the description is tuned for sonnet.
 
 ## Updating the test surface
 

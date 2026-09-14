@@ -9,8 +9,8 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 ## Files
 
 - `trigger-eval.json` — 20-query test set: 10 should-trigger phrasings asking a forward-looking question about which tests to add and at which layer, spanning the documented input types (a Jira key, a Testmo CSV, an `assessing-test-coverage` report, a PR, and a feature description) and phrasings like "are unit tests enough", "trophy or pyramid", "which layer should this live at", and "do we need an E2E or can component cover it"; and 10 should-not-trigger near-misses that share the words "test"/"coverage"/"layer" but want something the skill deliberately does not do: inventorying coverage that already exists (`assessing-test-coverage`), authoring manual Gherkin cases (`writing-manual-test-cases`), writing or refactoring automated test code, running or fixing existing tests, reading an overall coverage percentage, a general PR review, or explaining a testing concept in the abstract with no change to place (the sibling's negative, mirrored here since the description advertises "pyramid or trophy").
-- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. Each subprocess is killed as soon as the model requests `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, without first invoking the target skill — so the adversarial should-not-trigger queries never actually clone repos or run build/test toolchains. See the note under "Running".
-- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded 2026-09-14 with `--model claude-opus-4-8` at `--runs-per-query 7`; use the same model when re-running so verdicts are comparable, and so results line up with the sibling `assessing-test-coverage` eval.
+- `run_real_eval.py` — runner. Spawns parallel `claude -p` subprocesses, parses streamed tool-use events, computes per-query trigger rates. A trigger is detected the moment the target skill token streams in a `Skill` or `Read` tool input. Each subprocess is launched with `--allowedTools Skill Read` so the adversarial should-not-trigger queries can't clone repos or run build/test toolchains, and `--timeout` bounds anything that stalls.
+- `baseline.json` — last known-good run. Diff against this to spot regressions on future description changes. Recorded with `--model claude-sonnet-5` at `--runs-per-query 7`; use the same model when re-running so verdicts are comparable, and so results line up with the sibling `assessing-test-coverage` eval.
 
 ## Running
 
@@ -20,15 +20,15 @@ Requires Python 3.10+ and an authenticated `claude` CLI on `PATH`. The plugin mu
 python3 run_real_eval.py \
   --eval-set trigger-eval.json \
   --runs-per-query 7 \
-  --num-workers 5 \
+  --num-workers 3 \
   --timeout 90 \
-  --model claude-opus-4-8 \
+  --model claude-sonnet-5 \
   > result.json
 ```
 
-20 queries × 7 runs = 140 `claude -p` invocations. With 5 workers the run takes several minutes.
+20 queries × 7 runs = 140 `claude -p` invocations. With 3 workers the run takes several minutes.
 
-Each `claude -p` subprocess is a full agent, so keep `--num-workers` modest: the 10 should-not-trigger queries are adversarial real-work prompts, and the runner already bails the instant such a query reaches for `Task`, or a `Bash` command outside the read-only `gh`/`git` allowlist, but N full agents still run concurrently. Raising `--num-workers` much past the default (5), or removing the early-exit, will spawn enough parallel clone/build work to exhaust memory on a typical machine.
+Each `claude -p` subprocess is a full Node agent holding ~1GB of RAM while it runs, so `--num-workers` is the memory knob: the default of 3 keeps a full run comfortably in memory on a typical machine, and each subprocess (with its whole Node child tree) is reaped as soon as it triggers, finishes, or times out. `--allowedTools Skill Read` additionally stops the adversarial should-not-trigger prompts from cloning repos or running build/test toolchains.
 
 The first recorded run is also the baseline: redirect it to `baseline.json` and commit it alongside the skill.
 
