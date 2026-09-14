@@ -1,0 +1,18 @@
+{
+  "name": "bitwarden-planning-tools",
+  "version": "1.0.0",
+  "description": "Planning and preparation tools for Bitwarden — pre-implementation work such as architecture-decision consulting, ahead of the delivery lifecycle.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-planning-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "planning",
+    "pre-implementation",
+    "architecture",
+    "adr",
+    "preparation"
+  ]
+}
