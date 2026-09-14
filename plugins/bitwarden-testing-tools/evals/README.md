@@ -79,7 +79,7 @@ flag sampling noise):
 
 ```bash
 project='{
-  should_trigger_pass, should_not_trigger_pass,
+  model, should_trigger_pass, should_not_trigger_pass,
   results: [.results[] | {query, should_trigger, pass: ((.trigger_rate >= 0.5) == .should_trigger)}]
 }'
 diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
@@ -113,7 +113,7 @@ No engine copy, no token to set:
    python3 ../../../evals/run_real_eval.py --eval-set trigger-eval.json \
      --runs-per-query 7 --num-workers 3 --timeout 90 --model claude-sonnet-5 > baseline.json
    ```
-   Record the model in a top-level `"model"` field in `baseline.json` so a later re-run can
-   match it.
+   The runner writes the model into a top-level `"model"` field, so the baseline records the
+   model it was measured on with no manual step.
 3. If the skill has a should-trigger query recorded below threshold, add a line for it under
    _Known below-threshold queries_ above. No per-skill README — this one covers every skill.

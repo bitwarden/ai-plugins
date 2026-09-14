@@ -247,6 +247,7 @@ def main():
     no_trigger_total = sum(1 for r in results if not r["should_trigger"])
 
     summary = {
+        "model": args.model,
         "should_trigger_pass_rate": triggers_pass / triggers_total if triggers_total else None,
         "should_not_trigger_pass_rate": no_trigger_pass / no_trigger_total if no_trigger_total else None,
         "should_trigger_pass": f"{triggers_pass}/{triggers_total}",
