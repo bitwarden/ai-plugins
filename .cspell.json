@@ -119,6 +119,7 @@
     "pyproject",
     "pytest",
     "refspec",
+    "shlex",
     "remotelink",
     "Rescope",
     "resolutiondate",

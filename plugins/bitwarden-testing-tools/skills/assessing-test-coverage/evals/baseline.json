@@ -1,7 +1,7 @@
 {
   "model": "claude-opus-4-8",
   "runs_per_query": 7,
-  "recorded_utc": "2026-09-14T12:11:38Z",
+  "recorded_utc": "2026-09-14T13:21:59Z",
   "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
   "should_trigger_pass": "10/10",
@@ -12,6 +12,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -29,13 +30,14 @@
       "should_trigger": true,
       "triggers": 5,
       "timeouts": 0,
+      "bails": 2,
       "runs": 7,
       "trigger_rate": 0.7142857142857143,
       "first_skills": [
-        "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
         "Bash (bailed: real-work tool)",
+        "bitwarden-testing-tools:assessing-test-coverage",
+        "bitwarden-testing-tools:assessing-test-coverage",
+        "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
         "Bash (bailed: real-work tool)",
         "bitwarden-testing-tools:assessing-test-coverage"
@@ -46,6 +48,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -63,14 +66,15 @@
       "should_trigger": true,
       "triggers": 6,
       "timeouts": 0,
+      "bails": 1,
       "runs": 7,
       "trigger_rate": 0.8571428571428571,
       "first_skills": [
         "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
-        "bitwarden-testing-tools:assessing-test-coverage",
         "Bash (bailed: real-work tool)",
+        "bitwarden-testing-tools:assessing-test-coverage",
+        "bitwarden-testing-tools:assessing-test-coverage",
+        "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage"
       ]
@@ -80,6 +84,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -95,10 +100,11 @@
     {
       "query": "which behaviors of the passkey enrollment flow we just merged already have tests? permalinks if you can",
       "should_trigger": true,
-      "triggers": 6,
+      "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
-      "trigger_rate": 0.8571428571428571,
+      "trigger_rate": 1.0,
       "first_skills": [
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
@@ -106,7 +112,7 @@
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
         "bitwarden-testing-tools:assessing-test-coverage",
-        "Bash (bailed: real-work tool)"
+        "bitwarden-testing-tools:assessing-test-coverage"
       ]
     },
     {
@@ -114,6 +120,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -131,6 +138,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -148,6 +156,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -165,6 +174,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -182,6 +192,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -199,6 +210,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 4,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -216,6 +228,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -233,15 +246,16 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 5,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
         "Bash (bailed: real-work tool)",
+        null,
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
+        "bitwarden-testing-tools:recommending-test-layers",
+        null,
         "Bash (bailed: real-work tool)"
       ]
     },
@@ -250,6 +264,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -267,6 +282,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -284,16 +300,17 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 2,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
         null,
         "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
         null,
         "Bash (bailed: real-work tool)",
         null,
-        "Bash (bailed: real-work tool)"
+        null,
+        null
       ]
     },
     {
@@ -301,6 +318,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -318,16 +336,17 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
+        "bitwarden-code-review:code-review-local",
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
+        "bitwarden-code-review:code-review-local",
         "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)"
+        "bitwarden-code-review:code-review-local",
+        "bitwarden-code-review:code-review-local"
       ]
     },
     {
@@ -335,15 +354,16 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 2,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
         "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
+        null,
+        null,
+        null,
+        null,
+        null,
         "Bash (bailed: real-work tool)"
       ]
     }

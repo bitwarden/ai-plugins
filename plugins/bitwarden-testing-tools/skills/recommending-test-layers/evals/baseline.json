@@ -1,7 +1,7 @@
 {
   "model": "claude-opus-4-8",
   "runs_per_query": 7,
-  "recorded_utc": "2026-09-14T02:19:50Z",
+  "recorded_utc": "2026-09-14T13:14:49Z",
   "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
   "should_trigger_pass": "10/10",
@@ -12,6 +12,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -29,6 +30,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -46,6 +48,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -63,6 +66,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -78,15 +82,16 @@
     {
       "query": "the coverage report for the org-vault export epic lists several behaviors with no automated tests. which layer should each new test target?",
       "should_trigger": true,
-      "triggers": 6,
+      "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
-      "trigger_rate": 0.8571428571428571,
+      "trigger_rate": 1.0,
       "first_skills": [
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
-        "Bash (bailed: real-work tool)",
+        "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers"
@@ -97,6 +102,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -114,6 +120,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -131,6 +138,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -148,6 +156,7 @@
       "should_trigger": true,
       "triggers": 7,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 1.0,
       "first_skills": [
@@ -163,10 +172,11 @@
     {
       "query": "what's the lowest layer that can own the CipherService.RestoreAsync validation logic?",
       "should_trigger": true,
-      "triggers": 7,
+      "triggers": 6,
       "timeouts": 0,
+      "bails": 1,
       "runs": 7,
-      "trigger_rate": 1.0,
+      "trigger_rate": 0.8571428571428571,
       "first_skills": [
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
@@ -174,7 +184,7 @@
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
-        "bitwarden-testing-tools:recommending-test-layers"
+        "Bash (bailed: real-work tool)"
       ]
     },
     {
@@ -182,6 +192,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -199,6 +210,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -216,6 +228,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -233,10 +246,11 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 6,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
-        "Bash (bailed: real-work tool)",
+        null,
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
@@ -250,6 +264,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -267,6 +282,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -284,16 +300,17 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
-        "Bash (bailed: real-work tool)",
         "bitwarden-code-review:code-review-local",
         "bitwarden-code-review:code-review-local",
         "bitwarden-code-review:code-review-local",
-        "bitwarden-code-review:code-review-local"
+        "bitwarden-code-review:code-review-local",
+        "bitwarden-code-review:code-review-local",
+        "bitwarden-code-review:code-review-local",
+        "Bash (bailed: real-work tool)"
       ]
     },
     {
@@ -301,16 +318,17 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 2,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
-        null,
         "Bash (bailed: real-work tool)",
         null,
         null,
-        "Bash (bailed: real-work tool)",
         null,
-        "Bash (bailed: real-work tool)"
+        null,
+        "Bash (bailed: real-work tool)",
+        null
       ]
     },
     {
@@ -318,6 +336,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 7,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
@@ -335,6 +354,7 @@
       "should_trigger": false,
       "triggers": 0,
       "timeouts": 0,
+      "bails": 0,
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [null, null, null, null, null, null, null]

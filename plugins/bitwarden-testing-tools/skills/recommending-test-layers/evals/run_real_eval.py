@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 import select
+import shlex
 import subprocess
 import sys
 import time
@@ -35,8 +36,15 @@ READ_ONLY_BASH = ("gh pr view", "gh pr list", "gh search", "gh api repos/", "git
 
 # A read-only prefix only earns the carve-out if it's a single command; any
 # shell operator could chain heavy work onto it (`gh api ... && npm test`,
-# `gh api ... > payload`, `gh pr view <(curl evil)`).
-SHELL_CHAINS = (";", "|", "&", "`", "$(", ">", "<", "\n")
+# `gh api ... > payload`, `gh pr view <(curl evil)`). Operator detection is
+# quote-aware (see `_has_shell_chain`): a redirect-looking character inside a
+# quoted argument (`gh search code "Task<Cipher>"`) is literal text, not a chain,
+# and must not disqualify an otherwise read-only lookup.
+SHELL_PUNCTUATION = set("();<>|&")
+# Command substitution and newlines that the `shlex` punctuation tokens don't
+# separate on their own; matched against the raw string, deliberately quote-blind
+# since `"$(...)"` still executes in a real shell.
+RAW_SHELL_CHARS = ("`", "$(", "\n")
 
 # cspell:ignore xpost fbody
 # `gh` is pflag-based, so a method or request-body flag can appear as `-X POST`,
@@ -59,6 +67,25 @@ def _flag_names(cmd: str):
                 yield "-" + ch
 
 
+def _has_shell_chain(cmd: str) -> bool:
+    """True if `cmd` chains or redirects real work onto a read-only prefix. A
+    non-posix `shlex` tokenizer with `punctuation_chars` keeps quotes on their
+    tokens, so an operator character inside a quoted argument
+    (`gh search code "Task<Cipher>"`) stays part of that token and reads as
+    literal text; only a bare unquoted operator token (`>`, `&&`, `|`, `<(`)
+    counts. Command substitution and newlines are matched on the raw string."""
+    try:
+        lexer = shlex.shlex(cmd, posix=False, punctuation_chars=True)
+        lexer.whitespace_split = True
+        tokens = list(lexer)
+    except ValueError:
+        # Malformed (e.g. unbalanced quotes): bail rather than wave it through.
+        return True
+    if any(tok and set(tok) <= SHELL_PUNCTUATION for tok in tokens):
+        return True
+    return any(seq in cmd for seq in RAW_SHELL_CHARS)
+
+
 def is_read_only_bash(cmd: str) -> bool:
     """Wave through a `gh api repos/...` call only when it is a plain read. The
     `repos/` prefix bounds the target but not the HTTP method: `gh` accepts the
@@ -67,7 +94,7 @@ def is_read_only_bash(cmd: str) -> bool:
     Any method or request-body flag disqualifies the carve-out; the cost is a
     conservative bail on an explicit `-X GET`, which the default GET already
     covers."""
-    if not cmd.startswith(READ_ONLY_BASH) or any(op in cmd for op in SHELL_CHAINS):
+    if not cmd.startswith(READ_ONLY_BASH) or _has_shell_chain(cmd):
         return False
     return not any(name in WRITE_FLAGS for name in _flag_names(cmd))
 
@@ -145,7 +172,7 @@ def run_query(query: str, timeout: int, model: str) -> dict:
                     if name in EXEC_TOOLS:
                         if first_skill_seen is None:
                             first_skill_seen = f"{name} (bailed: real-work tool)"
-                        return {"triggered": False, "first_skill": first_skill_seen}
+                        return {"triggered": False, "first_skill": first_skill_seen, "bailed": True}
             elif event.get("type") == "result":
                 return {"triggered": False, "first_skill": first_skill_seen}
         return None
@@ -185,6 +212,7 @@ def run_query(query: str, timeout: int, model: str) -> dict:
 def runs_for(query, should_trigger, runs, timeout, model):
     triggers = 0
     timeouts = 0
+    bails = 0
     samples = []
     for _ in range(runs):
         r = run_query(query, timeout, model)
@@ -192,7 +220,16 @@ def runs_for(query, should_trigger, runs, timeout, model):
             triggers += 1
         if r.get("timed_out"):
             timeouts += 1
+        if r.get("bailed"):
+            bails += 1
         samples.append(r.get("first_skill"))
+    # `bails` stays in the denominator: a bail means the model reached a real-work
+    # tool instead of the target skill, which is a genuine non-trigger (the
+    # intended pass for the adversarial should-not-trigger queries and a real miss
+    # for a should-trigger one). It is recorded separately only so a harness bail
+    # is greppable during triage rather than indistinguishable from a clean
+    # non-trigger; the quote-aware `is_read_only_bash` is what keeps read-only
+    # lookups from bailing spuriously in the first place.
     rate = triggers / runs
     # Echo samples to stderr on unexpected outcomes for quick triage. The samples
     # are portable skill tokens (not absolute paths), so they are also persisted
@@ -206,11 +243,14 @@ def runs_for(query, should_trigger, runs, timeout, model):
     # real failure.
     if timeouts:
         print(f"    warning: {timeouts}/{runs} run(s) timed out (counted as non-trigger): {query[:80]}", file=sys.stderr)
+    if bails:
+        print(f"    note: {bails}/{runs} run(s) bailed on a real-work tool (counted as non-trigger): {query[:80]}", file=sys.stderr)
     return {
         "query": query,
         "should_trigger": should_trigger,
         "triggers": triggers,
         "timeouts": timeouts,
+        "bails": bails,
         "runs": runs,
         "trigger_rate": rate,
         "first_skills": samples,
