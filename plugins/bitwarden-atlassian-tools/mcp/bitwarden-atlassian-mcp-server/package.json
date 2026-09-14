@@ -25,12 +25,12 @@
   "author": "Bitwarden",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.29.0",
-    "axios": "1.18.0",
-    "zod": "4.4.3"
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "axios": "1.20.0",
+    "zod": "4.5.4"
   },
   "devDependencies": {
-    "@types/node": "24.12.4",
+    "@types/node": "24.13.3",
     "typescript": "7.0.2",
     "vitest": "4.1.11"
   },
