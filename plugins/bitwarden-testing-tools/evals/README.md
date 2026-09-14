@@ -42,7 +42,8 @@ timeout — `--timeout` bounds anything that stalls.
   subprocess holds ~1GB while it runs, so raising this raises peak memory.
 - `--timeout` (default `90`) — per-query wall-clock bound in seconds.
 - `--model` (default `claude-sonnet-5`) — pass the same model the baseline was recorded on so
-  verdicts are comparable.
+  verdicts are comparable. Each `baseline.json` records its model in a top-level `model` field;
+  match it. Both current baselines were recorded on `claude-sonnet-5`.
 
 ## Running
 
@@ -97,10 +98,6 @@ clean. Worth revisiting if a description is tuned for `claude-sonnet-5`:
 - `assessing-test-coverage` — `audit the current test coverage on the feat/cipher-key-rotation
 branch — I just want to see what exists, not recommendations` (baseline 2/7): sonnet answers
   the branch-audit phrasing directly instead of invoking the skill.
-- `recommending-test-layers` — `the coverage report for the org-vault export epic lists several
-behaviors with no automated tests. which layer should each new test target?` (baseline 4/7): a
-  dual-intent phrasing that names an existing coverage report, so it splits samples with the
-  sibling `assessing-test-coverage` skill.
 
 ## Add evals for a new skill
 
@@ -114,5 +111,7 @@ No engine copy, no token to set:
    python3 ../../../evals/run_real_eval.py --eval-set trigger-eval.json \
      --runs-per-query 7 --num-workers 3 --timeout 90 --model claude-sonnet-5 > baseline.json
    ```
+   Record the model in a top-level `"model"` field in `baseline.json` so a later re-run can
+   match it.
 3. If the skill has a should-trigger query recorded below threshold, add a line for it under
    _Known below-threshold queries_ above. No per-skill README — this one covers every skill.

@@ -1,4 +1,5 @@
 {
+  "model": "claude-sonnet-5",
   "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
   "should_trigger_pass": "10/10",
