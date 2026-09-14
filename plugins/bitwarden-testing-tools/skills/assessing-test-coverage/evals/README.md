@@ -44,7 +44,12 @@ diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
 
 Empty diff means no regression; a non-empty diff means a query flipped PASS↔FAIL (the changed `pass` field names it). If a new failure appears, fix the skill description rather than the eval set — the eval set encodes intent, not implementation. If the change is intentional and the new run is the new desired behavior, replace `baseline.json` with `result.json` and commit alongside the description change.
 
-**Known gap on `claude-sonnet-5`:** `which behaviors of the passkey enrollment flow we just merged already have tests` triggers below threshold (baseline records it at 2/7); sonnet answers the phrasing directly instead of invoking the skill, where `claude-opus-4-8` fired it 7/7. The baseline records it as a should-trigger miss, so a run that leaves it below threshold diffs clean — the query is worth revisiting if the description is tuned for sonnet.
+**Known gaps on `claude-sonnet-5`:** two should-trigger queries sit below threshold and are recorded that way in the baseline, so a run that leaves them below threshold diffs clean:
+
+- `which behaviors of the passkey enrollment flow we just merged already have tests` (baseline 2/7): sonnet answers the phrasing directly instead of invoking the skill, where `claude-opus-4-8` fired it 7/7.
+- `does the autofill refactor PR in bitwarden/clients have tests, and which layers do they land at` (baseline 3/7): a dual-intent phrasing straddling the boundary with the sibling `recommending-test-layers` skill — it asks both what coverage exists and which layers it lands at — so it splits its samples between the two skills and lands right on the 0.5 threshold.
+
+Both are worth revisiting if the description is tuned for sonnet.
 
 ## Updating the test surface
 
