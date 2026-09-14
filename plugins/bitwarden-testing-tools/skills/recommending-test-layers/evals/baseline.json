@@ -1,7 +1,7 @@
 {
   "model": "claude-opus-4-8",
   "runs_per_query": 7,
-  "recorded_utc": "2026-09-10T21:20:04Z",
+  "recorded_utc": "2026-09-14T02:19:50Z",
   "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
   "should_trigger_pass": "10/10",
@@ -78,15 +78,15 @@
     {
       "query": "the coverage report for the org-vault export epic lists several behaviors with no automated tests. which layer should each new test target?",
       "should_trigger": true,
-      "triggers": 7,
+      "triggers": 6,
       "timeouts": 0,
       "runs": 7,
-      "trigger_rate": 1.0,
+      "trigger_rate": 0.8571428571428571,
       "first_skills": [
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
-        "bitwarden-testing-tools:recommending-test-layers",
+        "Bash (bailed: real-work tool)",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers",
         "bitwarden-testing-tools:recommending-test-layers"
@@ -287,8 +287,8 @@
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
-        "bitwarden-code-review:code-review-local",
-        "bitwarden-code-review:code-review-local",
+        "Bash (bailed: real-work tool)",
+        "Bash (bailed: real-work tool)",
         "Bash (bailed: real-work tool)",
         "bitwarden-code-review:code-review-local",
         "bitwarden-code-review:code-review-local",
@@ -304,13 +304,13 @@
       "runs": 7,
       "trigger_rate": 0.0,
       "first_skills": [
+        null,
         "Bash (bailed: real-work tool)",
         null,
         null,
+        "Bash (bailed: real-work tool)",
         null,
-        null,
-        null,
-        null
+        "Bash (bailed: real-work tool)"
       ]
     },
     {
