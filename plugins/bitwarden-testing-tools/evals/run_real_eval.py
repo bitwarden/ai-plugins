@@ -71,7 +71,6 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
     skill_needle = f"{plugin}:{skill_token}"
     read_needle = f"/{skill_token}/SKILL.md"
 
-    triggered = False
     first_skill_seen = None
     start = time.time()
     buffer = ""
@@ -125,7 +124,7 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
                 if name == "Read" and read_needle in inp.get("file_path", ""):
                     return {"triggered": True, "first_skill": inp.get("file_path")}
         elif event.get("type") == "result":
-            return {"triggered": triggered, "first_skill": first_skill_seen}
+            return {"triggered": False, "first_skill": first_skill_seen}
         return None
 
     try:
@@ -162,7 +161,7 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
                 break
     finally:
         _terminate(process)
-    return {"triggered": triggered, "first_skill": first_skill_seen, "timed_out": timed_out}
+    return {"triggered": False, "first_skill": first_skill_seen, "timed_out": timed_out}
 
 
 def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):

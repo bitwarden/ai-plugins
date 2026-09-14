@@ -11,8 +11,9 @@ The upstream `skill-creator` harness measures triggering by registering a tempor
 the skill under a UUID-suffixed name and watching whether the model invokes that exact name.
 When the real plugin-registered skill is already installed in the test environment, the model
 invokes the real one and the harness records a false negative. This runner instead watches
-`claude -p` stream events for any invocation of the real skill token, ignoring unrelated
-session-init or workflow skills that may fire first.
+`claude -p` stream events for a plugin-qualified `<plugin>:<skill>` `Skill` invocation or a
+`Read` of the skill's own `SKILL.md` (see _What it does_), ignoring unrelated session-init or
+workflow skills that may fire first.
 
 ## What it does
 
@@ -40,7 +41,8 @@ timeout — `--timeout` bounds anything that stalls.
 - `--runs-per-query` (default `3`) — samples per query; use `7` for a baseline.
 - `--num-workers` (default `3`) — concurrency, and the memory knob. Each `claude -p`
   subprocess holds ~1GB while it runs, so raising this raises peak memory.
-- `--timeout` (default `90`) — per-query wall-clock bound in seconds.
+- `--timeout` (default `90`) — per-query wall-clock bound in seconds. An expiry is recorded as
+  a non-trigger and warns on stderr, so a slow run is not silently read as a real failure.
 - `--model` (default `claude-sonnet-5`) — pass the same model the baseline was recorded on so
   verdicts are comparable. Each `baseline.json` records its model in a top-level `model` field;
   match it. Both current baselines were recorded on `claude-sonnet-5`.
