@@ -46,7 +46,7 @@ diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
 
 Empty diff means no regression; a non-empty diff means a query flipped PASS↔FAIL (the changed `pass` field names it). If a new failure appears, fix the skill description rather than the eval set — the eval set encodes intent, not implementation. If the change is intentional and the new run is the new desired behavior, replace `baseline.json` with `result.json` and commit alongside the description change.
 
-**Known gap on `claude-sonnet-5`:** `the coverage report for the org-vault export epic lists several behaviors with no automated tests. which layer should each new test target?` sits below threshold and is recorded that way in the baseline (3/7), so a run that leaves it below threshold diffs clean. It is a dual-intent phrasing straddling the boundary with the sibling `assessing-test-coverage` skill — it names an existing coverage report and then asks which layer new tests belong at — so it splits its samples between the two skills and lands right on the 0.5 threshold. Worth revisiting if the description is tuned for sonnet.
+**Borderline query on `claude-sonnet-5`:** `the coverage report for the org-vault export epic lists several behaviors with no automated tests. which layer should each new test target?` passes but sits close to threshold (baseline 4/7). It is a dual-intent phrasing straddling the boundary with the sibling `assessing-test-coverage` skill — it names an existing coverage report and then asks which layer new tests belong at — so it splits its samples between the two skills. Worth watching if the description is tuned for sonnet.
 
 ## Updating the test surface
 

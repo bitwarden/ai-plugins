@@ -12,12 +12,13 @@ only counts invocations of that name as triggers. When the real plugin-registere
 skill is already installed in the environment running the eval, the model invokes
 the real one and the harness records a false negative.
 
-This script runs `claude -p` for each eval query and counts a "trigger" when any
-Skill or Read tool call references the real skill token, anywhere in the response.
-The scan continues past unrelated Skill invocations (some accounts auto-fire
-session-init skills before the model selects a task skill), so the eval is
-portable across environments rather than tied to any specific set of installed
-plugins.
+This script runs `claude -p` for each eval query and counts a "trigger" only when
+a Skill call invokes the plugin-qualified skill (`<plugin>:<skill>`) or a Read
+opens the skill's own `SKILL.md` — not any tool input that merely has the token
+somewhere in its path. The scan continues past unrelated Skill invocations (some
+accounts auto-fire session-init skills before the model selects a task skill), so
+the eval is portable across environments rather than tied to any specific set of
+installed plugins.
 """
 
 import argparse
@@ -55,7 +56,7 @@ def _terminate(process) -> None:
         pass
 
 
-def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
+def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: str) -> dict:
     # Restrict the subprocess to the only tools trigger detection observes. The
     # should-not-trigger queries are adversarial real-work prompts ("run the jest
     # suite", "write the unit tests"); without this, the child agents clone repos
@@ -77,6 +78,12 @@ def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
         env=env,
         start_new_session=True,
     )
+
+    # A trigger is the plugin-qualified skill invocation or a Read of the skill's
+    # own SKILL.md, never a bare token substring: the eval runs from the skill's
+    # evals/ dir, so an exploratory read there carries the token in its path.
+    skill_needle = f"{plugin}:{skill_token}"
+    read_needle = f"/{skill_token}/SKILL.md"
 
     triggered = False
     first_skill_seen = None
@@ -108,7 +115,8 @@ def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
                 delta = se.get("delta", {})
                 if delta.get("type") == "input_json_delta":
                     accum += delta.get("partial_json", "")
-                    if skill_token in accum:
+                    needle = skill_needle if pending == "Skill" else read_needle
+                    if needle in accum:
                         return {"triggered": True, "first_skill": accum}
             elif se.get("type") == "content_block_stop" and pending:
                 if first_skill_seen is None:
@@ -125,9 +133,9 @@ def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
                     continue
                 name = item.get("name")
                 inp = item.get("input", {})
-                if name == "Skill" and skill_token in inp.get("skill", ""):
+                if name == "Skill" and skill_needle in inp.get("skill", ""):
                     return {"triggered": True, "first_skill": inp.get("skill")}
-                if name == "Read" and skill_token in inp.get("file_path", ""):
+                if name == "Read" and read_needle in inp.get("file_path", ""):
                     return {"triggered": True, "first_skill": inp.get("file_path")}
         elif event.get("type") == "result":
             return {"triggered": triggered, "first_skill": first_skill_seen}
@@ -169,11 +177,11 @@ def run_query(query: str, timeout: int, model: str, skill_token: str) -> dict:
     return {"triggered": triggered, "first_skill": first_skill_seen}
 
 
-def runs_for(query, should_trigger, runs, timeout, model, skill_token):
+def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
     triggers = 0
     samples = []
     for _ in range(runs):
-        r = run_query(query, timeout, model, skill_token)
+        r = run_query(query, timeout, model, skill_token, plugin)
         if r["triggered"]:
             triggers += 1
         samples.append(r.get("first_skill"))
@@ -202,10 +210,19 @@ def resolve_skill_token(args) -> str:
     return Path(args.eval_set).resolve().parents[1].name
 
 
+def resolve_plugin(args) -> str:
+    if args.plugin:
+        return args.plugin
+    # skills/<skill>/evals/<file> sits three levels below the plugin root, whose
+    # directory name is the token that qualifies a Skill invocation.
+    return Path(args.eval_set).resolve().parents[3].name
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-set", required=True)
     parser.add_argument("--skill", help="Target skill token; inferred from --eval-set path when omitted.")
+    parser.add_argument("--plugin", help="Plugin token qualifying a Skill invocation; inferred from --eval-set path when omitted.")
     parser.add_argument("--runs-per-query", type=int, default=3)
     # Each worker holds one ~1GB `claude -p` Node process open at a time; cap the
     # default low so a full run fits in memory on a typical machine.
@@ -215,11 +232,12 @@ def main():
     args = parser.parse_args()
 
     skill_token = resolve_skill_token(args)
+    plugin = resolve_plugin(args)
     eval_set = json.loads(Path(args.eval_set).read_text())
     results = [None] * len(eval_set)
     with ProcessPoolExecutor(max_workers=args.num_workers) as pool:
         futures = {
-            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model, skill_token): i
+            pool.submit(runs_for, e["query"], e["should_trigger"], args.runs_per_query, args.timeout, args.model, skill_token, plugin): i
             for i, e in enumerate(eval_set)
         }
         for fut in as_completed(futures):

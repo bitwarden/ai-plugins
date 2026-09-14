@@ -44,12 +44,11 @@ diff <(jq -S "$project" baseline.json) <(jq -S "$project" result.json)
 
 Empty diff means no regression; a non-empty diff means a query flipped PASS↔FAIL (the changed `pass` field names it). If a new failure appears, fix the skill description rather than the eval set — the eval set encodes intent, not implementation. If the change is intentional and the new run is the new desired behavior, replace `baseline.json` with `result.json` and commit alongside the description change.
 
-**Known gaps on `claude-sonnet-5`:** two should-trigger queries sit below threshold and are recorded that way in the baseline, so a run that leaves them below threshold diffs clean:
+**Known gap on `claude-sonnet-5`:** one should-trigger query sits below threshold and is recorded that way in the baseline, so a run that leaves it below threshold diffs clean:
 
-- `which behaviors of the passkey enrollment flow we just merged already have tests` (baseline 2/7): sonnet answers the phrasing directly instead of invoking the skill, where `claude-opus-4-8` fired it 7/7.
-- `does the autofill refactor PR in bitwarden/clients have tests, and which layers do they land at` (baseline 3/7): a dual-intent phrasing straddling the boundary with the sibling `recommending-test-layers` skill — it asks both what coverage exists and which layers it lands at — so it splits its samples between the two skills and lands right on the 0.5 threshold.
+- `audit the current test coverage on the feat/cipher-key-rotation branch — I just want to see what exists, not recommendations` (baseline 2/7): sonnet answers the branch-audit phrasing directly instead of invoking the skill. Worth revisiting if the description is tuned for sonnet.
 
-Both are worth revisiting if the description is tuned for sonnet.
+The dual-intent `does the autofill refactor PR in bitwarden/clients have tests, and which layers do they land at` query, previously below threshold, now passes (baseline 4/7) after the sibling `recommending-test-layers` description was tightened to disclaim layer-worded inventory questions, so it no longer splits its samples with that skill.
 
 ## Updating the test surface
 
