@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Trigger-rate evaluator for the installed `assessing-test-coverage` skill.
+"""Trigger-rate evaluator for the installed `using-stripe-cli` skill.
 
 Thin wrapper over the plugin's shared eval harness. See
 `plugins/bitwarden-testing-tools/scripts/eval_harness.py` for the runner and
@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 
 from eval_harness import EvalConfig, main  # noqa: E402
 
-CONFIG = EvalConfig(target_skill_token="assessing-test-coverage")
+CONFIG = EvalConfig(target_skill_token="using-stripe-cli")
 
 # These trigger evals are a diagnostic reading, not a merge gate (see README),
 # and `main` reports its result by printing JSON rather than by return code, so
