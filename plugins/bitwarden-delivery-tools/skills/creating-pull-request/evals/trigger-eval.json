@@ -4,7 +4,7 @@
     "should_trigger": true
   },
   {
-    "query": "ok the feat/passkeys branch is done — ship it for review",
+    "query": "ok this branch is done — ship it for review",
     "should_trigger": true
   },
   {
@@ -12,23 +12,23 @@
     "should_trigger": true
   },
   {
-    "query": "I just finished the PM-23456 work on the autofill prompts, throw together a pull request with the usual template please",
+    "query": "I just finished the work on this branch, throw together a pull request with the usual template please",
     "should_trigger": true
   },
   {
-    "query": "open a draft pr for me — the branch is fix/sync-crash and it tracks origin already",
+    "query": "open a draft pr for me — this branch tracks origin already",
     "should_trigger": true
   },
   {
-    "query": "let's get this in front of reviewers — it's the auth middleware rewrite for PM-19002, I want it as a draft",
+    "query": "let's get this in front of reviewers — it's the rewrite I just committed, I want it as a draft",
     "should_trigger": true
   },
   {
     "query": "draft the PR body for feat/refresh-tokens — I've already pushed the branch, just need a clean description that follows the bitwarden template",
-    "should_trigger": true
+    "should_trigger": false
   },
   {
-    "query": "can you put together a pull request? the bitwarden/clients diff is ready, branch is chore/cleanup-stale-flags",
+    "query": "can you put together a pull request? the diff on this branch is ready",
     "should_trigger": true
   },
   {
@@ -36,7 +36,7 @@
     "should_trigger": true
   },
   {
-    "query": "I want to open a non-draft PR for PM-12345, what should the title look like and which t: label will it get?",
+    "query": "I want to open a non-draft PR for this branch, what should the title look like and which t: label will it get?",
     "should_trigger": true
   },
   {
@@ -78,5 +78,13 @@
   {
     "query": "rebase feat/auth-refactor onto main and walk me through any conflicts in the session store",
     "should_trigger": false
+  },
+  {
+    "query": "what should the PR title be for this change? not opening it yet, just want the prefix right",
+    "should_trigger": false
+  },
+  {
+    "query": "title and body are already written and agreed — just open the PR for this branch",
+    "should_trigger": true
   }
 ]

@@ -30,6 +30,8 @@ Per target, in order:
 10. **Commit** per `Skill(committing-changes)`, using the locked title/type.
 11. **Push and open a draft PR** per the locked `pr_spec` — never to a default branch, never force-pushed. Capture the PR URL.
 
+    **Pass the body with `--body-file`, never `--body`.** The body came from the target repo's PR template and model-generated text, so it is untrusted content; interpolating it into a double-quoted shell argument would let backticks or `$(…)` execute, once per target. Write it to a file and hand `gh` the path. Run both checks in `${CLAUDE_PLUGIN_ROOT}/references/pr-title-allowlist.md` against the composed title before it reaches the shell too, in order: line break first, then whole-string match. Write the title with the `Write` tool, pass both `grep` operands as files, and use `--title "$(cat <title-file>)"`; never assign the title to a shell variable, which would expand `$(…)` before any check runs. `gh` has no `--title-file`, and the summary is the generated part.
+
 If `dry_run` is set, perform steps 1–9 and stop before commit, push, and open-PR (steps 10–11); record what _would_ have shipped. It mutates no git state, local or remote.
 
 ## Report
