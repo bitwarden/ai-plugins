@@ -5,6 +5,35 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2026-09-15
+
+Addresses two Minor findings from the PR #222 review.
+
+### Fixed
+
+- `setup_release_runs.py` validates `project_id` and `run_name` in `load_specs()`, before any API call
+  is made. `run_name` was previously read with a bare `spec["run_name"]` inside the create loop, and
+  was only ever defaulted when a period could be derived from the milestone name — so a spec omitting
+  it survived load, survived the whole dry-run, and then raised `KeyError` at the first POST, after
+  earlier runs had already been created. That produced exactly the half-populated milestone the
+  surrounding code is written to avoid. A missing key is now one error naming every offending file, and
+  the `spec.get("run_name", name)` fallbacks that implied the key was optional are gone.
+
+### Changed
+
+- `SKILL.md` split from 3,082 words to 2,294, back inside the 1,000-3,000 target, with the
+  branch-specific reference data moved behind one-line pointers:
+  - `references/api-reference.md` — endpoints, project ids, the pagination quirk, and the project 1
+    field-id tables.
+  - `references/multi-configuration-runs.md` — the Mobile/Desktop/Extension variants, the broad/narrow
+    split, why step 2 cannot be automated, and the `"config_id": null` placeholder.
+  - `references/tls-inspecting-proxies.md` — why `urllib` fails behind a TLS-inspecting proxy and what
+    the `curl` fallback does.
+    Cross-references that previously pointed at in-file anchors now point at these files.
+- Removed the stale "Not yet implemented (next steps)" section, which said the `full` profile's specs
+  were still to be seeded. All 8 have shipped since 0.5.0 and every file exists, so the note told
+  Claude the shipped profile was incomplete.
+
 ## [0.7.0] - 2026-09-15
 
 Addresses the Major findings from the PR #222 review.

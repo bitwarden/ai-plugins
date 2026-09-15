@@ -16,23 +16,10 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 - `TESTMO_API_KEY` exported in the environment. Reference it only by variable — never print, echo, log,
   commit, or pass the value as a command-line argument (argv is readable by other local users).
 - `python3` available on `PATH` (the scripts use only the standard library).
-- `curl` is **not** normally needed, but is used as a fallback on networks running TLS interception —
-  see below. It ships with macOS, Windows 10+, and most Linux distributions.
-
-### TLS-inspecting proxies
-
-On a network behind a TLS-inspecting proxy (Zscaler and similar), Python may refuse the connection with
-`CERTIFICATE_VERIFY_FAILED`. Two things cause it, and both have to be true to break: the proxy's root CA
-is absent from `certifi`, and Python 3.13+ enables `VERIFY_X509_STRICT`, which rejects that root outright
-when its Basic Constraints are not marked critical. `curl` uses the OS trust store and is not strict, so
-it connects where Python cannot.
-
-The scripts handle this themselves: `call()` tries `urllib` first and, only on a verification failure,
-prints a one-line note and switches to `curl` for the rest of the session. The key stays out of `ps` on
-both paths — the `curl` path passes the Authorization header through `curl --config -` on stdin, never in
-argv. That header is the **only** thing on stdin: the URL, method, and body all travel as argv elements,
-so nothing spec-derived can inject a directive into the config that carries the key. Nothing to
-configure; if `curl` is missing too, the error says so.
+- `curl` is **not** normally needed, but is used as a fallback on networks running TLS interception.
+  It ships with macOS, Windows 10+, and most Linux distributions. The scripts switch to it by
+  themselves on a `CERTIFICATE_VERIFY_FAILED`; if you need to know why, see
+  [references/tls-inspecting-proxies.md](references/tls-inspecting-proxies.md).
 
 ## Locating the scripts and specs
 
@@ -47,21 +34,12 @@ SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
 
 A user's own spec file is the exception — pass its real path, wherever it lives.
 
-## API reference
+## Reference material
 
-- **Base:** `https://bitwarden.testmo.net/api/v1`, auth header `Authorization: Bearer $TESTMO_API_KEY`.
-- **Projects:** `1` = **Bitwarden** (live: ~13.7k cases), `2` = **Pretend** (sandbox), `11` = Automation -
-  Test, `14` = Archive. Every shipped spec targets project `1`. Project `2` is safe for exercising the
-  script's write path, but it does **not** mirror project 1's folders, tags, or configurations, so a spec
-  cannot be validated there — a dry-run against it proves nothing about the case set the spec will select.
-- **Pagination quirk:** `per_page` only accepts specific values (100 works; 5/10 return HTTP 422). Omit
-  `per_page` and page with `page=N`; responses carry `next_page`/`last_page`.
-- **Read endpoints (GET):** `/projects/{id}/cases`, `/projects/{id}/folders`, `/projects/{id}/milestones`,
-  `/projects/{id}/runs`, `/projects/{id}/automation/runs`, and single-run detail at `/runs/{id}`
-  (top-level — `/projects/{id}/runs/{id}` 404s).
-- **Create run (POST `/projects/{id}/runs`):** body `{name, state_id, include_all:false, cases:[ids],
-milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}/states`): 6=New,
-  7=In progress, 8=Under review, 9=Rejected, 10=Done. Active runs use `7`.
+Endpoints, project ids, and the numeric ids behind every field value live in
+[references/api-reference.md](references/api-reference.md). Read it before writing a new spec or
+diagnosing one that selects the wrong cases. The base URL is
+`https://bitwarden.testmo.net/api/v1` and every shipped spec targets project `1` (live Bitwarden).
 
 ## Workflow
 
@@ -121,7 +99,7 @@ the warning below.
 - `milestone_id` — milestone to link the run to. Usually supplied at run time by `--milestone-id` or by
   `setup_release_runs.py` instead of being committed.
 - `config_id` — Testmo Configuration, for platforms that ship several same-named runs (omit it otherwise).
-  See [Multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension).
+  See [references/multi-configuration-runs.md](references/multi-configuration-runs.md).
 - `tags` — **labels applied to the created run.** These do _not_ select cases.
 - `note` — free-text note on the run.
 - `filters` — the case-selection block, below.
@@ -181,69 +159,10 @@ period in the name:
 
 - The **release/period** is conveyed by the parent milestone the run is linked to, so `<period>` no longer
   belongs in `run_name` (the `--period` substitution remains for any spec that still uses the placeholder).
-- The **platform variant** is conveyed by the run's Testmo **Configuration** (`config_id`), not the name.
+- The **platform variant** is conveyed by the run's Testmo **Configuration** (`config_id`), not the name
+  — see [references/multi-configuration-runs.md](references/multi-configuration-runs.md).
   Both mobile specs are therefore named just `"Mobile"` and distinguished by config
   (`config_id` 1 = Android, 3 = iOS). Look up config ids via `GET /projects/{id}/configs`.
-
-## Multi-configuration runs (Mobile, Desktop, Extension)
-
-Some platforms ship **several same-named runs distinguished only by Testmo Configuration**. Each variant
-is its own spec file with the same `run_name` and a different `config_id`.
-
-Testmo's `/cases` API **cannot filter by configuration** and exposes no per-case config assignment, so
-these are always **two-step runs**: the spec reproduces step 1, and removing the non-target
-configuration's cases is a manual UI pass. Each affected spec documents its own step 2 in `_comment`.
-
-- **Mobile** — 2 runs, both named `Mobile`. Same filters, differing only by which automation type is
-  excluded. `config_id` 1 = Android, 3 = iOS.
-
-Desktop and Extension instead use a **broad + narrow** split, where one variant covers the full folder and
-the rest are driven by an "essential" tag:
-
-- **Desktop** — 3 runs, all named `Desktop`. Broad = **macOS** (21); narrow = **Windows** (22), **Linux**
-  (20), driven by the `desktop-essential` tag (id 15999).
-- **Extension** — 4 runs, all named `Extension`. Broad = **`MacOS, Chrome`** (7); narrow =
-  **`Windows, Edge`** (15), **`MacOS, Safari`** (10), **`Linux, Firefox`** (5), driven by the
-  `extension-essential` tag (id 17190).
-
-Config and tag ids above verified 2026-08-28 via `GET /projects/1/configs` and `GET /projects/1/tags`.
-
-Every variant on both platforms — broad and narrow alike — takes a step 2. The two variant types differ
-only in how cases are selected:
-
-|            | Broad                               | Narrow                                       |
-| ---------- | ----------------------------------- | -------------------------------------------- |
-| Scope      | whole top-level folder + subfolders | the `<platform>-essential` tag (server-side) |
-| Test Type  | Smoke + Regression                  | **any** — the tag defines the scope          |
-| Case state | Active                              | Active                                       |
-| Automation | manual only (exclude 10, 23, 24)    | manual only (exclude 10, 23, 24)             |
-
-Narrow variants deliberately drop the **test-type** filter — a tagged case counts regardless of type — but
-they keep the **state** and **automation-type** filters so retired and already-automated cases stay out.
-
-Verify tag names against `GET /projects/1/tags` before trusting a narrow spec: it has no folder or type
-filter to constrain it, so a wrong or duplicated tag name silently yields the wrong case set rather than
-erroring.
-
-**`"config_id": null` is a deliberate placeholder** meaning "this run needs a Configuration that has not
-been looked up yet." Dry-runs still work so case counts can be validated, but `--create` is refused —
-otherwise the variants would be indistinguishable from each other. Fill it in from
-`GET /projects/{id}/configs`.
-
-## Project 1 field reference (captured 2026-07-22 — re-verify via `/projects/1/fields`)
-
-- **Test Type** (`custom_test_type`, multiselect): 18=Functional, 19=Regression, 20=Smoke,
-  21=Accessibility, 22=Compatibility.
-- **Automation Type** (`custom_automation_type`, single): 8=Not Automating, 11=Ready to Automate,
-  9=In Progress, 10=Automated, 23=Automated-Android, 24=Automated-iOS, 12=Blocked. "Manual only" =
-  exclude {10, 23, 24}.
-- **Case `state_id`**: 4=Active (~94% of cases), 5=(inactive/deprecated), plus legacy strays. Regression
-  runs filter to `[4]`.
-- **Team** (`custom_team`, multiselect): 25=Admin Console, 26=Auth, 27=Autofill, 28=Billing,
-  38=Desktop Native, 29=DIRT, 30=Key Management, 31=Mobile, 37=Passwordless, 32=Platform,
-  33=Secrets Manager, 34=Tools, 35=UI Foundation, 36=Vault.
-- **Top-level folders**: Web=3136, Extension=2779, Mobile=3010, Desktop=2923, CLI=2858, API=3390,
-  Passwordless=3103. (Excluded as junk: "Retired Test Cases"=81330, "Need to be deleted"=371518.)
 
 ## Guardrails
 
@@ -254,7 +173,7 @@ otherwise the variants would be indistinguishable from each other. Fill it in fr
   issue the dry-run and the `--create` in the same turn.
 - **Multi-configuration runs are not finished when the script exits** — every run created with a
   `config_id` (all Mobile, Desktop, and Extension runs) needs the manual step 2 described in
-  [Multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension). Tell the user which
+  [references/multi-configuration-runs.md](references/multi-configuration-runs.md). Tell the user which
   runs still need it; the scripts list them.
 - **Idempotent** — do not create a duplicate run for a period/milestone. `setup_release_runs.py` enforces
   this: it refuses to create when the milestone already has runs linked, unless `--allow-existing` is
@@ -302,7 +221,8 @@ python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "
 the dry-run and `--create` in the same turn.
 
 **Step 4 is mandatory, not optional.** A `--release full` run creates 14 runs, and 9 of them — 2
-Mobile, 3 Desktop, 4 Extension — are [multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension)
+Mobile, 3 Desktop, 4 Extension — are
+[multi-configuration runs](references/multi-configuration-runs.md)
 that the API can only get halfway. Each one still needs a Testmo UI pass to remove the non-target
 configuration's cases, and until that pass is done the run holds the wrong case set. `--release
 partial` creates 7 runs, 2 of which (both Mobile) need it. Both scripts name the affected runs in
@@ -350,7 +270,3 @@ For a single run, `testmo_create_run.py --spec <file> [--milestone-id N] [--peri
 
 Case counts change as the repository evolves — a spec that matched 202 last cycle may match 196 this
 cycle. That is expected; the tooling always reflects live data. Review the dry-run summary each period.
-
-## Not yet implemented (next steps)
-
-- Seed the `full` profile's additional specs as they are captured.

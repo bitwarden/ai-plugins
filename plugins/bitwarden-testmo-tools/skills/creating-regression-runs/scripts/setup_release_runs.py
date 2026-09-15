@@ -41,21 +41,38 @@ def load_profile(name):
     collect(name)
     return order
 
+# Keys the create loop indexes directly. Checked here rather than there: a KeyError raised mid-loop
+# fires after earlier runs have already been POSTed, producing exactly the half-populated milestone
+# the surrounding code works to avoid. `run_name` is the one that actually bit — it was only ever
+# defaulted when a period was derived from the milestone name, so a spec omitting it survived
+# load_specs and the whole dry-run, then failed at the first create.
+REQUIRED_SPEC_KEYS = ("project_id", "run_name")
+
 def load_specs(spec_names):
     """Load every spec up front, so a packaging error fails before any API call is made."""
-    specs, missing = [], []
+    specs, missing, incomplete = [], [], []
     for name in spec_names:
         path = SPECS_DIR / f"{name}.json"
         if not path.exists():
             missing.append(name)
             continue
         try:
-            specs.append((name, json.loads(path.read_text())))
+            spec = json.loads(path.read_text())
         except json.JSONDecodeError as e:
             sys.exit(f"{path.name} is not valid JSON: {e}")
+        absent = [k for k in REQUIRED_SPEC_KEYS if spec.get(k) is None]
+        if absent:
+            incomplete.append(f"{path.name} is missing {', '.join(repr(k) for k in absent)}")
+            continue
+        specs.append((name, spec))
     if missing:
         sys.exit(f"Profile references {len(missing)} spec(s) with no file in {SPECS_DIR}: "
                  f"{', '.join(missing)}")
+    if incomplete:
+        detail = "\n".join(f"  {line}" for line in incomplete)
+        sys.exit(f"{len(incomplete)} spec(s) are missing a required key:\n{detail}\n"
+                 f"Every spec needs {', '.join(REQUIRED_SPEC_KEYS)} before a run can be created "
+                 f"from it.")
     return specs
 
 
@@ -67,9 +84,6 @@ def resolve_project(specs):
     project it was never written for, and the two entrypoints would disagree about the same file
     (testmo_create_run.py has always treated spec["project_id"] as authoritative).
     """
-    missing = [name for name, spec in specs if spec.get("project_id") is None]
-    if missing:
-        sys.exit(f"{len(missing)} spec(s) have no \"project_id\": {', '.join(missing)}")
     by_project = {}
     for name, spec in specs:
         by_project.setdefault(spec["project_id"], []).append(name)
@@ -205,23 +219,23 @@ def main():
     for name, spec in specs:
         spec["milestone_id"] = milestone_id
         if period:
-            spec["run_name"] = spec.get("run_name", name).replace("<period>", period)
+            spec["run_name"] = spec["run_name"].replace("<period>", period)
         filters = spec.get("filters", {})
 
         cases = core.fetch_cases(project, filters) if filters.get("tags") else all_cases
         folder_ids, notes = core.resolve_folders(filters, project, folders=folders)
         bad = [n for n in notes if n.startswith(("UNMATCHED", "UNKNOWN"))]
         if bad:
-            rows.append((spec.get("run_name", name), "FOLDER ERROR", "; ".join(bad)))
+            rows.append((spec["run_name"], "FOLDER ERROR", "; ".join(bad)))
             continue
         selected = [c for c in cases if core.matches(c, filters, folder_ids)]
         ids = [c["id"] for c in selected]
         # "config_id": null is an explicit placeholder — the run needs a Testmo Configuration that
         # has not been looked up yet. Surface it in the dry-run summary; block --create below.
         if "config_id" in spec and spec["config_id"] is None:
-            rows.append((spec.get("run_name", name), str(len(ids)), "NEEDS CONFIG_ID"))
+            rows.append((spec["run_name"], str(len(ids)), "NEEDS CONFIG_ID"))
         else:
-            rows.append((spec.get("run_name", name), str(len(ids)), "ready"))
+            rows.append((spec["run_name"], str(len(ids)), "ready"))
         results.append((name, spec, ids))
 
     print(f"{'RUN NAME':<60}{'CASES':>7}  STATUS")
@@ -239,7 +253,7 @@ def main():
     if not args.create:
         print("\nDRY RUN — no runs created. Re-run with --create to POST all of the above.")
         print_step_2_reminder(
-            [f"{spec.get('run_name', name)}  [{name}]"
+            [f"{spec['run_name']}  [{name}]"
              for name, spec, _ in results if needs_manual_step_2(spec)],
             created=False,
         )
