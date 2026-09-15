@@ -43,9 +43,9 @@
     {
       "query": "which behaviors of the passkey enrollment flow we just merged already have tests? permalinks if you can",
       "should_trigger": true,
-      "triggers": 7,
+      "triggers": 6,
       "runs": 7,
-      "trigger_rate": 1.0
+      "trigger_rate": 0.8571428571428571
     },
     {
       "query": "which behaviors in bitwarden/server PR 6001 \u2014 the billing webhook handler \u2014 have no test today?",
