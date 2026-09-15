@@ -10,10 +10,9 @@ an engine fix lands once and applies everywhere.
 The upstream `skill-creator` harness measures triggering by registering a temporary copy of
 the skill under a UUID-suffixed name and watching whether the model invokes that exact name.
 When the real plugin-registered skill is already installed in the test environment, the model
-invokes the real one and the harness records a false negative. This runner instead watches
-`claude -p` stream events for a plugin-qualified `<plugin>:<skill>` `Skill` invocation or a
-`Read` of the skill's own `SKILL.md` (see _What it does_), ignoring unrelated session-init or
-workflow skills that may fire first.
+invokes the real one and the harness records a false negative. This runner instead inspects the
+real `claude -p` stream for the target skill's own invocation (the exact match rule is under
+_What it does_), ignoring unrelated session-init or workflow skills that may fire first.
 
 ## What it does
 
@@ -74,8 +73,9 @@ confirm neither cannibalizes the other's triggers.
 
 ## Regression check
 
-Diff each query's PASS/FAIL verdict, not the raw `trigger_rate` values (which are stochastic and
-flag sampling noise):
+Run the eval before merging any change to a skill's `description`, then diff each query's
+PASS/FAIL verdict, not the raw `trigger_rate` values (which are stochastic and flag sampling
+noise):
 
 ```bash
 project='{

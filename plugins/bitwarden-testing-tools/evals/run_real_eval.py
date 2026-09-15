@@ -77,6 +77,7 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
     pending = None
     accum = ""
     timed_out = True
+    exhausted = False
 
     def scan(line: str):
         nonlocal pending, accum, first_skill_seen
@@ -158,15 +159,19 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
                     if result is not None:
                         return result
                 timed_out = False
+                exhausted = True
                 break
     finally:
         _terminate(process)
-    return {"triggered": False, "first_skill": first_skill_seen, "timed_out": timed_out}
+
+    errored = exhausted and process.returncode not in (0, None)
+    return {"triggered": False, "first_skill": first_skill_seen, "timed_out": timed_out, "errored": errored}
 
 
 def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
     triggers = 0
     timeouts = 0
+    errors = 0
     samples = []
     for _ in range(runs):
         r = run_query(query, timeout, model, skill_token, plugin)
@@ -174,6 +179,8 @@ def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
             triggers += 1
         if r.get("timed_out"):
             timeouts += 1
+        if r.get("errored"):
+            errors += 1
         samples.append(r.get("first_skill"))
     rate = triggers / runs
     # Surface samples to stderr only when the per-query outcome disagrees with
@@ -187,6 +194,10 @@ def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
     # keep a slow should-trigger run from silently reading as a real failure.
     if timeouts:
         print(f"    warning: {timeouts}/{runs} run(s) timed out (counted as non-trigger): {query[:80]}", file=sys.stderr)
+    # A crashed child also counts as a non-trigger; warn so a partial error rate
+    # (auth blip, CLI crash, OOM) is not silently read as a real should-not-trigger.
+    if errors:
+        print(f"    warning: {errors}/{runs} run(s) exited non-zero (counted as non-trigger): {query[:80]}", file=sys.stderr)
     return {
         "query": query,
         "should_trigger": should_trigger,
