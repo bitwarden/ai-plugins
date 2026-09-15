@@ -29,8 +29,10 @@ it connects where Python cannot.
 
 The scripts handle this themselves: `call()` tries `urllib` first and, only on a verification failure,
 prints a one-line note and switches to `curl` for the rest of the session. The key stays out of `ps` on
-both paths — the `curl` path passes the header through `curl --config -` on stdin, never in argv. Nothing
-to configure; if `curl` is missing too, the error says so.
+both paths — the `curl` path passes the Authorization header through `curl --config -` on stdin, never in
+argv. That header is the **only** thing on stdin: the URL, method, and body all travel as argv elements,
+so nothing spec-derived can inject a directive into the config that carries the key. Nothing to
+configure; if `curl` is missing too, the error says so.
 
 ## Locating the scripts and specs
 
@@ -78,7 +80,10 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
 3. **Idempotency check:** confirm a run for this period/milestone does not already exist
    (`GET /projects/1/runs`) before creating another. This step is manual for a single run —
    `setup_release_runs.py` performs it for you and refuses on a collision.
-4. **Create the run** only after the dry-run is reviewed:
+4. **Create the run** only after **the user** has reviewed the dry-run. Print the dry-run summary
+   — matched case count, sample cases, run payload — and obtain their explicit confirmation first.
+   **Never issue the dry-run and the `--create` in the same turn:** reviewing your own dry-run and
+   proceeding is not the review step, and this write mutates the live instance.
    ```bash
    SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
    python3 "$SKILL/scripts/testmo_create_run.py" --spec "$SKILL/specs/<run>.json" --create
@@ -132,7 +137,11 @@ are ANDed; multi-value lists within a key are ORed).
 
 - `tags` — **selects cases** carrying these Testmo tag names or ids, applied **server-side** by the
   `/cases` API (`?tags=...`), then combined with any other filters. Prefer the tag **id** when a name is
-  ambiguous — several tag names in project 1 are duplicated.
+  ambiguous — several tag names in project 1 are duplicated. Values are percent-encoded, so a tag name
+  containing a space or a non-ASCII character is fine. Before trusting any tag filter the script probes
+  `/cases` with a tag no case can carry: this API ignores query parameters it does not recognize, and a
+  tag-only spec has nothing else constraining it, so an ignored `?tags=` would select the whole project.
+  A non-empty probe result is a hard error.
 - `folder_paths` — folders by readable path, e.g. `"Web > Password Manager"`. Each expands to that folder
   **and all descendants** (set `include_subfolders: false` for exact-folder-only). Paths are OR'd. The
   script resolves paths against the live folder tree and **fails fast** if any path is unmatched, so specs
@@ -239,8 +248,14 @@ otherwise the variants would be indistinguishable from each other. Fill it in fr
 ## Guardrails
 
 - **Dry-run by default** — the script writes only with `--create`.
-- **Review the dry-run** — a dry-run reads live project `1` data and writes nothing, so it is the real
-  guardrail. Check the case count against the previous cycle before `--create`.
+- **The user reviews the dry-run, not you** — a dry-run reads live project `1` data and writes nothing,
+  so it is the real guardrail, and it is only a guardrail if a human reads it. Print the summary, check
+  the case count against the previous cycle, and get explicit confirmation before `--create`. Never
+  issue the dry-run and the `--create` in the same turn.
+- **Multi-configuration runs are not finished when the script exits** — every run created with a
+  `config_id` (all Mobile, Desktop, and Extension runs) needs the manual step 2 described in
+  [Multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension). Tell the user which
+  runs still need it; the scripts list them.
 - **Idempotent** — do not create a duplicate run for a period/milestone. `setup_release_runs.py` enforces
   this: it refuses to create when the milestone already has runs linked, unless `--allow-existing` is
   passed. For a single run, check by hand (workflow step 3).
@@ -278,9 +293,20 @@ SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
 # 1. Create the period's milestone in the Testmo UI, e.g. "2026.8.0 Manual Regression".
 # 2. Dry-run the whole release (prints a run/case-count summary; creates nothing):
 python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "2026.8.0 Manual Regression"
-# 3. Create them all once the summary looks right:
+# 3. Create them all once the USER has confirmed the summary (never in the same turn as step 2):
 python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "2026.8.0 Manual Regression" --create
+# 4. Finish the multi-configuration runs by hand in the Testmo UI — see below.
 ```
+
+**Step 3 needs the user's explicit approval.** Show them the dry-run summary and wait; do not run
+the dry-run and `--create` in the same turn.
+
+**Step 4 is mandatory, not optional.** A `--release full` run creates 14 runs, and 9 of them — 2
+Mobile, 3 Desktop, 4 Extension — are [multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension)
+that the API can only get halfway. Each one still needs a Testmo UI pass to remove the non-target
+configuration's cases, and until that pass is done the run holds the wrong case set. `--release
+partial` creates 7 runs, 2 of which (both Mobile) need it. Both scripts name the affected runs in
+their output; each spec's `_comment` gives the exact pass for that run.
 
 It resolves the milestone by name (fails if missing/ambiguous — the API can't create milestones), derives
 `--period` from the milestone name (override with `--period`), fetches cases/folders once for the whole

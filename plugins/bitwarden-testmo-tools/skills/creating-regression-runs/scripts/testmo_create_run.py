@@ -24,11 +24,14 @@ Filter model (all keys under "filters" are optional; a case must match every key
                           (e.g. [10, 23, 24] = Automated / Automated-Android / Automated-iOS).
   has_automation          bool; case has_automation flag must equal this.
 """
-import argparse, json, os, shutil, ssl, subprocess, sys, tempfile, urllib.error, urllib.request
+import argparse, json, os, shutil, ssl, subprocess, sys, tempfile
+import urllib.error, urllib.parse, urllib.request
 
 BASE = "https://bitwarden.testmo.net/api/v1"
 KEY = os.environ.get("TESTMO_API_KEY")
 TIMEOUT = 60
+# Paging guard: project 1 holds ~13.7k cases, ~137 pages at the 100/page the API allows.
+MAX_PAGES = 1000
 
 # Set once a TLS verification failure proves this Python cannot validate the chain (see _curl_call).
 _USE_CURL = False
@@ -95,24 +98,33 @@ def _curl_call(method, path, body):
     The key is still kept out of argv: the Authorization header is fed to `curl --config -` on
     stdin. Any request body goes to a 0600 temp file, referenced by path — the body is not
     secret, and this keeps stdin free for the config.
+
+    *Only* the Authorization header goes through the config; every other directive is an argv
+    element. curl's config format is one directive per line, so a value carrying a `"` and a
+    newline would inject further directives onto the same config that holds the key — a second
+    `url =` would send the authenticated request to an attacker-chosen host. On argv each value is
+    one token no matter what it contains, so nothing spec-derived can reach the config parser. The
+    remaining interpolation is the key itself, which `_check_key` rejects if it holds a quote or a
+    newline.
     """
     marker = "__TESTMO_HTTP_STATUS__"
-    config = [
-        "silent", "show-error", f"max-time = {TIMEOUT}",
-        f'url = "{BASE + path}"',
-        f'request = "{method}"',
-        f'header = "Authorization: Bearer {KEY}"',
-        'header = "Accept: application/json"',
-        f'write-out = "\\n{marker}%{{http_code}}"',
+    argv = [
+        "curl", "--silent", "--show-error", "--max-time", str(TIMEOUT),
+        "--request", method,
+        "--header", "Accept: application/json",
+        "--write-out", f"\n{marker}%{{http_code}}",
+        "--url", BASE + path,
     ]
+    config = [f'header = "Authorization: Bearer {KEY}"']
     body_file = None
     try:
         if body is not None:
             fd, body_file = tempfile.mkstemp(prefix="testmo-body-", suffix=".json")
             with os.fdopen(fd, "w") as fh:
                 json.dump(body, fh)
-            config += ['header = "Content-Type: application/json"', f'data-binary = "@{body_file}"']
-        proc = subprocess.run(["curl", "--config", "-"], input="\n".join(config) + "\n",
+            argv += ["--header", "Content-Type: application/json",
+                     "--data-binary", f"@{body_file}"]
+        proc = subprocess.run(argv + ["--config", "-"], input="\n".join(config) + "\n",
                               capture_output=True, text=True)
     finally:
         if body_file:
@@ -135,6 +147,14 @@ def _curl_call(method, path, body):
         )
     return _decode(method, path, raw)
 
+def _check_key():
+    """Exit unless TESTMO_API_KEY is set and safe to interpolate into a curl config line."""
+    if not KEY:
+        sys.exit("TESTMO_API_KEY not set")
+    if any(c in KEY for c in '"\r\n'):
+        sys.exit("TESTMO_API_KEY contains a quote or a newline, which cannot be carried safely in "
+                 "an HTTP header. Re-copy the key from Testmo (no surrounding quotes).")
+
 def call(method, path, body=None):
     """Issue a Testmo API request and return the decoded JSON body.
 
@@ -147,8 +167,7 @@ def call(method, path, body=None):
     error instead of an empty case list or a run "created" with id None.
     """
     global _USE_CURL
-    if not KEY:
-        sys.exit("TESTMO_API_KEY not set")
+    _check_key()
     if _USE_CURL:
         return _curl_call(method, path, body)
     try:
@@ -166,20 +185,78 @@ def call(method, path, body=None):
         _USE_CURL = True
         return _curl_call(method, path, body)
 
+def project_path_id(value):
+    """Return `value` as an int, for interpolation into a request path.
+
+    Every path is built as f"/projects/{project}/…" from the spec's `project_id`, so a non-integer
+    value would let a spec steer the URL itself (`1/../..`, a whole `https://…`) rather than just
+    name a project. Reject anything that is not an integer id.
+    """
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        raise TestmoAPIError(f'"project_id" must be an integer project id, got {value!r}')
+
 def fetch_all(project, resource, query=""):
+    project = project_path_id(project)
     out, page = [], 1
     sep = "&" if query else ""
     while True:
-        d = call("GET", f"/projects/{project}/{resource}?{query}{sep}page={page}")
+        d = call("GET", f"/projects/{project}/{resource}?{query}{sep}page={page:d}")
         out += d.get("result", [])
         if not d.get("next_page"):
             return out
         page += 1
+        if page > MAX_PAGES:
+            raise TestmoAPIError(
+                f"GET /projects/{project}/{resource} kept reporting next_page past {MAX_PAGES} "
+                f"pages ({len(out)} records so far). Aborting rather than paging forever — check "
+                f"the query above for an unencoded character that truncated it."
+            )
+
+# A tag name no case can carry. verify_tag_filter() asks /cases for it and expects nothing back.
+_SENTINEL_TAG = "testmo-tools-probe-no-such-tag"
+_TAG_FILTER_VERIFIED = set()
+
+def verify_tag_filter(project):
+    """Prove /cases actually applies `?tags=` before any tag filter is trusted.
+
+    This API ignores query parameters it does not recognize — 0.6.1 found `?milestone=240` returning
+    every run in the project. A tag-only spec has no other constraint, so were `?tags=` renamed or
+    dropped, /cases would return all ~13.7k project-1 cases, every one would pass matches(), and
+    --create would post a 13k-case run. Asking for a tag that cannot exist separates the two:
+    an honored parameter yields zero cases, an ignored one yields the whole repository.
+    """
+    project = project_path_id(project)
+    if project in _TAG_FILTER_VERIFIED:
+        return
+    probe = f"/projects/{project}/cases?tags={_SENTINEL_TAG}&page=1"
+    try:
+        result = call("GET", probe).get("result") or []
+    except TestmoAPIError:
+        # The API rejected the value outright, which still shows it parses `?tags=`.
+        _TAG_FILTER_VERIFIED.add(project)
+        return
+    if result:
+        raise TestmoAPIError(
+            f"Refusing to trust filters.tags: GET {probe} returned {len(result)} case(s) for a tag "
+            f"no case can carry, so /cases is not applying `?tags=`. A tag filter would therefore "
+            f"select every case in project {project}. Confirm the current tag-filter parameter name "
+            f"against the Testmo API before creating any tag-driven run."
+        )
+    _TAG_FILTER_VERIFIED.add(project)
 
 def fetch_cases(project, filters):
     """Fetch repository cases, applying any tag filter server-side."""
     tags = filters.get("tags")
-    query = ("tags=" + ",".join(str(t) for t in tags)) if tags else ""
+    if not tags:
+        return fetch_all(project, "cases")
+    verify_tag_filter(project)
+    # Percent-encode each tag but keep the commas that separate them: Testmo tag names are free
+    # text, and a raw space raises http.client.InvalidURL, a non-ASCII character raises
+    # UnicodeEncodeError, `&` appends a parameter, and `#` truncates the URL at the fragment —
+    # dropping `page=` so fetch_all would re-request page 1 forever.
+    query = "tags=" + ",".join(urllib.parse.quote(str(t), safe="") for t in tags)
     return fetch_all(project, "cases", query)
 
 def build_folder_index(folders):
@@ -277,7 +354,7 @@ def main():
     if args.period is not None:
         spec["run_name"] = spec["run_name"].replace("<period>", args.period)
 
-    project = spec["project_id"]
+    project = project_path_id(spec["project_id"])
     filters = spec.get("filters", {})
 
     folder_ids, notes = resolve_folders(filters, project)
@@ -343,6 +420,14 @@ def main():
     if rid is None:
         sys.exit(f"POST succeeded but the response carried no run id — nothing to link to. Response:\n{res}")
     print(f"\nCREATED run id={rid}  https://bitwarden.testmo.net/run/{rid}")
+    if spec.get("config_id") is not None:
+        # Multi-configuration runs are two-step: /cases cannot filter by configuration, so this
+        # only ever reproduced step 1. The spec's "_comment" holds its own step 2 and is never
+        # displayed, so say so here rather than leaving the run silently holding the wrong cases.
+        print("\nMANUAL STEP 2 REQUIRED — this run has a config_id, so it is one of several "
+              "same-named\nvariants. In the Testmo UI, remove the cases belonging to the other "
+              "configurations; the\nspec's \"_comment\" gives the exact pass. Until then this run "
+              "holds the wrong case set.")
 
 if __name__ == "__main__":
     try:

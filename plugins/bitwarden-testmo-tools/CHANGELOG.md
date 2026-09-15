@@ -5,6 +5,72 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-09-15
+
+Addresses the Major findings from the PR #222 review.
+
+### Security
+
+- `testmo_create_run.py`: the `curl` fallback no longer builds its request out of interpolated strings.
+  curl's config format is one directive per line, so a spec value carrying a `"` followed by a newline —
+  both legal in JSON — injected further directives into the same config that holds the API key: a second
+  `url =` would have sent the authenticated request, Bearer key included, to an attacker-chosen host, and
+  `output =` would have overwritten a local file. The URL, method, `--write-out`, and body reference now
+  travel as argv elements, where curl treats each as a single token regardless of its contents, and the
+  Authorization header is the only thing left on stdin. Reachable only on the TLS-interception path, but
+  `SKILL.md` invites passing a user's own spec file from anywhere, so an unreviewed spec was a plausible
+  source. Verified with a spec path containing an embedded `url =` and `output =`: both stayed inside one
+  argv token and the config contained nothing but the header.
+- `TESTMO_API_KEY` is now rejected up front if it contains a quote or a newline, closing the same
+  injection through the one value still interpolated into the config line.
+- Request paths are built by interpolating the spec's `project_id`, so it is now coerced to an `int`
+  before use on both entrypoints. A string value could previously steer the URL itself (`1/../../runs`,
+  or a whole `https://…`) rather than just name a project — the SSRF surface Aikido flagged on the PR.
+
+### Fixed
+
+- Tag values are percent-encoded into the `?tags=` query instead of being concatenated raw. Testmo tag
+  names are free text, and a raw space raised `http.client.InvalidURL`, a non-ASCII character raised
+  `UnicodeEncodeError`, `&` appended an unintended query parameter, and `#` truncated the URL at the
+  fragment — which dropped `page=` and made `fetch_all` re-request page 1 forever while accumulating
+  duplicates. Commas still separate the tags; only the values are encoded.
+- `fetch_all` stops after 1,000 pages with an actionable error rather than paging indefinitely. Project 1
+  is ~137 pages, so the cap is only reached when a malformed query has broken pagination.
+
+### Added
+
+- A server-side tag-filter probe. Before any tag filter is trusted, `/cases` is asked for a tag no case
+  can carry; an honored `?tags=` returns zero cases, an ignored one returns the repository. This API
+  ignores query parameters it does not recognize — 0.6.1 found `?milestone=240` returning every run in
+  the project — and a tag-only spec (`old-client-new-server-regression`, and the five narrow
+  Desktop/Extension specs) has no other constraint, so a renamed parameter would have meant `/cases`
+  returning all ~13.7k project-1 cases, every one passing `matches()`, and `--create` posting a
+  13k-case run against the release milestone. The same defense-in-depth 0.6.1 applied to the milestone
+  guard. A non-empty probe result is a hard error; an API rejection of the probe value counts as
+  honored, since it proves the parameter is parsed. Probed once per project per invocation.
+- Both scripts now name the runs that still need their manual step 2. Every run created with a
+  `config_id` is one of several same-named Configuration variants, and `/cases` cannot filter by
+  configuration, so the API only ever reproduces step 1. `--release full` creates 14 runs of which 9
+  (2 Mobile, 3 Desktop, 4 Extension) need the UI pass; `partial` creates 7 of which 2 do. The step-2
+  text previously lived only in each spec's `_comment`, which is never displayed, so a reader following
+  the recommended recipe top to bottom finished with 9 runs silently holding the wrong case set.
+  `setup_release_runs.py` prints the list in the dry-run summary and again after the create tally;
+  `testmo_create_run.py` prints it after creating a run with a `config_id`.
+
+### Changed
+
+- `SKILL.md`: the pre-write review is now addressed to Claude and names who reviews. Step 4 said "only
+  after the dry-run is reviewed" without saying by whom, so nothing stopped Claude judging its own
+  dry-run reasonable and re-running with `--create` against live project 1 — the only guardrail here
+  that existed purely as prose, and the one authorizing the mutation. It now requires printing the
+  summary to the user, obtaining explicit confirmation, and never issuing the dry-run and the `--create`
+  in the same turn. Repeated in Guardrails and in the whole-release recipe.
+- `SKILL.md`: the "Setting up a whole release (recommended)" recipe gains a step 4 for the manual
+  configuration pass, with the per-platform counts and a link to
+  [Multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension); mirrored in
+  Guardrails. The recipe previously ended at `--create`.
+- `SKILL.md`: the TLS-proxy and `filters.tags` sections describe the transport and probe above.
+
 ## [0.6.2] - 2026-09-03
 
 ### Fixed

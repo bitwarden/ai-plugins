@@ -77,7 +77,11 @@ def resolve_project(specs):
         lines = "\n".join(f"  {pid}: {', '.join(names)}" for pid, names in sorted(by_project.items()))
         sys.exit(f"Specs in this profile disagree on project_id:\n{lines}\n"
                  f"Every spec in a release profile must target the same project.")
-    return next(iter(by_project))
+    try:
+        # Request paths interpolate this, so it has to be an integer id and nothing else.
+        return core.project_path_id(next(iter(by_project)))
+    except core.TestmoAPIError as e:
+        sys.exit(str(e))
 
 
 def resolve_milestone(project, name):
@@ -107,6 +111,31 @@ def existing_runs_for_milestone(project, milestone_id):
     if runs and not any("milestone_id" in r for r in runs):
         return [], False
     return [r for r in runs if r.get("milestone_id") == milestone_id], True
+
+
+def needs_manual_step_2(spec):
+    """True when this run cannot be finished by the API alone.
+
+    A `config_id` marks a run that is one of several same-named variants distinguished only by
+    Testmo Configuration (Mobile, Desktop, Extension). /cases cannot filter by configuration and
+    exposes no per-case config assignment, so the script only ever reproduces step 1 — removing the
+    other configurations' cases is a manual UI pass. Each spec's `_comment` spells out its own
+    step 2, and `_comment` is never displayed, so the reminder has to come from here.
+    """
+    return spec.get("config_id") is not None
+
+
+def print_step_2_reminder(labels, created):
+    """Name every run that still needs its manual Testmo UI pass."""
+    if not labels:
+        return
+    verb = "need" if created else "will need"
+    print(f"\nMANUAL STEP 2 REQUIRED — {len(labels)} run(s) {verb} a Testmo UI pass:")
+    for label in labels:
+        print(f"  {label}")
+    print("  These are multi-configuration runs: the API reproduced step 1 only. In the Testmo UI, "
+          "remove\n  the cases belonging to the other configurations. Each spec's \"_comment\" gives "
+          "its own step 2.\n  Until that pass is done these runs hold the wrong case set.")
 
 
 def derive_period(milestone_name):
@@ -209,6 +238,11 @@ def main():
 
     if not args.create:
         print("\nDRY RUN — no runs created. Re-run with --create to POST all of the above.")
+        print_step_2_reminder(
+            [f"{spec.get('run_name', name)}  [{name}]"
+             for name, spec, _ in results if needs_manual_step_2(spec)],
+            created=False,
+        )
         if existing:
             print(f"NOTE: {len(existing)} run(s) are already linked to milestone {milestone_id}; "
                   f"--create would refuse unless --allow-existing is passed.")
@@ -242,7 +276,7 @@ def main():
     # 14-run release leaves a half-populated milestone and no record of which runs made it. Each
     # failure is recorded and reported in the closing tally instead.
     print()
-    created, skipped, failed = [], [], []
+    created, skipped, failed, step_2 = [], [], [], []
     for spec_name, spec, ids in results:
         name = spec["run_name"]
         # Multi-config runs share a run_name by design, so identify rows by spec file as well —
@@ -270,10 +304,13 @@ def main():
             failed.append((label, "response carried no run id"))
             continue
         created.append((rid, label))
+        if needs_manual_step_2(spec):
+            step_2.append(f"{label}  -> https://bitwarden.testmo.net/run/{rid}")
         print(f"  CREATED run {rid}  ({len(ids)} cases)  {label}")
 
     print(f"\n{len(created)} created, {len(skipped)} skipped (0 cases), {len(failed)} failed "
           f"— of {len(results)} run(s) attempted.")
+    print_step_2_reminder(step_2, created=True)
     if failed:
         print("\nNOT created:")
         for name, reason in failed:
