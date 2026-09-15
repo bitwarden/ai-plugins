@@ -222,7 +222,7 @@ def main():
     # default low so a full run fits in memory on a typical machine.
     parser.add_argument("--num-workers", type=int, default=3)
     parser.add_argument("--timeout", type=int, default=90)
-    parser.add_argument("--model", default="claude-sonnet-5")
+    parser.add_argument("--model", default="claude-opus-4-8")
     args = parser.parse_args()
 
     skill_token = resolve_skill_token(args)

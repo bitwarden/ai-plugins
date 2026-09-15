@@ -43,9 +43,9 @@ timeout — `--timeout` bounds anything that stalls.
   subprocess holds ~1GB while it runs, so raising this raises peak memory.
 - `--timeout` (default `90`) — per-query wall-clock bound in seconds. An expiry is recorded as
   a non-trigger and warns on stderr, so a slow run is not silently read as a real failure.
-- `--model` (default `claude-sonnet-5`) — pass the same model the baseline was recorded on so
+- `--model` (default `claude-opus-4-8`) — pass the same model the baseline was recorded on so
   verdicts are comparable. Each `baseline.json` records its model in a top-level `model` field;
-  match it. Both current baselines were recorded on `claude-sonnet-5`.
+  match it. Both current baselines were recorded on `claude-opus-4-8`, the model most users run.
 
 ## Running
 
@@ -63,7 +63,7 @@ python3 ../../../evals/run_real_eval.py \
   --runs-per-query 7 \
   --num-workers 3 \
   --timeout 90 \
-  --model claude-sonnet-5 \
+  --model claude-opus-4-8 \
   > result.json
 ```
 
@@ -94,12 +94,13 @@ description change.
 
 ## Known below-threshold queries
 
-Recorded below threshold in the current baselines and accepted as-is, so a clean diff is still
-clean. Worth revisiting if a description is tuned for `claude-sonnet-5`:
-
-- `assessing-test-coverage` — `audit the current test coverage on the feat/cipher-key-rotation
-branch — I just want to see what exists, not recommendations` (baseline 2/7): sonnet answers
-  the branch-audit phrasing directly instead of invoking the skill.
+None. On `claude-opus-4-8` both baselines pass every query: `recommending-test-layers` at 10/10
+should-trigger and 10/10 should-not-trigger, `assessing-test-coverage` likewise 10/10 and 10/10.
+The mechanism still allows a baseline to _record_ a should-trigger query below threshold and diff
+clean; when the model was `claude-sonnet-5`, `assessing-test-coverage`'s branch-audit phrasing
+(`audit the current test coverage on the feat/cipher-key-rotation branch — I just want to see what
+exists, not recommendations`) sat at 2/7, but on Opus it triggers 7/7. If one drops below
+threshold on a future run, list it here rather than editing the eval set.
 
 ## Add evals for a new skill
 
@@ -111,7 +112,7 @@ No engine copy, no token to set:
    ```bash
    cd skills/<new-skill>/evals
    python3 ../../../evals/run_real_eval.py --eval-set trigger-eval.json \
-     --runs-per-query 7 --num-workers 3 --timeout 90 --model claude-sonnet-5 > baseline.json
+     --runs-per-query 7 --num-workers 3 --timeout 90 --model claude-opus-4-8 > baseline.json
    ```
    The runner writes the model into a top-level `"model"` field, so the baseline records the
    model it was measured on with no manual step.
