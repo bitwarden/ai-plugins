@@ -259,7 +259,7 @@ export const CreateIssueSchema = z.object({
     .string()
     .min(1, "Summary cannot be empty")
     .max(255, "Jira summaries are limited to 255 characters"),
-  /** Description body as paragraphs of plain text, converted to ADF. */
+  /** Description body as paragraphs of markdown, converted to ADF. */
   descriptionParagraphs: z.array(z.string().min(1)).optional().default([]),
   /** Parent key, for a child of an epic. */
   parentKey: JiraIssueKey.optional(),
@@ -327,8 +327,8 @@ export const LinkIssuesSchema = z.discriminatedUnion("linkType", [
 export type LinkIssuesInput = z.infer<typeof LinkIssuesSchema>;
 
 /**
- * Add a plain-text comment to an existing issue. The body is converted to ADF
- * by the tool, so only plain text is accepted here rather than pre-built ADF.
+ * Add a comment to an existing issue. The body is markdown, converted to ADF
+ * by the tool, so markdown is accepted here rather than pre-built ADF.
  */
 export const AddIssueCommentSchema = z.object({
   issueIdOrKey: JiraIssueKey,
