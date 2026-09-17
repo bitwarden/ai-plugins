@@ -40,6 +40,36 @@ _DRY_RUN_RE = re.compile(r"(?<![\w-])--dry-run(?![\w-])")
 _PR_CREATE_FAILURE_MARKERS = ("already exists", "error", "failed", "fatal",
                               "could not", "must be authenticated")
 
+# `git commit` announces its result as "[<branch> <sha>] <summary>", with
+# "(root-commit)" interposed on a repo's first commit and the words "detached
+# HEAD" in place of a branch. This is the authoritative record of WHAT was
+# committed, because the directory the hook can reach is not necessarily the
+# one the commit happened in.
+_COMMIT_SUMMARY_RE = re.compile(
+    r"^\[(?P<branch>[^\]]+?)\s+(?:\(root-commit\)\s+)?(?P<sha>[0-9a-f]{7,40})\]",
+    re.MULTILINE,
+)
+# The URL `gh pr create` prints names the repo outright, so bw.pr never has to
+# infer it from a directory. Host-agnostic, since Enterprise serves the same
+# shape.
+_PR_URL_RE = re.compile(r"https?://[^/\s]+/([^/\s]+/[^/\s]+)/pull/\d+")
+# A command can move before it acts. An explicit `git -C <dir>` is definitive;
+# otherwise a `cd` that PRECEDES the git call is what moved it.
+# An unquoted directory stops at a shell separator. Matching \S+ instead would
+# swallow the separator itself — `cd /wt; git commit` yields "/wt;" and
+# `cd /wt&&git commit` yields "/wt&&" — and git would then fail on a directory
+# that does not exist, silently costing the event.
+_UNQUOTED_DIR = r"[^\s;|&]+"
+_GIT_DASH_C_RE = re.compile(
+    r"\bgit\b[^\n|&;]*?\s-C\s+(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
+)
+_CD_RE = re.compile(
+    r"(?:^|[\n|;]|\&\&)\s*cd\s+(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
+)
+# The `git` PROGRAM at the start of a command segment, as opposed to the three
+# letters appearing anywhere. Paths carry them routinely, so anchoring matters.
+_GIT_INVOCATION_RE = re.compile(r"(?:^|[\n|&;])\s*(?P<cmd>git)\b")
+
 
 def _is_successful_commit(command, tool_response):
     """Pure predicate: did this Bash `command` + PostToolUse `tool_response`
@@ -102,6 +132,59 @@ def _is_successful_pr_create(tool_response):
     return bool(stdout)
 
 
+def _commit_summary(stdout):
+    """``(branch, sha)`` as `git commit` itself reported them, or None.
+
+    The SHA may be abbreviated; callers resolve it against a real HEAD rather
+    than emitting it directly. A detached HEAD yields an empty branch instead
+    of the literal words, so nothing downstream joins "detached HEAD" against
+    a pull request's head ref.
+    """
+    m = _COMMIT_SUMMARY_RE.search(stdout or "")
+    if not m:
+        return None
+    branch = m.group("branch").strip()
+    if branch.lower() == "detached head":
+        branch = ""
+    return branch, m.group("sha")
+
+
+def _pr_url_repo(stdout):
+    """``owner/repo`` from the PR URL `gh pr create` printed, else ""."""
+    m = _PR_URL_RE.search(stdout or "")
+    return m.group(1) if m else ""
+
+
+def _command_git_dir(cwd, command):
+    """The directory a Bash command actually operated in.
+
+    Commands routinely move before acting, via `git -C <dir>` or `cd <dir> &&
+    ...`, while the hook payload's cwd stays wherever the session started.
+    Relative directives resolve against cwd. A `cd` after the git call cannot
+    have moved it, so only text preceding the git call is considered.
+
+    The git call is located at a command-segment boundary, not by any "git"
+    in the string: directory names contain it often enough (a worktree at
+    .../verify-hook-git-context) that a bare word match would cut the prefix
+    mid-path and yield a directory that does not exist.
+    """
+    cmd = command or ""
+
+    def _resolve(raw):
+        d = raw[1:-1] if len(raw) > 1 and raw[0] == raw[-1] and raw[0] in "\"'" else raw
+        return d if os.path.isabs(d) else os.path.normpath(os.path.join(cwd, d))
+
+    m = _GIT_DASH_C_RE.search(cmd)
+    if m:
+        return _resolve(m.group("dir"))
+    git_call = _GIT_INVOCATION_RE.search(cmd)
+    prefix = cmd[:git_call.start("cmd")] if git_call else cmd
+    cds = list(_CD_RE.finditer(prefix))
+    if cds:
+        return _resolve(cds[-1].group("dir"))
+    return cwd
+
+
 def _git(cwd, *args):
     """Run a git command in cwd, returning trimmed stdout or "" on any failure."""
     try:
@@ -119,34 +202,96 @@ def _repo_full(cwd):
     return m.group(1) if m else ""
 
 
-def _repo_rel(cwd, path):
-    """Make an edited file path relative to the repo root, so it joins against
-    GitHub's repo-root-relative ``files[].filename``."""
-    if not path:
-        return ""
-    top = _git(cwd, "rev-parse", "--show-toplevel")
+def _abs_path(cwd, path):
+    """Absolute, symlink-resolved form of a tool payload's file path.
+
+    A relative path in the payload is relative to the session cwd, so that one
+    step still anchors on cwd. Everything after it anchors on the file.
+    realpath matters on macOS, where /var -> /private/var otherwise leaves a
+    path and a repo root divergent and makes relpath produce "../../.." noise.
+    """
     try:
         ap = path if os.path.isabs(path) else os.path.join(cwd, path)
-        # realpath both sides: on macOS /var -> /private/var symlinks otherwise
-        # leave the two paths divergent and relpath produces "../../.." noise.
-        ap = os.path.realpath(ap)
-        top = os.path.realpath(top) if top else top
-        return os.path.relpath(ap, top) if top else os.path.basename(ap)
+        return os.path.realpath(ap)
     except Exception:
-        return os.path.basename(path)
+        return path
+
+
+def _git_context_dir(cwd, abs_path):
+    """The directory whose git metadata describes this edit: the file's own.
+
+    A session's cwd says nothing about where an edited file lives. Working in
+    a worktree or a sibling checkout while Claude runs from one repo root is
+    routine, and resolving git against cwd stamps those edits with the cwd
+    repo's slug and branch. Attribution joins bw.branch against the PR's head
+    ref and bw.file against the PR's changed paths, so a cwd-derived event
+    cannot match the PR it belongs to, and its branch may collide with an
+    unrelated one.
+
+    Walks up to the nearest existing directory, since a Write can name a file
+    that does not exist yet, and falls back to cwd only when nothing resolves.
+    """
+    try:
+        d = os.path.dirname(abs_path)
+        while d and not os.path.isdir(d):
+            parent = os.path.dirname(d)
+            if parent == d:
+                return cwd
+            d = parent
+        return d or cwd
+    except Exception:
+        return cwd
+
+
+def _repo_rel(git_dir, abs_path):
+    """Path relative to the root of the repo that owns the file, so it joins
+    against GitHub's repo-root-relative ``files[].filename``.
+
+    Expects the already-absolute, realpath'd form from _abs_path. A file in no
+    repo degrades to its bare filename rather than a "../" path, which is the
+    honest answer: nothing on the PR side can match either, and a relative
+    escape reads as though it belonged to whichever repo cwd happened to be.
+    """
+    if not abs_path:
+        return ""
+    top = _git(git_dir, "rev-parse", "--show-toplevel")
+    try:
+        top = os.path.realpath(top) if top else top
+        return os.path.relpath(abs_path, top) if top else os.path.basename(abs_path)
+    except Exception:
+        return os.path.basename(abs_path)
+
+
+def _has_joinable_repo(repo):
+    """Whether an event naming this repo slug can ever be read.
+
+    Every tier of attribution keys on the repo: a commit SHA or pull request
+    number is matched within one, and a file path is matched against one
+    pull request's changed files. A slug is absent when the file sits outside
+    any repository (a plan file, a memory file, something under /tmp) or when
+    the repository has no origin remote to name. Either way nothing downstream
+    can join the event, so emitting it would spend a sampled slot on a record
+    no reader can use.
+    """
+    return bool(repo)
 
 
 def handle_edit(h, tin, cwd, session):
     path = tin.get("file_path") or tin.get("notebook_path") or ""
     if not path:
         return
+    abs_path = _abs_path(cwd, path)
+    git_dir = _git_context_dir(cwd, abs_path)
+    repo = _repo_full(git_dir)
+    if not _has_joinable_repo(repo):
+        return
     emit("bw.edit", {
         "event.name": "bw.edit",
         "session.id": session,
-        "bw.repo_full": _repo_full(cwd),
-        "bw.branch": _git(cwd, "rev-parse", "--abbrev-ref", "HEAD"),
-        "bw.base_sha": _git(cwd, "rev-parse", "HEAD"),
-        "bw.file": _repo_rel(cwd, path),
+        "bw.repo_full": repo,
+        "bw.branch": _git(git_dir, "rev-parse", "--abbrev-ref", "HEAD"),
+        "bw.base_sha": _git(git_dir, "rev-parse", "HEAD"),
+        "bw.file": _repo_rel(git_dir, abs_path),
         "bw.tool": h.get("tool_name", ""),
         "bw.hook": h.get("hook_event_name", ""),
     })
@@ -154,38 +299,57 @@ def handle_edit(h, tin, cwd, session):
 
 def handle_bash(h, tin, cwd, session):
     cmd = tin.get("command") or ""
-    # git commit: the hook fires AFTER the command, so HEAD already points at the
-    # new commit. Re-reading HEAD is deterministic and avoids parsing stdout, but
-    # only once a real commit has been confirmed to have succeeded. A loose match
-    # would let `git commit --dry-run`, a failed commit (nothing staged / rejected
-    # pre-commit hook), or a read-only lookalike (git log --grep commit, git show,
-    # git help commit) emit the PRIOR HEAD as a fabricated authored commit.
-    if _is_successful_commit(cmd, h.get("tool_response") or {}):
-        sha = _git(cwd, "rev-parse", "HEAD")
-        if sha:
-            emit("bw.commit", {
-                "event.name": "bw.commit",
-                "session.id": session,
-                "bw.repo_full": _repo_full(cwd),
-                "bw.branch": _git(cwd, "rev-parse", "--abbrev-ref", "HEAD"),
-                "bw.commit_sha": sha,
-                "bw.hook": h.get("hook_event_name", ""),
-            })
+    resp = h.get("tool_response") or {}
+    # git commit: the command's own output says WHAT was committed, the
+    # directory it ran in says WHERE. Both are needed, and they have to agree.
+    #
+    # Reading HEAD from cwd alone was wrong for any commit made outside it, in
+    # a worktree or a sibling checkout, because cwd's untouched HEAD is still a
+    # real SHA and would be reported as work this session authored — landing on
+    # whichever pull request happens to contain it. Requiring HEAD to match the
+    # SHA git printed drops those rather than guessing, in the same spirit as
+    # _is_successful_commit refusing to fabricate a commit from an ambiguous
+    # response. `--dry-run`, failed commits and read-only lookalikes are gated
+    # out before this point.
+    if _is_successful_commit(cmd, resp):
+        summary = _commit_summary(resp.get("stdout") or "")
+        if summary:
+            branch, printed_sha = summary
+            git_dir = _command_git_dir(cwd, cmd)
+            head = _git(git_dir, "rev-parse", "HEAD")
+            repo = _repo_full(git_dir)
+            if head and head.startswith(printed_sha) and _has_joinable_repo(repo):
+                emit("bw.commit", {
+                    "event.name": "bw.commit",
+                    "session.id": session,
+                    "bw.repo_full": repo,
+                    "bw.branch": branch or _git(git_dir, "rev-parse",
+                                                "--abbrev-ref", "HEAD"),
+                    # The resolved full SHA, since attribution matches it
+                    # against a pull request's commit list by equality.
+                    "bw.commit_sha": head,
+                    "bw.hook": h.get("hook_event_name", ""),
+                })
     # gh pr create: pull the new PR's number from stdout, only on success.
     # A failed invocation (most commonly a PR already existing for the
     # branch) reports the EXISTING PR's URL on stderr; only stdout can be
-    # trusted to name a PR this session actually created.
+    # trusted to name a PR this session actually created. The same URL names
+    # the repo, which beats inferring it from a directory; the directory is
+    # only the fallback, and the source of the head branch.
     if re.search(r"\bgh\b[^\n|&;]*\bpr\b[^\n|&;]*\bcreate\b", cmd):
-        resp = h.get("tool_response") or {}
         if _is_successful_pr_create(resp):
             stdout = resp.get("stdout") or ""
             m = re.search(r"/pull/(\d+)", stdout)
             if m:
+                git_dir = _command_git_dir(cwd, cmd)
+                repo = _pr_url_repo(stdout) or _repo_full(git_dir)
+                if not _has_joinable_repo(repo):
+                    return
                 emit("bw.pr", {
                     "event.name": "bw.pr",
                     "session.id": session,
-                    "bw.repo_full": _repo_full(cwd),
-                    "bw.branch": _git(cwd, "rev-parse", "--abbrev-ref", "HEAD"),
+                    "bw.repo_full": repo,
+                    "bw.branch": _git(git_dir, "rev-parse", "--abbrev-ref", "HEAD"),
                     "bw.pr_number": m.group(1),
                     "bw.hook": h.get("hook_event_name", ""),
                 })
