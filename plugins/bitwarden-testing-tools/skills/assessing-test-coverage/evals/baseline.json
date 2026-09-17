@@ -1,4 +1,5 @@
 {
+  "model": "claude-opus-4-8",
   "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
   "should_trigger_pass": "10/10",
@@ -28,9 +29,9 @@
     {
       "query": "is the new CipherService.RestoreAsync path covered by any existing tests? I'm not asking you to add any \u2014 just tell me what's already there",
       "should_trigger": true,
-      "triggers": 6,
+      "triggers": 7,
       "runs": 7,
-      "trigger_rate": 0.8571428571428571
+      "trigger_rate": 1.0
     },
     {
       "query": "what test coverage already exists for the surfaces in the emergency-access revamp Tech Breakdown doc (bitwarden/tech-breakdowns)?",
@@ -42,9 +43,9 @@
     {
       "query": "which behaviors of the passkey enrollment flow we just merged already have tests? permalinks if you can",
       "should_trigger": true,
-      "triggers": 7,
+      "triggers": 6,
       "runs": 7,
-      "trigger_rate": 1.0
+      "trigger_rate": 0.8571428571428571
     },
     {
       "query": "which behaviors in bitwarden/server PR 6001 \u2014 the billing webhook handler \u2014 have no test today?",
@@ -140,9 +141,9 @@
     {
       "query": "explain how the testing pyramid works and which layers bitwarden uses across its repos",
       "should_trigger": false,
-      "triggers": 0,
+      "triggers": 1,
       "runs": 7,
-      "trigger_rate": 0.0
+      "trigger_rate": 0.14285714285714285
     }
   ]
 }
