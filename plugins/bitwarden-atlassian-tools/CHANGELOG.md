@@ -5,6 +5,14 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.2] - 2026-09-17
+
+### Fixed
+
+- The bundled MCP server now starts on Node.js releases that do not ship Corepack. The launch sequence fetches Corepack as a package through the `npm` bundled with every Node release, so the server manifest's `packageManager` field remains the single place the pnpm version is declared and its pinned integrity hash is still verified before pnpm runs.
+- First launch installs only the packages needed to build and run the server. `typescript` and `@types/node` are declared alongside the runtime dependencies because the launch compiles from source, which leaves `vitest` as the only development-time package and keeps its dependency tree out of the startup path. A package published within the registry's minimum-age window anywhere in that tree, down to a transitive dependency of the test runner's bundler, would otherwise stop the server from starting.
+- Dropped the server manifest's `devEngines.packageManager` declaration. `npm` treats a foreign package manager declared there as a hard failure and refuses to run in the directory at all, and pnpm ignores `packageManager` whenever both fields are present.
+
 ## [2.7.1] - 2026-09-14
 
 ### Changed
