@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.3] - 2026-09-17
+
+### Fixed
+
+- The optional `ATLASSIAN_JIRA_WRITE_TOKEN` is no longer reported among the plugin's missing environment variables. The MCP config now declares it with an empty default, which is how an optional variable is distinguished from a required one: a read-only install intends to omit it, so listing it alongside genuinely absent configuration read as a setup failure. Whether a live write can proceed is decided by the write tools themselves, where it already was. A dry run notes the absent token in its preview, and a `dryRun: false` call refuses before opening a connection.
+
 ## [2.7.2] - 2026-09-17
 
 ### Fixed
