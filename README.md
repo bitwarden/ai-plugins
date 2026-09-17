@@ -23,6 +23,14 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [claude-config-validator](plugins/claude-config-validator/)         | 2.0.2   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                  |
 
+### External plugins
+
+Sourced from outside Bitwarden and **pinned to a reviewed commit**, following the pattern Anthropic uses for third-party entries in its own marketplace. Their files are not copied into this repo; each entry references an upstream repository at a fixed commit.
+
+| Plugin                                                        | Author          | Description                                                                                                |
+| ------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
+| [`aikido`](https://github.com/AikidoSec/aikido-claude-plugin) | Aikido Security | Scan code (SAST, secrets, IaC) and list all issues from your Aikido feed powered by the Aikido MCP server. |
+
 ## Usage
 
 ### Adding this marketplace to Claude Code
