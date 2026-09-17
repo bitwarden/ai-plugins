@@ -167,6 +167,56 @@ describe("add_issue_comment handler", () => {
     });
   });
 
+  it("posts a markdown body as rich ADF, not as literal syntax", async () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
+    mockPost.mockResolvedValueOnce({
+      data: { id: "10052", created: "2026-08-26T12:00:00.000Z" },
+    });
+
+    await addIssueCommentTool.handler({
+      issueIdOrKey: "AI-27",
+      body: "One **blocker**, see [AI-1](http://x/1):\n\n- the guard is inverted",
+      dryRun: false,
+    });
+
+    expect(mockPost).toHaveBeenCalledWith("/rest/api/3/issue/AI-27/comment", {
+      body: {
+        version: 1,
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "One " },
+              { type: "text", text: "blocker", marks: [{ type: "strong" }] },
+              { type: "text", text: ", see " },
+              {
+                type: "text",
+                text: "AI-1",
+                marks: [{ type: "link", attrs: { href: "http://x/1" } }],
+              },
+              { type: "text", text: ":" },
+            ],
+          },
+          {
+            type: "bulletList",
+            content: [
+              {
+                type: "listItem",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [{ type: "text", text: "the guard is inverted" }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+  });
+
   it("reports the API error rather than throwing on a failed live comment", async () => {
     process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "write-token";
     mockPost.mockRejectedValueOnce(new Error("JIRA API error (400): boom"));
