@@ -15,7 +15,7 @@ import re
 import subprocess
 import sys
 
-from emit import emit  # sibling module; script dir is on sys.path[0]
+from emit import emit, flush_warning  # sibling module; script dir is on sys.path[0]
 
 EDIT_TOOLS = {"Edit", "MultiEdit", "Write", "NotebookEdit"}
 
@@ -372,4 +372,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # After main(), so a warning reports what this invocation actually found.
+    # Prints at most one throttled systemMessage and still exits 0.
+    flush_warning()
     sys.exit(0)
