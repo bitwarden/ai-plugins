@@ -1,7 +1,8 @@
 ---
 name: creating-pull-request
-description: Open a pull request from a branch in a Bitwarden repository — pick the conventional commit type prefix that drives the t: label, fill in the repo's PR template, choose an ai-review label, and confirm a full submission preview before running gh pr create.
-when_to_use: Use when the user is ready to open a pull request from a branch — phrasings like "create a PR", "open a PR", "ship a draft", "put it up for review", "ready for review", or "ship it". Also use when drafting a PR title or body, picking the conventional commit type prefix, or choosing the t: or ai-review label for a PR being opened (takes precedence over labeling-changes in PR-creation contexts). Do not use for conceptual questions ("how do PRs work") or managing existing PRs (status, merging, addressing comments).
+description: Open a pull request from a branch in a Bitwarden repository — pick the conventional commit type prefix that drives the t: label, fill in the repo's PR template, choose an ai-review label, and confirm a full submission preview before running gh pr create. Also applies Bitwarden's disclosure policy when the change is security-sensitive.
+when_to_use: Use when the user is ready to open a pull request from a branch — phrasings like "create a PR", "open a PR", "ship a draft", "put it up for review", "ready for review", "ship it", or "open a PR for a security fix". Also use when drafting a PR title or body, picking the conventional commit type prefix, or choosing the t: or ai-review label for a PR being opened (takes precedence over labeling-changes in PR-creation contexts). Do not use for conceptual questions ("how do PRs work") or managing existing PRs (status, merging, addressing comments).
+allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
 ---
 
 # Creating a Pull Request
@@ -62,9 +63,11 @@ The `<type>:` prefix is what CI scans (lowercased) to assign the `t:` label. Wit
 
 If the Jira ticket key isn't in the branch name or recent conversation, ask the user. Don't leave `PM-XXXXX` as a placeholder — a real ticket key is required for tracking links to resolve.
 
+Before proposing the title, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`. If it is, the canonical policy named there also governs the title wording — apply it so the title you propose is already compliant, and carry the determination into Step 3 for the body. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines.
+
 **Show the proposed title to the user before continuing.** This is the first chance for them to catch typos, a missing prefix, or the wrong ticket key.
 
-### Step 3 — Read the repo's PR template
+### Step 3 — Read the repo's PR template and apply security handling
 
 Always read `.github/PULL_REQUEST_TEMPLATE.md` from the target repo before drafting the body. Even when you have a body draft in mind, the template's sections are what other reviewers expect to scan. Skipping this is a common failure mode — PRs ship with improvised bodies that miss sections reviewers depend on.
 
@@ -90,6 +93,8 @@ If no template exists, fall back to:
 
 <!-- Required for UI changes; delete if not applicable. -->
 ```
+
+**Security-sensitive changes.** If Step 2 flagged this change as security-relevant (per `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`), apply the canonical policy retrieved there to the body and the Tracking reference as well as the title. The author owns the final wording, and the Step 5 preview is where they confirm it. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines — do not draft a security-fix PR body from memory.
 
 ### Step 4 — Ask about the AI review label
 
@@ -117,6 +122,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Security fix:   <No | Yes — canonical policy applied>
 
 Body:
 ---
@@ -165,5 +171,6 @@ These are what the Step 5 preview is built to prevent. Recognizing them helps wh
 - **Generic body replacing the template** → reviewers expect the template's sections. Read the template even when the body feels obvious.
 - **Label answer dropped between Step 4 and Step 6** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 5.
+- **Security fix not in line with policy** → the body doesn't follow the canonical policy read in Step 2. Apply it in Step 3; the Step 5 preview is the last catch.
 
 If any of these slip past the preview, recovery is awkward — the title is permanent in the merge commit, and labels feed downstream filtering and automation.
