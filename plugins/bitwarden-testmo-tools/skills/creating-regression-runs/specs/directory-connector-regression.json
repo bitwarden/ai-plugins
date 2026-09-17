@@ -1,0 +1,13 @@
+{
+  "project_id": 1,
+  "run_name": "Directory Connector (BWDC)",
+  "run_state_id": 7,
+  "tags": ["regression"],
+  "filters": {
+    "folder_paths": ["Directory Connector (BWDC)"],
+    "include_subfolders": true,
+    "test_type_ids": [19, 20],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 23, 24]
+  }
+}

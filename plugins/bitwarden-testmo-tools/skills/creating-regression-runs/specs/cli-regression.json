@@ -1,0 +1,14 @@
+{
+  "_comment": "CLI regression run. Scope is the whole CLI top-level folder (folder id 2858) and all descendants, with the established regression defaults: Test Type = Smoke or Regression, case state Active, manual only (excludes Automated / Automated-Android / Automated-iOS). Part of the 'full' release profile only — not run for partial releases. Case count not yet validated against a live dry-run.",
+  "project_id": 1,
+  "run_name": "CLI",
+  "run_state_id": 7,
+  "tags": ["regression"],
+  "filters": {
+    "folder_paths": ["CLI"],
+    "include_subfolders": true,
+    "test_type_ids": [19, 20],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 23, 24]
+  }
+}
