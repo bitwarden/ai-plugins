@@ -62,4 +62,14 @@ describe("Jira write-token access mode", () => {
 
     expect(hasJiraWriteToken()).toBe(false);
   });
+
+  // What .mcp.json hands us on a read-only install: the write variable is
+  // declared with an empty default so Claude Code stops reporting an optional
+  // variable as missing, which means the server receives "" rather than nothing.
+  it("treats an empty write token as absent", () => {
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "";
+
+    expect(hasJiraWriteToken()).toBe(false);
+    expect(() => loadJiraConfig("write")).toThrow(/ATLASSIAN_JIRA_WRITE_TOKEN/);
+  });
 });
