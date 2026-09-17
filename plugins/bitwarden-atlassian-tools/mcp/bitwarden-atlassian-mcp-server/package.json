@@ -32,6 +32,7 @@
     "zod": "4.5.4"
   },
   "devDependencies": {
+    "corepack": "0.36.0",
     "vitest": "4.1.11"
   },
   "engines": {
