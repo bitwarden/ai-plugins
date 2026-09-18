@@ -9,7 +9,7 @@
       "prompt": "PM-40001 adds a banner to the web vault organization billing page when a subscription is past due. Build the application context for testing this.",
       "expected_output": "Returns a markdown document with a `## States` section and a `## Flows` section. States describe observable UI conditions such as 'org billing page with past-due banner visible' and 'org billing page with no banner', each with a verification point. Flows describe the transitions. Does not return a list of changed files as the primary output.",
       "expectations": [
-        "Output has both a `## States` and a `## Flows` section",
+        "The artifact is wrapped in a single well-formed `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence, and within it both a `## States` and a `## Flows` section are present.",
         "States are described as observable UI conditions, not as files or functions",
         "Each state carries a verification point that is observable in the browser",
         "Does not present a changed-file inventory as the deliverable"
