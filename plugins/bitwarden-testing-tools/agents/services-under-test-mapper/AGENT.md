@@ -40,14 +40,14 @@ Also read the context artifact, locating the context artifact by its `<!-- CONTE
 
 ## Step 2 — Determine required services
 
-Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)`. Pass the routes collected in Step 1 and the affected repos. The skill runs its own `git -C <repo-path> diff --name-only` internally, consults the service dependency map at `references/services.md`, and returns a structured list of required services (name, URL, port) plus a primary test URL.
+Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)` and follow its instructions to determine the required services, using the routes collected in Step 1 and the affected repos as inputs. Following the skill, you run `git -C <repo-path> diff --name-only` internally, consult the service dependency map at `references/services.md`, and produce a structured list of required services (name, URL, port) plus a primary test URL.
 
 ## Step 3 — Return the services list as markdown
 
 Do not preface or follow your response with any other commentary; the entire response is the artifact content.
 
-The skill may emit the document across multiple passes. If more than one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block appears, keep only the content between the first `<!-- SERVICES START -->` and the last `<!-- SERVICES END -->` — discard earlier passes. Never concatenate multiple passes.
+The document may get emitted across multiple passes. If more than one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block appears, keep only the content between the first `<!-- SERVICES START -->` and the last `<!-- SERVICES END -->` — discard earlier passes. Never concatenate multiple passes.
 
-Your final response is the services artifact the skill returns, verbatim, wrapped in `<!-- SERVICES START -->` / `<!-- SERVICES END -->` containing a `## Required Services` section. Do not add, remove, reformat, or re-wrap anything.
+Your final response is the services artifact you produced by following the skill, verbatim, wrapped in `<!-- SERVICES START -->` / `<!-- SERVICES END -->` containing a `## Required Services` section. Do not add, remove, reformat, or re-wrap anything.
 
 Self-check before returning: your response is exactly one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block containing a `## Required Services` section. If the self-check fails, surface the failure instead of returning a malformed artifact.
