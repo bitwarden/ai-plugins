@@ -151,6 +151,8 @@ This is pure orchestrator work, no agent dispatch. Read both planning artifacts 
 3. Write `<artifacts-output-dir>/test-plan-<timestamp>.md` using this exact template:
 
 ```markdown
+<!-- TEST-PLAN START -->
+
 # Test Plan
 
 **Generated:** <timestamp>
@@ -158,7 +160,11 @@ This is pure orchestrator work, no agent dispatch. Read both planning artifacts 
 <contents of services-<timestamp>.md, verbatim>
 
 <contents of test-cases-<timestamp>.md, verbatim>
+
+<!-- TEST-PLAN END -->
 ```
+
+The services and test-cases contents already carry their own `SERVICES` / `TEST-CASES` fences, so the composed plan nests them inside the `TEST-PLAN` fence. Do not strip or re-wrap those nested fences.
 
 ---
 
@@ -269,7 +275,7 @@ This is pure orchestrator work, no agent dispatch.
 
 Invoke `Skill(compiling-playwright-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
 
-Read the `## Required Services` line from `<artifacts-output-dir>/test-plan-<timestamp>.md` to form the services-tested string and the primary base URL, then run the render script:
+Locate the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence in the test plan and read its `## Required Services` bullets to form the services-tested string and the primary base URL, then run the render script:
 
 ```
 <plugin>/skills/compiling-playwright-report/scripts/render_report.py \
