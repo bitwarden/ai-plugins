@@ -30,8 +30,8 @@ Your task prompt includes:
 
 Read the test plan file and extract:
 
-- **Required service names**: from the `## Required Services` block, pull the bullet's leading name token (e.g., `- Api — http://localhost:4000 (port 4000)` → `Api`). Collect these as a space-separated list — they are the argv for the health-check script.
-- **Primary test URL**: the bullet marked `**(primary test URL)**` in the same block. Used by the render-verify step inside the skill.
+- **Required service names**: from the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence (its `## Required Services` section), pull the bullet's leading name token (e.g., `- Api — http://localhost:4000 (port 4000)` → `Api`). Collect these as a space-separated list — they are the argv for the health-check script.
+- **Primary test URL**: the bullet marked `**(primary test URL)**` in that fence. Used by the render-verify step inside the skill.
 
 ## Step 2 — Verify the environment
 
@@ -51,4 +51,4 @@ Environment verified: <N> services healthy, render OK.
 
 **On failure**, return the skill's failure output verbatim — the offending script's stdout/stderr or the render-verify screenshot path + description. Do not invent a success line.
 
-Self-check before returning: your response is either the one-line success confirmation beginning with `Environment verified:` OR the failure block from the skill. It is never a `# Service State` heading or any other markdown artifact shape.
+Self-check before returning: your response is either the one-line success confirmation beginning with `Environment verified:` OR the failure block from the skill. It is never a fenced artifact (no `<!-- ... START -->` / `END` markers) or any other markdown artifact shape.

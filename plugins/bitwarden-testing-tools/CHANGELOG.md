@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Two execution-phase agents: `localhost-web-health-checker`, which gates the run on environment health, and `playwright-test-runner`, which executes the plan and returns the segment results JSON.
 - Category 3 execution content and Category 1 execution constraints in `references/playwright-tool-policy.md`: the `external_trigger.py` registry entry with its POST-only, allowed-hosts, and TLS rules, and the `eval` and `run-code` no-network rule. Plus a known-limits note recording that these Category 1 constraints and the agent script grants are agent instructions rather than platform-enforced boundaries, pending a `PreToolUse` hook.
 
+### Changed
+
+- `localhost-web-health-checker` and `checking-localhost-web-health` now locate the services artifact via its `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence instead of the `## Required Services` heading; `playwright-test-runner` now locates the test-cases artifact via its `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence instead of the `## Test Cases` heading.
+
 ## [1.4.0] - 2026-08-24
 
 ### Added
