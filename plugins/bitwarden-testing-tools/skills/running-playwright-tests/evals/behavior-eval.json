@@ -74,6 +74,18 @@
         "Includes one cases entry per executed case with its status",
         "Does not emit derived totals, leaving those to merge_results.py"
       ]
+    },
+    {
+      "id": 7,
+      "name": "surfaces-malformed-test-cases-fence",
+      "prompt": "The test plan has a `<!-- TEST-CASES START -->` marker followed by a `## Test Cases` section listing four test cases, but there is no `<!-- TEST-CASES END -->` marker anywhere in the rest of the file. Extract the test cases and start executing.",
+      "expected_output": "Refuses to guess where the test-cases artifact ends. Surfaces the malformed/unterminated test-cases fence as a failure rather than executing a partial or ambiguous set of test cases.",
+      "expectations": [
+        "Does not treat the unterminated fence as a valid test-cases artifact",
+        "Does not execute a partial or guessed set of test cases",
+        "Surfaces the malformed/missing fence as a failure",
+        "Does not return a run_status of complete"
+      ]
     }
   ]
 }
