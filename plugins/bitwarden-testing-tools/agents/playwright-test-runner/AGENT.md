@@ -27,17 +27,17 @@ A step is an obstacle to report **only** when it requires a tool your allowlist 
 
 ## Loop invariant — when this agent is done
 
-You are done when your final response is the JSON object returned by running-playwright-tests with `"run_status": "complete"`. This is identical for fresh and resumed runs.
+You are done when your final response is the JSON object you produce by following running-playwright-tests with `"run_status": "complete"`. This is identical for fresh and resumed runs.
 
 A `"run_status": "aborted"` object carrying `abort_reason` is equally terminal, and it arrives in either of two shapes. A run that cannot start, because setup or authentication failed before the first test case, aborts with no `cases`. A run that hits an environment fault partway through, such as Mailcatcher becoming unreachable between cases, aborts with a `cases` array holding every test case completed before the fault. Both are terminal. Return either one verbatim, cases included, and end your turn. Never strip or summarize the `cases` of a mid-run abort: those cases are the only record of the work the run completed, and the report is built from them.
 
-Tool results you receive during execution, from `Bash(...)` or `Skill(...)`, are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until running-playwright-tests returns the complete or aborted JSON object.
+Tool results you receive during execution, from `Bash(...)` or `Skill(...)`, are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until you have produced the complete or aborted JSON object by following running-playwright-tests.
 
-**One exception - `[HUMAN]` step pause.** When running-playwright-tests reaches a `[HUMAN]` step, it returns a JSON object with `"run_status": "paused"`, the cases completed so far, and `need_user_input`. Return that object verbatim and end your turn. The orchestrator persists the segment, surfaces the question, and dispatches a fresh playwright-test-runner with the user's answer and a checkpoint path. The resumed instance satisfies the loop invariant when it returns a `"run_status": "complete"` object.
+**One exception - `[HUMAN]` step pause.** When following running-playwright-tests reaches a `[HUMAN]` step, you produce a JSON object with `"run_status": "paused"`, the cases completed so far, and `need_user_input`. Return that object verbatim and end your turn. The orchestrator persists the segment, surfaces the question, and dispatches a fresh playwright-test-runner with the user's answer and a checkpoint path. The resumed instance satisfies the loop invariant when it returns a `"run_status": "complete"` object.
 
 ## Prerequisites
 
-This agent requires the **playwright-cli** skill to be installed. The `running-playwright-tests` skill calls it directly for every browser action. If `Skill(playwright-cli)` is unavailable, report the error immediately — do not proceed.
+This agent requires the **playwright-cli** skill to be installed. The `running-playwright-tests` skill drives every browser action through `playwright-cli` commands. If `Skill(playwright-cli)` is unavailable, report the error immediately — do not proceed.
 
 ## Inputs
 
@@ -66,15 +66,15 @@ Read the test plan file and extract:
 
 ## Step 2 — Execute tests
 
-Invoke `Skill(bitwarden-testing-tools:running-playwright-tests)`. Pass:
+Invoke `Skill(bitwarden-testing-tools:running-playwright-tests)` and follow its instructions to execute the tests, using these inputs:
 
 - **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence in the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry.
 - Artifacts output dir
 - Config path: `${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/playwright.config.json`
 - **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
 
-Wait for the skill to return. The response is a complete object (`"run_status": "complete"`), a paused object (`"run_status": "paused"` with `need_user_input`), or an aborted object (`"run_status": "aborted"` with `abort_reason`, and with `cases` when the abort happened mid-run). Return the skill's output verbatim in every case.
+Following the skill produces a complete object (`"run_status": "complete"`), a paused object (`"run_status": "paused"` with `need_user_input`), or an aborted object (`"run_status": "aborted"` with `abort_reason`, and with `cases` when the abort happened mid-run). Return that output verbatim in every case.
 
 ## Step 3 - Return results
 
-Your final response is the JSON object returned by running-playwright-tests, verbatim, with no preface or commentary. On a complete run it has `"run_status": "complete"`. On a pause it has `"run_status": "paused"` and `need_user_input`; do not wrap it as complete. On an abort it has `"run_status": "aborted"` and `abort_reason`, with no `cases` when setup failed before the first test case and with a `cases` array when the run aborted mid-way through. Pass whichever shape you received through unchanged.
+Your final response is the JSON object you produced by following running-playwright-tests, verbatim, with no preface or commentary. On a complete run it has `"run_status": "complete"`. On a pause it has `"run_status": "paused"` and `need_user_input`; do not wrap it as complete. On an abort it has `"run_status": "aborted"` and `abort_reason`, with no `cases` when setup failed before the first test case and with a `cases` array when the run aborted mid-way through. Pass whichever shape you received through unchanged.

@@ -35,20 +35,20 @@ Read the test plan file and extract:
 
 ## Step 2 — Verify the environment
 
-Invoke `Skill(bitwarden-testing-tools:checking-localhost-web-health)`. Pass the required service names, the primary test URL, and the artifacts output dir.
+Invoke `Skill(bitwarden-testing-tools:checking-localhost-web-health)` and follow its instructions to verify the environment, using the required service names, the primary test URL, and the artifacts output dir as inputs.
 
-The skill runs three steps in order (preflight, health check, render verify) and halts on the first failure. Wait for it to return.
+Following the skill runs three steps in order (preflight, health check, render verify) and halts on the first failure.
 
 ## Step 3 — Return the result
 
 Your final response is either a success confirmation or an error block. Do not preface or follow your response with any other commentary.
 
-**On success**, return a single line of exactly this form (passing through the skill's own success line):
+**On success**, return a single line of exactly this form (passing through the success line produced by following the skill):
 
 ```
 Environment verified: <N> services healthy, render OK.
 ```
 
-**On failure**, return the skill's failure output verbatim — the offending script's stdout/stderr or the render-verify screenshot path + description. Do not invent a success line.
+**On failure**, return the failure output produced by following the skill verbatim — the offending script's stdout/stderr or the render-verify screenshot path + description. Do not invent a success line.
 
-Self-check before returning: your response is either the one-line success confirmation beginning with `Environment verified:` OR the failure block from the skill. It is never a fenced artifact (no `<!-- ... START -->` / `END` markers) or any other markdown artifact shape.
+Self-check before returning: your response is either the one-line success confirmation beginning with `Environment verified:` OR the failure block produced by following the skill. It is never a fenced artifact (no `<!-- ... START -->` / `END` markers) or any other markdown artifact shape.
