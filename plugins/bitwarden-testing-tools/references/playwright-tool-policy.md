@@ -11,7 +11,7 @@ The sections below give the constraints for each category present in this pipeli
 
 ## Canonical script paths
 
-Reference these scripts by these exact paths; do not duplicate the paths elsewhere in prose.
+Prose that needs a pipeline script path references it from here rather than hardcoding it. A skill whose `allowed-tools` grant must name its own script path is the exception — that repetition is required for the grant to match.
 
 - Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py`
 
@@ -39,7 +39,7 @@ Read-only Stripe test-mode queries, plus the single permitted write of advancing
 - API calls that substitute for UI actions a user could perform in the browser
 - Using API calls to verify test results when the outcome is observable in the UI (always assert via `playwright-cli` instead)
 - CLI tools not related to service startup (the `using-stripe-cli` wrapper script excepted when used read-only per Category 4)
-- Stripe write operations (POST, PUT, DELETE): creating coupons, modifying subscriptions, updating customers, or any other Stripe state change
+- Stripe write operations (POST, PUT, DELETE) — creating coupons, modifying subscriptions, updating customers, or any other Stripe state change — **except the single sanctioned test-clock advance owned by the `using-stripe-cli` skill (Category 4)**
 - Editing feature flags or any other application configuration
 
 ## Stop Condition
