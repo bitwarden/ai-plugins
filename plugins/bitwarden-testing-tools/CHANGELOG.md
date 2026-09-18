@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Behavior evals for `scoping-playwright-application-context`, five advice-only cases. The suite is kept as an authoring aid and has not been benchmarked.
 - Behavior evals for `mapping-services-under-test`, four advice-only cases. The suite is kept as an authoring aid and has not been benchmarked.
 
+### Changed
+
+- Inter-agent artifacts (context, app-context, services) now use unique HTML-comment fences (`<!-- CONTEXT START -->`, `<!-- APP-CONTEXT START -->`, `<!-- SERVICES START -->`) as their contract instead of markdown-header shape.
+
 ## [1.2.0] - 2026-08-31
 
 ### Added
