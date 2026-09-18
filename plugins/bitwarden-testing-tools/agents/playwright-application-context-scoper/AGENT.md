@@ -51,7 +51,7 @@ Feature description: <Feature Description section text>
 Acceptance criteria:
 <Acceptance Criteria items as a numbered list>
 
-Return the complete Application Context with two top-level sections: ## States and ## Flows. State and flow definitions follow the state-centric schema documented in the skill.
+Return the complete Application Context: a `## States` section and a `## Flows` section following the state-centric schema documented in the skill.
 ```
 
 Wait for the complete Application Context.
@@ -60,16 +60,20 @@ Wait for the complete Application Context.
 
 Your final response is the app-context artifact itself, formatted as markdown. Do not preface or follow your response with any other commentary; the entire response is the artifact content.
 
-The skill serializes the Application Context exactly once. As a defensive backstop only, if the skill output ever contains more than one `## States` section, extract only the content beginning at the LAST `## States` heading — discard all earlier passes and any prose between them. Never concatenate multiple passes.
+The skill serializes the Application Context exactly once. As a defensive backstop only, if the skill serializes the block more than once, keep only the content between the first `<!-- APP-CONTEXT START -->` and the last `<!-- APP-CONTEXT END -->`. Never concatenate multiple passes.
 
 Return exactly this structure:
 
 ```markdown
-## Application Context
+<!-- APP-CONTEXT START -->
 
-<the final ## States … ## Flows block from the skill output — containing exactly two top-level sections>
+# Application Context
+
+<the final ## States … ## Flows block from the skill output>
+
+<!-- APP-CONTEXT END -->
 ```
 
 Do not summarize, reformat, or omit any part of the final block. Downstream agents depend on the full content.
 
-Self-check before returning: your first non-empty line must be `## Application Context`, the response must contain exactly one `## States` section and exactly one `## Flows` section, and no other top-level (`##`) sections. If the self-check fails, surface the failure in your final output instead of returning a malformed artifact.
+Self-check before returning: your response is exactly one `<!-- APP-CONTEXT START -->` … `<!-- APP-CONTEXT END -->` block, and within it a `## States` section and a `## Flows` section are each present. If the self-check fails, surface the failure in your final output instead of returning a malformed artifact.

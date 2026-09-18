@@ -81,7 +81,7 @@ Every flow obeys these rules:
 
 ## Output schema
 
-Produce a single markdown document with exactly two top-level sections, in this order: `## States` then `## Flows`. No other top-level sections.
+Produce a `## States` section followed by a `## Flows` section, in that order. The calling agent wraps this in the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` artifact fence and a `# Application Context` title; emit only the two sections here.
 
 ### `## States`
 
