@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The plugin README now describes two families of tooling: standalone analysis skills, and the web test pipeline whose components are composed rather than invoked.
+- `start-playwright-test` now composes the test plan inside a `<!-- TEST-PLAN START -->` / `<!-- TEST-PLAN END -->` fence, nesting the already-fenced services and test-cases blocks verbatim, and locates those sub-artifacts by fence rather than by heading.
 
 ## [1.5.0] - 2026-10-07
 
