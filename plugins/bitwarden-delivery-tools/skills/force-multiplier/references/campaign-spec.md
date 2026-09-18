@@ -43,8 +43,8 @@ The per-target gate that must pass before a commit is made. Defined by what the 
 The shape of the change as it is delivered. Confirmed once on the pilot, then replicated:
 
 - `branch` — a deterministic branch name template (same input → same branch, so re-runs are no-ops).
-- `title` — follows `Skill(committing-changes)` / `Skill(labeling-changes)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label. `[TICKET]` is a placeholder — substitute a real tracking-issue key, never the literal word.
-- `body` — fills the target repo's `.github/PULL_REQUEST_TEMPLATE.md` per `Skill(creating-pull-request)`.
+- `title` — follows `Skill(applying-pr-conventions)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label. `[TICKET]` is a placeholder — substitute a real tracking-issue key, never the literal word.
+- `body` — fills the target repo's `.github/PULL_REQUEST_TEMPLATE.md` per `Skill(applying-pr-conventions)`.
 - `labels` — the `ai-review` choice and any others, confirmed at pilot.
 - `draft` — `true` by default.
 
