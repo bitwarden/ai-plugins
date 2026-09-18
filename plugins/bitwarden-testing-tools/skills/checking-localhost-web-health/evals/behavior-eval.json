@@ -50,6 +50,18 @@
         "Halts and names the missing playwright-cli dependency",
         "Does not report the environment as verified"
       ]
+    },
+    {
+      "id": 5,
+      "name": "surfaces-malformed-services-fence",
+      "prompt": "The test plan has a `<!-- SERVICES START -->` marker followed by a `## Required Services` list, but there is no `<!-- SERVICES END -->` marker anywhere in the rest of the file. Extract the required service names and proceed with the health check.",
+      "expected_output": "Refuses to guess where the services artifact ends. Surfaces the malformed/absent services artifact as a failure rather than health-checking a partial or ambiguous list of service names.",
+      "expectations": [
+        "Does not treat the unterminated fence as a valid services artifact",
+        "Does not health-check a partial or guessed list of service names",
+        "Surfaces the malformed/missing fence as a failure",
+        "Does not report the environment as verified"
+      ]
     }
   ]
 }
