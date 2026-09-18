@@ -10,7 +10,7 @@ Paths written `references/...` in this skill resolve relative to the skill direc
 
 ## Inputs
 
-- **Routes:** list of URLs the tests will navigate to (typically extracted from an Application Context's `## States` section by the calling agent).
+- **Routes:** list of URLs the tests will navigate to (typically extracted from an Application Context's `## States` section by the calling agent, located within its `APP-CONTEXT` fence).
 - **Affected repos:** the same repos passed to `scoping-playwright-application-context` — used as scope for `git diff`.
 
 ## Procedure
@@ -24,7 +24,7 @@ Paths written `references/...` in this skill resolve relative to the skill direc
 
 ## Output
 
-Return the output as a markdown block whose first non-empty line is the literal heading `## Required Services`. Below that heading, list each required service as a bullet with name, URL, and port. Clearly note the **primary test URL** since it drives the render verification step.
+Return a `## Required Services` section; the calling agent wraps it in the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` artifact fence. Below the heading, list each required service as a bullet with name, URL, and port. Clearly note the **primary test URL** since it drives the render verification step.
 
 The leading token of each bullet MUST be the entry's **Health-check name** from `${CLAUDE_SKILL_DIR}/references/services.md`, not its heading. The downstream health-check step consumes that token verbatim and accepts exactly this closed set, rejecting anything else:
 

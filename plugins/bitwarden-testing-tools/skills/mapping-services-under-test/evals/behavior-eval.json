@@ -36,7 +36,8 @@
         "Sources URLs and ports from `references/services.md` rather than from memory",
         "Returns names alongside URLs and ports, not names alone",
         "Includes Identity, which login requires, not just Web",
-        "Identifies the web vault (`https://localhost:8080`) as the primary test URL, since a web vault route is present"
+        "Identifies the web vault (`https://localhost:8080`) as the primary test URL, since a web vault route is present",
+        "The output is wrapped in a single well-formed `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence containing a `## Required Services` section."
       ]
     },
     {

@@ -12,7 +12,7 @@ Case 3's expectation about sourcing ports from `references/services.md` is only 
 
 ## Files
 
-- `behavior-eval.json` - the four cases and their 16 expectations, described above.
+- `behavior-eval.json` - the four cases and their 17 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running

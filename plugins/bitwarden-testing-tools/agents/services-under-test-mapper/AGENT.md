@@ -34,9 +34,9 @@ Your task prompt includes:
 
 ## Step 1 — Read the app-context artifact
 
-Read the app-context markdown file. The app-context has two top-level sections — `## States` and `## Flows`. Extract every route line from the `## States` section: each state's `UI projection` block contains a `Route: <URL>` line. Collect those URLs (deduplicated) — these are the routes you will pass to the skill.
+Read the app-context artifact. Locate it by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence, and within it find the `## States` section. Extract every route line from `## States`: each state's `UI projection` block contains a `Route: <URL>` line. Collect those URLs (deduplicated) — these are the routes you will pass to the skill.
 
-Also read the context artifact and extract the affected repos from its `## Affected Repositories` section.
+Also read the context artifact, locating the context artifact by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence, and extract the affected repos from its `## Affected Repositories` section.
 
 ## Step 2 — Determine required services
 
@@ -51,9 +51,13 @@ The skill may emit the document across multiple passes. If the skill output cont
 Return exactly this structure:
 
 ```markdown
+<!-- SERVICES START -->
+
 ## Required Services
 
 <the final ## Required Services block from the skill output>
+
+<!-- SERVICES END -->
 ```
 
-Self-check before returning: your first non-empty line must be `## Required Services`, and that heading must appear exactly once. If the self-check fails, surface the failure in your final output instead of returning a malformed artifact.
+Self-check before returning: your response is exactly one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block containing a `## Required Services` section. If the self-check fails, surface the failure instead of returning a malformed artifact.
