@@ -1,8 +1,8 @@
 # Bitwarden Service Dependency Reference
 
-## Resolving `<bitwarden git root>`
+## About `<bitwarden git root>`
 
-`<bitwarden git root>` is the directory containing the Bitwarden `clients/` and `server/` checkouts — typically the current working directory. When resolving a repo path below, first try it relative to the current working directory. If it isn't there, attempt to locate the repo using your own reasoning (e.g. check nearby directories). If it still can't be found, **stop and alert the user that the repository folder could not be located** rather than guessing.
+In the `Repo` fields below, `<bitwarden git root>` denotes the directory containing the Bitwarden `clients/` and `server/` checkouts. The mapping procedure receives an explicit `<repo-path>` for each affected repo, so it never resolves this itself; the notation only documents where each service's code lives.
 
 ## Service Map
 
@@ -44,7 +44,7 @@
 - **Technology**: .NET Razor views (NOT Angular)
 - **Repo**: `<bitwarden git root>/server/src/Admin/`
 - **Health check**: `http://localhost:62911` (200 response)
-- **Required by**: `server/src/Admin/**` changes only
+- **Required by**: `server/src/Admin/**` changes, and any test whose routes include an Admin portal URL (`http://localhost:62911`)
 - **Note**: The Bitwarden Portal is a standalone .NET web app. No frontend build is needed. Playwright navigates directly to port 62911.
 
 ### Billing Service

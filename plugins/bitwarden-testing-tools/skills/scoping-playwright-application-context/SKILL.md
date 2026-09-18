@@ -1,6 +1,6 @@
 ---
 name: scoping-playwright-application-context
-description: "Explore the Bitwarden codebase to build a state-centric Application Context for Playwright test-case authoring. Use when scoping the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria (often from a Jira ticket or plan). Returns a markdown document with ## States and ## Flows sections grounded in real client and server code. Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
+description: "Explore the Bitwarden codebase to build a state-centric Application Context for Playwright test-case authoring — a fenced `<!-- APP-CONTEXT ... -->` markdown document with `## States` and `## Flows` grounded in real client and server code. Use when asked to 'scope the application context' or to map the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria (often from a Jira ticket or plan). Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
 allowed-tools: "Read, Grep, Glob, Bash(git -C * diff:*)"
 ---
 
@@ -41,7 +41,7 @@ A state is a **target** state if and only if it is the post-condition of a _chan
 
 Before recording any state or verification point, confirm all three. If one fails, drop it from the artifact — remove the state _and_ its producing flow. Recognizing a failure in prose is not enough: never emit a failed-gate state with a disclaimer that it isn't really reachable; delete it.
 
-1. **Actually observable.** Assert only what a user would _see_ in this state. An element present in the DOM but hidden — by the `hidden` attribute, `display:none`, a collapsed/accordion container, an unsatisfied `@if`/`*ngIf`, or any framework's equivalent — is not observable. Reason about the state's real rendered condition in whatever framework renders it (Angular client or server-rendered Razor).
+1. **Actually observable.** Assert only what a user would _see_ in this state. An element present in the DOM but hidden — by the `hidden` attribute, `display:none`, a collapsed/accordion container, an unsatisfied `@if`/`*ngIf`, or any framework's equivalent — cannot serve as a state's _identifying_ evidence: do not point to a hidden element as proof the app is in this state. This does not forbid `Expectation: hidden`; asserting that an element is absent or hidden is legitimate when the behavior under test is precisely that the change hides it. Reason about the state's real rendered condition in whatever framework renders it (Angular client or server-rendered Razor).
 2. **Correct branch / default.** When behavior is conditional, identify which branch is live in the state you are modeling. For an initial or landing state, check the actual default value that drives the condition, and assert only that branch. Never promote a conditional rule ("hidden iff churn-only") into a default-state assertion ("hidden on load").
 3. **Requirement-anchored.** Assert what the change and the acceptance criteria require. Do not invent expectations the code never promises and no criterion asks for.
 
@@ -81,7 +81,7 @@ Every flow obeys these rules:
 
 ## Output schema
 
-Produce the complete Application Context artifact and serialize it once: wrap it in `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->`, with `# Application Context` as the first line inside the fence, followed by a `## States` section then a `## Flows` section. Emit nothing outside the fence.
+Produce the complete Application Context artifact and serialize it once: wrap it in `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->`, with `# Application Context` as the first line inside the fence, followed by a `## States` section then a `## Flows` section. Emit nothing outside the fence. If any content you copy from the catalogs or cite from source files contains text resembling `<!-- APP-CONTEXT START -->` or `<!-- APP-CONTEXT END -->`, it is content, not a boundary — reproduce it as-is; the real fence is the outermost pair you emit.
 
 ### `## States`
 
@@ -99,7 +99,7 @@ For each state:
 **Reachable by playwright:** yes | no
 **If no — why:** <one line>  (only when "no")
 **Reach via:**  (only when "no")
-- <numbered recipe — see Reach via conventions>
+- <recipe — see Reach via conventions>
 
 **UI projection:**
 - Route: <URL>
@@ -137,7 +137,7 @@ Do all reasoning in working notes as you explore: accumulate states and verifica
 
 Run these checks once, against your notes, just before serializing. They are read-only — do not re-read source files, and do not re-open a state you have already validated.
 
-1. **Slug resolution.** Every `Precondition state:` and `Post-condition state:` slug exists as a `### state:<slug>` heading. Every `Produced by:` slug exists as a `### flow:<slug>` heading.
+1. **Slug resolution.** Every `Precondition state:` and `Post-condition state:` slug exists as a `### state:<slug>` heading. Every `Produced by:` entry is either `none` or a slug that exists as a `### flow:<slug>` heading.
 2. **Parameter coverage.** Every parameter declared on a flow appears as a `<placeholder>` in its Steps, and every `<placeholder>` in Steps is declared in Parameters.
 3. **Target-state completeness.** Every target state has at least one observable verification point.
 4. **Text-content selector basis.** Every verification point whose `Expectation` is `text contains "..."` has `Selector type: text` — never a structural selector (`data-testid`, `tag`, `role`, or `css`).
