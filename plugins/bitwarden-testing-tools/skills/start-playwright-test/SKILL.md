@@ -136,7 +136,7 @@ Context artifact path: <artifacts-output-dir>/context-<timestamp>.md
 App-context artifact path: <artifacts-output-dir>/app-context-<timestamp>.md
 ```
 
-Wait for completion. The agent returns the test cases as a markdown response. The response begins with the `## Test Cases` heading.
+Wait for completion. The agent returns the test cases as a markdown response, wrapped in the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence.
 
 **Persist artifact**: Write the agent's response text verbatim to `<artifacts-output-dir>/test-cases-<timestamp>.md` using the `Write` tool.
 
