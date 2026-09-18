@@ -51,29 +51,17 @@ Feature description: <Feature Description section text>
 Acceptance criteria:
 <Acceptance Criteria items as a numbered list>
 
-Return the complete Application Context: a `## States` section and a `## Flows` section following the state-centric schema documented in the skill.
+Return the complete Application Context artifact wrapped in the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence, per the skill's output schema.
 ```
 
 Wait for the complete Application Context.
 
 ## Step 3 — Return app-context as markdown
 
-Your final response is the app-context artifact itself, formatted as markdown. Do not preface or follow your response with any other commentary; the entire response is the artifact content.
+Do not preface or follow your response with any other commentary; the entire response is the artifact content.
 
 The skill serializes the Application Context exactly once. As a defensive backstop only, if the skill serializes the block more than once, keep only the content between the first `<!-- APP-CONTEXT START -->` and the last `<!-- APP-CONTEXT END -->`. Never concatenate multiple passes.
 
-Return exactly this structure:
-
-```markdown
-<!-- APP-CONTEXT START -->
-
-# Application Context
-
-<the final ## States … ## Flows block from the skill output>
-
-<!-- APP-CONTEXT END -->
-```
-
-Do not summarize, reformat, or omit any part of the final block. Downstream agents depend on the full content.
+Your final response is the Application Context artifact the skill returns, verbatim. The skill emits it wrapped in `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` with a `# Application Context` title and `## States` / `## Flows` sections inside. Do not add, remove, reformat, or re-wrap anything.
 
 Self-check before returning: your response is exactly one `<!-- APP-CONTEXT START -->` … `<!-- APP-CONTEXT END -->` block, and within it a `## States` section and a `## Flows` section are each present. If the self-check fails, surface the failure in your final output instead of returning a malformed artifact.
