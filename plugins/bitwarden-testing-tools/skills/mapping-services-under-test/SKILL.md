@@ -4,7 +4,7 @@ description: "Determine which Bitwarden local development services are required 
 allowed-tools: "Read, Grep, Glob, Bash(git -C * diff:*)"
 ---
 
-Given the routes the tests will navigate to AND the affected repos, determine which local services are required to run web tests. The skill runs its own `git -C <repo-path> diff --name-only origin/main...HEAD` against each affected repo to obtain the changed file list, then consults `${CLAUDE_SKILL_DIR}/references/services.md` for the dependency map.
+Given the routes the tests will navigate to AND the affected repos, determine which local services are required to run web tests. Following this skill, you run `git -C <repo-path> diff --name-only origin/main...HEAD` against each affected repo to obtain the changed file list, then consult `${CLAUDE_SKILL_DIR}/references/services.md` for the dependency map.
 
 Paths written `references/...` in this skill resolve relative to the skill directory (`${CLAUDE_SKILL_DIR}`).
 
