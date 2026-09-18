@@ -46,7 +46,7 @@ Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)`. Pass the ro
 
 Your final response is the services artifact, formatted as markdown. Do not preface or follow your response with any other commentary; the entire response is the artifact content.
 
-The skill may emit the document across multiple passes. If the skill output contains more than one `## Required Services` section, extract only the content beginning at the LAST `## Required Services` heading — discard all earlier draft passes and any prose between them. Never concatenate multiple passes.
+The skill may emit the document across multiple passes. If more than one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block appears, keep only the content between the first `<!-- SERVICES START -->` and the last `<!-- SERVICES END -->` — discard earlier passes. Never concatenate multiple passes.
 
 Return exactly this structure:
 
