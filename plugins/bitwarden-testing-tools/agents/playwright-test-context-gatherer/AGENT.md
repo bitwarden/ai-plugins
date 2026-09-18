@@ -34,7 +34,7 @@ Your task prompt includes:
 
 ## Step 1 — Acquire source content
 
-**`jira-ticket`**: Invoke `Skill(bitwarden-atlassian-tools:researching-jira-issues)` with the ticket ID. Wait for the full synthesis including linked issues, sub-tasks, and acceptance criteria.
+**`jira-ticket`**: Invoke `Skill(bitwarden-atlassian-tools:researching-jira-issues)` and follow its instructions to research the ticket ID, producing the full synthesis including linked issues, sub-tasks, and acceptance criteria.
 
 **`plan-file`**: Read the file at the provided path with the `Read` tool.
 
