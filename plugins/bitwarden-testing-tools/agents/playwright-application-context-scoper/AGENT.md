@@ -33,7 +33,7 @@ Your task prompt includes:
 
 ## Step 1 — Read context artifact
 
-Read the context markdown file. Extract these sections by their headers:
+Read the context artifact, locating it by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence. Extract these sections by name from within it:
 
 - `## Affected Repositories` — list items
 - `## Feature Description` — paragraph text
