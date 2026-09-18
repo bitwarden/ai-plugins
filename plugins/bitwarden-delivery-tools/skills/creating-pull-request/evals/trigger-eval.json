@@ -36,10 +36,6 @@
     "should_trigger": true
   },
   {
-    "query": "I want to open a non-draft PR for this branch, what should the title look like and which t: label will it get?",
-    "should_trigger": true
-  },
-  {
     "query": "address the PR review comments on #1234 — the reviewer flagged a race condition in the session middleware and I want to push back on one of them",
     "should_trigger": false
   },

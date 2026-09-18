@@ -65,4 +65,4 @@ Ask:
 
 ## Returning to the caller
 
-Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Say so when returning them, and name `${CLAUDE_PLUGIN_ROOT}/references/pr-title-allowlist.md` as the check the caller runs before the title reaches a command. `gh` has no `--title-file`, so the title goes through a shell on the caller's side, which is where that check can execute — this skill holds no `Bash` grant.
+Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Say so when returning them. Keeping them out of a shell argument is the caller's job, since this skill holds no `Bash` grant and never submits: the body goes via `--body-file`, and the title via a file and `--title "$(cat <title-file>)"`, because `gh` has no `--title-file`.

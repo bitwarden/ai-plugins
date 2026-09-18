@@ -2,9 +2,9 @@
   "model": "claude-opus-5",
   "plugin_dirs": ["bitwarden-delivery-tools"],
   "runs_per_query": 3,
-  "should_trigger_pass_rate": 0.9,
+  "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
-  "should_trigger_pass": "9/10",
+  "should_trigger_pass": "9/9",
   "should_not_trigger_pass": "12/12",
   "results": [
     {
@@ -15,11 +15,11 @@
       "trigger_rate": 1.0
     },
     {
-      "query": "ok this branch is done — ship it for review",
+      "query": "ok this branch is done \u2014 ship it for review",
       "should_trigger": true,
-      "triggers": 2,
+      "triggers": 3,
       "runs": 3,
-      "trigger_rate": 0.6666666666666666
+      "trigger_rate": 1.0
     },
     {
       "query": "wrap this branch and send it over to the team for review",
@@ -36,21 +36,21 @@
       "trigger_rate": 1.0
     },
     {
-      "query": "open a draft pr for me — this branch tracks origin already",
+      "query": "open a draft pr for me \u2014 this branch tracks origin already",
+      "should_trigger": true,
+      "triggers": 2,
+      "runs": 3,
+      "trigger_rate": 0.6666666666666666
+    },
+    {
+      "query": "let's get this in front of reviewers \u2014 it's the rewrite I just committed, I want it as a draft",
       "should_trigger": true,
       "triggers": 3,
       "runs": 3,
       "trigger_rate": 1.0
     },
     {
-      "query": "let's get this in front of reviewers — it's the rewrite I just committed, I want it as a draft",
-      "should_trigger": true,
-      "triggers": 3,
-      "runs": 3,
-      "trigger_rate": 1.0
-    },
-    {
-      "query": "draft the PR body for feat/refresh-tokens — I've already pushed the branch, just need a clean description that follows the bitwarden template",
+      "query": "draft the PR body for feat/refresh-tokens \u2014 I've already pushed the branch, just need a clean description that follows the bitwarden template",
       "should_trigger": false,
       "triggers": 0,
       "runs": 3,
@@ -71,14 +71,7 @@
       "trigger_rate": 1.0
     },
     {
-      "query": "I want to open a non-draft PR for this branch, what should the title look like and which t: label will it get?",
-      "should_trigger": true,
-      "triggers": 1,
-      "runs": 3,
-      "trigger_rate": 0.3333333333333333
-    },
-    {
-      "query": "address the PR review comments on #1234 — the reviewer flagged a race condition in the session middleware and I want to push back on one of them",
+      "query": "address the PR review comments on #1234 \u2014 the reviewer flagged a race condition in the session middleware and I want to push back on one of them",
       "should_trigger": false,
       "triggers": 0,
       "runs": 3,
@@ -92,7 +85,7 @@
       "trigger_rate": 0.0
     },
     {
-      "query": "explain how pull requests work in the bitwarden org — I'm new and trying to understand the review process",
+      "query": "explain how pull requests work in the bitwarden org \u2014 I'm new and trying to understand the review process",
       "should_trigger": false,
       "triggers": 0,
       "runs": 3,
@@ -106,7 +99,7 @@
       "trigger_rate": 0.0
     },
     {
-      "query": "close that stale PR from last quarter — the one about the deprecated auth flow, I don't think we're picking it up",
+      "query": "close that stale PR from last quarter \u2014 the one about the deprecated auth flow, I don't think we're picking it up",
       "should_trigger": false,
       "triggers": 0,
       "runs": 3,
@@ -127,7 +120,7 @@
       "trigger_rate": 0.0
     },
     {
-      "query": "run preflight before I commit — I want to make sure tests pass and the spell check is clean",
+      "query": "run preflight before I commit \u2014 I want to make sure tests pass and the spell check is clean",
       "should_trigger": false,
       "triggers": 0,
       "runs": 3,
@@ -155,7 +148,7 @@
       "trigger_rate": 0.0
     },
     {
-      "query": "title and body are already written and agreed — just open the PR for this branch",
+      "query": "title and body are already written and agreed \u2014 just open the PR for this branch",
       "should_trigger": true,
       "triggers": 3,
       "runs": 3,
