@@ -26,7 +26,7 @@ Your task prompt includes:
 Read the context markdown and the app-context markdown. Extract by header:
 
 - `## Feature Description` and `## Acceptance Criteria` from the context markdown
-- The full app-context markdown content, which begins with the `## Application Context` heading
+- The full app-context artifact, located by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence; read the `## States` and `## Flows` sections within it
 
 ## Step 2 — Build test cases
 
@@ -41,18 +41,24 @@ Acceptance criteria:
 <full app-context markdown content, pasted verbatim>
 ```
 
-The skill returns a single markdown document whose first non-empty line is the `## Test Cases` heading.
+The skill returns a single markdown document wrapped in the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence, beginning with the `## Test Cases` heading inside it.
 
 ## Step 3 — Return the skill output
 
 Your final response is the test cases artifact, formatted as markdown. Do not preface or follow your response with any other commentary; the entire response is the artifact content.
 
-The skill may emit the document across multiple passes. If the skill output contains more than one `## Test Cases` heading, extract only the content beginning at the LAST `## Test Cases` heading — discard all earlier draft passes and any prose between them. Never concatenate multiple passes.
+The skill may emit the document across multiple passes. If the skill serializes more than once, keep only the content between the first `<!-- TEST-CASES START -->` and the last `<!-- TEST-CASES END -->`. Never concatenate multiple passes.
 
 Return exactly this structure:
+
+```markdown
+<!-- TEST-CASES START -->
 
 ## Test Cases
 
 ...
 
-Self-check before returning: your first non-empty line must be the `## Test Cases` heading, and `## Test Cases` must appear exactly once in your response. If the self-check fails, surface the failure to the orchestrator instead of returning a malformed artifact.
+<!-- TEST-CASES END -->
+```
+
+Self-check before returning: your response is exactly one `<!-- TEST-CASES START -->` … `<!-- TEST-CASES END -->` block containing a `## Test Cases` section. If the self-check fails, surface the failure to the orchestrator instead of returning a malformed artifact.
