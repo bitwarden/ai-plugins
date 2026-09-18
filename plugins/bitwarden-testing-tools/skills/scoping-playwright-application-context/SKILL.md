@@ -81,7 +81,7 @@ Every flow obeys these rules:
 
 ## Output schema
 
-Produce a `## States` section followed by a `## Flows` section, in that order. The calling agent wraps this in the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` artifact fence and a `# Application Context` title; emit only the two sections here.
+Produce the complete Application Context artifact and serialize it once: wrap it in `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->`, with `# Application Context` as the first line inside the fence, followed by a `## States` section then a `## Flows` section. Emit nothing outside the fence.
 
 ### `## States`
 
@@ -131,7 +131,7 @@ For each flow:
 
 ## Producing the document — work in notes, serialize once
 
-Do all reasoning in working notes as you explore: accumulate states and verification points, applying the validity gates as you mint each one. **Do not write out the full `## States` / `## Flows` document as an intermediate step.** The complete document appears for the first and only time as your final response — it is a serialization of notes you have already validated, not a draft you revise.
+Do all reasoning in working notes as you explore: accumulate states and verification points, applying the validity gates as you mint each one. **Do not write out the full fenced Application Context artifact as an intermediate step.** The complete `<!-- APP-CONTEXT START -->` … `<!-- APP-CONTEXT END -->` artifact appears for the first and only time as your final response — it is a serialization of notes you have already validated, not a draft you revise.
 
 ### Terminal self-review (one read-only pass over your notes)
 

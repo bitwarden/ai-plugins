@@ -24,7 +24,7 @@ Paths written `references/...` in this skill resolve relative to the skill direc
 
 ## Output
 
-Return a `## Required Services` section; the calling agent wraps it in the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` artifact fence. Below the heading, list each required service as a bullet with name, URL, and port. Clearly note the **primary test URL** since it drives the render verification step.
+Return the services artifact wrapped in `<!-- SERVICES START -->` / `<!-- SERVICES END -->`, containing a `## Required Services` section; serialize it once. Below the heading, list each required service as a bullet with name, URL, and port. Clearly note the **primary test URL** since it drives the render verification step.
 
 The leading token of each bullet MUST be the entry's **Health-check name** from `${CLAUDE_SKILL_DIR}/references/services.md`, not its heading. The downstream health-check step consumes that token verbatim and accepts exactly this closed set, rejecting anything else:
 
@@ -37,9 +37,12 @@ If a change or route resolves to a service that has no entry in `${CLAUDE_SKILL_
 Example:
 
 ```markdown
+<!-- SERVICES START -->
+
 ## Required Services
 
 - Api — `http://localhost:4000` (port 4000)
 - Identity — `http://localhost:33656` (port 33656)
 - Web — `https://localhost:8080` (port 8080) **(primary test URL)**
+<!-- SERVICES END -->
 ```
