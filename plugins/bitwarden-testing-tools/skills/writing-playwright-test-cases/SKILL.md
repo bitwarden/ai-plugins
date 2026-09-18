@@ -13,7 +13,7 @@ This skill must receive an app-context artifact in the prompt, delimited by `<!-
 - **Setup sequences** come from `## Flows` entries — each flow declares a `Precondition state:` and `Post-condition state:`, and the planner chains flows by matching post-conditions to required preconditions.
 - **Assertions** come from a state's `UI projection > Verification points`. Each verification point identifies the state; assert it exactly as the Application Context records it — a text-content point by its resolved text (not a container class or `data-testid`), a structure/state point by its selector.
 
-If no `<!-- APP-CONTEXT START -->` fence is present, return an error asking the caller to run `scoping-playwright-application-context` first.
+If no `<!-- APP-CONTEXT START -->` fence is present, return an error that the Application Context artifact (from `scoping-playwright-application-context`) is required first.
 
 ## Tool Policy
 
