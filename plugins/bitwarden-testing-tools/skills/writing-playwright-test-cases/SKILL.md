@@ -7,13 +7,13 @@ Given the plan context and Application Context (from `scoping-playwright-applica
 
 ## Prerequisite: Application Context
 
-This skill must receive an `## Application Context` section in the prompt, produced by the `scoping-playwright-application-context` skill. The Application Context contains exactly two top-level sections: `## States` and `## Flows`. Use it to ground every test case in the actual codebase:
+This skill must receive an app-context artifact in the prompt, delimited by `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` and produced by `scoping-playwright-application-context`. Within that fence it has a `## States` section and a `## Flows` section. Use it to ground every test case in the actual codebase:
 
 - **Starting URLs** come from a state's `UI projection > Route` line. Do not infer URLs from Jira descriptions.
 - **Setup sequences** come from `## Flows` entries — each flow declares a `Precondition state:` and `Post-condition state:`, and the planner chains flows by matching post-conditions to required preconditions.
 - **Assertions** come from a state's `UI projection > Verification points`. Each verification point identifies the state; assert it exactly as the Application Context records it — a text-content point by its resolved text (not a container class or `data-testid`), a structure/state point by its selector.
 
-If no Application Context is present, return an error asking the caller to run `scoping-playwright-application-context` first.
+If no `<!-- APP-CONTEXT START -->` fence is present, return an error asking the caller to run `scoping-playwright-application-context` first.
 
 ## Tool Policy
 
@@ -111,12 +111,14 @@ iframe selectors, and discount eligibility details directly into the relevant te
 
 ## Output
 
-Emit a single markdown document with this exact structure and no preceding narrative or commentary. The first non-empty line must be the `## Test Cases` heading — downstream agents anchor on it positionally and shape-validate the response.
+Emit a single markdown document with this exact structure and no preceding narrative or commentary. Wrap the document in `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->`; downstream agents locate it by that fence. Inside, the document begins with the `## Test Cases` heading.
 
 ```
+<!-- TEST-CASES START -->
 ## Test Cases
 
 <one block per test case, see Test Cases format below>
+<!-- TEST-CASES END -->
 ```
 
 **Test Cases format** — one block per test case:
