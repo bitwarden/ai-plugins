@@ -6,7 +6,7 @@ allowed-tools: >
   Bash(${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py *)
 ---
 
-Given the test cases, artifacts output dir, and the absolute path to `${CLAUDE_SKILL_DIR}/playwright.config.json`, execute the tests by calling `Skill(playwright-cli)` for each browser action.
+Given the test cases, artifacts output dir, and the absolute path to `${CLAUDE_SKILL_DIR}/playwright.config.json`, execute the tests by running `playwright-cli` commands (the CLI the `playwright-cli` skill provides) for each browser action.
 
 ## Before you start
 
@@ -52,7 +52,7 @@ Resume: Paused at <location string>. User's answer: <answer>.
 Before any navigation, open the browser with the custom config to disable SSL certificate errors (`ignoreHTTPSErrors` in playwright.config.json is intentional: Bitwarden dev certs are self-signed and all navigation targets are localhost). This must be the first `playwright-cli` call — all subsequent interactions inherit this session:
 
 ```
-Skill(playwright-cli): open --config=<config-path>
+playwright-cli open --config=<config-path>
 ```
 
 ## Step 2 — Run setup and authentication
@@ -146,7 +146,7 @@ When a case resolves to `PASS (adaptive)`, set the case's `status` to `"PASS (ad
 
 ### Screenshot policy
 
-Call `Skill(playwright-cli)` to take a full-page screenshot **after every visual state change** — no exceptions:
+Run `playwright-cli screenshot` to take a full-page screenshot **after every visual state change** — no exceptions:
 
 - After navigating to a new page or URL
 - After a modal, dialog, or overlay opens or closes
