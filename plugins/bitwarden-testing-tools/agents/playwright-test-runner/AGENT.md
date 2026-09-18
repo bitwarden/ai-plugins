@@ -62,13 +62,13 @@ If no resume context is present, proceed normally from Step 1.
 
 Read the test plan file and extract:
 
-- **All test cases**: everything under `## Test Cases`
+- **All test cases**: locate the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence, then everything under its `## Test Cases` section
 
 ## Step 2 — Execute tests
 
 Invoke `Skill(bitwarden-testing-tools:running-playwright-tests)`. Pass:
 
-- **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry.
+- **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence in the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry.
 - Artifacts output dir
 - Config path: `${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/playwright.config.json`
 - **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`

@@ -12,7 +12,7 @@ The procedure is linear and halts on the first failure. Each step has a specific
 
 ## Inputs
 
-- **Required service names:** a list of names (e.g., `Api`, `Identity`, `Web`) drawn from the test plan's `## Required Services` block. These names are the argv for `scripts/health-check.sh`; see that script for the full list of accepted names.
+- **Required service names:** a list of names (e.g., `Api`, `Identity`, `Web`) drawn from the test plan's `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence (its `## Required Services` section). These names are the argv for `scripts/health-check.sh`; see that script for the full list of accepted names.
 - **Primary test URL:** the URL the test run will navigate to first. Either `https://localhost:8080` (web vault) or `http://localhost:62911` (Bitwarden Portal). Drives the render-verify step.
 - **Artifacts output dir:** absolute path to the run's artifacts folder. The render-verify screenshot is saved under `<artifacts-output-dir>/screenshots/`.
 
