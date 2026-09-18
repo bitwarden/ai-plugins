@@ -44,20 +44,10 @@ Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)`. Pass the ro
 
 ## Step 3 — Return the services list as markdown
 
-Your final response is the services artifact, formatted as markdown. Do not preface or follow your response with any other commentary; the entire response is the artifact content.
+Do not preface or follow your response with any other commentary; the entire response is the artifact content.
 
 The skill may emit the document across multiple passes. If more than one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block appears, keep only the content between the first `<!-- SERVICES START -->` and the last `<!-- SERVICES END -->` — discard earlier passes. Never concatenate multiple passes.
 
-Return exactly this structure:
-
-```markdown
-<!-- SERVICES START -->
-
-## Required Services
-
-<the final ## Required Services block from the skill output>
-
-<!-- SERVICES END -->
-```
+Your final response is the services artifact the skill returns, verbatim, wrapped in `<!-- SERVICES START -->` / `<!-- SERVICES END -->` containing a `## Required Services` section. Do not add, remove, reformat, or re-wrap anything.
 
 Self-check before returning: your response is exactly one `<!-- SERVICES START -->` … `<!-- SERVICES END -->` block containing a `## Required Services` section. If the self-check fails, surface the failure instead of returning a malformed artifact.
