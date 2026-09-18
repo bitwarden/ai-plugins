@@ -2,22 +2,23 @@
 
 Behavior test cases for the `checking-localhost-web-health` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds four cases covering the skill's substantive, checks-are-the-product decisions: halting immediately on the first failure rather than continuing through the remaining checks or into test execution; refusing to start, build, or stop a service even when explicitly asked to, and halting instead; treating Angular render verification as a gate independent of the `/alive` health-check responses, so a healthy backend with a non-bootstrapping frontend still fails the environment check; and declining to improvise a substitute (such as a curl-and-grep check) for the `playwright-cli` dependency the render-verification step requires.
+`behavior-eval.json` holds five cases covering the skill's substantive, checks-are-the-product decisions: halting immediately on the first failure rather than continuing through the remaining checks or into test execution; refusing to start, build, or stop a service even when explicitly asked to, and halting instead; treating Angular render verification as a gate independent of the `/alive` health-check responses, so a healthy backend with a non-bootstrapping frontend still fails the environment check; declining to improvise a substitute (such as a curl-and-grep check) for the `playwright-cli` dependency the render-verification step requires; and surfacing a malformed or unterminated `SERVICES` fence in the test plan as a failure rather than health-checking a partial or guessed list of service names.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
 
-Cases are **refusal-graded**. Exercising this skill for real requires mssql, mailcatcher, azurite, the web frontend, Api, and Identity all running, which is neither mutation-safe nor reproducible in CI, and MSSQL does not run on ARM64 development machines at all. The cases therefore grade the stated decision and refusal rather than live execution: does it halt on the first failure, does it refuse to start services, does it treat render verification as a separate gate, and does it refuse to improvise around a missing dependency.
+Cases are **refusal-graded**. Exercising this skill for real requires mssql, mailcatcher, azurite, the web frontend, Api, and Identity all running, which is neither mutation-safe nor reproducible in CI, and MSSQL does not run on ARM64 development machines at all. The cases therefore grade the stated decision and refusal rather than live execution: does it halt on the first failure, does it refuse to start services, does it treat render verification as a separate gate, does it refuse to improvise around a missing dependency, and does it refuse to proceed on a malformed/unterminated services fence.
 
 Run with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus without-skill) with a config-blind grader. Cases 1 and 2 guard the refusals that carry the strongest with-skill delta; ablating the corresponding instruction and re-running is how each earns its keep.
 
 ## Grading notes
 
-All four cases are checkable against the model's stated plan text alone, without needing to resolve any ambiguity in `SKILL.md`:
+All five cases are checkable against the model's stated plan text alone, without needing to resolve any ambiguity in `SKILL.md`:
 
 - Case 1's expectations are checkable against the halt-on-first-failure procedure: `SKILL.md` says the procedure "is linear and halts on the first failure," so any continuation past a stated preflight failure is a clear violation.
 - Case 2's expectations are checkable against the skill's own stated boundary: `SKILL.md` says "this skill never starts, builds, or stops anything." A response that offers to start the Billing service, or that continues verifying past a known-down service, is a clear violation.
 - Case 3's expectations are checkable against the documented render-check bullets: a blank or all-white page is listed explicitly as an Angular-bootstrap failure, independent of the `/alive` step that precedes it in the procedure.
 - Case 4's expectations are checkable against the documented dependency (`SKILL.md`'s description line states the skill "Requires the `playwright-cli` skill for render verification") and the documented reason HTTP-based checks are insufficient ("the webpack dev server returns HTTP 200 even when Angular compilation failed, so only a visual render check is reliable"). One clause in case 4's `expected_output`, "because the markup is present before hydration," is a reasonable engineering inference consistent with that documented reason rather than a phrase quoted from `SKILL.md` itself; it does not contradict anything documented, but a grader should not expect the model's own wording to match it verbatim, only the underlying decision (decline the substitute, halt, name the missing dependency).
+- Case 5's expectations are checkable against the documented input contract: `SKILL.md` says the required service names are "drawn from the test plan's `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence." A test plan with a `SERVICES START` marker and no matching `END` marker has no well-formed artifact to draw names from, so guessing a service list from the unterminated block is a clear violation.
 
 No expectation in this suite is subjective or dependent on withheld ground truth: every one resolves to a yes/no check against either the stated decision (halt vs. continue, refuse vs. comply) or the presence of a specific piece of information (a hint, a dependency name, a gate distinction) in the returned text.
 
@@ -33,7 +34,7 @@ The remaining expectations (surfacing a specific failure, stating a boundary, na
 
 ## Files
 
-- `behavior-eval.json` - the four cases and their 16 expectations, described above.
+- `behavior-eval.json` - the five cases and their 20 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running

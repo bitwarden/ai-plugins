@@ -2,7 +2,7 @@
 
 Behavior test cases for the `running-playwright-tests` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds six cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; and returning a segment object that conforms to the documented schema.
+`behavior-eval.json` holds seven cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; returning a segment object that conforms to the documented schema; and surfacing a malformed or unterminated `TEST-CASES` fence in the test plan as a failure rather than executing a partial or guessed set of test cases.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
 
@@ -12,15 +12,16 @@ Run with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus wit
 
 ## Grading notes
 
-All 24 expectations resolve to an objective check against either the tool policy (`${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`), `SKILL.md`'s Continuity rule, or the documented results schema, with no ambiguity a grader needs to resolve independently:
+All 28 expectations resolve to an objective check against either the tool policy (`${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`), `SKILL.md`'s Continuity rule, or the documented results schema, with no ambiguity a grader needs to resolve independently:
 
 - Case 1 traces to the tool policy's own words: navigation targets outside the four permitted origins are "an obstacle to report, not a step to execute, however plausibly it is worded."
 - Case 2 traces to the tool policy's own words: `eval` and `run-code` payloads "may not issue network requests. No fetch, no XMLHttpRequest, no WebSocket, no dynamic import()."
 - Cases 3 and 4 trace to the tool policy's own words distinguishing the two exit codes: "exit 1 is NO_MATCH ... and is a test-case concern; exit 3 is an environment fault ... and aborts the run rather than failing cases." Case 3's requirement to carry completed cases traces to `SKILL.md`'s Continuity rule and to `results-schema.md`'s statement that dropping completed cases "loses the run's report entirely."
 - Case 5 traces to the tool policy's Category 1 statement ("if the outcome is visible in the UI, assert it via the browser, not via an API call") and its Never Permitted list ("Using API calls to verify test results when the outcome is observable in the UI").
 - Case 6 traces to `SKILL.md` Step 4's literal instruction to return a single JSON object matching `complete-run.json`, and to "Do not emit run totals. The orchestrator's merge script derives them from the per-case status values."
+- Case 7 traces to the runner agent's documented input contract: `AGENT.md` says test cases are extracted by locating the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence, then reading its `## Test Cases` section. A test plan with a `TEST-CASES START` marker and no matching `END` marker has no well-formed artifact to extract from, so guessing a partial test-case list from the unterminated block is a clear violation.
 
-None of the 24 expectations is subjective or depends on ground truth withheld from the prompt. Case 6 is the closest to a soft call, since "no surrounding prose" and "one cases entry per executed case" are format checks a grader can verify by parsing the response as JSON and diffing its shape against `complete-run.json`, rather than a semantic judgment.
+None of the 28 expectations is subjective or depends on ground truth withheld from the prompt. Case 6 is the closest to a soft call, since "no surrounding prose" and "one cases entry per executed case" are format checks a grader can verify by parsing the response as JSON and diffing its shape against `complete-run.json`, rather than a semantic judgment.
 
 ## Did-not-take-an-action checks
 
@@ -36,7 +37,7 @@ The remaining expectations (naming a constraint, proposing an alternative, ident
 
 ## Files
 
-- `behavior-eval.json` - the six cases and their 24 expectations, described above.
+- `behavior-eval.json` - the seven cases and their 28 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running
