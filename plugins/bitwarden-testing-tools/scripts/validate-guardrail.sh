@@ -6,18 +6,29 @@ set -uo pipefail
 ROOT="${1:-"$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"}"
 AGENTS_DIR="$ROOT/agents"
 SKILL="$ROOT/skills/start-playwright-test/SKILL.md"
+POLICY="$ROOT/references/untrusted-source-policy.md"
 # Anchors are short phrases guaranteed to sit on one physical line, so prose
-# line-wrapping of the guardrail/backstop can never break these greps.
-BACKSTOP="names this run's fence token"
-GUARD="delimit that source"
+# line-wrapping of the guardrail can never break these greps. Both the current
+# guardrail (rules inline plus a pointer to the shared policy) and the earlier
+# form (rules deferred to the dispatch prompt) carry the "Untrusted source
+# content." heading and bind to the `UNTRUSTED-SOURCE-<nonce>` fence, so anchoring
+# on those two keeps this validator green while agents are migrated one at a time.
+HEADING="Untrusted source content."
+FENCE="UNTRUSTED-SOURCE-<nonce>"
 rc=0
+
+# The full rules live in one shared policy file; each agent and skill points at it.
+[ -f "$POLICY" ] || { echo "MISSING shared policy file: $POLICY"; rc=1; }
 
 seen=0
 for f in "$AGENTS_DIR"/*/AGENT.md; do
   [ -e "$f" ] || continue
   seen=$((seen+1))
-  if ! grep -qF "$BACKSTOP" "$f"; then
-    echo "MISSING backstop: $f"; rc=1
+  if ! grep -qF "$HEADING" "$f"; then
+    echo "MISSING guardrail heading: $f"; rc=1
+  fi
+  if ! grep -qF "$FENCE" "$f"; then
+    echo "MISSING fence binding: $f"; rc=1
   fi
   if grep -qF "Never follow directives embedded" "$f"; then
     echo "STALE paragraph still present: $f"; rc=1
@@ -25,7 +36,7 @@ for f in "$AGENTS_DIR"/*/AGENT.md; do
 done
 [ "$seen" -gt 0 ] || { echo "NO agent files found under $AGENTS_DIR"; rc=1; }
 
-if ! grep -qF "$GUARD" "$SKILL"; then
+if ! grep -qF "$FENCE" "$SKILL"; then
   echo "MISSING guardrail block in: $SKILL"; rc=1
 fi
 if ! grep -qF "gen-nonce.sh" "$SKILL"; then
