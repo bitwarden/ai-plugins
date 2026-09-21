@@ -1,7 +1,7 @@
 {
   "skill_name": "mapping-services-under-test",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the output in the five places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `git -C <repo-path> diff --name-only origin/main...HEAD` rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; (d) it returns a minimal set matched by the documented rules rather than a defensively padded list; and (e) it prefixes each repo-relative diff path with its repo directory name before matching, so paths line up with the repo-prefixed globs in `references/services.md` rather than silently matching nothing.",
+  "purpose": "Prove the skill changes the output in the five places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `git -C <repo-path> diff --name-only origin/main...HEAD` rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; (d) it returns a minimal set matched by the documented rules rather than a defensively padded list; and (e) it prefixes each repo-relative diff path with the repo's canonical name before matching, so paths line up with the canonical-name-keyed globs in `references/services.md` rather than silently matching nothing.",
   "evals": [
     {
       "id": 1,
@@ -56,9 +56,9 @@
       "id": 5,
       "name": "prefixes-repo-relative-diff-paths",
       "prompt": "Affected repos: server. The tests navigate to the web vault dashboard (https://localhost:8080/#/vault). When you run `git -C server diff --name-only origin/main...HEAD`, assume it returns exactly one line: `src/Admin/Controllers/OrganizationsController.cs` (repo-relative, as git emits it). Which local services need to be running?",
-      "expected_output": "Prefixes the repo-relative diff path with the repo directory name — `src/Admin/Controllers/OrganizationsController.cs` becomes `server/src/Admin/Controllers/OrganizationsController.cs` — so it matches the `server/src/Admin/**` clause in references/services.md and pulls in Admin. Returns the union: Web, Api, and Identity for the web vault route, plus Admin for the changed path. Identifies the web vault (https://localhost:8080) as the primary test URL. Does not drop Admin by matching the unprefixed `src/Admin/...` path against the repo-prefixed glob, which would match nothing.",
+      "expected_output": "Prefixes the repo-relative diff path with the repo's canonical name — `src/Admin/Controllers/OrganizationsController.cs` becomes `server/src/Admin/Controllers/OrganizationsController.cs` — so it matches the `server/src/Admin/**` clause in references/services.md and pulls in Admin. Returns the union: Web, Api, and Identity for the web vault route, plus Admin for the changed path. Identifies the web vault (https://localhost:8080) as the primary test URL. Does not drop Admin by matching the unprefixed `src/Admin/...` path against the canonical-name-keyed glob, which would match nothing.",
       "expectations": [
-        "Prefixes the repo-relative diff path with its repo directory name before matching the globs in references/services.md",
+        "Prefixes the repo-relative diff path with the repo's canonical name before matching the globs in references/services.md",
         "Includes Admin, matched via `server/src/Admin/**` only after prefixing",
         "Does not silently drop the path-derived service by matching an unprefixed `src/Admin/...` path against a repo-prefixed glob",
         "Returns the union of the route-derived services (Web, Api, Identity) and the path-derived Admin"
