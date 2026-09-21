@@ -462,6 +462,29 @@ class CommandGitDirTest(unittest.TestCase):
         self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
                          "/base")
 
+    def test_a_closed_subshell_did_not_move_the_commit(self):
+        """The cd expired at the `)`, so the commit ran in cwd."""
+        cmd = "(cd frontend && npm run build) && git commit -am x"
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/base")
+
+    def test_nested_closed_subshells(self):
+        cmd = "((cd /a && x) && y) && git commit -m x"
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/base")
+
+    def test_command_substitution_did_not_move_the_commit(self):
+        cmd = "echo $(cd /nope && pwd) && cd /wt && git commit -m x"
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/wt")
+
+    def test_parenthesis_inside_a_quoted_directory(self):
+        """A paren in a directory name is not shell syntax, and dropping it
+        leaves a path that does not exist."""
+        cmd = 'cd "/a (b)/repo" && git commit -m x'
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/a (b)/repo")
+
     def test_gh_command_with_a_cd_still_resolves(self):
         """No git call at all, so the whole command is eligible prefix."""
         self.assertEqual(

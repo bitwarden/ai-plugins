@@ -159,6 +159,37 @@ def _pr_url_repo(stdout):
     return m.group(1) if m else ""
 
 
+def _drop_closed_groups(text):
+    """``text`` with every balanced ``(...)`` blanked out, length preserved.
+
+    A subshell that opened and closed before the invocation cannot have moved
+    it: `(cd frontend && npm run build) && git commit -am x` commits in cwd,
+    because the `cd` expired at the `)`. A group left open is the invocation's
+    own subshell and stays, which is what keeps `(cd /wt && git commit -m x)`
+    resolving to the worktree. `$(...)` goes the same way as any other closed
+    group, having likewise never moved the outer command.
+
+    Quoted spans are skipped: a parenthesis inside `cd "/a (b)/repo"` is part
+    of a directory name, not shell syntax, and blanking it would leave a path
+    that does not exist.
+    """
+    out = list(text)
+    opens = []
+    quote = ""
+    for i, ch in enumerate(text):
+        if quote:
+            if ch == quote:
+                quote = ""
+        elif ch in "\"'":
+            quote = ch
+        elif ch == "(":
+            opens.append(i)
+        elif ch == ")" and opens:
+            for j in range(opens.pop(), i + 1):
+                out[j] = " "
+    return "".join(out)
+
+
 def _command_git_dir(cwd, command, acts_at=None):
     """The directory the invocation at ``acts_at`` operated in.
 
@@ -170,8 +201,9 @@ def _command_git_dir(cwd, command, acts_at=None):
     can run several programs in several directories, and only one of them is
     the subject of the event: in `git status && cd /wt && git commit -m x` the
     `cd` moved the commit, even though it follows a git call. A `cd` before
-    the invocation moved it; a `cd` after it could not; and a `-C` counts only
-    when it belongs to the invocation itself, not to some other segment.
+    the invocation moved it, unless a subshell closed over it first; a `cd`
+    after it could not; and a `-C` counts only when it belongs to the
+    invocation itself, not to some other segment.
 
     Callers that have already located their invocation pass its offset. With
     none given, the first git call in the string stands in, located at a
@@ -191,7 +223,7 @@ def _command_git_dir(cwd, command, acts_at=None):
     m = _GIT_DASH_C_RE.match(cmd, acts_at)
     if m:
         return _resolve(m.group("dir"))
-    cds = list(_CD_RE.finditer(cmd[:acts_at]))
+    cds = list(_CD_RE.finditer(_drop_closed_groups(cmd[:acts_at])))
     if cds:
         return _resolve(cds[-1].group("dir"))
     return cwd
