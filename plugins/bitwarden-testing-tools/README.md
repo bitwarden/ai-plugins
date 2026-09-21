@@ -4,7 +4,7 @@ A set of test related skills for Bitwarden.
 
 ## Overview
 
-A set of skills that support Bitwarden's testing and quality work with evidence grounded in our repos, layers, and where our tests actually live. Skills can be invoked individually and this plugin is designed to grow over time. See the table below for what ships today.
+A set of skills and agents that support Bitwarden's testing and quality work with evidence grounded in our repos, layers, and where our tests actually live. Skills can be invoked individually, and the planning-phase agents listed below turn a feature reference into grounded Playwright test-planning artifacts. This plugin is designed to grow over time. See the tables below for what ships today.
 
 ## Skills
 
@@ -80,6 +80,14 @@ Grab the verification link from the email Mailcatcher just received for qa+trial
 
 ```
 What's the status of test subscription sub_abc123, and is a test clock attached?
+```
+
+```
+Scope the application context for the past-due billing banner change in clients and server.
+```
+
+```
+Which local services do I need running for these tests, and what should I start?
 ```
 
 ## Path variables

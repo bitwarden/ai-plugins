@@ -2,7 +2,7 @@
 name: mapping-services-under-test
 description: "Determine which Bitwarden local development services are required for a given set of routes and the current branch diff. Use this skill when given the routes the tests will navigate to, or when asked 'which services do I need running' or 'what should I start for these tests'. Returns the union of route-based and file-path-based service dependencies as service names with their URLs and ports. Do NOT use it to start services, run health checks, or debug a running service."
 argument-hint: "[routes from an Application Context ## States] [affected repos]"
-allowed-tools: "Read, Grep, Glob, Bash(git -C:*)"
+allowed-tools: "Read, Bash(git -C:*)"
 ---
 
 Given the routes the tests will navigate to AND the affected repos, determine which local services are required to run web tests. Following this skill, you run `git -C <repo-path> diff --name-only origin/main...HEAD` against each affected repo to obtain the changed file list, then consult `${CLAUDE_SKILL_DIR}/references/services.md` for the dependency map.
@@ -13,12 +13,16 @@ Paths written `${CLAUDE_SKILL_DIR}/...` resolve from this skill's directory; pat
 
 ## Inputs
 
-- **Routes:** list of URLs the tests will navigate to (typically extracted from an Application Context's `## States` section by the calling agent, located within its `APP-CONTEXT` fence).
+- **Routes:** list of URLs the tests will navigate to (typically extracted from an Application Context's `## States` section by the calling agent, located within its `APP-CONTEXT` fence). Routes should be fully-qualified URLs including the host; a bare path (no host) is assumed to be a web vault route, so an Admin portal route must include `http://localhost:62911` to be recognized as one.
 - **Affected repos:** the same repos passed to `scoping-playwright-application-context` — used as scope for `git diff`.
+- **Repo path:** each affected repo's `<repo-path>` is `<bitwarden git root>/<canonical name>` (e.g. `<root>/server`, `<root>/clients`). The caller supplies the root, or it is the working directory; if the working directory is not the bitwarden git root and no root was given, stop and ask for it.
 
 ## Procedure
 
-1. For each affected repo, run `git -C <repo-path> diff --name-only origin/main...HEAD` and collect the resulting file paths. If the command fails — the repo path does not resolve, or `origin/main` is not present locally — stop and report that the diff base could not be resolved, rather than proceeding on routes alone (which would silently under-report path-based services). `git diff` emits paths relative to the repo root (`src/Admin/Foo.cs`), so prefix each collected path with the repo's **canonical name** — the affected-repo token it was passed in as, one of `clients`, `server`, or `billing-pricing` — before matching: a `server` line becomes `server/src/Admin/Foo.cs`. The `Required by:` globs in `services.md` are keyed to those canonical names (`server/src/Admin/**`), so a path prefixed with anything else (for example a non-canonical checkout directory such as `bw-server`) matches none of them. If an affected repo cannot be mapped to a canonical name, stop and report it rather than emitting an unprefixed or wrongly-prefixed path that would silently under-report path-based services.
+1. For each affected repo, obtain and normalize its changed file paths:
+   - **1a — Run the diff.** Run `git -C <repo-path> diff --name-only origin/main...HEAD` and collect the resulting file paths.
+   - **1b — Stop conditions.** Stop and report, rather than proceeding on routes alone (which would silently under-report path-based services), if the command fails (the repo path does not resolve, or `origin/main` is not present locally) or if an affected repo cannot be mapped to a canonical name.
+   - **1c — Prefix with the canonical name.** `git diff` emits paths relative to the repo root (`src/Admin/Foo.cs`), so prefix each collected path with the repo's **canonical name** — the affected-repo token it was passed in as, one of `clients`, `server`, or `billing-pricing` — before matching: a `server` line becomes `server/src/Admin/Foo.cs`. The `Required by (paths):` globs in `services.md` are keyed to those canonical names; see the note in `services.md` on why any other prefix matches nothing.
 2. For each repo-prefixed file path, match against the `Required by (paths):` clauses in `${CLAUDE_SKILL_DIR}/references/services.md` to determine which services that file's change requires.
 3. For each route, match against the `Required by (routes):` clauses in `${CLAUDE_SKILL_DIR}/references/services.md` to determine which services that route requires. A route that matches no `Required by (routes):` clause contributes nothing on its own — do not guess a service for it; it is backstopped by the step 5 fallback only when the union is otherwise empty.
 4. Take the union of services from steps 2 and 3. Only `## Service Map` entries can enter the union; the `## Optional Infrastructure Services` (Notifications, Events, Icons) are keyed on `Start if:` symptoms rather than `Required by:`, so they are never part of it — start them on demand only when a running test's failure points to one.
