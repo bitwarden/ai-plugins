@@ -27,7 +27,8 @@ EDIT_TOOLS = {"Edit", "MultiEdit", "Write", "NotebookEdit"}
 # `git commit-tree` etc. don't false-positive; `[^\n|&;]*?` lets global flags but
 # not another subcommand precede it.
 _GIT_COMMIT_RE = re.compile(
-    r"(?:^|[\n|&;]|\&\&|\|\|)\s*git\b(?:\s+-[^\s]+(?:\s+[^\s-][^\s]*)?)*\s+commit\b"
+    r"(?:^|[\n|&;]|\&\&|\|\|)\s*(?P<git>git)\b(?:\s+-[^\s]+(?:\s+[^\s-][^\s]*)?)*"
+    r"\s+commit\b"
 )
 # `--dry-run` turns a commit into a no-op preview: no SHA is produced, so it must
 # never emit bw.commit even though the subcommand IS `commit`.
@@ -158,31 +159,39 @@ def _pr_url_repo(stdout):
     return m.group(1) if m else ""
 
 
-def _command_git_dir(cwd, command):
-    """The directory a Bash command actually operated in.
+def _command_git_dir(cwd, command, acts_at=None):
+    """The directory the invocation at ``acts_at`` operated in.
 
     Commands routinely move before acting, via `git -C <dir>` or `cd <dir> &&
     ...`, while the hook payload's cwd stays wherever the session started.
-    Relative directives resolve against cwd. A `cd` after the git call cannot
-    have moved it, so only text preceding the git call is considered.
+    Relative directives resolve against cwd.
 
-    The git call is located at a command-segment boundary, not by any "git"
-    in the string: directory names contain it often enough (a worktree at
-    .../verify-hook-git-context) that a bare word match would cut the prefix
-    mid-path and yield a directory that does not exist.
+    ``acts_at`` is the offset of the invocation being described. One command
+    can run several programs in several directories, and only one of them is
+    the subject of the event: in `git status && cd /wt && git commit -m x` the
+    `cd` moved the commit, even though it follows a git call. A `cd` before
+    the invocation moved it; a `cd` after it could not; and a `-C` counts only
+    when it belongs to the invocation itself, not to some other segment.
+
+    Callers that have already located their invocation pass its offset. With
+    none given, the first git call in the string stands in, located at a
+    command-segment boundary rather than by any "git" in the text: directory
+    names carry those three letters often enough that a bare word match would
+    cut the prefix mid-path and yield a directory that does not exist.
     """
     cmd = command or ""
+    if acts_at is None:
+        git_call = _GIT_INVOCATION_RE.search(cmd)
+        acts_at = git_call.start("cmd") if git_call else len(cmd)
 
     def _resolve(raw):
         d = raw[1:-1] if len(raw) > 1 and raw[0] == raw[-1] and raw[0] in "\"'" else raw
         return d if os.path.isabs(d) else os.path.normpath(os.path.join(cwd, d))
 
-    m = _GIT_DASH_C_RE.search(cmd)
+    m = _GIT_DASH_C_RE.match(cmd, acts_at)
     if m:
         return _resolve(m.group("dir"))
-    git_call = _GIT_INVOCATION_RE.search(cmd)
-    prefix = cmd[:git_call.start("cmd")] if git_call else cmd
-    cds = list(_CD_RE.finditer(prefix))
+    cds = list(_CD_RE.finditer(cmd[:acts_at]))
     if cds:
         return _resolve(cds[-1].group("dir"))
     return cwd
@@ -303,19 +312,21 @@ def handle_bash(h, tin, cwd, session):
     # git commit: the command's own output says WHAT was committed, the
     # directory it ran in says WHERE. Both are needed, and they have to agree.
     #
-    # Reading HEAD from cwd alone was wrong for any commit made outside it, in
-    # a worktree or a sibling checkout, because cwd's untouched HEAD is still a
-    # real SHA and would be reported as work this session authored, when in
-    # fact nobody in this session made it. Requiring HEAD to match the
-    # SHA git printed drops those rather than guessing, in the same spirit as
-    # _is_successful_commit refusing to fabricate a commit from an ambiguous
-    # response. `--dry-run`, failed commits and read-only lookalikes are gated
-    # out before this point.
+    # Any directory has a HEAD, and it is a real SHA whether or not this
+    # session produced it, so HEAD on its own cannot establish authorship for a
+    # commit made in a worktree or a sibling checkout. Requiring HEAD to match
+    # the SHA git printed drops the ambiguous cases rather than guessing, in
+    # the same spirit as _is_successful_commit refusing to fabricate a commit
+    # from an ambiguous response. `--dry-run`, failed commits and read-only
+    # lookalikes are gated out before this point.
     if _is_successful_commit(cmd, resp):
         summary = _commit_summary(resp.get("stdout") or "")
         if summary:
             branch, printed_sha = summary
-            git_dir = _command_git_dir(cwd, cmd)
+            # The commit's own offset: in `git status && cd /wt && git commit
+            # -m x` the cd moved the commit, though a git call precedes it.
+            invocation = _GIT_COMMIT_RE.search(cmd)
+            git_dir = _command_git_dir(cwd, cmd, invocation.start("git"))
             head = _git(git_dir, "rev-parse", "HEAD")
             repo = _repo_full(git_dir)
             if head and head.startswith(printed_sha) and _has_joinable_repo(repo):
@@ -336,12 +347,13 @@ def handle_bash(h, tin, cwd, session):
     # trusted to name a PR this session actually created. The same URL names
     # the repo, which beats inferring it from a directory; the directory is
     # only the fallback, and the source of the head branch.
-    if re.search(r"\bgh\b[^\n|&;]*\bpr\b[^\n|&;]*\bcreate\b", cmd):
+    gh_call = re.search(r"\bgh\b[^\n|&;]*\bpr\b[^\n|&;]*\bcreate\b", cmd)
+    if gh_call:
         if _is_successful_pr_create(resp):
             stdout = resp.get("stdout") or ""
             m = re.search(r"/pull/(\d+)", stdout)
             if m:
-                git_dir = _command_git_dir(cwd, cmd)
+                git_dir = _command_git_dir(cwd, cmd, gh_call.start())
                 repo = _pr_url_repo(stdout) or _repo_full(git_dir)
                 if not _has_joinable_repo(repo):
                     return

@@ -418,9 +418,8 @@ class CommandGitDirTest(unittest.TestCase):
 
     def test_path_containing_the_word_git(self):
         """A directory named ...-git-... must not be mistaken for the git call
-        and truncate the cd target mid-path. A worktree whose own name carried
-        the word silently suppressed every bw.commit made in it, because the
-        resolved directory did not exist."""
+        and truncate the cd target mid-path: the resolved directory does not
+        exist, and every bw.commit made in that worktree is lost."""
         self.assertEqual(
             _command_git_dir("/base", "cd /repos/verify-hook-git-context && git commit -m x"),
             "/repos/verify-hook-git-context")
@@ -450,6 +449,19 @@ class CommandGitDirTest(unittest.TestCase):
         self.assertEqual(_command_git_dir("/base", "(cd /wt && git commit -m x)"),
                          "/wt")
 
+    def test_only_a_cd_before_the_named_invocation_counts(self):
+        """acts_at names the invocation being described. A cd that follows an
+        earlier git call still moved the later one."""
+        cmd = "git status && cd /wt && git commit -m x"
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/wt")
+
+    def test_dash_c_from_another_segment_is_not_adopted(self):
+        """A -C belongs to the invocation that carries it, not to the event."""
+        cmd = "git -C /other log && git commit -m x"
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/base")
+
     def test_gh_command_with_a_cd_still_resolves(self):
         """No git call at all, so the whole command is eligible prefix."""
         self.assertEqual(
@@ -458,10 +470,9 @@ class CommandGitDirTest(unittest.TestCase):
 
 class BashGitContextTest(unittest.TestCase):
     """bw.commit and bw.pr must describe the repo the command ran in, and
-    bw.commit must never report a SHA the command did not produce. Reading
-    HEAD from the session's cwd did both: a commit made in a worktree was
-    reported as the cwd repo's untouched HEAD, which is a real SHA belonging
-    to some other pull request."""
+    bw.commit must never report a SHA the command did not produce. Any
+    directory's HEAD is a real SHA belonging to somebody's work, so reporting
+    it for a commit made somewhere else credits that work to this session."""
 
     @classmethod
     def setUpClass(cls):
@@ -517,6 +528,18 @@ class BashGitContextTest(unittest.TestCase):
         self.assertEqual(a["bw.commit_sha"], sha)
         self.assertEqual(a["bw.branch"], "feat/wt")
         self.assertEqual(a["bw.repo_full"], "acme/alpha")
+
+    def test_commit_after_an_earlier_git_call_reports_the_worktree(self):
+        """A read-only git call before the cd must not anchor the search: the
+        commit still happened where the cd left it."""
+        sha, branch, out = self._commit_in(self.worktree, "wt2.txt")
+        got = self._emit_for(
+            self.repo_a,
+            f"git status && cd {self.worktree} && git commit -m 'add wt2.txt'",
+            out)
+        a = got["bw.commit"]
+        self.assertEqual(a["bw.commit_sha"], sha)
+        self.assertEqual(a["bw.branch"], "feat/wt")
 
     def test_commit_in_sibling_repo_reports_that_repo(self):
         sha, branch, out = self._commit_in(self.repo_b, "sib.txt")
