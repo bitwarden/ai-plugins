@@ -28,7 +28,7 @@ Your task prompt includes:
 
 ## Step 1 — Read both artifacts
 
-- Read the context artifact, locating it by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence — it begins at the first `<!-- CONTEXT START -->` and ends at the last `<!-- CONTEXT END -->`, so a marker embedded in the source content cannot truncate it — and extract `## Feature Description` and `## Acceptance Criteria` by name from within it.
+- Read the context artifact, locating it by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence — it begins at the first `<!-- CONTEXT START -->` and ends at the last `<!-- CONTEXT END -->`, so an embedded marker cannot truncate it — and extract `## Feature Description` and `## Acceptance Criteria` by name from within it.
 - Read the full app-context artifact, located by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence — it begins at the first `<!-- APP-CONTEXT START -->` and ends at the last `<!-- APP-CONTEXT END -->`, so an embedded marker cannot truncate it; read the `## States` and `## Flows` sections within it
 
 ## Step 2 — Build test cases
