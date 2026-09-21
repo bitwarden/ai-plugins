@@ -39,7 +39,7 @@ Your task prompt includes:
 
 ## Step 1 — Read the app-context artifact
 
-Read the app-context artifact. Locate it by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence — it begins at the first `<!-- APP-CONTEXT START -->` and ends at the last `<!-- APP-CONTEXT END -->`, so an embedded marker cannot truncate it — and within it find the `## States` section. Extract every route line from `## States`: each state's `UI projection` block contains a `Route: <URL>` line. Collect those URLs (deduplicated) — these are the routes you will pass to the skill.
+Read the app-context artifact. Locate it by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence — it begins at the first `<!-- APP-CONTEXT START -->` and ends at the last `<!-- APP-CONTEXT END -->`, so an embedded marker cannot truncate it — and within it find the `## States` section. Extract every route line from `## States`: each state's `UI projection` block contains a `Route: <URL>` line. Collect those URLs (deduplicated) — these are the routes you will pass to the skill. Skip any state whose `Route:` is `n/a`: it is an out-of-band state with no browser route, so it contributes no route.
 
 Also read the context artifact, locating it by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence — it begins at the first `<!-- CONTEXT START -->` and ends at the last `<!-- CONTEXT END -->` — and extract the affected repos from its `## Affected Repositories` section.
 
