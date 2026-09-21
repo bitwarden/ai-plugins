@@ -14,7 +14,8 @@ In the `Repo` fields below, `<bitwarden git root>` denotes the directory contain
 - **Technology**: Angular (NX/Webpack)
 - **Repo**: `<bitwarden git root>/clients/`
 - **Health check**: `https://localhost:8080` (200 response)
-- **Required by**: any change to `clients/apps/web/**` or `clients/libs/**`, any server-side API change that surfaces in the web UI, and any test whose routes include a web vault URL (`https://localhost:8080`)
+- **Required by (paths)**: any change to `clients/apps/web/**` or `clients/libs/**`
+- **Required by (routes)**: any test whose routes include a web vault URL (`https://localhost:8080`); a server-side API change that surfaces in the web UI is covered here, since it is exercised through a web vault route
 
 ### Api Service
 
@@ -24,7 +25,8 @@ In the `Repo` fields below, `<bitwarden git root>` denotes the directory contain
 - **Technology**: .NET
 - **Repo**: `<bitwarden git root>/server/src/Api/`
 - **Health check**: `http://localhost:4000/alive`
-- **Required by**: web vault testing (handles vault data), any `server/src/Api/**` change
+- **Required by (paths)**: any `server/src/Api/**` change
+- **Required by (routes)**: web vault testing — any web vault route requires Api, which handles vault data
 
 ### Identity Service
 
@@ -34,7 +36,8 @@ In the `Repo` fields below, `<bitwarden git root>` denotes the directory contain
 - **Technology**: .NET
 - **Repo**: `<bitwarden git root>/server/src/Identity/`
 - **Health check**: `http://localhost:33656/alive`
-- **Required by**: any flow involving login/authentication, always required alongside Api for web vault
+- **Required by (paths)**: none
+- **Required by (routes)**: any flow involving login/authentication; always required alongside Api for web vault
 
 ### Bitwarden Portal
 
@@ -44,7 +47,8 @@ In the `Repo` fields below, `<bitwarden git root>` denotes the directory contain
 - **Technology**: .NET Razor views (NOT Angular)
 - **Repo**: `<bitwarden git root>/server/src/Admin/`
 - **Health check**: `http://localhost:62911` (200 response)
-- **Required by**: `server/src/Admin/**` changes, and any test whose routes include an Admin portal URL (`http://localhost:62911`)
+- **Required by (paths)**: `server/src/Admin/**` changes
+- **Required by (routes)**: any test whose routes include an Admin portal URL (`http://localhost:62911`)
 - **Note**: The Bitwarden Portal is a standalone .NET web app. No frontend build is needed. Playwright navigates directly to port 62911.
 
 ### Billing Service
@@ -55,7 +59,8 @@ In the `Repo` fields below, `<bitwarden git root>` denotes the directory contain
 - **Technology**: .NET
 - **Repo**: `<bitwarden git root>/server/src/Billing/`
 - **Health check**: `http://localhost:44519/alive`
-- **Required by**: `server/src/Billing/**` changes, and any test whose routes include `/billing/` or `/organizations/:id/billing/**` (e.g. `/organizations/:id/billing/subscription`)
+- **Required by (paths)**: `server/src/Billing/**` changes
+- **Required by (routes)**: any test whose routes include `/billing/` or `/organizations/:id/billing/**` (e.g. `/organizations/:id/billing/subscription`)
 
 ### billing-pricing Service
 
@@ -65,7 +70,8 @@ In the `Repo` fields below, `<bitwarden git root>` denotes the directory contain
 - **Technology**: .NET
 - **Repo**: `<bitwarden git root>/billing-pricing/`
 - **Health check**: `http://localhost:5082/alive` (200 response) — use HTTP; the HTTPS port (7088) has SSL errors in dev
-- **Required by**: `billing-pricing/src/**` changes only — never triggered by routes or pricing UI flows
+- **Required by (paths)**: `billing-pricing/src/**` changes only
+- **Required by (routes)**: none — never triggered by routes or pricing UI flows
 - **Note**: Separate repo — does not share `Bitwarden.sln`. Does not need the pre-build step and does not use `--no-build`. Most developers use a QA cloud environment for pricing; only require this service when the billing-pricing repo has local code changes on the branch.
 
 ---
