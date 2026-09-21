@@ -197,8 +197,15 @@ def _drop_closed_groups(text):
     return "".join(out)
 
 
-def _command_git_dir(cwd, command, acts_at=None):
-    """The directory the invocation at ``acts_at`` operated in.
+def _command_git_dirs(cwd, command, acts_at=None):
+    """Every directory the invocation at ``acts_at`` might have operated in,
+    best interpretation first: an explicit `-C`, then the `cd` that survived
+    to reach it, then the directory the session started in.
+
+    A single answer would have to parse shell exactly. A caller holding an
+    oracle, such as the SHA `git commit` printed, does not need one: it can
+    try each in turn and let the wrong readings fail, with cwd always on the
+    list as the reading that assumes the command never moved.
 
     Commands routinely move before acting, via `git -C <dir>` or `cd <dir> &&
     ...`, while the hook payload's cwd stays wherever the session started.
@@ -227,13 +234,43 @@ def _command_git_dir(cwd, command, acts_at=None):
         d = raw[1:-1] if len(raw) > 1 and raw[0] == raw[-1] and raw[0] in "\"'" else raw
         return d if os.path.isabs(d) else os.path.normpath(os.path.join(cwd, d))
 
+    out = []
     m = _GIT_DASH_C_RE.match(cmd, acts_at)
     if m:
-        return _resolve(m.group("dir"))
+        out.append(_resolve(m.group("dir")))
     cds = list(_CD_RE.finditer(_drop_closed_groups(cmd[:acts_at])))
     if cds:
-        return _resolve(cds[-1].group("dir"))
-    return cwd
+        out.append(_resolve(cds[-1].group("dir")))
+    out.append(cwd)
+    seen = set()
+    return [d for d in out if not (d in seen or seen.add(d))]
+
+
+def _command_git_dir(cwd, command, acts_at=None):
+    """The single best reading of where the invocation ran.
+
+    For a caller with nothing to check the answer against, such as the `gh pr
+    create` branch, which has only the directory to read a head ref from.
+    """
+    return _command_git_dirs(cwd, command, acts_at)[0]
+
+
+def _commit_dir(candidates, printed_sha):
+    """``(directory, full SHA)`` for the candidate holding the commit git just
+    reported, or ``("", "")`` when none of them does.
+
+    The printed SHA identifies the commit on its own, so this asks each
+    candidate whether it has that commit at HEAD rather than trusting any one
+    reading of the command. A directory the command never ran in does not, and
+    neither does a path that a misread produced, so a wrong candidate costs a
+    `rev-parse` rather than the event. Returning nothing keeps a commit this
+    session did not make from being reported as one.
+    """
+    for d in candidates:
+        head = _git(d, "rev-parse", "HEAD")
+        if head and head.startswith(printed_sha):
+            return d, head
+    return "", ""
 
 
 def _git(cwd, *args):
@@ -365,10 +402,11 @@ def handle_bash(h, tin, cwd, session):
             # The commit's own offset: in `git status && cd /wt && git commit
             # -m x` the cd moved the commit, though a git call precedes it.
             invocation = _GIT_COMMIT_RE.search(cmd)
-            git_dir = _command_git_dir(cwd, cmd, invocation.start("git"))
-            head = _git(git_dir, "rev-parse", "HEAD")
-            repo = _repo_full(git_dir)
-            if head and head.startswith(printed_sha) and _has_joinable_repo(repo):
+            git_dir, head = _commit_dir(
+                _command_git_dirs(cwd, cmd, invocation.start("git")),
+                printed_sha)
+            repo = _repo_full(git_dir) if git_dir else ""
+            if head and _has_joinable_repo(repo):
                 emit("bw.commit", {
                     "event.name": "bw.commit",
                     "session.id": session,

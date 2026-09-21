@@ -17,7 +17,8 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import emit_git
-from emit_git import (_command_git_dir, _commit_summary, _is_successful_commit,
+from emit_git import (_command_git_dir, _command_git_dirs,
+                     _commit_summary, _is_successful_commit,
                      _is_successful_pr_create, _pr_url_repo)
 
 # Fixtures: a stub session id and a fabricated abbreviated SHA.
@@ -424,6 +425,16 @@ class CommandGitDirTest(unittest.TestCase):
                           ("git --no-pager -C /wt commit -m x", "/wt")):
             self.assertEqual(_command_git_dir("/base", cmd), want, cmd)
 
+    def test_candidates_run_best_first_and_end_at_cwd(self):
+        """cwd is always last, as the reading that assumes no move happened."""
+        cmd = "cd /one && git -C /two commit -m x"
+        self.assertEqual(
+            _command_git_dirs("/base", cmd, cmd.index("git -C")),
+            ["/two", "/one", "/base"])
+
+    def test_candidates_are_deduplicated(self):
+        self.assertEqual(_command_git_dirs("/base", "git commit -m x"), ["/base"])
+
     def test_leading_cd(self):
         self.assertEqual(_command_git_dir("/base", "cd /other && git commit -m x"),
                          "/other")
@@ -588,6 +599,15 @@ class BashGitContextTest(unittest.TestCase):
         a = got["bw.commit"]
         self.assertEqual(a["bw.commit_sha"], sha)
         self.assertEqual(a["bw.branch"], "feat/wt")
+
+    def test_a_misread_directive_falls_through_to_cwd(self):
+        """`-C` is a commit flag too, so a candidate can be a path that never
+        existed. The printed SHA decides, and cwd is still on the list."""
+        sha, _, out = self._commit_in(self.repo_a, "amend.txt")
+        got = self._emit_for(self.repo_a,
+                             "git --no-pager commit --amend -C HEAD", out)
+        self.assertEqual(got["bw.commit"]["bw.commit_sha"], sha)
+        self.assertEqual(got["bw.commit"]["bw.repo_full"], "acme/alpha")
 
     def test_commit_in_sibling_repo_reports_that_repo(self):
         sha, branch, out = self._commit_in(self.repo_b, "sib.txt")
