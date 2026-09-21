@@ -61,8 +61,15 @@ _PR_URL_RE = re.compile(r"https?://[^/\s]+/([^/\s]+/[^/\s]+)/pull/\d+")
 # `cd /wt&&git commit` yields "/wt&&" — and git would then fail on a directory
 # that does not exist, silently costing the event.
 _UNQUOTED_DIR = r"[^\s;|&]+"
+# Only GLOBAL options may precede the -C, mirroring the shape _GIT_COMMIT_RE
+# uses for the subcommand. Once a non-flag word appears, the option run is over
+# and a later -C belongs to the subcommand, not to git: `git commit -C <commit>`
+# reuses a message and authorship, and `HEAD` is not a directory. A message can
+# carry the same trap, since `git commit -m "use git -C instead of cd"` puts the
+# characters in the command line too.
 _GIT_DASH_C_RE = re.compile(
-    r"\bgit\b[^\n|&;]*?\s-C\s+(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
+    r"\bgit\b(?:\s+-[^\sC]\S*(?:\s+[^\s-]\S*)?)*\s+-C\s+"
+    r"(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
 )
 # `(` opens a segment too: `(cd /wt && git commit -m x)` is the ordinary way
 # to act in a worktree without moving the session, and treating the paren as

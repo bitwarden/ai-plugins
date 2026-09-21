@@ -399,6 +399,31 @@ class CommandGitDirTest(unittest.TestCase):
         self.assertEqual(_command_git_dir("/base", 'git -C "/a b/repo" commit -m x'),
                          "/a b/repo")
 
+    def test_commit_dash_c_reuses_a_message_not_a_directory(self):
+        """`-C <commit>` is a commit flag. Reading it as a directory resolves
+        to a path that does not exist and costs the event."""
+        for cmd in ("git commit -C HEAD",
+                    "git commit --amend -C HEAD --no-edit"):
+            self.assertEqual(
+                _command_git_dir("/base", cmd, cmd.index("git commit")),
+                "/base", cmd)
+
+    def test_commit_dash_c_does_not_override_a_cd(self):
+        cmd = "cd /wt && git commit --amend -C HEAD"
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/wt")
+
+    def test_dash_c_inside_a_commit_message(self):
+        """The message text sits on the command line like anything else."""
+        cmd = 'git commit -m "use git -C instead of cd"'
+        self.assertEqual(_command_git_dir("/base", cmd, cmd.index("git commit")),
+                         "/base")
+
+    def test_global_options_may_precede_dash_c(self):
+        for cmd, want in (("git -c user.email=x -C /wt commit -m x", "/wt"),
+                          ("git --no-pager -C /wt commit -m x", "/wt")):
+            self.assertEqual(_command_git_dir("/base", cmd), want, cmd)
+
     def test_leading_cd(self):
         self.assertEqual(_command_git_dir("/base", "cd /other && git commit -m x"),
                          "/other")
