@@ -283,14 +283,13 @@ class EditGitContextTest(unittest.TestCase):
         self.assertEqual(a["bw.file"], "rel/here.py")
 
     def test_file_outside_any_repo_is_not_emitted(self):
-        """Nothing can join an event with no repository to key on, and every
-        record sent competes for the same sampled slots."""
+        """An event with no repository to key on identifies nothing."""
         f = self._touch(self.outside, "scratch.py")
         self.assertEqual(self._emit_for(self.repo_a, f), {})
 
     def test_repo_without_an_origin_remote_is_not_emitted(self):
-        """A branch and SHA are not enough: attribution matches within a repo,
-        and an origin remote is the only thing that names one."""
+        """A branch and SHA are only meaningful within a repository, and an
+        origin remote is the only thing that names one."""
         anon = os.path.join(self.tmp, "anon")
         os.makedirs(anon, exist_ok=True)
         _run(anon, "git", "init", "-b", "main")
@@ -419,9 +418,9 @@ class CommandGitDirTest(unittest.TestCase):
 
     def test_path_containing_the_word_git(self):
         """A directory named ...-git-... must not be mistaken for the git call
-        and truncate the cd target mid-path. Observed live: a worktree at
-        baud.worktrees/verify-hook-git-context silently suppressed every
-        bw.commit, because the resolved directory did not exist."""
+        and truncate the cd target mid-path. A worktree whose own name carried
+        the word silently suppressed every bw.commit made in it, because the
+        resolved directory did not exist."""
         self.assertEqual(
             _command_git_dir("/base", "cd /repos/verify-hook-git-context && git commit -m x"),
             "/repos/verify-hook-git-context")
@@ -443,6 +442,12 @@ class CommandGitDirTest(unittest.TestCase):
 
     def test_dash_c_terminated_by_a_semicolon(self):
         self.assertEqual(_command_git_dir("/base", "git -C /wt; echo done"),
+                         "/wt")
+
+    def test_cd_inside_a_subshell(self):
+        """`(cd /wt && git commit ...)` acts in a worktree without moving the
+        session, so the paren has to open a segment like any other separator."""
+        self.assertEqual(_command_git_dir("/base", "(cd /wt && git commit -m x)"),
                          "/wt")
 
     def test_gh_command_with_a_cd_still_resolves(self):

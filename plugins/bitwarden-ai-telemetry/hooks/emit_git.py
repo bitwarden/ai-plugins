@@ -63,8 +63,11 @@ _UNQUOTED_DIR = r"[^\s;|&]+"
 _GIT_DASH_C_RE = re.compile(
     r"\bgit\b[^\n|&;]*?\s-C\s+(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
 )
+# `(` opens a segment too: `(cd /wt && git commit -m x)` is the ordinary way
+# to act in a worktree without moving the session, and treating the paren as
+# part of the text would leave the cd unseen and the commit charged to cwd.
 _CD_RE = re.compile(
-    r"(?:^|[\n|;]|\&\&)\s*cd\s+(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
+    r"(?:^|[\n|;(]|\&\&)\s*cd\s+(?P<dir>\"[^\"]+\"|'[^']+'|" + _UNQUOTED_DIR + r")"
 )
 # The `git` PROGRAM at the start of a command segment, as opposed to the three
 # letters appearing anywhere. Paths carry them routinely, so anchoring matters.
@@ -137,8 +140,8 @@ def _commit_summary(stdout):
 
     The SHA may be abbreviated; callers resolve it against a real HEAD rather
     than emitting it directly. A detached HEAD yields an empty branch instead
-    of the literal words, so nothing downstream joins "detached HEAD" against
-    a pull request's head ref.
+    of the literal words, so the branch field is never the phrase "detached
+    HEAD" presented as though it named a branch.
     """
     m = _COMMIT_SUMMARY_RE.search(stdout or "")
     if not m:
@@ -223,10 +226,9 @@ def _git_context_dir(cwd, abs_path):
     A session's cwd says nothing about where an edited file lives. Working in
     a worktree or a sibling checkout while Claude runs from one repo root is
     routine, and resolving git against cwd stamps those edits with the cwd
-    repo's slug and branch. Attribution joins bw.branch against the PR's head
-    ref and bw.file against the PR's changed paths, so a cwd-derived event
-    cannot match the PR it belongs to, and its branch may collide with an
-    unrelated one.
+    repo's slug and branch. A cwd-derived event then names a repository the
+    edit never touched and a branch from a different checkout, so every field
+    on it is false about the file it reports.
 
     Walks up to the nearest existing directory, since a Write can name a file
     that does not exist yet, and falls back to cwd only when nothing resolves.
@@ -244,13 +246,13 @@ def _git_context_dir(cwd, abs_path):
 
 
 def _repo_rel(git_dir, abs_path):
-    """Path relative to the root of the repo that owns the file, so it joins
-    against GitHub's repo-root-relative ``files[].filename``.
+    """Path relative to the root of the repo that owns the file, matching the
+    repo-root-relative shape GitHub uses for ``files[].filename``.
 
     Expects the already-absolute, realpath'd form from _abs_path. A file in no
     repo degrades to its bare filename rather than a "../" path, which is the
-    honest answer: nothing on the PR side can match either, and a relative
-    escape reads as though it belonged to whichever repo cwd happened to be.
+    honest answer: a relative escape reads as though the file belonged to
+    whichever repo cwd happened to be.
     """
     if not abs_path:
         return ""
@@ -263,15 +265,13 @@ def _repo_rel(git_dir, abs_path):
 
 
 def _has_joinable_repo(repo):
-    """Whether an event naming this repo slug can ever be read.
+    """Whether the event identifies the repository it describes.
 
-    Every tier of attribution keys on the repo: a commit SHA or pull request
-    number is matched within one, and a file path is matched against one
-    pull request's changed files. A slug is absent when the file sits outside
-    any repository (a plan file, a memory file, something under /tmp) or when
-    the repository has no origin remote to name. Either way nothing downstream
-    can join the event, so emitting it would spend a sampled slot on a record
-    no reader can use.
+    A commit SHA, a pull request number and a file path are each meaningful
+    only within one repository, so an event that cannot name its own is not a
+    usable record of anything. A slug is absent when the file sits outside any
+    repository (a plan file, a memory file, something under /tmp) or when the
+    repository has no origin remote to name.
     """
     return bool(repo)
 
@@ -305,8 +305,8 @@ def handle_bash(h, tin, cwd, session):
     #
     # Reading HEAD from cwd alone was wrong for any commit made outside it, in
     # a worktree or a sibling checkout, because cwd's untouched HEAD is still a
-    # real SHA and would be reported as work this session authored — landing on
-    # whichever pull request happens to contain it. Requiring HEAD to match the
+    # real SHA and would be reported as work this session authored, when in
+    # fact nobody in this session made it. Requiring HEAD to match the
     # SHA git printed drops those rather than guessing, in the same spirit as
     # _is_successful_commit refusing to fabricate a commit from an ambiguous
     # response. `--dry-run`, failed commits and read-only lookalikes are gated
@@ -325,8 +325,8 @@ def handle_bash(h, tin, cwd, session):
                     "bw.repo_full": repo,
                     "bw.branch": branch or _git(git_dir, "rev-parse",
                                                 "--abbrev-ref", "HEAD"),
-                    # The resolved full SHA, since attribution matches it
-                    # against a pull request's commit list by equality.
+                    # The resolved full SHA rather than git's abbreviated
+                    # print, so the field is unambiguous on its own.
                     "bw.commit_sha": head,
                     "bw.hook": h.get("hook_event_name", ""),
                 })

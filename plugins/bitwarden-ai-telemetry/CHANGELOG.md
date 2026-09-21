@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `bw.edit` resolves repo, branch, base SHA and path from the edited file's own location. Resolving them against the session's starting directory mislabelled every edit made in a worktree or a sibling checkout, and left `bw.file` escaping the repo root, so attribution could not match those events to the pull request they belonged to.
-- `bw.commit` reports the commit the command produced, resolved from the directory it ran in and confirmed against the SHA git printed. Reading HEAD from the starting directory named a real but unrelated commit, attributing whichever pull request contained it. Where the two disagree, nothing is emitted.
-- `bw.pr` takes its repo from the URL `gh pr create` prints. Opening a pull request from a session started elsewhere recorded the wrong slug against the new number, which is exactly the pair attribution joins on.
-- Events with no repository to name are no longer sent. Attribution matches a commit, pull request or path within one repo, so a plan file, a memory file, something under `/tmp`, or a checkout with no origin remote produces a record nothing can join. A fifth of the edit events we were emitting had this shape, and each one competed for the same delivery as a record that could be read.
+- `bw.edit` resolves repo, branch, base SHA and path from the edited file's own location. Resolving them against the session's starting directory mislabelled every edit made in a worktree or a sibling checkout, and left `bw.file` escaping the repo root, so the event described a repository the edit never touched.
+- `bw.commit` reports the commit the command produced, resolved from the directory it ran in and confirmed against the SHA git printed. Reading HEAD from the starting directory reported a real but unrelated commit as this session's work. Where the two disagree, nothing is emitted.
+- `bw.pr` takes its repo from the URL `gh pr create` prints. Opening a pull request from a session started elsewhere paired the new number with the wrong repository slug.
+- Events with no repository to name are no longer sent. A commit SHA, pull request number or file path is meaningful only within one repository, so a plan file, a memory file, something under `/tmp`, or a checkout with no origin remote produces a record that identifies nothing.
 
 ## [1.1.0] - 2026-07-31
 
