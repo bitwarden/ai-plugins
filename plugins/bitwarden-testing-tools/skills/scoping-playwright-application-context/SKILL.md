@@ -1,8 +1,8 @@
 ---
 name: scoping-playwright-application-context
-description: "Explore the Bitwarden codebase to build a state-centric Application Context for Playwright test-case authoring — a fenced `<!-- APP-CONTEXT ... -->` markdown document with `## States` and `## Flows` grounded in real client and server code. Use when asked to 'scope the application context' or to map the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria (often from a Jira ticket or plan). Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
+description: "Explore the Bitwarden codebase to build a state-centric Application Context for Playwright test-case authoring — a markdown document with `## States` and `## Flows` grounded in real client and server code. Use when asked to 'scope the application context' or to map the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria. Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
 argument-hint: "[affected repos] [feature description] [acceptance criteria]"
-allowed-tools: "Read, Grep, Glob, Bash(git -C * diff --name-only:*)"
+allowed-tools: "Read, Grep, Glob, Bash(git -C:*)"
 ---
 
 Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what the downstream test-case authoring step consumes to generate grounded, accurate test cases.
@@ -21,7 +21,7 @@ Read all three catalogs under `${CLAUDE_SKILL_DIR}/references/known-flows/` (`au
 
 ### Gather the blast radius
 
-For each affected repo passed in by the calling agent, run:
+For each affected repo you were given (by the caller or in the request), run:
 
 ```bash
 git -C <repo-path> diff --name-only origin/main...HEAD
@@ -71,7 +71,7 @@ For states with `Reachable by playwright: no`, the `Reach via:` recipe documents
 
 ### Gather `## Flows`
 
-1. From the catalog's `## Known Flows` section, copy relevant entries through verbatim if their post-condition state matches a state in `## States`, OR their precondition/steps exercise UI affected by the change. (Setup states their preconditions reference are minted in `## States` via catalog copy or route-only, per Gather `## States` above.)
+1. From the catalog's `## Known Flows` section, copy relevant entries through verbatim if their post-condition state matches a state in `## States`, OR their precondition/steps exercise UI affected by the change. (Both the precondition and the post-condition state(s) of every copied flow are minted in `## States` via catalog copy or route-only, per Gather `## States` above.)
 2. **Token preservation:** When copying any flow whose Steps contain `<bitwarden-portal-admin-email>`, leave the placeholder token in place verbatim. Do NOT read `server/dev/secrets.json` or substitute a real address here. The executor resolves it at run time.
 3. For change-driven flows not in the catalog: trace the click handler or form submission through the server controller, command, and integration calls. Enumerate atomic steps, inline per-step feedback (a `- Feedback:` sub-item on each step that produces a visible response), post-condition state, and any branch conditions. Every step must be a real user interaction.
 4. After flows are populated, return to `## States` and fill in each state's `**Produced by:**` line with the slug(s) of the flow(s) whose post-condition is that state.
@@ -105,11 +105,11 @@ For each state:
 - <recipe — see Reach via conventions>
 
 **UI projection:**
-- Route: <URL>
+- Route: <URL>  (or `n/a` for a state confirmed out-of-band rather than on a rendered page — e.g. an email read by a sanctioned non-browser tool)
 - Verification points:
   - Selector: <selector value>
-    - Selector type: tag | data-testid | role | text | css  (text-content points must use `text`; structure/state points use a structural type)
-    - Expectation: <visible | hidden | disabled | text contains "..." | count = N>
+    - Selector type: tag | data-testid | role | text | css  (text-content points must use `text`; structure/state points use a structural type; for an out-of-band `Route: n/a` state, the Selector names the non-browser check and `text` denotes its stdout/textual output)
+    - Expectation: <visible | hidden | disabled | text contains "..." | count = N | stdout contains "..." (out-of-band checks only)>
     - Source: <file:line where the element/message is defined; note in prose any gate affecting observability in this state>
 ```
 
@@ -140,7 +140,7 @@ Do all reasoning in working notes as you explore: accumulate states and verifica
 
 Run these checks once, against your notes, just before serializing. They are read-only — do not re-read source files, and do not re-open a state you have already validated.
 
-1. **Slug resolution.** Every `Precondition state:` and `Post-condition state:` slug exists as a `### state:<slug>` heading. Every `Produced by:` entry is either `none` or a slug that exists as a `### flow:<slug>` heading.
+1. **Slug resolution.** Every `Precondition state:` and `Post-condition state(s):` entry is either `none` or a slug that exists as a `### state:<slug>` heading. Every `Produced by:` entry is either `none` or a slug that exists as a `### flow:<slug>` heading.
 2. **Parameter coverage.** Every parameter declared on a flow appears as a `<placeholder>` in its Steps, and every `<placeholder>` in Steps is declared in Parameters.
 3. **Target-state completeness.** Every target state has at least one observable verification point.
 4. **Text-content selector basis.** Every verification point whose `Expectation` is `text contains "..."` has `Selector type: text` — never a structural selector (`data-testid`, `tag`, `role`, or `css`).
@@ -149,4 +149,4 @@ On any failure, surface the inconsistency in your return — do not self-fix by 
 
 ### Done condition
 
-You are done when all four terminal self-review checks pass. When that holds, serialize the document once and stop.
+Run the four terminal self-review checks once. If all pass, serialize the document once and stop. If any fails, emit the plain failure report instead of the artifact (per Output schema) and stop.

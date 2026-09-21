@@ -31,17 +31,23 @@ Curated reference of validated, reusable test states and UI flows for the Bitwar
 
 ### flow:authenticate-admin-portal
 
-- **Use when:** Any test that requires administrative setup (creating discounts, managing users, verifying subscription state).
-- **Parameters:** `bitwarden-portal-admin-email`
-- **Precondition state:** none
-- **Steps:**
-  1. Navigate to `http://localhost:62911`
-     - Feedback: redirect to the Admin portal login page
-  2. Enter `<bitwarden-portal-admin-email>` in the login field
-  3. Submit the form
-     - Feedback: form clears; magic-link email sent
-  4. Run `read_mailcatcher.py --recipient <bitwarden-portal-admin-email> --pattern "Continue Logging In"` (the Mailcatcher reader; path in the tool policy's Canonical script paths) to read the magic link (subject contains "Admin" or "Continue Logging In"); stdout is the URL
-  5. Navigate directly to the extracted magic-link URL
-     - Feedback: Admin portal home loads, authenticated
-- **Post-condition state(s):**
-  - Default: state:admin-portal-authenticated
+**Use when:** Any test that requires administrative setup (creating discounts, managing users, verifying subscription state).
+
+**Parameters:** `bitwarden-portal-admin-email`
+
+**Precondition state:** none
+
+**Steps:**
+
+1. Navigate to `http://localhost:62911`
+   - Feedback: redirect to the Admin portal login page
+2. Enter `<bitwarden-portal-admin-email>` in the login field
+3. Submit the form
+   - Feedback: form clears; magic-link email sent
+4. Run `read_mailcatcher.py --recipient <bitwarden-portal-admin-email> --pattern "Continue Logging In"` (the Mailcatcher reader; path in the tool policy's Canonical script paths) to read the magic link (subject contains "Admin" or "Continue Logging In"); stdout is the URL
+5. Navigate directly to the extracted magic-link URL
+   - Feedback: Admin portal home loads, authenticated
+
+**Post-condition state(s):**
+
+- Default: state:admin-portal-authenticated

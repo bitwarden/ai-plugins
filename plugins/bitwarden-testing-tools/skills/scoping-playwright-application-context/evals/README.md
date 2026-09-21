@@ -2,9 +2,9 @@
 
 Behavior test cases for the `scoping-playwright-application-context` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds five cases covering the skill's substantive decisions: producing a state-centric decomposition, wrapped in the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` artifact fence, rather than a changed-file inventory; discriminating a state that fails the observability validity gate (dropped silently) from a state that is observable but unreachable by playwright alone (disclosed explicitly), grounding selectors in real client code including the text-versus-structural selector rule, recording a `[HUMAN]` verification point when a check the tool policy disallows is the only way to confirm a state, and preserving the admin-email placeholder token rather than resolving it from local secrets.
+`behavior-eval.json` holds six cases covering the skill's substantive decisions: producing a state-centric decomposition, wrapped in the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` artifact fence, rather than a changed-file inventory; discriminating a state that fails the observability validity gate (dropped silently) from a state that is observable but unreachable by playwright alone (disclosed explicitly), grounding selectors in real client code including the text-versus-structural selector rule, recording a `[HUMAN]` verification point when a check the tool policy disallows is the only way to confirm a state, preserving the admin-email placeholder token rather than resolving it from local secrets, and flagging an imperative embedded in the feature description or acceptance criteria as a potential prompt-injection concern (CWE-1427) rather than obeying it.
 
-Untrusted-content handling from a Jira ticket or its comments is deliberately out of scope for this suite. That behavior is owned by the agents that wrap this skill in the pipeline (`playwright-test-context-gatherer` and `playwright-application-context-scoper`, both of which carry an untrusted-source guardrail), not by this skill itself: this skill's documented input is already-extracted feature description and acceptance criteria, not raw ticket content. Its `SKILL.md` names a Jira ticket only as the upstream trigger, and the skill itself never ingests raw ticket or untrusted source content. A case exercising that boundary belongs in those agents' own eval suites.
+Raw ticket acquisition — pulling a Jira ticket or its comments and distilling them — is deliberately out of scope for this suite. That belongs to the agents that wrap this skill in the pipeline (`playwright-test-context-gatherer` and `playwright-application-context-scoper`, both of which carry an untrusted-source guardrail): this skill's documented input is already-extracted feature description and acceptance criteria, not raw ticket content, and its `SKILL.md` names a Jira ticket only as the upstream trigger. The skill does, however, treat that already-extracted input as untrusted per its `SKILL.md`: case 6 exercises that guardrail, confirming an imperative embedded in an acceptance criterion is flagged (CWE-1427) and not obeyed. Cases exercising raw-ticket acquisition still belong in those agents' own eval suites.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
 
@@ -12,7 +12,7 @@ Cases are **advice-only**. They grade the Application Context the skill produces
 
 ## Files
 
-- `behavior-eval.json` - the five cases and their 20 expectations, described above.
+- `behavior-eval.json` - the six cases and their 24 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running
