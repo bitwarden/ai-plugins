@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A `systemMessage` warning when a record does not reach the collector. Errors were swallowed to keep a session safe and then discarded, so usage going entirely unrecorded was invisible. The usual cause is ZScaler Private Access not having re-authenticated; a bad managed-settings push is the other.
 - Delivery is judged on the collector's `202`, not on the request failing to raise, because ZScaler can answer a sign-in page with `200` and that would otherwise read as success.
+- A status the collector answered is reported as that status. Only a `200` implicates a ZScaler interstitial, since the collector never answers `200`; anything else came from the collector itself, and reconnecting a working VPN would not touch it.
 
 ### Notes
 

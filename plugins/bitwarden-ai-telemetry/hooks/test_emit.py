@@ -17,6 +17,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import urllib.error
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -236,10 +237,31 @@ class FaultDetectionTest(unittest.TestCase):
         self.assertEqual(self._kinds(), [emit_module.FAULT_UNEXPECTED_STATUS])
 
     def test_server_error_is_a_fault(self):
-        resp = mock.MagicMock()
-        resp.status = 503
-        self._post(return_value=resp)
+        """urlopen raises for any status at or above 400, so a 503 never
+        reaches the status check and must be classified from the exception."""
+        self._post(side_effect=urllib.error.HTTPError(
+            "https://ait.bitwarden.pw/v1/logs", 503, "Service Unavailable",
+            {}, None))
+        self.assertEqual(emit_module.faults(),
+                         [(emit_module.FAULT_UNEXPECTED_STATUS, "503")])
+
+    def test_a_status_the_collector_answered_is_not_unreachable(self):
+        """A server that answers is reachable. Saying otherwise sends the user
+        to reconnect a VPN that is already working."""
+        self._post(side_effect=urllib.error.HTTPError(
+            "https://ait.bitwarden.pw/v1/logs", 404, "Not Found", {}, None))
         self.assertEqual(self._kinds(), [emit_module.FAULT_UNEXPECTED_STATUS])
+
+    def test_zscaler_remedy_only_accompanies_a_200(self):
+        """The collector never answers 200, so only that status implicates an
+        interstitial. Every other status came from the collector itself."""
+        for detail in ("404", "503", "401"):
+            msg = emit_module._fault_message(
+                emit_module.FAULT_UNEXPECTED_STATUS, detail)
+            self.assertIn(detail, msg)
+            self.assertNotIn("ZScaler", msg)
+        msg = emit_module._fault_message(emit_module.FAULT_UNEXPECTED_STATUS, "200")
+        self.assertIn("ZScaler", msg)
 
     def test_unreachable_is_a_fault(self):
         self._post(side_effect=OSError("connection refused"))

@@ -14,6 +14,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
@@ -136,9 +137,17 @@ def emit(body_name, attrs):
             COLLECTOR, data=json.dumps(payload).encode(),
             headers={"Content-Type": "application/json"})
         resp = urllib.request.urlopen(req, timeout=1)
+    except urllib.error.HTTPError as e:
+        # The collector answered, and said no. urlopen raises for any status
+        # at or above 400, so this is the only place a 4xx or 5xx surfaces,
+        # including one the collector passed through from Datadog. Recording
+        # it as unreachable would send the user to reconnect a VPN that is
+        # working, and would throw away the status that says what went wrong.
+        code = getattr(e, "code", None)
+        _record_fault(FAULT_UNEXPECTED_STATUS, str(code) if code else "")
+        return  # fail-open, always
     except Exception:
-        # No answer at all: offline, DNS, timeout, TLS, or an HTTPError for a
-        # status the collector passed through from Datadog.
+        # No answer at all: offline, DNS, timeout, TLS.
         _record_fault(FAULT_UNREACHABLE)
         return  # fail-open, always
     status = _response_status(resp)
@@ -164,10 +173,17 @@ def _fault_message(kind, detail):
         return ("AI telemetry is not being recorded: BW_TELEMETRY_OTLP is unset "
                 "or is not an allowed collector address.")
     if kind == FAULT_UNEXPECTED_STATUS:
-        return (f"AI telemetry is not being recorded: the collector answered "
-                f"HTTP {detail} rather than 202. A 200 usually means a ZScaler "
-                f"sign-in page was served instead of the collector, so "
-                f"reconnecting ZScaler Private Access should restore it.")
+        answered = (f"AI telemetry is not being recorded: the collector "
+                    f"answered HTTP {detail} rather than 202.")
+        if detail == "200":
+            # Only a 200 points at ZScaler: the collector never answers 200,
+            # so that status is the signature of an interstitial standing in
+            # for it. Any other status came from something that really is the
+            # collector, and reconnecting would not touch it.
+            return (f"{answered} A 200 usually means a ZScaler sign-in page "
+                    f"was served instead of the collector, so reconnecting "
+                    f"ZScaler Private Access should restore it.")
+        return answered
     return ("AI telemetry is not being recorded: the collector could not be "
             "reached. If ZScaler Private Access has not re-authenticated, "
             "reconnecting it should restore delivery.")
