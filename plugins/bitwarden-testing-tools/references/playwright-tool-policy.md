@@ -14,6 +14,7 @@ The sections below give the constraints for each category present in this pipeli
 Prose that needs a pipeline script path references it from here rather than hardcoding it. A skill whose `allowed-tools` grant must name its own script path is the exception — that repetition is required for the grant to match.
 
 - Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py`
+- Stripe CLI wrapper: `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py`
 
 ## Category 1 - Web UI Interactions (default)
 
