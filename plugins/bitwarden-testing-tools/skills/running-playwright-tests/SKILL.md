@@ -3,7 +3,9 @@ name: running-playwright-tests
 description: Execute Bitwarden web test cases step-by-step using the playwright-cli skill directly. Use after test cases are defined and services are running. Governs tool policy, screenshot naming, toast capture, and Setup Steps execution.
 allowed-tools: >
   Bash(${CLAUDE_SKILL_DIR}/scripts/external_trigger.py *),
-  Bash(${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py *)
+  Bash(${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py *),
+  Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py *),
+  Bash(ls *)
 ---
 
 Given the test cases, artifacts output dir, and the absolute path to `${CLAUDE_SKILL_DIR}/playwright.config.json`, execute the tests by running `playwright-cli` commands (the CLI the `playwright-cli` skill provides) for each browser action.
