@@ -35,7 +35,7 @@ States come in two tiers:
 
 - **Target state** — a state the change _produces or modifies_, and that a test asserts against. Model these fully (route + verification points), applying the validity gates below.
 - **Setup state** — a state that only _positions_ the app for the test (a precondition or a generic authenticated context); never the assertion target. Satisfy a setup state one of two ways:
-  - **Catalog copy:** if the state appears under `## Known States` in the catalog, copy its entry verbatim. Do not re-ground it. You may narrow a copied state's `Produced by:` to the single producer flow you intend the planner to run, dropping the other listed producers so the state does not drag in flows the change never exercises; the rest of the entry stays verbatim.
+  - **Catalog copy:** if the state appears under `## Known States` in the catalog, copy its entry verbatim. Do not re-ground it. Narrow a copied state's `Produced by:` to only the producer flow(s) you actually mint in `## Flows`, dropping every other listed producer so the state does not drag in flows the change never exercises; the rest of the entry stays verbatim. (Narrowing is required, not optional — an unpruned `Produced by:` slug with no matching flow fails the terminal self-review and blocks the artifact.)
   - **Route-only:** otherwise, declare it with its `Route` and a single landmark check confirming the page loaded.
 
 A state is a **target** state if and only if it is the post-condition of a _change-driven_ flow — one you traced from the diff. Every state referenced as a precondition or post-condition of a _copied catalog flow_ is a **setup** state.
@@ -51,7 +51,7 @@ Before recording any state or verification point, confirm all three. If one fail
 #### Recording a target state
 
 - **Slug.** Choose a kebab-slug that encodes distinguishing features when near-neighbor states exist; never reuse a user-intent label across distinct states (e.g. `state:subscription-pending-cancellation` vs. `state:subscription-pending-cancellation-with-deferred-price-schedule`).
-- **Route.** The Angular route or full URL the planner navigates to to assert this state.
+- **Route.** The fully-qualified URL, **including host**, the planner navigates to to assert this state — `https://localhost:8080/…` for the web vault, `http://localhost:62911/…` for the Admin portal. A bare, host-less path is not acceptable: the downstream service mapper reads a host-less route as a web vault route, so an Admin route missing its host is silently misclassified.
 - **Verification points.** Record the points that identify this state. For each point: Selector value, Selector type, Expectation, and a `Source:` citation (`file:line`) for where the asserted element or message is defined. **The first grounded, observable selector that identifies the state wins.** If observability in this state depends on a gate (a collapsed container, a conditional), note that gate in prose in `Source:`. If the gate is unsatisfied in this state's landing condition, the point is not observable here (gate 1) — choose a different point, or model the state as the condition in which the element _is_ observable and have its producing flow drive into that condition.
 - **Choose the assertion basis by what you are observing — text content vs. structure/state.**
   - **Text content.** When the verification is that some _text_ renders correctly — a validation error, toast, banner/callout, a localized or runtime-computed term (e.g. `/ 年`), a relabeled control, any case where "is the right text on screen?" is the question — the verification point **must use `Selector type: text`**, with the text substring as the Selector value. A `text contains "..."` expectation may **not** be grounded on any structural selector (`data-testid`, `tag`, `role`, or `css`). Collision-safety comes from a **distinctive substring**, not a structural selector — assert the longest literal substring that excludes placeholder tokens and cannot match elsewhere on the page (e.g. `Churn-only cohorts cannot have a proactive discount coupon.`, not a short fragment). If no distinctive substring exists — a short localized unit or computed term like `/ 年` has none — keep `Selector type: text` and name its nearest stable container in `Source:` so the read can be scoped there; the container only bounds the search, it never becomes the assertion basis. Only assert text the change affects.
@@ -71,10 +71,10 @@ For states with `Reachable by playwright: no`, the `Reach via:` recipe documents
 
 ### Gather `## Flows`
 
-1. From the catalog's `## Known Flows` section, copy relevant entries through verbatim if their post-condition state matches a state in `## States`, OR their precondition/steps exercise UI affected by the change. (Both the precondition and the post-condition state(s) of every copied flow are minted in `## States` via catalog copy or route-only, per Gather `## States` above.)
+1. From the catalog's `## Known Flows` section, copy relevant entries through verbatim if their post-condition state matches a state in `## States`, OR their precondition/steps exercise UI affected by the change. For a catalog setup state, copy only the producer flow(s) you narrowed its `Produced by:` to — not every producer the catalog lists for it. (Both the precondition and the post-condition state(s) of every copied flow are minted in `## States` via catalog copy or route-only, per Gather `## States` above.)
 2. **Token preservation:** When copying any flow whose Steps contain `<bitwarden-portal-admin-email>`, leave the placeholder token in place verbatim. Do NOT read `server/dev/secrets.json` or substitute a real address here. The executor resolves it at run time.
 3. For change-driven flows not in the catalog: trace the click handler or form submission through the server controller, command, and integration calls. Enumerate atomic steps, inline per-step feedback (a `- Feedback:` sub-item on each step that produces a visible response), post-condition state, and any branch conditions. Every step must be a real user interaction.
-4. After flows are populated, return to `## States` and fill in each state's `**Produced by:**` line with the slug(s) of the flow(s) whose post-condition is that state.
+4. After flows are populated, return to `## States` and set each state's `**Produced by:**` line to the slug(s) of the flow(s) in `## Flows` whose post-condition is that state. This governs catalog-copied states too: prune each copied state's `Produced by:` to the flows actually present here, dropping any producer slug with no matching `### flow:` entry.
 
 Every flow obeys these rules:
 
@@ -105,7 +105,7 @@ For each state:
 - <recipe — see Reach via conventions>
 
 **UI projection:**
-- Route: <URL>  (or `n/a` for a state confirmed out-of-band rather than on a rendered page — e.g. an email read by a sanctioned non-browser tool)
+- Route: <fully-qualified URL including host>  (or `n/a` for a state confirmed out-of-band rather than on a rendered page — e.g. an email read by a sanctioned non-browser tool)
 - Verification points:
   - Selector: <selector value>
     - Selector type: tag | data-testid | role | text | css  (text-content points must use `text`; structure/state points use a structural type; for an out-of-band `Route: n/a` state, the Selector names the non-browser check and `text` denotes its stdout/textual output)
