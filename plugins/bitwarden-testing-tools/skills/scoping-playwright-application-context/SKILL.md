@@ -2,7 +2,7 @@
 name: scoping-playwright-application-context
 description: "Explore the Bitwarden codebase to build a state-centric Application Context for Playwright test-case authoring. Use when asked to 'scope the application context' or to map the reachable UI states and flows for a change, given its affected repos, feature description, and acceptance criteria. Do NOT use it to author test cases (use writing-manual-test-cases) or to inventory what tests already exist (use assessing-test-coverage)."
 argument-hint: "[affected repos] [feature description] [acceptance criteria]"
-allowed-tools: "Read, Grep, Glob, Bash(git -C:*)"
+allowed-tools: "Read, Grep, Glob, Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh:*)"
 ---
 
 Given the affected repos, feature description, and acceptance criteria, build a state-centric Application Context by exploring the codebase. This is what the downstream test-case authoring step consumes to generate grounded, accurate test cases.
@@ -24,10 +24,10 @@ Read all three catalogs under `${CLAUDE_SKILL_DIR}/references/known-flows/` (`au
 For each affected repo you were given (by the caller or in the request), run:
 
 ```bash
-git -C <repo-path> diff --name-only origin/main...HEAD
+${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh <repo-path>
 ```
 
-Read the change set. For each changed component, controller, command, or template, trace the handlers and templates it references to identify the **trace surface** — non-diff code you need to read to identify states and flows. The change set and trace surface together form the blast radius. The blast radius is working context only — do not emit it.
+This lists the repo's changed files; it runs `git diff --name-only origin/main...HEAD` inside `<repo-path>` and exits non-zero if that diff base cannot be resolved. Read the change set. For each changed component, controller, command, or template, trace the handlers and templates it references to identify the **trace surface** — non-diff code you need to read to identify states and flows. The change set and trace surface together form the blast radius. The blast radius is working context only — do not emit it.
 
 ### Gather `## States`
 
