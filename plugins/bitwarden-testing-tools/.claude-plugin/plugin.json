@@ -20,6 +20,9 @@
     "stripe",
     "billing",
     "email",
-    "mailcatcher"
+    "mailcatcher",
+    "playwright",
+    "e2e",
+    "test-planning"
   ]
 }

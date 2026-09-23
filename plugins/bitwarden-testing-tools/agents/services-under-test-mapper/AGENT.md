@@ -12,6 +12,15 @@ description: |
   The task is mapping a scoped change to the local services under test — exactly this agent's job.
   </commentary>
   </example>
+
+  <example>
+  Context: An engineer is about to start the local environment and wants to avoid launching every service.
+  user: "Before I start Aspire, tell me the minimal set of services and which URL the tests should open. Artifacts are ./app-context-billing.md and ./context-billing.md."
+  assistant: "I'll use the services-under-test-mapper agent to union the route-based and diff-based service requirements and mark the primary test URL."
+  <commentary>
+  Asking for the minimal service set and primary URL before a run is this agent's job, even when phrased around starting the environment.
+  </commentary>
+  </example>
 model: sonnet
 skills:
   - mapping-services-under-test
