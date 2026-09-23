@@ -50,3 +50,16 @@ export function buildDescriptionAdf(
 
   return { version: 1, type: "doc", content };
 }
+
+/**
+ * Build an ADF document from a single block of plain text, splitting on blank
+ * lines so a caller can write a multi-paragraph comment as one string.
+ */
+export function buildCommentAdf(text: string): AdfDoc {
+  const paragraphs = text.split(/\n\s*\n/);
+  const doc = buildDescriptionAdf(paragraphs);
+
+  // Comment bodies are validated non-empty by the schema before reaching here,
+  // so splitting can only ever yield at least one non-blank paragraph.
+  return doc as AdfDoc;
+}
