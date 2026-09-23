@@ -8,7 +8,7 @@
   },
   "author": "Bitwarden Inc. <hello@bitwarden.com> (https://bitwarden.com)",
   "license": "SEE LICENSE IN LICENSE.txt",
-  "packageManager": "pnpm@11.11.0",
+  "packageManager": "pnpm@11.11.0+sha512.4463f65fd80ed80d69bc1d4bf163ee94f605c7380fc318bb5b2ebe15f8cd12d49c51a4d59e951b401e764d3b6ca751cbf51bc50ed7001a6bcb4935e684c34882",
   "bugs": {
     "url": "https://github.com/bitwarden/ai-plugins/issues"
   },
@@ -32,7 +32,7 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "11.8.0",
+      "version": "11.11.0",
       "onFail": "error"
     }
   }
