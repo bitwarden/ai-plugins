@@ -36,7 +36,7 @@ If no subject was passed, say so in one line and stop. Do not fetch the catalog,
 
 ## Output
 
-Fill this template. The roll-up is the last line: no preamble before it, no notes, caveats, or commentary after it.
+Fill this template. Output nothing before the first finding line and nothing after the roll-up.
 
 ```
 [CONFLICT] <summary>. ADR <n> <title> (<status>, <url>); decision: "<text>"; in change: <element>.
