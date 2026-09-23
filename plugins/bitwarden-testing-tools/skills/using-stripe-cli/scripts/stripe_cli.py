@@ -10,11 +10,16 @@ caller-supplied flag is ever forwarded, so a caller-supplied --live can never
 be interpreted as a flag by the CLI.
 
 No environment variable is required. The CLI's own credentials from
-`stripe login` are used, and the CLI defaults to test mode without --live.
-Pinning --api-key would not help: the CLI reads STRIPE_API_KEY in GetAPIKey()
-(pkg/config/profile.go) ahead of other sources, so a live value there would win
-over a pinned flag. Hence check_environment refuses to run at all when the
-environment points the CLI at live mode.
+`stripe login` are used, and the CLI defaults to test mode without --live. But
+the CLI never checks that its test-mode key is actually a test key: a live key
+typed into `stripe login --interactive` or `stripe config --set
+test_mode_api_key` is used without --live. So before every call check_key
+resolves the key the CLI would use (STRIPE_API_KEY, else the active profile's
+test-mode key in the CLI config, per Stripe CLI v1.35 GetAPIKey() in
+pkg/config/profile.go), refuses anything that is not a test key, and pins the
+checked key for the call. Pinning goes through STRIPE_API_KEY itself, because
+the CLI reads that variable ahead of every other source, including --api-key.
+A config the wrapper cannot verify is refused, not passed through.
 
 Two operations, both read-only except the single permitted test-clock advance:
   stripe_cli.py read --path /v1/<resource> [--param k=v ...]
@@ -25,9 +30,11 @@ clock. Everything else that creates, updates, or deletes Stripe state is out of
 scope and unreachable through this script.
 
 Exit codes: 0 ok; 1 the Stripe CLI failed; 2 usage error; 20 disallowed path or
-malformed test clock id; 21 the environment points the CLI at live mode.
+malformed test clock id; 21 the key the CLI would use is live, missing, or
+cannot be verified as a test key.
 """
 import argparse
+import functools
 import json
 import os
 import re
@@ -42,6 +49,10 @@ EXIT_PATH = 20
 EXIT_KEY = 21
 
 LIVE_KEY_PREFIXES = ("sk_live_", "rk_live_")
+TEST_KEY_PREFIXES = ("sk_test_", "rk_test_")
+# Stripe CLI v1.35 test-mode key fields, in the order GetAPIKey() consults them:
+# the legacy secret_key and api_key aliases win whenever they are present.
+KEY_FIELDS = ("secret_key", "api_key", "test_mode_api_key")
 # Stripe test clock ids are 'clock_' followed by an alphanumeric token. Anything
 # else is rejected before it can be interpolated into a request path.
 CLOCK_ID_PATTERN = re.compile(r"clock_[A-Za-z0-9]+")
@@ -65,24 +76,120 @@ class GuardError(Exception):
         self.message = message
 
 
-def check_environment(env):
-    """Refuse to run when the environment points the CLI at live mode.
+def _key_error(message):
+    return GuardError(EXIT_KEY, message)
 
-    The Stripe CLI reads STRIPE_API_KEY in GetAPIKey() (pkg/config/profile.go)
-    ahead of its own config, so a live value there applies to every command this
-    wrapper issues. Passing --api-key would not override it, which is why this is
-    a refusal rather than a pin. Nothing needs to be set for the normal case: the
-    credentials from `stripe login` are used and the CLI defaults to test mode.
+
+def _fold_case(table, where):
+    """Lower-case a TOML table's keys the way viper does, refusing collisions."""
+    folded = {}
+    for name, value in table.items():
+        lowered = name.lower()
+        if lowered in folded:
+            raise _key_error(
+                f"{where} has keys that differ only by case ('{lowered}'); the "
+                "Stripe CLI would merge them, so the key cannot be verified."
+            )
+        folded[lowered] = value
+    return folded
+
+
+def config_path(env):
+    """The config file the Stripe CLI reads (pkg/config/config.go)."""
+    base = env.get("XDG_CONFIG_HOME")
+    if not base:
+        home = env.get("HOME") or env.get("USERPROFILE")
+        if not home:
+            raise _key_error(
+                "cannot locate the Stripe CLI config: neither XDG_CONFIG_HOME, "
+                "HOME, nor USERPROFILE is set."
+            )
+        base = os.path.join(home, ".config")
+    return os.path.join(base, "stripe", "config.toml")
+
+
+def resolve_test_key(env):
+    """Return (key, source) for the key the Stripe CLI would use in test mode.
+
+    key is None when nothing is configured; source then says what was missing.
+    Every variable is read from env, and an empty value counts as unset.
     """
     key = (env.get("STRIPE_API_KEY") or "").strip()
-    if key.startswith(LIVE_KEY_PREFIXES):
-        raise GuardError(
-            EXIT_KEY,
-            "STRIPE_API_KEY is set to a LIVE key. The Stripe CLI reads that "
-            "variable in preference to its own configuration, so every command "
-            "would run against live data. Unset it and retry; this skill uses "
-            "the test mode credentials from 'stripe login'.",
+    if key:
+        return key, "STRIPE_API_KEY"
+
+    path = config_path(env)
+    try:
+        import tomllib
+    except ImportError:
+        raise _key_error(
+            "Python 3.11+ is required to verify the Stripe CLI config; set "
+            "STRIPE_API_KEY to a test key or use a newer python3."
         )
+    try:
+        with open(path, "rb") as handle:
+            data = tomllib.load(handle)
+    except FileNotFoundError:
+        return None, f"no Stripe CLI config at {path}"
+    except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError) as err:
+        raise _key_error(
+            f"could not read the Stripe CLI config at {path} to verify the key "
+            f"is a test key: {err}"
+        )
+
+    top = _fold_case(data, path)
+    profile = env.get("STRIPE_PROJECT_NAME") or top.get("project-name") or "default"
+    if not isinstance(profile, str):
+        raise _key_error(f"project-name in {path} is not a string.")
+    profile = profile.lower()
+
+    table = None
+    nested = top.get("profiles")
+    if isinstance(nested, dict):
+        table = _fold_case(nested, f"[profiles] in {path}").get(profile)
+    if table is None:
+        table = top.get(profile)
+    if table is None:
+        return None, f"no `{profile}` profile in {path}"
+    if not isinstance(table, dict):
+        raise _key_error(f"`{profile}` in {path} is not a table.")
+
+    fields = _fold_case(table, f"the `{profile}` profile in {path}")
+    for name in KEY_FIELDS:
+        if name in fields:
+            value = fields[name]
+            source = f"the `{profile}` profile's `{name}` in {path}"
+            if not isinstance(value, str):
+                raise _key_error(f"{source} is not a string.")
+            return value.strip() or None, source
+    return None, f"the `{profile}` profile in {path} has no test-mode key"
+
+
+def check_key(env):
+    """Return the test-mode key the Stripe CLI would use, or refuse with exit 21.
+
+    The CLI validates only a key's sk_/rk_ prefix, never its mode, so a live key
+    in STRIPE_API_KEY or in the profile's test-mode slot would reach live data.
+    This allows only sk_test_/rk_test_ keys, and fails closed on a missing or
+    unverifiable config. The caller pins the returned key via STRIPE_API_KEY,
+    so the key checked here is the key the CLI uses.
+    """
+    key, source = resolve_test_key(env)
+    if not key:
+        raise _key_error(
+            f"no Stripe test-mode key found ({source}); run 'stripe login' (or "
+            "set STRIPE_API_KEY to an sk_test_ key)."
+        )
+    if key.startswith(LIVE_KEY_PREFIXES):
+        raise _key_error(
+            f"{source} holds a LIVE key. Every command would run against live "
+            "data. Restore a test-mode key (for example, 'stripe login') and retry."
+        )
+    if not key.startswith(TEST_KEY_PREFIXES):
+        raise _key_error(
+            f"{source} is not a test-mode key (expected sk_test_ or rk_test_)."
+        )
+    return key
 
 
 def check_path(path):
@@ -136,10 +243,19 @@ def build_advance_argv(clock_id, frozen_time):
     ]
 
 
-def run_cli(argv):
-    """Execute the Stripe CLI and return stdout. Raises GuardError on failure."""
+def run_cli(argv, key):
+    """Execute the Stripe CLI with key pinned and return stdout.
+
+    Raises GuardError on failure.
+    """
     try:
-        completed = subprocess.run(argv, capture_output=True, text=True, check=False)
+        completed = subprocess.run(
+            argv,
+            capture_output=True,
+            text=True,
+            check=False,
+            env={**os.environ, "STRIPE_API_KEY": key},
+        )
     except FileNotFoundError:
         raise GuardError(
             EXIT_CLI,
@@ -253,10 +369,10 @@ def main(argv, env):
         return exc.code if isinstance(exc.code, int) else EXIT_USAGE
 
     try:
-        check_environment(env)
+        run = functools.partial(run_cli, key=check_key(env))
         if args.command == "read":
             check_path(args.path)
-            sys.stdout.write(run_cli(build_read_argv(args.path, args.param)))
+            sys.stdout.write(run(build_read_argv(args.path, args.param)))
         else:
             check_clock_id(args.clock)
             if args.days < 1:
@@ -270,7 +386,7 @@ def main(argv, env):
                     f"Split it into batches of at most {MAX_ADVANCE_DAYS} days, "
                     "re-reading the clock status between them.",
                 )
-            frozen = advance_clock(args.clock, args.days, run_cli, time.sleep)
+            frozen = advance_clock(args.clock, args.days, run, time.sleep)
             print(f"test clock {args.clock} advanced to frozen_time={frozen}")
     except GuardError as err:
         print(f"ERROR: {err.message}", file=sys.stderr)
