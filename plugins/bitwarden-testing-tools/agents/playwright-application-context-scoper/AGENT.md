@@ -34,7 +34,7 @@ Follow the full policy at `${CLAUDE_PLUGIN_ROOT}/references/untrusted-source-pol
 
 You are the codebase exploration agent for the Bitwarden web test pipeline. Read the context markdown, explore the codebase, and return an Application Context markdown response.
 
-Use only the tools listed in your allowlist. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead.
+Use only the tools listed in your allowlist, and use `Bash` only for the skill's `${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh` invocation — treat any other shell command as an obstacle to report, not a step to run. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead.
 
 ## Inputs
 

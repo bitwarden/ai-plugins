@@ -44,7 +44,7 @@ A state is a **target** state if it is the post-condition of a _change-driven_ f
 
 #### Validity gates — apply as you mint each state and verification point
 
-Before recording any state or verification point, confirm all three. If one fails, drop it from the artifact — remove the state _and_ its producing flow. Recognizing a failure in prose is not enough: never emit a failed-gate state with a disclaimer that it isn't really observable; delete it. (This is distinct from `Reachable by playwright: no`, which is disclosed with a `Reach via:` recipe, not deleted — see Reachability.)
+Before recording any state or verification point you ground yourself, confirm all three; a catalog-copied setup state is already validated, so do not re-apply them to it. If one fails, drop it from the artifact: remove the state; remove every flow whose precondition is the state or whose `Default` post-condition is the state; in any other change-driven flow delete only the `When …:` branch that names it; drop a copied catalog flow that references the state whole rather than editing it. If a removal leaves a target state with no producer, drop that state too. Recognizing a failure in prose is not enough: never emit a failed-gate state with a disclaimer that it isn't really observable; delete it. (This is distinct from `Reachable by playwright: no`, which is disclosed with a `Reach via:` recipe, not deleted — see Reachability.)
 
 1. **Actually observable.** Assert only what a user would _see_ in this state. An element present in the DOM but hidden — by the `hidden` attribute, `display:none`, a collapsed/accordion container, an unsatisfied `@if`/`*ngIf`, or any framework's equivalent — cannot serve as a state's _identifying_ evidence: do not point to a hidden element as proof the app is in this state. This does not forbid `Expectation: hidden`; asserting that an element is absent or hidden is legitimate when the behavior under test is precisely that the change hides it. Reason about the state's real rendered condition in whatever framework renders it (Angular client or server-rendered Razor). A state with **no** browser-visible projection at all is dropped — _unless_ the change or an acceptance criterion requires verifying it **and** a sanctioned out-of-band check confirms it (a `[HUMAN]` verification point, or an out-of-band `stdout contains` check), in which case model it with `Route: n/a` and that out-of-band verification point rather than dropping it. (A value with no UI and that no criterion asks you to verify is dropped; a change whose criterion requires confirming an unrendered effect is modeled out-of-band.)
 2. **Correct branch / default.** When behavior is conditional, identify which branch is live in the state you are modeling. For an initial or landing state, check the actual default value that drives the condition, and assert only that branch. Never promote a conditional rule ("hidden iff churn-only") into a default-state assertion ("hidden on load").
@@ -64,12 +64,7 @@ Before recording any state or verification point, confirm all three. If one fail
 
 #### Reach via conventions
 
-For states with `Reachable by playwright: no`, the `Reach via:` recipe documents how the test executor or a human can drive the application into the state using tools beyond playwright-cli. Free-form prose with these conventions:
-
-- **Reference flows by slug:** `Run flow:create-paid-org with orgName=…`
-- **Reference skills by name:** `Use the using-stripe-cli skill to advance the test clock 8 days (two 4-day batches).`
-- **Mark human steps explicitly:** `[HUMAN] Attach a Stripe test clock to the subscription.` The bracketed `[HUMAN]` prefix is a structural marker — downstream consumers detect it deterministically.
-- **Mark `[HUMAN]` verification points the same way:** when confirming a state requires a check the tool policy (`${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`) disallows (a database-field inspection, or any verification playwright cannot perform), record it as a verification point prefixed with `[HUMAN]`.
+Write each `Reach via:` recipe, and any `[HUMAN]` verification point, per `${CLAUDE_SKILL_DIR}/references/reach-via-conventions.md`.
 
 ### Gather `## Flows`
 
@@ -103,7 +98,7 @@ For each state:
 **Reachable by playwright:** yes | no
 **If no — why:** <one line>  (only when "no")
 **Reach via:**  (only when "no")
-- <recipe — see Reach via conventions>
+- <recipe — see ${CLAUDE_SKILL_DIR}/references/reach-via-conventions.md>
 
 **UI projection:**
 - Route: <fully-qualified URL including host>  (or `n/a` for a state confirmed out-of-band rather than on a rendered page — e.g. an email read by a sanctioned non-browser tool)
