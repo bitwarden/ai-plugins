@@ -2,7 +2,7 @@
 name: consulting-adrs
 description: Check a design, change, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, or when someone needs to find or summarize ADRs. Produces structured findings (conflict, gap, stale-reference, aligned) with cited ADRs, or an ADR summary when that is the ask.
 allowed-tools: WebFetch(domain:contributing.bitwarden.com), Read, Grep
-disallowed-tools: Write, Edit, NotebookEdit, Agent, Bash
+disallowed-tools: Write, Edit, NotebookEdit, Agent, Bash, WebSearch
 context: fork
 agent: general-purpose
 background: false
@@ -20,7 +20,7 @@ If the ask is to locate or summarize ADRs rather than validate a specific change
 
 This skill runs in its own context and sees nothing of the calling conversation. Everything it evaluates arrives in the invocation: the design, diff, plan, or threat model to check, or the catalog request.
 
-The subject needs enough substance for Step 1 to be real work, meaning the domain it touches and the specific elements at stake (new contracts, fields, trust boundaries, dependencies, cross-client patterns). A one-line description is not a subject.
+For a validation ask, the subject needs enough substance for Step 1 to be real work, meaning the domain it touches and the specific elements at stake (new contracts, fields, trust boundaries, dependencies, cross-client patterns). A one-line description is not a subject.
 
 If no subject was passed, say so in one line and stop. Do not fetch the catalog, infer a subject from the working tree, or produce findings against nothing.
 
@@ -39,9 +39,9 @@ If no subject was passed, say so in one line and stop. Do not fetch the catalog,
 Fill this template. Output nothing before the first finding line and nothing after the roll-up.
 
 ```
-[CONFLICT] <summary>. ADR <n> <title> (<status>, <url>); decision: "<text>"; in change: <element>.
+[CONFLICT] <summary>. ADR <n> <title> (<status>, <url or local path>); decision: "<text>"; in change: <element>.
 [GAP] <summary>. No ADR found; in change: <element>.
-[STALE-REFERENCE] <summary>. ADR <n> <title> (<status>, <url>) superseded by ADR <n2> <title2>; in change: <element>.
+[STALE-REFERENCE] <summary>. ADR <n> <title> (<status>, <url or local path>) superseded by ADR <n2> <title2> | deprecated, no replacement; in change: <element>.
 [ALIGNED] ADR <n> <title>: <element>.
 
 Roll-up: <n> conflict, <n> gap, <n> stale-reference, <n> aligned.
