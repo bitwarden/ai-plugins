@@ -9,7 +9,7 @@ Bitwarden follows a 4-phase engagement model for security work. This skill prima
 
 ### Phase 1: Initial Security Assessment (Engineering Team)
 
-1. Check the system or components under review against Bitwarden's Architecture Decision Records by invoking `Skill(bitwarden-adr-tools:consulting-adrs)` — a threat model should align with already-accepted architecture, not silently re-derive or contradict it
+1. Check the system or components under review against Bitwarden's Architecture Decision Records by invoking `Skill(bitwarden-adr-tools:consulting-adrs)` and passing it the system description, components, and trust boundaries. A threat model should align with already-accepted architecture, not silently re-derive or contradict it
 2. Create data flow diagrams (Mermaid)
 3. Define security requirements separate from product requirements
 4. Propose security definitions (threat model + security goals)
