@@ -82,10 +82,10 @@
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, commits, pull requests, preflight checks, change labeling, and Jira ticket filing."
     },
     {
-      "name": "bitwarden-planning-tools",
-      "source": "./plugins/bitwarden-planning-tools",
+      "name": "bitwarden-adr-tools",
+      "source": "./plugins/bitwarden-adr-tools",
       "version": "1.0.0",
-      "description": "Planning and preparation tools for Bitwarden — pre-implementation work such as architecture-decision consulting, ahead of the delivery lifecycle."
+      "description": "Tools that act on Bitwarden's Architecture Decision Records: checking a design, change, plan, or threat model against the ADR catalog, and locating or summarizing ADRs."
     },
     {
       "name": "bitwarden-designer",

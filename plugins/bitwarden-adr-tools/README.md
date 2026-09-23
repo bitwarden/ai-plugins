@@ -1,10 +1,10 @@
-# Bitwarden Planning Tools Plugin
+# Bitwarden ADR Tools Plugin
 
-Planning and preparation tools for Bitwarden — the pre-implementation half of the lifecycle.
+Tools that act on Bitwarden's Architecture Decision Records.
 
 ## Overview
 
-This plugin is the home for **pre-implementation planning and preparation** work: understanding a change, checking it against recorded architecture decisions, and shaping it before code is written.
+This plugin holds skills whose subject is Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/). It depends on no other plugin, so any plugin can compose it without creating a dependency cycle.
 
 Skills can be invoked individually. See the table below for what ships today.
 
@@ -17,7 +17,7 @@ Skills can be invoked individually. See the table below for what ships today.
 ## Installation
 
 ```bash
-/plugin install bitwarden-planning-tools@bitwarden-marketplace
+/plugin install bitwarden-adr-tools@bitwarden-marketplace
 ```
 
 ## Usage
