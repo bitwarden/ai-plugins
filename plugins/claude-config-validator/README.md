@@ -349,8 +349,24 @@ reviewer judges it.
 The permission checks and the inventory report themselves as skipped rather than passed when
 they cannot run. Check 3's four rule tests need `jq`, a `settings.json` that parses, and string
 rules in `permissions.allow`, since a rule in `deny` is the control rather than a defect and
-telling it from `allow` needs the array the rule sits in; the inventory needs the first two.
-The `settings.local.json` check does not yet report itself this way.
+telling it from `allow` needs the array the rule sits in; the inventory needs the first two. The
+`settings.local.json` check does the same when the target is not inside a git repository, since
+it cannot then tell whether the file is committed.
+
+An absent `settings.json` is not a skip. It is an answer: no rules are set in the scanned
+directory. Rules reaching the session from elsewhere, such as `~/.claude/settings.json` or
+managed settings, are outside what this scan looks at.
+
+`scripts/security-scan.test.sh` covers the scanner, including the paths where a check that did
+not run must not report as passed. It is plain bash and takes no arguments:
+
+```bash
+skills/reviewing-claude-config/scripts/security-scan.test.sh
+```
+
+Nothing runs it automatically, so run it after changing the scanner. Install `jq` first: without
+it check 3's rule tests are skipped and the suite asserts the incomplete verdict instead of the
+clean one, which still passes but exercises less.
 
 ## Plugin Structure
 

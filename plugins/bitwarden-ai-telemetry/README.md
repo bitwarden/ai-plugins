@@ -4,10 +4,11 @@ Claude Code hooks that emit **metadata-only** AI-usage telemetry as [OTLP](https
 
 ## What it does
 
-The plugin registers Claude Code lifecycle hooks (`PostToolUse`, `SubagentStop`, and `UserPromptExpansion`) that fire after tool use, subagent completion, and prompt expansion. Each hook POSTs a single OTLP-JSON log record describing what happened, using metadata only. The hooks emit four event families:
+The plugin registers Claude Code lifecycle hooks (`SessionStart`, `PostToolUse`, `SubagentStop`, and `UserPromptExpansion`) that fire at session start, after tool use, subagent completion, and prompt expansion. Each hook POSTs a single OTLP-JSON log record describing what happened, using metadata only. The hooks emit these event families:
 
 | Event         | Fires on                                                                  | Recovers                                                                                    |
 | ------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `bw.session`  | Session start                                                             | The session and repo, so every session produces at least one record                         |
 | `bw.identity` | `Task` / `Agent` / `Skill` tool use; subagent stop; `UserPromptExpansion` | Skill and agent names that native telemetry redacts                                         |
 | `bw.edit`     | `Edit` / `MultiEdit` / `Write` / `NotebookEdit`                           | Repo slug, branch, base SHA, and the edited file **path**                                   |
 | `bw.commit`   | `Bash` running `git commit`                                               | Repo slug, branch, and the resulting commit **SHA**                                         |
@@ -23,6 +24,7 @@ Metadata only. Specifically:
 - Commit SHAs and PR numbers
 - Tool, skill, agent, and MCP server/tool **names**
 - The Claude Code session id
+- The email of the signed-in Claude account, read from Claude Code's local config (`.claude.json`)
 
 **It never collects:**
 
@@ -40,9 +42,9 @@ Telemetry is best-effort and must never interfere with a working session. Every 
 
 The OTLP destination is supplied at deploy time via the `BW_TELEMETRY_OTLP` environment variable (normally set org-wide through managed-settings.json's `env` block), and is not hardcoded anywhere in the plugin.
 
-`BW_TELEMETRY_OTLP` has no default. If it isn't set, the hooks emit nothing.
+`BW_TELEMETRY_OTLP` has no default. If it isn't set, the hooks emit nothing and say so: a warning that telemetry is not being recorded reaches the user at most once an hour, so a missing destination doesn't go unnoticed for a whole session.
 
-The value must be an `https` URL whose host is `bitwarden.pw` or a subdomain of it (e.g. `https://ait.bitwarden.pw/v1/logs`). Anything else (`http://`, a different domain, a malformed URL) is treated exactly like an unset variable: the hooks emit nothing, with no error or log line to distinguish "not configured" from "configured but rejected."
+The value must be an `https` URL whose host is `bitwarden.pw` or a subdomain of it (e.g. `https://ait.bitwarden.pw/v1/logs`). Anything else (`http://`, a different domain, a malformed URL) is treated exactly like an unset variable: the hooks emit nothing, and the warning names both cases together rather than distinguishing "not configured" from "configured but rejected."
 
 ## Requirements
 

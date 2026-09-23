@@ -1,6 +1,6 @@
 # Evaluation Standards
 
-Loaded by the orchestrator in Step 1. **Severity Levels**, **Do Not Flag**, and **Confidence Scoring** below are propagated verbatim into every Step 2–5 subagent prompt. The **Finding Shape** schema lives in `finding-shape.md` and is propagated the same way.
+Loaded by the orchestrator in Step 1. **Severity Levels**, **Do Not Flag**, and **Confidence Scoring** below are propagated verbatim into every Step 2–5 subagent prompt except Agent 5, which takes the carve-out subset in `agent-5-skill-review.md`. The **Finding Shape** schema lives in `finding-shape.md` and is propagated the same way.
 
 ## Severity Levels
 
@@ -21,7 +21,7 @@ The following are not valid findings under any tier. Subagents must not emit the
 - Pedantic nit-picks a senior engineer would not raise in code review.
 - Issues a linter would catch.
 - Speculative issues that depend on specific inputs or runtime state without evidence those inputs occur in practice.
-- Pre-existing issues not introduced or worsened by this change.
+- Pre-existing issues not introduced or worsened by this change. Exception: a CWE-1427 observation in a changed file stands whether or not the diff touched the line it sits on.
 
 ## Confidence Scoring
 
@@ -37,4 +37,4 @@ Rate each potential finding on a 0–100 scale:
 
 ## Finding Shape
 
-Every finding and every Step 4/5 return object follows the JSON schema in `finding-shape.md`. The main orchestrator loads that file in Step 1 and propagates its contents verbatim to every subagent.
+Every finding and every Step 4/5 return object follows the JSON schema in `finding-shape.md`. The main orchestrator loads that file in Step 1 and propagates its contents verbatim to every subagent except Agent 5, which returns prose the orchestrator translates.

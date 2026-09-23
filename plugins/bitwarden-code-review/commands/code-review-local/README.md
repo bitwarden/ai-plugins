@@ -35,9 +35,9 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 /code-review-local
 # When asked for PR number, indicate you want to review local changes instead
 
-# The agent will analyze:
-# - Uncommitted changes (git diff)
-# - Committed changes on current branch vs base branch
+# The agent reviews one scope, not both:
+# - The branch against its base, when it has commits ahead of origin/HEAD
+# - Otherwise your pending changes (tracked edits plus untracked files)
 ```
 
 ## Output Files
@@ -120,8 +120,8 @@ The agent uses Bitwarden's standard emoji classification system:
 ### For Local Changes Reviews:
 
 1. **Analyzes git changes** using `git status`, `git diff`, and `git log`
-2. **Evaluates uncommitted and committed changes** on current branch
-3. **Compares against base branch** to understand full change scope
+2. **Evaluates whichever scope local mode resolves** — the branch against its base, or pending changes when there is no resolvable base
+3. **Falls back to pending changes** when the branch has nothing ahead of its base, or when the base cannot be resolved at all, and says so in the summary
 
 ### Common Review Steps:
 
@@ -169,10 +169,10 @@ python process_review.py review-summary.md review-inline-comments.md
 
 ### Pre-Commit Validation
 
-Review your local changes before committing or creating a PR:
+Review your pending changes before committing. This reviews the edits themselves only while the branch has no commits ahead of `origin/HEAD` — once it does, the branch-against-base diff wins and your uncommitted edits are not what gets reviewed. Commit first and re-run to cover them.
 
 ```bash
-# Review uncommitted changes before commit
+# On a branch level with its base, this reviews the pending edits
 /code-review-local
 # Choose "local changes" when prompted
 # Review findings in the generated files

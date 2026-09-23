@@ -1,6 +1,6 @@
 ---
 name: posting-review-summary
-description: Use this skill when posting the final summary comment after all inline comments are posted. Apply as the LAST step of code review after all findings are classified and inline comments are complete. Detects context (agent mode sticky comment, GitHub Actions MCP tool, or local file) and routes output accordingly.
+description: Use this skill when posting the final summary comment, including its No Verdict form when nothing could be reviewed and no inline comments exist. Otherwise apply as the LAST step of code review, after all findings are classified and inline comments are complete. Detects context (caller-declared local-file output, agent mode sticky comment, GitHub Actions MCP tool, or local file) and routes output accordingly.
 ---
 
 # Posting Review Summary
@@ -9,11 +9,13 @@ description: Use this skill when posting the final summary comment after all inl
 
 Check contexts **in this order** — use the first match:
 
-| Context                   | How to Detect                                                                                    | Action                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| **Agent Mode**            | Sticky comment context provided in prompt (comment ID + `<!-- bitwarden-code-review -->` marker) | Write summary to `/tmp/review-summary.md`         |
-| GitHub Actions (tag mode) | `mcp__github_comment__update_claude_comment` available AND no sticky comment context             | Update sticky comment via MCP tool                |
-| Local review              | Neither agent mode context nor MCP tool available                                                | Write to `review-summary.md` in working directory |
+| Context                             | How to Detect                                                                                                                                                                                                         | Action                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **Local output in effect**          | An `OUTPUT: local files` line in the prompt's leading directive block, **or** a caller that passes local files as the destination in effect. Check this first, and never key it on which tools happen to be available | Write to `review-summary.md` in working directory |
+| Local target, no GitHub destination | The review target is local changes and no caller declared a GitHub destination                                                                                                                                        | Write to `review-summary.md` in working directory |
+| **Agent Mode**                      | Sticky comment context provided in prompt (comment ID + `<!-- bitwarden-code-review -->` marker)                                                                                                                      | Write summary to `/tmp/review-summary.md`         |
+| GitHub Actions (tag mode)           | `mcp__github_comment__update_claude_comment` available AND no sticky comment context                                                                                                                                  | Update sticky comment via MCP tool                |
+| Local review                        | Neither agent mode context nor MCP tool available                                                                                                                                                                     | Write to `review-summary.md` in working directory |
 
 **FORBIDDEN:** Do not use `gh pr comment` to create summary comments.
 
@@ -59,6 +61,8 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 
 [Up to 4 neutral sentences describing what was reviewed]
 
+[Optional **Not covered:** line - only when a review step the diff called for did not run and nothing else in this review covered its ground]
+
 <details>
 <summary>Code Review Details</summary>
 
@@ -68,6 +72,60 @@ If PR title, description, or test plan is genuinely deficient, add as a finding 
 
 </details>
 ```
+
+## No Verdict
+
+Use this form **instead of** the template above — not as a third value inside it — when nothing
+was reviewed — the diff could not be produced, it came back empty, the pull request could not be
+identified, or any other reason the review did not happen. Emit no APPROVE or REQUEST CHANGES; a verdict over an unreviewed diff is worse
+than none.
+
+It goes to the same destination the mode you are in would have used for a normal summary, by
+the routing in **Context Detection** above **and** the per-mode steps in **Output Execution**
+below — including the marker append in agent mode, without which the next run cannot find the
+sticky comment and duplicates it. Nothing about this form changes where output lands —
+a stop that writes nowhere leaves a placeholder comment reading as a review that found nothing,
+which is the outcome the form exists to prevent.
+
+The reason goes in the assessment-sentence position, **outside** `<details>`, for the same
+reason the coverage note does — a reason nobody expands is a reason nobody reads. There is no
+`<details>` block at all here, because there are no findings to put in one, and no coverage
+note either: this form already says the whole review did not happen.
+
+```markdown
+## 🤖 Bitwarden Claude Code Review
+
+**Overall Assessment:** NO VERDICT
+
+[One or two sentences: what was attempted, what stopped it, and what the caller should do next]
+```
+
+## Not Covered
+
+A coverage note is not a finding: it has no `file:line` to cite and it says what was _not_
+reviewed, which is the opposite of the assessment sentences above it. So it gets its own line,
+outside the `<details>` block, where an approval cannot bury it.
+
+Render it when a review step the diff called for did not run and nothing else in this review
+covered its ground — this path cannot reach that reviewer at all, or the reviewer errored or
+returned nothing usable. An optional enrichment skill that was merely unavailable does not
+qualify: those fall back to your existing review knowledge, so the ground was still covered.
+Name the files that went unreviewed, why, and which other path covers them. Give the reason
+that actually applies on your path — do not assert an install state you cannot check, and do
+not point at a remedy the stated reason would also block.
+
+Example, the `bitwarden-code-reviewer` path, where `Task` is unavailable so
+`plugin-dev:skill-reviewer` cannot be launched whatever is installed:
+
+```markdown
+**Not covered:** Skill review did not run — this review path cannot launch
+`plugin-dev:skill-reviewer`, so `plugins/example/skills/doing-a-thing/SKILL.md` was not checked
+for description quality, length, or progressive disclosure.
+`performing-multi-agent-code-review` covers them where `plugin-dev` is installed.
+```
+
+Omit the line entirely when every review step the diff called for ran. An approval that hides
+what went unreviewed reads as a pass on it.
 
 ## Dependency Changes Table
 

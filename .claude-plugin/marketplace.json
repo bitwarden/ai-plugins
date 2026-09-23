@@ -18,13 +18,13 @@
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Routes CLAUDE.md, agents, commands, hooks, and settings to targeted review skills, reporting only what a changeset introduced."
     },
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "1.13.1",
+      "version": "2.1.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -36,7 +36,7 @@
     {
       "name": "bitwarden-product-analyst",
       "source": "./plugins/bitwarden-product-analyst",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "description": "Product analyst agent for creating comprehensive Bitwarden requirements documents from multiple sources, and writing user-facing release notes"
     },
     {
@@ -48,13 +48,13 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.6.0",
+      "version": "2.7.3",
       "description": "Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, attachments, and opt-in Jira write tools"
     },
     {
       "name": "bitwarden-security-engineer",
       "source": "./plugins/bitwarden-security-engineer",
-      "version": "1.4.0",
+      "version": "2.2.0",
       "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis."
     },
     {
@@ -102,8 +102,8 @@
     {
       "name": "bitwarden-ai-telemetry",
       "source": "./plugins/bitwarden-ai-telemetry",
-      "version": "1.1.0",
-      "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (identity, git-linkage, MCP) via OTLP."
+      "version": "1.3.0",
+      "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (session, identity, git-linkage, MCP) tagged with the signed-in account email via OTLP."
     },
     {
       "name": "bitwarden-testing-tools",

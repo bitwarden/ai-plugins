@@ -38,18 +38,38 @@ CHECKS_SKIPPED=0
 # ============================================================================
 echo "[1/4] Checking for committed settings.local.json..."
 
-if git ls-files 2>/dev/null | grep -q "settings.local.json"; then
-    echo "  ❌ CRITICAL: settings.local.json is committed to git"
-    echo "     Files found:"
-    git ls-files | grep "settings.local.json" | sed 's/^/     - /'
-    echo ""
-    echo "     Remediation:"
-    echo "     git rm --cached .claude/settings.local.json"
-    echo "     echo '.claude/settings.local.json' >> .gitignore"
-    echo ""
-    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+if ! git -C "${CLAUDE_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
+    CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+    echo "  ⚠️  SKIPPED: ${CLAUDE_DIR} is not inside a git repository"
 else
-    echo "  ✅ OK: settings.local.json not in git"
+    # Target the repository the scanned directory belongs to, not the shell's and not
+    # the subtree: `-C "${CLAUDE_DIR}"` alone would list only paths under .claude and
+    # print them relative to it, missing a committed file elsewhere in the repository.
+    REPO_ROOT=$(git -C "${CLAUDE_DIR}" rev-parse --show-toplevel)
+
+    # Ask git directly. Piping it to `grep -q` loses matches under `pipefail`:
+    # grep exits on the first hit, git dies of SIGPIPE, and the pipeline reports
+    # failure, so a committed file reads as absent whenever git's output is long
+    # enough that grep finishes first.
+    if ! LOCAL_SETTINGS=$(git -C "${REPO_ROOT}" ls-files -- '*settings.local.json'); then
+        CHECKS_SKIPPED=$((CHECKS_SKIPPED + 1))
+        echo "  ⚠️  SKIPPED: git could not list files in ${REPO_ROOT}"
+        LOCAL_SETTINGS=""
+    fi
+
+    if [ -n "${LOCAL_SETTINGS}" ]; then
+        echo "  ❌ CRITICAL: settings.local.json is committed to git"
+        echo "     Files found:"
+        echo "${LOCAL_SETTINGS}" | sed 's/^/     - /'
+        echo ""
+        echo "     Remediation:"
+        echo "     git rm --cached .claude/settings.local.json"
+        echo "     echo '.claude/settings.local.json' >> .gitignore"
+        echo ""
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    elif [ "${CHECKS_SKIPPED}" -eq 0 ]; then
+        echo "  ✅ OK: settings.local.json not in git"
+    fi
 fi
 echo ""
 
@@ -268,7 +288,9 @@ if [ -f "${SETTINGS_FILE}" ]; then
         ISSUES_FOUND=$((ISSUES_FOUND + 1))
     fi
 else
-    echo "  ℹ️  No settings.json found (OK)"
+    # A determinate answer, not a check that could not run: no file means no rules in force
+    # from this directory. Rules from elsewhere are outside what this scan sees.
+    echo "  ℹ️  No settings.json at ${CLAUDE_DIR}, so no rules are set here"
 fi
 echo ""
 
@@ -311,7 +333,9 @@ if [ -f "${SETTINGS_FILE}" ]; then
         fi
     fi
 else
-    echo "  ℹ️  No settings.json found (OK)"
+    # A determinate answer, not a check that could not run: no file means no rules in force
+    # from this directory. Rules from elsewhere are outside what this scan sees.
+    echo "  ℹ️  No settings.json at ${CLAUDE_DIR}, so no rules are set here"
 fi
 echo ""
 
