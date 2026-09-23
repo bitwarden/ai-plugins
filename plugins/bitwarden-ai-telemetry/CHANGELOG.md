@@ -5,6 +5,20 @@ All notable changes to the bitwarden-ai-telemetry plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-09-17
+
+### Added
+
+- A `systemMessage` warning when a record does not reach the collector. Errors were swallowed to keep a session safe and then discarded, so usage going entirely unrecorded was invisible. The usual cause is ZScaler Private Access not having re-authenticated; a bad managed-settings push is the other.
+- Delivery is judged on the collector's `202`, not on the request failing to raise, because ZScaler can answer a sign-in page with `200` and that would otherwise read as success.
+- A status the collector answered is reported as that status. Only a `200` implicates a ZScaler interstitial, since the collector never answers `200`; anything else came from the collector itself, and reconnecting a working VPN would not touch it.
+
+### Notes
+
+- One warning per fault class per hour, and none at all if that state cannot be written: a warning on every edit is worse than silence.
+- The hooks still exit 0, so nothing is blocked or interrupted.
+- Delivery past the collector is out of reach. A record it accepts returns 202 regardless of what becomes of it afterwards.
+
 ## [1.1.1] - 2026-09-17
 
 ### Fixed
