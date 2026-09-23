@@ -38,7 +38,7 @@ result the skill returns, not the calling session's summary of it. The caller
 paraphrases, and the paraphrase is not the skill's output.
 
 Behavior cases point the skill at `fixtures/adr/` via its local-clone path so
-grading is deterministic and offline. The `source-call-live` case provides no
+grading is deterministic and offline. The `source-call-live-contributing-site` case provides no
 local checkout, so the skill must reach `contributing.bitwarden.com`; the
 recorded assertions check that the output cites a real ADR path and does not
 fabricate, not that a fetch actually occurred.
