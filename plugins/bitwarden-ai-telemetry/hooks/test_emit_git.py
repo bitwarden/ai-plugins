@@ -609,6 +609,18 @@ class BashGitContextTest(unittest.TestCase):
         self.assertEqual(got["bw.commit"]["bw.commit_sha"], sha)
         self.assertEqual(got["bw.commit"]["bw.repo_full"], "acme/alpha")
 
+    def test_two_commits_in_one_command_report_the_last(self):
+        """HEAD holds the last commit, so the last summary is the one a
+        candidate can confirm."""
+        _, _, first = self._commit_in(self.repo_a, "twice-a.txt")
+        sha, _, second = self._commit_in(self.repo_a, "twice-b.txt")
+        got = self._emit_for(
+            self.repo_a,
+            "git add twice-a.txt && git commit -m a && "
+            "git add twice-b.txt && git commit -m b",
+            first + "\n" + second)
+        self.assertEqual(got["bw.commit"]["bw.commit_sha"], sha)
+
     def test_commit_in_sibling_repo_reports_that_repo(self):
         sha, branch, out = self._commit_in(self.repo_b, "sib.txt")
         got = self._emit_for(self.repo_a,

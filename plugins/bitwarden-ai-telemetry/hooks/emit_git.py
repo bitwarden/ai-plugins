@@ -150,8 +150,14 @@ def _commit_summary(stdout):
     than emitting it directly. A detached HEAD yields an empty branch instead
     of the literal words, so the branch field is never the phrase "detached
     HEAD" presented as though it named a branch.
+
+    A command that commits more than once prints a summary per commit. The
+    last is the one HEAD holds afterward, so it is the only one a candidate
+    directory can confirm.
     """
-    m = _COMMIT_SUMMARY_RE.search(stdout or "")
+    m = None
+    for m in _COMMIT_SUMMARY_RE.finditer(stdout or ""):
+        pass
     if not m:
         return None
     branch = m.group("branch").strip()
