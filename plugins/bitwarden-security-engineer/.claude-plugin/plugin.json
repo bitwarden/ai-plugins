@@ -15,5 +15,6 @@
     "threat-modeling",
     "security-review"
   ],
-  "agents": ["./agents/bitwarden-security-engineer.md"]
+  "agents": ["./agents/bitwarden-security-engineer.md"],
+  "dependencies": ["bitwarden-adr-tools"]
 }
