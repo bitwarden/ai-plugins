@@ -12,6 +12,15 @@ description: |
   The task is turning structured context into a grounded, state-centric Application Context — exactly this agent's job.
   </commentary>
   </example>
+
+  <example>
+  Context: An engineer just ran the context gatherer and wants to know what UI states the Admin portal change needs covered.
+  user: "What UI states and flows do I need to test for the cohort coupon validation change? Context is saved at ./context-cohorts.md."
+  assistant: "I'll use the playwright-application-context-scoper agent to diff the affected repos, trace the Admin portal code, and return the reachable states and the flows that reach them."
+  <commentary>
+  Asking which states and flows a change needs covered is a scoping request, even without the phrase "application context".
+  </commentary>
+  </example>
 model: sonnet
 skills:
   - scoping-playwright-application-context

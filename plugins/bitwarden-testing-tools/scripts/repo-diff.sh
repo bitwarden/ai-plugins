@@ -3,10 +3,10 @@
 # repo-diff.sh — list the files a branch changed in one repo, relative to origin/main.
 #
 # The web-test planning skills (scoping-playwright-application-context and
-# mapping-services-under-test) call this instead of invoking git directly, so their
-# Bash grant can be scoped to this one script rather than to git. Keeping `git -C`
-# inside the script means no open-ended git subcommand is ever exposed to the
-# permission layer.
+# mapping-services-under-test) call this instead of invoking git directly, so the
+# skills' `allowed-tools` Bash grant can be scoped to this one script rather than to
+# git. Keeping `git -C` inside the script means no open-ended git subcommand is
+# ever exposed to the permission layer.
 #
 # Usage: repo-diff.sh <repo-path>
 #   <repo-path>  path to the repo to diff (absolute, or relative to the cwd)
@@ -16,9 +16,10 @@
 # base cannot be resolved, so callers keep their stop-on-failure behavior.
 #
 # The repo argument is allowlisted by basename to the three canonical Bitwarden
-# repos the pipeline knows. This is the real scoping boundary: it holds no matter
-# how the caller's Bash grant is written, so an untrusted repo token cannot point
-# the diff at an arbitrary repository on disk.
+# repos the pipeline knows. The check holds no matter how the caller's Bash grant is
+# written, but it matches the basename only: it restricts the diff to a repo *named*
+# clients, server, or billing-pricing, not to one under the bitwarden root. The
+# argument is always quoted and the output is filenames only.
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then

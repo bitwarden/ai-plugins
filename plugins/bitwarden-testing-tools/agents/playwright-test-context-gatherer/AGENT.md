@@ -12,6 +12,24 @@ description: |
   The task is acquiring and structuring feature source into planning context — exactly this agent's job.
   </commentary>
   </example>
+
+  <example>
+  Context: An engineer has written an implementation plan and wants planning context from it rather than from a ticket.
+  user: "Build the test-planning context from my plan at ./docs/plans/cohort-discounts.md."
+  assistant: "I'll use the playwright-test-context-gatherer agent with input type plan-file to read the plan and return the affected repos, feature description, and acceptance criteria."
+  <commentary>
+  A plan file is one of the three input types this agent acquires from; the output artifact is the same.
+  </commentary>
+  </example>
+
+  <example>
+  Context: There is no ticket or plan yet, only a short description of the change.
+  user: "Get the test context for this: the web vault subscription page now shows a past-due banner when the latest invoice is unpaid."
+  assistant: "I'll use the playwright-test-context-gatherer agent with input type description to distill that text into the structured context artifact."
+  <commentary>
+  A free-form description is the third input type; the agent distills it without reproducing the raw text.
+  </commentary>
+  </example>
 model: sonnet
 skills:
   - bitwarden-atlassian-tools:researching-jira-issues

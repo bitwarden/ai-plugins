@@ -62,7 +62,7 @@ The `Required by (paths):` globs are keyed to each repo's **canonical name** (`c
 - **Repo**: `<bitwarden git root>/server/src/Billing/`
 - **Health check**: `http://localhost:44519/alive`
 - **Required by (paths)**: `server/src/Billing/**` changes
-- **Required by (routes)**: any test whose routes include `/billing/` or `/organizations/:id/billing/**` (e.g. `/organizations/:id/billing/subscription`)
+- **Required by (routes)**: any test whose routes include `/billing/` or `/organizations/:organizationId/billing/**` (e.g. `/organizations/:organizationId/billing/subscription`)
 
 ### billing-pricing Service
 
