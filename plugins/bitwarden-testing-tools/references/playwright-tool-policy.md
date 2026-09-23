@@ -46,3 +46,9 @@ Read-only Stripe test-mode queries, plus the single permitted write of advancing
 ## Stop Condition
 
 If a step cannot be completed using any of the permitted categories above, STOP immediately. Return a detailed report of what was completed, where the block occurred, and what approach was tried. Do not improvise or use unapproved tools.
+
+## Known limits of these controls
+
+Some controls this plugin relies on are instructions to the agent, not boundaries the platform enforces. They are recorded here so nobody reads this file as a security guarantee.
+
+**The agent-level Bash grant is not a hard boundary.** The scoper and mapper agents list unscoped `Bash` because a script-scoped grant does not work in an agent's `tools:`: tested on Claude Code 2.1.x, `${CLAUDE_PLUGIN_ROOT}` is not substituted there, and path-glob forms such as `Bash(*/scripts/repo-diff.sh:*)` do not match, so every run would prompt. Literal-prefix grants such as `Bash(gh pr diff:*)` do work in `tools:`, but a plugin script has no install-independent literal prefix. Listing `Bash` makes the tool available without approving any command. Scoping lives in each planning skill's `allowed-tools`, which pre-approves only `${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh` (the skills documentation states that `${CLAUDE_PLUGIN_ROOT}` is substituted in `allowed-tools` Bash rules), backed by the script's basename allowlist, and each agent's body limits its `Bash` use to that script. Any other command follows the session's permission rules and mode: it prompts in default mode, and runs unprompted under `bypassPermissions` or an allow rule the user already has. A `PreToolUse` hook on `Bash` would make it a hard boundary.
