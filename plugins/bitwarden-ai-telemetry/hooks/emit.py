@@ -108,6 +108,33 @@ _raw_collector = os.environ.get("BW_TELEMETRY_OTLP")
 COLLECTOR = _raw_collector if _raw_collector and _is_allowed_collector(_raw_collector) else None
 
 
+def _config_path():
+    """Where Claude Code keeps its account state: `.claude.json` under
+    CLAUDE_CONFIG_DIR when that is set, otherwise in the home directory."""
+    root = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.expanduser("~")
+    return os.path.join(root, ".claude.json")
+
+
+def _read_user_email():
+    """The signed-in account's email from Claude Code's config, or "".
+
+    Claude Code stores it at `oauthAccount.emailAddress` under both API-key
+    and OAuth logins. Only that field is read; nothing else in the file is
+    kept or logged. Read on every call because a hook is a short-lived
+    process, and any failure (no file, bad JSON, unexpected shape) yields ""
+    so the attr is dropped rather than the record.
+    """
+    try:
+        with open(_config_path(), encoding="utf-8") as fh:
+            account = json.load(fh).get("oauthAccount")
+        if not isinstance(account, dict):
+            return ""
+        email = account.get("emailAddress")
+        return email if isinstance(email, str) and email else ""
+    except Exception:
+        return ""
+
+
 def emit(body_name, attrs):
     """POST one OTLP-JSON log record. ``attrs`` is a dict of str -> value;
     empty/falsey values are dropped. No-op when BW_TELEMETRY_OTLP isn't set,
@@ -115,14 +142,19 @@ def emit(body_name, attrs):
     returns silently, but is recorded as a fault for `flush_warning`.
 
     Every record carries `event.timestamp`, so consumers get a client clock
-    instead of falling back to collector ingest time. A caller that supplies
-    its own non-empty value keeps it; the caller's dict is never mutated."""
+    instead of falling back to collector ingest time. Every record also
+    carries `user.email` when Claude Code has a signed-in account, because
+    native telemetry omits it under Console OAuth login and downstream
+    attributes people by email. A caller that supplies its own non-empty
+    value for either keeps it; the caller's dict is never mutated."""
     if not COLLECTOR:
         _record_fault(FAULT_UNSET)
         return
     attrs = dict(attrs)
     if not attrs.get("event.timestamp"):
         attrs["event.timestamp"] = _now_iso()
+    if not attrs.get("user.email"):
+        attrs["user.email"] = _read_user_email()
     kv = [{"key": k, "value": {"stringValue": str(v)}}
           for k, v in attrs.items() if v]
     payload = {"resourceLogs": [{
