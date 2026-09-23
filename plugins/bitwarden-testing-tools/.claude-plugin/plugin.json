@@ -17,6 +17,9 @@
     "test-strategy",
     "test-cases",
     "gherkin",
-    "qa"
+    "qa",
+    "playwright",
+    "e2e",
+    "test-planning"
   ]
 }
