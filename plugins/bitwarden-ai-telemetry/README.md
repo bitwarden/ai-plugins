@@ -4,10 +4,11 @@ Claude Code hooks that emit **metadata-only** AI-usage telemetry as [OTLP](https
 
 ## What it does
 
-The plugin registers Claude Code lifecycle hooks (`PostToolUse`, `SubagentStop`, and `UserPromptExpansion`) that fire after tool use, subagent completion, and prompt expansion. Each hook POSTs a single OTLP-JSON log record describing what happened, using metadata only. The hooks emit four event families:
+The plugin registers Claude Code lifecycle hooks (`SessionStart`, `PostToolUse`, `SubagentStop`, and `UserPromptExpansion`) that fire at session start, after tool use, subagent completion, and prompt expansion. Each hook POSTs a single OTLP-JSON log record describing what happened, using metadata only. The hooks emit these event families:
 
 | Event         | Fires on                                                                  | Recovers                                                                                    |
 | ------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `bw.session`  | Session start                                                             | The session and repo, so every session produces at least one record                         |
 | `bw.identity` | `Task` / `Agent` / `Skill` tool use; subagent stop; `UserPromptExpansion` | Skill and agent names that native telemetry redacts                                         |
 | `bw.edit`     | `Edit` / `MultiEdit` / `Write` / `NotebookEdit`                           | Repo slug, branch, base SHA, and the edited file **path**                                   |
 | `bw.commit`   | `Bash` running `git commit`                                               | Repo slug, branch, and the resulting commit **SHA**                                         |
@@ -23,6 +24,7 @@ Metadata only. Specifically:
 - Commit SHAs and PR numbers
 - Tool, skill, agent, and MCP server/tool **names**
 - The Claude Code session id
+- The email of the signed-in Claude account, read from Claude Code's local config (`.claude.json`)
 
 **It never collects:**
 
