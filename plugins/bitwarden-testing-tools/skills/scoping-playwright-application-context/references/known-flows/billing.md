@@ -113,9 +113,9 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 ### flow:purchase-premium-subscription
 
-**Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout), etc.
+**Use when:** Any test that requires the user to already hold an active Premium subscription — subscription management page, premium-feature access, discount badge display (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md`), etc.
 
-**Parameters:** none (uses default billing values)
+**Parameters:** none (uses defaults documented in `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md`)
 
 **Precondition state:** state:authenticated-free-user
 
@@ -139,7 +139,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 ### flow:create-paid-org
 
-**Use when:** Testing features that require a paid organization (Teams, Enterprise, Families, etc.) — including discount badge display on a Families organization (any eligible Stripe coupon imported to Admin portal applies automatically at checkout).
+**Use when:** Testing features that require a paid organization (Teams, Enterprise, Families, etc.) — including discount badge display on a Families organization (any eligible Stripe coupon imported to Admin portal applies automatically at checkout; see `${CLAUDE_PLUGIN_ROOT}/skills/writing-playwright-test-cases/references/billing-test-data.md` for the discount mechanism).
 
 **Parameters:** `orgName`, `billingEmail`, `planTier`
 
