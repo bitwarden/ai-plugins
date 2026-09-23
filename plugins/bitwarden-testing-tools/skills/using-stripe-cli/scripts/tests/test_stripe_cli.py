@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Unit tests for stripe_cli: live-mode refusal, argv construction, clock advance.
+"""Unit tests for stripe_cli: test-key guard, argv construction, clock advance.
 
-Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
+Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir;
+            Python 3.11+, which the config-reading tests need for tomllib)
 """
 import contextlib
 import io
 import json
 import os
+import subprocess
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS = os.path.dirname(HERE)
@@ -16,22 +20,206 @@ sys.path.insert(0, SCRIPTS)
 
 import stripe_cli
 
+FIXTURE_CONFIG = '[default]\ntest_mode_api_key = "sk_test_fixture"\n'
 
-class CheckEnvironmentTest(unittest.TestCase):
-    def test_empty_environment_is_fine(self):
-        stripe_cli.check_environment({})
 
-    def test_configured_test_key_is_fine(self):
-        stripe_cli.check_environment({"STRIPE_API_KEY": "sk_test_abc123"})
+def config_env(test, text, **extra):
+    """Write text as a Stripe CLI config.toml under a temp XDG_CONFIG_HOME.
+
+    Returns an env that points check_key at it, so no test ever reads the
+    developer's real ~/.config/stripe/config.toml.
+    """
+    root = tempfile.mkdtemp()
+    test.addCleanup(__import__("shutil").rmtree, root, True)
+    if text is not None:
+        os.makedirs(os.path.join(root, "stripe"))
+        with open(os.path.join(root, "stripe", "config.toml"), "w") as fh:
+            fh.write(text)
+    env = {"XDG_CONFIG_HOME": root}
+    env.update(extra)
+    return env
+
+
+class CheckKeyTest(unittest.TestCase):
+    def assertRefused(self, env, needle=None):
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.check_key(env)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_KEY)
+        if needle:
+            self.assertIn(needle, cm.exception.message)
+        return cm.exception
+
+    def test_configured_test_key_in_profile_is_returned(self):
+        self.assertEqual(
+            stripe_cli.check_key(config_env(self, FIXTURE_CONFIG)), "sk_test_fixture"
+        )
+
+    def test_test_key_in_environment_is_returned(self):
+        env = config_env(self, None, STRIPE_API_KEY="sk_test_abc123")
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_abc123")
+
+    def test_restricted_test_key_is_accepted(self):
+        env = config_env(self, '[default]\ntest_mode_api_key = "rk_test_abc"\n')
+        self.assertEqual(stripe_cli.check_key(env), "rk_test_abc")
 
     def test_live_secret_key_in_environment_is_refused(self):
-        with self.assertRaises(stripe_cli.GuardError) as cm:
-            stripe_cli.check_environment({"STRIPE_API_KEY": "sk_live_abcdef"})
-        self.assertEqual(cm.exception.code, stripe_cli.EXIT_KEY)
+        self.assertRefused({"STRIPE_API_KEY": "sk_live_abcdef"}, "LIVE key")
 
     def test_live_restricted_key_in_environment_is_refused(self):
-        with self.assertRaises(stripe_cli.GuardError):
-            stripe_cli.check_environment({"STRIPE_API_KEY": "rk_live_abcdef"})
+        self.assertRefused({"STRIPE_API_KEY": "rk_live_abcdef"}, "LIVE key")
+
+    def test_environment_key_takes_precedence_over_the_config(self):
+        env = config_env(
+            self, '[default]\ntest_mode_api_key = "sk_live_abc"\n',
+            STRIPE_API_KEY="sk_test_env",
+        )
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_env")
+
+    def test_empty_environment_key_counts_as_unset(self):
+        env = config_env(self, FIXTURE_CONFIG, STRIPE_API_KEY="")
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_fixture")
+
+    def test_live_key_in_test_mode_slot_is_refused(self):
+        env = config_env(self, '[default]\ntest_mode_api_key = "sk_live_abc"\n')
+        err = self.assertRefused(env, "LIVE key")
+        self.assertIn("test_mode_api_key", err.message)
+
+    def test_live_key_in_legacy_secret_key_is_refused(self):
+        env = config_env(
+            self,
+            '[default]\nsecret_key = "sk_live_abc"\ntest_mode_api_key = "sk_test_x"\n',
+        )
+        self.assertRefused(env, "secret_key")
+
+    def test_live_key_in_legacy_api_key_is_refused(self):
+        env = config_env(
+            self,
+            '[default]\napi_key = "rk_live_abc"\ntest_mode_api_key = "sk_test_x"\n',
+        )
+        self.assertRefused(env, "api_key")
+
+    def test_present_but_empty_legacy_key_wins_and_leaves_no_key(self):
+        env = config_env(
+            self, '[default]\nsecret_key = ""\ntest_mode_api_key = "sk_test_x"\n'
+        )
+        self.assertRefused(env, "no Stripe test-mode key")
+
+    def test_non_test_key_is_refused(self):
+        env = config_env(self, '[default]\ntest_mode_api_key = "sk_abc_def"\n')
+        self.assertRefused(env, "not a test-mode key")
+
+    def test_missing_config_file_is_refused(self):
+        self.assertRefused(config_env(self, None), "no Stripe test-mode key")
+
+    def test_missing_profile_is_refused(self):
+        env = config_env(self, '[other]\ntest_mode_api_key = "sk_test_x"\n')
+        self.assertRefused(env, "no Stripe test-mode key")
+
+    def test_project_name_environment_selects_the_profile(self):
+        env = config_env(
+            self,
+            '[default]\ntest_mode_api_key = "sk_live_a"\n'
+            '[work]\ntest_mode_api_key = "sk_test_work"\n',
+            STRIPE_PROJECT_NAME="work",
+        )
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_work")
+
+    def test_top_level_project_name_selects_the_profile(self):
+        env = config_env(
+            self,
+            'project-name = "work"\n'
+            '[default]\ntest_mode_api_key = "sk_test_default"\n'
+            '[work]\ntest_mode_api_key = "sk_live_work"\n',
+        )
+        self.assertRefused(env, "`work` profile")
+
+    def test_project_name_environment_beats_the_top_level_key(self):
+        env = config_env(
+            self,
+            'project-name = "work"\n'
+            '[default]\ntest_mode_api_key = "sk_test_default"\n'
+            '[work]\ntest_mode_api_key = "sk_live_work"\n',
+            STRIPE_PROJECT_NAME="default",
+        )
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_default")
+
+    def test_empty_project_name_counts_as_unset(self):
+        env = config_env(self, FIXTURE_CONFIG, STRIPE_PROJECT_NAME="")
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_fixture")
+
+    def test_table_and_field_names_ignore_case(self):
+        env = config_env(self, '[DEFAULT]\nTest_Mode_API_Key = "sk_test_upper"\n')
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_upper")
+
+    def test_tables_differing_only_by_case_are_refused(self):
+        env = config_env(
+            self,
+            '[default]\ntest_mode_api_key = "sk_test_a"\n'
+            '[DEFAULT]\ntest_mode_api_key = "sk_live_b"\n',
+        )
+        self.assertRefused(env, "differ only by case")
+
+    def test_profiles_table_is_preferred_over_the_flat_table(self):
+        env = config_env(
+            self,
+            '[default]\ntest_mode_api_key = "sk_live_flat"\n'
+            '[profiles.default]\ntest_mode_api_key = "sk_test_nested"\n',
+        )
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_nested")
+
+    def test_empty_xdg_config_home_falls_back_to_home(self):
+        home = tempfile.mkdtemp()
+        self.addCleanup(__import__("shutil").rmtree, home, True)
+        os.makedirs(os.path.join(home, ".config", "stripe"))
+        with open(os.path.join(home, ".config", "stripe", "config.toml"), "w") as fh:
+            fh.write(FIXTURE_CONFIG)
+        env = {"XDG_CONFIG_HOME": "", "HOME": home}
+        self.assertEqual(stripe_cli.check_key(env), "sk_test_fixture")
+
+    def test_userprofile_is_used_when_home_is_unset(self):
+        home = tempfile.mkdtemp()
+        self.addCleanup(__import__("shutil").rmtree, home, True)
+        os.makedirs(os.path.join(home, ".config", "stripe"))
+        with open(os.path.join(home, ".config", "stripe", "config.toml"), "w") as fh:
+            fh.write(FIXTURE_CONFIG)
+        self.assertEqual(stripe_cli.check_key({"USERPROFILE": home}), "sk_test_fixture")
+
+    def test_unparseable_config_is_refused(self):
+        self.assertRefused(config_env(self, "[default\n"), "could not read")
+
+    def test_unreadable_config_path_is_refused(self):
+        root = tempfile.mkdtemp()
+        self.addCleanup(__import__("shutil").rmtree, root, True)
+        os.makedirs(os.path.join(root, "stripe", "config.toml"))  # a directory
+        self.assertRefused({"XDG_CONFIG_HOME": root}, "could not read")
+
+    def test_non_string_key_is_refused(self):
+        env = config_env(self, "[default]\ntest_mode_api_key = 42\n")
+        self.assertRefused(env, "not a string")
+
+    def test_profile_that_is_not_a_table_is_refused(self):
+        self.assertRefused(config_env(self, 'default = "x"\n'), "not a table")
+
+    def test_missing_tomllib_is_refused_with_a_python_hint(self):
+        env = config_env(self, FIXTURE_CONFIG)
+        with mock.patch.dict(sys.modules, {"tomllib": None}):
+            self.assertRefused(env, "Python 3.11+")
+
+    def test_environment_key_needs_no_tomllib(self):
+        with mock.patch.dict(sys.modules, {"tomllib": None}):
+            self.assertEqual(
+                stripe_cli.check_key({"STRIPE_API_KEY": "sk_test_abc"}), "sk_test_abc"
+            )
+
+
+class RunCliPinTest(unittest.TestCase):
+    def test_checked_key_is_pinned_in_the_child_environment(self):
+        completed = subprocess.CompletedProcess([], 0, stdout="{}", stderr="")
+        with mock.patch.object(stripe_cli.subprocess, "run", return_value=completed) as run:
+            stripe_cli.run_cli(["stripe", "get", "/v1/customers"], key="sk_test_pin")
+        child_env = run.call_args.kwargs["env"]
+        self.assertEqual(child_env["STRIPE_API_KEY"], "sk_test_pin")
+        self.assertIn("PATH", child_env)
 
 
 class CheckPathTest(unittest.TestCase):
@@ -207,20 +395,23 @@ class AdvanceClockTest(unittest.TestCase):
 class MainGuardOrderingTest(unittest.TestCase):
     """The guards must run before any subprocess is spawned.
 
-    Proving check_environment raises in isolation, and that no built argv
-    carries --live, does not prove main() checks the environment *first*. These
+    Proving check_key raises in isolation, and that no built argv
+    carries --live, does not prove main() checks the key *first*. These
     tests replace run_cli with a recorder and assert it was never called, which
     is the property the module docstring actually sells.
     """
 
     def setUp(self):
         self.invocations = []
+        self.keys = []
+        self.env = config_env(self, FIXTURE_CONFIG)
         self._real_run_cli = stripe_cli.run_cli
         stripe_cli.run_cli = self._recorder
         self.addCleanup(setattr, stripe_cli, "run_cli", self._real_run_cli)
 
-    def _recorder(self, argv):
+    def _recorder(self, argv, key=None):
         self.invocations.append(argv)
+        self.keys.append(key)
         return json.dumps({"frozen_time": 1750000000, "status": "ready"})
 
     def _main(self, argv, env):
@@ -236,6 +427,33 @@ class MainGuardOrderingTest(unittest.TestCase):
         self.assertEqual(self.invocations, [])
         self.assertIn("LIVE key", err)
 
+    def test_live_key_in_profile_spawns_no_cli_on_read(self):
+        env = config_env(self, '[default]\ntest_mode_api_key = "sk_live_abc"\n')
+        code, err = self._main(["read", "--path", "/v1/customers"], env)
+        self.assertEqual(code, stripe_cli.EXIT_KEY)
+        self.assertEqual(self.invocations, [])
+        self.assertIn("LIVE key", err)
+
+    def test_missing_key_spawns_no_cli(self):
+        code, _err = self._main(["read", "--path", "/v1/customers"], config_env(self, None))
+        self.assertEqual(code, stripe_cli.EXIT_KEY)
+        self.assertEqual(self.invocations, [])
+
+    def test_read_passes_the_checked_key_to_the_cli(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            code, _err = self._main(["read", "--path", "/v1/customers"], self.env)
+        self.assertEqual(code, stripe_cli.EXIT_OK)
+        self.assertEqual(self.keys, ["sk_test_fixture"])
+
+    def test_advance_clock_passes_the_checked_key_on_every_call(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            code, _err = self._main(
+                ["advance-clock", "--clock", "clock_1", "--days", "1"], self.env
+            )
+        self.assertEqual(code, stripe_cli.EXIT_OK)
+        self.assertTrue(self.keys)
+        self.assertEqual(set(self.keys), {"sk_test_fixture"})
+
     def test_live_key_spawns_no_cli_on_advance_clock(self):
         code, _err = self._main(
             ["advance-clock", "--clock", "clock_1", "--days", "8"],
@@ -246,7 +464,7 @@ class MainGuardOrderingTest(unittest.TestCase):
 
     def test_zero_days_is_a_usage_error_and_spawns_no_cli(self):
         code, err = self._main(
-            ["advance-clock", "--clock", "clock_1", "--days", "0"], {}
+            ["advance-clock", "--clock", "clock_1", "--days", "0"], self.env
         )
         self.assertEqual(code, stripe_cli.EXIT_USAGE)
         self.assertEqual(self.invocations, [])
@@ -254,7 +472,7 @@ class MainGuardOrderingTest(unittest.TestCase):
 
     def test_negative_days_is_a_usage_error(self):
         code, _err = self._main(
-            ["advance-clock", "--clock", "clock_1", "--days", "-3"], {}
+            ["advance-clock", "--clock", "clock_1", "--days", "-3"], self.env
         )
         self.assertEqual(code, stripe_cli.EXIT_USAGE)
         self.assertEqual(self.invocations, [])
@@ -265,7 +483,7 @@ class MainGuardOrderingTest(unittest.TestCase):
                 "advance-clock", "--clock", "clock_1",
                 "--days", str(stripe_cli.MAX_ADVANCE_DAYS + 1),
             ],
-            {},
+            self.env,
         )
         self.assertEqual(code, stripe_cli.EXIT_USAGE)
         self.assertEqual(self.invocations, [])
@@ -279,13 +497,14 @@ class MainGuardOrderingTest(unittest.TestCase):
                     "advance-clock", "--clock", "clock_1",
                     "--days", str(stripe_cli.MAX_ADVANCE_DAYS),
                 ],
-                {},
+                self.env,
             )
         self.assertEqual(code, stripe_cli.EXIT_OK)
 
     def test_malformed_clock_id_spawns_no_cli(self):
         code, _err = self._main(
-            ["advance-clock", "--clock", "clock_1/../../customers", "--days", "1"], {}
+            ["advance-clock", "--clock", "clock_1/../../customers", "--days", "1"],
+            self.env,
         )
         self.assertEqual(code, stripe_cli.EXIT_PATH)
         self.assertEqual(self.invocations, [])
