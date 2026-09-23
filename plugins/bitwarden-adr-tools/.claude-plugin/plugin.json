@@ -1,0 +1,12 @@
+{
+  "name": "bitwarden-adr-tools",
+  "version": "1.0.0",
+  "description": "Tools that act on Bitwarden's Architecture Decision Records: checking a design, change, plan, or threat model against the ADR catalog, and locating or summarizing ADRs.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-adr-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["adr", "architecture-decision-records", "architecture"]
+}
