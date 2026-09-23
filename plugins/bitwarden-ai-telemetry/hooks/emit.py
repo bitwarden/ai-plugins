@@ -118,9 +118,11 @@ def _config_path():
 def _read_user_email():
     """The signed-in account's email from Claude Code's config, or "".
 
-    Claude Code stores it at `oauthAccount.emailAddress` under both API-key
-    and OAuth logins. Only that field is read; nothing else in the file is
-    kept or logged. Read on every call because a hook is a short-lived
+    Claude Code stores it at `oauthAccount.emailAddress` for any Claude
+    account login, including an API key created through `/login`. A bare
+    API key, `apiKeyHelper`, or third-party provider has no account, so it
+    yields "". Only that field is read; nothing else in the file is kept or
+    logged. Read on every call because a hook is a short-lived
     process, and any failure (no file, bad JSON, unexpected shape) yields ""
     so the attr is dropped rather than the record.
     """
