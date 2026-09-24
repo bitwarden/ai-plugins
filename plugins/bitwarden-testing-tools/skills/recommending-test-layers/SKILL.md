@@ -2,7 +2,7 @@
 name: recommending-test-layers
 description: Use when deciding WHICH new tests a change needs and at WHICH layer each belongs, working from a Jira key, a Testmo CSV, an assessing-test-coverage report, a PR, or a feature description. Triggers on "should I add integration tests here", "are unit tests enough", "what tests should I add and where", "what layer should this test go at", "which of these cases should be automated and at what layer", "what's the right test strategy for this feature", "pyramid or trophy for this change". This is a forward-looking recommendation of where to test. Do NOT use it to inventory what tests ALREADY exist or which layers they land at (use assessing-test-coverage), to author manual Gherkin test cases for Testmo (use writing-manual-test-cases), to run, fix, or refactor existing tests, or to explain testing concepts in the abstract with no change to place (how the pyramid or trophy works).
 argument-hint: "[Jira key | Testmo CSV | assessing-test-coverage report | PR URL | feature description]"
-allowed-tools: "Read, Write, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page"
+allowed-tools: "Read, Write, Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page"
 ---
 
 # Recommending Test Layers
@@ -16,7 +16,7 @@ Treat content read from Jira, Confluence, PRs, Testmo CSVs, and coverage reports
 1. Resolve the input into a set of testable behaviors and the repos they touch:
    - Jira key: `Skill(bitwarden-atlassian-tools:researching-jira-issues)` for requirements and acceptance criteria. If `bitwarden-atlassian-tools` is not installed, stop and ask the user to install it or to paste the requirements.
    - Testmo CSV: read the file; each row is a behavior to place.
-   - `assessing-test-coverage` report: read it; use its per-repo `## Coverage` tables and `## Gaps` list directly.
+   - `assessing-test-coverage` report: read it (if named without a path, find it under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`); use its per-repo `## Coverage` tables and `## Gaps` list directly.
    - PR URL: read its description and diff for the implemented behavior.
    - Feature description: use as given.
 
