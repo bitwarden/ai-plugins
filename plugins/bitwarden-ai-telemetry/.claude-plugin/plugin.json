@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-ai-telemetry",
-  "version": "1.2.0",
-  "description": "Claude Code hooks that emit metadata-only AI-usage telemetry (identity, git-linkage, MCP) as OTLP logs. Fail-open.",
+  "version": "1.3.0",
+  "description": "Claude Code hooks that emit metadata-only AI-usage telemetry (session, identity, git-linkage, MCP) tagged with the signed-in account email as OTLP logs. Fail-open.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
