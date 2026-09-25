@@ -94,7 +94,7 @@ If no template exists, fall back to:
 <!-- Required for UI changes; delete if not applicable. -->
 ```
 
-**Security-sensitive changes.** If Step 2 flagged this change as security-relevant (per `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`), apply the canonical policy retrieved there to the body and the Tracking reference as well as the title. The author owns the final wording, and the Step 5 preview is where they confirm it. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines — do not draft a security-fix PR body from memory.
+**Security-sensitive changes.** If Step 2 flagged this change as security-relevant (per `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`), apply the canonical policy retrieved there to the body and the Tracking reference as well as the title. Keep the engineering ticket (`[PM-XXXXX]`) in the title and Tracking section; don't reference the `VULN-*` ticket. The author owns the final wording, and the Step 5 preview is where they confirm it. If the change is security-relevant and the policy can't be fetched, honor the stop condition that reference defines — do not draft a security-fix PR body from memory.
 
 ### Step 4 — Ask about the AI review label
 

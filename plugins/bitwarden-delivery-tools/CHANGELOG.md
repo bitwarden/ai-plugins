@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `committing-changes` and `creating-pull-request` now apply Bitwarden's [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages)
+- `committing-changes` and `creating-pull-request` now apply Bitwarden's [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) policy when a change is security-relevant.
 - `creating-pull-request` gains a `Security fix` line in the Step 5 submission preview.
 
 ## [3.1.0] - 2026-08-19

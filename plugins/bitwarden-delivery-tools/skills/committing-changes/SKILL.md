@@ -12,7 +12,7 @@ Resolve the repository's default branch from the remote rather than assuming `ma
 
 ## Security-Sensitive Changes
 
-Before writing the message, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md` (which covers when to treat a change as security-relevant outright vs. ask the author). If it is, retrieve the canonical policy named there and apply it to how the summary, body, and any ticket reference are worded, then show the proposed message to the author for approval before committing. If a security-relevant change's policy can't be fetched, honor the stop condition that reference defines — stop rather than writing a security-fix message from memory.
+Before writing the message, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md` (which covers when to treat a change as security-relevant outright vs. ask the author). If it is, retrieve the canonical policy named there and apply it to how the summary, body, and any ticket reference are worded, then show the proposed message to the author for approval before committing. Keep the engineering ticket in the `[PM-XXXXX]` prefix as usual; don't reference the `VULN-*` ticket. If the policy can't be fetched, honor the stop condition that reference defines — stop rather than writing a security-fix message from memory.
 
 ---
 
