@@ -5,6 +5,22 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-09-25
+
+### Added
+
+- **Markdown bodies on the Jira write path**. `add_issue_comment` bodies and `create_issue` description paragraphs are parsed as markdown and converted to ADF via [marklassian](https://github.com/jamsinclair/marklassian), so emphasis, links, inline and fenced code, bullet and numbered lists, headings, blockquotes, and tables render in Jira instead of arriving as literal syntax.
+- Conversion preserves every character of the body. Markdown reads `<` followed by a name as opening an HTML tag and discards the raw HTML, which would swallow ordinary ticket prose such as `List<String>` or a Gherkin `<placeholder>`. An entry carrying raw HTML is therefore sent verbatim as plain text, keeping its paragraph and line breaks, rather than converted; it forfeits markdown rendering for that entry so that no characters are lost. An entry carrying a link reference definition is sent the same way, since the converter drops a definition no link uses, URL and all. Whether an entry carries raw HTML is decided by the same lexer the converter parses with, so a code span, a fenced or indented code block, and an autolink are each read the way markdown reads them.
+
+### Changed
+
+- Markdown syntax in a comment or description is interpreted rather than sent literally. Prose without markdown metacharacters converts to the same single-paragraph ADF as before, but text that starts a line with `#`, `-`, or `>` renders as a heading, list, or blockquote.
+- `filing-jira-tickets` passes Gherkin acceptance criteria as a fenced `gherkin` block under an `Acceptance criteria` heading, which holds the line breaks and keeps the criteria distinguishable from the description prose around them.
+
+### Security
+
+- Link and image targets are restricted to an allowlist of `http`, `https`, and `mailto`. These bodies are untrusted input, arriving from a model or caller rather than Jira's own editor, and markdown can name any scheme in a target, so a `javascript:` or `data:` target would otherwise reach Jira verbatim. The check covers both a link mark's `href` and the `url` of the media node an image converts to, and a target that fails to parse has to positively look relative to be kept, so an encoded spelling such as `javascript&colon;` cannot slip past. For a link, the covered text is kept and only the target is dropped. An image has no covered text, so the node goes with its target, and a body whose only content was that image falls back to its own source as inert text. Jira sanitizes on render, so this is defense in depth.
+
 ## [2.7.3] - 2026-09-17
 
 ### Fixed

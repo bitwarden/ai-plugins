@@ -1,7 +1,7 @@
 /**
  * Add Comment Tool (write, opt-in)
  *
- * Adds a plain-text comment to an existing Jira issue. Mirrors create-issue.ts:
+ * Adds a markdown comment to an existing Jira issue. Mirrors create-issue.ts:
  * `dryRun` defaults to true, and a live comment requires ATLASSIAN_JIRA_WRITE_TOKEN.
  */
 
@@ -84,7 +84,9 @@ async function handler(input: any): Promise<string> {
 const addIssueCommentTool: ToolDefinition = {
   name: "add_issue_comment",
   description:
-    "Add a plain-text comment to an existing Jira issue. Defaults to a dry run " +
+    "Add a comment to an existing Jira issue. The body is markdown and is " +
+    "converted to ADF, so emphasis, links, lists, code blocks, and tables all " +
+    "render. Defaults to a dry run " +
     "that returns the exact payload without sending it; pass dryRun: false to " +
     "post for real. Requires ATLASSIAN_JIRA_WRITE_TOKEN for live posting.",
   inputSchema: {
@@ -98,7 +100,9 @@ const addIssueCommentTool: ToolDefinition = {
       body: {
         type: "string",
         description:
-          "Comment text. Blank lines split the text into separate paragraphs.",
+          "Comment body as markdown. Blank lines separate paragraphs; " +
+          "**bold**, links, `code`, fenced code blocks, bullet and numbered " +
+          "lists, and tables are all preserved.",
       },
       dryRun: {
         type: "boolean",
