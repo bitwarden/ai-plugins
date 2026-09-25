@@ -5,6 +5,26 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-09-25
+
+### Added
+
+- `docs/commit-and-pr-flows.md`: mermaid diagrams of the `committing-changes`, `creating-pull-request`, and `force-multiplier` flows.
+
+### Changed
+
+- `labeling-changes` owns the type keyword table and selection guidance, so the type-to-`t:` mapping lives in one skill.
+- `committing-changes` and `applying-pr-conventions` invoke `labeling-changes` for the type keyword.
+- `force-multiplier` pre-approves `Skill(labeling-changes)`, so its pilot resolves the type without a permission prompt.
+
+### Fixed
+
+- `labeling-changes` quotes its `description`, which previously failed to parse as YAML because of an unquoted `: `.
+
+### Removed
+
+- `references/change-type-labels.md`, now part of `labeling-changes`.
+
 ## [3.2.0] - 2026-09-18
 
 ### Added

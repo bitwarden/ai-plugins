@@ -1,12 +1,12 @@
 ---
 name: applying-pr-conventions
-allowed-tools: Read, Glob
+allowed-tools: Read, Glob, Skill(labeling-changes)
 description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, and label choice. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
 # Applying PR Conventions
 
-Compose four values for one pull request and return them: the title, the body, the `ai-review` label choice, and the resolved `t:` label that the title's type keyword maps to in `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md`.
+Compose four values for one pull request and return them: the title, the body, the `ai-review` label choice, and the resolved `t:` label that the title's type keyword maps to.
 
 The caller says how many pull requests it is composing for and whether any value is already settled. Follow its instruction over the defaults below.
 
@@ -16,7 +16,7 @@ The caller says how many pull requests it is composing for and whether any value
 [<TICKET>] <type>: <short imperative summary>
 ```
 
-- Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` and pick the `<type>` keyword. CI reads it to apply the `t:` label.
+- Invoke `Skill(labeling-changes)` to pick the `<type>` keyword and the `t:` label it maps to. CI reads the keyword to apply the label.
 - Include the ticket key when the branch name or the conversation has one, or when the caller supplies it. Bitwarden does not require a ticket on every pull request, so drop the bracket entirely rather than inventing a key or leaving a placeholder.
 - Show the proposed title to the user.
 - Return the `t:` label the keyword maps to, alongside the title.

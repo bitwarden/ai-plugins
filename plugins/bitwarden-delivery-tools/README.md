@@ -43,6 +43,8 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | `labeling-changes`        | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                                |
 | `perform-preflight`       | "preflight", "self review"                           | Pre-commit quality gate checklist                                                                  |
 
+[Commit and pull request flows](docs/commit-and-pr-flows.md) diagrams how the commit and pull request skills hand off to one another.
+
 ## Design Principle
 
 Each skill owns the **workflow** (what steps to follow, what format to use). The repo's CLAUDE.md owns the **platform specifics** (which linter to run, which test command to use, which security rules apply). This separation allows the same skills to work across Android, iOS, Server, SDK, and Clients repos.
