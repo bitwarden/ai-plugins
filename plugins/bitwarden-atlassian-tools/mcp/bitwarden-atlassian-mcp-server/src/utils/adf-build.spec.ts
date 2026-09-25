@@ -141,6 +141,32 @@ describe("buildCommentAdf", () => {
       content: [paragraph("[ref]: https://example.com")],
     });
   });
+
+  it("sends verbatim a body that mixes blocks with an unused link reference definition", () => {
+    // The converter would render the paragraphs and drop the definition line,
+    // URL and all.
+    const doc = buildCommentAdf(
+      "before\n\n[ref]: https://example.com\n\nafter",
+    );
+
+    expect(doc.content).toEqual([
+      paragraph("before"),
+      paragraph("[ref]: https://example.com"),
+      paragraph("after"),
+    ]);
+  });
+
+  it("sends verbatim a body whose reference link uses its definition", () => {
+    // A used definition would survive as the link target, but telling used
+    // from unused means reimplementing marked's label matching, so any
+    // definition forfeits rendering for the entry.
+    const doc = buildCommentAdf("see [x][ref]\n\n[ref]: https://example.com");
+
+    expect(doc.content).toEqual([
+      paragraph("see [x][ref]"),
+      paragraph("[ref]: https://example.com"),
+    ]);
+  });
 });
 
 describe("link target sanitization", () => {
@@ -454,7 +480,7 @@ describe("line breaks on the verbatim path", () => {
 });
 
 describe("marked version agreement", () => {
-  // `containsRawHtml` lexes with marked to predict what marklassian will do to
+  // `containsDiscardedToken` lexes with marked to predict what marklassian will do to
   // the same input. That prediction holds only while both resolve to one copy
   // of marked, so the direct pin has to stay inside the range marklassian
   // declares. Drifting outside it installs a second copy and the agreement
