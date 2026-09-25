@@ -33,14 +33,15 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Mechanics
 
-| Skill                    | Triggers                                             | Purpose                                                                                         |
-| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `committing-changes`     | "commit", "stage changes"                            | Default-branch check, commit message format, staging best practices                             |
-| `creating-pull-request`  | "create PR", "open PR"                               | PR title/body format, draft workflow, AI review labels                                          |
-| `filing-breakdown-tasks` | "tickets from tasks.md", "file the epic and stories" | Turn a breakdown's `tasks.md` into epic + child ticket drafts for `filing-jira-tickets` to file |
-| `force-multiplier`       | "across all repos", "in bulk"                        | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs            |
-| `labeling-changes`       | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                             |
-| `perform-preflight`      | "preflight", "self review"                           | Pre-commit quality gate checklist                                                               |
+| Skill                     | Triggers                                             | Purpose                                                                                            |
+| ------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `applying-pr-conventions` | "PR title", "draft the PR body"                      | Composes one PR's title/type-prefix, template body, and label; never reviews, previews, or submits |
+| `committing-changes`      | "commit", "stage changes"                            | Default-branch check, commit message format, staging best practices                                |
+| `creating-pull-request`   | "create PR", "open PR"                               | Single-branch PR workflow: review gate, conventions, submission preview, `gh pr create`            |
+| `filing-breakdown-tasks`  | "tickets from tasks.md", "file the epic and stories" | Turn a breakdown's `tasks.md` into epic + child ticket drafts for `filing-jira-tickets` to file    |
+| `force-multiplier`        | "across all repos", "in bulk"                        | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs               |
+| `labeling-changes`        | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                                |
+| `perform-preflight`       | "preflight", "self review"                           | Pre-commit quality gate checklist                                                                  |
 
 ## Design Principle
 
@@ -52,7 +53,7 @@ The lifecycle skills follow the same principle: they describe the funnel and tra
 
 Several skills in this plugin reference tools or skills provided by sibling plugins. Install these alongside `bitwarden-delivery-tools` for full functionality:
 
-- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel`, and by `committing-changes` and `creating-pull-request` to detect security-sensitive changes and fetch the disclosure policy. Without it, those two skills stop on a confirmed security-relevant change rather than commit or open a PR without the policy. It also provides the `filing-jira-tickets` skill plus its opt-in Jira write tools that `filing-breakdown-tasks` hands off to.
+- **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel`, and by `committing-changes` and `applying-pr-conventions` (for `creating-pull-request`) to detect security-sensitive changes and fetch the disclosure policy. Without it, those skills stop on a confirmed security-relevant change rather than commit or open a PR without the policy. It also provides the `filing-jira-tickets` skill plus its opt-in Jira write tools that `filing-breakdown-tasks` hands off to.
 - **`bitwarden-security-engineer`** — provides `Skill(bitwarden-security-context)`, referenced from `architecting-solutions`.
 - **`bitwarden-code-review`** — provides `/bitwarden-code-review:code-review-local` and `Skill(performing-multi-agent-code-review)`, the code-review gate `creating-pull-request` runs before opening a PR. If it is absent, `creating-pull-request` prompts you to install it rather than skip the review.
 

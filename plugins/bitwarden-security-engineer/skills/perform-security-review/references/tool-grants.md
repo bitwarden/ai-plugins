@@ -43,8 +43,9 @@ deletes the repository.
 
 There is no `gh api` rule in `allowed-tools`. No pattern could be written that constrains the
 verb, and this skill's entire input is a diff an attacker may have influenced, so a rule the
-model is merely asked to follow is not a control. The step-1-C scan-evidence calls therefore
-prompt, and in CI they are denied.
+model is merely asked to follow is not a control. Step 1-C's two `gh api` scan-evidence calls
+(secret scanning and Dependabot) therefore prompt, and in CI they are denied. Step 1-C's Aikido
+call does not go through `gh api`, so it is unaffected.
 
 That is a real capability loss: GHAS evidence is unavailable on the unattended path unless the
 deployment grants it. **The control at that level is the token, not a permission rule** — run
@@ -52,9 +53,10 @@ the workflow with a read-only `GH_TOKEN` and minimal `permissions:`, and the des
 is unavailable no matter what command is composed. A deployment that has done that can add its
 own narrow allow rules with the residual risk understood.
 
-Step 1-C is written to degrade rather than fail: each scanner records its own outcome, and a
-denial is recorded as `Not checked (permission denied)` so it never reads as `None`, which
-would say the scanner ran and found nothing.
+Step 1-C is written to degrade rather than fail: each scanner records its own outcome, and for
+the two `gh api` scanners a denial is recorded as `Not checked (permission denied)` so it never
+reads as `None`, which would say the scanner ran and found nothing. Aikido cannot reach that
+state — its grant is pre-approved, so the call never prompts and is never denied.
 
 ## Why the default-branch lookup does not use `gh api`
 

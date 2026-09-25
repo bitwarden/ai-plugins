@@ -5,6 +5,36 @@ All notable changes to the bitwarden-ai-telemetry plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-23
+
+### Added
+
+- `user.email` on every record, read from the signed-in account in Claude Code's own config. Native telemetry carries no email under Console OAuth login, and people are attributed downstream by email, so without it that usage could not be tied to anyone. A caller supplying its own non-empty value keeps it, and nothing else is read from the file.
+- A `bw.session` record when a session starts, so a session that never uses a tool, skill or agent still produces a record naming who ran it.
+
+## [1.2.0] - 2026-09-17
+
+### Added
+
+- A `systemMessage` warning when a record does not reach the collector. Errors were swallowed to keep a session safe and then discarded, so usage going entirely unrecorded was invisible. The usual cause is ZScaler Private Access not having re-authenticated; a bad managed-settings push is the other.
+- Delivery is judged on the collector's `202`, not on the request failing to raise, because ZScaler can answer a sign-in page with `200` and that would otherwise read as success.
+- A status the collector answered is reported as that status. Only a `200` implicates a ZScaler interstitial, since the collector never answers `200`; anything else came from the collector itself, and reconnecting a working VPN would not touch it.
+
+### Notes
+
+- One warning per fault class per hour, and none at all if that state cannot be written: a warning on every edit is worse than silence.
+- The hooks still exit 0, so nothing is blocked or interrupted.
+- Delivery past the collector is out of reach. A record it accepts returns 202 regardless of what becomes of it afterwards.
+
+## [1.1.1] - 2026-09-17
+
+### Fixed
+
+- `bw.edit` resolves repo, branch, base SHA and path from the edited file's own location. Resolving them against the session's starting directory mislabelled every edit made in a worktree or a sibling checkout, and left `bw.file` escaping the repo root, so the event described a repository the edit never touched.
+- `bw.commit` reports the commit the command produced, resolved from the directory it ran in and confirmed against the SHA git printed. Reading HEAD from the starting directory reported a real but unrelated commit as this session's work. Where the two disagree, nothing is emitted.
+- `bw.pr` takes its repo from the URL `gh pr create` prints. Opening a pull request from a session started elsewhere paired the new number with the wrong repository slug.
+- Events with no repository to name are no longer sent. A commit SHA, pull request number or file path is meaningful only within one repository, so a plan file, a memory file, something under `/tmp`, or a checkout with no origin remote produces a record that identifies nothing.
+
 ## [1.1.0] - 2026-07-31
 
 ### Added
