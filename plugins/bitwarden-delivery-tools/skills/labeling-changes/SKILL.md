@@ -1,6 +1,6 @@
 ---
 name: labeling-changes
-description: Conventional commit type keywords for PR titles and commit messages. Use when determining the change type for commits or PRs, or when another delivery skill asks for the type keyword and its t: label. Triggered by "what type", "label", "change type", "conventional commit", "t: label".
+description: 'Conventional commit type keywords for PR titles and commit messages. Use when determining the change type for commits or PRs, or when another delivery skill asks for the type keyword and its t: label. Triggered by "what type", "label", "change type", "conventional commit", "t: label".'
 ---
 
 # Labeling Changes

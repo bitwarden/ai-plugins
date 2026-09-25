@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `labeling-changes` owns the type keyword table and selection guidance, so the type-to-`t:` mapping lives in one skill.
 - `committing-changes` and `applying-pr-conventions` invoke `labeling-changes` for the type keyword.
+- `force-multiplier` pre-approves `Skill(labeling-changes)`, so its pilot resolves the type without a permission prompt.
+
+### Fixed
+
+- `labeling-changes` quotes its `description`, which previously failed to parse as YAML because of an unquoted `: `.
 
 ### Removed
 

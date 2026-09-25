@@ -3,7 +3,7 @@ name: force-multiplier
 description: Apply one intent across many targets at once — a fleet of repositories across the Bitwarden ecosystem, or many projects inside a monorepo — as N consistent, idempotent, reviewable draft PRs.
 when_to_use: Use when the user wants the same change made everywhere — phrasings like "across all repos", "every repo", "for every project", "fleet-wide", "org-wide", "enterprise-wide", "company-wide", "in bulk", "mass update", or "roll this out everywhere".
 argument-hint: "<natural-language intent> [--scope multi-repo|monorepo] [--dry-run] [--no-pilot]"
-allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Agent, Skill(perform-preflight), Skill(committing-changes), Skill(applying-pr-conventions)"
+allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Agent, Skill(perform-preflight), Skill(committing-changes), Skill(applying-pr-conventions), Skill(labeling-changes)"
 ---
 
 # Force Multiplier
