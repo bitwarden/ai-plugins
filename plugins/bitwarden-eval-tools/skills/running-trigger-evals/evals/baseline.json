@@ -1,0 +1,131 @@
+{
+  "mode": "isolated",
+  "skill_token": null,
+  "skill_name": "running-trigger-evals",
+  "runs_per_query": 3,
+  "model": "claude-opus-4-7",
+  "balance_warning": null,
+  "should_trigger_pass_rate": 0.0,
+  "should_not_trigger_pass_rate": 1.0,
+  "should_trigger_pass": "0/7",
+  "should_not_trigger_pass": "7/7",
+  "reliability": {
+    "all_runs_agree_rate": 0.5,
+    "should_trigger_reliable": "0/7",
+    "should_not_trigger_reliable": "7/7"
+  },
+  "results": [
+    {
+      "query": "I just edited the description on my pdf-processing skill \u2014 can you confirm triggering hasn't regressed before I merge?",
+      "should_trigger": true,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": false
+    },
+    {
+      "query": "This skill is brand new and doesn't have an eval set yet. Can you set one up and record a baseline for it?",
+      "should_trigger": true,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": false
+    },
+    {
+      "query": "Can you run a trigger eval on this skill to make sure the description fires on the right prompts?",
+      "should_trigger": true,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": false
+    },
+    {
+      "query": "Check the trigger rate for my skill and compare it against the baseline we recorded last week.",
+      "should_trigger": true,
+      "triggers": 1,
+      "runs": 3,
+      "trigger_rate": 0.3333333333333333,
+      "all_runs_agree": false
+    },
+    {
+      "query": "I changed the when_to_use frontmatter on this skill \u2014 did that break triggering on the phrasings it used to catch?",
+      "should_trigger": true,
+      "triggers": 1,
+      "runs": 3,
+      "trigger_rate": 0.3333333333333333,
+      "all_runs_agree": false
+    },
+    {
+      "query": "Benchmark this skill's triggering against its last recorded baseline before I open the PR.",
+      "should_trigger": true,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": false
+    },
+    {
+      "query": "Test whether my skill still fires on the prompts it's supposed to catch and stays silent on the ones it shouldn't.",
+      "should_trigger": true,
+      "triggers": 1,
+      "runs": 3,
+      "trigger_rate": 0.3333333333333333,
+      "all_runs_agree": false
+    },
+    {
+      "query": "Once my skill triggers, walk through its steps and confirm the output matches the documented format.",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    },
+    {
+      "query": "Does my skill actually do what its description promises once it's invoked?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    },
+    {
+      "query": "Clean up the wording in this skill's description so it reads more naturally \u2014 I don't need it tested.",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    },
+    {
+      "query": "Walk me through building a brand-new skill from scratch, including the SKILL.md and any scripts it needs.",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    },
+    {
+      "query": "What's the difference between a trigger eval and a behavior eval?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    },
+    {
+      "query": "Fix the JSON parsing bug in my plugin's PreToolUse hook script.",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    },
+    {
+      "query": "Bump the version number for this plugin and add a changelog entry for the release.",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 3,
+      "trigger_rate": 0.0,
+      "all_runs_agree": true
+    }
+  ]
+}
