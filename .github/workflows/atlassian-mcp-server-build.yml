@@ -56,8 +56,10 @@ jobs:
 
       - name: Set up pnpm via Corepack
         run: |
-          corepack enable
-          corepack prepare --activate
+          COREPACK_VERSION=$(jq -er '.devDependencies.corepack' package.json)
+          mkdir -p "$RUNNER_TEMP/corepack-bin"
+          npm exec --yes --package=corepack@"$COREPACK_VERSION" -- corepack enable --install-directory "$RUNNER_TEMP/corepack-bin"
+          echo "$RUNNER_TEMP/corepack-bin" >> "$GITHUB_PATH"
 
       - name: Get pnpm store directory
         id: pnpm-store
