@@ -1,6 +1,6 @@
 ---
 name: applying-pr-conventions
-allowed-tools: Read, Glob
+allowed-tools: Read, Glob, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
 description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, and label choice. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
@@ -9,6 +9,12 @@ description: 'Compose the conventions a Bitwarden pull request needs — the con
 Compose four values for one pull request and return them: the title, the body, the `ai-review` label choice, and the resolved `t:` label that the title's type keyword maps to in `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md`.
 
 The caller says how many pull requests it is composing for and whether any value is already settled. Follow its instruction over the defaults below.
+
+## Security-sensitive changes
+
+Before composing the title, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`. If it is, the canonical policy named there governs the title summary, the body, and the Tracking reference, so apply it in Steps 1 and 2. Keep the engineering ticket (`[PM-XXXXX]`) in the title and Tracking section; don't reference the `VULN-*` ticket. If the caller settled a value that conflicts with the policy, flag the conflict to the user rather than silently rewriting it. If the policy can't be fetched, honor the stop condition that reference defines — do not compose a security-fix title or body from memory.
+
+Tell the caller whether you treated the change as security-relevant, so its submission preview can show it.
 
 ## Step 1 — Title
 

@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-09-25
+
+### Added
+
+- `committing-changes` and `applying-pr-conventions` now apply Bitwarden's [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) policy when a change is security-relevant, so PRs opened through `creating-pull-request` get it too.
+- `creating-pull-request` gains a `Security fix` line in the Step 3 submission preview.
+
 ## [3.2.0] - 2026-09-18
 
 ### Added

@@ -49,7 +49,7 @@ Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the t
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section.
 
-Carry back the title, the body, the resolved `t:` label its prefix will produce, and the `ai-review` label choice. Step 3's preview shows all four — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
+Carry back the title, the body, the resolved `t:` label its prefix will produce, and the `ai-review` label choice, plus whether it treated the change as security-relevant and applied the disclosure policy. Step 3's preview shows all of them — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
 
 Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
@@ -70,6 +70,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Security fix:   <No | Yes — canonical policy applied>
 
 Body:
 ---
@@ -120,5 +121,6 @@ These are what the Step 3 preview is built to prevent. Recognizing them helps wh
 - **Generic body replacing the template** → check what Step 2 returned actually follows the repo's template sections; `applying-pr-conventions` reads the template, but the preview is where a drifted body is caught.
 - **Label answer dropped between Step 2 and Step 4** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 3.
+- **Security fix not in line with policy** → the title or body names the vulnerability, its severity, or the `VULN-*` ticket. `applying-pr-conventions` applies the policy in Step 2; the Step 3 preview is the last catch.
 
 If any of these slip past the preview, recovery is awkward — the title is permanent in the merge commit, and labels feed downstream filtering and automation.
