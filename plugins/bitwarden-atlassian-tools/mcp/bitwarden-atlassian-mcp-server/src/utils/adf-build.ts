@@ -10,8 +10,8 @@
  * instead of hand-built text nodes, so emphasis, links, inline and fenced
  * code, lists, headings, blockquotes, and tables survive the trip into Jira.
  * Targets outside a scheme allowlist are dropped on the way through, and an
- * entry carrying raw HTML is sent as plain text so none of its characters are
- * lost to markup the converter would discard.
+ * entry carrying raw HTML or a link reference definition is sent as plain text
+ * so none of its characters are lost to markup the converter would discard.
  */
 
 import { markdownToAdf } from "marklassian";
@@ -175,42 +175,52 @@ function sanitizeNode(node: AdfNode): AdfNode | null {
 }
 
 /**
- * Whether markdown carries a raw-HTML token.
+ * Token types marklassian drops without emitting their source text.
  *
- * marklassian discards raw HTML instead of rendering it, so an entry holding
- * any would reach Jira with those characters missing: `List<String>` arrives
- * as `List`, and a Gherkin Scenario Outline's `<placeholder>` disappears.
+ * `html` is raw HTML, discarded instead of rendered: `List<String>` arrives as
+ * `List`, and a Gherkin Scenario Outline's `<placeholder>` disappears. `def` is
+ * a link reference definition, which renders nothing itself. A link that uses
+ * it carries its URL as the target, but an unused one vanishes, URL and all.
+ * Telling used from unused would mean reimplementing marked's label matching,
+ * so any definition counts.
+ */
+const DISCARDED_TOKEN_TYPES = new Set(["html", "def"]);
+
+/**
+ * Whether markdown carries a token the converter would discard.
  *
  * The question is asked of marked, the lexer marklassian itself parses with,
  * so the answer matches what the converter will actually do. Recognizing the
- * brackets by hand cannot: a stray fence run, a four-space indented block, an
+ * constructs by hand cannot: a stray fence run, a four-space indented block, an
  * unmatched backtick and an autolink all hinge on lexical context, and every
  * approximation of it mistook one for another.
  */
-function containsRawHtml(markdown: string): boolean {
-  return hasHtmlToken(marked.lexer(markdown));
+function containsDiscardedToken(markdown: string): boolean {
+  return hasDiscardedToken(marked.lexer(markdown));
 }
 
 /**
- * Walk anything the lexer returns looking for an `html` token. Tokens nest
+ * Walk anything the lexer returns looking for a discarded token. Tokens nest
  * differently by kind, with children under `tokens`, `items`, `header` and
  * `rows`, so this recurses over every value rather than naming those keys and
  * silently missing a nesting the next marked release introduces.
  */
-function hasHtmlToken(value: unknown): boolean {
+function hasDiscardedToken(value: unknown): boolean {
   if (Array.isArray(value)) {
-    return value.some(hasHtmlToken);
+    return value.some(hasDiscardedToken);
   }
 
   if (value === null || typeof value !== "object") {
     return false;
   }
 
-  if ((value as { type?: unknown }).type === "html") {
+  const { type } = value as { type?: unknown };
+
+  if (typeof type === "string" && DISCARDED_TOKEN_TYPES.has(type)) {
     return true;
   }
 
-  return Object.values(value).some(hasHtmlToken);
+  return Object.values(value).some(hasDiscardedToken);
 }
 
 /**
@@ -271,12 +281,12 @@ function plainParagraphs(text: string): AdfNode[] {
  * paragraph and no author's words are ever silently dropped.
  */
 function convertMarkdown(text: string): AdfNode[] {
-  // Raw HTML would be discarded, taking the author's characters with it, so
-  // the entry is sent as plain text instead. It forfeits markdown rendering
-  // for that entry, which is the deliberate trade: text is never lost, and
-  // the outcome is predictable from the input rather than depending on which
-  // constructs happen to survive conversion.
-  if (containsRawHtml(text)) {
+  // Raw HTML and link reference definitions would be discarded, taking the
+  // author's characters with them, so the entry is sent as plain text instead.
+  // It forfeits markdown rendering for that entry, which is the deliberate
+  // trade: text is never lost, and the outcome is predictable from the input
+  // rather than depending on which constructs happen to survive conversion.
+  if (containsDiscardedToken(text)) {
     return plainParagraphs(text);
   }
 
