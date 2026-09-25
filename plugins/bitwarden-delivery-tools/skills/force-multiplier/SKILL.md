@@ -54,7 +54,7 @@ Force Multiplier is the **cross-target** layer. Per-target intelligence lives in
 
 - `Skill(perform-preflight)` — the quality gate before any commit.
 - `Skill(committing-changes)` — the commit message format.
-- `Skill(applying-pr-conventions)` — the title (including the type keyword that drives the `t:` label), the template body, and the `ai-review` label. It reads `labeling-changes`' keyword reference to pick the type.
+- `Skill(applying-pr-conventions)` — the title (including the type keyword that drives the `t:` label), the template body, and the `ai-review` label. It invokes `labeling-changes` to pick the type.
 
 Of these, `applying-pr-conventions` is **interactive** — it proposes a title and asks the label question, which you cannot answer dozens of times. Resolve it at **PILOT**: invoke it once and tell it the title and label are locked for the whole campaign, so it proposes and asks once, using the pilot's ticket key on every target. Then replicate that confirmed pattern non-interactively across the fan-out as draft PRs. It composes conventions and nothing else, so it neither reviews nor submits, and there is no gate to suppress.
 
