@@ -5,6 +5,19 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-09-28
+
+### Added
+
+- `/code-review-local` accepts `--base <ref>`, passed to the agent as a `BASE:` line and used in place of `origin/HEAD` for the local-mode diff. Local changes only; dropped with a PR target
+- The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`, checked in the command turn and again in the agent. A rejected ref is No Verdict, not a fallback to `origin/HEAD`
+- A supplied ref that passes the pattern but does not resolve is also No Verdict; it skips the pending-changes fallback, which on a dirty tree would report a verdict on a scope the caller never asked for
+
+### Changed
+
+- Local-mode summaries name the base ref they diffed against
+- The unresolvable-base abort gives different advice for a supplied ref than for the `origin/HEAD` default
+
 ## [2.1.0] - 2026-09-04
 
 ### Added

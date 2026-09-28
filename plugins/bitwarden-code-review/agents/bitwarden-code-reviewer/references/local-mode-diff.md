@@ -5,15 +5,57 @@ the reasoning, so the agent's system prompt stays short on a path that never run
 
 ## Pass `origin/HEAD` to git, never a resolved name
 
-Nothing is interpolated, so a repository whose default branch is named something like
-`main$(id)` cannot turn the base ref into a shell payload. Resolving it to a name first would
-put attacker-influenceable text into a command string for no gain. `origin/HEAD` also resolves
-to the remote's default branch, so it never compares against a stale local `main`.
+On the default path nothing is interpolated, so a repository whose default branch is named
+something like `main$(id)` cannot turn the base ref into a shell payload. Resolving it to a name
+first would put attacker-influenceable text into a command string for no gain. `origin/HEAD` also
+resolves to the remote's default branch, so it never compares against a stale local `main`.
+
+A caller-supplied `BASE:` ref is the one exception, and the next section is what holds it.
+
+## Why a caller can name the base, and what constrains it
+
+`origin/HEAD` is the right default and the wrong answer on a branch cut from a release branch
+such as `rc` or `hotfix-rc`. The three-dot diff takes the merge base with trunk, so every
+already-merged commit the release branch carries lands in the review and the scope covers work
+that is not in the change. `BASE:` exists for that case, and only that case: a pull request's
+base is the one GitHub records and `gh pr diff` already uses it.
+
+The default costs nothing at the shell, because `origin/HEAD` is a literal in the agent's own
+text. A caller-supplied ref is not, so it is the one value on this path that reaches a command
+string from outside. Two things hold it: the `^[A-Za-z0-9][A-Za-z0-9._/-]*$` pattern, and the
+fact that it is checked on both sides of the delegation. The leading character class is the
+load-bearing half — `Bash(git diff:*)` is a prefix rule, so it matches `git diff --output=… …`
+just as readily as a ref, and a value beginning with `-` is handed to git as a flag. The rest of
+the class keeps whitespace, shell metacharacters, and git's own `@{…}` revision syntax out.
+
+The command turn checks it because it is the turn that reads `$ARGUMENTS`. The agent re-checks
+it because the command turn is not its only caller — an agent reached directly, or through a
+prompt someone else composed, gets the same control either way.
+
+## Why a `BASE:` that fails aborts instead of falling back
+
+Two ways it fails, and both land on No Verdict.
+
+A ref that fails the pattern is rejected before any command runs. A ref that passes it can still
+fail to resolve — a release branch nobody fetched is the ordinary case — and `git diff` exits
+non-zero. Neither computed the scope the caller named.
+
+What makes the abort necessary is what the alternatives review instead. Falling back to
+`origin/HEAD` is safe at the shell and wrong at the review: the caller named a base precisely
+because the default resolves the wrong scope for them, so it reproduces the sweep-in this
+parameter was added to prevent. Falling through to the pending-changes path is wrong the same
+way and reads worse, because a dirty tree makes it succeed — the agent reviews uncommitted edits
+and reports a verdict, and nothing in that verdict says the branch-against-`rc` comparison never
+happened. Both produce a confident answer to a question nobody asked. Unknown scope is No
+Verdict, the same as an unidentifiable pull request.
+
+An empty result is the one outcome that is not a failure of the ref. The ref resolved; the
+branch simply holds nothing ahead of it. That falls back like the default does.
 
 ## An empty diff is a failure, not a clean result
 
 A three-dot diff compares commits and ignores the working tree, so it exits 0 and prints
-nothing whenever the branch is level with `origin/HEAD` — which is exactly the state of a
+nothing whenever the branch is level with its base — which is exactly the state of a
 developer asking for their pending edits to be reviewed. Four agents reviewing an empty diff
 report clean, and that verdict is worse than no verdict.
 
@@ -59,7 +101,10 @@ caller's declaration — so the abort lands in `review-summary.md` in the workin
 same place a normal local review goes. Naming a destination here instead would risk writing a
 file the active mode does not read, which is as silent as writing nothing.
 
-## Why this path has no second candidate
+## Why this path guesses no second candidate
+
+A caller can name a base. The agent cannot pick one for itself, and the abort below is what it
+does instead.
 
 `perform-security-review` probes further before aborting, and this agent cannot mirror it: the
 probes there run `git rev-parse --verify`, `git merge-base`, and a REST call for the default
@@ -68,4 +113,6 @@ command outside the listed set is denied, and this agent grants none of those th
 would be reachable without any new grant — `git diff origin/main...HEAD` is already inside
 `Bash(git diff:*)` — but it hardcodes a branch name this agent otherwise avoids, which is the
 whole reason local mode uses `origin/HEAD`. Adding it would trade a clean abort for a wrong
-base on any repository whose default branch is not `main`.
+base on any repository whose default branch is not `main`. A guessed base and a caller-supplied
+one are not the same thing: the caller knows which branch the work was cut from, and the abort
+now tells them the parameter exists.
