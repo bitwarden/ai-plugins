@@ -82,5 +82,13 @@
   {
     "query": "title and body are already written and agreed — just open the PR for this branch",
     "should_trigger": true
+  },
+  {
+    "query": "split this branch into dependent PRs and put them up for review",
+    "should_trigger": false
+  },
+  {
+    "query": "open the whole chain of stacked PRs for this work, bottom to top",
+    "should_trigger": false
   }
 ]

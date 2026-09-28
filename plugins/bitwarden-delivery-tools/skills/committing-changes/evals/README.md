@@ -9,7 +9,11 @@ Two eval sets. Run the one that matches what changed.
 
 ## Trigger eval
 
-Does the skill activate on the right phrasings and stay silent on near-misses? `trigger-eval.json` holds 13 queries; `run_real_eval.py` runs them (see `../../creating-pull-request/evals/run_real_eval.py` for why this runner exists instead of the skill-creator harness); `baseline.json` is the last known-good run. Requires Python 3.10+ and an authenticated `claude` CLI.
+Does the skill activate on the right phrasings and stay silent on near-misses? `trigger-eval.json` holds 14 queries and `run_real_eval.py` runs them. See `../../creating-pull-request/evals/run_real_eval.py` for why this runner exists instead of the skill-creator harness. Requires Python 3.10+ and an authenticated `claude` CLI.
+
+**Not measurable here:** the `stacking-pull-requests` boundary. A correctly-routed stack phrasing invokes this skill once per layer, and the runner matches its token anywhere in the response, so a should-trigger stack query passes whether or not the exclusion has any effect.
+
+**Baseline is stale** as of the stack-scope description change: `baseline.json` holds 13 results against the current 14 queries. The 14th is listed under Pending baseline below, and the carve-out there explains why it is not re-recorded in the same PR.
 
 ```bash
 python3 run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 \
@@ -19,6 +23,10 @@ diff <(jq -S . baseline.json) <(jq -S . result.json)
 ```
 
 Empty diff means no regression. Fix the description rather than the eval set; if a change is intentional, replace `baseline.json` in the same PR.
+
+**One carve-out, for `description` changes only.** This runner takes no `--plugin-dir` and loads the installed plugin cache, so a run made before release measures the description the change replaces, not the new one. When a PR edits the `description`, add the new queries and record them as `pending-baseline` in the list below rather than replacing `baseline.json` in that PR; re-record once the version ships. Every other kind of change replaces the baseline in the same PR as above. A query under `pending-baseline` is expected to be missing from `baseline.json`, so the diff stays meaningful for the rest of the set.
+
+**Pending baseline:** `commit what I have on this layer before I start the next one` (added with the stack-scope `description` change; baseline holds 13 results against 14 queries until re-recorded).
 
 **Known flaky query:** `create a new branch for the PM-33210 work before I start coding, nothing to commit yet` sits near the decision boundary and `baseline.json` records it at 1-of-3. A clean re-run can diff non-empty with no regression — judge that query by whether it stayed under the 0.5 threshold, not by byte equality.
 
