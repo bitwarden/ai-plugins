@@ -5,6 +5,22 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-09-28
+
+### Added
+
+- `applying-pr-conventions` fetches the canonical PR template from `bitwarden/template` when the target repo has none.
+
+### Security
+
+- The fetch grant is an exact-match `Bash` rule with no trailing wildcard, so it admits that one command and nothing else. A wildcard would have admitted `-X PUT` on a `contents/` endpoint, which writes a file, and `gh` resolves the method last-wins.
+
+### Changed
+
+- The embedded template is now a last resort, reached only when the fetch fails, and the skill says which source produced the body.
+- The embedded copy matches `bitwarden/template` verbatim.
+- Both template sources are treated as data rather than as instructions; being canonical does not make the fetched one trusted.
+
 ## [3.3.0] - 2026-09-25
 
 ### Added
