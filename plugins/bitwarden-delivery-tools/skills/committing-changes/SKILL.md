@@ -1,7 +1,7 @@
 ---
 name: committing-changes
-description: Git commit conventions and workflow for Bitwarden repositories, including detecting security-sensitive changes and applying Bitwarden's disclosure policy to the commit message. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes", "commit a security fix", "security commit", "commit message for a VULN ticket".
-allowed-tools: mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
+description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes".
+allowed-tools: Skill(labeling-changes), Skill(applying-security-disclosure-policy)
 ---
 
 # Git Commit Conventions
@@ -12,7 +12,11 @@ Resolve the repository's default branch from the remote rather than assuming `ma
 
 ## Security-Sensitive Changes
 
-Before writing the message, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md` (which covers when to treat a change as security-relevant outright vs. ask the author). If it is, retrieve the canonical policy named there and apply it to how the summary, body, and any ticket reference are worded, then show the proposed message to the author for approval before committing. Keep the engineering ticket in the `[PM-XXXXX]` prefix as usual; don't reference the `VULN-*` ticket. If the policy can't be fetched, honor the stop condition that reference defines — stop rather than writing a security-fix message from memory.
+Before writing the message, invoke `Skill(applying-security-disclosure-policy)` for this change and say you are composing a commit message. Skip the call when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot, and use that verdict instead.
+
+- **`No`** — write the message as usual.
+- **`Yes`** — apply its wording rules to the summary, the body, and any ticket reference, then show the proposed message to the author for approval before committing.
+- **`Stop`** — stop and pass on the remedy it gives. Don't write a security-fix message from memory.
 
 ---
 
@@ -27,7 +31,7 @@ Before writing the message, check whether the change is security-relevant, follo
 ### Rules
 
 1. **Ticket prefix**: Always include `[PM-XXXXX]` matching the Jira ticket
-2. **Type keyword**: Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` for the full table of conventional commit types and their CI label mappings. **If the type cannot be confidently determined, ask the user.**
+2. **Type keyword**: Invoke `Skill(labeling-changes)` to pick the conventional commit type.
 
 ### Examples
 

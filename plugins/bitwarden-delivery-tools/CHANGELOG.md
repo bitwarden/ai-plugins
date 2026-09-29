@@ -5,12 +5,38 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-09-29
+
+### Added
+
+- **`applying-security-disclosure-policy` skill** — detects security-relevant changes and applies Bitwarden's [disclosure policy](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) to commit and PR wording; stops if the policy can't be fetched.
+- `committing-changes` and `applying-pr-conventions` invoke it before drafting.
+- `creating-pull-request`: `Security fix` line in the Step 3 preview.
+
+### Changed
+
+- `applying-pr-conventions` also returns the security verdict.
+- `force-multiplier` settles the verdict once at PILOT.
+
 ## [3.3.0] - 2026-09-25
 
 ### Added
 
-- `committing-changes` and `applying-pr-conventions` now apply Bitwarden's [Security Information in Pull Requests & Commit Messages](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) policy when a change is security-relevant, so PRs opened through `creating-pull-request` get it too.
-- `creating-pull-request` gains a `Security fix` line in the Step 3 submission preview.
+- `docs/commit-and-pr-flows.md`: mermaid diagrams of the `committing-changes`, `creating-pull-request`, and `force-multiplier` flows.
+
+### Changed
+
+- `labeling-changes` owns the type keyword table and selection guidance, so the type-to-`t:` mapping lives in one skill.
+- `committing-changes` and `applying-pr-conventions` invoke `labeling-changes` for the type keyword.
+- `force-multiplier` pre-approves `Skill(labeling-changes)`, so its pilot resolves the type without a permission prompt.
+
+### Fixed
+
+- `labeling-changes` quotes its `description`, which previously failed to parse as YAML because of an unquoted `: `.
+
+### Removed
+
+- `references/change-type-labels.md`, now part of `labeling-changes`.
 
 ## [3.2.0] - 2026-09-18
 

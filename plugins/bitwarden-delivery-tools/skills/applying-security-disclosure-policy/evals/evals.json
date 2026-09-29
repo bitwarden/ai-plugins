@@ -1,0 +1,29 @@
+{
+  "skill_name": "applying-security-disclosure-policy",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm on branch PM-40123-fix-invite-accept. PM-40123 is linked to VULN-311 in Jira: the org invite accept endpoint didn't check that the invite token matched the accepting user's email, so anyone with a leaked link could join the org. I've fixed it and I'm about to commit. What should the commit message say? This is non-interactive: state any question as plain text and stop.",
+      "expected_output": "Treats the change as security-relevant (VULN link), fetches or attempts to fetch the Confluence policy, keeps [PM-40123] in the prefix, does not reference VULN-311, does not describe the bypass, and says the author approves the wording before committing.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "quick one: fixing a bug in the web vault where the refresh token wasn't being cleared from session storage on logout, ticket PM-40588 (no labels on it, not linked to anything). help me write the PR title and body. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "No high-confidence signal, but it's a fix touching session handling and secret storage, so it asks the author once whether the disclosure policy applies and does not draft a security-sensitive title until answered.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Bumping @angular/core from 19.1.2 to 19.1.4 in clients, ticket PM-40701. Write me a commit message. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "Returns not security-relevant without asking the author and without fetching the Confluence policy; the commit message is written normally.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "The author confirmed PM-40900 is a security fix (XSS in the Send preview). The bitwarden-atlassian-tools plugin is not installed in this environment, so get_confluence_page is unavailable. Draft the PR title and body. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "Returns Stop: does not draft a title or body from memory, names the missing tool as the reason, and gives the install remedy.",
+      "files": []
+    }
+  ]
+}

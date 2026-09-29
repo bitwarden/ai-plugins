@@ -1,20 +1,22 @@
 ---
 name: applying-pr-conventions
-allowed-tools: Read, Glob, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
-description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, and label choice. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
+allowed-tools: Read, Glob, Skill(labeling-changes), Skill(applying-security-disclosure-policy)
+description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, and whether the security disclosure policy applied. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
 # Applying PR Conventions
 
-Compose four values for one pull request and return them: the title, the body, the `ai-review` label choice, and the resolved `t:` label that the title's type keyword maps to in `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md`.
+Compose five values for one pull request and return them: the title, the body, the `ai-review` label choice, the resolved `t:` label that the title's type keyword maps to, and whether the change was treated as security-relevant.
 
 The caller says how many pull requests it is composing for and whether any value is already settled. Follow its instruction over the defaults below.
 
 ## Security-sensitive changes
 
-Before composing the title, check whether the change is security-relevant, following `${CLAUDE_PLUGIN_ROOT}/references/security-sensitive-changes.md`. If it is, the canonical policy named there governs the title summary, the body, and the Tracking reference, so apply it in Steps 1 and 2. Keep the engineering ticket (`[PM-XXXXX]`) in the title and Tracking section; don't reference the `VULN-*` ticket. If the caller settled a value that conflicts with the policy, flag the conflict to the user rather than silently rewriting it. If the policy can't be fetched, honor the stop condition that reference defines — do not compose a security-fix title or body from memory.
+Before composing the title, invoke `Skill(applying-security-disclosure-policy)` for this change and say you are composing a pull request title and body. Skip the call when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot, and use that verdict instead.
 
-Tell the caller whether you treated the change as security-relevant, so its submission preview can show it.
+- **`No`** — compose as usual.
+- **`Yes`** — its wording rules govern the title summary, the body, and the Tracking reference, so apply them in Steps 1 and 2. If the caller settled a value that conflicts with them, flag the conflict to the user rather than silently rewriting it.
+- **`Stop`** — don't compose the title or body. Return the stop and its remedy to the caller.
 
 ## Step 1 — Title
 
@@ -22,7 +24,7 @@ Tell the caller whether you treated the change as security-relevant, so its subm
 [<TICKET>] <type>: <short imperative summary>
 ```
 
-- Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` and pick the `<type>` keyword. CI reads it to apply the `t:` label.
+- Invoke `Skill(labeling-changes)` to pick the `<type>` keyword and the `t:` label it maps to. CI reads the keyword to apply the label.
 - Include the ticket key when the branch name or the conversation has one, or when the caller supplies it. Bitwarden does not require a ticket on every pull request, so drop the bracket entirely rather than inventing a key or leaving a placeholder.
 - Show the proposed title to the user.
 - Return the `t:` label the keyword maps to, alongside the title.
@@ -70,5 +72,7 @@ Ask:
 - **Options**: `ai-review`, `ai-review-vnext`, `No label`
 
 ## Returning to the caller
+
+Return the security verdict (`No` or `Yes`) alongside the title, the body, and both labels, so the caller's submission preview can show it.
 
 Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Say so when returning them. Keeping them out of a shell argument is the caller's job, since this skill holds no `Bash` grant and never submits: the body goes via `--body-file`, and the title via a file and `--title "$(cat <title-file>)"`, because `gh` has no `--title-file`.
