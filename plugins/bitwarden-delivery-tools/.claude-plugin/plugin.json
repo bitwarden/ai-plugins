@@ -16,6 +16,9 @@
     "commit",
     "pull-request",
     "pr-conventions",
+    "security",
+    "disclosure",
+    "vulnerability",
     "preflight",
     "labeling",
     "jira"

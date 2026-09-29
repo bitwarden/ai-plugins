@@ -3,27 +3,60 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I'm on branch PM-40123-fix-invite-accept. PM-40123 is linked to VULN-311 in Jira: the org invite accept endpoint didn't check that the invite token matched the accepting user's email, so anyone with a leaked link could join the org. I've fixed it and I'm about to commit. What should the commit message say? This is non-interactive: state any question as plain text and stop.",
-      "expected_output": "Treats the change as security-relevant (VULN link), fetches or attempts to fetch the Confluence policy, keeps [PM-40123] in the prefix, does not reference VULN-311, does not describe the bypass, and says the author approves the wording before committing.",
-      "files": []
+      "name": "vulnerability-linked-commit",
+      "prompt": "I'm on branch PM-99901-fix-invite-accept. PM-99901 is linked to VULN-99901 in Jira: the org invite accept endpoint didn't check that the invite token belonged to the accepting user. I've fixed it and I'm about to commit. What should the commit message say? This is non-interactive: state any question as plain text and stop.",
+      "expected_output": "Treats the change as security-relevant from the VULN link, fetches or attempts to fetch the Confluence policy, keeps [PM-99901] in the prefix, keeps VULN-99901 and the bypass details out of the message, and says the author approves the wording before committing.",
+      "expectations": [
+        "Treats the change as security-relevant because of the VULN link, without asking the author",
+        "Fetches or attempts to fetch the disclosure policy page before proposing wording",
+        "Any proposed message keeps the [PM-99901] prefix",
+        "Any proposed message contains no VULN-* key and does not describe how the invite check was bypassed",
+        "Says the author approves the message before it is committed"
+      ]
     },
     {
       "id": 2,
-      "prompt": "quick one: fixing a bug in the web vault where the refresh token wasn't being cleared from session storage on logout, ticket PM-40588 (no labels on it, not linked to anything). help me write the PR title and body. Non-interactive: state any question as plain text and stop.",
-      "expected_output": "No high-confidence signal, but it's a fix touching session handling and secret storage, so it asks the author once whether the disclosure policy applies and does not draft a security-sensitive title until answered.",
-      "files": []
+      "name": "session-fix-asks-once",
+      "prompt": "quick one: fixing a bug in the web vault where the refresh token wasn't being cleared from session storage on logout, ticket PM-99902 (no labels on it, not linked to anything). help me write the PR title and body. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "Finds no high-confidence signal, but the change is a fix touching session handling and secret storage, so it asks the author once whether the disclosure policy applies and does not draft a title or body until answered.",
+      "expectations": [
+        "Asks the author whether the disclosure policy applies",
+        "Asks exactly one disclosure question, not several",
+        "Does not propose a final PR title or body before the question is answered"
+      ]
     },
     {
       "id": 3,
-      "prompt": "Bumping @angular/core from 19.1.2 to 19.1.4 in clients, ticket PM-40701. Write me a commit message. Non-interactive: state any question as plain text and stop.",
+      "name": "dependency-bump-no-fetch",
+      "prompt": "Bumping @angular/core from 19.1.2 to 19.1.4 in clients, ticket PM-99903. Write me a commit message. Non-interactive: state any question as plain text and stop.",
       "expected_output": "Returns not security-relevant without asking the author and without fetching the Confluence policy; the commit message is written normally.",
-      "files": []
+      "expectations": [
+        "Does not ask the author whether the disclosure policy applies",
+        "Does not fetch or attempt to fetch the Confluence policy page",
+        "Proposes a normal commit message with the [PM-99903] prefix"
+      ]
     },
     {
       "id": 4,
-      "prompt": "The author confirmed PM-40900 is a security fix (XSS in the Send preview). The bitwarden-atlassian-tools plugin is not installed in this environment, so get_confluence_page is unavailable. Draft the PR title and body. Non-interactive: state any question as plain text and stop.",
+      "name": "policy-unavailable-stops",
+      "prompt": "The author confirmed PM-99904 is a security fix (XSS in the Send preview). The bitwarden-atlassian-tools plugin is not installed in this environment, so get_confluence_page is unavailable. Draft the PR title and body. Non-interactive: state any question as plain text and stop.",
       "expected_output": "Returns Stop: does not draft a title or body from memory, names the missing tool as the reason, and gives the install remedy.",
-      "files": []
+      "expectations": [
+        "Does not produce a PR title or body",
+        "States that the disclosure policy could not be fetched because the MCP tool is unavailable",
+        "Gives installing bitwarden-atlassian-tools as the remedy"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "vulnerability-key-only-in-branch",
+      "prompt": "Current branch is VULN-99905-session-fixation. There's no PM ticket for this yet. Write the PR title for me. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "Treats the VULN-* branch name as a high-confidence signal, and does not put VULN-99905 in the title bracket; either drops the bracket or asks for the engineering ticket.",
+      "expectations": [
+        "Treats the change as security-relevant because the branch is named for a VULN-* key",
+        "Any proposed title contains no VULN-* key, including in the [<TICKET>] bracket",
+        "Drops the ticket bracket or asks the author for the engineering ticket instead"
+      ]
     }
   ]
 }

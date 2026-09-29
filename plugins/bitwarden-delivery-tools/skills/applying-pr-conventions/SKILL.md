@@ -1,7 +1,7 @@
 ---
 name: applying-pr-conventions
 allowed-tools: Read, Glob, Skill(labeling-changes), Skill(applying-security-disclosure-policy)
-description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, and whether the security disclosure policy applied. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
+description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, and the security-disclosure verdict. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
 # Applying PR Conventions
@@ -12,11 +12,13 @@ The caller says how many pull requests it is composing for and whether any value
 
 ## Security-sensitive changes
 
-Before composing the title, invoke `Skill(applying-security-disclosure-policy)` for this change and say you are composing a pull request title and body. Skip the call when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot, and use that verdict instead.
+Before composing the title, invoke `Skill(applying-security-disclosure-policy)` for this change. Say you are composing a pull request title and body, and pass the branch name and any ticket key you have. Skip the call when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot. A settled `Yes` must come with its wording rules; if it doesn't, invoke the skill anyway.
 
-- **`No`** — compose as usual.
-- **`Yes`** — its wording rules govern the title summary, the body, and the Tracking reference, so apply them in Steps 1 and 2. If the caller settled a value that conflicts with them, flag the conflict to the user rather than silently rewriting it.
-- **`Stop`** — don't compose the title or body. Return the stop and its remedy to the caller.
+Branch on the `Verdict:` line:
+
+- **`Verdict: Stop`** — the policy couldn't be fetched. Don't compose the title or body. Return the stop and its remedy to the caller.
+- **`Verdict: Yes`** — its wording rules govern the whole title, including the `[<TICKET>]` bracket (never a `VULN-*` key), the body, and the Tracking reference, so apply them in Steps 1 and 2. If the caller settled a value that conflicts with them, flag the conflict to the user rather than silently rewriting it. Show the body to the user along with the title, unless the caller says it previews both before submitting.
+- **`Verdict: No`** — compose as usual.
 
 ## Step 1 — Title
 
@@ -73,6 +75,6 @@ Ask:
 
 ## Returning to the caller
 
-Return the security verdict (`No` or `Yes`) alongside the title, the body, and both labels, so the caller's submission preview can show it.
+Return the security verdict alongside the title, the body, and both labels: `No`, or `Yes` with its signal and wording rules, so the caller's submission preview can show them and check the strings against the rules. On `Stop`, return the stop and its remedy instead of a title and body.
 
 Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Say so when returning them. Keeping them out of a shell argument is the caller's job, since this skill holds no `Bash` grant and never submits: the body goes via `--body-file`, and the title via a file and `--title "$(cat <title-file>)"`, because `gh` has no `--title-file`.
