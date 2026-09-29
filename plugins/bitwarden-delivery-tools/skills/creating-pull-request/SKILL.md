@@ -53,6 +53,8 @@ Carry back the title, the body, the resolved `t:` label its prefix will produce,
 
 If it returns a stop instead of a title and body, the change is security-relevant and the disclosure policy couldn't be fetched. Stop here and report its remedy. Don't push, don't run `gh pr create`, and don't compose a title or body yourself. A stop never reaches the preview.
 
+On `Yes`, check the branch's commit messages too, because Step 4's push publishes them. They may predate the verdict or have been written with plain `git commit`. List every commit since the branch left the repository's default branch, resolved from the remote (`git log <default>..HEAD --format='%h %s%n%b'`), and check each subject and body against the wording rules. The preview shows them. If one breaks the rules and the branch has never been pushed, offer to reword it before continuing. If the branch is already on the remote, rewording needs a force-push, which this workflow never does, so flag the commit and let the author decide.
+
 Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
 ### Step 3 — Show the full submission preview, then confirm
@@ -72,7 +74,8 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
-Security fix:   <No | Yes (<signal>)  →  wording rules applied to title and body>
+Security fix:   <No | Yes (<signal>)  →  wording rules applied to title, body, and commits>
+Commits:        <on Yes only: each commit's hash and subject, flagging any that break the rules>
 
 Body:
 ---

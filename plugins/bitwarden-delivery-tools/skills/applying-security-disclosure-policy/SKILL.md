@@ -26,7 +26,7 @@ Two tiers.
 
 "At most once" is per change, not per string. When the caller is composing both a commit and a PR for the same change, or a campaign covering many targets, one answer covers all of them.
 
-A missing `bitwarden-atlassian-tools` plugin does not make a change safe. It only removes the Jira signals, so fall through to the author's word and the heuristic tier.
+A missing `bitwarden-atlassian-tools` plugin does not make a change safe, but it isn't a reason to ask either. It only removes the Jira signals. Use what the author has already said, and ask only when the heuristic tier applies.
 
 If nothing marks the change as security-relevant, return `No` (see [Returning to the caller](#returning-to-the-caller)) and stop. There is no fetch on the common path.
 

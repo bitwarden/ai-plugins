@@ -31,6 +31,8 @@ pr_spec:
   body: "<filled from the repo's PULL_REQUEST_TEMPLATE.md>"
   labels: ["ai-review"]
   draft: true
+  disclosure:
+    verdict: "No"
 safety_policy:
   max_targets_per_run: 10
   destructive: false # replaces a lockfile; the old one is recoverable via git history
