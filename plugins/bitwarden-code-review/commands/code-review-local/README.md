@@ -126,9 +126,9 @@ The agent uses Bitwarden's standard emoji classification system:
 ### For Local Changes Reviews:
 
 1. **Analyzes git changes** using `git status`, `git diff`, and `git log`
-2. **Evaluates whichever scope local mode resolves** — the branch against its base, or pending changes when there is no resolvable base
+2. **Evaluates whichever scope local mode resolves** — the branch against its base, or pending changes when the default base cannot be resolved
 3. **Diffs against `--base` when given, `origin/HEAD` otherwise**, and names the ref it used in the summary
-4. **Falls back to pending changes** when the branch has nothing ahead of its base, and says so in the summary
+4. **Falls back to pending changes** when the branch has nothing ahead of its base, or when the default `origin/HEAD` cannot be resolved, and says so in the summary
 5. **Reports No Verdict instead of falling back** when a supplied `--base` does not resolve — the named scope was never computed, and reviewing the working tree instead would answer a question nobody asked
 
 ### Common Review Steps:

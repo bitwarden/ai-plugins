@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/code-review-local` accepts `--base <ref>`, passed to the agent as a `BASE:` line and used in place of `origin/HEAD` for the local-mode diff. Local changes only; dropped with a PR target
 - The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`, checked in the command turn and again in the agent. A rejected ref is No Verdict, not a fallback to `origin/HEAD`
 - A supplied ref that passes the pattern but does not resolve is also No Verdict; it skips the pending-changes fallback, which on a dirty tree would report a verdict on a scope the caller never asked for
+- Only the space-separated `--base <ref>` pair is accepted. Any other appearance of the token, `--base=<ref>` among them, is an error rather than a fall-through to the default base
 
 ### Changed
 
