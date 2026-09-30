@@ -382,17 +382,17 @@ Follow semantic versioning: `MAJOR.MINOR.PATCH`
 
 ### Official Documentation
 
-- [Link to primary docs]()
-- [Link to API reference]()
+- [Link to primary docs](<>)
+- [Link to API reference](<>)
 
 ### Internal Documentation
 
-- [Link to contributing guide]()
-- [Link to code style guide]()
+- [Link to contributing guide](<>)
+- [Link to code style guide](<>)
 
 ### Tools & Libraries
 
-- [Link to key dependency docs]()
+- [Link to key dependency docs](<>)
 
 ---
 

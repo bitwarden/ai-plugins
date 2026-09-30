@@ -5,6 +5,48 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-09-25
+
+### Added
+
+- `docs/commit-and-pr-flows.md`: mermaid diagrams of the `committing-changes`, `creating-pull-request`, and `force-multiplier` flows.
+
+### Changed
+
+- `labeling-changes` owns the type keyword table and selection guidance, so the type-to-`t:` mapping lives in one skill.
+- `committing-changes` and `applying-pr-conventions` invoke `labeling-changes` for the type keyword.
+- `force-multiplier` pre-approves `Skill(labeling-changes)`, so its pilot resolves the type without a permission prompt.
+
+### Fixed
+
+- `labeling-changes` quotes its `description`, which previously failed to parse as YAML because of an unquoted `: `.
+
+### Removed
+
+- `references/change-type-labels.md`, now part of `labeling-changes`.
+
+## [3.2.0] - 2026-09-18
+
+### Added
+
+- **`applying-pr-conventions` skill** — composes one pull request's title, template body, resolved `t:` label, and `ai-review` label choice, and returns them.
+
+### Changed
+
+- `creating-pull-request`: title, body, and label move to `applying-pr-conventions`; steps renumber 1–6 to 1–4.
+- `creating-pull-request`: the review gate no longer exempts callers.
+- `creating-pull-request`: review findings are assessed with the user through `addressing-code-review-comments` before any are acted on.
+- `creating-pull-request`: `when_to_use` folded into `description`, and `description` broadened to cover the natural phrasings for turning a branch into a PR.
+- `creating-pull-request` evals: six should-trigger queries rewritten to drop repo fixtures, `--plugin-dir` added to the runner, baseline re-recorded.
+- `force-multiplier`: takes conventions from `applying-pr-conventions` at its pilot target, and no longer walks `creating-pull-request`.
+
+### Security
+
+- Every path that submits a PR title writes it to a file and passes `--title "$(cat …)"`, never a shell variable.
+- `applying-pr-conventions` declares `allowed-tools: Read, Glob`, so its compose-and-return contract is structural rather than prose.
+- `force-multiplier` states the `--body-file` and title-handoff rules where it opens each PR, rather than inheriting them from `creating-pull-request`.
+- `applying-pr-conventions` treats the target repo's PR template as data rather than as instructions addressed to it, matching `force-multiplier`'s rule for target-repo content.
+
 ## [3.1.0] - 2026-08-19
 
 ### Added

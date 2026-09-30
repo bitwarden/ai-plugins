@@ -5,20 +5,45 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.7.1] - 2026-08-26
-
-### Fixed
-
-- `evaluating-qa-readiness` no longer reports "no PR or build is linked" as a settled fact. `get_issue_remote_links` cannot see Jira's native Development panel (the GitHub/Bitbucket integration that links most PRs via smart commits or branch naming), so an empty result is now reported as "not found in the sources this check can search" with a pointer to check the Development panel manually, instead of a confident negative.
-- `evaluating-qa-readiness`'s feature-flag criterion and developer-ask draft no longer demand an explicit on/off state when only one flag is named — "enable to test" is now the assumed default unless the ticket gives a real reason the state is ambiguous.
-- `evaluating-qa-readiness`'s drafted developer ask now names the gap without dictating exhaustive step-by-step detail (exact queries, seed data, timing) that a competent tester doesn't need.
-- README's `## Usage` examples used the unscoped `mcp__bitwarden-atlassian__<tool_name>` prefix; corrected to the plugin-scoped `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__<tool_name>` form that Claude Code actually resolves.
-
-## [2.7.0] - 2026-08-06
+## [2.8.0] - 2026-09-28
 
 ### Added
 
-- Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing instructions, implementation notes, feature-flag state, acceptance criteria, affected clients, and a linked PR/build) via the read-only Atlassian MCP and drafts a ready-to-paste developer comment for any gaps
+- Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing notes, implementation notes, settled scope, feature flag, acceptance criteria, affected clients, and a linked PR/build) and posts a comment on the ticket through `add_issue_comment` asking the developer to fill the gaps that would actually stop a tester, so QA no longer has to copy and paste the ask. The comment is plain text, skipped when an unanswered readiness comment already raises the same gaps, and shown as a draft instead when the user asks for a preview or the install has no `ATLASSIAN_JIRA_WRITE_TOKEN`.
+
+### Changed
+
+- `get_issue` now includes Jira's **Development** field as a readable summary (e.g. `Pull requests: 2 (MERGED); Branches: 1`) instead of dropping it. That field is where the GitHub integration records the PRs, branches, and commits it links automatically, which is how most PRs are attached to a ticket, so dropping it made linked PRs invisible to every skill. The field is still omitted when nothing is linked.
+
+### Fixed
+
+- README's `## Usage` examples used the unscoped `mcp__bitwarden-atlassian__<tool_name>` prefix; corrected to the plugin-scoped `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__<tool_name>` form that Claude Code actually resolves.
+
+## [2.7.3] - 2026-09-17
+
+### Fixed
+
+- The optional `ATLASSIAN_JIRA_WRITE_TOKEN` is no longer reported among the plugin's missing environment variables. The MCP config now declares it with an empty default, which is how an optional variable is distinguished from a required one: a read-only install intends to omit it, so listing it alongside genuinely absent configuration read as a setup failure. Whether a live write can proceed is decided by the write tools themselves, where it already was. A dry run notes the absent token in its preview, and a `dryRun: false` call refuses before opening a connection.
+
+## [2.7.2] - 2026-09-17
+
+### Fixed
+
+- The bundled MCP server now starts on Node.js releases that do not ship Corepack. The launch sequence fetches Corepack as a package through the `npm` bundled with every Node release, so the server manifest's `packageManager` field remains the single place the pnpm version is declared and its pinned integrity hash is still verified before pnpm runs.
+- First launch installs only the packages needed to build and run the server. `typescript` and `@types/node` are declared alongside the runtime dependencies because the launch compiles from source, which leaves `vitest` as the only development-time package and keeps its dependency tree out of the startup path. A package published within the registry's minimum-age window anywhere in that tree, down to a transitive dependency of the test runner's bundler, would otherwise stop the server from starting.
+- Dropped the server manifest's `devEngines.packageManager` declaration. `npm` treats a foreign package manager declared there as a hard failure and refuses to run in the directory at all, and pnpm ignores `packageManager` whenever both fields are present.
+
+## [2.7.1] - 2026-09-14
+
+### Changed
+
+- Updated the MCP server runtime dependencies: `@modelcontextprotocol/sdk` to 1.30.0, `axios` to 1.20.0, and `zod` to 4.5.4.
+
+## [2.7.0] - 2026-08-26
+
+### Added
+
+- **`add_issue_comment` MCP tool** (write, opt-in) — adds a plain-text comment to an existing Jira issue. Blank lines in the input split the text into separate ADF paragraphs. Defaults to a dry run that returns the exact payload without sending it; a live post requires an explicit `dryRun: false` and `ATLASSIAN_JIRA_WRITE_TOKEN`, matching the existing `create_issue`/`link_issues` write tools. Rejects a whitespace-only body so a live post can never send an empty comment payload.
 
 ## [2.6.0] - 2026-08-04
 

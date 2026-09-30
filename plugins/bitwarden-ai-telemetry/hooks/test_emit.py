@@ -2,17 +2,22 @@
 """Unit tests for emit.emit — the shared OTLP-JSON emitter.
 
 Covers the fail-closed behavior (no network call at all when
-BW_TELEMETRY_OTLP isn't set — see emit.py's module docstring for why) and the
-payload shape (falsey attrs dropped) when a collector IS configured.
+BW_TELEMETRY_OTLP isn't set — see emit.py's module docstring for why), the
+payload shape (falsey attrs dropped) when a collector IS configured, and the
+delivery-fault detection and throttled user warning built on top of it.
 
 Run with:  python3 -m unittest test_emit   (from the hooks/ dir)
       or:  python3 -m pytest test_emit.py
 """
 import importlib
+import io
 import json
 import os
+import shutil
 import sys
+import tempfile
 import unittest
+import urllib.error
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -25,13 +30,18 @@ class EmitFailClosedTest(unittest.TestCase):
     def setUp(self):
         # Reload so module-level COLLECTOR is re-read fresh under each test's
         # patched environment, rather than whatever was cached at first import.
-        self._env_patch = mock.patch.dict(os.environ, {}, clear=False)
+        # An empty config dir keeps the real ~/.claude.json out of the
+        # payload; UserEmailTest covers the email itself.
+        self._config_dir = tempfile.mkdtemp(prefix="claude_config_")
+        self._env_patch = mock.patch.dict(
+            os.environ, {"CLAUDE_CONFIG_DIR": self._config_dir}, clear=False)
         self._env_patch.start()
         os.environ.pop("BW_TELEMETRY_OTLP", None)
         importlib.reload(emit_module)
 
     def tearDown(self):
         self._env_patch.stop()
+        shutil.rmtree(self._config_dir, ignore_errors=True)
         importlib.reload(emit_module)
 
     def test_no_network_call_when_collector_unset(self):
@@ -112,13 +122,18 @@ class EventTimestampTest(unittest.TestCase):
     fall back to collector ingest time."""
 
     def setUp(self):
-        self._env_patch = mock.patch.dict(os.environ, {}, clear=False)
+        # An empty config dir keeps the real ~/.claude.json out of the
+        # payload; UserEmailTest covers the email itself.
+        self._config_dir = tempfile.mkdtemp(prefix="claude_config_")
+        self._env_patch = mock.patch.dict(
+            os.environ, {"CLAUDE_CONFIG_DIR": self._config_dir}, clear=False)
         self._env_patch.start()
         os.environ["BW_TELEMETRY_OTLP"] = "https://example.bitwarden.pw/v1/logs"
         importlib.reload(emit_module)
 
     def tearDown(self):
         self._env_patch.stop()
+        shutil.rmtree(self._config_dir, ignore_errors=True)
         importlib.reload(emit_module)
 
     def _attrs_for(self, attrs):
@@ -193,6 +208,292 @@ class IsAllowedCollectorTest(unittest.TestCase):
     def test_malformed_ipv6_bracket_syntax_is_rejected_not_raised(self):
         # urlsplit raises ValueError on this bracket syntax.
         self.assertFalse(emit_module._is_allowed_collector("https://[bad"))
+
+
+class FaultDetectionTest(unittest.TestCase):
+    """Delivery is only established by a 202. The collector normalizes a
+    Datadog 2xx to exactly that and passes anything else through, so any other
+    answer means the records went nowhere — which the user cannot tell today.
+    """
+
+    def setUp(self):
+        emit_module.reset_faults()
+        self._collector = emit_module.COLLECTOR
+        emit_module.COLLECTOR = "https://ait.bitwarden.pw/v1/logs"
+        self._email = mock.patch("emit._read_user_email", return_value="")
+        self._email.start()
+
+    def tearDown(self):
+        self._email.stop()
+        emit_module.COLLECTOR = self._collector
+        emit_module.reset_faults()
+
+    def _post(self, **kwargs):
+        with mock.patch("urllib.request.urlopen", **kwargs):
+            emit_module.emit("bw.edit", {"event.name": "bw.edit"})
+
+    def _kinds(self):
+        return [f[0] for f in emit_module.faults()]
+
+    def test_202_is_clean(self):
+        resp = mock.MagicMock()
+        resp.status = 202
+        self._post(return_value=resp)
+        self.assertEqual(emit_module.faults(), [])
+
+    def test_bare_200_is_a_fault(self):
+        """A ZScaler Private Access interstitial answers 200. The collector
+        never does, so 200 is the signature of never having reached it."""
+        resp = mock.MagicMock()
+        resp.status = 200
+        self._post(return_value=resp)
+        self.assertEqual(self._kinds(), [emit_module.FAULT_UNEXPECTED_STATUS])
+
+    def test_server_error_is_a_fault(self):
+        """urlopen raises for any status at or above 400, so a 503 never
+        reaches the status check and must be classified from the exception."""
+        self._post(side_effect=urllib.error.HTTPError(
+            "https://ait.bitwarden.pw/v1/logs", 503, "Service Unavailable",
+            {}, None))
+        self.assertEqual(emit_module.faults(),
+                         [(emit_module.FAULT_UNEXPECTED_STATUS, "503")])
+
+    def test_a_status_the_collector_answered_is_not_unreachable(self):
+        """A server that answers is reachable. Saying otherwise sends the user
+        to reconnect a VPN that is already working."""
+        self._post(side_effect=urllib.error.HTTPError(
+            "https://ait.bitwarden.pw/v1/logs", 404, "Not Found", {}, None))
+        self.assertEqual(self._kinds(), [emit_module.FAULT_UNEXPECTED_STATUS])
+
+    def test_zscaler_remedy_only_accompanies_a_200(self):
+        """The collector never answers 200, so only that status implicates an
+        interstitial. Every other status came from the collector itself."""
+        for detail in ("404", "503", "401"):
+            msg = emit_module._fault_message(
+                emit_module.FAULT_UNEXPECTED_STATUS, detail)
+            self.assertIn(detail, msg)
+            self.assertNotIn("ZScaler", msg)
+        msg = emit_module._fault_message(emit_module.FAULT_UNEXPECTED_STATUS, "200")
+        self.assertIn("ZScaler", msg)
+
+    def test_unreachable_is_a_fault(self):
+        self._post(side_effect=OSError("connection refused"))
+        self.assertEqual(self._kinds(), [emit_module.FAULT_UNREACHABLE])
+
+    def test_unreadable_status_is_not_a_fault(self):
+        """Claim nothing when the response shape is unrecognized, rather than
+        crying wolf over a delivery that probably happened."""
+        resp = mock.MagicMock(spec=[])
+        self._post(return_value=resp)
+        self.assertEqual(emit_module.faults(), [])
+
+    def test_no_collector_is_a_fault(self):
+        emit_module.COLLECTOR = None
+        with mock.patch("urllib.request.urlopen") as urlopen:
+            emit_module.emit("bw.edit", {"event.name": "bw.edit"})
+            urlopen.assert_not_called()
+        self.assertEqual(self._kinds(), [emit_module.FAULT_UNSET])
+
+    def test_emit_still_returns_none_and_never_raises(self):
+        self._post(side_effect=OSError("boom"))
+        self.assertIsNone(emit_module.emit("bw.edit", {"event.name": "bw.edit"}))
+
+
+class WarningSurfaceTest(unittest.TestCase):
+    """The warning is a systemMessage on stdout with exit 0, so nothing in the
+    session is interrupted, and it is throttled because the hook fires on
+    every edit while a ZScaler re-auth gap lasts minutes."""
+
+    def setUp(self):
+        emit_module.reset_faults()
+        self.tmp = tempfile.mkdtemp(prefix="warn_state_")
+        self._env = mock.patch.dict(os.environ, {"XDG_CACHE_HOME": self.tmp})
+        self._env.start()
+
+    def tearDown(self):
+        self._env.stop()
+        emit_module.reset_faults()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _flush(self):
+        buf = io.StringIO()
+        emit_module.flush_warning(out=buf)
+        return buf.getvalue()
+
+    def _fault(self, kind=None, detail=""):
+        emit_module.reset_faults()
+        emit_module._record_fault(kind or emit_module.FAULT_UNREACHABLE, detail)
+
+    def test_nothing_printed_without_a_fault(self):
+        self.assertEqual(self._flush(), "")
+
+    def test_fault_prints_only_a_system_message(self):
+        self._fault()
+        parsed = json.loads(self._flush())
+        self.assertEqual(list(parsed), ["systemMessage"])
+
+    def test_message_says_telemetry_is_not_recorded(self):
+        self._fault()
+        msg = json.loads(self._flush())["systemMessage"].lower()
+        self.assertIn("telemetry", msg)
+        self.assertIn("not being recorded", msg)
+
+    def test_unreachable_message_names_zscaler(self):
+        self._fault(emit_module.FAULT_UNREACHABLE)
+        self.assertIn("zscaler", json.loads(self._flush())["systemMessage"].lower())
+
+    def test_unset_message_is_about_configuration_not_zscaler(self):
+        self._fault(emit_module.FAULT_UNSET)
+        msg = json.loads(self._flush())["systemMessage"]
+        self.assertIn("BW_TELEMETRY_OTLP", msg)
+        self.assertNotIn("ZScaler", msg)
+
+    def test_status_message_reports_the_code(self):
+        self._fault(emit_module.FAULT_UNEXPECTED_STATUS, "200")
+        self.assertIn("200", json.loads(self._flush())["systemMessage"])
+
+    def test_second_flush_within_the_interval_is_silent(self):
+        self._fault()
+        self.assertNotEqual(self._flush(), "")
+        self._fault()
+        self.assertEqual(self._flush(), "")
+
+    def test_flush_again_after_the_interval(self):
+        self._fault()
+        self.assertNotEqual(self._flush(), "")
+        state = emit_module._warn_state_path()
+        with open(state) as fh:
+            data = json.load(fh)
+        for k in data:
+            data[k] -= emit_module.WARN_INTERVAL_SECONDS + 1
+        with open(state, "w") as fh:
+            json.dump(data, fh)
+        self._fault()
+        self.assertNotEqual(self._flush(), "")
+
+    def test_fault_classes_throttle_independently(self):
+        self._fault(emit_module.FAULT_UNREACHABLE)
+        self.assertNotEqual(self._flush(), "")
+        self._fault(emit_module.FAULT_UNSET)
+        self.assertNotEqual(self._flush(), "")
+
+    def test_silent_when_state_cannot_be_persisted(self):
+        """Better to say nothing than to warn on every edit indefinitely."""
+        self._fault()
+        with mock.patch("emit.open", create=True, side_effect=OSError("read-only")):
+            self.assertEqual(self._flush(), "")
+
+    def test_flush_never_raises(self):
+        self._fault()
+        with mock.patch("emit._warn_state_path", side_effect=OSError("nope")):
+            self.assertEqual(self._flush(), "")
+
+    def test_one_message_even_with_several_faults(self):
+        emit_module.reset_faults()
+        emit_module._record_fault(emit_module.FAULT_UNREACHABLE, "")
+        emit_module._record_fault(emit_module.FAULT_UNREACHABLE, "")
+        self.assertEqual(len(self._flush().strip().splitlines()), 1)
+
+
+class UserEmailTest(unittest.TestCase):
+    """Native telemetry carries no user.email under Console OAuth login, so
+    every hook record takes it from Claude Code's own config. Never touches
+    the real ~/.claude.json: CLAUDE_CONFIG_DIR and HOME point at tmp dirs."""
+
+    def setUp(self):
+        emit_module.reset_faults()
+        self.tmp = tempfile.mkdtemp(prefix="claude_config_")
+        self.home = tempfile.mkdtemp(prefix="home_")
+        self._env = mock.patch.dict(os.environ, {
+            "CLAUDE_CONFIG_DIR": self.tmp, "HOME": self.home,
+            "USERPROFILE": self.home})
+        self._env.start()
+        self._collector = emit_module.COLLECTOR
+        emit_module.COLLECTOR = "https://ait.bitwarden.pw/v1/logs"
+
+    def tearDown(self):
+        emit_module.COLLECTOR = self._collector
+        self._env.stop()
+        emit_module.reset_faults()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+        shutil.rmtree(self.home, ignore_errors=True)
+
+    def _write_config(self, content, root=None):
+        path = os.path.join(root or self.tmp, ".claude.json")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(content if isinstance(content, str) else json.dumps(content))
+
+    def _attrs_for(self, attrs=None):
+        with mock.patch("urllib.request.urlopen") as urlopen:
+            emit_module.emit("bw.session", attrs or {"event.name": "bw.session"})
+            body = json.loads(urlopen.call_args[0][0].data)
+        record = body["resourceLogs"][0]["scopeLogs"][0]["logRecords"][0]
+        return {a["key"]: a["value"]["stringValue"] for a in record["attributes"]}
+
+    def test_email_from_config_is_attached(self):
+        self._write_config({"oauthAccount": {"emailAddress": "dev@bitwarden.com"}})
+        self.assertEqual(self._attrs_for()["user.email"], "dev@bitwarden.com")
+
+    def test_claude_config_dir_is_preferred_over_home(self):
+        self._write_config({"oauthAccount": {"emailAddress": "home@bitwarden.com"}},
+                           root=self.home)
+        self._write_config({"oauthAccount": {"emailAddress": "override@bitwarden.com"}})
+        self.assertEqual(self._attrs_for()["user.email"], "override@bitwarden.com")
+
+    def test_home_is_used_when_claude_config_dir_is_empty(self):
+        os.environ["CLAUDE_CONFIG_DIR"] = ""
+        self._write_config({"oauthAccount": {"emailAddress": "home@bitwarden.com"}},
+                           root=self.home)
+        self.assertEqual(emit_module._config_path(),
+                         os.path.join(self.home, ".claude.json"))
+        self.assertEqual(self._attrs_for()["user.email"], "home@bitwarden.com")
+
+    def test_missing_file_gives_no_email(self):
+        self.assertNotIn("user.email", self._attrs_for())
+
+    def test_malformed_json_gives_no_email(self):
+        self._write_config("{not json")
+        self.assertNotIn("user.email", self._attrs_for())
+
+    def test_missing_oauth_account_gives_no_email(self):
+        self._write_config({"userID": "abc"})
+        self.assertNotIn("user.email", self._attrs_for())
+
+    def test_non_dict_oauth_account_gives_no_email(self):
+        self._write_config({"oauthAccount": "dev@bitwarden.com"})
+        self.assertNotIn("user.email", self._attrs_for())
+
+    def test_non_dict_top_level_gives_no_email(self):
+        self._write_config(["dev@bitwarden.com"])
+        self.assertNotIn("user.email", self._attrs_for())
+
+    def test_non_string_or_empty_email_gives_no_email(self):
+        for value in ("", None, 42, ["dev@bitwarden.com"], {"a": "b"}):
+            self._write_config({"oauthAccount": {"emailAddress": value}})
+            self.assertNotIn("user.email", self._attrs_for(), value)
+
+    def test_only_the_email_is_taken_from_the_config(self):
+        self._write_config({
+            "oauthAccount": {"emailAddress": "dev@bitwarden.com",
+                             "organizationUuid": "org-1"},
+            "userID": "secret-ish"})
+        got = self._attrs_for()
+        self.assertEqual(set(got), {"event.name", "event.timestamp", "user.email"})
+
+    def test_caller_supplied_email_wins(self):
+        self._write_config({"oauthAccount": {"emailAddress": "dev@bitwarden.com"}})
+        got = self._attrs_for({"event.name": "bw.session",
+                               "user.email": "caller@bitwarden.com"})
+        self.assertEqual(got["user.email"], "caller@bitwarden.com")
+
+    def test_config_is_not_read_when_collector_unset(self):
+        self._write_config({"oauthAccount": {"emailAddress": "dev@bitwarden.com"}})
+        emit_module.COLLECTOR = None
+        with mock.patch("emit._read_user_email") as read_email, \
+                mock.patch("urllib.request.urlopen") as urlopen:
+            emit_module.emit("bw.session", {"event.name": "bw.session"})
+            read_email.assert_not_called()
+            urlopen.assert_not_called()
 
 
 if __name__ == "__main__":

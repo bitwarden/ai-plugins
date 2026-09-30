@@ -1,6 +1,7 @@
 ---
 name: committing-changes
 description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes".
+allowed-tools: Skill(labeling-changes)
 ---
 
 # Git Commit Conventions
@@ -20,7 +21,7 @@ Resolve the repository's default branch from the remote rather than assuming `ma
 ### Rules
 
 1. **Ticket prefix**: Always include `[PM-XXXXX]` matching the Jira ticket
-2. **Type keyword**: Read `${CLAUDE_PLUGIN_ROOT}/references/change-type-labels.md` for the full table of conventional commit types and their CI label mappings. **If the type cannot be confidently determined, ask the user.**
+2. **Type keyword**: Invoke `Skill(labeling-changes)` to pick the conventional commit type.
 
 ### Examples
 

@@ -6,7 +6,7 @@ import json
 import os
 import sys
 
-from emit import emit  # sibling module; script dir is on sys.path[0]
+from emit import emit, flush_warning  # sibling module; script dir is on sys.path[0]
 
 EXPANSION_HOOK = "UserPromptExpansion"
 SLASH_EXPANSION = "slash_command"
@@ -80,4 +80,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    flush_warning()
     sys.exit(0)
