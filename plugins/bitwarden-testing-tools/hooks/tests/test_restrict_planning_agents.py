@@ -28,9 +28,11 @@ MAPPER_DIR_FORM = (
 )
 SCOPER = "bitwarden-testing-tools:playwright-application-context-scoper"
 GATHERER = "bitwarden-testing-tools:playwright-test-context-gatherer"
+WRITER = "bitwarden-testing-tools:playwright-test-case-writer"
 MAPPER_SKILL = "bitwarden-testing-tools:mapping-services-under-test"
 SCOPER_SKILL = "bitwarden-testing-tools:scoping-playwright-application-context"
 GATHERER_SKILL = "bitwarden-atlassian-tools:researching-jira-issues"
+WRITER_SKILL = "bitwarden-testing-tools:writing-playwright-test-cases"
 FORKED_SKILL = "bitwarden-security-engineer:auditing-external-claude-plugins"
 ALLOWED = ROOT + "/scripts/repo-diff.sh server"
 BASH_BLOCK = "Only repo-diff.sh may run through Bash in this agent"
@@ -107,6 +109,9 @@ class AllowedTest(unittest.TestCase):
 
     def test_gatherer_invokes_its_own_skill(self):
         self.assertAllowed(skill(GATHERER_SKILL, GATHERER))
+
+    def test_writer_invokes_its_own_skill(self):
+        self.assertAllowed(skill(WRITER_SKILL, WRITER))
 
     def test_own_skill_with_leading_slash_and_spaces(self):
         self.assertAllowed(skill("  /" + MAPPER_SKILL + " "))
@@ -227,6 +232,12 @@ class BlockedTest(unittest.TestCase):
 
     def test_gatherer_bash_is_blocked(self):
         self.assertBlocked(bash("echo hi", GATHERER))
+
+    def test_writer_bash_is_blocked(self):
+        self.assertBlocked(bash("echo hi", WRITER))
+
+    def test_writer_foreign_forked_skill_is_blocked(self):
+        self.assertBlocked(skill(FORKED_SKILL, WRITER), message=SKILL_BLOCK)
 
     def test_foreign_forked_skill_is_blocked(self):
         self.assertBlocked(skill(FORKED_SKILL), message=SKILL_BLOCK)

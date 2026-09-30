@@ -28,6 +28,7 @@ AGENT_SKILLS = {
     "playwright-application-context-scoper": "bitwarden-testing-tools:scoping-playwright-application-context",
     "services-under-test-mapper": "bitwarden-testing-tools:mapping-services-under-test",
     "playwright-test-context-gatherer": "bitwarden-atlassian-tools:researching-jira-issues",
+    "playwright-test-case-writer": "bitwarden-testing-tools:writing-playwright-test-cases",
 }
 BASH_BLOCK_MESSAGE = (
     "Only repo-diff.sh may run through Bash in this agent (bitwarden-testing-tools "
