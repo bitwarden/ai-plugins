@@ -4,7 +4,7 @@ allowed-tools: AskUserQuestion, Task
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
 ---
 
-**Take `--base <ref>` out of `$ARGUMENTS` first**, before anything below reads it. The accepted form is exactly that — `--base`, a space, then the ref — and nothing else. Remove the pair and resolve the target from what is left, so `--base rc` on its own still reaches the interactive path instead of being read as a target. It names the ref local mode diffs against, and it applies to local changes only — with a pull request target, drop it and say you did. A pull request's base is the one GitHub records, and `gh pr diff` already uses it.
+**Take `--base <ref>` out of `$ARGUMENTS` first**, before anything below reads it. The accepted form is exactly that — `--base`, a space, then the ref — and nothing else. Remove the pair and resolve the target from what is left, so `--base origin/rc` on its own still reaches the interactive path instead of being read as a target. It names the ref local mode diffs against, and it applies to local changes only — with a pull request target, drop it and say you did. A pull request's base is the one GitHub records, and `gh pr diff` already uses it.
 
 **Any other appearance of the token `--base` is an error**, `--base=<ref>` and a trailing `--base` with nothing after it and a second `--base` among them. Do not invoke the Task tool: say which form you were given and ask again. The rule is stated this way round on purpose — an enumeration of bad forms is a closed list, and the next one nobody thought of falls through it.
 

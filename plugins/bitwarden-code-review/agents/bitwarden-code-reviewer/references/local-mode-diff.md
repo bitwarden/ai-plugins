@@ -32,6 +32,27 @@ The command turn checks it because it is the turn that reads `$ARGUMENTS`. The a
 it because the command turn is not its only caller — an agent reached directly, or through a
 prompt someone else composed, gets the same control either way.
 
+## Why the remote-tracking form is the one to recommend
+
+`--base origin/rc` and `--base rc` both pass the pattern, and the docs and the abort advice
+point at the first. Two reasons, and the second is the same one that picked `origin/HEAD` as the
+default above.
+
+A bare `rc` resolves only against `refs/heads/rc`, a local branch. The checkout that actually
+hits this abort is the one that has no such branch: `actions/checkout`, or any clone where
+someone ran `git checkout -b feat/x origin/rc` and never made a local `rc`. Telling that caller
+to run `git fetch origin rc` does not help them, because a fetch writes `refs/remotes/origin/rc`
+and leaves `refs/heads/rc` absent, so the next run aborts on the identical message. Interpolating
+the supplied ref into the advice is worse when it is already `origin/rc`, since
+`git fetch origin origin/rc` fails with `couldn't find remote ref`. That is why the advice names
+the bare branch in the fetch and the remote-tracking ref in the re-run, rather than echoing back
+whatever was supplied.
+
+The second reason is staleness. When a bare `rc` does resolve, it resolves to a local branch that
+can sit behind the remote, which is exactly the failure the first section gives for not resolving
+`origin/HEAD` to a name. A review scoped against a stale base reports a verdict over the wrong
+set of commits, quietly, which is the outcome this whole path is built to refuse.
+
 ## Why a `BASE:` that fails aborts instead of falling back
 
 Two ways it fails, and both land on No Verdict.

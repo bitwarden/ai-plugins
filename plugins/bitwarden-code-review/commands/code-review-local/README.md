@@ -14,7 +14,7 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 
 - **`[PR#]`** (optional): Pull request number (e.g., `123`)
 - **`[PR URL]`** (optional): Full GitHub PR URL (e.g., `https://github.com/bitwarden/clients/pull/123`)
-- **`[--base <ref>]`** (optional): Ref that local mode diffs the branch against, in place of `origin/HEAD`. Applies to local changes only; it is dropped with a PR target, where GitHub's recorded base is used. The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$` — anything else is refused before the review starts
+- **`[--base <ref>]`** (optional): Ref that local mode diffs the branch against, in place of `origin/HEAD`. Prefer the remote-tracking form (`origin/rc`) over a bare branch name: a bare `rc` resolves only against a local branch of that name, which may not exist and which can sit behind the remote. Applies to local changes only; it is dropped with a PR target, where GitHub's recorded base is used. Only the space-separated pair is accepted, and the ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$` — any other form is refused before the review starts
 - **No arguments**: The command will ask interactively whether to review a PR or local changes
 
 ### Examples
@@ -39,7 +39,9 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 # On a branch cut from a release branch, name the base you cut from.
 # Without it the three-dot diff takes the merge base with trunk and
 # sweeps in every commit the release branch already carries.
-/code-review-local --base rc
+# Use the remote-tracking ref: a bare `rc` needs a local branch of
+# that name, and a local branch can sit behind the remote.
+/code-review-local --base origin/rc
 
 # The agent reviews one scope, not both:
 # - The branch against its base, when it has commits ahead of that base

@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Local-mode summaries name the base ref they diffed against
-- The unresolvable-base abort gives different advice for a supplied ref than for the `origin/HEAD` default
+- The unresolvable-base abort gives different advice for a supplied ref than for the `origin/HEAD` default, and names the remote-tracking ref in its remedy. A fetch writes no local branch, so advising a bare branch name would return the caller to the same abort
 
 ## [2.1.0] - 2026-09-04
 
