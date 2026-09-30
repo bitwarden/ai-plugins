@@ -226,12 +226,11 @@ describe("get_issue formatting", () => {
     expect(result).not.toContain("## Additional Fields");
   });
 
-  it("should skip low-value fields like Rank and Development", async () => {
+  it("should skip low-value fields like Rank", async () => {
     const mockIssue = {
       key: "TEST-15",
       names: {
         customfield_10100: "Rank",
-        customfield_10101: "Development",
         customfield_10102: "Bug category",
       },
       fields: {
@@ -239,7 +238,6 @@ describe("get_issue formatting", () => {
         priority: { name: "Medium" },
         // cspell:ignore hzvg tqzzw
         customfield_10100: "1|hzvg5q:uo9tqj6002tqzzw7hey4b",
-        customfield_10101: { storyPoints: 5 },
         customfield_10102: { name: "Broken basic behavior" },
       },
     };
@@ -249,9 +247,78 @@ describe("get_issue formatting", () => {
     const result = await getIssueTool.handler({ issueIdOrKey: "TEST-15" });
 
     expect(result).not.toContain("### Rank");
-    expect(result).not.toContain("### Development");
     expect(result).toContain("### Bug category");
     expect(result).toContain("Broken basic behavior");
+  });
+
+  it("should summarize linked PRs from the Development field", async () => {
+    const summary = {
+      cachedValue: {
+        errors: [],
+        summary: {
+          pullrequest: {
+            overall: { count: 2, state: "MERGED", dataType: "pullrequest" },
+          },
+          branch: { overall: { count: 1, dataType: "branch" } },
+          build: { overall: { count: 0, dataType: "build" } },
+        },
+      },
+      isStale: false,
+    };
+    const mockIssue = {
+      key: "TEST-16",
+      names: { customfield_10000: "Development" },
+      fields: {
+        summary: "Issue with linked PRs",
+        priority: { name: "Medium" },
+        customfield_10000: `{pullrequest={dataType=pullrequest, state=MERGED, stateCount=2}, json=${JSON.stringify(summary)}}`,
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: "TEST-16" });
+
+    expect(result).toContain("### Development");
+    expect(result).toContain("Pull requests: 2 (MERGED); Branches: 1");
+    expect(result).not.toContain("Builds");
+  });
+
+  it("should fall back to the key=value form when the Development JSON is malformed", async () => {
+    const mockIssue = {
+      key: "TEST-17",
+      names: { customfield_10000: "Development" },
+      fields: {
+        summary: "Issue with truncated Development JSON",
+        priority: { name: "Medium" },
+        customfield_10000:
+          "{pullrequest={dataType=pullrequest, state=OPEN, stateCount=1}, json={not json}",
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: "TEST-17" });
+
+    expect(result).toContain("Pull requests: 1 (OPEN)");
+  });
+
+  it("should omit the Development field when nothing is linked", async () => {
+    const mockIssue = {
+      key: "TEST-18",
+      names: { customfield_10000: "Development" },
+      fields: {
+        summary: "Issue with no linked dev work",
+        priority: { name: "Medium" },
+        customfield_10000: "{}",
+      },
+    };
+
+    mockGetIssue.mockResolvedValueOnce(mockIssue);
+
+    const result = await getIssueTool.handler({ issueIdOrKey: "TEST-18" });
+
+    expect(result).not.toContain("### Development");
   });
 
   it("should fall back to raw field key when names not provided", async () => {

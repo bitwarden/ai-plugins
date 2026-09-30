@@ -189,15 +189,16 @@ Features:
 
 ### `evaluating-qa-readiness`
 
-Checks a Jira ticket for the concrete, objectively-verifiable information QA needs before testing starts — testing instructions, implementation notes, feature-flag state, acceptance criteria, affected clients, and a linked PR/build — then drafts a developer comment for any gaps. Triggered by requests to check QA readiness (e.g., "Is PROJ-123 ready for QA?", "QA-check PROJ-123") or proactively when a ticket is being moved to Ready for QA.
+Checks a Jira ticket for the concrete, objectively-verifiable information QA needs before testing starts — testing notes, implementation notes, settled scope, feature-flag state, acceptance criteria, affected clients, and a linked PR/build (read from the Development panel) — then posts a comment on the ticket asking the developer to fill any gaps. Triggered by requests to check QA readiness (e.g., "Is PROJ-123 ready for QA?", "QA-check PROJ-123") or proactively when a ticket is being moved to Ready for QA.
 
 Features:
 
 - Reads description, custom fields, comments, and remote links as evidence, since developers often drop testing notes or flag names in a comment rather than the description
 - Distinguishes blocking gaps (testing instructions, implementation notes, feature flag) from non-blocking ones (acceptance criteria, affected clients, linked PR/build) so the verdict reflects how stuck a tester actually is
-- Drafts a targeted, collegial ask addressing only the gaps found
+- Posts a targeted, collegial ask addressing only the gaps found, so QA doesn't have to copy and paste it onto the ticket
+- Skips the post when the ticket already has an unanswered readiness comment raising the same gaps, or when asked for a preview only
 
-This skill is read-only: it drafts the developer comment but cannot post it to the ticket.
+Posting requires `ATLASSIAN_JIRA_WRITE_TOKEN` (it uses the `add_issue_comment` write tool); without it the skill shows the comment as a draft for you to post by hand. The comment is the skill's only write: it never edits the ticket's fields or status.
 
 ## Requirements
 

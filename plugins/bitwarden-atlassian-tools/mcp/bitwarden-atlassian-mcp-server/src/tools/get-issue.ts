@@ -12,6 +12,73 @@ import {
 } from "../utils/validation.js";
 import { extractPlainText } from "../utils/adf.js";
 
+/** Display labels for the entity types in Jira's Development field summary. */
+const developmentLabels: Record<string, string> = {
+  pullrequest: "Pull requests",
+  branch: "Branches",
+  commit: "Commits",
+  build: "Builds",
+  review: "Reviews",
+  "deployment-environment": "Deployments",
+};
+
+/**
+ * Summarize Jira's "Development" field — the GitHub/Bitbucket integration's
+ * rollup of the PRs, branches, commits, and builds linked to an issue. Jira
+ * returns it as an opaque string such as
+ * `{pullrequest={dataType=pullrequest, state=MERGED, stateCount=1}, json={...}}`,
+ * where the embedded `json=` payload carries per-type counts. Only counts and
+ * PR state are available here, not URLs.
+ * @returns A one-line summary, or null when nothing is linked or the value
+ *   can't be parsed.
+ */
+export function formatDevelopmentField(val: unknown): string | null {
+  if (typeof val !== "string" || !val.trim()) return null;
+
+  const parts: string[] = [];
+  const describe = (type: string, count: number, state?: string) => {
+    if (!count) return;
+    const label = developmentLabels[type] || type;
+    parts.push(`${label}: ${count}${state ? ` (${state})` : ""}`);
+  };
+
+  // Preferred source: the embedded JSON summary
+  const jsonStart = val.indexOf("json=");
+  if (jsonStart !== -1) {
+    try {
+      const json = JSON.parse(
+        val.slice(jsonStart + "json=".length, val.lastIndexOf("}")),
+      );
+      const summary = json?.cachedValue?.summary ?? {};
+      for (const [type, entry] of Object.entries<any>(summary)) {
+        const overall = entry?.overall;
+        if (overall) describe(type, Number(overall.count) || 0, overall.state);
+      }
+      if (parts.length > 0) return parts.join("; ");
+    } catch {
+      // Fall through to the key=value form
+    }
+  }
+
+  // Fallback: the `{type={dataType=..., count=N}}` entries outside the JSON
+  const prefix = jsonStart === -1 ? val : val.slice(0, jsonStart);
+  for (const match of prefix.matchAll(/\{([^{}]*dataType=[^{}]*)\}/g)) {
+    const attrs = Object.fromEntries(
+      match[1].split(",").map((pair) => {
+        const [k, ...rest] = pair.split("=");
+        return [k.trim(), rest.join("=").trim()];
+      }),
+    );
+    describe(
+      attrs.dataType,
+      Number(attrs.stateCount ?? attrs.count) || 0,
+      attrs.state,
+    );
+  }
+
+  return parts.length > 0 ? parts.join("; ") : null;
+}
+
 /**
  * Format issue details for display.
  * @param issue - The Jira issue object returned by the API.
@@ -191,7 +258,7 @@ function formatIssueDetails(
   ]);
 
   // Field names that produce low-value noise in output
-  const skippedFieldNames = new Set(["Rank", "Development"]);
+  const skippedFieldNames = new Set(["Rank"]);
 
   const customFields: Array<{ name: string; value: string }> = [];
 
@@ -211,8 +278,12 @@ function formatIssueDetails(
 
     let rendered: string | null = null;
 
+    // Development panel rollup (linked PRs, branches, commits, builds)
+    if (displayName === "Development") {
+      rendered = formatDevelopmentField(val);
+    }
     // ADF rich-text field
-    if (
+    else if (
       val &&
       typeof val === "object" &&
       val.type === "doc" &&
