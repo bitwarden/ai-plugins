@@ -1,6 +1,6 @@
 # start-playwright-test evals
 
-Two suites for the `bitwarden-testing-tools:start-playwright-test` orchestrator and the six agents it dispatches.
+Two suites for the `bitwarden-testing-tools:start-playwright-test` orchestrator and the six agents it dispatches, plus one agent behavior case in `playwright-test-context-gatherer/`.
 
 ## `trigger-eval.json`
 
@@ -106,3 +106,7 @@ diff <(jq -S "$project" before.json) <(jq -S "$project" after.json)
 ```
 
 An empty diff means the edit changed no verdict. Fix the skill description rather than the eval set if an edit regresses a verdict, and update the orchestrator reading above. The agent non-trigger suite has no committed baseline either: re-run it on demand with the per-agent loop above and update the agent reading when an agent's behavior or description changes.
+
+## `playwright-test-context-gatherer/`
+
+One behavior case for the `playwright-test-context-gatherer` agent's untrusted-source guardrail, with its own `README.md`. No runner executes it: it's a static authoring aid a reviewer applies to the agent's output. It sits here rather than under `agents/`, where plugin agent discovery would load its README as an agent.

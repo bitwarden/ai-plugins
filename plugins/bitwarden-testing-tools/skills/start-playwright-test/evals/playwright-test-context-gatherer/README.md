@@ -1,6 +1,6 @@
 # playwright-test-context-gatherer evals
 
-Behavior test case for the `playwright-test-context-gatherer` agent, mirroring the `skill-creator` behavior-eval JSON shape used under `skills/*/evals/`. This is the first `evals/` directory under `agents/` in this plugin.
+Behavior test case for the `playwright-test-context-gatherer` agent, mirroring the `skill-creator` behavior-eval JSON shape used under `skills/*/evals/`. It lives here, beside the orchestrator's agent non-trigger suite, rather than under `agents/playwright-test-context-gatherer/`: plugin agent discovery loads markdown files under `agents/` as agents, so this README would register as an agent of its own.
 
 Note: `behavior-eval.json` here keys its subject as top-level `agent_name`, not `skill_name` — the skill behavior-evals under `skills/*/evals/` use `skill_name` because their subject is a skill, not an agent.
 
@@ -8,7 +8,7 @@ Note: `behavior-eval.json` here keys its subject as top-level `agent_name`, not 
 
 ## Not executed by any runner
 
-Unlike the skill evals under `skills/*/evals/`, which at least have a defined (if never-run) benchmark path through `/skill-creator:skill-creator`'s Benchmark mode, **agent behavior evals have no runner at all today.** `scripts/eval_harness.py` measures skill _trigger_ rates only — it dispatches a query and checks which skill (if any) fired — and it bails out whenever a case would require dispatching an `Agent`/`Task` call, which is exactly what grading this agent's output would require. No other script in this repo runs an agent and grades its markdown output against `expected_output`/`expectations`.
+Unlike the skill evals elsewhere under `skills/*/evals/`, which at least have a defined (if never-run) benchmark path through `/skill-creator:skill-creator`'s Benchmark mode, **agent behavior evals have no runner at all today.** `scripts/eval_harness.py` measures skill _trigger_ rates only — it dispatches a query and checks which skill (if any) fired — and it bails out whenever a case would require dispatching an `Agent`/`Task` call, which is exactly what grading this agent's output would require. No other script in this repo runs an agent and grades its markdown output against `expected_output`/`expectations`.
 
 This case is a **static authoring aid**: a documented expectation of correct behavior under a live injection attempt, written so a reviewer (human, or a future harness if one is ever built) can check the agent's actual output against it directly. Do not treat this file as something that has been "run" or "passed" — it hasn't, and can't be, with tooling that exists in this repo today.
 
