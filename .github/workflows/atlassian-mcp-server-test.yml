@@ -110,7 +110,7 @@ jobs:
           set -eu
 
           # Read the command from the shipped artifact so this test cannot drift from it.
-          CMD=$(node -p "require('./.mcp.json').mcpServers['bitwarden-atlassian'].args[1]")
+          CMD=$(jq -er '.mcpServers["bitwarden-atlassian"].args[1]' .mcp.json)
           printf '%s\n' "Launch command under test:" "$CMD"
 
           # Fail loudly if the runner image puts Corepack back on PATH, rather
@@ -134,15 +134,5 @@ jobs:
             bash "$RUNNER_TEMP/launch.sh" | head -1)
 
           printf '%s\n' "$OUT"
-          printf '%s' "$OUT" | node -e '
-            let s = "";
-            process.stdin.on("data", d => s += d).on("end", () => {
-              let r;
-              try { r = JSON.parse(s); } catch { console.error("no JSON-RPC response on stdout"); process.exit(1); }
-              const info = r.result && r.result.serverInfo;
-              if (!info || info.name !== "bitwarden-atlassian-mcp") {
-                console.error("unexpected initialize result: " + s);
-                process.exit(1);
-              }
-              console.log("handshake ok, server version " + info.version);
-            });'
+          printf '%s' "$OUT" | jq -e '.result.serverInfo.name == "bitwarden-atlassian-mcp"' >/dev/null \
+            || { echo "unexpected initialize result" >&2; exit 1; }
