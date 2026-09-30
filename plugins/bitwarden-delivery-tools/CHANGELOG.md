@@ -5,18 +5,21 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.4.0] - 2026-09-29
+## [3.4.0] - 2026-09-30
 
 ### Added
 
-- **`applying-security-disclosure-policy` skill** — detects security-relevant changes and applies Bitwarden's [disclosure policy](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) to commit and PR wording; stops if the policy can't be fetched.
+- **`applying-security-disclosure-policy` skill** — detects security-relevant changes and applies Bitwarden's [disclosure policy](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) to commit and PR wording; accepts the rules only from that page, and stops if it can't be fetched or has no usable rules.
 - `committing-changes` and `applying-pr-conventions` invoke it before drafting.
-- `creating-pull-request`: `Security fix` line in the Step 3 preview.
+- `creating-pull-request`: on a security fix, checks the commits it is about to push against the wording rules and offers to reword any that break them. The Step 3 preview gains a `Security fix` line and a `Commits` block.
+- `force-multiplier`: an eval case for a `VULN`-linked campaign.
 
 ### Changed
 
-- `applying-pr-conventions` also returns the security verdict.
-- `force-multiplier` settles the verdict once at PILOT.
+- `applying-pr-conventions` also returns the security verdict, takes the branch name from its caller, and marks the returned wording rules as untrusted.
+- `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
+- `force-multiplier` settles the verdict once at PILOT, records it in `pr_spec.disclosure`, and stops the whole campaign, pilot included, on `Stop`.
+- `docs/commit-and-pr-flows.md` shows the disclosure check, the branch commit check, and the `Stop` paths in all three flows.
 
 ## [3.3.0] - 2026-09-25
 

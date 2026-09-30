@@ -16,7 +16,7 @@ Before writing the message, invoke `Skill(applying-security-disclosure-policy)` 
 
 Branch on the `Verdict:` line:
 
-- **`Verdict: Stop`** — the policy couldn't be fetched. Stop, pass on the remedy it gives, and don't write the message from memory.
+- **`Verdict: Stop`** — the policy couldn't be fetched, or came back without usable rules. Stop, pass on the remedy it gives, and don't write the message from memory.
 - **`Verdict: Yes`** — apply its wording rules to the summary, the body, and any ticket reference, then show the proposed message to the author for approval before committing. Skip the approval only when the caller says the author already approved this wording pattern.
 - **`Verdict: No`** — write the message as usual.
 

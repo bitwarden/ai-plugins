@@ -1,0 +1,24 @@
+{
+  "claude-sonnet-5-5/default": {
+    "vulnerability-linked-commit": {
+      "skill": "15/15",
+      "no-skill": "9/15"
+    },
+    "session-fix-asks-once": {
+      "skill": "9/9",
+      "no-skill": "2/9"
+    },
+    "dependency-bump-no-fetch": {
+      "skill": "9/9",
+      "no-skill": "9/9"
+    },
+    "policy-unavailable-stops": {
+      "skill": "9/9",
+      "no-skill": "3/9"
+    },
+    "vulnerability-key-only-in-branch": {
+      "skill": "12/12",
+      "no-skill": "9/12"
+    }
+  }
+}

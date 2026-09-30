@@ -1,6 +1,6 @@
 ---
 name: creating-pull-request
-description: 'Open a pull request from a branch in a Bitwarden repository. Use whenever the user wants a branch turned into a pull request, however they phrase it — "create a PR", "open a PR", "ship a draft", "ship it", "ready for review", "put it up for review", "get this in front of reviewers", "send it over to the team", "throw together a pull request", "wrap this branch up". Use it too when the user says the title and body are already settled and only the PR needs opening — the gate, the preview, and the submission still apply. Runs the required local code-review gate, takes the title, template body, and ai-review label from applying-pr-conventions, confirms a full submission preview, then pushes and runs gh pr create. Not for composing a title, body, or label when no PR is being opened (that is applying-pr-conventions), conceptual questions ("how do PRs work"), or managing existing PRs (status, merging, addressing comments).'
+description: 'Open a pull request from a branch in a Bitwarden repository. Use whenever the user wants a branch turned into a pull request, however they phrase it — "create a PR", "open a PR", "ship a draft", "ship it", "ready for review", "put it up for review", "get this in front of reviewers", "send it over to the team", "throw together a pull request", "wrap this branch up". Use it too when the user says the title and body are already settled and only the PR needs opening — the gate, the preview, and the submission still apply. Runs the required local code-review gate, takes the title, template body, and ai-review label from applying-pr-conventions, confirms a full submission preview, then pushes and runs gh pr create. On a security fix it also checks the commit messages it is about to push against the disclosure policy, and stops without pushing when the policy can't be fetched. Not for composing a title, body, or label when no PR is being opened (that is applying-pr-conventions), conceptual questions ("how do PRs work"), or managing existing PRs (status, merging, addressing comments).'
 ---
 
 # Creating a Pull Request
@@ -45,15 +45,17 @@ Each review path checks its own prerequisites and reports what to install if som
 
 ### Step 2 — Compose the title, body, and label
 
-Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the title and the type keyword behind the `t:` label, the body built from the repo's `.github/PULL_REQUEST_TEMPLATE.md`, and the `ai-review` label question.
+Invoke `Skill(applying-pr-conventions)` for this one pull request, passing the current branch name and any ticket key you have. Tell it this workflow also checks the branch's commit messages, so it asks the disclosure policy for rules covering `both` the commits and the PR title and body. It owns the title and the type keyword behind the `t:` label, the body built from the repo's `.github/PULL_REQUEST_TEMPLATE.md`, and the `ai-review` label question.
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section.
 
 Carry back the title, the body, the resolved `t:` label its prefix will produce, and the `ai-review` label choice, plus the security verdict: `No`, or `Yes` with its signal and wording rules. Step 3's preview shows all of them — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label. Tell it the Step 3 preview shows the title and body, so it doesn't show them separately.
 
-If it returns a stop instead of a title and body, the change is security-relevant and the disclosure policy couldn't be fetched. Stop here and report its remedy. Don't push, don't run `gh pr create`, and don't compose a title or body yourself. A stop never reaches the preview.
+If it returns a stop instead of a title and body, the change is security-relevant and the disclosure policy couldn't be fetched or had no usable rules. Stop here and report its remedy. Don't push, don't run `gh pr create`, and don't compose a title or body yourself. A stop never reaches the preview.
 
-On `Yes`, check the branch's commit messages too, because Step 4's push publishes them. They may predate the verdict or have been written with plain `git commit`. List every commit since the branch left the repository's default branch, resolved from the remote (`git log <default>..HEAD --format='%h %s%n%b'`), and check each subject and body against the wording rules. The preview shows them. If one breaks the rules and the branch has never been pushed, offer to reword it before continuing. If the branch is already on the remote, rewording needs a force-push, which this workflow never does, so flag the commit and let the author decide.
+On `Yes`, check the commits Step 4's push is about to publish. They may predate the verdict or have been written with plain `git commit`. This is a check before the push, so only commits not yet on the remote are in scope: list them with `git log origin/<branch-name>..HEAD --format='%h %s%n%b%n---'`, or `origin/HEAD..HEAD` when the branch has never been pushed. Check each subject and body against the wording rules. The preview shows them.
+
+If one breaks the rules, offer to reword it before continuing. When it is `HEAD`, reword with `git commit --amend`, drafting the new message per `Skill(committing-changes)` with the verdict and wording rules already in hand. For an older commit, rewording means an interactive rebase, which is out of scope here: hand it back to the author and stop before Step 3.
 
 Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
@@ -75,7 +77,9 @@ Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
 Security fix:   <No | Yes (<signal>)  →  wording rules applied to title, body, and commits>
-Commits:        <on Yes only: each commit's hash and subject, flagging any that break the rules>
+
+Commits:
+<one line per commit about to be pushed: hash, subject, and any rule it breaks>
 
 Body:
 ---
@@ -83,6 +87,8 @@ Body:
 ---
 ═══════════════════════════════════════
 ```
+
+Omit the `Commits:` block when the security verdict is `No`.
 
 Then use the `AskUserQuestion` tool to confirm:
 
@@ -126,6 +132,6 @@ These are what the Step 3 preview is built to prevent. Recognizing them helps wh
 - **Generic body replacing the template** → check what Step 2 returned actually follows the repo's template sections; `applying-pr-conventions` reads the template, but the preview is where a drifted body is caught.
 - **Label answer dropped between Step 2 and Step 4** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 3.
-- **Security fix worded against the policy** → the vulnerability goes public before the fix ships, and the title stays in the merge commit permanently. Check the title and body against the wording rules Step 2 carried back, and look for a `VULN-*` key anywhere, including the title bracket.
+- **Security fix worded against the policy** → the vulnerability goes public before the fix ships, and the title stays in the merge commit permanently. Check the title, the body, and the commits about to be pushed against the wording rules Step 2 carried back, and look for a `VULN-*` key anywhere, including the title bracket.
 
 If any of these slip past the preview, recovery is awkward — the title is permanent in the merge commit, and labels feed downstream filtering and automation.
