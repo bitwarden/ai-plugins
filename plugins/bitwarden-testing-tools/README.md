@@ -25,6 +25,12 @@ A set of skills and agents that support Bitwarden's testing and quality work wit
 | `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.             |
 | `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
 
+## Hooks
+
+| Hook                          | Event                          | What It Does                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `restrict_planning_agents.py` | `PreToolUse` (`Bash`, `Skill`) | Limits the `playwright-application-context-scoper` and `services-under-test-mapper` agents' `Bash` to `scripts/repo-diff.sh`, and those two plus `playwright-test-context-gatherer` to their own skill, blocking anything else before permission rules are evaluated while the hook runs. Other agents and the main session are unaffected. Needs `python3` on `PATH`; see "Known limits of these controls" in `references/playwright-tool-policy.md`. |
+
 ## Cross-Plugin Integration
 
 | Plugin                      | How It's Used                                                                                                                                                                                                                                                                                                                                                                                             |

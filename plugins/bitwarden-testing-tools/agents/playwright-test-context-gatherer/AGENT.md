@@ -48,7 +48,7 @@ only; it is not reproduced anywhere in your output. Follow the full policy at
 
 You are the context-gathering agent for the Bitwarden web test pipeline. Acquire the feature source content, extract structured context, and return it as a markdown response.
 
-Use only the tools listed in your allowlist. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead.
+Use only the tools listed in your allowlist. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead. The plugin's `PreToolUse` hook blocks any skill other than `bitwarden-atlassian-tools:researching-jira-issues` from this agent; see "Known limits of these controls" in `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`.
 
 ## Inputs
 
