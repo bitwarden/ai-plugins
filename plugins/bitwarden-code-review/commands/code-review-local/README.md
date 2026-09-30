@@ -7,13 +7,14 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 ## Usage
 
 ```bash
-/code-review-local [PR#] | [PR URL]
+/code-review-local [PR#] | [PR URL] | [--base <ref>]
 ```
 
 ### Arguments
 
 - **`[PR#]`** (optional): Pull request number (e.g., `123`)
 - **`[PR URL]`** (optional): Full GitHub PR URL (e.g., `https://github.com/bitwarden/clients/pull/123`)
+- **`[--base <ref>]`** (optional): Ref that local mode diffs the branch against, in place of `origin/HEAD`. Prefer the remote-tracking form (`origin/rc`) over a bare branch name: a bare `rc` resolves only against a local branch of that name, which may not exist and which can sit behind the remote. Applies to local changes only; it is dropped with a PR target, where GitHub's recorded base is used. Only the space-separated pair is accepted, and the ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$` — any other form is refused before the review starts
 - **No arguments**: The command will ask interactively whether to review a PR or local changes
 
 ### Examples
@@ -35,8 +36,15 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 /code-review-local
 # When asked for PR number, indicate you want to review local changes instead
 
+# On a branch cut from a release branch, name the base you cut from.
+# Without it the three-dot diff takes the merge base with trunk and
+# sweeps in every commit the release branch already carries.
+# Use the remote-tracking ref: a bare `rc` needs a local branch of
+# that name, and a local branch can sit behind the remote.
+/code-review-local --base origin/rc
+
 # The agent reviews one scope, not both:
-# - The branch against its base, when it has commits ahead of origin/HEAD
+# - The branch against its base, when it has commits ahead of that base
 # - Otherwise your pending changes (tracked edits plus untracked files)
 ```
 
@@ -120,8 +128,10 @@ The agent uses Bitwarden's standard emoji classification system:
 ### For Local Changes Reviews:
 
 1. **Analyzes git changes** using `git status`, `git diff`, and `git log`
-2. **Evaluates whichever scope local mode resolves** — the branch against its base, or pending changes when there is no resolvable base
-3. **Falls back to pending changes** when the branch has nothing ahead of its base, or when the base cannot be resolved at all, and says so in the summary
+2. **Evaluates whichever scope local mode resolves** — the branch against its base, or pending changes when the default base cannot be resolved
+3. **Diffs against `--base` when given, `origin/HEAD` otherwise**, and names the ref it used in the summary
+4. **Falls back to pending changes** when the branch has nothing ahead of its base, or when the default `origin/HEAD` cannot be resolved, and says so in the summary
+5. **Reports No Verdict instead of falling back** when a supplied `--base` does not resolve — the named scope was never computed, and reviewing the working tree instead would answer a question nobody asked
 
 ### Common Review Steps:
 
@@ -169,7 +179,7 @@ python process_review.py review-summary.md review-inline-comments.md
 
 ### Pre-Commit Validation
 
-Review your pending changes before committing. This reviews the edits themselves only while the branch has no commits ahead of `origin/HEAD` — once it does, the branch-against-base diff wins and your uncommitted edits are not what gets reviewed. Commit first and re-run to cover them.
+Review your pending changes before committing. This reviews the edits themselves only while the branch has no commits ahead of its base — once it does, the branch-against-base diff wins and your uncommitted edits are not what gets reviewed. Commit first and re-run to cover them.
 
 ```bash
 # On a branch level with its base, this reviews the pending edits
