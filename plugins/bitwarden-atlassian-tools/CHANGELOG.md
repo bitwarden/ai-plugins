@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing notes, implementation notes, settled scope, feature flag, acceptance criteria, affected clients, and a linked PR/build) and posts a comment on the ticket through `add_issue_comment` asking the developer to fill the gaps that would actually stop a tester, so QA no longer has to copy and paste the ask. The comment is plain text, skipped when an unanswered readiness comment already raises the same gaps, and shown as a draft instead when the user asks for a preview or the install has no `ATLASSIAN_JIRA_WRITE_TOKEN`.
+- Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing notes, implementation notes, settled scope, feature flag, acceptance criteria, affected clients, and a linked PR/build) and posts a comment on the ticket through `add_issue_comment` asking the developer to fill the gaps that would actually stop a tester, so QA no longer has to copy and paste the ask. The comment is posted without asking when the user requested the check. When the skill starts on its own because a ticket is being moved to Ready for QA, it shows the draft and posts only after the user approves. It is plain text, skipped when an unanswered readiness comment already raises the same gaps, and shown as a draft instead when the user asks for a preview or the install has no `ATLASSIAN_JIRA_WRITE_TOKEN`. The skill's description names the testing skills to use instead for writing test cases, inventorying coverage, and choosing test layers.
 
 ### Changed
 

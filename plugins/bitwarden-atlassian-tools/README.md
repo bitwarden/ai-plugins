@@ -196,6 +196,7 @@ Features:
 - Reads description, custom fields, comments, and remote links as evidence, since developers often drop testing notes or flag names in a comment rather than the description
 - Distinguishes blocking gaps (testing instructions, implementation notes, feature flag) from non-blocking ones (acceptance criteria, affected clients, linked PR/build) so the verdict reflects how stuck a tester actually is
 - Posts a targeted, collegial ask addressing only the gaps found, so QA doesn't have to copy and paste it onto the ticket
+- Posts without asking when you request the check; when it starts on its own because a ticket is moving to Ready for QA, it shows the comment and waits for your approval
 - Skips the post when the ticket already has an unanswered readiness comment raising the same gaps, or when asked for a preview only
 
 Posting requires `ATLASSIAN_JIRA_WRITE_TOKEN` (it uses the `add_issue_comment` write tool); without it the skill shows the comment as a draft for you to post by hand. The comment is the skill's only write: it never edits the ticket's fields or status.

@@ -1,6 +1,6 @@
 ---
 name: evaluating-qa-readiness
-description: Use whenever the user wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", or any request to validate that a story or bug has what a tester needs before testing starts. Reports which pieces are present or missing and posts a comment on the ticket asking the developer to fill the gaps. Use proactively when the user says they are moving a ticket to Ready for QA, even without the words "QA readiness."
+description: Use whenever the user wants to check whether a Jira ticket is ready to hand to QA — "Is PROJ-123 ready for QA?", "QA-check PROJ-123", "Does PROJ-123 have everything QA needs?", or any request to validate that a story or bug has what a tester needs before testing starts. Reports which pieces are present or missing and posts a comment on the ticket asking the developer to fill the gaps. Use proactively when the user says they are moving a ticket to Ready for QA, even without the words "QA readiness." Do NOT use it to write manual test cases (use writing-manual-test-cases), to inventory what automated tests already exist for a change (use assessing-test-coverage), to decide which new tests to add or at which layer (use recommending-test-layers), or to judge whether the fix itself is correct.
 allowed-tools: Read, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_comments, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue_remote_links, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__add_issue_comment
 ---
 
@@ -96,9 +96,14 @@ If nothing is missing, say so plainly and don't post anything — no need to man
 
 ### Step 5: Post the comment
 
-Post the draft to the ticket with `add_issue_comment`, passing the issue key, the plain-text body, and `dryRun: false`. The tool defaults to a dry run, so without `dryRun: false` nothing is posted. QA shouldn't have to copy and paste the ask; posting it is the default.
+Post the draft to the ticket with `add_issue_comment`, passing the issue key, the plain-text body, and `dryRun: false`. The tool defaults to a dry run, so without `dryRun: false` nothing is posted.
 
-Don't post when:
+Whether to post straight away depends on how the check started:
+
+- **The user asked for the check** ("Is PM-123 ready for QA?", "QA-check PM-123"). Post without asking. QA shouldn't have to copy and paste the ask, and asking for the check is asking for the comment.
+- **The skill started on its own**, because the user mentioned moving a ticket to Ready for QA without asking for a check. Show the report and the draft, then ask whether to post it. Post only after a yes. The user may be the developer who owns the ticket, and a public comment they didn't ask for is a surprise.
+
+Don't post, however the check started, when:
 
 - **The user asked not to.** "Don't post", "just show me", "dry run", or "preview" means show the draft instead. If they asked for a preview, call the tool with `dryRun: true` and show the result.
 - **The same ask is already on the ticket.** Check the comments from Step 1 for an earlier `QA readiness check:` comment. If it raised the same gaps and nothing after it answers them, don't post a duplicate. Say that the gaps were already raised, and when. If the gaps have changed since then, post a new comment covering only what's still open.
