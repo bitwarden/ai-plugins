@@ -1,12 +1,12 @@
 ---
 name: applying-pr-conventions
 allowed-tools: "Read, Glob, Skill(labeling-changes), Bash(gh api repos/bitwarden/template/contents/.github/PULL_REQUEST_TEMPLATE.md -H Accept:application/vnd.github.raw)"
-description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, and label choice. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
+description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, and which template the body came from. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
 # Applying PR Conventions
 
-Compose four values for one pull request and return them: the title, the body, the `ai-review` label choice, and the resolved `t:` label that the title's type keyword maps to.
+Compose five values for one pull request and return them: the title, the body, the `ai-review` label choice, the resolved `t:` label that the title's type keyword maps to, and which of Step 2's three templates the body was built from.
 
 The caller says how many pull requests it is composing for and whether any value is already settled. Follow its instruction over the defaults below.
 
