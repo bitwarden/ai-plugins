@@ -44,7 +44,7 @@ The shape of the change as it is delivered. Confirmed once on the pilot, then re
 
 - `branch` — a deterministic branch name template (same input → same branch, so re-runs are no-ops).
 - `title` — follows `Skill(applying-pr-conventions)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label. `[TICKET]` is a placeholder — substitute a real tracking-issue key, never the literal word.
-- `body` — fills the target repo's `.github/PULL_REQUEST_TEMPLATE.md` per `Skill(applying-pr-conventions)`.
+- `body` — fills whichever template `Skill(applying-pr-conventions)` resolves for the target repo, which is its own `.github/PULL_REQUEST_TEMPLATE.md` when it has one.
 - `labels` — the `ai-review` choice and any others, confirmed at pilot.
 - `draft` — `true` by default.
 
@@ -77,7 +77,7 @@ validation: "<repo-defined build/lint/test> + Skill(perform-preflight)"
 pr_spec:
   branch: "<deterministic-branch-name-template>"
   title: "[<TICKET>] <type>: <summary>"
-  body: "<filled from the target repo's PR template>"
+  body: "<filled from the resolved PR template>"
   labels: ["<ai-review choice>"]
   draft: true
 safety_policy:

@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The embedded template is now a last resort, reached only when the fetch fails, and the skill says which source produced the body.
 - `creating-pull-request` carries that source back and shows it on a `Template:` line in the submission preview, so a body built from the embedded copy is visible before submission rather than after. The line names the source without asserting a cause, and has a value for the path where the caller supplied a finished body and no template was read.
 - `applying-pr-conventions` quotes its `allowed-tools` value, which now contains spaces and a colon.
+- The template source's possible values are defined in one place, and the only permitted restatement is the preview block that displays them. Every other reference points at the definition instead of re-listing it.
+- `creating-pull-request` and `force-multiplier` no longer describe the body as coming from the target repo's own template, which is now one of several sources rather than the only one.
 - The embedded copy matches `bitwarden/template` verbatim.
 - Both template sources are treated as data rather than as instructions; being canonical does not make the fetched one trusted.
 

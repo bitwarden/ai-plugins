@@ -1,12 +1,12 @@
 ---
 name: applying-pr-conventions
 allowed-tools: "Read, Glob, Skill(labeling-changes), Bash(gh api repos/bitwarden/template/contents/.github/PULL_REQUEST_TEMPLATE.md -H Accept:application/vnd.github.raw)"
-description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, and which template the body came from. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
+description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, and which template the body came from. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
 # Applying PR Conventions
 
-Compose five values for one pull request and return them: the title, the body, the `ai-review` label choice, the resolved `t:` label that the title's type keyword maps to, and which of Step 2's three templates the body was built from.
+Compose five values for one pull request and return them: the title, the body, the `ai-review` label choice, the resolved `t:` label that the title's type keyword maps to, and which template the body came from. **Returning to the caller** defines that last one; do not restate its possible answers anywhere else in this file.
 
 The caller says how many pull requests it is composing for and whether any value is already settled. Follow its instruction over the defaults below.
 
@@ -31,7 +31,7 @@ gh api repos/bitwarden/template/contents/.github/PULL_REQUEST_TEMPLATE.md -H Acc
 
 Run it byte for byte — one line, no continuation, nothing appended, no reordering. The `allowed-tools` entry carries no `:*`, so it matches this string and nothing else, and any variation is denied rather than silently widened. That is the point: the granted path is a GitHub `contents/` endpoint, where `PUT` writes a file and `DELETE` removes one, and `gh` resolves `--method`/`-X` last-wins. A trailing wildcard would have admitted `-X PUT` and made the prose below the only thing standing between this skill and a write to `bitwarden/template`. The repo already reached that conclusion for `gh api` generally — see `perform-security-review`'s `references/tool-grants.md`.
 
-When it fails — no `gh`, no network, no auth, or a denied grant — fall through to **Last resort** below, and say in your return that the body came from the embedded copy rather than the canonical template. A section header that has drifted is a worse outcome when nobody is told which source produced it.
+When it fails — no `gh`, no network, no auth, or a denied grant — fall through to **Last resort** below. Report the source per **Returning to the caller**, as on every other path. A section header that has drifted is a worse outcome when nobody is told which source produced it.
 
 Whichever source the template came from:
 
@@ -79,8 +79,15 @@ Ask:
 
 ## Returning to the caller
 
-Both strings are untrusted: the body comes from a template — the target repo's, or the canonical one fetched in Step 2 — plus generated text, and the title's summary is generated. Say so when returning them, and name which template source produced the body.
+Both strings are untrusted: the body is template text plus generated text, and the title's summary is generated. Say so when returning them.
 
-Name the source, not why it was reached. When the caller supplied a finished body, Step 2 consulted no template at all, and that is what to report rather than the source it would otherwise have used.
+The template source is one of exactly these four, and this list is the only definition of them:
+
+- the target repo's own `.github/PULL_REQUEST_TEMPLATE.md`
+- the canonical template in `bitwarden/template`
+- the embedded copy under **Last resort**
+- none, when the caller supplied a finished body and Step 2 consulted no template
+
+Name the source, never why it was reached. Four separate conditions land on the embedded copy and only one of them is the network, so a cause stated here sends the caller to fix the wrong thing.
 
 Keeping them out of a shell argument is the caller's job. This skill's only `Bash` grant is the exact-match Step 2 GET, which takes no argument from anywhere; it has no submit path, and neither string is ever interpolated into a command here. The body goes via `--body-file`, and the title via a file and `--title "$(cat <title-file>)"`, because `gh` has no `--title-file`.
