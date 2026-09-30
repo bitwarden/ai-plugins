@@ -141,14 +141,14 @@ A leaked write token permits more than any one tool uses: `write:comment.propert
 
 ## Usage
 
-The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples:
+The MCP tools are available as `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__<tool_name>`. Examples:
 
-- Read an issue: `mcp__bitwarden-atlassian__get_issue` with `issueIdOrKey: "PROJ-123"`
-- Search with JQL: `mcp__bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
-- Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
-- Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
-- Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
-- Preview a comment before posting it: `mcp__bitwarden-atlassian__add_issue_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
+- Read an issue: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue` with `issueIdOrKey: "PROJ-123"`
+- Search with JQL: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
+- Read a Confluence page: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
+- Search Confluence: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
+- Preview a ticket before creating it: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
+- Preview a comment before posting it: `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__add_issue_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
 
 ## Skills
 
@@ -176,6 +176,29 @@ Features:
 - Role-named link arguments (`blockerKey`, `blockedKey`) so dependency direction cannot be inverted
 
 Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can still draft and preview.
+
+### `assessing-jira-issue-relevance`
+
+Determines whether a Jira issue still applies to the current codebase by fetching the ticket, locating the code path it describes, and comparing current behavior against the ticket's description. Triggered by questions about whether a ticket is still relevant (e.g., "Is PM-123 still pending?", "Has this been fixed?", "Can we close this?").
+
+Features:
+
+- Fetches ticket, comments, and remote links as evidence, then verifies against the current codebase rather than trusting ticket status
+- Returns a verdict (still applicable / fixed / stale) backed by cited evidence
+- Assesses one ticket at a time; invoke iteratively for multiple tickets
+
+### `evaluating-qa-readiness`
+
+Checks a Jira ticket for the concrete, objectively-verifiable information QA needs before testing starts — testing notes, implementation notes, settled scope, feature-flag state, acceptance criteria, affected clients, and a linked PR/build (read from the Development panel) — then posts a comment on the ticket asking the developer to fill any gaps. Triggered by requests to check QA readiness (e.g., "Is PROJ-123 ready for QA?", "QA-check PROJ-123") or proactively when a ticket is being moved to Ready for QA.
+
+Features:
+
+- Reads description, custom fields, comments, and remote links as evidence, since developers often drop testing notes or flag names in a comment rather than the description
+- Distinguishes blocking gaps (testing instructions, implementation notes, feature flag) from non-blocking ones (acceptance criteria, affected clients, linked PR/build) so the verdict reflects how stuck a tester actually is
+- Posts a targeted, collegial ask addressing only the gaps found, so QA doesn't have to copy and paste it onto the ticket
+- Skips the post when the ticket already has an unanswered readiness comment raising the same gaps, or when asked for a preview only
+
+Posting requires `ATLASSIAN_JIRA_WRITE_TOKEN` (it uses the `add_issue_comment` write tool); without it the skill shows the comment as a draft for you to post by hand. The comment is the skill's only write: it never edits the ticket's fields or status.
 
 ## Requirements
 

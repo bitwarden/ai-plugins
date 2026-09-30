@@ -5,6 +5,20 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-09-28
+
+### Added
+
+- Added the `evaluating-qa-readiness` skill, which checks a Jira ticket for the information QA needs before testing (testing notes, implementation notes, settled scope, feature flag, acceptance criteria, affected clients, and a linked PR/build) and posts a comment on the ticket through `add_issue_comment` asking the developer to fill the gaps that would actually stop a tester, so QA no longer has to copy and paste the ask. The comment is plain text, skipped when an unanswered readiness comment already raises the same gaps, and shown as a draft instead when the user asks for a preview or the install has no `ATLASSIAN_JIRA_WRITE_TOKEN`.
+
+### Changed
+
+- `get_issue` now includes Jira's **Development** field as a readable summary (e.g. `Pull requests: 2 (MERGED); Branches: 1`) instead of dropping it. That field is where the GitHub integration records the PRs, branches, and commits it links automatically, which is how most PRs are attached to a ticket, so dropping it made linked PRs invisible to every skill. The field is still omitted when nothing is linked.
+
+### Fixed
+
+- README's `## Usage` examples used the unscoped `mcp__bitwarden-atlassian__<tool_name>` prefix; corrected to the plugin-scoped `mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__<tool_name>` form that Claude Code actually resolves.
+
 ## [2.7.3] - 2026-09-17
 
 ### Fixed
