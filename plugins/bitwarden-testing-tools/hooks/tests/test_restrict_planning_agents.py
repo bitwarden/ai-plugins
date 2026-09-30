@@ -23,9 +23,11 @@ MAPPER_DIR_FORM = (
 )
 SCOPER = "bitwarden-testing-tools:playwright-application-context-scoper"
 GATHERER = "bitwarden-testing-tools:playwright-test-context-gatherer"
+WRITER = "bitwarden-testing-tools:playwright-test-case-writer"
 MAPPER_SKILL = "bitwarden-testing-tools:mapping-services-under-test"
 SCOPER_SKILL = "bitwarden-testing-tools:scoping-playwright-application-context"
 GATHERER_SKILL = "bitwarden-atlassian-tools:researching-jira-issues"
+WRITER_SKILL = "bitwarden-testing-tools:writing-playwright-test-cases"
 FORKED_SKILL = "bitwarden-security-engineer:auditing-external-claude-plugins"
 SKILL_BLOCK = "skill may be invoked in this agent"
 
@@ -76,6 +78,9 @@ class AllowedTest(unittest.TestCase):
     def test_directory_form_agent_type_invokes_its_own_skill(self):
         self.assertAllowed(skill(MAPPER_SKILL, MAPPER_DIR_FORM))
 
+    def test_writer_invokes_its_own_skill(self):
+        self.assertAllowed(skill(WRITER_SKILL, WRITER))
+
     def test_own_skill_with_leading_slash_and_spaces(self):
         self.assertAllowed(skill("  /" + MAPPER_SKILL + " "))
 
@@ -124,6 +129,9 @@ class BlockedTest(unittest.TestCase):
     def test_non_utf8_skill_name_is_blocked(self):
         data = skill(FORKED_SKILL).encode("utf-8").replace(b"auditing", b"\xff")
         self.assertBlocked(data)
+
+    def test_writer_foreign_forked_skill_is_blocked(self):
+        self.assertBlocked(skill(FORKED_SKILL, WRITER))
 
     def test_foreign_forked_skill_is_blocked(self):
         self.assertBlocked(skill(FORKED_SKILL))
