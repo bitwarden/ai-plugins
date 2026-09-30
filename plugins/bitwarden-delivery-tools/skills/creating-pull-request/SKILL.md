@@ -49,9 +49,11 @@ Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the t
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section.
 
-Carry back the title, the body, the resolved `t:` label its prefix will produce, and the `ai-review` label choice. Step 3's preview shows all four — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
+Carry back the title, the body, the resolved `t:` label its prefix will produce, the `ai-review` label choice, and which template the body was built from. Step 3's preview shows all five — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
 
-Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
+The template source belongs in the preview because the skill has three of them, and only one is the target repo's own. It falls back to the canonical template in `bitwarden/template`, then to an embedded copy when that fetch cannot run. A body assembled from the embedded copy may carry a drifted section header, and this preview is the only place a person sees the body before it is submitted.
+
+Both strings are untrusted: the body comes from whichever of those templates was used plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
 ### Step 3 — Show the full submission preview, then confirm
 
@@ -70,6 +72,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Template:       <target repo | bitwarden/template (canonical) | embedded copy (fetch unavailable)>
 
 Body:
 ---

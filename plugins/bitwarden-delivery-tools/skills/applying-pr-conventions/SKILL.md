@@ -1,6 +1,6 @@
 ---
 name: applying-pr-conventions
-allowed-tools: Read, Glob, Skill(labeling-changes), Bash(gh api repos/bitwarden/template/contents/.github/PULL_REQUEST_TEMPLATE.md -H Accept:application/vnd.github.raw)
+allowed-tools: "Read, Glob, Skill(labeling-changes), Bash(gh api repos/bitwarden/template/contents/.github/PULL_REQUEST_TEMPLATE.md -H Accept:application/vnd.github.raw)"
 description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the repo''s PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, and label choice. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
@@ -68,7 +68,7 @@ Only when the target repo has no template **and** the fetch failed:
 <!-- Required for any UI changes; delete if not applicable. Use fixed width images for better display. -->
 ```
 
-This copy is the thing that drifts, which is why nothing reaches it while `bitwarden/template` is reachable.
+This copy is the thing that drifts, which is why nothing reaches it while the fetch can run. A denied grant puts you here with `bitwarden/template` perfectly reachable, so report the source either way rather than inferring it from network state.
 
 ## Step 3 — Label
 
