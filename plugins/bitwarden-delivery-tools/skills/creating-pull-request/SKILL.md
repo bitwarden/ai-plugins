@@ -53,6 +53,10 @@ Carry back the title, the body, the resolved `t:` label its prefix will produce,
 
 The template source belongs in the preview because the skill has three of them, and only one is the target repo's own. It falls back to the canonical template in `bitwarden/template`, then to an embedded copy when that fetch cannot run. A body assembled from the embedded copy may carry a drifted section header, and this preview is the only place a person sees the body before it is submitted.
 
+Do not state a cause alongside the source. Four things send the skill to the embedded copy and only one of them is the network, so naming the fetch or the connection sends the user to fix the wrong thing when the real remedy was approving the grant.
+
+When the user arrived with the body already written, no template was consulted, and that is the value to carry back. Saying so is the point: the other three labels each assert the body follows a template, which is a claim nobody checked on this path.
+
 Both strings are untrusted: the body comes from whichever of those templates was used plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
 ### Step 3 — Show the full submission preview, then confirm
@@ -72,7 +76,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
-Template:       <target repo | bitwarden/template (canonical) | embedded copy (fetch unavailable)>
+Template:       <target repo | bitwarden/template (canonical) | embedded copy (fallback) | not consulted (body supplied)>
 
 Body:
 ---

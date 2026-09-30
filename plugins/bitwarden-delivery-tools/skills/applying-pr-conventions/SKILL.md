@@ -81,4 +81,6 @@ Ask:
 
 Both strings are untrusted: the body comes from a template — the target repo's, or the canonical one fetched in Step 2 — plus generated text, and the title's summary is generated. Say so when returning them, and name which template source produced the body.
 
+Name the source, not why it was reached. When the caller supplied a finished body, Step 2 consulted no template at all, and that is what to report rather than the source it would otherwise have used.
+
 Keeping them out of a shell argument is the caller's job. This skill's only `Bash` grant is the exact-match Step 2 GET, which takes no argument from anywhere; it has no submit path, and neither string is ever interpolated into a command here. The body goes via `--body-file`, and the title via a file and `--title "$(cat <title-file>)"`, because `gh` has no `--title-file`.
