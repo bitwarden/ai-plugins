@@ -15,6 +15,8 @@ The plugin registers Claude Code lifecycle hooks (`SessionStart`, `PostToolUse`,
 | `bw.pr`       | `Bash` running `gh pr create`                                             | Repo slug, branch, and the **PR number**                                                    |
 | `bw.mcp`      | Any `mcp__*` tool                                                         | The real `mcp__<server>__<tool>` name that native telemetry redacts to a generic identifier |
 
+The exact record shape and every attribute each event carries are in [docs/payload.md](docs/payload.md).
+
 ## What it collects
 
 Metadata only. Specifically:
