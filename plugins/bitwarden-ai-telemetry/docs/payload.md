@@ -16,12 +16,18 @@ The envelope is identical for every event. Only `body` and `attributes` vary.
             "key": "service.name",
             "value": { "stringValue": "bitwarden-ai-telemetry" }
           },
-          { "key": "service.version", "value": { "stringValue": "1.5.0" } }
+          {
+            "key": "service.version",
+            "value": { "stringValue": "<plugin version>" }
+          }
         ]
       },
       "scopeLogs": [
         {
-          "scope": { "name": "bw.telemetry.hooks", "version": "1.5.0" },
+          "scope": {
+            "name": "bw.telemetry.hooks",
+            "version": "<plugin version>"
+          },
           "logRecords": [
             {
               "timeUnixNano": "1790000000000000000",
