@@ -1,7 +1,7 @@
 ---
 name: committing-changes
 description: Git commit conventions and workflow for Bitwarden repositories. Use when committing code, writing commit messages, or preparing changes for commit. Triggered by "commit", "git commit", "commit message", "prepare commit", "stage changes".
-allowed-tools: Skill(labeling-changes)
+allowed-tools: Skill(labeling-changes), Skill(applying-security-disclosure-policy)
 ---
 
 # Git Commit Conventions
@@ -9,6 +9,20 @@ allowed-tools: Skill(labeling-changes)
 ## Branch Check
 
 Resolve the repository's default branch from the remote rather than assuming `main`. If the current branch is the default, ask for a branch name before staging or committing. Offer to suggest one and confirm before switching. If the default branch cannot be resolved, say so and confirm the current branch is intended before staging.
+
+## Security-Sensitive Changes
+
+Before writing the message, invoke `Skill(applying-security-disclosure-policy)` for this change. Say you are composing a commit message, and pass the current branch name and any ticket key you have. Skip the call when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot. A settled `Yes` must come with its wording rules; if it doesn't, invoke the skill anyway.
+
+Branch on the `Verdict:` line:
+
+- **`Verdict: Stop`** — the policy couldn't be fetched, or came back without usable rules. Stop, pass on the remedy it gives, and don't write the message from memory.
+- **`Verdict: Yes`** — apply its wording rules to the summary, the body, and any ticket reference, then show the proposed message to the author for approval before committing. Skip the approval only when the caller says the author already approved this wording pattern.
+- **`Verdict: No`** — write the message as usual.
+
+The verdict holds for every commit on the change, followup commits included.
+
+---
 
 ## Commit Message Format
 
@@ -44,7 +58,7 @@ Ambiguous cases — choosing between similar types:
 
 ### Followup Commits
 
-Only the first commit on a branch needs the full format (ticket prefix, type keyword, body). Subsequent commits can use a short, descriptive summary with no prefix or body required.
+Only the first commit on a branch needs the full format (ticket prefix, type keyword, body). Subsequent commits can use a short, descriptive summary with no prefix or body required. When the disclosure policy applied to the change, its wording rules still govern that summary.
 
 ```
 Update error handling in login flow

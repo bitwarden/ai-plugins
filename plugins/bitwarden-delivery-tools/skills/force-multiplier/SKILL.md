@@ -3,7 +3,7 @@ name: force-multiplier
 description: Apply one intent across many targets at once — a fleet of repositories across the Bitwarden ecosystem, or many projects inside a monorepo — as N consistent, idempotent, reviewable draft PRs.
 when_to_use: Use when the user wants the same change made everywhere — phrasings like "across all repos", "every repo", "for every project", "fleet-wide", "org-wide", "enterprise-wide", "company-wide", "in bulk", "mass update", or "roll this out everywhere".
 argument-hint: "<natural-language intent> [--scope multi-repo|monorepo] [--dry-run] [--no-pilot]"
-allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Agent, Skill(perform-preflight), Skill(committing-changes), Skill(applying-pr-conventions), Skill(labeling-changes)"
+allowed-tools: "Bash, Read, Write, Edit, Glob, Grep, Agent, Skill(perform-preflight), Skill(committing-changes), Skill(applying-pr-conventions), Skill(labeling-changes), Skill(applying-security-disclosure-policy)"
 ---
 
 # Force Multiplier
@@ -55,8 +55,17 @@ Force Multiplier is the **cross-target** layer. Per-target intelligence lives in
 - `Skill(perform-preflight)` — the quality gate before any commit.
 - `Skill(committing-changes)` — the commit message format.
 - `Skill(applying-pr-conventions)` — the title (including the type keyword that drives the `t:` label), the template body, and the `ai-review` label. It invokes `labeling-changes` to pick the type.
+- `Skill(applying-security-disclosure-policy)` — whether the campaign is a security fix and, if so, the disclosure policy's wording rules. `committing-changes` and `applying-pr-conventions` both invoke it unless handed a settled verdict.
 
-Of these, `applying-pr-conventions` is **interactive** — it proposes a title and asks the label question, which you cannot answer dozens of times. Resolve it at **PILOT**: invoke it once and tell it the title and label are locked for the whole campaign, so it proposes and asks once, using the pilot's ticket key on every target. Then replicate that confirmed pattern non-interactively across the fan-out as draft PRs. It composes conventions and nothing else, so it neither reviews nor submits, and there is no gate to suppress.
+Of these, `applying-pr-conventions` is **interactive** — it proposes a title and asks the label question, which you cannot answer dozens of times. Resolve it at **PILOT**: invoke it once and tell it the title and label are locked for the whole campaign, so it proposes and asks once, using the pilot's ticket key on every target. Then replicate that confirmed pattern non-interactively across the fan-out as draft PRs. It composes conventions and nothing else, so it neither reviews nor submits, and there is no code-review gate to suppress.
+
+`applying-security-disclosure-policy` is interactive for the same reason: it may ask the author whether the policy applies, and a security fix needs the author's approval of the wording. Resolve it at **PILOT** too, once for the whole campaign:
+
+- Invoke it before `applying-pr-conventions`, and say it is composing both the commit message and the PR title and body.
+- On `Yes`, have the author approve the pilot's commit message and PR wording once.
+- Record the settled verdict in `pr_spec.disclosure`, and on `Yes` its wording rules and the author's approval. Pass all of it to `applying-pr-conventions` at the pilot, and to `committing-changes` on the pilot and every target, so neither asks nor fetches again.
+- On `Stop` (the policy couldn't be fetched, or had no usable rules), stop the campaign. The pilot gets no commit message, title, or body, nothing composes them another way, and nothing fans out. Report the reason and remedy.
+- When `--no-pilot` downgrades the pilot, settle the verdict the same way before the first chunk. The campaign never enters FAN-OUT without one.
 
 ## Safety defaults (non-negotiable unless explicitly overridden)
 

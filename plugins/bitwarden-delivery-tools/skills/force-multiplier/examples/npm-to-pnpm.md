@@ -2,7 +2,7 @@
 
 A worked campaign showing an **agentic** recipe applied to a non-trivial per-repo migration. Read it for shape, then generalize.
 
-> This example shows campaign _shape_ only. The production npm→pnpm migration lives in [PM-35701] — Corepack pinning, integrity-hash format, and the VULN-545 acceptance conditions stay in the ticket, not in the skill.
+> This example shows campaign _shape_ only. The production npm→pnpm migration lives in [PM-35701] — Corepack pinning, integrity-hash format, and the VULN-545 acceptance conditions stay in the ticket, not in the skill. The `disclosure` verdict below is illustrative: a campaign whose ticket links a `VULN-*` issue settles `Yes` at PILOT.
 
 [PM-35701]: https://bitwarden.atlassian.net/browse/PM-35701
 
@@ -31,6 +31,8 @@ pr_spec:
   body: "<filled from the repo's PULL_REQUEST_TEMPLATE.md>"
   labels: ["ai-review"]
   draft: true
+  disclosure:
+    verdict: "No"
 safety_policy:
   max_targets_per_run: 10
   destructive: false # replaces a lockfile; the old one is recoverable via git history
