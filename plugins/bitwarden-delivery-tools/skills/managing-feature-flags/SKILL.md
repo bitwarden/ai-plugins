@@ -1,7 +1,7 @@
 ---
 name: managing-feature-flags
 description: 'Bitwarden''s feature-flag conventions and lifecycle — how server and clients evaluate flags, how to name and scope them, and how a release flag progresses from creation to cleanup. Use when deciding whether work needs a flag, gating a new code path, naming a flag, planning a rollout, or removing a launched one. Triggered by "feature flag", "flag this", "put it behind a flag", "LaunchDarkly", "IFeatureService", "FeatureFlagKeys", "RequireFeature", "gradual rollout", "flag cleanup", "kill switch".'
-allowed-tools: Skill, Read, Glob, Grep, WebFetch(domain:contributing.bitwarden.com)
+allowed-tools: Read, Glob, Grep, WebFetch(domain:contributing.bitwarden.com), Skill(launchdarkly:launchdarkly-flag-discovery), Skill(launchdarkly:launchdarkly-flag-create), Skill(launchdarkly:launchdarkly-flag-targeting), Skill(launchdarkly:launchdarkly-flag-cleanup), Skill(launchdarkly:launchdarkly-metric-choose), Skill(launchdarkly:launchdarkly-metric-create)
 ---
 
 # Managing Feature Flags
@@ -69,7 +69,14 @@ Cleanup means removing the flag check and hardcoding the winning variation, then
 
 ## Optional: the LaunchDarkly Plugin
 
-The third-party [`launchdarkly`](https://github.com/launchdarkly/ai-tooling) plugin adds skills that drive LaunchDarkly over MCP. They require **both** the plugin installed and its hosted MCP server configured ([install](https://mcp.launchdarkly.com/mcp/launchdarkly/install)). Degrade gracefully if either is absent — everything above stands on its own, so never stop over a missing LaunchDarkly plugin.
+The third-party [`launchdarkly`](https://github.com/launchdarkly/ai-tooling) plugin adds skills that drive LaunchDarkly over MCP. They require **both** the plugin installed and its hosted MCP server configured ([install](https://mcp.launchdarkly.com/mcp/launchdarkly/install)).
+
+Everything above stands on its own, so never stop over a missing LaunchDarkly plugin. Two failure modes, one response:
+
+- **Plugin absent** — the `Skill(launchdarkly:…)` invocation itself fails.
+- **Plugin present, MCP server not configured** — the skill loads, then its LaunchDarkly calls fail.
+
+Either way: do not retry, and do not treat it as a blocker. Finish the code-side work, then tell the user which LaunchDarkly step is outstanding and that its owner has to do it by hand in the LaunchDarkly UI.
 
 | Skill                                             | Use for                                                       |
 | ------------------------------------------------- | ------------------------------------------------------------- |

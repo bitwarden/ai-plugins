@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `AGENT.md`: `managing-feature-flags` (`bitwarden-delivery-tools`) added to Cross-Plugin Integration for flag placement, rollout, and retirement decisions.
+- `AGENT.md`: `managing-feature-flags` (`bitwarden-delivery-tools`) added to Cross-Plugin Integration for flag placement, rollout, and retirement decisions, as long as `bitwarden-delivery-tools` 3.4.0+ is installed.
+- `README.md`: Cross-Plugin Integration table row for `bitwarden-delivery-tools` names the new skill.
 
 ## [3.0.1] - 2026-08-08
 
