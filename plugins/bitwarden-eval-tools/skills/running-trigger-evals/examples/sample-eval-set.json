@@ -1,0 +1,18 @@
+[
+  {
+    "query": "package this up into a draft pr",
+    "should_trigger": true
+  },
+  {
+    "query": "the feat/passkeys branch is done, ship it for review",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the status of my open PRs right now?",
+    "should_trigger": false
+  },
+  {
+    "query": "explain how pull requests work in the bitwarden org, I'm new here",
+    "should_trigger": false
+  }
+]

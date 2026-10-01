@@ -1,0 +1,58 @@
+[
+  {
+    "query": "I just edited the description on my pdf-processing skill, can you confirm triggering hasn't regressed before I merge?",
+    "should_trigger": true
+  },
+  {
+    "query": "This skill is brand new and doesn't have an eval set yet. Can you set one up and record a baseline for it?",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you run a trigger eval on this skill to make sure the description fires on the right prompts?",
+    "should_trigger": true
+  },
+  {
+    "query": "Check the trigger rate for my skill and compare it against the baseline we recorded last week.",
+    "should_trigger": true
+  },
+  {
+    "query": "I changed the when_to_use frontmatter on this skill, did that break triggering on the phrasings it used to catch?",
+    "should_trigger": true
+  },
+  {
+    "query": "Benchmark this skill's triggering against its last recorded baseline before I open the PR.",
+    "should_trigger": true
+  },
+  {
+    "query": "Test whether my skill still fires on the prompts it's supposed to catch and stays silent on the ones it shouldn't.",
+    "should_trigger": true
+  },
+  {
+    "query": "Once my skill triggers, walk through its steps and confirm the output matches the documented format.",
+    "should_trigger": false
+  },
+  {
+    "query": "Does my skill actually do what its description promises once it's invoked?",
+    "should_trigger": false
+  },
+  {
+    "query": "Clean up the wording in this skill's description so it reads more naturally, I don't need it tested.",
+    "should_trigger": false
+  },
+  {
+    "query": "Walk me through building a brand-new skill from scratch, including the SKILL.md and any scripts it needs.",
+    "should_trigger": false
+  },
+  {
+    "query": "What's the difference between a trigger eval and a behavior eval?",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the JSON parsing bug in my plugin's PreToolUse hook script.",
+    "should_trigger": false
+  },
+  {
+    "query": "Bump the version number for this plugin and add a changelog entry for the release.",
+    "should_trigger": false
+  }
+]
