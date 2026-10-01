@@ -22,6 +22,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-testing-tools](plugins/bitwarden-testing-tools/)         | 1.2.0   | Testing tools for analyzing and improving test quality across Bitwarden's repositories.                                                                     |
 | [claude-config-validator](plugins/claude-config-validator/)         | 2.0.2   | Validates Claude Code configuration files for security, structure, and quality                                                                              |
 | [claude-retrospective](plugins/claude-retrospective/)               | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                  |
+| [i-have-adhd](https://github.com/ayghri/i-have-adhd)                | 0.3.0   | External plugin, pinned to commit `839872f` — ADHD-friendly output shaping: action first, numbered steps, no tangents                                       |
 
 ## Usage
 
