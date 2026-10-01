@@ -108,6 +108,26 @@ _raw_collector = os.environ.get("BW_TELEMETRY_OTLP")
 COLLECTOR = _raw_collector if _raw_collector and _is_allowed_collector(_raw_collector) else None
 
 
+def _read_plugin_version(path):
+    """The `version` from the plugin's own manifest, or "".
+
+    Read from the manifest rather than hardcoded so the version on the wire
+    can never drift from the version that shipped. Any failure yields "" and
+    the version is omitted from the record rather than the record dropped.
+    """
+    try:
+        with open(path, encoding="utf-8") as fh:
+            version = json.load(fh).get("version")
+        return version if isinstance(version, str) and version else ""
+    except Exception:
+        return ""
+
+
+PLUGIN_VERSION = _read_plugin_version(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir,
+    ".claude-plugin", "plugin.json"))
+
+
 def _config_path():
     """Where Claude Code keeps its account state: `.claude.json` under
     CLAUDE_CONFIG_DIR when that is set, otherwise in the home directory."""
@@ -159,10 +179,17 @@ def emit(body_name, attrs):
         attrs["user.email"] = _read_user_email()
     kv = [{"key": k, "value": {"stringValue": str(v)}}
           for k, v in attrs.items() if v]
+    # The version rides on the resource and the scope, where native Claude
+    # Code telemetry puts its own, so both streams answer "which build sent
+    # this" from the same place.
+    resource = [{"key": "service.name", "value": {"stringValue": "bitwarden-ai-telemetry"}}]
+    scope = {"name": "bw.telemetry.hooks"}
+    if PLUGIN_VERSION:
+        resource.append({"key": "service.version", "value": {"stringValue": PLUGIN_VERSION}})
+        scope["version"] = PLUGIN_VERSION
     payload = {"resourceLogs": [{
-        "resource": {"attributes": [
-            {"key": "service.name", "value": {"stringValue": "bitwarden-ai-telemetry"}}]},
-        "scopeLogs": [{"scope": {"name": "bw.telemetry.hooks"},
+        "resource": {"attributes": resource},
+        "scopeLogs": [{"scope": scope,
                        "logRecords": [{"timeUnixNano": str(time.time_ns()),
                                        "body": {"stringValue": body_name},
                                        "attributes": kv}]}]}]}
