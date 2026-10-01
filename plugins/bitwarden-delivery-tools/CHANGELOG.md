@@ -5,6 +5,17 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-10-01
+
+### Added
+
+- `managing-feature-flags`: Bitwarden's feature-flag conventions and lifecycle — when to flag, server-side evaluation via `Bitwarden.Server.Sdk.Features`, client reads from `/config`, release vs operational categories, rollout, and cleanup. Hands off to the optional third-party `launchdarkly` plugin when it is installed.
+
+### Changed
+
+- `architecting-solutions`: added a "Feature-flag new work by default" principle that defers to `managing-feature-flags`, plus a Red Flag for feature work landing without a warranted flag.
+- Plugin description now names feature flags in scope.
+
 ## [3.3.0] - 2026-09-25
 
 ### Added
