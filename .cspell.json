@@ -124,6 +124,8 @@
     "resolutiondate",
     "retarget",
     "ripgreprc",
+    "rollout",
+    "rollouts",
     "rustdoc",
     "sarif",
     "sast",
