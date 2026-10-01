@@ -6,8 +6,8 @@ Sends one POST per call to the collector configured via BW_TELEMETRY_OTLP
 session — every error is swallowed.
 
 Errors are swallowed but no longer discarded: each one is recorded as a fault,
-and `flush_warning` surfaces at most one throttled `systemMessage` so a person
-whose AI usage is going unrecorded finds out. Calling it is optional; a hook
+and `flush_warning` surfaces at most one throttled `systemMessage`, echoed as a
+desktop notification, so a person whose AI usage is going unrecorded finds out. Calling it is optional; a hook
 that never calls it behaves exactly as before.
 """
 import json
@@ -226,9 +226,13 @@ def _fault_message(kind, detail):
 def flush_warning(out=None):
     """Surface at most one throttled warning for this process's faults.
 
-    Writes a single `{"systemMessage": ...}` object, which Claude Code shows
-    to the user as a warning. Nothing blocks: PostToolUse runs after the tool
-    has already completed, and the caller still exits 0.
+    Writes a single `{"systemMessage": ..., "terminalSequence": ...}` object.
+    Claude Code shows the systemMessage as a warning, but in dim text that is
+    easy to scroll past and cannot be styled, so the same text also goes out
+    as an OSC 9 desktop notification. OSC 9 is on the terminalSequence
+    allowlist, and a terminal that doesn't support it ignores it. Nothing
+    blocks: PostToolUse runs after the tool has already completed, and the
+    caller still exits 0.
 
     Throttled per fault class via `_warn_state_path`, and deliberately silent
     when that state cannot be written — warning on every edit forever is worse
@@ -259,6 +263,10 @@ def flush_warning(out=None):
         except Exception:
             return
         stream = out if out is not None else sys.stdout
-        stream.write(json.dumps({"systemMessage": _fault_message(kind, detail)}))
+        message = _fault_message(kind, detail)
+        stream.write(json.dumps({
+            "systemMessage": message,
+            "terminalSequence": f"\x1b]9;{message}\x07",
+        }))
     except Exception:
         return  # fail-open, always

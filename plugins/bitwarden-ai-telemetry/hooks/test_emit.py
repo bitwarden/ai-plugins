@@ -327,10 +327,18 @@ class WarningSurfaceTest(unittest.TestCase):
     def test_nothing_printed_without_a_fault(self):
         self.assertEqual(self._flush(), "")
 
-    def test_fault_prints_only_a_system_message(self):
+    def test_fault_prints_a_system_message_and_a_notification(self):
         self._fault()
         parsed = json.loads(self._flush())
-        self.assertEqual(list(parsed), ["systemMessage"])
+        self.assertEqual(sorted(parsed), ["systemMessage", "terminalSequence"])
+
+    def test_notification_is_osc_9_carrying_the_message(self):
+        # OSC 9 is on Claude Code's terminalSequence allowlist; anything else
+        # in the value makes it drop the whole field.
+        self._fault()
+        parsed = json.loads(self._flush())
+        self.assertEqual(parsed["terminalSequence"],
+                         "\x1b]9;" + parsed["systemMessage"] + "\x07")
 
     def test_message_says_telemetry_is_not_recorded(self):
         self._fault()
