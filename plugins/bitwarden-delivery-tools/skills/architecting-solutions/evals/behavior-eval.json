@@ -1,7 +1,7 @@
 {
   "skill_name": "architecting-solutions",
   "eval_type": "behavior",
-  "purpose": "Prove the `architecting-solutions` skill changes the design output in the two Bitwarden-specific places the skill is load-bearing: (a) the ADR check — does the model consult `https://contributing.bitwarden.com/architecture/adr/` before recommending, and does it handle the ADR's three real branches (ADR applies, ADR conflicts with in-place code, no ADR governs) correctly; and (b) the six Bitwarden-Specific Principles — multi-client reality, dual data-access parity across Dapper and EF, open-source stewardship, self-hosted deployment constraint, V±2 client compatibility, and additive-only changes on existing endpoints. Each case is designed so a design that misses the constraint would look reasonable on its face; the impact-vs-baseline delta reflects whether the skill reliably pulls the Bitwarden constraint into the model's reasoning.",
+  "purpose": "Prove the `architecting-solutions` skill changes the design output in the two Bitwarden-specific places the skill is load-bearing: (a) the ADR check — does the model consult `https://contributing.bitwarden.com/architecture/adr/` before recommending, and does it handle the ADR's three real branches (ADR applies, ADR conflicts with in-place code, no ADR governs) correctly; and (b) the seven Bitwarden-Specific Principles — feature-flagging new work, multi-client reality, dual data-access parity across Dapper and EF, open-source stewardship, self-hosted deployment constraint, V±2 client compatibility, and additive-only changes on existing endpoints. Each case is designed so a design that misses the constraint would look reasonable on its face; the impact-vs-baseline delta reflects whether the skill reliably pulls the Bitwarden constraint into the model's reasoning.",
   "evals": [
     {
       "id": 1,
@@ -109,6 +109,18 @@
         "Cites the 'no formal API versioning' / additive-only-changes principle explicitly (not just generic 'be backwards-compatible')",
         "Proposes a concrete alternative that keeps older clients working: server-side default, optional field with fallback, new endpoint, or client-capability gating",
         "Does NOT accept 'just require the newer client' — V±2 and no formal versioning together rule this out"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "feature-flag-placement-new-work",
+      "prompt": "We're adding org-scoped export restrictions: a new policy the server enforces on the export endpoint, plus a banner in web and browser telling the user why export is blocked. Server work is about a week, clients maybe three days after that. I want to merge the server piece to main as soon as it's green so it doesn't rot on a branch, then land the clients. Does that plan hold up?",
+      "expected_output": "Identifies that merging incomplete work to mainline across server and clients is exactly the case that calls for a feature flag, and does not let the plan proceed unflagged. Raises flag placement as an up-front design decision rather than an implementation detail, concluding the flag belongs server-side with clients reading it from `/config`. Hands off to `managing-feature-flags` for the conventions rather than restating them.",
+      "expectations": [
+        "Flags the plan as needing a feature flag, rather than endorsing merging the server piece to main unflagged",
+        "Treats flag placement (server-side vs client-side) as an up-front design decision and concludes the flag is server-side, with clients consuming it",
+        "Hands off to `Skill(managing-feature-flags)` for the naming, evaluation, and lifecycle conventions instead of restating them",
+        "Does not invent a specific rollout percentage schedule, which is a release decision rather than an architecture one"
       ]
     }
   ]

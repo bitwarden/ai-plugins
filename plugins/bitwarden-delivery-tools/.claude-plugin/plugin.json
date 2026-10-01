@@ -18,6 +18,8 @@
     "pr-conventions",
     "preflight",
     "labeling",
-    "jira"
+    "jira",
+    "feature-flags",
+    "launchdarkly"
   ]
 }

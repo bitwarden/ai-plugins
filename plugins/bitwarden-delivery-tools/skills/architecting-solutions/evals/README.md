@@ -2,7 +2,7 @@
 
 Behavior test cases for the `architecting-solutions` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds nine cases targeting the Bitwarden-specific parts of the skill.
+`behavior-eval.json` holds ten cases targeting the Bitwarden-specific parts of the skill.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs — every expectation is graded independently for both configurations.
 
