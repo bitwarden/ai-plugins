@@ -70,6 +70,40 @@ For detailed guidance on building each component, see the [Plugin Reference](htt
 5. Add any domain-specific terms to `.cspell.json`
 6. [Validate your plugin](#validating-changes) before submitting
 
+## Adding an External Plugin
+
+An external plugin lives in someone else's repository and is referenced from this marketplace rather than vendored under `plugins/`. Give it an object `source` of type `github` and pin it to a commit:
+
+```json
+{
+  "name": "their-plugin-name",
+  "source": {
+    "source": "github",
+    "repo": "their-org/their-plugin-name",
+    "ref": "main",
+    "sha": "<full 40-character commit SHA>"
+  },
+  "version": "1.0.0",
+  "category": "external",
+  "description": "Brief description of the plugin",
+  "homepage": "https://github.com/their-org/their-plugin-name",
+  "license": "MIT"
+}
+```
+
+Rules for these entries:
+
+- **Always pin `sha`.** Never track a branch tip. Claude Code checks out `sha` when both `ref` and `sha` are set, so the pin holds even if the branch or tag disappears upstream.
+- **Pick a commit with green upstream CI**, not just the newest one. Record which upstream checks passed in the pull request description.
+- **`"category": "external"` is required.** The [Audit External Claude Plugin](.github/workflows/audit-external-plugin.yml) workflow diffs `marketplace.json` for `external` entries whose `source.sha` is new or changed, and audits each one with the `bitwarden-security-engineer:auditing-external-claude-plugins` skill, posting the report to the pull request. Omitting the category silently skips that security gate.
+- **Set the display fields on the entry** (`description`, `version`, `author`, `homepage`, `license`). Claude Code cannot read an external plugin's own `plugin.json` before install, so these are all a user sees when browsing the marketplace.
+- **Add a README catalog row** whose link points at the upstream repository, with the pinned plugin's version.
+- There is no `plugins/<name>/` directory, so no `CHANGELOG.md` and no version bump of our own. The entry's `version` mirrors the upstream `plugin.json` at the pinned commit.
+
+To move an external plugin to a newer upstream commit, change `source.sha` (and `version`, plus the README row, if upstream's version changed). That re-triggers the audit workflow.
+
+Note that `validate-marketplace.sh` in `bitwarden/gh-actions` assumes every `source` is a `./plugins/...` string, so it reports two errors for each external entry: `source should start with './plugins/'` and `has an invalid or missing source directory`. No workflow in this repository runs that script, so CI is unaffected; ignore those two errors for `external` entries when running it locally.
+
 ## Plugin Requirements
 
 All plugins must include:
