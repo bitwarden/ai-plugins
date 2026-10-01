@@ -5,6 +5,19 @@ All notable changes to the bitwarden-ai-telemetry plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-01
+
+### Added
+
+- The plugin's version on every record, as `service.version` on the resource and `version` on the scope, where native Claude Code telemetry carries its own. Without it a record can't be tied to the hook behavior that produced it, which matters whenever a fix changes what an event means.
+- A payload reference covering the OTLP envelope and the attributes on each event family, so anyone querying or reviewing the telemetry can see exactly what leaves the machine without reading the hooks.
+
+## [1.4.0] - 2026-10-01
+
+### Added
+
+- A desktop notification alongside the "telemetry is not being recorded" warning. Claude Code renders hook warnings in dim text that can't be styled and is easy to miss, and a lost connection to the collector should not go unnoticed for an hour.
+
 ## [1.3.0] - 2026-09-23
 
 ### Added

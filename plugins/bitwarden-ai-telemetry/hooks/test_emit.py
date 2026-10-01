@@ -327,10 +327,18 @@ class WarningSurfaceTest(unittest.TestCase):
     def test_nothing_printed_without_a_fault(self):
         self.assertEqual(self._flush(), "")
 
-    def test_fault_prints_only_a_system_message(self):
+    def test_fault_prints_a_system_message_and_a_notification(self):
         self._fault()
         parsed = json.loads(self._flush())
-        self.assertEqual(list(parsed), ["systemMessage"])
+        self.assertEqual(sorted(parsed), ["systemMessage", "terminalSequence"])
+
+    def test_notification_is_osc_9_carrying_the_message(self):
+        # OSC 9 is on Claude Code's terminalSequence allowlist; anything else
+        # in the value makes it drop the whole field.
+        self._fault()
+        parsed = json.loads(self._flush())
+        self.assertEqual(parsed["terminalSequence"],
+                         "\x1b]9;" + parsed["systemMessage"] + "\x07")
 
     def test_message_says_telemetry_is_not_recorded(self):
         self._fault()
@@ -494,6 +502,68 @@ class UserEmailTest(unittest.TestCase):
             emit_module.emit("bw.session", {"event.name": "bw.session"})
             read_email.assert_not_called()
             urlopen.assert_not_called()
+
+
+class PluginVersionTest(unittest.TestCase):
+    """Native Claude Code telemetry carries its version on the resource and
+    the scope, so hook records carry the plugin's version the same way and a
+    consumer can tell which hook behavior produced a record."""
+
+    def setUp(self):
+        emit_module.reset_faults()
+        self.tmp = tempfile.mkdtemp(prefix="plugin_root_")
+        self._collector = emit_module.COLLECTOR
+        emit_module.COLLECTOR = "https://ait.bitwarden.pw/v1/logs"
+
+    def tearDown(self):
+        emit_module.COLLECTOR = self._collector
+        emit_module.reset_faults()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _write_manifest(self, content):
+        path = os.path.join(self.tmp, "plugin.json")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(content if isinstance(content, str) else json.dumps(content))
+        return path
+
+    def _body(self, version):
+        with mock.patch.object(emit_module, "PLUGIN_VERSION", version), \
+                mock.patch("urllib.request.urlopen") as urlopen:
+            emit_module.emit("bw.session", {"event.name": "bw.session"})
+            return json.loads(urlopen.call_args[0][0].data)
+
+    def test_version_is_on_the_resource_and_the_scope(self):
+        body = self._body("1.4.0")
+        resource = body["resourceLogs"][0]["resource"]["attributes"]
+        scope = body["resourceLogs"][0]["scopeLogs"][0]["scope"]
+        self.assertIn({"key": "service.version", "value": {"stringValue": "1.4.0"}},
+                      resource)
+        self.assertEqual(scope["version"], "1.4.0")
+
+    def test_unknown_version_is_omitted_not_blank(self):
+        body = self._body("")
+        resource = body["resourceLogs"][0]["resource"]["attributes"]
+        scope = body["resourceLogs"][0]["scopeLogs"][0]["scope"]
+        self.assertNotIn("service.version", [a["key"] for a in resource])
+        self.assertNotIn("version", scope)
+
+    def test_version_is_read_from_the_manifest(self):
+        path = self._write_manifest({"name": "bitwarden-ai-telemetry", "version": "9.8.7"})
+        self.assertEqual(emit_module._read_plugin_version(path), "9.8.7")
+
+    def test_unreadable_manifest_gives_no_version(self):
+        missing = os.path.join(self.tmp, "absent.json")
+        self.assertEqual(emit_module._read_plugin_version(missing), "")
+        for content in ("{not json", ["1.0.0"], {"version": 1}, {"version": ""}, {}):
+            path = self._write_manifest(content)
+            self.assertEqual(emit_module._read_plugin_version(path), "", content)
+
+    def test_shipped_manifest_matches_module_version(self):
+        manifest = os.path.join(os.path.dirname(os.path.abspath(emit_module.__file__)),
+                                os.pardir, ".claude-plugin", "plugin.json")
+        with open(manifest, encoding="utf-8") as fh:
+            expected = json.load(fh)["version"]
+        self.assertEqual(emit_module.PLUGIN_VERSION, expected)
 
 
 if __name__ == "__main__":

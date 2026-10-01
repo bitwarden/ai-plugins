@@ -6,8 +6,8 @@ Sends one POST per call to the collector configured via BW_TELEMETRY_OTLP
 session — every error is swallowed.
 
 Errors are swallowed but no longer discarded: each one is recorded as a fault,
-and `flush_warning` surfaces at most one throttled `systemMessage` so a person
-whose AI usage is going unrecorded finds out. Calling it is optional; a hook
+and `flush_warning` surfaces at most one throttled `systemMessage`, echoed as a
+desktop notification, so a person whose AI usage is going unrecorded finds out. Calling it is optional; a hook
 that never calls it behaves exactly as before.
 """
 import json
@@ -108,6 +108,26 @@ _raw_collector = os.environ.get("BW_TELEMETRY_OTLP")
 COLLECTOR = _raw_collector if _raw_collector and _is_allowed_collector(_raw_collector) else None
 
 
+def _read_plugin_version(path):
+    """The `version` from the plugin's own manifest, or "".
+
+    Read from the manifest rather than hardcoded so the version on the wire
+    can never drift from the version that shipped. Any failure yields "" and
+    the version is omitted from the record rather than the record dropped.
+    """
+    try:
+        with open(path, encoding="utf-8") as fh:
+            version = json.load(fh).get("version")
+        return version if isinstance(version, str) and version else ""
+    except Exception:
+        return ""
+
+
+PLUGIN_VERSION = _read_plugin_version(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir,
+    ".claude-plugin", "plugin.json"))
+
+
 def _config_path():
     """Where Claude Code keeps its account state: `.claude.json` under
     CLAUDE_CONFIG_DIR when that is set, otherwise in the home directory."""
@@ -159,10 +179,17 @@ def emit(body_name, attrs):
         attrs["user.email"] = _read_user_email()
     kv = [{"key": k, "value": {"stringValue": str(v)}}
           for k, v in attrs.items() if v]
+    # The version rides on the resource and the scope, where native Claude
+    # Code telemetry puts its own, so both streams answer "which build sent
+    # this" from the same place.
+    resource = [{"key": "service.name", "value": {"stringValue": "bitwarden-ai-telemetry"}}]
+    scope = {"name": "bw.telemetry.hooks"}
+    if PLUGIN_VERSION:
+        resource.append({"key": "service.version", "value": {"stringValue": PLUGIN_VERSION}})
+        scope["version"] = PLUGIN_VERSION
     payload = {"resourceLogs": [{
-        "resource": {"attributes": [
-            {"key": "service.name", "value": {"stringValue": "bitwarden-ai-telemetry"}}]},
-        "scopeLogs": [{"scope": {"name": "bw.telemetry.hooks"},
+        "resource": {"attributes": resource},
+        "scopeLogs": [{"scope": scope,
                        "logRecords": [{"timeUnixNano": str(time.time_ns()),
                                        "body": {"stringValue": body_name},
                                        "attributes": kv}]}]}]}
@@ -226,9 +253,13 @@ def _fault_message(kind, detail):
 def flush_warning(out=None):
     """Surface at most one throttled warning for this process's faults.
 
-    Writes a single `{"systemMessage": ...}` object, which Claude Code shows
-    to the user as a warning. Nothing blocks: PostToolUse runs after the tool
-    has already completed, and the caller still exits 0.
+    Writes a single `{"systemMessage": ..., "terminalSequence": ...}` object.
+    Claude Code shows the systemMessage as a warning, but in dim text that is
+    easy to scroll past and cannot be styled, so the same text also goes out
+    as an OSC 9 desktop notification. OSC 9 is on the terminalSequence
+    allowlist, and a terminal that doesn't support it ignores it. Nothing
+    blocks: PostToolUse runs after the tool has already completed, and the
+    caller still exits 0.
 
     Throttled per fault class via `_warn_state_path`, and deliberately silent
     when that state cannot be written — warning on every edit forever is worse
@@ -259,6 +290,10 @@ def flush_warning(out=None):
         except Exception:
             return
         stream = out if out is not None else sys.stdout
-        stream.write(json.dumps({"systemMessage": _fault_message(kind, detail)}))
+        message = _fault_message(kind, detail)
+        stream.write(json.dumps({
+            "systemMessage": message,
+            "terminalSequence": f"\x1b]9;{message}\x07",
+        }))
     except Exception:
         return  # fail-open, always

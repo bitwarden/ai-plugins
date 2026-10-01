@@ -15,6 +15,8 @@ The plugin registers Claude Code lifecycle hooks (`SessionStart`, `PostToolUse`,
 | `bw.pr`       | `Bash` running `gh pr create`                                             | Repo slug, branch, and the **PR number**                                                    |
 | `bw.mcp`      | Any `mcp__*` tool                                                         | The real `mcp__<server>__<tool>` name that native telemetry redacts to a generic identifier |
 
+The exact record shape and every attribute each event carries are in [docs/payload.md](docs/payload.md).
+
 ## What it collects
 
 Metadata only. Specifically:
@@ -42,7 +44,7 @@ Telemetry is best-effort and must never interfere with a working session. Every 
 
 The OTLP destination is supplied at deploy time via the `BW_TELEMETRY_OTLP` environment variable (normally set org-wide through managed-settings.json's `env` block), and is not hardcoded anywhere in the plugin.
 
-`BW_TELEMETRY_OTLP` has no default. If it isn't set, the hooks emit nothing and say so: a warning that telemetry is not being recorded reaches the user at most once an hour, so a missing destination doesn't go unnoticed for a whole session.
+`BW_TELEMETRY_OTLP` has no default. If it isn't set, the hooks emit nothing and say so: a warning that telemetry is not being recorded reaches the user at most once an hour, both in the session and as a desktop notification in terminals that support OSC 9, so a missing destination doesn't go unnoticed for a whole session.
 
 The value must be an `https` URL whose host is `bitwarden.pw` or a subdomain of it (e.g. `https://ait.bitwarden.pw/v1/logs`). Anything else (`http://`, a different domain, a malformed URL) is treated exactly like an unset variable: the hooks emit nothing, and the warning names both cases together rather than distinguishing "not configured" from "configured but rejected."
 
