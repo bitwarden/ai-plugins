@@ -115,11 +115,11 @@
       "id": 10,
       "name": "feature-flag-placement-new-work",
       "prompt": "We're adding org-scoped export restrictions: a new policy the server enforces on the export endpoint, plus a banner in web and browser telling the user why export is blocked. Server work is about a week, clients maybe three days after that. I want to merge the server piece to main as soon as it's green so it doesn't rot on a branch, then land the clients. Does that plan hold up?",
-      "expected_output": "Identifies that merging incomplete work to mainline across server and clients is exactly the case that calls for a feature flag, and does not let the plan proceed unflagged. Raises flag placement as an up-front design decision rather than an implementation detail, concluding the flag belongs server-side with clients reading it from `/config`. Hands off to `managing-feature-flags` for the conventions rather than restating them.",
+      "expected_output": "Identifies that merging incomplete work to mainline across server and clients is exactly the case that calls for a feature flag, and does not let the plan proceed unflagged. Concludes the flag is evaluated server-side with clients reading its state, and keeps the mechanics on Bitwarden's conventions rather than a hand-rolled toggle or a direct LaunchDarkly SDK call.",
       "expectations": [
         "Flags the plan as needing a feature flag, rather than endorsing merging the server piece to main unflagged",
-        "Treats flag placement (server-side vs client-side) as an up-front design decision and concludes the flag is server-side, with clients consuming it",
-        "Hands off to `Skill(managing-feature-flags)` for the naming, evaluation, and lifecycle conventions instead of restating them",
+        "Concludes the flag is evaluated server-side, with the clients reading its state rather than carrying a flag of their own",
+        "Ties turning the flag on to the clients having shipped, rather than to the server merging — so deployment and release stay separate decisions",
         "Does not invent a specific rollout percentage schedule, which is a release decision rather than an architecture one"
       ]
     }
