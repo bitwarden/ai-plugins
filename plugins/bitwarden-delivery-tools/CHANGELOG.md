@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `architecting-solutions`: added a "Feature-flag new work by default" principle that defers to `managing-feature-flags`, plus a Red Flag for feature work landing without a warranted flag.
 - Plugin description and keywords now name feature flags in scope.
 - `managing-feature-flags`: the `RequireFeature` example uses a `FeatureFlagKeys` constant, matching the convention stated two lines above it.
-- `architecting-solutions` evals: added a `feature-flag-placement-new-work` case. `behavior-baseline.json` is unchanged and needs a benchmark re-run.
+- `architecting-solutions` evals: added a `feature-flag-placement-new-work` case (4/4 with the skill, 3/4 without).
+- `architecting-solutions` evals: `behavior-baseline.json` rebuilt on `claude-opus-5-5/default`; the stale `claude-opus-4-7/default` series is dropped.
+- `architecting-solutions` evals: README documents the benchmark harness, so future refreshes are comparable.
 
 ## [3.4.0] - 2026-09-28
 
