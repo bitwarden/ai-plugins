@@ -122,6 +122,8 @@
     "remotelink",
     "Rescope",
     "resolutiondate",
+    "rollout",
+    "rollouts",
     "retarget",
     "ripgreprc",
     "rustdoc",
