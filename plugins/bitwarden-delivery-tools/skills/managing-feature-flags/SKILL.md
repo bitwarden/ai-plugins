@@ -47,10 +47,11 @@ Evaluate through the [`Bitwarden.Server.Sdk.Features`](https://github.com/bitwar
 
 ### Clients
 
-Clients are simple consumers. They read flag state from the server's `/config` endpoint and **never** talk to LaunchDarkly directly.
+Clients are simple consumers. They read flag state from the server's `/config` endpoint and **never** talk to LaunchDarkly directly. Each client has its own accessor, so confirm the current one in the repo rather than assuming parity across platforms.
 
-- **Web, browser, desktop, CLI:** add the key to the `FeatureFlags` enum and read via `ConfigService` — `getFeatureFlagBool`, `getFeatureFlagString`, `getFeatureFlagNumber`.
-- **Mobile:** add the constant and read via `IConfigService` — `GetFeatureFlagBoolAsync`, `GetFeatureFlagStringAsync`, `GetFeatureFlagNumberAsync`.
+- **Web, browser, desktop, CLI** (`bitwarden/clients`): add the flag in two places in `libs/common/src/enums/feature-flag.enum.ts` — a member on the `FeatureFlag` enum and a matching entry in the `DefaultFeatureFlagValue` object. The entry is required (`satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>`) and its type flows through to the call site. Read via `ConfigService.getFeatureFlag$(key)` for an `Observable`, or `getFeatureFlag(key)` for a `Promise`. Both are generic over the flag, so there are no per-type accessors.
+- **Android** (`bitwarden/android`): add a `FlagKey`, then read via `FeatureFlagManager` — `getFeatureFlagFlow(key)` for a `Flow`, or `getFeatureFlag(key)` for a one-shot read.
+- **iOS** (`bitwarden/ios`): add a case to the Swift `FeatureFlag` enum and read via `ConfigService.getFeatureFlag(_:defaultValue:isPreAuth:)`.
 
 ## Lifecycle
 
@@ -70,14 +71,14 @@ Cleanup means removing the flag check and hardcoding the winning variation, then
 
 The third-party [`launchdarkly`](https://github.com/launchdarkly/ai-tooling) plugin adds skills that drive LaunchDarkly over MCP. They require **both** the plugin installed and its hosted MCP server configured ([install](https://mcp.launchdarkly.com/mcp/launchdarkly/install)). Degrade gracefully if either is absent — everything above stands on its own, so never stop over a missing LaunchDarkly plugin.
 
-| Skill                                | Use for                                                       |
-| ------------------------------------ | ------------------------------------------------------------- |
-| `Skill(launchdarkly-flag-discovery)` | Finding an existing flag before touching code                 |
-| `Skill(launchdarkly-flag-create)`    | Gating a new or risky code path                               |
-| `Skill(launchdarkly-flag-targeting)` | Toggling a flag while verifying locally                       |
-| `Skill(launchdarkly-flag-cleanup)`   | Removing a launched flag and hardcoding the winning variation |
-| `Skill(launchdarkly-metric-choose)`  | Picking the metric a rollout is gated on                      |
-| `Skill(launchdarkly-metric-create)`  | Defining that metric when none fits                           |
+| Skill                                             | Use for                                                       |
+| ------------------------------------------------- | ------------------------------------------------------------- |
+| `Skill(launchdarkly:launchdarkly-flag-discovery)` | Finding an existing flag before touching code                 |
+| `Skill(launchdarkly:launchdarkly-flag-create)`    | Gating a new or risky code path                               |
+| `Skill(launchdarkly:launchdarkly-flag-targeting)` | Toggling a flag while verifying locally                       |
+| `Skill(launchdarkly:launchdarkly-flag-cleanup)`   | Removing a launched flag and hardcoding the winning variation |
+| `Skill(launchdarkly:launchdarkly-metric-choose)`  | Picking the metric a rollout is gated on                      |
+| `Skill(launchdarkly:launchdarkly-metric-create)`  | Defining that metric when none fits                           |
 
 `launchdarkly-flag-create` explores the repo's existing flag patterns first. In .NET server code that pattern is `Bitwarden.Server.Sdk.Features`, so steer the generated evaluation onto `IFeatureService` or `[RequireFeature]` rather than a raw SDK call.
 

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `managing-feature-flags`: Bitwarden's feature-flag conventions and lifecycle — when to flag, server-side evaluation via `Bitwarden.Server.Sdk.Features`, client reads from `/config`, release vs operational categories, rollout, and cleanup. Hands off to the optional third-party `launchdarkly` plugin when it is installed.
+- `managing-feature-flags`: Bitwarden's feature-flag conventions and lifecycle — when to flag, server-side evaluation via `Bitwarden.Server.Sdk.Features`, per-client reads from `/config` across clients/Android/iOS, release vs operational categories, rollout, and cleanup. Hands off to the optional third-party `launchdarkly` plugin when it is installed.
 
 ### Changed
 
