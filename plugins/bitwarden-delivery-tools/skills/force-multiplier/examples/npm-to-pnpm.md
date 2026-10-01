@@ -28,7 +28,7 @@ validation: "pnpm install --frozen-lockfile + repo build/test (from its CLAUDE.m
 pr_spec:
   branch: "force-multiplier/npm-to-pnpm"
   title: "[PM-XXXXX] deps: Migrate from npm to pnpm"
-  body: "<filled from the repo's PULL_REQUEST_TEMPLATE.md>"
+  body: "<filled from the resolved PR template>"
   labels: ["ai-review"]
   draft: true
 safety_policy:
