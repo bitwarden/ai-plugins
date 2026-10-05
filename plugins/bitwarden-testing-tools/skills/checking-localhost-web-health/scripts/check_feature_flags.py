@@ -4,27 +4,28 @@ in the required state.
 
 The running Api's GET /config response is the authority: its featureStates map
 is what the web client loads, so one read answers for the server and the web
-client. server/dev/secrets.json is read only to explain a mismatch, and only the
-requested flag keys are looked up in it. That file also holds the Stripe test
-key, the SQL password, and the installation id and key, so nothing else from it
-is ever printed.
+client. server/dev/secrets.json and the server source are read only to explain a
+mismatch, and only the requested flag keys are looked up in them. secrets.json
+also holds the Stripe test key, the SQL password, and the installation id and
+key, so nothing else from it is ever printed.
 
 Usage:
-  check_feature_flags.py [--secrets-path <path>] [--constants-path <path>]
+  check_feature_flags.py [--secrets-path <path>] [--server-src-path <path>]
                          -- <flag-key>=on|off [...]
 
 Put `--` before the requirements so no value can be read as an option. The
 running Api does not read secrets.json directly: it reads dotnet user-secrets,
 which server/dev/setup_secrets.ps1 copies from secrets.json (Aspire runs it as
-the setup-secrets resource). So a fix to secrets.json must be applied with that
-script before an Api restart can pick it up, and the Resolve lines say so.
+the setup-secrets resource). So every mismatch ends with one line saying to
+refresh secrets and restart the dependent services.
 
---secrets-path defaults to server/dev/secrets.json and --constants-path to
-server/src/Core/Constants.cs, both relative to the current working directory
-(the bitwarden root, where the pipeline runs). The server reports only the flags
-its FeatureFlagKeys class in Constants.cs defines, so when a flag is missing
-from /config the script checks whether that file defines the key, to tell
-"restart the Api" apart from "the server does not know this flag".
+--secrets-path defaults to server/dev/secrets.json and --server-src-path to
+server/src, both relative to the current working directory (the bitwarden root,
+where the pipeline runs). /config reports a flag only when a class marked
+[FlagKeyCollection] under server/src declares it and a value is configured for
+it, so when a required flag is missing from /config the script checks both
+secrets.json and those classes and prints a Problem line for each one that
+explains the gap.
 
 Exit codes: 0 every flag is in the required state; 1 the Api's /config could not
 be read; 2 usage error, including --help, so an option-shaped value never reads
@@ -47,7 +48,11 @@ EXIT_MISMATCH = 3
 CONFIG_URL = "http://localhost:4000/config"
 CONFIG_TIMEOUT_SECONDS = 10
 DEFAULT_SECRETS_FILE = os.path.join("server", "dev", "secrets.json")
-DEFAULT_CONSTANTS_FILE = os.path.join("server", "src", "Core", "Constants.cs")
+DEFAULT_SERVER_SRC = os.path.join("server", "src")
+# The Bitwarden.Server.Sdk.Features source generator registers the keys of every
+# class marked with this attribute, so only those files can declare a flag.
+FLAG_KEY_COLLECTION_MARKER = "[FlagKeyCollection"
+SKIPPED_SOURCE_DIRS = ("bin", "obj")
 # Flag keys can originate in untrusted Jira text, so only the documented key
 # shape is accepted before anything is looked up or printed.
 REQUIREMENT_PATTERN = re.compile(r"([a-z0-9][a-z0-9.-]*)=(on|off)")
@@ -59,10 +64,7 @@ FLAG_SECTIONS = (
     ("globalSettings", "launchDarkly", "flagValues"),
 )
 DEFAULT_FLAG_SECTION = ".".join(FLAG_SECTIONS[1])
-APPLY_SECRETS = (
-    "apply it with `pwsh ./setup_secrets.ps1` from server/dev (or re-run the "
-    "setup-secrets resource in the Aspire dashboard)"
-)
+FOLLOW_UP = "  Then refresh secrets and restart the dependent services."
 
 
 class ApiError(Exception):
@@ -214,11 +216,24 @@ def load_secrets(path, read_text):
     return data, None
 
 
-def defines_flag(constants_text, key):
-    """Return True/False whether Constants.cs defines key, or None if unread."""
-    if constants_text is None:
+def declares_flag(server_src_path, key, read_text):
+    """Return True/False whether a [FlagKeyCollection] class declares key, or
+    None when the source tree, or any file in it, could not be read."""
+    if not os.path.isdir(server_src_path):
         return None
-    return f'"{key}"' in constants_text
+    quoted_key = f'"{key}"'
+    for root, dirs, files in os.walk(server_src_path):
+        dirs[:] = [d for d in dirs if d.lower() not in SKIPPED_SOURCE_DIRS]
+        for name in files:
+            if not name.endswith(".cs"):
+                continue
+            try:
+                text = read_text(os.path.join(root, name))
+            except (OSError, UnicodeDecodeError):
+                return None
+            if FLAG_KEY_COLLECTION_MARKER in text and quoted_key in text:
+                return True
+    return False
 
 
 def configured_value(secrets, key):
@@ -239,9 +254,42 @@ def _state(value):
     return "on" if value else "off"
 
 
-def evaluate(requirements, states, secrets, secrets_path, constants_text=None,
-             constants_path=DEFAULT_CONSTANTS_FILE):
-    """Return (output lines, every flag matches)."""
+def secrets_problem(secrets, secrets_problem_text, key, required_on, secrets_path):
+    """Return the secrets.json Problem for key, or None when it is set as required."""
+    if secrets is None:
+        return f"{secrets_problem_text}, so its value for this flag is unknown."
+    configured, section = configured_value(secrets, key)
+    if configured is required_on:
+        return None
+    wanted = "true" if required_on else "false"
+    return (
+        f'set "{key}": "{wanted}" under {section or DEFAULT_FLAG_SECTION} in '
+        f"{secrets_path}."
+    )
+
+
+def declaration_problem(declared, server_src_path):
+    """Return the server source Problem for a flag, or None when it is declared."""
+    if declared is None:
+        return (
+            f"{server_src_path} could not be read, so whether a [FlagKeyCollection] "
+            "class declares this flag is unknown."
+        )
+    if not declared:
+        return (
+            f"no [FlagKeyCollection] class under {server_src_path} declares this "
+            "flag; check out a server branch that declares it."
+        )
+    return None
+
+
+def evaluate(requirements, states, secrets, secrets_problem_text, secrets_path,
+             is_declared, server_src_path=DEFAULT_SERVER_SRC):
+    """Return (output lines, every flag matches).
+
+    A flag /config does not report runs every check, so the output names every
+    problem rather than only the first.
+    """
     lines = []
     all_match = True
     for key, required_on in requirements:
@@ -254,35 +302,19 @@ def evaluate(requirements, states, secrets, secrets_path, constants_text=None,
             continue
         all_match = False
         lines.append(f"{key}: required {_state(required_on)}, running {running} — MISMATCH")
-        wanted = "true" if required_on else "false"
-        if not reported and defines_flag(constants_text, key) is False:
-            lines.append(
-                f"  Resolve: {constants_path} does not define this flag, so the "
-                "running Api cannot report it. Check out a server branch whose "
-                "FeatureFlagKeys defines it, then restart the Api."
+        problems = [secrets_problem(secrets, secrets_problem_text, key, required_on, secrets_path)]
+        if not reported:
+            problems.append(declaration_problem(is_declared(key), server_src_path))
+        problems = [problem for problem in problems if problem]
+        if not problems:
+            _configured, section = configured_value(secrets, key)
+            wanted = "true" if required_on else "false"
+            problems.append(
+                f'{section} in {secrets_path} already sets it to "{wanted}", but the '
+                "running Api has not picked it up."
             )
-            continue
-        if secrets is None:
-            lines.append(
-                f"  Resolve: {secrets_path} could not be read to explain this. Set "
-                f'"{key}": "{wanted}" under {DEFAULT_FLAG_SECTION} there, '
-                f"{APPLY_SECRETS}, then restart the Api."
-            )
-            continue
-        configured, section = configured_value(secrets, key)
-        if configured is required_on:
-            lines.append(
-                f"  Resolve: {section} in {secrets_path} already sets it to "
-                f'"{wanted}", but the Api reads the dotnet user-secrets copied from '
-                f"that file, which may be stale, so {APPLY_SECRETS}, then restart "
-                "the Api."
-            )
-        else:
-            lines.append(
-                f'  Resolve: Set "{key}": "{wanted}" under '
-                f"{section or DEFAULT_FLAG_SECTION} in {secrets_path}, "
-                f"{APPLY_SECRETS}, then restart the Api."
-            )
+        lines.extend(f"  Problem: {problem}" for problem in problems)
+        lines.append(FOLLOW_UP)
     return lines, all_match
 
 
@@ -297,7 +329,7 @@ def main(argv, fetch=_http_get, read_text=_read_text):
         description="Check required feature flags against the running local Api.",
     )
     parser.add_argument("--secrets-path", default=DEFAULT_SECRETS_FILE)
-    parser.add_argument("--constants-path", default=DEFAULT_CONSTANTS_FILE)
+    parser.add_argument("--server-src-path", default=DEFAULT_SERVER_SRC)
     parser.add_argument("requirements", nargs="+", metavar="<flag-key>=on|off")
     try:
         args = parser.parse_args(argv)
@@ -322,18 +354,13 @@ def main(argv, fetch=_http_get, read_text=_read_text):
         return EXIT_API
 
     secrets, problem = load_secrets(args.secrets_path, read_text)
-    try:
-        constants_text = read_text(args.constants_path)
-    except (OSError, UnicodeDecodeError):
-        constants_text = None
     lines, all_match = evaluate(
-        requirements, states, secrets, args.secrets_path,
-        constants_text, args.constants_path,
+        requirements, states, secrets, problem, args.secrets_path,
+        lambda key: declares_flag(args.server_src_path, key, read_text),
+        args.server_src_path,
     )
     for line in lines:
         print(line)
-    if problem and not all_match:
-        print(f"Note: {problem}, so configured values are unknown.")
     return EXIT_OK if all_match else EXIT_MISMATCH
 
 
