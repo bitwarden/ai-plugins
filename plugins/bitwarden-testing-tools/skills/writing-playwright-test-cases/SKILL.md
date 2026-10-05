@@ -1,6 +1,6 @@
 ---
 name: writing-playwright-test-cases
-description: Build structured Playwright test cases for Bitwarden web changes. Use when you have plan context (file paths, acceptance criteria, UI flows) and need to define starting URLs, interaction sequences, and screenshot checkpoints. Labels external trigger steps (flows initiated by external systems like the marketing website) so they are visible to the user approving the plan. Returns a test case list.
+description: Build structured Playwright test cases for Bitwarden web changes. Use when you have plan context (file paths, acceptance criteria, UI flows) and need to define starting URLs, interaction sequences, and screenshot checkpoints. Labels external trigger steps (flows initiated by external systems like the marketing website) so they are visible in the plan and the execution log. Returns a test case list.
 ---
 
 Given the plan context and Application Context (from `scoping-playwright-application-context`), build concrete test cases for Playwright execution.
