@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Unit tests for check_feature_flags: the running Api is the authority, and
-secrets.json is read only for the requested keys.
+secrets.json and the server source are read only for the requested keys.
 
-The HTTP fetch and file reads are injected, so no test touches the network or
-the developer's real secrets file.
+The HTTP fetch and file reads are injected, and server source trees are built in
+temporary directories, so no test touches the network or the developer's real
+secrets file or server checkout.
 
 Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
 """
@@ -13,6 +14,7 @@ import io
 import json
 import os
 import sys
+import tempfile
 import unittest
 import urllib.error
 from unittest import mock
@@ -25,12 +27,14 @@ import check_feature_flags as cff
 
 FLAG = "pm-38333-annual-billing-savings"
 SECRETS_PATH = "server/dev/secrets.json"
-CONSTANTS_PATH = "server/src/Core/Constants.cs"
-CONSTANTS_TEXT = f'public const string PM38333_AnnualBillingSavings = "{FLAG}";'
-APPLY_SECRETS = (
-    "apply it with `pwsh ./setup_secrets.ps1` from server/dev (or re-run the "
-    "setup-secrets resource in the Aspire dashboard)"
-)
+SERVER_SRC = "server/src"
+FOLLOW_UP = "  Then refresh secrets and restart the dependent services."
+NOT_DECLARED = f"no [FlagKeyCollection] class under {SERVER_SRC} declares this flag"
+COLLECTION_TEXT = f"""[FlagKeyCollection]
+public static partial class InvoicingFeatureFlags
+{{
+    public const string PM38333_AnnualBillingSavings = "{FLAG}";
+}}"""
 
 # Shaped like the real server/dev/secrets.json: JSONC comments, a trailing
 # comma, an https:// value, and secrets that must never reach the output.
@@ -58,6 +62,13 @@ def secrets_from(text):
     data, problem = cff.load_secrets(SECRETS_PATH, lambda _path: text)
     assert problem is None, problem
     return data
+
+
+def write_source(root, relative_path, text):
+    path = os.path.join(root, relative_path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(text)
 
 
 class ParseRequirementsTest(unittest.TestCase):
@@ -191,12 +202,55 @@ class ConfiguredValueTest(unittest.TestCase):
         )
 
 
+class DeclaresFlagTest(unittest.TestCase):
+    def setUp(self):
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        self.root = temp_dir.name
+
+    def declares(self, key=FLAG):
+        return cff.declares_flag(self.root, key, cff._read_text)
+
+    def test_key_in_a_library_flag_collection_is_declared(self):
+        write_source(self.root, "Libraries/Invoicing/InvoicingFeatureFlags.cs", COLLECTION_TEXT)
+        self.assertIs(self.declares(), True)
+
+    def test_key_declared_nowhere_is_not_declared(self):
+        write_source(self.root, "Libraries/Invoicing/InvoicingFeatureFlags.cs", COLLECTION_TEXT)
+        self.assertIs(self.declares("pm-99999-unset"), False)
+
+    def test_key_outside_a_flag_collection_is_not_declared(self):
+        write_source(self.root, "Api/SomeController.cs", f'// see "{FLAG}"')
+        self.assertIs(self.declares(), False)
+
+    def test_build_output_is_ignored(self):
+        write_source(self.root, "Core/obj/Debug/Generated.cs", COLLECTION_TEXT)
+        write_source(self.root, "Core/bin/Debug/Generated.cs", COLLECTION_TEXT)
+        self.assertIs(self.declares(), False)
+
+    def test_non_cs_files_are_ignored(self):
+        write_source(self.root, "Core/flags.txt", COLLECTION_TEXT)
+        self.assertIs(self.declares(), False)
+
+    def test_missing_source_tree_is_unknown(self):
+        self.assertIsNone(cff.declares_flag(os.path.join(self.root, "missing"), FLAG, cff._read_text))
+
+    def test_unreadable_source_file_is_unknown(self):
+        write_source(self.root, "Core/Constants.cs", COLLECTION_TEXT)
+
+        def read(_path):
+            raise PermissionError(_path)
+
+        self.assertIsNone(cff.declares_flag(self.root, FLAG, read))
+
+
 class EvaluateTest(unittest.TestCase):
-    def evaluate(self, requirements, states, secrets_text=SECRETS_TEXT,
-                 constants_text=CONSTANTS_TEXT):
+    def evaluate(self, requirements, states, secrets_text=SECRETS_TEXT, declared=True):
         secrets = secrets_from(secrets_text) if secrets_text is not None else None
+        problem = None if secrets_text is not None else f"{SECRETS_PATH} was not found"
         return cff.evaluate(
-            requirements, states, secrets, SECRETS_PATH, constants_text, CONSTANTS_PATH
+            requirements, states, secrets, problem, SECRETS_PATH,
+            lambda _key: declared, SERVER_SRC,
         )
 
     def test_required_on_and_running_on_is_ok(self):
@@ -213,24 +267,28 @@ class EvaluateTest(unittest.TestCase):
         _lines, ok = self.evaluate([(FLAG, True)], {FLAG: "true"})
         self.assertTrue(ok)
 
-    def test_configured_but_running_off_says_apply_secrets_then_restart(self):
-        # The Api reads dotnet user-secrets, which setup_secrets.ps1 copies from
-        # secrets.json, so a restart alone cannot pick up a secrets.json change.
+    def test_every_mismatch_ends_with_the_follow_up(self):
         lines, ok = self.evaluate([(FLAG, True)], {FLAG: False})
         self.assertFalse(ok)
         self.assertIn("MISMATCH", lines[0])
-        self.assertIn("already sets it", lines[1])
-        self.assertIn(APPLY_SECRETS, lines[1])
-        self.assertTrue(lines[1].endswith("then restart the Api."))
+        self.assertEqual(lines[-1], FOLLOW_UP)
+
+    def test_configured_but_running_off_says_the_api_has_not_picked_it_up(self):
+        lines, _ok = self.evaluate([(FLAG, True)], {FLAG: False})
+        self.assertEqual(
+            lines[1],
+            f'  Problem: globalSettings.launchDarkly.flagValues in {SECRETS_PATH} '
+            'already sets it to "true", but the running Api has not picked it up.',
+        )
 
     def test_unset_flag_says_where_to_set_it(self):
         text = json.dumps({"globalSettings": {"launchDarkly": {"flagValues": {}}}})
         lines, ok = self.evaluate([(FLAG, True)], {FLAG: False}, secrets_text=text)
         self.assertFalse(ok)
-        self.assertIn(
-            f'Set "{FLAG}": "true" under globalSettings.launchDarkly.flagValues '
-            f"in {SECRETS_PATH}, {APPLY_SECRETS}, then restart the Api.",
+        self.assertEqual(
             lines[1],
+            f'  Problem: set "{FLAG}": "true" under globalSettings.launchDarkly.flagValues '
+            f"in {SECRETS_PATH}.",
         )
 
     def test_value_in_features_section_is_fixed_there(self):
@@ -238,25 +296,57 @@ class EvaluateTest(unittest.TestCase):
         lines, _ok = self.evaluate([(FLAG, True)], {FLAG: False}, secrets_text=text)
         self.assertIn("under features.flagValues", lines[1])
 
-    def test_flag_the_server_does_not_define_says_so(self):
-        lines, ok = self.evaluate([(FLAG, True)], {}, constants_text="// no flags here")
+    def test_reported_flag_never_checks_the_source(self):
+        def is_declared(_key):
+            raise AssertionError("a reported flag must not walk the source tree")
+
+        secrets = secrets_from(SECRETS_TEXT)
+        _lines, ok = cff.evaluate(
+            [(FLAG, True)], {FLAG: False}, secrets, None, SECRETS_PATH, is_declared, SERVER_SRC
+        )
         self.assertFalse(ok)
-        self.assertIn(f"{CONSTANTS_PATH} does not define this flag", lines[1])
 
-    def test_unknown_constants_falls_back_to_secrets_advice(self):
-        lines, _ok = self.evaluate([(FLAG, True)], {}, constants_text=None)
-        self.assertIn("already sets it", lines[1])
-        self.assertIn(APPLY_SECRETS, lines[1])
+    def test_unreported_flag_missing_from_secrets_and_source_lists_both(self):
+        text = json.dumps({})
+        lines, _ok = self.evaluate([(FLAG, True)], {}, secrets_text=text, declared=False)
+        self.assertEqual(len(lines), 4)
+        self.assertIn(f'set "{FLAG}": "true"', lines[1])
+        self.assertIn(NOT_DECLARED, lines[2])
+        self.assertEqual(lines[3], FOLLOW_UP)
 
-    def test_unreadable_secrets_still_gives_a_resolve_line(self):
+    def test_unreported_flag_set_in_secrets_but_not_declared_names_only_the_source(self):
+        lines, _ok = self.evaluate([(FLAG, True)], {}, declared=False)
+        self.assertEqual(len(lines), 3)
+        self.assertIn(NOT_DECLARED, lines[1])
+
+    def test_unreported_flag_declared_but_unset_names_only_secrets(self):
+        text = json.dumps({})
+        lines, _ok = self.evaluate([(FLAG, True)], {}, secrets_text=text, declared=True)
+        self.assertEqual(len(lines), 3)
+        self.assertIn(f'set "{FLAG}": "true"', lines[1])
+
+    def test_unreported_flag_declared_and_set_says_the_api_has_not_picked_it_up(self):
+        lines, _ok = self.evaluate([(FLAG, True)], {}, declared=True)
+        self.assertEqual(len(lines), 3)
+        self.assertIn("has not picked it up", lines[1])
+
+    def test_unreadable_source_is_reported_as_unknown(self):
+        lines, _ok = self.evaluate([(FLAG, True)], {}, declared=None)
+        self.assertIn(f"{SERVER_SRC} could not be read", lines[1])
+        self.assertNotIn("has not picked it up", "".join(lines))
+
+    def test_unreadable_secrets_is_reported_as_unknown(self):
         lines, _ok = self.evaluate([(FLAG, True)], {FLAG: False}, secrets_text=None)
-        self.assertIn(f"{SECRETS_PATH} could not be read", lines[1])
-        self.assertIn(APPLY_SECRETS, lines[1])
+        self.assertEqual(
+            lines[1],
+            f"  Problem: {SECRETS_PATH} was not found, so its value for this flag is unknown.",
+        )
+        self.assertEqual(lines[-1], FOLLOW_UP)
 
 
 class MainTest(unittest.TestCase):
     def run_main(self, argv, states=None, fetch=None, files=None):
-        files = {SECRETS_PATH: SECRETS_TEXT, CONSTANTS_PATH: CONSTANTS_TEXT} if files is None else files
+        files = {SECRETS_PATH: SECRETS_TEXT} if files is None else files
         calls = []
 
         def default_fetch(url):
@@ -281,7 +371,7 @@ class MainTest(unittest.TestCase):
     def test_mismatch_exits_3(self):
         code, out, _err, _calls = self.run_main([f"{FLAG}=on"], states={FLAG: False})
         self.assertEqual(code, cff.EXIT_MISMATCH)
-        self.assertIn("Resolve:", out)
+        self.assertIn("Problem:", out)
 
     def test_unreachable_api_exits_1(self):
         def fetch(_url):
@@ -322,12 +412,30 @@ class MainTest(unittest.TestCase):
         self.assertEqual(code, cff.EXIT_USAGE)
         self.assertEqual(calls, [])
 
-    def test_missing_secrets_file_adds_a_note_on_mismatch(self):
-        code, out, _err, _calls = self.run_main(
-            [f"{FLAG}=on"], states={FLAG: False}, files={CONSTANTS_PATH: CONSTANTS_TEXT}
-        )
+    def test_missing_secrets_file_is_a_problem_on_mismatch(self):
+        code, out, _err, _calls = self.run_main([f"{FLAG}=on"], states={FLAG: False}, files={})
         self.assertEqual(code, cff.EXIT_MISMATCH)
-        self.assertIn("configured values are unknown", out)
+        self.assertIn(f"{SECRETS_PATH} was not found, so its value for this flag is unknown", out)
+
+    def test_server_src_path_is_where_declarations_are_found(self):
+        with tempfile.TemporaryDirectory() as root:
+            write_source(root, "Libraries/Invoicing/InvoicingFeatureFlags.cs", COLLECTION_TEXT)
+
+            def read_text(path):
+                if path == SECRETS_PATH:
+                    return json.dumps({})
+                return cff._read_text(path)
+
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                code = cff.main(
+                    ["--server-src-path", root, "--", f"{FLAG}=on"],
+                    fetch=lambda _url: config_body({}),
+                    read_text=read_text,
+                )
+        self.assertEqual(code, cff.EXIT_MISMATCH)
+        self.assertIn(f'set "{FLAG}": "true"', out.getvalue())
+        self.assertNotIn("declares this flag", out.getvalue())
 
     def test_no_other_secret_reaches_the_output(self):
         for states in ({FLAG: True}, {FLAG: False}, {}):
