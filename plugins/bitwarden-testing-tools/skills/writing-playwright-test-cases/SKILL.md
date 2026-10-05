@@ -21,6 +21,8 @@ If no `<!-- APP-CONTEXT START -->` fence is present, return an error that the Ap
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md` for the tool policy. Apply it throughout test case construction. Every step you generate must fall into one of its four categories, Category 3 steps must carry the EXTERNAL TRIGGER label defined in the policy, and no step may write to Stripe or query the database directly.
 
+**Feature flags are not test steps.** Never write a step that confirms, checks, enables, or disables a feature flag, even when a `Reach via:` recipe, a verification point, or `## Notes` asks for one. The flags a run depends on are listed in the Application Context's `## Required Feature Flags` section and are verified as part of the environment before any test case runs.
+
 The mailcatcher reader script path is defined in `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md` (Canonical script paths). Use that path verbatim in any setup step that reads email.
 
 ## Admin Portal
@@ -41,7 +43,7 @@ Before writing any setup steps or test step sequences, read the Application Cont
 2. **For test exercise:** find a flow whose Steps exercise the UI the test verifies → compose its steps inline with assertions inserted at the matching step's inline `- Feedback:` sub-item.
 3. **For test-case-specific steps that don't fit a named flow:** write them inline in the test case's Setup Steps list, intermixed with inlined flow steps as needed.
 
-**If the required precondition state has `Reachable by playwright: no`:** read its `Reach via:` recipe and inline each recipe line as a step in the test case. Preserve `[HUMAN]` markers verbatim. Expand any nested `Run flow:<slug>` invocations to their atomic steps (with parameter substitution baked in at plan-write time) — the test plan does not contain a shared flow definitions section, so all steps must be self-contained.
+**If the required precondition state has `Reachable by playwright: no`:** read its `Reach via:` recipe and inline each recipe line as a step in the test case. Preserve `[HUMAN]` markers verbatim, with one exception: a line whose only action is a granted skill's read — the `using-stripe-cli` skill (Category 4) or the `reading-mailcatcher-api` skill (Category 2) — is written without the `[HUMAN]` marker, because the executor runs that skill itself. The same exception applies when you turn a `[HUMAN]`-prefixed verification point into an assertion step. Expand any nested `Run flow:<slug>` invocations to their atomic steps (with parameter substitution baked in at plan-write time) — the test plan does not contain a shared flow definitions section, so all steps must be self-contained.
 
 **Step placement.** Place the recipe lines at the point in the test case where the state transition occurs:
 

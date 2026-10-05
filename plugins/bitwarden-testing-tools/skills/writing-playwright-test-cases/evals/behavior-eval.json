@@ -1,7 +1,7 @@
 {
   "skill_name": "writing-playwright-test-cases",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the generated plan in the places it is load-bearing: (a) every generated step falls into one of the tool policy's four categories; (b) Category 3 steps carry the EXTERNAL TRIGGER label in its exact documented punctuation, with a rationale for why no Bitwarden service can initiate them; (c) the Category 3 qualifying test is applied, so an action the Admin portal or web vault could perform is routed there rather than simulated; (d) setup for a state with no named Flow in the Application Context still runs through the browser rather than the database; (e) billing steps bake the Stripe test card values into web UI payment-form steps rather than calling Stripe directly; and (f) a state that is Reachable by playwright: no carries its Reach via: recipe's [HUMAN] marker into the test case verbatim. Every prompt below except `errors-without-app-context-fence` embeds the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fenced Application Context the skill requires as a precondition, because the skill returns an error and builds nothing without one; (g) the produced test-cases document is wrapped in its own `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence; and (h) the absence of the app-context fence is detected and rejected before any test cases are built.",
+  "purpose": "Prove the skill changes the generated plan in the places it is load-bearing: (a) every generated step falls into one of the tool policy's four categories; (b) Category 3 steps carry the EXTERNAL TRIGGER label in its exact documented punctuation, with a rationale for why no Bitwarden service can initiate them; (c) the Category 3 qualifying test is applied, so an action the Admin portal or web vault could perform is routed there rather than simulated; (d) setup for a state with no named Flow in the Application Context still runs through the browser rather than the database; (e) billing steps bake the Stripe test card values into web UI payment-form steps rather than calling Stripe directly; and (f) a state that is Reachable by playwright: no carries its Reach via: recipe's [HUMAN] marker into the test case verbatim. Every prompt below except `errors-without-app-context-fence` embeds the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fenced Application Context the skill requires as a precondition, because the skill returns an error and builds nothing without one; (g) the produced test-cases document is wrapped in its own `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence; (h) the absence of the app-context fence is detected and rejected before any test cases are built; (i) a feature flag the run depends on never becomes a test step, even when the Application Context asks for one; and (j) a recipe line whose only action is a granted skill's read is written without `[HUMAN]`.",
   "evals": [
     {
       "id": 1,
@@ -81,6 +81,29 @@
       "expected_output": "Returns an error asking the caller to run scoping-playwright-application-context first, because no `<!-- APP-CONTEXT START -->` fence is present in the prompt. Produces no test cases.",
       "expectations": [
         "The skill returns an error asking the caller to run `scoping-playwright-application-context` first and produces no test cases"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "no-flag-step-from-notes",
+      "prompt": "<!-- APP-CONTEXT START -->\n# Application Context\n\n## States\n\n### state:annual-offer-visible\n\n**State type:** target\n\n**Produced by:**\n- none\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/organizations/org-1/billing/subscription\n- Verification points:\n  - Selector: annual-upgrade-offer\n    - Selector type: data-testid\n    - Expectation: visible\n    - Source: clients/apps/web/src/app/billing/organizations/cancellation-survey.component.html\n\n## Flows\n\n(none)\n\n## Required Feature Flags\n\n- pm-38333-annual-billing-savings: on\n  - Source: `server/src/Core/Constants.cs` (`PM38333_AnnualBillingSavings`)\n\n## Notes\n\n- Confirm the `pm-38333-annual-billing-savings` flag is on in the server and the web client before running.\n<!-- APP-CONTEXT END -->\n\nBuild the test cases for the annual billing offer.",
+      "expected_output": "Builds the test case for the offer without any step that confirms, checks, or sets the feature flag, ignoring the `## Notes` request, because flag requirements are verified with the environment before test cases run. Does not add a `[HUMAN]` step for the flag.",
+      "expectations": [
+        "Contains no step that confirms, checks, enables, or disables `pm-38333-annual-billing-savings`",
+        "Does not add a `[HUMAN]` step for the flag",
+        "Still builds a test case asserting `[data-testid=\"annual-upgrade-offer\"]` is visible"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "drops-human-marker-on-stripe-read",
+      "prompt": "<!-- APP-CONTEXT START -->\n# Application Context\n\n## States\n\n### state:trial-end-recorded\n\n**State type:** setup\n\n**Produced by:**\n- none\n\n**Reachable by playwright:** no\n**If no — why:** the subscription's `trial_end` lives in Stripe and the web vault does not show it.\n**Reach via:**\n1. [HUMAN] Use the using-stripe-cli skill to read the organization's Stripe subscription and record its `trial_end`.\n\n**UI projection:**\n- Route: n/a\n- Verification points:\n  - Selector: using-stripe-cli read of the subscription\n    - Selector type: text\n    - Expectation: stdout contains \"trial_end\"\n    - Source: server/src/Core/Billing/Subscriptions/Schedules/SubscriptionScheduleCreator.cs\n\n### state:subscription-page-trial\n\n**State type:** target\n\n**Produced by:**\n- none\n\n**Reachable by playwright:** yes\n\n**UI projection:**\n- Route: https://localhost:8080/#/organizations/org-1/billing/subscription\n- Verification points:\n  - Selector: Trial\n    - Selector type: text\n    - Expectation: text contains \"Trial\"\n    - Source: clients/apps/web/src/app/billing/organizations/subscription-status.component.ts\n\n## Flows\n\n(none)\n<!-- APP-CONTEXT END -->\n\nBuild a test case that records the Stripe trial end and then checks that the subscription page still shows Trial.",
+      "expected_output": "Copies the Reach via: line in as a SETUP step that uses the using-stripe-cli skill to read the subscription's `trial_end`, written without the `[HUMAN]` marker because the executor runs that skill itself. Asserts the text \"Trial\" on the subscription page. Does not add any Stripe write.",
+      "expectations": [
+        "Includes a SETUP step that uses the using-stripe-cli skill to read the subscription's `trial_end`",
+        "Writes that step without the `[HUMAN]` marker",
+        "Does not add any Stripe write step",
+        "Asserts the text \"Trial\" on the subscription page"
       ]
     }
   ]
