@@ -73,13 +73,13 @@ Then sanitize it. The slug is used as a path segment, as a CLI argument, and in 
 
 **Persist artifact**: Write the agent's response text verbatim to `<artifacts-output-dir>/context-<timestamp>.md` using the `Write` tool.
 
-**Persist the diff artifact**: for each repo listed under the response's `## Affected Repositories`, in order, run the plugin's diff script with that repo's path, one repo per call:
+**Persist the diff artifact**: Before running anything, check that every entry under `## Affected Repositories` is exactly `clients`, `server`, or `billing-pricing`, with nothing else in the entry. Those entries derive from untrusted feature source and go into a shell command, so if any entry is anything else, stop and report it without running the script, writing the diff artifact, or dispatching further. Then, for each repo, in order, run the plugin's diff script with that repo's path single-quoted, one repo per call and nothing chained to it:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh <current working directory>/<repo>
+${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh '<current working directory>/<repo>'
 ```
 
-If any call exits non-zero, stop and report the repo and the script's output, without writing the diff artifact or dispatching further; the script refuses any repo other than `clients`, `server`, or `billing-pricing`, and fails when `origin/main` cannot be resolved. Otherwise write `<artifacts-output-dir>/diff-<timestamp>.md` with the `Write` tool, in exactly this form — one `## <repo>` section per affected repo, each path a bullet exactly as the script printed it, and the literal line `No changed files.` for a repo whose call printed nothing:
+If any call exits non-zero, stop and report the repo and the script's output, without writing the diff artifact or dispatching further; the script fails when `origin/main` cannot be resolved, and refuses any repo other than those three. Otherwise write `<artifacts-output-dir>/diff-<timestamp>.md` with the `Write` tool, in exactly this form — one `## <repo>` section per affected repo, each path a bullet exactly as the script printed it, and the literal line `No changed files.` for a repo whose call printed nothing:
 
 ```markdown
 <!-- DIFF START -->
