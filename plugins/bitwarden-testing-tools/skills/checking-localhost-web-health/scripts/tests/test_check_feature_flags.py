@@ -27,6 +27,10 @@ FLAG = "pm-38333-annual-billing-savings"
 SECRETS_PATH = "server/dev/secrets.json"
 CONSTANTS_PATH = "server/src/Core/Constants.cs"
 CONSTANTS_TEXT = f'public const string PM38333_AnnualBillingSavings = "{FLAG}";'
+APPLY_SECRETS = (
+    "apply it with `pwsh ./setup_secrets.ps1` from server/dev (or re-run the "
+    "setup-secrets resource in the Aspire dashboard)"
+)
 
 # Shaped like the real server/dev/secrets.json: JSONC comments, a trailing
 # comma, an https:// value, and secrets that must never reach the output.
@@ -209,11 +213,15 @@ class EvaluateTest(unittest.TestCase):
         _lines, ok = self.evaluate([(FLAG, True)], {FLAG: "true"})
         self.assertTrue(ok)
 
-    def test_configured_but_running_off_says_restart(self):
+    def test_configured_but_running_off_says_apply_secrets_then_restart(self):
+        # The Api reads dotnet user-secrets, which setup_secrets.ps1 copies from
+        # secrets.json, so a restart alone cannot pick up a secrets.json change.
         lines, ok = self.evaluate([(FLAG, True)], {FLAG: False})
         self.assertFalse(ok)
         self.assertIn("MISMATCH", lines[0])
-        self.assertIn("Restart the Api to load that value", lines[1])
+        self.assertIn("already sets it", lines[1])
+        self.assertIn(APPLY_SECRETS, lines[1])
+        self.assertTrue(lines[1].endswith("then restart the Api."))
 
     def test_unset_flag_says_where_to_set_it(self):
         text = json.dumps({"globalSettings": {"launchDarkly": {"flagValues": {}}}})
@@ -221,7 +229,7 @@ class EvaluateTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn(
             f'Set "{FLAG}": "true" under globalSettings.launchDarkly.flagValues '
-            f"in {SECRETS_PATH}, then restart the Api.",
+            f"in {SECRETS_PATH}, {APPLY_SECRETS}, then restart the Api.",
             lines[1],
         )
 
@@ -237,11 +245,13 @@ class EvaluateTest(unittest.TestCase):
 
     def test_unknown_constants_falls_back_to_secrets_advice(self):
         lines, _ok = self.evaluate([(FLAG, True)], {}, constants_text=None)
-        self.assertIn("Restart the Api to load that value", lines[1])
+        self.assertIn("already sets it", lines[1])
+        self.assertIn(APPLY_SECRETS, lines[1])
 
     def test_unreadable_secrets_still_gives_a_resolve_line(self):
         lines, _ok = self.evaluate([(FLAG, True)], {FLAG: False}, secrets_text=None)
         self.assertIn(f"{SECRETS_PATH} could not be read", lines[1])
+        self.assertIn(APPLY_SECRETS, lines[1])
 
 
 class MainTest(unittest.TestCase):
@@ -286,6 +296,25 @@ class MainTest(unittest.TestCase):
         self.assertEqual(code, cff.EXIT_USAGE)
         self.assertEqual(calls, [])
         self.assertIn("PM38333_AnnualBillingSavings=on", err)
+
+    def test_help_is_a_usage_error_and_never_calls_the_api(self):
+        # An option-shaped value such as -h must never read as success: the
+        # health check treats exit 0 as "every flag is as required".
+        with contextlib.redirect_stdout(io.StringIO()):
+            code, _out, _err, calls = self.run_main(["--help"])
+        self.assertEqual(code, cff.EXIT_USAGE)
+        self.assertEqual(calls, [])
+
+    def test_double_dash_ends_options_before_requirements(self):
+        code, out, _err, _calls = self.run_main(["--", f"{FLAG}=on"], states={FLAG: True})
+        self.assertEqual(code, cff.EXIT_OK)
+        self.assertIn("— OK", out)
+
+    def test_option_shaped_requirement_after_double_dash_is_refused(self):
+        code, _out, err, calls = self.run_main(["--", "-h=on"])
+        self.assertEqual(code, cff.EXIT_USAGE)
+        self.assertEqual(calls, [])
+        self.assertIn("-h=on", err)
 
     def test_no_arguments_is_a_usage_error(self):
         with contextlib.redirect_stderr(io.StringIO()):

@@ -11,7 +11,13 @@ is ever printed.
 
 Usage:
   check_feature_flags.py [--secrets-path <path>] [--constants-path <path>]
-                         <flag-key>=on|off [...]
+                         -- <flag-key>=on|off [...]
+
+Put `--` before the requirements so no value can be read as an option. The
+running Api does not read secrets.json directly: it reads dotnet user-secrets,
+which server/dev/setup_secrets.ps1 copies from secrets.json (Aspire runs it as
+the setup-secrets resource). So a fix to secrets.json must be applied with that
+script before an Api restart can pick it up, and the Resolve lines say so.
 
 --secrets-path defaults to server/dev/secrets.json and --constants-path to
 server/src/Core/Constants.cs, both relative to the current working directory
@@ -21,7 +27,8 @@ from /config the script checks whether that file defines the key, to tell
 "restart the Api" apart from "the server does not know this flag".
 
 Exit codes: 0 every flag is in the required state; 1 the Api's /config could not
-be read; 2 usage error; 3 at least one flag is in the wrong state.
+be read; 2 usage error, including --help, so an option-shaped value never reads
+as success; 3 at least one flag is in the wrong state.
 """
 import argparse
 import json
@@ -52,6 +59,10 @@ FLAG_SECTIONS = (
     ("globalSettings", "launchDarkly", "flagValues"),
 )
 DEFAULT_FLAG_SECTION = ".".join(FLAG_SECTIONS[1])
+APPLY_SECRETS = (
+    "apply it with `pwsh ./setup_secrets.ps1` from server/dev (or re-run the "
+    "setup-secrets resource in the Aspire dashboard)"
+)
 
 
 class ApiError(Exception):
@@ -254,21 +265,23 @@ def evaluate(requirements, states, secrets, secrets_path, constants_text=None,
         if secrets is None:
             lines.append(
                 f"  Resolve: {secrets_path} could not be read to explain this. Set "
-                f'"{key}": "{wanted}" under {DEFAULT_FLAG_SECTION} there, then '
-                "restart the Api."
+                f'"{key}": "{wanted}" under {DEFAULT_FLAG_SECTION} there, '
+                f"{APPLY_SECRETS}, then restart the Api."
             )
             continue
         configured, section = configured_value(secrets, key)
         if configured is required_on:
             lines.append(
                 f"  Resolve: {section} in {secrets_path} already sets it to "
-                f'"{wanted}". Restart the Api to load that value.'
+                f'"{wanted}", but the Api reads the dotnet user-secrets copied from '
+                f"that file, which may be stale, so {APPLY_SECRETS}, then restart "
+                "the Api."
             )
         else:
             lines.append(
                 f'  Resolve: Set "{key}": "{wanted}" under '
-                f"{section or DEFAULT_FLAG_SECTION} in {secrets_path}, then restart "
-                "the Api."
+                f"{section or DEFAULT_FLAG_SECTION} in {secrets_path}, "
+                f"{APPLY_SECRETS}, then restart the Api."
             )
     return lines, all_match
 
@@ -288,8 +301,9 @@ def main(argv, fetch=_http_get, read_text=_read_text):
     parser.add_argument("requirements", nargs="+", metavar="<flag-key>=on|off")
     try:
         args = parser.parse_args(argv)
-    except SystemExit as exc:
-        return exc.code if isinstance(exc.code, int) else EXIT_USAGE
+    except SystemExit:
+        # Covers --help too: exit 0 would read as "every flag is as required".
+        return EXIT_USAGE
 
     try:
         requirements = parse_requirements(args.requirements)

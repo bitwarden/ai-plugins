@@ -36,7 +36,7 @@ Read the test plan file and extract:
 
 - **Required service names**: from the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence (its `## Required Services` section), pull the bullet's leading name token (e.g., `- Api — http://localhost:4000 (port 4000)` → `Api`). Collect these as a space-separated list — they are the argv for the health-check script.
 - **Primary test URL**: the bullet marked `**(primary test URL)**` in that fence. Used by the render-verify step inside the skill.
-- **Required feature flags** (optional): when the `SERVICES` fence has a `## Required Feature Flags` section, take each bullet's flag key and state (e.g., `- pm-38333-annual-billing-savings: on` → `pm-38333-annual-billing-savings=on`), ignoring the `Source:` sub-bullets. These are the argv for the flag-check step. When the section is absent, there are none.
+- **Required feature flags** (optional): when the `SERVICES` fence has a `## Required Feature Flags` section, take each bullet's flag key and state (e.g., `- pm-38333-annual-billing-savings: on` → `pm-38333-annual-billing-savings=on`), ignoring the `Source:` sub-bullets. Check each key against `^[a-z0-9][a-z0-9.-]*$` and each state is `on` or `off`; if any entry fails, report it as malformed instead of verifying, and never pass it on. These are the argv for the flag-check step. When the section is absent, there are none.
 
 ## Step 2 — Verify the environment
 

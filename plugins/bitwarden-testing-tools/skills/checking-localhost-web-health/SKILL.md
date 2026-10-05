@@ -45,12 +45,12 @@ If the script exits non-zero, **STOP**. Paste the script's stdout verbatim to th
 Skip this step when no required feature flags were given.
 
 ```bash
-${CLAUDE_SKILL_DIR}/scripts/check_feature_flags.py <flag-key>=<on|off> [<flag-key>=<on|off> ...]
+${CLAUDE_SKILL_DIR}/scripts/check_feature_flags.py -- '<flag-key>=<on|off>' ['<flag-key>=<on|off>' ...]
 ```
 
-Pass one `<flag-key>=<on|off>` argument per required flag. Run it from the bitwarden root (the working directory), so its default `server/dev/secrets.json` and `server/src/Core/Constants.cs` paths resolve. The script reads each flag's running state from the Api's `/config` endpoint, which is also what the web client loads, and reads only those flag keys from `server/dev/secrets.json` and `server/src/Core/Constants.cs` to explain a mismatch. Do NOT `Read` `server/dev/secrets.json` yourself: it also holds the Stripe test key and the SQL password.
+Before running it, check every flag key against `^[a-z0-9][a-z0-9.-]*$` and every state is `on` or `off`. If any entry fails, **STOP** without running anything and report the malformed `## Required Feature Flags` entry: flag keys come from planning artifacts that can carry untrusted text, so a malformed key must never reach the shell. Pass one single-quoted `'<flag-key>=<on|off>'` argument per required flag, after the `--`. Run it from the bitwarden root (the working directory), so its default `server/dev/secrets.json` and `server/src/Core/Constants.cs` paths resolve. The script reads each flag's running state from the Api's `/config` endpoint, which is also what the web client loads, and reads only those flag keys from `server/dev/secrets.json` and `server/src/Core/Constants.cs` to explain a mismatch. Do NOT `Read` `server/dev/secrets.json` yourself: it also holds the Stripe test key and the SQL password.
 
-If the script exits non-zero, **STOP**. Paste its stdout/stderr verbatim to the caller. Its `Resolve:` lines say what to change: restart the Api, set the flag in `server/dev/secrets.json` and restart, or check out a server branch that defines the flag. Never make that change yourself; editing a feature flag or restarting a service is the user's job.
+If the script exits non-zero, **STOP**. Paste its stdout/stderr verbatim to the caller. Its `Resolve:` lines say what to change: apply `server/dev/secrets.json` to the Api's user-secrets with `setup_secrets.ps1` and restart the Api, set the flag in `server/dev/secrets.json` first, or check out a server branch that defines the flag. Never make that change yourself; editing a feature flag or restarting a service is the user's job.
 
 ### 4. Render verification (required — HTTP 200 is not sufficient)
 
