@@ -147,7 +147,7 @@ Optional; include this section only when the run depends on a feature flag's val
   - Source: <citation of the gate, in the catalog citation form `<workspace path>` (`<literal>`, …)>
 ```
 
-`<flag-key>` is the flag's string key exactly as the server's `FeatureFlagKeys` class in `server/src/Core/Constants.cs` spells it (for example `pm-38333-annual-billing-savings`, never the constant name `PM38333_AnnualBillingSavings`), and matches `^[a-z0-9][a-z0-9.-]*$`. Only boolean flags belong here; a dependency on a string or numeric flag value goes in `## Notes`.
+`<flag-key>` is the flag's string key exactly as the server declares it, in the `FeatureFlagKeys` class in `server/src/Core/Constants.cs` or in another class under `server/src` marked `[FlagKeyCollection]`, such as `InvoicingFeatureFlags` (for example `pm-38333-annual-billing-savings`, never the constant name `PM38333_AnnualBillingSavings`), and matches `^[a-z0-9][a-z0-9.-]*$`. Only boolean flags belong here; a dependency on a string or numeric flag value goes in `## Notes`.
 
 ### `## Notes`
 
