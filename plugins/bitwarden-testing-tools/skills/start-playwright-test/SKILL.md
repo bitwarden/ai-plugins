@@ -1,7 +1,7 @@
 ---
 name: start-playwright-test
-description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services but never starts them. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions. Add --confirm to review the test cases before execution begins.
-argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions] [--confirm]"
+description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services but never starts them. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions.
+argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions]"
 allowed-tools: "Agent, Read, Write, Bash(mkdir *), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh *)"
 ---
 
@@ -9,9 +9,7 @@ You are the orchestrator for the Bitwarden web test pipeline. Your role is orche
 
 ## Task 1: Parse input
 
-**`--confirm` flag**: present or absent. If present, strip it from the remaining input. Call what remains the raw input.
-
-If the raw input is empty, show the user the usage line from this skill's `argument-hint` and stop.
+Call the full argument the raw input. If it is empty, show the user the usage line from this skill's `argument-hint` and stop.
 
 **Primary source**: the first whitespace-delimited token of the raw input determines the input type and `<input value>`. Evaluate the rows in order and take the first match:
 
@@ -173,28 +171,6 @@ This is pure orchestrator work, no agent dispatch. Read both planning artifacts 
 ```
 
 The services and test-cases contents already carry their own `SERVICES` / `TEST-CASES` fences, so the composed plan nests them inside the `TEST-PLAN` fence. Do not strip or re-wrap those nested fences.
-
----
-
-## Optional review gate _(only if `--confirm` was set)_
-
-When `--confirm` was passed, present the plan for approval. Do not show only the case count and names: those labels exist in the plan precisely so the approver can see them, and `writing-playwright-test-cases` marks external trigger steps for this purpose.
-
-Show, in this order:
-
-1. The test case count and each case name.
-2. Every line in the plan matching `EXTERNAL TRIGGER:`, quoted with its endpoint and its rationale.
-3. Every step marked `[HUMAN]`, quoted with its location (test case and step number).
-4. Every step that advances a Stripe test clock, quoted with the clock id and day count.
-
-Then ask for approval. If categories 2 through 4 are all empty, say so explicitly ("no external triggers, manual steps, or Stripe writes in this plan") rather than omitting the section.
-
-Approving "3 test cases" and approving "3 test cases, 2 POSTs to localhost:33656, 1 test-clock advance, 1 manual action" are different decisions.
-
-- **No**: tell the user the test plan path and stop.
-- **Yes**: continue.
-
-If `--confirm` was not set, print: "Test plan complete — proceeding to test execution." and continue immediately.
 
 ---
 
