@@ -2,7 +2,7 @@
 
 Behavior test cases for the `mapping-services-under-test` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds five cases covering the skill's substantive decisions: taking the union of route-based and file-path-based dependencies rather than one alone, running its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD`) rather than relying on the caller, sourcing names, URLs, and ports from `references/services.md` rather than recall, returning a minimal set matched by the documented rules rather than a defensively padded one, and prefixing repo-relative diff paths with the canonical repo name so the path-based globs match.
+`behavior-eval.json` holds six cases covering the skill's substantive decisions: taking the union of route-based and file-path-based dependencies rather than one alone, running its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD`) rather than relying on the caller, sourcing names, URLs, and ports from `references/services.md` rather than recall, returning a minimal set matched by the documented rules rather than a defensively padded one, prefixing repo-relative diff paths with the canonical repo name so the path-based globs match, and carrying a supplied `## Required Feature Flags` section into the services artifact while adding `Api`.
 
 Each case's `expectations` are the pass criteria. Cases are **advice-only** and start no services, so re-runs are mutation-safe.
 
@@ -12,7 +12,7 @@ Case 3's expectation about sourcing ports from `references/services.md` is only 
 
 ## Files
 
-- `behavior-eval.json` - the five cases and their 21 expectations, described above.
+- `behavior-eval.json` - the six cases and their 25 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running

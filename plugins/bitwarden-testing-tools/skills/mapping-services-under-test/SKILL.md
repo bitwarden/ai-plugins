@@ -16,6 +16,7 @@ Paths written `${CLAUDE_SKILL_DIR}/...` resolve from this skill's directory; pat
 - **Routes:** list of URLs the tests will navigate to (typically extracted from an Application Context's `## States` section by the calling agent, located within its `APP-CONTEXT` fence). Routes should be fully-qualified URLs including the host; a bare path (no host) is assumed to be a web vault route, so an Admin portal route must include `http://localhost:62911` to be recognized as one.
 - **Affected repos:** the same repos passed to `scoping-playwright-application-context` — used as scope for `git diff`.
 - **Changed files (optional):** each affected repo's changed file paths, repo-relative, as the `services-under-test-mapper` agent supplies them from its diff artifact. A repo listed with no changed files has an empty change set.
+- **Required feature flags (optional):** the Application Context's `## Required Feature Flags` bullets, verbatim, as the calling agent extracts them from within the `APP-CONTEXT` fence. Absent when the Application Context has no such section.
 - **Repo path (standalone only):** when no changed files are supplied, each affected repo's `<repo-path>` is `<bitwarden git root>/<canonical name>` (e.g. `<root>/server`, `<root>/clients`). The caller supplies the root, or it is the working directory; if the working directory is not the bitwarden git root and no root was given, stop and report it (a subagent caller has no interactive channel to answer a question).
 
 ## Procedure
@@ -30,10 +31,13 @@ Paths written `${CLAUDE_SKILL_DIR}/...` resolve from this skill's directory; pat
 5. If the union is empty (e.g., repo-root tooling or CI-config changes with no routes and no service-mapped paths), fall back to the `Web` + `Api` + `Identity` baseline.
 6. Identify the primary test URL — the web vault (`https://localhost:8080`) when any web vault route is present, otherwise the Admin portal (`http://localhost:62911`) when an Admin portal route is present. If no web vault route is present and the union contains `Admin` (a path-only Admin change), the Admin portal is primary. If none applies — no routes matched either, or the union came from the step-5 fallback — default the primary test URL to the web vault (`https://localhost:8080`).
 7. Reconcile the union with the primary test URL: the service that hosts the primary test URL must appear in the union, along with the companions it cannot run without. If the primary test URL is the web vault, ensure `Web`, `Api`, and `Identity` are all in the union; if it is the Admin portal, ensure `Admin` is in the union. Add any that are missing. This closes the gap where a bare-path route (for example `/settings/security/two-step`) matches no host-keyed route clause in `references/services.md`, the union is non-empty from a path-based match alone (for example `{Api}` from a `server/src/Api/**` change), and the primary test URL would otherwise name the web vault without `Web` ever being listed as required.
+8. If required feature flags were supplied, make sure `Api` is in the union, adding it if missing: flag state is read from the running Api's `/config` endpoint, so the Api must be running whenever the run depends on a flag.
 
 ## Output
 
 Return the services artifact wrapped in `<!-- SERVICES START -->` / `<!-- SERVICES END -->`, containing a `## Required Services` section; serialize it once. Below the heading, list each required service as a bullet with name, URL, and port. For a service that documents multiple ports (e.g. `billing-pricing` at 7088 HTTPS and 5082 HTTP), the bullet carries the URL's port — 7088 for `billing-pricing`, matching its `URL` field — and does not surface the separate HTTP health-check port. Mark the **primary test URL** by appending the literal marker `**(primary test URL)**` to its bullet, exactly as spelled here — downstream consumers detect it by that exact string, and it drives the render verification step.
+
+When required feature flags were supplied, add a `## Required Feature Flags` section inside the fence after `## Required Services`, holding the supplied bullets verbatim (each flag line and its `Source:` sub-bullet). Omit the section when none were supplied.
 
 If a stop-and-report condition fires — the bitwarden git root cannot be determined (Inputs), the changed files cannot be obtained (step 1b), a repo cannot be mapped to a canonical name, or a change/route resolves to a service with no `services.md` entry (name the service so the reference can be extended; never invent its Health-check name, URL, or port) — return a plain failure report naming the condition instead of a `<!-- SERVICES START -->` artifact. Do not emit a services fence assembled from partial or guessed data.
 
@@ -49,6 +53,25 @@ Example:
 - Api — `http://localhost:4000` (port 4000)
 - Identity — `http://localhost:33656` (port 33656)
 - Web — `https://localhost:8080` (port 8080) **(primary test URL)**
+
+<!-- SERVICES END -->
+```
+
+Example with required feature flags:
+
+```markdown
+<!-- SERVICES START -->
+
+## Required Services
+
+- Api — `http://localhost:4000` (port 4000)
+- Identity — `http://localhost:33656` (port 33656)
+- Web — `https://localhost:8080` (port 8080) **(primary test URL)**
+
+## Required Feature Flags
+
+- pm-38333-annual-billing-savings: on
+  - Source: `clients/libs/common/src/enums/feature-flag.enum.ts` (`PM38333_AnnualBillingSavings = "pm-38333-annual-billing-savings"`)
 
 <!-- SERVICES END -->
 ```
