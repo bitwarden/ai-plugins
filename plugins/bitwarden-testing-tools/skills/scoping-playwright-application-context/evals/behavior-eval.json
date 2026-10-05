@@ -137,9 +137,9 @@
     },
     {
       "id": 12,
-      "name": "no-payment-trial-uses-shortest-qualifying-chain",
-      "prompt": "Build the application context for a change to the free-trial banner on an organization's vault page. The test needs a trialing Teams organization that has no payment method on file.",
-      "expected_output": "A trial with no payment method on file meets the conditions of both `flow:complete-marketing-trial-signup-without-payment` and `flow:complete-sales-assisted-trial-signup`, and a normal paid-org signup can't produce it. The marketing chain is one flow shorter (the sales-assisted chain needs an Admin portal login first), so it copies the marketing trigger and without-payment flows, producing `state:trialing-org-marketing-without-payment`.",
+      "name": "no-payment-trial-selects-marketing-without-payment",
+      "prompt": "Build the application context for a change to the plan-name label on an organization's subscription page. The test needs a trialing Teams organization that has no payment method on file.",
+      "expected_output": "A trial with no payment method on file is a requirement only `flow:complete-marketing-trial-signup-without-payment` meets: a normal paid-org signup always takes a card, and the sales-assisted flows' condition (an explicit sales-assisted call, the sales-rep banner text, or a sales-assisted Stripe record) is not met. So it copies the marketing trigger and without-payment flows, producing `state:trialing-org-marketing-without-payment`.",
       "expectations": [
         "`flow:complete-marketing-trial-signup-without-payment` appears in `## Flows`, and `state:trialing-org-marketing-without-payment` lists it in `Produced by:`",
         "No flow whose slug contains `sales-assisted` appears in `## Flows`",
