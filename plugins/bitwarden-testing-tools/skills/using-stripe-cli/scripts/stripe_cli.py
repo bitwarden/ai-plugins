@@ -21,17 +21,22 @@ checked key for the call. Pinning goes through STRIPE_API_KEY itself, because
 the CLI reads that variable ahead of every other source, including --api-key.
 A config the wrapper cannot verify is refused, not passed through.
 
-Two operations, both read-only except the single permitted test-clock advance:
+Three operations, all read-only except the single permitted test-clock advance:
   stripe_cli.py read --path /v1/<resource> [--param k=v ...]
+  stripe_cli.py preview-invoice --subscription <subscription_id>
   stripe_cli.py advance-clock --clock <clock_id> --days <n>
 
-advance-clock is the single permitted write: advancing an ALREADY-ATTACHED test
-clock. Everything else that creates, updates, or deletes Stripe state is out of
-scope and unreachable through this script.
+preview-invoice is a POST to /v1/invoices/create_preview, the only form of
+Stripe's upcoming-invoice preview the API still accepts (GET
+/v1/invoices/upcoming is deprecated), but it creates no Stripe object, so it is
+a read. advance-clock is the single permitted write: advancing an
+ALREADY-ATTACHED test clock. Everything else that creates, updates, or deletes
+Stripe state is out of scope and unreachable through this script.
 
-Exit codes: 0 ok; 1 the Stripe CLI failed; 2 usage error; 20 disallowed path or
-malformed test clock id; 21 the key the CLI would use is live, missing, or
-cannot be verified as a test key.
+Exit codes: 0 ok; 1 the Stripe CLI failed, or preview-invoice got a Stripe API
+error; 2 usage error; 20 disallowed path, malformed test clock id, or malformed
+subscription id; 21 the key the CLI would use is live, missing, or cannot be
+verified as a test key.
 """
 import argparse
 import functools
@@ -56,6 +61,10 @@ KEY_FIELDS = ("secret_key", "api_key", "test_mode_api_key")
 # Stripe test clock ids are 'clock_' followed by an alphanumeric token. Anything
 # else is rejected before it can be interpolated into a request path.
 CLOCK_ID_PATTERN = re.compile(r"clock_[A-Za-z0-9]+")
+# Stripe subscription ids are 'sub_' followed by an alphanumeric token. This also
+# rejects schedule ids (sub_sched_...), which create_preview takes under a
+# different parameter.
+SUBSCRIPTION_ID_PATTERN = re.compile(r"sub_[A-Za-z0-9]+")
 CLOCK_POLL_DELAY = 2
 CLOCK_POLL_LIMIT = 60
 SECONDS_PER_DAY = 86400
@@ -221,6 +230,22 @@ def check_clock_id(clock_id):
         )
 
 
+def check_subscription_id(subscription_id):
+    """Reject anything that is not a bare Stripe subscription id.
+
+    The id is sent as the value of a -d parameter rather than in the path, so
+    traversal is not the risk; but it comes from plan content that can originate
+    in untrusted Jira text, and allowing only the documented id shape keeps
+    anything else out of the request.
+    """
+    if not SUBSCRIPTION_ID_PATTERN.fullmatch(subscription_id or ""):
+        raise GuardError(
+            EXIT_PATH,
+            "--subscription must be a Stripe subscription id of the form "
+            f"sub_<alphanumeric>, got: {subscription_id!r}",
+        )
+
+
 def build_read_argv(path, params):
     """argv for a read. Built from scratch, so no caller flag is ever forwarded."""
     argv = ["stripe", "get", path]
@@ -240,6 +265,16 @@ def build_advance_argv(clock_id, frozen_time):
         f"/v1/test_helpers/test_clocks/{clock_id}/advance",
         "-d",
         f"frozen_time={frozen_time}",
+    ]
+
+
+def build_preview_argv(subscription_id):
+    return [
+        "stripe",
+        "post",
+        "/v1/invoices/create_preview",
+        "-d",
+        f"subscription={subscription_id}",
     ]
 
 
@@ -278,8 +313,10 @@ def _run_json(argv, run):
     on them. Left unchecked on an internal clock call, a rejected advance would
     masquerade as success: the loop would see the clock still 'ready' at its old
     frozen_time and report an advance that never happened. Detect the error body
-    here and raise EXIT_CLI so the failure is loud. The read command keeps its
-    pass-through behavior on purpose (see SKILL.md, "Interpreting responses").
+    here and raise EXIT_CLI so the failure is loud. preview-invoice uses it too,
+    so a rejected preview is never printed as if it were an invoice. The read
+    command keeps its pass-through behavior on purpose (see SKILL.md,
+    "Interpreting responses").
     """
     body = run(argv)
     try:
@@ -295,6 +332,16 @@ def _run_json(argv, run):
 
 def _clock(clock_id, run):
     return _run_json(build_get_clock_argv(clock_id), run)
+
+
+def preview_invoice(subscription_id, run):
+    """Return Stripe's preview of the subscription's next invoice.
+
+    The preview includes a pending subscription schedule phase change, so a
+    schedule-managed subscription needs no separate schedule parameter.
+    """
+    check_subscription_id(subscription_id)
+    return _run_json(build_preview_argv(subscription_id), run)
 
 
 def advance_clock(clock_id, days, run, sleep):
@@ -359,6 +406,11 @@ def main(argv, env):
     read.add_argument("--path", required=True)
     read.add_argument("--param", action="append", default=[])
 
+    preview = sub.add_parser(
+        "preview-invoice", help="preview a subscription's next invoice"
+    )
+    preview.add_argument("--subscription", required=True)
+
     advance = sub.add_parser("advance-clock", help="advance an attached test clock")
     advance.add_argument("--clock", required=True)
     advance.add_argument("--days", type=int, required=True)
@@ -373,6 +425,9 @@ def main(argv, env):
         if args.command == "read":
             check_path(args.path)
             sys.stdout.write(run(build_read_argv(args.path, args.param)))
+        elif args.command == "preview-invoice":
+            preview = preview_invoice(args.subscription, run)
+            print(json.dumps(preview, indent=2))
         else:
             check_clock_id(args.clock)
             if args.days < 1:

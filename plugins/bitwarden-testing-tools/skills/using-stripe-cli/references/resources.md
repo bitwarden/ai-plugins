@@ -2,7 +2,7 @@
 
 Only read operations are listed. Creating, updating, deleting, attaching, detaching, paying, voiding, finalizing, cancelling, refunding, or closing any resource is out of scope for this read-only skill. The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
 
-Every operation below is a `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path <path>` call. The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
+Every operation below is a `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path <path>` call, except the invoice preview, which has its own `preview-invoice` subcommand (see `## invoices`). The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
 
 Search paths (`.../search`) require a `query` parameter, for example `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path /v1/customers/search --param query="email:'qa@example.com'"`.
 
@@ -23,9 +23,10 @@ Search paths (`.../search`) require a `query` parameter, for example `${CLAUDE_P
 ## invoices
 
 - **Base path**: `/v1/invoices` (append `/<id>` to retrieve, `/search` to search)
-- **Read operations**: retrieve, list, search
+- **Read operations**: retrieve, list, search, preview the next invoice
+- **Preview**: `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py preview-invoice --subscription <sub_id>`, which sends `POST /v1/invoices/create_preview` and creates nothing. `GET /v1/invoices/upcoming` is deprecated and returns an error, and `read` cannot reach `create_preview` because that endpoint accepts only POST. The preview includes a pending subscription schedule phase change. See "Previewing the next invoice" in the skill body.
 - **Key fields**: id, customer, parent.subscription_details.subscription (the related subscription; the top-level `subscription` field was removed in `2025-03-31.basil`), status, amount_due, amount_paid, amount_remaining, due_date, lines, payments (list; the top-level `payment_intent` field was removed in `2025-03-31.basil` — a payment intent is now reached at `payments.data.payment.payment_intent`), hosted_invoice_url, metadata
-- **Common queries**: "Show me recent invoices for this customer", "What's the payment status?"
+- **Common queries**: "Show me recent invoices for this customer", "What's the payment status?", "What will this subscription's next invoice be?"
 
 ## payment_intents
 

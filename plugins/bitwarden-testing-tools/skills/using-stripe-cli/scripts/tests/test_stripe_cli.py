@@ -262,6 +262,28 @@ class CheckClockIdTest(unittest.TestCase):
             stripe_cli.check_clock_id("")
 
 
+class CheckSubscriptionIdTest(unittest.TestCase):
+    def test_bare_subscription_id_is_accepted(self):
+        stripe_cli.check_subscription_id("sub_1234567890abcdef")
+
+    def test_injection_shaped_subscription_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.check_subscription_id("sub_1&customer=cus_2")
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_PATH)
+
+    def test_flag_shaped_subscription_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_subscription_id("sub_1 --live")
+
+    def test_schedule_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_subscription_id("sub_sched_1abc")
+
+    def test_empty_subscription_id_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_subscription_id("")
+
+
 class BuildArgvTest(unittest.TestCase):
     def test_read_argv_forwards_no_caller_flag(self):
         argv = stripe_cli.build_read_argv("/v1/customers", ["limit=3"])
@@ -280,6 +302,51 @@ class BuildArgvTest(unittest.TestCase):
             ],
         )
         self.assertNotIn("--live", argv)
+
+    def test_preview_argv_posts_only_the_subscription(self):
+        argv = stripe_cli.build_preview_argv("sub_1")
+        self.assertEqual(
+            argv,
+            [
+                "stripe", "post", "/v1/invoices/create_preview",
+                "-d", "subscription=sub_1",
+            ],
+        )
+        self.assertNotIn("--live", argv)
+
+
+class PreviewInvoiceTest(unittest.TestCase):
+    def test_returns_the_parsed_preview(self):
+        calls = []
+
+        def run(argv):
+            calls.append(argv)
+            return json.dumps({"object": "invoice", "subtotal": 24000})
+
+        preview = stripe_cli.preview_invoice("sub_1", run)
+        self.assertEqual(preview["subtotal"], 24000)
+        self.assertEqual(calls, [stripe_cli.build_preview_argv("sub_1")])
+
+    def test_malformed_subscription_id_never_reaches_the_cli(self):
+        calls = []
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.preview_invoice("sub_1&customer=cus_2", calls.append)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_PATH)
+        self.assertEqual(calls, [])
+
+    def test_error_payload_fails_loudly(self):
+        # The Stripe CLI exits 0 with an {"error": {...}} body for an unknown
+        # subscription, so the preview must raise rather than print it as data.
+        def run(_argv):
+            return json.dumps(
+                {"error": {"type": "invalid_request_error",
+                           "message": "No such subscription: 'sub_1'"}}
+            )
+
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.preview_invoice("sub_1", run)
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_CLI)
+        self.assertIn("No such subscription", cm.exception.message)
 
 
 class AdvanceClockTest(unittest.TestCase):
@@ -505,6 +572,30 @@ class MainGuardOrderingTest(unittest.TestCase):
         code, _err = self._main(
             ["advance-clock", "--clock", "clock_1/../../customers", "--days", "1"],
             self.env,
+        )
+        self.assertEqual(code, stripe_cli.EXIT_PATH)
+        self.assertEqual(self.invocations, [])
+
+    def test_live_key_spawns_no_cli_on_preview_invoice(self):
+        code, _err = self._main(
+            ["preview-invoice", "--subscription", "sub_1"],
+            {"STRIPE_API_KEY": "sk_live_abcdef"},
+        )
+        self.assertEqual(code, stripe_cli.EXIT_KEY)
+        self.assertEqual(self.invocations, [])
+
+    def test_preview_invoice_passes_the_checked_key_to_the_cli(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            code, _err = self._main(
+                ["preview-invoice", "--subscription", "sub_1"], self.env
+            )
+        self.assertEqual(code, stripe_cli.EXIT_OK)
+        self.assertEqual(self.keys, ["sk_test_fixture"])
+        self.assertEqual(self.invocations, [stripe_cli.build_preview_argv("sub_1")])
+
+    def test_malformed_subscription_id_spawns_no_cli(self):
+        code, _err = self._main(
+            ["preview-invoice", "--subscription", "sub_sched_1abc"], self.env
         )
         self.assertEqual(code, stripe_cli.EXIT_PATH)
         self.assertEqual(self.invocations, [])

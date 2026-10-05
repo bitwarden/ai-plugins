@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `reading-mailcatcher-api`, reading Bitwarden emails through the Mailcatcher REST API for verification links, magic links, and tokens, directly invocable outside a test run. Includes a trigger eval recorded as an on-demand prose reading.
-- `using-stripe-cli`, read-only Stripe test-mode data queries plus the single permitted write of advancing an already-attached test clock, through the `stripe_cli.py` wrapper. Includes a trigger eval and advice-only behavior evals, both recorded as on-demand prose readings.
+- `using-stripe-cli`, read-only Stripe test-mode data queries, a preview of a subscription's next invoice (`POST /v1/invoices/create_preview`, which creates nothing, because `GET /v1/invoices/upcoming` is deprecated), and the single permitted write of advancing an already-attached test clock, through the `stripe_cli.py` wrapper. Includes a trigger eval and advice-only behavior evals, both recorded as on-demand prose readings.
 - `scripts/eval_harness.py`, a shared trigger-eval runner that per-skill eval scripts configure rather than copy.
 
 ## [1.2.0] - 2026-09-14
