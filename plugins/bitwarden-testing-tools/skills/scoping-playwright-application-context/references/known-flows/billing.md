@@ -270,7 +270,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 - `server/src/Core/Billing/Enums/ProductType.cs` (`PasswordManager = 0`) — the fixed `products` value
 - `server/src/Core/Billing/Models/Mail/TrialInititaionVerifyEmail.cs` (`if (IsExistingUser)`, `return "create-organization";`, `? "trial-initiation"`; in order) — the emailed link's route
 - `clients/apps/web/src/app/billing/trial-initiation/trial-billing-step/trial-billing-step.service.ts` (`skipTrial: trial.length === 0,`) — a trial length of `0` skips the trial
-- `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts` (`stepperProductTypes: ProductTierType[] = [`) — the tiers the trial stepper renders for
+- `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts` (`stepperProductTypes: ProductTierType[] = [`, `ProductTierType.Teams,`, `ProductTierType.Enterprise,`, `ProductTierType.Families,`; in order) — the tiers the trial stepper renders for
 
 ---
 
@@ -293,12 +293,14 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 3. Fill "Organization name" with `<orgName>`; click "Next"
    - Feedback: the "Billing" step opens
 4. When `<cadence>` is `monthly`, click the Monthly radio (`#monthly-cadence-button`); otherwise leave Annually, the default. Families offers Annually only
-5. Fill the card number, expiry, and CVC iframes as in `flow:purchase-premium-subscription` steps 3–5
-6. Set Country to `United States` and fill the ZIP / Postal code field with `12345`
-7. Click "Start trial"
+5. Fill the card number iframe (`frameLocator('[title="Secure card number input frame"]')`): `4242424242424242`
+6. Fill the expiry iframe (`frameLocator('[title="Secure expiration date input frame"]')`): `12/29`
+7. Fill the CVC iframe (`frameLocator('[title="Secure CVC input frame"]')`): `123`
+8. Set Country to `United States` and fill the ZIP / Postal code field with `12345`
+9. Click "Start trial"
    - Feedback: the "Confirmation Details" step opens
-8. Click "Get Started"
-   - Feedback: redirect to the new organization's vault
+10. Click "Get Started"
+    - Feedback: redirect to the new organization's vault
 
 **Post-condition state(s):**
 
@@ -309,7 +311,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 - `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html` (`label="Create Account"`, `{ key: 'createAccount' }`, `label="Organization Information"`, `[nameOnly]="true"`, `("startTrial" | i18n) : ("next" | i18n)`, `label="Billing"`, `label="Confirmation Details"`, `"getStarted" | i18n | titlecase`; in order) — the wizard's step order and buttons
 - `clients/apps/web/src/app/billing/trial-initiation/trial-billing-step/trial-billing-step.component.html` (`id="annual-cadence-button"`, `@if (prices.monthly)`, `id="monthly-cadence-button"`, `"startTrial" : "submit"`; in order) — the cadence radios (monthly only when a monthly price exists) and the "Start trial" button
 - `clients/apps/web/src/app/billing/trial-initiation/trial-billing-step/trial-billing-step.component.ts` (`new FormControl<Cadence>(Cadences.Annually`) — Annually is the default cadence
-- `clients/apps/web/src/app/billing/trial-initiation/trial-billing-step/trial-billing-step.service.ts` (`? { type: planType, passwordManagerSeats: 1 }`) — one user seat
+- `clients/apps/web/src/app/billing/trial-initiation/trial-billing-step/trial-billing-step.service.ts` (`case "families": {`, `annually: annually!.PasswordManager.basePrice,`, `case "teams":`, `? { type: planType, passwordManagerSeats: 1 }`; in order) — Families has an annual price only; one user seat
 
 ---
 
@@ -341,7 +343,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 **Sources:**
 
 - `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html` (`label="Create Account"`, `{ key: 'createAccount' }`, `label="Organization Information"`, `[nameOnly]="true"`, `("startTrial" | i18n) : ("next" | i18n)`, `*ngIf="showBillingStep"`, `label="Confirmation Details"`, `"getStarted" | i18n | titlecase`; in order) — the wizard's step order and buttons
-- `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts` (`return PlanType.TeamsAnnually;`, `return !this.paymentOptional && !this.isSecretsManagerFree;`; in order) — the no-payment path's annual plan and the skipped billing step
+- `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts` (`return PlanType.TeamsAnnually;`, `return PlanType.EnterpriseAnnually;`, `return PlanType.FamiliesAnnually;`, `return !this.paymentOptional && !this.isSecretsManagerFree;`; in order) — the no-payment path's annual plan and the skipped billing step
 
 ---
 
@@ -370,13 +372,13 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
    }
    ```
    `<productTier>` is `1` (Families), `2` (Teams), or `3` (Enterprise). `<trialLength>` must be at least `1`.
-2. Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths). The account's earlier signup email matches the same pattern and the reader takes the newest match, so if stdout is a `finish-signup` link the trial email has not arrived yet: re-run the reader until stdout contains `/#/create-organization?`, and capture that URL.
+2. Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths). The account's earlier signup email matches the same pattern and the reader takes the newest match, so if stdout is a `finish-signup` link the trial email has not arrived yet: re-run the reader, up to 5 times a few seconds apart, until stdout contains `/#/create-organization?`, and capture that URL. If it never does, stop and report that the trial email did not arrive.
    - Feedback: a `https://localhost:8080/#/create-organization?...` URL is on stdout
 3. Navigate to that URL in the same logged-in browser
    - Feedback: the Create organization page opens with the `<productTier>` plan preselected (at `/#/settings/add-plan` instead when the `VFO1Foundation` flag is on)
 4. Fill "Organization name" with `<orgName>` and "Billing email" with `<billingEmail>`
-5. If `<productTier>` is Teams or Enterprise, set "User seats" to `<seats>`
-6. Under "Summary", click the radio labelled "Monthly" when `<cadence>` is `monthly`, or "Annually" when it is `annually`; Families offers Annually only
+5. If `<productTier>` is `2` (Teams) or `3` (Enterprise), set "User seats" to `<seats>`
+6. Under "Summary", click the radio labelled "Monthly" when `<cadence>` is `monthly`, or "Annually" when it is `annually`; Families offers Annually only (`<productTier>` `1`)
 7. In the Payment information section, leave "Credit card" selected and fill the card number iframe (`frameLocator('[title="Secure card number input frame"]')`): `4242424242424242`
 8. Fill the expiry iframe (`frameLocator('[title="Secure expiration date input frame"]')`): `12/29`
 9. Fill the CVC iframe (`frameLocator('[title="Secure CVC input frame"]')`): `123`
@@ -468,4 +470,4 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 - `server/src/Core/Billing/Models/Mail/Mailer/SalesAssistedTrialInvitationEmailView.cs` (`&salesAssistedToken={WebUtility.UrlEncode(Token)}`, `"&paymentOptional=true&fromEmail=true"`; in order) — the link's token and no-payment parameters
 - `clients/apps/web/src/app/oss-routing.module.ts` (`path: "trial-initiation",`, `canActivate: [unauthGuardFn()],`; in order) — the link's page requires a logged-out browser
 - `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html` (`label="Create Account"`, `{ key: 'createAccount' }`, `label="Organization Information"`, `[nameOnly]="true"`, `("startTrial" | i18n) : ("next" | i18n)`, `*ngIf="showBillingStep"`, `label="Confirmation Details"`, `"getStarted" | i18n | titlecase`; in order) — the wizard's step order and buttons
-- `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts` (`InitiationPath.SalesAssistedTrialFromAdminPortal`, `return PlanType.TeamsAnnually;`; in order) — the sales-assisted initiation path and the annual plan
+- `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts` (`InitiationPath.SalesAssistedTrialFromAdminPortal`, `return PlanType.TeamsAnnually;`, `return PlanType.EnterpriseAnnually;`, `return PlanType.FamiliesAnnually;`; in order) — the sales-assisted initiation path and the annual plan
