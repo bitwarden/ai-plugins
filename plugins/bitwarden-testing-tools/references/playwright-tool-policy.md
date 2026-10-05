@@ -32,7 +32,7 @@ Some flows begin with an action that a system _outside_ the Bitwarden applicatio
 
 ## Category 4 - Stripe Data Queries (read-only)
 
-Read-only Stripe test-mode queries, plus the single permitted write of advancing an already-attached test clock, are owned by the `using-stripe-cli` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/SKILL.md`. Stripe is never used to set up state the application's own flows can create, and never for any other write.
+Read-only Stripe test-mode queries, including a preview of a subscription's next invoice, plus the single permitted write of advancing an already-attached test clock, are owned by the `using-stripe-cli` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/SKILL.md`. The invoice preview is sent as a POST to `/v1/invoices/create_preview`, but it creates and changes nothing, so it counts as a read. Stripe is never used to set up state the application's own flows can create, and never for any other write.
 
 ## Never Permitted
 
@@ -40,7 +40,7 @@ Read-only Stripe test-mode queries, plus the single permitted write of advancing
 - API calls that substitute for UI actions a user could perform in the browser
 - Using API calls to verify test results when the outcome is observable in the UI (always assert via `playwright-cli` instead)
 - CLI tools not related to service startup (the `using-stripe-cli` wrapper script excepted when used read-only per Category 4)
-- Stripe write operations (POST, PUT, DELETE) — creating coupons, modifying subscriptions, updating customers, or any other Stripe state change — **except the single sanctioned test-clock advance owned by the `using-stripe-cli` skill (Category 4)**
+- Stripe write operations, meaning any request that changes Stripe state whatever its HTTP method — creating coupons, modifying subscriptions, updating customers, or any other create, update, or delete — **except the single sanctioned test-clock advance owned by the `using-stripe-cli` skill (Category 4)**. The invoice preview's POST changes nothing and is a Category 4 read, not a write.
 - Editing feature flags or any other application configuration
 
 ## Stop Condition
