@@ -21,7 +21,7 @@ If the raw input is empty, show the user the usage line from this skill's `argum
 | Ends with `.md`, or otherwise reads as a filesystem path. A URL is never a plan file.                                                                       | `plan-file`   | The token as given   |
 | Anything else                                                                                                                                               | `description` | The entire raw input |
 
-**Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent. If it references other tickets, research them with the skills available to you.
+**Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent, and pass them verbatim to the scoper in Task 3. If it references other tickets, research them with the skills available to you.
 
 **Generate timestamp** (`YYYYMMDD-HHmm`) once now. Reuse it for all artifact filenames and <timestamp> placeholders in this run.
 
@@ -104,7 +104,10 @@ Dispatch `playwright-application-context-scoper` with:
 ```
 Context artifact path: <artifacts-output-dir>/context-<timestamp>.md
 Diff artifact path: <artifacts-output-dir>/diff-<timestamp>.md
+Extra instructions: <the extra instructions from Task 1, verbatim>
 ```
+
+Include the `Extra instructions:` line only when Task 1 captured extra instructions; omit this line otherwise. The scoper uses it to tell whether the run calls for a marketing-initiated or sales-assisted trial.
 
 Wait for completion. The agent returns the Application Context as a markdown response.
 
