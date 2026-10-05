@@ -19,7 +19,7 @@ This plugin holds Bitwarden's testing and quality tooling in two families.
 - **Dev infrastructure (containers)**: start Bitwarden's mssql, mailcatcher, and azurite containers via either Docker Compose (`server/dev/docker-compose.yml`) or .NET Aspire (`server/AppHost`).
 - **Application services**: start the web frontend (`clients` Nx workspace, `nx serve web --configuration=commercial`), plus the .NET services your test will touch (typically `Api`, `Identity`, and depending on scope `Billing`, `billing-pricing`, `Admin` / Bitwarden Portal, `Notifications`, `Events`, `Icons`).
 
-The `checking-localhost-web-health` skill confirms Docker dev containers, application `/alive` endpoints, and the Angular bootstrap before tests begin. If anything is missing it halts with a hint pointing to what to start.
+The `checking-localhost-web-health` skill confirms Docker dev containers, application `/alive` endpoints, required feature flags, and the Angular bootstrap before tests begin. If anything is missing or a flag is in the wrong state, it halts with a hint pointing to what to start or change.
 
 ## Skills
 
