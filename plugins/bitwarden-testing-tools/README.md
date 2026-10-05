@@ -117,7 +117,7 @@ Recommend which tests to add and at which layer for PM-32009.
 Invoke the orchestration skill:
 
 ```bash
-/start-playwright-test <jira-ticket-id | feature-plan-path | feature-description> [--confirm]
+/start-playwright-test <jira-ticket-id | feature-plan-path | feature-description>
 ```
 
 The first argument is the source the test run is built from: a Jira ticket key, a Jira browse URL, or a path to an implementation plan. When it is one of those, anything typed after it reaches the orchestrator as extra guidance, which it folds into the instructions it gives each agent. If the first argument is none of those, the whole input is read as a plain description of the feature to test.
@@ -129,12 +129,8 @@ The first argument is the source the test run is built from: a Jira ticket key, 
 /start-playwright-test https://bitwarden.atlassian.net/browse/PM-1234
 /start-playwright-test PM-1234 focus on the owner role
 /start-playwright-test ~/code/bitwarden/server/plans/PM-1234-billing-ui.md
-/start-playwright-test "exempt orgs from billing automation when the flag is set" --confirm
+/start-playwright-test "exempt orgs from billing automation when the flag is set"
 ```
-
-**Flags:**
-
-- `--confirm`: pause after the test plan is built and display the test cases for review before executing.
 
 ## How the pipeline works
 

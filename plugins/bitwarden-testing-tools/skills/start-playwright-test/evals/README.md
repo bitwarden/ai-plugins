@@ -4,7 +4,7 @@ Two suites for the `bitwarden-testing-tools:start-playwright-test` orchestrator 
 
 ## `trigger-eval.json`
 
-20-query trigger-rate set for the orchestrator. 10 should-trigger phrasings covering all three input types (Jira key, Jira browse URL, plan file path, and free-form description), the `--confirm` review gate, and extra-guidance phrasings. 10 should-not-trigger near-misses that share the vocabulary but want something else: a backward-looking coverage inventory (which belongs to `assessing-test-coverage`), authoring a committed spec file, debugging a flaky test, starting the dev environment, test-layer strategy advice, PR review, test-pyramid explanation, running the existing jest suite, fixing a broken build, and writing manual QA notes.
+20-query trigger-rate set for the orchestrator. 10 should-trigger phrasings covering all three input types (Jira key, Jira browse URL, plan file path, and free-form description) and extra-guidance phrasings. 10 should-not-trigger near-misses that share the vocabulary but want something else: a backward-looking coverage inventory (which belongs to `assessing-test-coverage`), authoring a committed spec file, debugging a flaky test, starting the dev environment, test-layer strategy advice, PR review, test-pyramid explanation, running the existing jest suite, fixing a broken build, and writing manual QA notes.
 
 Two of those near-misses deliberately target sibling tooling. `assessing-test-coverage` now lives in this same plugin, and `qa-testing-notes` is a separate skill, so proving no cross-fire is part of the set's job.
 

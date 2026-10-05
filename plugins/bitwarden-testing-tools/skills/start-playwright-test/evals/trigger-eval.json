@@ -28,11 +28,11 @@
     "should_trigger": true
   },
   {
-    "query": "spin up automated UI coverage for the changes on my current branch, let me review the cases before it runs",
+    "query": "spin up automated UI coverage for the changes on my current branch and run it against my local stack",
     "should_trigger": true
   },
   {
-    "query": "drive PM-40013 through the web test pipeline and pause so I can approve the plan first",
+    "query": "drive PM-40013 through the web test pipeline and give me the report when it finishes",
     "should_trigger": true
   },
   {
