@@ -151,6 +151,11 @@ class BlockedTest(unittest.TestCase):
     def test_gatherer_bash_is_blocked(self):
         self.assertBlocked(bash("echo hi", GATHERER))
 
+    def test_bash_block_message_does_not_mention_the_diff_artifact(self):
+        # The gatherer gets the same message and has no diff artifact.
+        _code, err = run_hook(bash("echo hi", GATHERER))
+        self.assertNotIn("diff artifact", err)
+
     def test_foreign_forked_skill_is_blocked(self):
         self.assertBlocked(skill(FORKED_SKILL), message=SKILL_BLOCK)
 
