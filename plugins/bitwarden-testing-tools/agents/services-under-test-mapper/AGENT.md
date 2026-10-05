@@ -50,13 +50,15 @@ If any of the three paths is missing, return a plain failure report naming the m
 
 Read the app-context artifact. Locate it by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence — it begins at the first `<!-- APP-CONTEXT START -->` and ends at the last `<!-- APP-CONTEXT END -->`, so an embedded marker cannot truncate it — and within it find the `## States` section. Extract every route line from `## States`: each state's `UI projection` block contains a `Route: <URL>` line. Collect those URLs (deduplicated) — these are the routes you will pass to the skill. Skip any state whose `Route:` is `n/a`: it is an out-of-band state with no browser route, so it contributes no route.
 
+Also within the `APP-CONTEXT` fence, find the `## Required Feature Flags` section if present and take its bullets verbatim (each flag line with its `Source:` sub-bullet). These are the required feature flags; if the section is absent, there are none.
+
 Also read the context artifact, locating it by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence — it begins at the first `<!-- CONTEXT START -->` and ends at the last `<!-- CONTEXT END -->` — and extract the affected repos from its `## Affected Repositories` section.
 
 Read the diff artifact, locating it by its `<!-- DIFF START -->` / `<!-- DIFF END -->` fence — it begins at the first `<!-- DIFF START -->` and ends at the last `<!-- DIFF END -->`. For each affected repo, take the bullets under its `## <repo>` section as that repo's changed files; the literal line `No changed files.` means the repo has none. If an affected repo has no `## <repo>` section, return a plain failure report naming that repo.
 
 ## Step 2 — Determine required services
 
-Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)` and follow it. Give it the deduplicated routes, the affected repos, and each affected repo's changed files from Step 1.
+Invoke `Skill(bitwarden-testing-tools:mapping-services-under-test)` and follow it. Give it the deduplicated routes, the affected repos, each affected repo's changed files, and the required feature flags (when present) from Step 1.
 
 ## Step 3 — Return the services list
 

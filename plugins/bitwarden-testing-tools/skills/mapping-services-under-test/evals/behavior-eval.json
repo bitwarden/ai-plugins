@@ -1,7 +1,7 @@
 {
   "skill_name": "mapping-services-under-test",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the output in the five places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD` inside the repo) rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; (d) it returns a minimal set matched by the documented rules rather than a defensively padded list; and (e) it prefixes each repo-relative diff path with the repo's canonical name before matching, so paths line up with the canonical-name-keyed globs in `references/services.md` rather than silently matching nothing.",
+  "purpose": "Prove the skill changes the output in the six places it is load-bearing: (a) it returns the union of route-based and file-path-based service dependencies rather than only the services the routes imply; (b) it runs its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD` inside the repo) rather than relying on the caller to supply changed paths; (c) it sources service names, URLs, and ports from `references/services.md` rather than recalling them; (d) it returns a minimal set matched by the documented rules rather than a defensively padded list; (e) it prefixes each repo-relative diff path with the repo's canonical name before matching, so paths line up with the canonical-name-keyed globs in `references/services.md` rather than silently matching nothing; and (f) it carries a supplied `## Required Feature Flags` section into the services artifact verbatim and adds `Api` whenever that section is present.",
   "evals": [
     {
       "id": 1,
@@ -62,6 +62,18 @@
         "Includes Admin, matched via `server/src/Admin/**` only after prefixing",
         "Does not silently drop the path-derived service by matching an unprefixed `src/Admin/...` path against a repo-prefixed glob",
         "Returns the union of the route-derived services (Web, Api, Identity) and the path-derived Admin"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "carries-required-flags-and-adds-api",
+      "prompt": "Determine the required services. Routes from the Application Context: http://localhost:62911/organizations. Affected repo: server, with one changed file: src/Admin/Controllers/OrganizationsController.cs. The Application Context also has this section:\n\n## Required Feature Flags\n\n- pm-38333-annual-billing-savings: on\n  - Source: `server/src/Core/Constants.cs` (`PM38333_AnnualBillingSavings`)",
+      "expected_output": "Returns Admin with the Admin portal as the primary test URL, adds Api because a required feature flag is present, and carries the `## Required Feature Flags` section verbatim inside the SERVICES fence after `## Required Services`.",
+      "expectations": [
+        "Includes `Admin` with `http://localhost:62911` marked as the primary test URL",
+        "Includes `Api` even though no route or changed path requires it, because a required feature flag is present",
+        "Carries the `## Required Feature Flags` section and its bullet verbatim inside the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence, after `## Required Services`",
+        "Does not add services that neither the documented rules nor the flag requirement call for"
       ]
     }
   ]
