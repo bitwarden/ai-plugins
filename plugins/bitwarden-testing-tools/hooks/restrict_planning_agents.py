@@ -30,9 +30,8 @@ AGENT_SKILLS = {
     "playwright-test-context-gatherer": "bitwarden-atlassian-tools:researching-jira-issues",
 }
 BASH_BLOCK_MESSAGE = (
-    "No Bash command may run in this agent (bitwarden-testing-tools policy). "
-    "The changed files come from the diff artifact the caller passes in; report "
-    "this step as an obstacle."
+    "No Bash command may run in this agent (bitwarden-testing-tools policy); "
+    "report this step as an obstacle."
 )
 SKILL_BLOCK_TEMPLATE = (
     "Only the {skill} skill may be invoked in this agent (bitwarden-testing-tools "
