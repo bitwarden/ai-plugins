@@ -1,6 +1,6 @@
 ---
 name: start-playwright-test
-description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services but never starts them. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions.
+description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services and required feature flags but never starts services or changes flags. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions.
 argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions]"
 allowed-tools: "Agent, Read, Write, Bash(mkdir *), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh *)"
 ---
@@ -185,8 +185,8 @@ Artifacts output dir: <artifacts-output-dir>
 
 Wait for completion. The agent will return either:
 
-- A one-line success of the form `Environment verified: <N> services healthy, render OK.`
-- Or an error block from the checking-localhost-web-health skill (preflight failure, health-check timeout, or render failure).
+- A one-line success of the form `Environment verified: <N> services healthy, render OK.`, or `Environment verified: <N> services healthy, <M> feature flag(s) as required, render OK.` when the plan lists required feature flags.
+- Or an error block from the checking-localhost-web-health skill (preflight failure, health-check timeout, a required feature flag in the wrong state, or render failure).
 
 If the response is **not** the success confirmation, paste the response to the user and halt the run. Do not dispatch `playwright-test-runner` and do not write any artifact. If it is the success confirmation, proceed to Task 8.
 
