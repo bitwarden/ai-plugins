@@ -68,7 +68,7 @@ Read-only Stripe test-mode queries, including a preview of a subscription's next
 - Using API calls to verify test results when the outcome is observable in the UI (always assert via `playwright-cli` instead)
 - CLI tools not related to service startup (the `bitwarden-stripe-tools:using-stripe-cli` wrapper script excepted when used read-only per Category 4)
 - Stripe write operations, meaning any request that changes Stripe state whatever its HTTP method — creating coupons, modifying subscriptions, updating customers, or any other create, update, or delete — **except the single sanctioned test-clock advance owned by the `bitwarden-stripe-tools:using-stripe-cli` skill (Category 4)**. The invoice preview's POST changes nothing and is a Category 4 read, not a write.
-- Editing feature flags or any other application configuration
+- Editing feature flags or any other application configuration. Reading flag state is permitted: the health check (`checking-localhost-web-health`) reads each required flag from the running Api before any test runs, and that is the sanctioned way to learn a flag's state.
 
 ## Stop Condition
 
