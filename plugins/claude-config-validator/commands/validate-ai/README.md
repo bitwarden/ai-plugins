@@ -116,14 +116,14 @@ rather than by its turn count.
 
 - **GitHub CLI (`gh`)**, authenticated, with access to the repository
 - **`plugin-dev` plugin** for the plugin and skill sections. Install it with
-  `/plugin install plugin-dev@claude-code-plugins`, from the `claude-code-plugins`
-  marketplace at `anthropics/claude-code`. Without it those sections are reported as
+  `/plugin install plugin-dev@claude-plugins-official`, from the `claude-plugins-official`
+  marketplace at `anthropics/claude-plugins-official`. Without it those sections are reported as
   skipped, not silently dropped.
 
 ## Permissions
 
 The command pre-approves only read-only inspection: `gh pr view`, `gh pr diff`,
-`git rev-parse`, `ls`, and reading `GITHUB_ACTIONS`. An `Edit(//tmp/validation-summary.md)`
+`git rev-parse`, `ls`, and reading `GITHUB_ACTIONS`. `WebFetch` is scoped to `code.claude.com`, the one host it needs to check a finding's claim about Claude Code's schema against the official documentation. An `Edit(//tmp/validation-summary.md)`
 rule scopes the one file the command produces, `/tmp/validation-summary.md` — the doubled
 slash is permission-rule syntax for "absolute from the filesystem root", not part of the
 path. It is an `Edit` rule rather than a `Write` one because Claude Code consults
