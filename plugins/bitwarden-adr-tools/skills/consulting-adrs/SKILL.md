@@ -8,7 +8,7 @@ agent: general-purpose
 background: false
 ---
 
-# Validate against ADRs
+# Consulting ADRs
 
 Check the design, diff, plan, or threat model under review against Bitwarden's Architecture Decision Records. Return findings; the caller decides what to do with them.
 
@@ -18,7 +18,7 @@ If the ask is to locate or summarize ADRs rather than validate a specific change
 
 ## Input
 
-This skill runs in its own context and sees nothing of the calling conversation. Everything it evaluates arrives in the invocation: the design, diff, plan, or threat model to check, or the catalog request.
+This skill runs in its own context and sees nothing of the calling conversation. Everything it evaluates arrives in the invocation: the design, diff, plan, or threat model to check, or the catalog request. Optionally, it also carries a path to a local `bitwarden/contributing-docs` checkout; without one, fetch the site.
 
 For a validation ask, the subject needs enough substance for Step 1 to be real work, meaning the domain it touches and the specific elements at stake (new contracts, fields, trust boundaries, dependencies, cross-client patterns). A one-line description is not a subject.
 
@@ -36,7 +36,7 @@ If no subject was passed, say so in one line and stop. Do not fetch the catalog,
 
 ## Output
 
-Fill this template. Output nothing before the first finding line and nothing after the roll-up.
+For a validation ask with findings, fill this template. Output nothing before the first finding line and nothing after the roll-up.
 
 ```
 [CONFLICT] <summary>. ADR <n> <title> (<status>, <url or local path>); decision: "<text>"; in change: <element>.
