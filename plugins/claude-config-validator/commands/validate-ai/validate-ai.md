@@ -166,7 +166,10 @@ local checkout, use `/validate-ai-local`.
 
 ## 5. Write the report
 
-Before writing, check every finding that says a field, key, or value is invalid, unknown, unsupported, or deprecated against the official documentation, as the scope reference's schema-claims section describes. The checks in step 4 work from a fixed schema, so this is what keeps a documented field from being reported as a defect on the pull request.
+Before writing, check every finding that says a field, key, or value is invalid, unknown,
+unsupported, or deprecated against the official documentation, as the scope reference's
+schema-claims section describes. The checks in step 4 work from a fixed schema, so this is
+what keeps a documented field from being reported as a defect on the pull request.
 
 Write the full report to `/tmp/validation-summary.md`, following the report contract in the
 scope reference, which also carries the write-once rule and the completion marker. Both are

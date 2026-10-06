@@ -155,7 +155,10 @@ directly from the working tree. There is no `.claude-pr/` snapshot to redirect t
 
 ## 7. Write the report
 
-Before writing, check every finding that says a field, key, or value is invalid, unknown, unsupported, or deprecated against the official documentation, as the scope reference's schema-claims section describes. Sections 4 through 6 work from a fixed schema, so this is what keeps a documented field from being reported as a defect.
+Before writing, check every finding that says a field, key, or value is invalid, unknown,
+unsupported, or deprecated against the official documentation, as the scope reference's
+schema-claims section describes. Sections 4 through 6 work from a fixed schema, so this is
+what keeps a documented field from being reported as a defect.
 
 Write the full report to
 `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md`, where `<repo>` is
