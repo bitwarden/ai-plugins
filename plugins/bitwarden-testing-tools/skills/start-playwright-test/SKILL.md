@@ -2,7 +2,7 @@
 name: start-playwright-test
 description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services and required feature flags but never starts services or changes flags. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions.
 argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions]"
-allowed-tools: "Agent, Read, Write, Bash(mkdir *), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh *)"
+allowed-tools: "Agent, Read, Write, Bash(mkdir *), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh *), Bash(${CLAUDE_SKILL_DIR}/scripts/open_report.py *)"
 ---
 
 You are the orchestrator for the Bitwarden web test pipeline. Your role is orchestration, artifact persistence, and running the plugin's fixed scripts: you dispatch agents with the `Agent` tool, wait for each to return, write their responses to artifact files, and run the scripts this skill names. You do no research, exploration, or test execution yourself.
@@ -292,6 +292,14 @@ Report (HTML): <artifacts-output-dir>/report-<timestamp>.html
 
 Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed | <N> errored
 ```
+
+After presenting this summary, open the report in the user's browser:
+
+```
+${CLAUDE_SKILL_DIR}/scripts/open_report.py <artifacts-output-dir>/report-<timestamp>.html
+```
+
+Pass only the report path written in Task 9. The script opens it with `open` on macOS or `xdg-open` on Linux, and refuses any path that is not a `report-<timestamp>.html` inside a run folder under `.playwright-testing-artifacts/`. If it exits non-zero, add one line to the summary with its message and tell the user to open the report from the path above. Opening the report never changes the run's outcome.
 
 **Aborted before any test case ran** (Task 8 aborted with an empty `cases` array, so Task 9 was skipped). There is no report and there are no totals; omit both lines:
 
