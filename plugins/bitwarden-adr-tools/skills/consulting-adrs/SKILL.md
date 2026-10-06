@@ -1,7 +1,7 @@
 ---
 name: consulting-adrs
 description: Check a design, change, pull request, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, including reviewing a PR or diff for alignment with recorded architecture decisions, or when someone needs to find or summarize ADRs. Trigger phrases include "does this conflict with any of our ADRs", "check my PR against our architecture decisions", "is there an accepted ADR governing this", and "summarize our ADRs". Produces structured findings (conflict, gap, stale-reference, aligned, proposed) with cited ADRs, or an ADR summary when that is the ask.
-allowed-tools: WebFetch(domain:contributing.bitwarden.com), Read, Grep
+allowed-tools: WebFetch(domain:contributing.bitwarden.com), Read, Grep, Glob
 disallowed-tools: Write, Edit, Agent, Bash, WebSearch, Skill
 context: fork
 agent: general-purpose
@@ -12,7 +12,7 @@ background: false
 
 Check the design, diff, plan, or threat model under review against Bitwarden's Architecture Decision Records. Return findings; the caller decides what to do with them.
 
-Source: https://contributing.bitwarden.com/architecture/adr/ (fetch the index, then the ADR). If `bitwarden/contributing-docs` is checked out locally, Grep/Read it instead.
+Source: https://contributing.bitwarden.com/architecture/adr/ (fetch the index, then the ADR). If `bitwarden/contributing-docs` is checked out locally, Glob/Grep/Read it instead.
 
 If the ask is to locate or summarize ADRs rather than validate a specific change, skip the finding format: enumerate or search the catalog (Step 1) and confirm status (Step 2), then return them as a concise list of title and status. Include a URL confirmed per Output; otherwise cite the local path.
 
