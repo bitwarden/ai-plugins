@@ -1,6 +1,6 @@
 ---
 argument-hint: "[PR#] | [PR URL] | (blank for the checked-out PR)"
-allowed-tools: Read, Edit(//tmp/validation-summary.md), Grep, Glob, Task, Skill, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
+allowed-tools: Read, Edit(//tmp/validation-summary.md), Grep, Glob, Task, Skill, WebFetch(domain:code.claude.com), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
 description: Validate the Claude Code material changed in a pull request (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and report results to the pull request
 ---
 
@@ -165,6 +165,11 @@ checks table so a reader does not read their absence as a pass. To run them your
 local checkout, use `/validate-ai-local`.
 
 ## 5. Write the report
+
+Before writing, check every finding that says a field, key, or value is invalid, unknown,
+unsupported, or deprecated against the official documentation, as the scope reference's
+schema-claims section describes. The checks in step 4 work from a fixed schema, so this is
+what keeps a documented field from being reported as a defect on the pull request.
 
 Write the full report to `/tmp/validation-summary.md`, following the report contract in the
 scope reference, which also carries the write-once rule and the completion marker. Both are
