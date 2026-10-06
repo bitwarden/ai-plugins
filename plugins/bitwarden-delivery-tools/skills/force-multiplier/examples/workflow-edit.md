@@ -22,7 +22,7 @@ validation: "repo lint of remaining workflows (e.g. actionlint if defined) + Ski
 pr_spec:
   branch: "force-multiplier/retire-<name>-workflow"
   title: "[PM-XXXXX] ci: Remove deprecated <name> workflow"
-  body: "<filled from the repo's PULL_REQUEST_TEMPLATE.md>"
+  body: "<filled from the resolved PR template>"
   labels: ["ai-review"]
   draft: true
 safety_policy:
