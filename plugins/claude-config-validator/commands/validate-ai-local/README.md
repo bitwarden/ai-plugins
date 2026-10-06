@@ -173,4 +173,4 @@ overridden to point at the repository being validated.
 ### Plugin or skill sections reported as skipped
 
 The `plugin-dev` plugin is not installed. Install it with
-`/plugin install plugin-dev@claude-code-plugins`.
+`/plugin install plugin-dev@claude-plugins-official`.
