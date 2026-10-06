@@ -1,8 +1,8 @@
 ---
 name: consulting-adrs
-description: Check a design, change, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, or when someone needs to find or summarize ADRs. Produces structured findings (conflict, gap, stale-reference, aligned) with cited ADRs, or an ADR summary when that is the ask.
+description: Check a design, change, pull request, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, including reviewing a PR or diff for alignment with recorded architecture decisions, or when someone needs to find or summarize ADRs. Trigger phrases include "does this conflict with any of our ADRs", "check my PR against our architecture decisions", "is there an accepted ADR governing this", and "summarize our ADRs". Produces structured findings (conflict, gap, stale-reference, aligned) with cited ADRs, or an ADR summary when that is the ask.
 allowed-tools: WebFetch(domain:contributing.bitwarden.com), Read, Grep
-disallowed-tools: Write, Edit, NotebookEdit, Agent, Bash, WebSearch
+disallowed-tools: Write, Edit, Agent, Bash, WebSearch, Skill
 context: fork
 agent: general-purpose
 background: false
