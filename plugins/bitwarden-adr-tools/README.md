@@ -10,9 +10,9 @@ Skills can be invoked individually. See the table below for what ships today.
 
 ## Skills
 
-| Skill             | What It Does                                                                                                                                                                                                                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `consulting-adrs` | Checks a design, change, plan, or threat model against Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/), or locates/summarizes the catalog. Returns structured findings (conflict, gap, stale-reference, aligned) with cited ADRs. |
+| Skill             | What It Does                                                                                                                                                                                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `consulting-adrs` | Checks a design, change, plan, or threat model against Bitwarden's [Architecture Decision Records](https://contributing.bitwarden.com/architecture/adr/), or locates/summarizes the catalog. Returns structured findings (conflict, gap, stale-reference, aligned, proposed) with cited ADRs. |
 
 ## Installation
 

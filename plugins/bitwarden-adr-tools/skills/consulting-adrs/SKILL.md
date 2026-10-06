@@ -1,6 +1,6 @@
 ---
 name: consulting-adrs
-description: Check a design, change, pull request, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, including reviewing a PR or diff for alignment with recorded architecture decisions, or when someone needs to find or summarize ADRs. Trigger phrases include "does this conflict with any of our ADRs", "check my PR against our architecture decisions", "is there an accepted ADR governing this", and "summarize our ADRs". Produces structured findings (conflict, gap, stale-reference, aligned) with cited ADRs, or an ADR summary when that is the ask.
+description: Check a design, change, pull request, plan, or threat model against Bitwarden's Architecture Decision Records (ADRs), or locate and summarize the ADR catalog. Use when assessing whether an approach conflicts with, is governed by, or lacks an accepted ADR, including reviewing a PR or diff for alignment with recorded architecture decisions, or when someone needs to find or summarize ADRs. Trigger phrases include "does this conflict with any of our ADRs", "check my PR against our architecture decisions", "is there an accepted ADR governing this", and "summarize our ADRs". Produces structured findings (conflict, gap, stale-reference, aligned, proposed) with cited ADRs, or an ADR summary when that is the ask.
 allowed-tools: WebFetch(domain:contributing.bitwarden.com), Read, Grep
 disallowed-tools: Write, Edit, Agent, Bash, WebSearch, Skill
 context: fork
@@ -27,7 +27,7 @@ If no subject was passed, say so in one line and stop. Do not fetch the catalog,
 ## Steps
 
 1. Map what the change touches (domain; new contract, field, trust boundary, dependency, or cross-client pattern). Search the ADR catalog for those terms. Nothing relevant is a valid result: report it, do not invent one.
-2. Confirm each candidate ADR's status. Only **Accepted** binds. Follow **Superseded** to its replacement and evaluate that. Ignore **Deprecated** and **Rejected**. Flag **Proposed** as not-yet-ratified.
+2. Confirm each candidate ADR's status. Only **Accepted** binds. Follow **Superseded** to its replacement and evaluate that. Ignore **Deprecated** and **Rejected**. Report a relevant **Proposed** ADR on a `[PROPOSED]` line; it does not bind yet, so do not classify it in Step 3.
 3. Classify each in-force ADR against the change:
    - **Aligned**: conforms. One line, no restatement.
    - **Conflict**: contradicts the decision. Cite the ADR, quote the decision text, name the contradicting element.
@@ -43,17 +43,18 @@ For a validation ask with findings, fill this template. Output nothing before th
 [GAP] <summary>. No ADR found; in change: <element>.
 [STALE-REFERENCE] <summary>. ADR <n> <title> (<status>, <url or local path>) superseded by ADR <n2> <title2> | deprecated, no replacement; in change: <element>.
 [ALIGNED] ADR <n> <title>: <element>.
+[PROPOSED] ADR <n> <title> (Proposed, <url or local path>), not yet ratified: <element>.
 
-Roll-up: <n> conflict, <n> gap, <n> stale-reference, <n> aligned.
+Roll-up: <n> conflict, <n> gap, <n> stale-reference, <n> aligned, <n> proposed.
 ```
 
-One line per finding, using the label for its type. Emit only the lines that apply; a run with two conflicts and no gap is two `[CONFLICT]` lines and a roll-up. Where no in-force ADR was relevant, the entire output is one line saying so.
+One line per finding, using the label for its type. Emit only the lines that apply; a run with two conflicts and no gap is two `[CONFLICT]` lines and a roll-up. Where no in-force or Proposed ADR was relevant, the entire output is one line saying so.
 
 `<url>` is the ADR's page on `contributing.bitwarden.com`. When you fetched the site, use the URL the index gave you. From a `bitwarden/contributing-docs` checkout, derive the slug by dropping the numeric prefix and the extension from the filename (`docs/architecture/adr/0030-adopt-pnpm.md` publishes at `https://contributing.bitwarden.com/architecture/adr/adopt-pnpm`), then confirm that slug against the catalog index before offering it. One fetch of the index covers every ADR in a run.
 
 Omit the URL and cite the local file path instead when the index is unreachable or does not list the slug. A URL that does not resolve is worse than no URL.
 
-The four type names are the label vocabulary; how the label itself is rendered does not matter.
+The five type names are the label vocabulary; how the label itself is rendered does not matter.
 
 ## Rules
 
