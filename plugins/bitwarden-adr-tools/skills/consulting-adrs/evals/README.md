@@ -1,13 +1,10 @@
 # Evals: consulting-adrs
 
-Eval set for the `consulting-adrs` skill, covering the three assertion
-categories from Bitwarden's AI Review Guidelines: **Triggering**, **Structure**,
-and **Behavior**. Baselines were recorded on `claude-opus-4-8`.
+Eval set for the `consulting-adrs` skill, covering the **Structure** and
+**Behavior** assertion categories from Bitwarden's AI Review Guidelines. Baselines were recorded on `claude-opus-4-8`.
 
 ## Files
 
-- `trigger-eval.json` — triggering cases (`{query, should_trigger}`).
-- `baseline.json` — recorded trigger baseline, keyed by model id.
 - `evals.json` — structure + behavior cases with assertions.
 - `benchmark.json` — recorded structure/behavior result (with-skill vs baseline).
 - `fixtures/adr/` — synthetic ADRs, structurally matching the real catalog's
@@ -45,9 +42,6 @@ fabricate, not that a fetch actually occurred.
 
 ## Known issues / boundaries
 
-- **Under-trigger on "review my PR for alignment with our recorded architecture
-  decisions".** A genuine should-trigger phrasing fires only 1/3 (goes silent,
-  not to a competitor).
 - **The fixtures path leaks the skill name into every offline prompt.** Baseline
   runs read `skills/consulting-adrs/evals/fixtures/adr` and go looking for a skill
   that is absent from that environment, spending turns on a call that cannot
