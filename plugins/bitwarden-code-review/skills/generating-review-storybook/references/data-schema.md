@@ -28,8 +28,9 @@ The `scaffold.py` script consumes a single JSON config file. This document is th
 | `title`         | string | no       | falls back to `key`    | Short human label.                                                                                                                                                                  |
 | `ticket`        | string | no       | `""`                   | Jira key, e.g. `"PM-32809"`. Renders next to the title; empty omits.                                                                                                                |
 | `description`   | string | no       | `""`                   | One-paragraph PR/commit summary used in the merge plan default.                                                                                                                     |
-| `verdict`       | enum   | no       | `"pending"`            | One of `approve` / `approve-fix` / `block` / `pending`. See verdict notes below.                                                                                                    |
+| `verdict`       | enum   | no       | `"pending"`            | One of `approve` / `approve-fix` / `block` / `no-verdict` / `pending`. See verdict notes below.                                                                                     |
 | `verdict_label` | string | no       | derived from `verdict` | Override the badge text (rarely needed).                                                                                                                                            |
+| `verdict_note`  | string | no       | `""`                   | The review's own qualification of its verdict: the reason for `no-verdict`, or the coverage gap on a reached verdict. See verdict notes below.                                      |
 | `findings`      | object | no       | all zero               | `{ critical, important, debt, suggested, question }`, all integers.                                                                                                                 |
 | `files_changed` | number | no       | derived from the diff  | Cover stats + cards. Counted from the diff when omitted or `0`; an explicit non-zero value wins.                                                                                    |
 | `lines_changed` | number | no       | derived from the diff  | Cover stats + cards. Added plus removed lines, counted from the diff when omitted or `0`; an explicit non-zero value wins.                                                          |
@@ -45,14 +46,14 @@ The `scaffold.py` script consumes a single JSON config file. This document is th
 | `approve`     | Reviewer signed off. No critical/important findings.        | Green "Approved"      |
 | `approve-fix` | Approve, but critical or important findings need follow-up. | Amber "Approve+"      |
 | `block`       | Blocked: change requested, do not merge.                    | Red "Blocked"         |
+| `no-verdict`  | A review was attempted and reached no verdict.              | Teal "No verdict"     |
 | `pending`     | Review not yet performed.                                   | Grey "Pending review" |
 
-`scripts/parse_review_md.py` derives these from a Bitwarden code-review summary:
+`verdict_note` carries what a reviewer needs to read before trusting the verdict:
 
-- "Overall Assessment: REQUEST CHANGES" (or BLOCK) is `block`.
-- "Overall Assessment: APPROVE" with at least one ❌ critical or ⚠️ important finding is `approve-fix`. Debt, suggested, and question findings never produce it.
-- "Overall Assessment: APPROVE" with no critical or important findings is `approve`.
-- No "Overall Assessment" line, or PENDING, is `pending`.
+- On `no-verdict`, it is the reason the review stopped, shown in place of the findings summary on the PR's verdict card.
+- On `approve`, `approve-fix`, or `block`, it is the coverage gap: what the review did not look at, and why. It renders as a "Not covered" callout on the verdict card, and the derived `verdict_label` gains a ", coverage gap" suffix so the cover and chapter list flag it too. An explicit `verdict_label` replaces the derived one, suffix included.
+- On `pending`, it is ignored.
 
 ### `findings` Object
 
@@ -92,16 +93,16 @@ an optional `items[]` array of per-finding details:
 Counts populate the cover rollup, the verdict card's findings grid, and the
 pagination dot indicators. The `items[]` list, when present, drives the per-PR
 **Findings** section, sorted by severity (critical -> important -> debt -> suggested ->
-question). `parse_review_md.py` produces both pieces from a Bitwarden review summary.
+question).
 
 Each item:
 
 | Field        | Type   | Required | Notes                                                                       |
 | ------------ | ------ | -------- | --------------------------------------------------------------------------- |
 | `severity`   | enum   | yes      | One of `critical` / `important` / `debt` / `suggested` / `question`.        |
-| `message`    | string | yes      | The one-line description (text after the severity emoji in the review).     |
-| `location`   | string | no       | `path/to/file.ext:lineno`, surfaced as a `mono` code chip on the card.      |
-| `suggestion` | string | no       | Free-form follow-up text (anything in sub-bullets that isn't the location). |
+| `message`    | string | yes      | The finding's one-line summary as the review states it.                     |
+| `location`   | string | no       | `path/to/file.ext:lineno`; a range `:start-end` anchors at its first line.  |
+| `suggestion` | string | no       | Free-form follow-up text: the explanation or suggested fix from the review. |
 
 ### `comments[]`
 
@@ -133,11 +134,10 @@ a Bitwarden Blue accent line (rather than a severity color).
 | `location`   | string | no       | `path/to/file.ext:lineno` anchors to that line. A path alone anchors a file-level prologue. |
 | `created_at` | string | no       | Free-form; e.g. `"23 min ago"`. Surfaces as a small right-aligned label on the gloss.       |
 
-Two producers ship with the skill: `parse_review_md.py` for Claude findings, and
-`fetch_pr_threads.py` for human reviewer threads (wraps `gh api graphql` against
-`reviewThreads`). Use `fetch_pr_threads.py --key <PR>` to emit a
-`{ key: [...comments] }` map you can merge into each stack item's `comments[]`.
-Hand-authored comments are also supported; the producer is optional.
+`fetch_pr_threads.py` produces these from human reviewer threads (it wraps
+`gh api graphql` against `reviewThreads`). Use `fetch_pr_threads.py --key <PR>` to
+emit a `{ key: [...comments] }` map you can merge into each stack item's
+`comments[]`. Hand-authored comments are also supported; the producer is optional.
 
 ### `chapters[]`
 
@@ -264,6 +264,7 @@ window.REVIEW_DATA = {
     description: "...",
     verdict: "approve",
     verdictLabel: "Approved",
+    verdictNote: "",
     findings: { critical: 0, important: 0, debt: 1, suggested: 0, question: 0 },
     filesChanged: 12,
     linesChanged: 320

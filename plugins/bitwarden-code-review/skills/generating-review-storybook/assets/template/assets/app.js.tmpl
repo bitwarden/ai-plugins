@@ -449,6 +449,7 @@ function verdictMeta(verdict) {
     case "approve":      return { class: "verdict-approve", label: "Approve" };
     case "approve-fix":  return { class: "verdict-fix",     label: "Fix applied — re-review" };
     case "block":        return { class: "verdict-block",   label: "Request changes" };
+    case "no-verdict":   return { class: "verdict-none",    label: "No verdict" };
     case "pending":
     default:             return { class: "verdict-pending", label: "Pending review" };
   }
@@ -464,9 +465,10 @@ const SEVERITY_META = {
 };
 
 function parseLocation(loc) {
-  // Accept "path/to/file.ext:42" or "path/to/file.ext" or "" → null
+  // Accept "path/to/file.ext:42", "path/to/file.ext:42-50" (anchors on 42),
+  // "path/to/file.ext", or "" -> null
   if (!loc) return { path: "", line: null };
-  const m = /^(.+?):(\d+)$/.exec(loc.trim());
+  const m = /^(.+?):(\d+)(?:-\d+)?$/.exec(loc.trim());
   if (m) return { path: m[1], line: parseInt(m[2], 10) };
   return { path: loc.trim(), line: null };
 }
@@ -751,16 +753,27 @@ function renderScenePage(descriptor, pageNumber) {
 function renderVerdictRecap(meta) {
   const v = verdictMeta(meta.verdict);
   const findings = meta.findings || {};
-  const isPending = meta.verdict === "pending";
   const total = ["critical", "important", "debt", "suggested", "question"]
     .reduce((a, k) => a + (findings[k] || 0), 0);
+  const note = meta.verdictNote || "";
+  let summary;
+  if (meta.verdict === "pending") {
+    summary = "No AI review pre-baked for this PR. Use this page to record your decision.";
+  } else if (meta.verdict === "no-verdict") {
+    summary = note || "The AI review did not run on this PR. Use this page to record your decision.";
+  } else {
+    summary = `${total} finding${total !== 1 ? "s" : ""} surfaced inline at the diff line they reference.`;
+  }
+  // On a reached verdict the note is the review's coverage gap; on no-verdict it is the summary itself.
+  const gap = note && !["pending", "no-verdict"].includes(meta.verdict)
+    ? el("p", { class: "small verdict-gap" },
+        el("strong", null, "Not covered: "), note)
+    : null;
   return el("aside", { class: `verdict-recap verdict-card ${v.class}` },
     el("span", { class: "eyebrow" }, "Verdict"),
     el("h2", { class: "verdict-headline" }, meta.verdictLabel || v.label),
-    el("p", { class: "small", style: "color: var(--ink-soft); margin: 8px 0 0;" },
-      isPending
-        ? "No AI review pre-baked for this PR. Use this page to record your decision."
-        : `${total} finding${total !== 1 ? "s" : ""} surfaced inline at the diff line they reference.`)
+    el("p", { class: "small", style: "color: var(--ink-soft); margin: 8px 0 0;" }, summary),
+    gap
   );
 }
 

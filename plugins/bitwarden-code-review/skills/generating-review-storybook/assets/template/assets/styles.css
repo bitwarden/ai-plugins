@@ -1289,6 +1289,10 @@ a.link:hover {
   color: var(--crit);
   background: var(--crit-bg);
 }
+.toc-pr-verdict.verdict-none {
+  color: var(--info);
+  background: var(--info-bg);
+}
 .toc-row {
   display: flex;
   gap: 16px;
@@ -1618,6 +1622,23 @@ a.link:hover {
   color: var(--ink-mute);
   font-style: italic;
   font-weight: 600;
+}
+
+/* ---- no verdict: a review was attempted and reached none, unlike pending ---- */
+.verdict-none {
+  border-left: 4px solid var(--info);
+}
+.verdict-none .verdict-headline {
+  color: var(--info);
+}
+
+/* ---- coverage gap on a reached verdict ---- */
+.verdict-gap {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--warn-line);
+  background: var(--warn-bg);
+  color: var(--ink);
 }
 
 /* Prism token overrides — strip the default theme's white pill from operators

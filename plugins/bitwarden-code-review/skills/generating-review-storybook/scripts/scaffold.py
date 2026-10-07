@@ -33,19 +33,24 @@ SKILL_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_ROOT = SKILL_ROOT / "assets" / "template"
 SHIELD_PATH = TEMPLATE_ROOT / "assets" / "bw-shield.svg"
 
-VALID_VERDICTS = {"approve", "approve-fix", "block", "pending"}
+VALID_VERDICTS = {"approve", "approve-fix", "block", "no-verdict", "pending"}
 VERDICT_LABELS = {
     "approve": "Approved",
     "approve-fix": "Approve with follow-up",
     "block": "Blocked",
+    "no-verdict": "No verdict",
     "pending": "Pending review",
 }
 VERDICT_BADGE_CLASS = {
     "approve": "badge-approve",
     "approve-fix": "badge-approve-fix",
     "block": "badge-block",
+    "no-verdict": "badge-no-verdict",
     "pending": "badge-pending",
 }
+# Appended to the derived label when a reached verdict carries a verdict_note, so a
+# review that left ground uncovered never reads as a clean verdict on the cover.
+COVERAGE_GAP_SUFFIX = ", coverage gap"
 
 
 def die(msg: str, code: int = 1) -> None:
@@ -122,7 +127,13 @@ def load_config(path: Path) -> dict[str, Any]:
         verdict = item.setdefault("verdict", "pending")
         if verdict not in VALID_VERDICTS:
             die(f"stack[{idx}].verdict must be one of {sorted(VALID_VERDICTS)}")
-        item.setdefault("verdict_label", VERDICT_LABELS[verdict])
+        note = item.setdefault("verdict_note", "")
+        if not isinstance(note, str):
+            die(f"stack[{idx}].verdict_note must be a string")
+        label = VERDICT_LABELS[verdict]
+        if note and verdict not in {"no-verdict", "pending"}:
+            label += COVERAGE_GAP_SUFFIX
+        item.setdefault("verdict_label", label)
         findings = item.setdefault("findings", {})
         for k in ("critical", "important", "debt", "suggested", "question"):
             findings.setdefault(k, 0)
@@ -565,6 +576,7 @@ def generate_data_js(config: dict[str, Any]) -> str:
             "description": item.get("description") or "",
             "verdict": item["verdict"],
             "verdictLabel": item.get("verdict_label") or VERDICT_LABELS[item["verdict"]],
+            "verdictNote": item.get("verdict_note") or "",
             "findings": item["findings"],
             "comments": item.get("comments") or [],
             "chapters": item.get("chapters") or [],
