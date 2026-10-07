@@ -37,6 +37,10 @@ timeout — `--timeout` bounds anything that stalls.
   Omit it and the runner infers it from the eval-set path (the plugin root is the eval file's
   great-great-grandparent directory), so a run from a skill's `evals/` dir needs no flag. Pass
   it explicitly when running the engine from a layout the path inference does not fit.
+- `--agent` — measure an agent instead of a skill: the target becomes a plugin-qualified
+  `Agent` (or legacy `Task`) dispatch naming this agent, or a `Read` of its own `AGENT.md`.
+  Mutually exclusive with `--skill`. Used by suites that check an orchestrator-only agent's
+  "do not invoke directly" description holds.
 - `--runs-per-query` (default `3`) — samples per query; use `7` for a baseline.
 - `--num-workers` (default `3`) — concurrency, and the memory knob. Each `claude -p`
   subprocess holds ~1GB while it runs, so raising this raises peak memory.
@@ -65,6 +69,30 @@ python3 ../../../evals/run_real_eval.py \
   --model claude-opus-4-8 \
   > result.json
 ```
+
+### Measuring the working tree instead of the installed copy
+
+To read a branch's `SKILL.md` without reinstalling, pin the inventory per invocation with two
+`claude` flags: `--setting-sources project` drops your user-level plugins, skills, hooks, and MCP
+servers, and `--plugin-dir <plugin-root>` loads this plugin from the working tree. The runner
+launches `claude` through a direct `PATH` lookup, so a shell alias is never consulted; inject
+the flags with a shim first on `PATH`:
+
+```bash
+PLUG="$(git rev-parse --show-toplevel)/plugins/bitwarden-testing-tools"
+REAL="$(type -P claude)"                       # real binary, bypassing any shell alias
+SHIM="$(mktemp -d)"; chmod 700 "$SHIM"
+cat > "$SHIM/claude" <<EOF
+#!/bin/bash
+exec "$REAL" "\$@" --setting-sources project --plugin-dir "$PLUG"
+EOF
+chmod +x "$SHIM/claude"
+export PATH="$SHIM:$PATH"
+```
+
+Remove it when done with `rm -rf "$SHIM"`. Do **not** relocate `CLAUDE_CONFIG_DIR` to isolate the
+inventory instead: on macOS the login token is keyed to the config directory, so a relocated
+directory reads an empty Keychain entry and every query records a false non-trigger.
 
 A 20-query set at `--runs-per-query 7` is 140 `claude -p` invocations; with 3 workers it takes
 several minutes. `--num-workers` is the memory knob (see _Arguments_). The two coverage skills
@@ -101,6 +129,14 @@ clean; when the model was `claude-sonnet-5`, `assessing-test-coverage`'s branch-
 (`audit the current test coverage on the feat/cipher-key-rotation branch — I just want to see what
 exists, not recommendations`) sat at 2/7, but on Opus it triggers 7/7. If one drops below
 threshold on a future run, list it here rather than editing the eval set.
+
+## Suites without a baseline
+
+`reading-mailcatcher-api` and `using-stripe-cli` commit no `baseline.json`. Their trigger
+readings depend on which sibling skills are installed alongside them, so each suite's own
+`README.md` records its last reading as dated prose naming the inventory it was measured
+against, and treats the suite as an on-demand diagnostic rather than a merge gate. Run them with
+the same command as above, from the suite's `evals/` directory.
 
 ## Add evals for a new skill
 
