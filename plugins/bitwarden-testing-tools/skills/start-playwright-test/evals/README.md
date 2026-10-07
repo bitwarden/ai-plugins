@@ -22,7 +22,7 @@ One residual caveat: direct-dispatch detection depends on the CLI surfacing a di
 
 ## Inventory
 
-These readings were recorded against the ten sibling skills the orchestrator competes with for selection (each reading below notes its own run date):
+These readings were recorded against the ten sibling skills the orchestrator competes with for selection (each reading below notes its own run date). Eight ship in this plugin:
 
 - `assessing-test-coverage`
 - `writing-playwright-test-cases`
@@ -30,10 +30,10 @@ These readings were recorded against the ten sibling skills the orchestrator com
 - `mapping-services-under-test`
 - `running-playwright-tests`
 - `scoping-playwright-application-context`
-- `reading-mailcatcher-api`
 - `start-playwright-test`
-- `using-stripe-cli`
 - `checking-localhost-web-health`
+
+The other two install with it from its dependency plugins: `bitwarden-mailcatcher-tools:reading-mailcatcher-api` and `bitwarden-stripe-tools:using-stripe-cli`.
 
 plus all six agents (`playwright-test-context-gatherer`, `playwright-application-context-scoper`, `services-under-test-mapper`, `playwright-test-case-writer`, `localhost-web-health-checker`, `playwright-test-runner`). A trigger eval measures whether the model auto-selects a skill or agent from a natural-language query among everything installed alongside it, so the recorded numbers are only meaningful against this exact inventory.
 
