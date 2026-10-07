@@ -10,9 +10,9 @@ Two of those near-misses deliberately target sibling tooling. `assessing-test-co
 
 ## `agent-non-trigger-eval.json`
 
-6 queries, all `should_trigger: false`, testing a claim every one of the six agent descriptions makes: "Do not invoke directly; dispatched by the `start-playwright-test` skill." Each query is phrased to tempt one specific agent with exactly the work it does, without naming any agent, so a trigger means the model reached for an internal agent on its own.
+3 queries, all `should_trigger: false`, testing a claim the three orchestrator-only agent descriptions make (`playwright-test-case-writer`, `localhost-web-health-checker`, `playwright-test-runner`): "Do not invoke directly; dispatched by the `start-playwright-test` skill." Each query is phrased to tempt one specific agent with exactly the work it does, without naming any agent, so a trigger means the model reached for an internal agent on its own. The other three agents (`playwright-test-context-gatherer`, `playwright-application-context-scoper`, `services-under-test-mapper`) are standalone-capable, with `<example>` blocks that invite direct use, so they are outside this suite.
 
-Run the shared runner with `--agent <name>` once per agent. A pass is zero triggers across all six queries for all six agents.
+Run the shared runner with `--agent <name>` once per orchestrator-only agent. A pass is zero triggers across all three queries for all three agents.
 
 ## What this suite measures
 
@@ -56,6 +56,8 @@ should_not_trigger result per agent:
 
 No agent triggered on any of the six work requests; the convention held across the suite.
 
+This reading predates narrowing the suite to the three orchestrator-only agents and their three queries. It was taken with the earlier six-query set against all six agents, so re-run the suite before comparing against it.
+
 There is no committed `agent-non-trigger-baseline.json` for this suite. A trigger rate depends on the agent set, the harness, the model, and the full installed skill inventory competing for selection, and most of those are outside any one agent, so a committed baseline would go stale for reasons unrelated to the agents. The query set and shared harness are kept and re-run on demand when an agent's behavior or description changes.
 
 ## Running
@@ -86,7 +88,7 @@ python3 ../../../evals/run_real_eval.py \
 For the agent suite, run once per agent name at `--runs-per-query 3`. Three runs are enough here because the expectation is zero triggers, and a zero-versus-nonzero signal does not need seven samples to establish. Install from a local marketplace pointing at your worktree checkout (the output of `git rev-parse --show-toplevel`), not the `ai-plugins` checkout, which is on the frozen source branch and holds a differently named plugin; reinstall after any harness edit so the run measures the current harness:
 
 ```bash
-for a in playwright-test-context-gatherer playwright-application-context-scoper services-under-test-mapper playwright-test-case-writer localhost-web-health-checker playwright-test-runner; do
+for a in playwright-test-case-writer localhost-web-health-checker playwright-test-runner; do
   python3 ../../../evals/run_real_eval.py --agent "$a" --eval-set agent-non-trigger-eval.json \
     --runs-per-query 3 --num-workers 3 --timeout 90 --model claude-opus-4-8 \
     > "/tmp/agent-$a.json"
