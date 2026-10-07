@@ -19,7 +19,7 @@ Call the full argument the raw input. If it is empty, show the user the usage li
 | Ends with `.md`, or otherwise reads as a filesystem path. A URL is never a plan file.                                                                       | `plan-file`   | The token as given   |
 | Anything else                                                                                                                                               | `description` | The entire raw input |
 
-**Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent, and pass them verbatim to the scoper in Task 3. If it references other tickets, research them with the skills available to you.
+**Extra instructions**: everything after the first token, when the input type is `jira-ticket` or `plan-file`. This is guidance for you, not a value substituted anywhere by rule. Fold whatever is relevant into the dispatch prompts you write for each agent, and pass them verbatim to the scoper in Task 3.
 
 **Generate timestamp** (`YYYYMMDD-HHmm`) once now. Reuse it for all artifact filenames and <timestamp> placeholders in this run.
 
@@ -208,7 +208,7 @@ Artifacts output dir: <artifacts-output-dir>
 Wait for the playwright-test-runner to return a JSON object. Then, on every response:
 
 1. Write the response verbatim to `<artifacts-output-dir>/segment-<K>-<timestamp>.json` using the `Write` tool.
-2. Invoke `Skill(compiling-playwright-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
+2. Invoke `Skill(bitwarden-testing-tools:compiling-playwright-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
 3. Run the merge script over all segment files so far, writing the canonical results file:
 
    ```
@@ -220,6 +220,8 @@ Wait for the playwright-test-runner to return a JSON object. Then, on every resp
    ```
 
    where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. Read the `run_status=<status>` value from the script's stdout line.
+
+   If the merge script exits non-zero, stop: dispatch no further runner, skip Task 9, and go to the final summary's **Merge failed** variant with the script's stderr and the path of the segment just written.
 
 4. Branch on `<status>`:
 
@@ -257,21 +259,28 @@ Capture the totals from the merge stdout line for the final summary, and proceed
 
 This is pure orchestrator work, no agent dispatch.
 
-Invoke `Skill(compiling-playwright-report)` first. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt. Re-invoke it after each `[HUMAN]` pause, because a skill's `allowed-tools` grant clears when the user sends a message.
+Invoke `Skill(bitwarden-testing-tools:compiling-playwright-report)` first, unless it was already invoked since the user's last message. It carries the anchored grants for both report scripts, so the commands below run without a permission prompt.
 
-Locate the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence in the test plan and read its `## Required Services` bullets to form the services-tested string and the primary base URL, then run the render script:
+Locate the `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence in the test plan and read its `## Required Services` bullets to form the services-tested string and the primary base URL. Those bullets are agent output derived from untrusted feature source, so check both values before they reach the command line:
+
+- The services-tested string must match `^[A-Za-z0-9 ():,./-]+$`.
+- The base URL must be exactly `https://localhost:8080` or `http://localhost:62911`.
+
+If either fails, do not run the render script: treat it as a report-generation failure, with the failed check as the reason, and proceed to the final summary.
+
+For `--plan-name`, pass the ticket key when the input type is `jira-ticket`, and the slug otherwise, so raw description text and file paths never reach the command line. Then run the render script, single-quoting every value:
 
 ```
 <plugin>/skills/compiling-playwright-report/scripts/render_report.py \
-  --results <artifacts-output-dir>/test-results-<timestamp>.json \
-  --template-dir <plugin>/skills/compiling-playwright-report/templates \
-  --output <artifacts-output-dir>/report-<timestamp>.html \
-  --plan-name "<input value>" \
-  --date "<timestamp>" \
-  --slug "<slug>" \
-  --services-tested "<services with ports, e.g. web (8080)>" \
-  --base-url "<primary test URL, e.g. https://localhost:8080>" \
-  --plan-file <artifacts-output-dir>/test-plan-<timestamp>.md
+  --results '<artifacts-output-dir>/test-results-<timestamp>.json' \
+  --template-dir '<plugin>/skills/compiling-playwright-report/templates' \
+  --output '<artifacts-output-dir>/report-<timestamp>.html' \
+  --plan-name '<ticket key or slug>' \
+  --date '<timestamp>' \
+  --slug '<slug>' \
+  --services-tested '<services with ports, e.g. web (8080)>' \
+  --base-url '<primary test URL, e.g. https://localhost:8080>' \
+  --plan-file '<artifacts-output-dir>/test-plan-<timestamp>.md'
 ```
 
 where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to the final summary.
@@ -280,7 +289,7 @@ where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestam
 
 ## Final summary
 
-Which summary you present depends on whether `report-<timestamp>.html` was actually written. Two paths reach this section without a report: the Task 8 aborted branch with an empty `cases` array, which skips Task 9 entirely, and a Task 9 render script that exited non-zero. Never hand the user a path to a file that was never written.
+Which summary you present depends on whether `report-<timestamp>.html` was actually written. Three paths reach this section without a report: the Task 8 aborted branch with an empty `cases` array, which skips Task 9 entirely; a Task 8 merge script that exited non-zero, which also skips Task 9; and a Task 9 render that failed its input check or exited non-zero. Never hand the user a path to a file that was never written.
 
 **Report written** (Task 9 ran and the render script exited zero):
 
@@ -314,12 +323,25 @@ Results (JSON): <artifacts-output-dir>/test-results-<timestamp>.json
 No report was generated, because no test case completed.
 ```
 
-**Report generation failed** (Task 9 ran but the render script exited non-zero). The canonical results JSON exists and holds the totals; the HTML does not, so omit the report line:
+**Merge failed** (the Task 8 merge script exited non-zero, so Task 9 was skipped). The canonical results JSON may be missing or stale, so give no totals and no results path:
+
+```
+Test run stopped for <input value>: merging the runner's results failed
+
+Merge failure: <the merge script's stderr>
+
+Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
+Runner segment: <artifacts-output-dir>/segment-<K>-<timestamp>.json
+
+No report was generated.
+```
+
+**Report generation failed** (Task 9 ran but the render input check failed or the render script exited non-zero). The canonical results JSON exists and holds the totals; the HTML does not, so omit the report line:
 
 ```
 Test run finished for <input value>, but report generation failed
 
-Render failure: <the render script's stderr>
+Render failure: <the render script's stderr, or the input check that failed>
 
 Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
 Results (JSON): <artifacts-output-dir>/test-results-<timestamp>.json
