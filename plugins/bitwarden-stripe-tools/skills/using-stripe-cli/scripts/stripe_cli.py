@@ -65,6 +65,9 @@ CLOCK_ID_PATTERN = re.compile(r"clock_[A-Za-z0-9]+")
 # rejects schedule ids (sub_sched_...), which create_preview takes under a
 # different parameter.
 SUBSCRIPTION_ID_PATTERN = re.compile(r"sub_[A-Za-z0-9]+")
+# A read path is /v1/ followed by one or more non-empty segments of letters,
+# digits, and underscores, which covers every Stripe v1 resource and object id.
+READ_PATH_PATTERN = re.compile(r"/v1(/[A-Za-z0-9_]+)+")
 CLOCK_POLL_DELAY = 2
 CLOCK_POLL_LIMIT = 60
 SECONDS_PER_DAY = 86400
@@ -202,21 +205,28 @@ def check_key(env):
 
 
 def check_path(path):
-    """Reject anything that is not a bare /v1/ resource path."""
-    if not path.startswith("/v1/"):
-        raise GuardError(EXIT_PATH, f"path must start with /v1/, got: {path}")
-    if any(char.isspace() for char in path):
-        raise GuardError(EXIT_PATH, f"path may not contain whitespace: {path}")
-    if "-" == path[4:5] or "--" in path:
-        raise GuardError(EXIT_PATH, f"path may not contain flag-like segments: {path}")
+    """Reject anything that is not a bare /v1/ resource path.
+
+    Like the clock and subscription id guards, this allows only the documented
+    shape rather than denying known-bad characters. That shuts out whitespace,
+    flag-like segments, `..` traversal (raw or percent-encoded as %2e), and a
+    `?` query string in one rule; query parameters go through --param.
+    """
+    if not READ_PATH_PATTERN.fullmatch(path or ""):
+        raise GuardError(
+            EXIT_PATH,
+            "--path must be a /v1/ resource path made of letters, digits, "
+            "underscores, and single slashes (pass parameters with --param), "
+            f"got: {path!r}",
+        )
 
 
 def check_clock_id(clock_id):
     """Reject anything that is not a bare Stripe test clock id.
 
-    The read path has check_path; the clock id had nothing, yet it is
-    interpolated straight into /v1/test_helpers/test_clocks/<id>[/advance],
-    which is the only Stripe write this wrapper permits. Flag injection is not
+    Like check_path, this is an allowlist. The clock id is interpolated
+    straight into /v1/test_helpers/test_clocks/<id>[/advance], which is the
+    only Stripe write this wrapper permits. Flag injection is not
     reachable, since argv is a list and no shell is involved, but a value like
     'clock_1/../../customers' would traverse to another resource, and the id
     ultimately comes from plan content that can originate in untrusted Jira
@@ -344,6 +354,16 @@ def preview_invoice(subscription_id, run):
     return _run_json(build_preview_argv(subscription_id), run)
 
 
+def _advanced_to(clock, frozen):
+    """True once the clock is 'ready' with its frozen_time at or past frozen."""
+    if clock.get("status") != "ready":
+        return False
+    try:
+        return int(clock.get("frozen_time")) >= frozen
+    except (TypeError, ValueError):
+        return False
+
+
 def advance_clock(clock_id, days, run, sleep):
     """Advance an already-attached test clock one day at a time.
 
@@ -351,6 +371,10 @@ def advance_clock(clock_id, days, run, sleep):
     retry per simulated day, which is what drives a subscription to unpaid after
     eight failures. Each step waits for status to return to 'ready' before the
     next, because Stripe rejects an advance on a clock that is still advancing.
+    A step is done only once the clock is 'ready' AND its frozen_time has
+    reached the requested time: a clock read just after the POST can still
+    report 'ready' at its old frozen_time, and gating on status alone would
+    send the next day's advance while this one is still being applied.
     """
     check_clock_id(clock_id)
     response = _clock(clock_id, run)
@@ -371,13 +395,14 @@ def advance_clock(clock_id, days, run, sleep):
         try:
             _run_json(build_advance_argv(clock_id, frozen), run)
             for _attempt in range(CLOCK_POLL_LIMIT):
-                if _clock(clock_id, run).get("status") == "ready":
+                if _advanced_to(_clock(clock_id, run), frozen):
                     break
                 sleep(CLOCK_POLL_DELAY)
             else:
                 raise GuardError(
                     EXIT_CLI,
-                    f"test clock {clock_id} did not return to 'ready' after "
+                    f"test clock {clock_id} did not return to 'ready' at "
+                    f"frozen_time={frozen} after "
                     f"{CLOCK_POLL_LIMIT * CLOCK_POLL_DELAY}s",
                 )
         except GuardError as err:
@@ -406,10 +431,10 @@ def main(argv, env):
     read.add_argument("--path", required=True)
     read.add_argument("--param", action="append", default=[])
 
-    preview = sub.add_parser(
+    preview_parser = sub.add_parser(
         "preview-invoice", help="preview a subscription's next invoice"
     )
-    preview.add_argument("--subscription", required=True)
+    preview_parser.add_argument("--subscription", required=True)
 
     advance = sub.add_parser("advance-clock", help="advance an attached test clock")
     advance.add_argument("--clock", required=True)

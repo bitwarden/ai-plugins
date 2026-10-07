@@ -21,6 +21,26 @@ sys.path.insert(0, SCRIPTS)
 import stripe_cli
 
 FIXTURE_CONFIG = '[default]\ntest_mode_api_key = "sk_test_fixture"\n'
+START_FROZEN_TIME = 1750000000
+
+
+class FakeClock:
+    """A test clock whose frozen_time moves to whatever each advance requested.
+
+    A real clock reports the new frozen_time once an advance lands, and
+    advance_clock waits for that, so a fake frozen at one value would never let
+    an advance finish.
+    """
+
+    def __init__(self):
+        self.frozen_time = START_FROZEN_TIME
+
+    def record(self, argv):
+        if argv[1] == "post" and argv[2].endswith("/advance"):
+            self.frozen_time = int(argv[4].split("=", 1)[1])
+
+    def body(self, status):
+        return json.dumps({"frozen_time": self.frozen_time, "status": status})
 
 
 def config_env(test, text, **extra):
@@ -226,6 +246,30 @@ class CheckPathTest(unittest.TestCase):
     def test_v1_path_is_accepted(self):
         stripe_cli.check_path("/v1/customers/cus_123")
 
+    def test_nested_test_helper_path_is_accepted(self):
+        stripe_cli.check_path("/v1/test_helpers/test_clocks/clock_abc123")
+
+    def test_traversal_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError) as cm:
+            stripe_cli.check_path("/v1/../v2/core/events")
+        self.assertEqual(cm.exception.code, stripe_cli.EXIT_PATH)
+
+    def test_percent_encoded_traversal_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_path("/v1/%2e%2e/v2/x")
+
+    def test_query_string_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_path("/v1/customers?limit=100")
+
+    def test_empty_segment_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_path("/v1//customers")
+
+    def test_bare_v1_prefix_is_refused(self):
+        with self.assertRaises(stripe_cli.GuardError):
+            stripe_cli.check_path("/v1/")
+
     def test_non_v1_path_is_refused(self):
         with self.assertRaises(stripe_cli.GuardError) as cm:
             stripe_cli.check_path("/v2/customers")
@@ -352,14 +396,16 @@ class PreviewInvoiceTest(unittest.TestCase):
 class AdvanceClockTest(unittest.TestCase):
     def test_advances_one_day_per_step_and_waits_for_ready(self):
         calls = []
+        clock = FakeClock()
         statuses = iter(["advancing", "ready", "advancing", "ready"])
 
         def run(argv):
             calls.append(argv)
+            clock.record(argv)
             if argv[1] == "get":
                 if "advance" in argv[2]:
                     raise AssertionError("advance must use post")
-                return json.dumps({"frozen_time": 1750000000, "status": next(statuses)})
+                return clock.body(next(statuses))
             return json.dumps({"status": "advancing"})
 
         slept = []
@@ -370,6 +416,27 @@ class AdvanceClockTest(unittest.TestCase):
         self.assertEqual(posts[1][4], "frozen_time=1750172800")
         self.assertEqual(frozen, 1750172800)
         self.assertTrue(slept)
+
+    def test_ready_at_the_old_frozen_time_keeps_polling(self):
+        # Read just after the POST, the clock can still say 'ready' at its old
+        # frozen_time. That is not the advance finishing, so the poll must
+        # carry on until frozen_time reaches the requested value.
+        clock = FakeClock()
+        polls = {"n": 0}
+
+        def run(argv):
+            if argv[1] == "post":
+                return "{}"
+            polls["n"] += 1
+            if polls["n"] == 3:  # initial read, then two stale 'ready' polls
+                clock.frozen_time += stripe_cli.SECONDS_PER_DAY
+            return clock.body("ready")
+
+        slept = []
+        frozen = stripe_cli.advance_clock("clock_1", 1, run, slept.append)
+        self.assertEqual(frozen, START_FROZEN_TIME + stripe_cli.SECONDS_PER_DAY)
+        self.assertEqual(polls["n"], 3)
+        self.assertEqual(len(slept), 1)
 
     def test_traversal_shaped_clock_id_never_reaches_the_cli(self):
         calls = []
@@ -422,14 +489,16 @@ class AdvanceClockTest(unittest.TestCase):
         original_limit = stripe_cli.CLOCK_POLL_LIMIT
         stripe_cli.CLOCK_POLL_LIMIT = 2
         self.addCleanup(setattr, stripe_cli, "CLOCK_POLL_LIMIT", original_limit)
+        clock = FakeClock()
         posts = {"n": 0}
 
         def run(argv):
+            clock.record(argv)
             if argv[1] == "post":
                 posts["n"] += 1
                 return "{}"
             status = "ready" if posts["n"] <= 1 else "advancing"
-            return json.dumps({"frozen_time": 1750000000, "status": status})
+            return clock.body(status)
 
         with self.assertRaises(stripe_cli.GuardError) as cm:
             stripe_cli.advance_clock("clock_1", 2, run, lambda _s: None)
@@ -440,6 +509,7 @@ class AdvanceClockTest(unittest.TestCase):
     def test_cli_failure_mid_advance_reports_partial_progress(self):
         # A CLI failure on day 2's advance must preserve the original message
         # and append how far the advance got before failing.
+        clock = FakeClock()
         posts = {"n": 0}
 
         def run(argv):
@@ -449,8 +519,9 @@ class AdvanceClockTest(unittest.TestCase):
                     raise stripe_cli.GuardError(
                         stripe_cli.EXIT_CLI, "stripe CLI failed (1): boom"
                     )
+                clock.record(argv)
                 return "{}"
-            return json.dumps({"frozen_time": 1750000000, "status": "ready"})
+            return clock.body("ready")
 
         with self.assertRaises(stripe_cli.GuardError) as cm:
             stripe_cli.advance_clock("clock_1", 3, run, lambda _s: None)
@@ -471,6 +542,7 @@ class MainGuardOrderingTest(unittest.TestCase):
     def setUp(self):
         self.invocations = []
         self.keys = []
+        self.clock = FakeClock()
         self.env = config_env(self, FIXTURE_CONFIG)
         self._real_run_cli = stripe_cli.run_cli
         stripe_cli.run_cli = self._recorder
@@ -479,7 +551,8 @@ class MainGuardOrderingTest(unittest.TestCase):
     def _recorder(self, argv, key=None):
         self.invocations.append(argv)
         self.keys.append(key)
-        return json.dumps({"frozen_time": 1750000000, "status": "ready"})
+        self.clock.record(argv)
+        return self.clock.body("ready")
 
     def _main(self, argv, env):
         with contextlib.redirect_stderr(io.StringIO()) as err:
