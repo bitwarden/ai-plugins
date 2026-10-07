@@ -124,13 +124,13 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 **Reach via:**
 
 - Run flow:trigger-marketing-trial-verification-email (its external-trigger step sends the verification email).
-- Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths); a trial-initiation URL printed on stdout confirms the state (exit 1 / `NO_MATCH` means the email has not arrived yet).
+- Use the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`); a trial-initiation URL printed on stdout confirms the state (exit 1 / `NO_MATCH` means the email has not arrived yet).
 
 **UI projection:**
 
 - Route: n/a
 - Verification points:
-  - Selector: trial-initiation URL on stdout from `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths)
+  - Selector: trial-initiation URL on stdout from the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`)
     - Selector type: text
     - Expectation: stdout contains "#/trial-initiation?"
     - Source: `server/src/Core/Billing/Models/Mail/TrialInititaionVerifyEmail.cs` (`? "trial-initiation"`) — the emailed link's route for a new user's Password Manager trial
@@ -148,13 +148,13 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 **Reach via:**
 
 - Run flow:send-sales-assisted-trial-invitation (its last step reads the invitation email).
-- Run `read_mailcatcher.py --recipient <email> --pattern "invited to try Bitwarden"` (the Mailcatcher reader; path in the tool policy's Canonical script paths); a trial-initiation URL carrying `salesAssistedToken` on stdout confirms the state.
+- Use the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "invited to try Bitwarden"`); a trial-initiation URL carrying `salesAssistedToken` on stdout confirms the state.
 
 **UI projection:**
 
 - Route: n/a
 - Verification points:
-  - Selector: invitation URL on stdout from `read_mailcatcher.py --recipient <email> --pattern "invited to try Bitwarden"` (the Mailcatcher reader; path in the tool policy's Canonical script paths)
+  - Selector: invitation URL on stdout from the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "invited to try Bitwarden"`)
     - Selector type: text
     - Expectation: stdout contains "salesAssistedToken="
     - Source: `server/src/Core/Billing/Models/Mail/Mailer/SalesAssistedTrialInvitationEmailView.cs` (`&salesAssistedToken={WebUtility.UrlEncode(Token)}`, `"&paymentOptional=true&fromEmail=true"`; in order) — the invitation link's query parameters
@@ -257,7 +257,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
    }
    ```
    Reference values. `productTier`: `0` = Free, `1` = Families, `2` = Teams, `3` = Enterprise, `4` = TeamsStarter; use `1`, `2`, or `3`, the tiers the trial wizard renders for. `products` is fixed at `[0]` (`0` = PasswordManager), so the link opens `/#/trial-initiation`; Secrets Manager trials are not covered by this catalog. `trialLength` must be at least `1`: `0` skips the trial. `paymentOptional`: `true` skips the payment step in the downstream completion flow; `false` requires payment. `<email>` must not already have an account: an existing account is sent a `/#/create-organization` link instead.
-2. Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths) to read the verification email; stdout is the trial-initiation URL, so capture it for the next flow.
+2. Use the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`) to read the verification email; stdout is the trial-initiation URL, so capture it for the next flow.
    - Feedback: trial-initiation URL is available on stdout
 
 **Post-condition state(s):**
@@ -372,7 +372,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
    }
    ```
    `<productTier>` is `1` (Families), `2` (Teams), or `3` (Enterprise). `<trialLength>` must be at least `1`.
-2. Run `read_mailcatcher.py --recipient <email> --pattern "Verify"` (the Mailcatcher reader; path in the tool policy's Canonical script paths). The account's earlier signup email matches the same pattern and the reader takes the newest match, so if stdout is a `finish-signup` link the trial email has not arrived yet: re-run the reader, up to 5 times a few seconds apart, until stdout contains `/#/create-organization?`, and capture that URL. If it never does, stop and report that the trial email did not arrive.
+2. Use the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`). The account's earlier signup email matches the same pattern and the reader takes the newest match, so if stdout is a `finish-signup` link the trial email has not arrived yet: re-run the reader, up to 5 times a few seconds apart, until stdout contains `/#/create-organization?`, and capture that URL. If it never does, stop and report that the trial email did not arrive.
    - Feedback: a `https://localhost:8080/#/create-organization?...` URL is on stdout
 3. Navigate to that URL in the same logged-in browser
    - Feedback: the Create organization page opens with the `<productTier>` plan preselected (at `/#/settings/add-plan` instead when the `VFO1Foundation` flag is on)
@@ -421,7 +421,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 5. Set "Trial Length (Days)" to `<trialLength>` (1–30)
 6. Click "Send invitation"
    - Feedback: the alert "Invitation sent." appears
-7. Run `read_mailcatcher.py --recipient <email> --pattern "invited to try Bitwarden"` (the Mailcatcher reader; path in the tool policy's Canonical script paths); stdout is the invitation link (the plain-text email prints it after "Get started:"), so capture it for the next flow
+7. Use the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "invited to try Bitwarden"`); stdout is the invitation link (the plain-text email prints it after "Get started:"), so capture it for the next flow
    - Feedback: a URL containing `salesAssistedToken=` is on stdout
 
 **Post-condition state(s):**

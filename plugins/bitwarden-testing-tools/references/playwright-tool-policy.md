@@ -3,18 +3,13 @@
 Steps fall into four categories during web test planning and execution, and everything else is blocked:
 
 1. Web UI interactions, driven by the external `playwright-cli` skill (Category 1).
-2. Email reading, owned by the `reading-mailcatcher-api` skill (Category 2).
+2. Email reading, owned by the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill (Category 2).
 3. External trigger simulation, for actions initiated by a system outside the Bitwarden application (Category 3).
-4. Read-only Stripe data queries, owned by the `using-stripe-cli` skill (Category 4).
+4. Read-only Stripe data queries, owned by the `bitwarden-stripe-tools:using-stripe-cli` skill (Category 4).
 
 The sections below give the constraints for each category present in this pipeline.
 
-## Canonical script paths
-
-Prose that needs a pipeline script path references it from here rather than hardcoding it. A skill whose `allowed-tools` grant must name its own script path is the exception — that repetition is required for the grant to match.
-
-- Mailcatcher reader: `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py`
-- Stripe CLI wrapper: `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py`
+Categories 2 and 4 live in vendor plugins this plugin depends on, `bitwarden-mailcatcher-tools` and `bitwarden-stripe-tools`. Reach them only by invoking the owning skill by its plugin-qualified name: invoking the skill is what applies its script grant, and a script path inside another plugin does not resolve from this one.
 
 ## Category 1 - Web UI Interactions (default)
 
@@ -24,7 +19,7 @@ Use the `playwright-cli` skill for all interactions a user would perform in the 
 
 ## Category 2 - Email Reading
 
-Reading an email during a test step (verification links, magic links, OTP codes) is owned by the `reading-mailcatcher-api` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/SKILL.md` for the exit-code contract, the reason the browser cannot reach Mailcatcher, and the argument detail. Its reader script is listed under Canonical script paths above.
+Reading an email during a test step (verification links, magic links, OTP codes) is owned by the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill. Invoke it for the exit-code contract, the reason the browser cannot reach Mailcatcher, the argument detail, and the grant for its reader script.
 
 ## Category 3 - External Trigger Simulation
 
@@ -32,15 +27,15 @@ Some flows begin with an action that a system _outside_ the Bitwarden applicatio
 
 ## Category 4 - Stripe Data Queries (read-only)
 
-Read-only Stripe test-mode queries, including a preview of a subscription's next invoice, plus the single permitted write of advancing an already-attached test clock, are owned by the `using-stripe-cli` skill. See `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/SKILL.md`. The invoice preview is sent as a POST to `/v1/invoices/create_preview`, but it creates and changes nothing, so it counts as a read. Stripe is never used to set up state the application's own flows can create, and never for any other write.
+Read-only Stripe test-mode queries, including a preview of a subscription's next invoice, plus the single permitted write of advancing an already-attached test clock, are owned by the `bitwarden-stripe-tools:using-stripe-cli` skill. Invoke it for the wrapper's commands, exit codes, and grant. The invoice preview is sent as a POST to `/v1/invoices/create_preview`, but it creates and changes nothing, so it counts as a read. Stripe is never used to set up state the application's own flows can create, and never for any other write.
 
 ## Never Permitted
 
 - Direct database queries
 - API calls that substitute for UI actions a user could perform in the browser
 - Using API calls to verify test results when the outcome is observable in the UI (always assert via `playwright-cli` instead)
-- CLI tools not related to service startup (the `using-stripe-cli` wrapper script excepted when used read-only per Category 4)
-- Stripe write operations, meaning any request that changes Stripe state whatever its HTTP method — creating coupons, modifying subscriptions, updating customers, or any other create, update, or delete — **except the single sanctioned test-clock advance owned by the `using-stripe-cli` skill (Category 4)**. The invoice preview's POST changes nothing and is a Category 4 read, not a write.
+- CLI tools not related to service startup (the `bitwarden-stripe-tools:using-stripe-cli` wrapper script excepted when used read-only per Category 4)
+- Stripe write operations, meaning any request that changes Stripe state whatever its HTTP method — creating coupons, modifying subscriptions, updating customers, or any other create, update, or delete — **except the single sanctioned test-clock advance owned by the `bitwarden-stripe-tools:using-stripe-cli` skill (Category 4)**. The invoice preview's POST changes nothing and is a Category 4 read, not a write.
 - Editing feature flags or any other application configuration
 
 ## Stop Condition
