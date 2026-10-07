@@ -31,6 +31,7 @@ from typing import Any
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_ROOT = SKILL_ROOT / "assets" / "template"
+SHIELD_PATH = TEMPLATE_ROOT / "assets" / "bw-shield.svg"
 
 VALID_VERDICTS = {"approve", "approve-fix", "block", "pending"}
 VERDICT_LABELS = {
@@ -55,6 +56,8 @@ def die(msg: str, code: int = 1) -> None:
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 _GH_REPO_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 _GIT_HEADER_RE = re.compile(r"^diff --git a/(.+) b/(.+)$")
+_SVG_RE = re.compile(r'<svg\b[^>]*\bviewBox="(?P<box>[^"]+)"[^>]*>(?P<body>.*?)</svg>', re.DOTALL)
+_SVG_TITLE_RE = re.compile(r"<title>.*?</title>", re.DOTALL)
 
 
 def slugify(text: str) -> str:
@@ -219,6 +222,21 @@ def replace_tokens(text: str, tokens: dict[str, str]) -> str:
 
 # ---------- HTML generation ----------
 
+def inline_shield(style: str = "") -> str:
+    """The shield from bw-shield.svg as inline markup, so styles.css can theme its fills."""
+    if not SHIELD_PATH.is_file():
+        die(f"template asset missing: {SHIELD_PATH}")
+    m = _SVG_RE.search(SHIELD_PATH.read_text(encoding="utf-8"))
+    if not m:
+        die(f"no <svg> element with a viewBox in {SHIELD_PATH}")
+    body = _SVG_TITLE_RE.sub("", m.group("body")).strip()
+    style_attr = f' style="{style}"' if style else ""
+    return (
+        f'<svg class="brand-shield" viewBox="{m.group("box")}" aria-hidden="true"{style_attr}>'
+        f"{body}</svg>"
+    )
+
+
 def generate_cover(config: dict[str, Any]) -> str:
     stack = config["stack"]
     pr_count = len(stack)
@@ -279,10 +297,7 @@ def generate_cover(config: dict[str, Any]) -> str:
     return f"""<!-- __BW_BLOCK_START__ cover -->
 <section class="page" id="page-1" data-page-key="cover">
   <div class="cover-hero-mark" aria-hidden="true">
-    <svg class="brand-shield" viewBox="0 0 24 28" style="width: 44px; height: 52px;">
-      <path class="shield-fill" d="M12 0C5.373 0 0 1.79 0 4v11c0 7.18 5.373 12.18 12 13 6.627-.82 12-5.82 12-13V4c0-2.21-5.373-4-12-4z"/>
-      <path class="shield-glyph" d="M12 4.5c-3.59 0-7 1-7 2.4v8.1c0 4.55 3.41 7.7 7 8.5 3.59-.8 7-3.95 7-8.5V6.9c0-1.4-3.41-2.4-7-2.4zm5 10.5c0 3.5-2.55 5.95-5 6.6V6.5c2.45 0 5 .68 5 1.4V15z"/>
-    </svg>
+    {inline_shield("width: 44px; height: 52px;")}
     <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 28px; color: var(--accent); letter-spacing: -0.022em;">Bitwarden</span>
   </div>
   <span class="eyebrow">{eyebrow}</span>
@@ -586,6 +601,7 @@ def render_index(config: dict[str, Any]) -> str:
             "__BW_DOC_TITLE__": escape(config["doc_title"]),
             "__BW_BRAND_META__": escape(config["brand_meta"]),
             "__BW_MERGE_PAGE__": str(merge_page),
+            "__BW_SHIELD__": inline_shield(),
         },
     )
 

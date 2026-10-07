@@ -11,7 +11,7 @@ The template's color palette lives in `assets/template/assets/styles.css` as CSS
    - Run `scaffold.py` with the default output, then post-edit the generated `assets/styles.css`. Quickest path; not reproducible.
    - Or maintain a fork of the skill's template under your own plugin. Add `bw-shield.svg` replacement, palette overrides, and font swaps there. Reproducible.
 
-The header lockup uses an inline SVG defined in `index.html.tmpl`. Swap the `path d="..."` values to drop in a different mark. Keep the `viewBox="0 0 24 28"` — `styles.css` sizes against it.
+Every shield in the storybook comes from `assets/template/assets/bw-shield.svg`: the favicon links to it, and `scaffold.py` copies its paths inline into the header lockup and the cover so `styles.css` can theme them for light and dark. To use a different mark, replace that one file. Keep the `shield-fill` and `shield-glyph` classes on its paths and the `viewBox="0 0 24 28"`, because `styles.css` colors and sizes against them.
 
 ## Language Imports for Code Highlighting
 
