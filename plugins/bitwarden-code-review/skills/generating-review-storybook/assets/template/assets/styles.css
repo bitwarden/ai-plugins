@@ -274,6 +274,10 @@ body {
 .btn-ghost:hover {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
+.btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .btn svg {
   width: 14px;
   height: 14px;
@@ -766,8 +770,6 @@ a.link:hover {
 }
 .diff-row.hunk .diff-content {
   color: var(--ink-mute);
-  white-space: nowrap;
-  overflow: hidden;
 }
 .diff-row.meta {
   background: var(--bg-elev);
@@ -805,11 +807,38 @@ a.link:hover {
 .diff-row.del .diff-marker {
   color: var(--diff-del-text);
 }
+/* Long lines wrap by default. The hanging indent sets continuation lines in
+   from the first, so a wrapped line reads as one line beside its gutter. */
 .diff-content {
-  padding: 0 12px;
-  white-space: pre;
-  overflow-x: hidden;
+  padding: 0 12px 0 calc(12px + 2ch);
+  text-indent: -2ch;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   min-width: 0;
+}
+/* With wrapping off, the diff scrolls sideways inside its own block. The
+   single grid track grows to the longest row so every row's background spans
+   the full scroll width; notes and comment threads stay pinned to the visible
+   width so they never need scrolling to read. */
+[data-diff-wrap="off"] .diff-view {
+  display: grid;
+  grid-template-columns: minmax(100%, max-content);
+  overflow-x: auto;
+  container-type: inline-size;
+}
+[data-diff-wrap="off"] .diff-row:not(.gloss-row) {
+  grid-template-columns: 4px 50px 50px 16px minmax(max-content, 1fr) auto;
+}
+[data-diff-wrap="off"] .diff-content {
+  white-space: pre;
+  overflow-wrap: normal;
+}
+[data-diff-wrap="off"] .diff-row.gloss-row,
+[data-diff-wrap="off"] .diff-view > .comment-thread,
+[data-diff-wrap="off"] .diff-file-notes {
+  position: sticky;
+  left: 0;
+  max-width: 100cqw;
 }
 .diff-action {
   display: flex;
@@ -864,6 +893,7 @@ a.link:hover {
   font-size: 13px;
   line-height: 1.55;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .comment-actions {
   display: flex;
@@ -1360,6 +1390,8 @@ a.link:hover {
   padding: 12px 16px;
   margin: 6px 0;
   font-family: "Inter", sans-serif;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .gloss-c {
   border-left-color: var(--crit-line);
@@ -1484,6 +1516,8 @@ a.link:hover {
 }
 .diff-row.gloss-row .diff-content {
   padding: 0 12px;
+  text-indent: 0;
+  white-space: normal;
 }
 .diff-row.gloss-row .gloss {
   margin: 6px 0;

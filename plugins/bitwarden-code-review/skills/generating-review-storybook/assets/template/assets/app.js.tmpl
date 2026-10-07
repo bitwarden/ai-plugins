@@ -414,7 +414,7 @@ function buildFileRow(file, prKey, parsedFiles, annotations) {
 
   const header = el("button", { class: "file-row-header", type: "button", "aria-expanded": "false" },
     el("svg", { class: "file-chev", viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", "stroke-width": "1.5", html: '<path d="M6 4l4 4-4 4"/>' }),
-    el("div", { class: "file-name" },
+    el("div", { class: "file-name", title: file.path },
       el("span", { class: "file-name-dim" }, dirPart),
       namePart
     ),
@@ -1098,6 +1098,15 @@ function initTheme() {
   applyTheme(dark ? "dark" : "light");
 }
 
+// ===== diff line wrapping =====
+function applyDiffWrap(wrap) {
+  document.body.dataset.diffWrap = wrap ? "on" : "off";
+  $("#wrap-btn").setAttribute("aria-pressed", String(wrap));
+}
+function initDiffWrap() {
+  applyDiffWrap(localStorage.getItem(`${STORAGE_PREFIX}:diffWrap`) !== "off");
+}
+
 // ===== keyboard nav =====
 function onKey(e) {
   if (e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT")) return;
@@ -1119,6 +1128,7 @@ function onKey(e) {
 // ===== bootstrap =====
 function init() {
   initTheme();
+  initDiffWrap();
   refreshTriageList();
   PAGE_ORDER.forEach((descriptor, idx) => {
     if (descriptor.kind !== "scene") return;
@@ -1154,6 +1164,11 @@ function init() {
     const next = document.body.dataset.theme === "dark" ? "light" : "dark";
     localStorage.setItem(`${STORAGE_PREFIX}:theme`, next);
     applyTheme(next);
+  });
+  $("#wrap-btn").addEventListener("click", () => {
+    const next = document.body.dataset.diffWrap === "off";
+    localStorage.setItem(`${STORAGE_PREFIX}:diffWrap`, next ? "on" : "off");
+    applyDiffWrap(next);
   });
   $("#export-btn").addEventListener("click", async () => {
     const md = buildExportMarkdown();
