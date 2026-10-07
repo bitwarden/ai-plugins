@@ -7,9 +7,9 @@ description: Generate a multi-file static "review storybook" website that walks 
 
 You are packaging a stack of PRs (or commits) into a self-contained HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/` — your job is to interview the user, build a config, and run the scaffolder.
 
-**What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review — the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
+**What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review — the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
 
-**Core principle:** The scaffolder is deterministic. Your job is synthesis: ask the user enough to fill the config faithfully, then let `scripts/scaffold.py` render the artifact.
+**Core principle:** The scaffolder is deterministic. Your job is synthesis: ask the user enough to fill the config faithfully, then let `${CLAUDE_SKILL_DIR}/scripts/scaffold.py` render the artifact.
 
 ## When to Use
 
@@ -23,7 +23,7 @@ Use when the user wants:
 
 - **A single PR review** — that's `bitwarden-code-review:code-review` or `code-review-local`, not this skill.
 - **Posting comments to GitHub** — the storybook is a local artifact; reviewer notes export as Markdown.
-- **Generating per-PR review verdicts from scratch** — this skill consumes verdicts; it does not produce them. To get verdicts, run code review first (manually or via the bitwarden-code-review agent), then feed the resulting `review-summary.md` files in via `parse_review_md.py`.
+- **Generating per-PR review verdicts from scratch** — this skill consumes verdicts; it does not produce them. To get verdicts, run code review first (manually or via the bitwarden-code-review agent), then feed the resulting `review-summary.md` files in via `${CLAUDE_SKILL_DIR}/scripts/parse_review_md.py`.
 
 ## Inputs You Need from the User
 
@@ -37,11 +37,11 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 
 ## Verdict Modes
 
-| Mode          | Trigger                          | Action                                                                                                         |
-| ------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Pending       | No reviews exist yet (default)   | Set every PR's `verdict` to `pending`. Cover and per-page cards show "Pending review."                         |
-| Pre-baked     | User has review markdown files   | Run `python scripts/parse_review_md.py KEY=path ...` and merge the result into the stack config.               |
-| Inline review | User wants reviews generated now | Out of scope for v1 — instead, run `bitwarden-code-review:code-review-local` per PR first, then use Pre-baked. |
+| Mode          | Trigger                          | Action                                                                                                                  |
+| ------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Pending       | No reviews exist yet (default)   | Set every PR's `verdict` to `pending`. Cover and per-page cards show "Pending review."                                  |
+| Pre-baked     | User has review markdown files   | Run `python3 "${CLAUDE_SKILL_DIR}/scripts/parse_review_md.py" KEY=path ...` and merge the result into the stack config. |
+| Inline review | User wants reviews generated now | Out of scope for v1 — instead, run `bitwarden-code-review:code-review-local` per PR first, then use Pre-baked.          |
 
 ## Workflow
 
@@ -50,9 +50,9 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 2. **Capture diffs.** For each PR/commit, run:
 
    ```bash
-   python scripts/capture_diffs.py --repo <owner/name> pr 1234 2345 ...
+   python3 "${CLAUDE_SKILL_DIR}/scripts/capture_diffs.py" --repo <owner/name> pr 1234 2345 ...
    # or for commits:
-   python scripts/capture_diffs.py commit a1b2c3 d4e5f6
+   python3 "${CLAUDE_SKILL_DIR}/scripts/capture_diffs.py" commit a1b2c3 d4e5f6
    ```
 
    Pipe the output into a temp file (e.g. `/tmp/diffs.json`).
@@ -60,14 +60,14 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 3. **(Pre-baked mode only) Parse review verdicts.**
 
    ```bash
-   python scripts/parse_review_md.py 1234=reviews/pr-1234.md 2345=reviews/pr-2345.md \
+   python3 "${CLAUDE_SKILL_DIR}/scripts/parse_review_md.py" 1234=reviews/pr-1234.md 2345=reviews/pr-2345.md \
      --output /tmp/verdicts.json
    ```
 
 3b. **(Optional) Pull human reviewer comments.** When the user wants existing GitHub review threads inlined alongside Claude findings, run for each PR:
 
 ```bash
-python scripts/fetch_pr_threads.py --repo <owner/name> --pr 1234 --key 1234 \
+python3 "${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py" --repo <owner/name> --pr 1234 --key 1234 \
   --output /tmp/threads-1234.json
 ```
 
@@ -80,7 +80,7 @@ The output is a `{ key: [...comments] }` map ready to merge into each stack item
 6. **Run the scaffolder.**
 
    ```bash
-   python scripts/scaffold.py --config /tmp/storybook.json
+   python3 "${CLAUDE_SKILL_DIR}/scripts/scaffold.py" --config /tmp/storybook.json
    ```
 
    By default the storybook is written to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` only if the user explicitly asks for a different location.
