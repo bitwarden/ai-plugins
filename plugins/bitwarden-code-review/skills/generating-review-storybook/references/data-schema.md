@@ -163,11 +163,57 @@ typically belong to the same chapter as the code they cover.
 | `title`     | string | yes      | Chapter heading — keep it short and concrete. Avoid generic labels like "Code" or "Other".                                                                                         |
 | `narrative` | string | yes      | One paragraph (2–4 sentences) explaining what this chapter is about. Talk concept, not file.                                                                                       |
 | `paths`     | array  | yes      | File paths that belong to this chapter (must match `diff_b64` paths exactly). A path that matches no file in the diff renders nothing, and `scaffold.py` warns about it on stderr. |
+| `scenes`    | array  | no       | Splits the chapter across several pages. When non-empty, the scenes' `paths` replace the chapter's `paths` and `paths` may be omitted. See below.                                  |
 
 **Tip:** if you can't articulate a non-trivial narrative for a chapter, the grouping
 is probably wrong — merge it with another chapter or split it differently. A
 chapter that earns its keep is one a reviewer can read top-down and understand the
 intent of the change before they read the code.
+
+#### `scenes[]`
+
+A chapter renders as one page by default. Give it a `scenes[]` array when its files are too many for one screen, or when it tells a story in steps a reviewer should take one at a time (the contract, then the implementation, then the tests that pin it). Each scene becomes its own page, in declaration order, so a chapter with three scenes contributes three pages to the walkthrough.
+
+```json
+{
+  "title": "Vault item model",
+  "narrative": "Bank accounts become a first-class cipher type, from the shared model down to the SDK bridge.",
+  "scenes": [
+    {
+      "title": "Model and enum",
+      "narrative": "The new cipher type and the fields it carries.",
+      "paths": [
+        "src/vault/models/bank-account.ts",
+        "src/vault/enums/cipher-type.ts"
+      ]
+    },
+    {
+      "title": "SDK bridge",
+      "narrative": "Mapping between the client model and the SDK view.",
+      "paths": ["src/vault/sdk/bank-account-mapper.ts"]
+    }
+  ]
+}
+```
+
+| Field       | Type   | Required | Notes                                                                                      |
+| ----------- | ------ | -------- | ------------------------------------------------------------------------------------------ |
+| `title`     | string | no       | Page heading for this scene. Falls back to the chapter `title` when empty.                 |
+| `narrative` | string | no       | One or two sentences shown on this scene's page, below the chapter intro on the first one. |
+| `paths`     | array  | no       | File paths shown on this scene's page, matched against the diff the same way as chapters.  |
+
+`scaffold.py` enforces the following when it loads the config:
+
+- `scenes` defaults to `[]` and must be an array; anything else exits with an error.
+- Each scene is an object whose `title` and `narrative` default to `""` and whose `paths` defaults to `[]`; a `paths` that is not an array exits with an error.
+- Every scene path, like every chapter path, is checked against the diff, and one that matches no changed file is reported as a warning on stderr.
+
+How the pages and paths fit together:
+
+- The chapter's `narrative` renders once, as an intro on the chapter's first scene page. Each scene's `narrative` renders on its own page.
+- When `scenes` is non-empty, only the scene `paths` decide what renders. A path listed in the chapter's own `paths` but in no scene is not shown under the chapter, and counts as unassigned.
+- An empty `scenes` array behaves as if it were absent: the chapter is one page showing its own `paths`.
+- After all chapters and scenes are laid out, any changed file that no chapter or scene claims renders once in an **Other files** group on the PR's last page, next to the verdict recap. A PR with no `chapters` at all skips this and shows every changed file on its single page.
 
 ## `merge_plan[]`
 
