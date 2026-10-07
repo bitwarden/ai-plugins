@@ -1,0 +1,80 @@
+{
+  "title": "Bank account cipher type",
+  "summary": "Two pull requests add bank accounts as a vault item type. The first introduces the model, SDK mapping, and form wiring; the second includes the new type in exports.",
+  "storage_prefix": "review-storybook-example-bank-account",
+  "gh_repo": "bitwarden/clients",
+  "stack": [
+    {
+      "key": "1001",
+      "title": "Bank account model and form",
+      "ticket": "PM-1001",
+      "description": "Adds the BankAccount model, its cipher type, the SDK mapper, and the add/edit form branch.",
+      "verdict": "approve-fix",
+      "findings": {
+        "critical": 0,
+        "important": 1,
+        "debt": 0,
+        "suggested": 0,
+        "question": 0,
+        "items": [
+          {
+            "severity": "important",
+            "message": "The SDK mapper drops routingNumber, so it never reaches the SDK view.",
+            "location": "src/vault/sdk/bank-account-mapper.ts:5",
+            "suggestion": "Map routingNumber alongside accountNumber."
+          }
+        ]
+      },
+      "diff_b64": "ZGlmZiAtLWdpdCBhL3NyYy92YXVsdC9tb2RlbHMvYmFuay1hY2NvdW50LnRzIGIvc3JjL3ZhdWx0L21vZGVscy9iYW5rLWFjY291bnQudHMKbmV3IGZpbGUgbW9kZSAxMDA2NDQKaW5kZXggMDAwMDAwMC4uMTExMTExMQotLS0gL2Rldi9udWxsCisrKyBiL3NyYy92YXVsdC9tb2RlbHMvYmFuay1hY2NvdW50LnRzCkBAIC0wLDAgKzEsNSBAQAorZXhwb3J0IGNsYXNzIEJhbmtBY2NvdW50IHsKKyAgYmFua05hbWU6IHN0cmluZzsKKyAgYWNjb3VudE51bWJlcjogc3RyaW5nOworICByb3V0aW5nTnVtYmVyOiBzdHJpbmc7Cit9CmRpZmYgLS1naXQgYS9zcmMvdmF1bHQvZW51bXMvY2lwaGVyLXR5cGUudHMgYi9zcmMvdmF1bHQvZW51bXMvY2lwaGVyLXR5cGUudHMKaW5kZXggMjIyMjIyMi4uMzMzMzMzMyAxMDA2NDQKLS0tIGEvc3JjL3ZhdWx0L2VudW1zL2NpcGhlci10eXBlLnRzCisrKyBiL3NyYy92YXVsdC9lbnVtcy9jaXBoZXItdHlwZS50cwpAQCAtNCwzICs0LDQgQEAKICAgSWRlbnRpdHkgPSA0LAogICBTc2hLZXkgPSA1LAorICBCYW5rQWNjb3VudCA9IDYsCiB9CmRpZmYgLS1naXQgYS9zcmMvdmF1bHQvc2RrL2JhbmstYWNjb3VudC1tYXBwZXIudHMgYi9zcmMvdmF1bHQvc2RrL2JhbmstYWNjb3VudC1tYXBwZXIudHMKbmV3IGZpbGUgbW9kZSAxMDA2NDQKaW5kZXggMDAwMDAwMC4uMTExMTExMQotLS0gL2Rldi9udWxsCisrKyBiL3NyYy92YXVsdC9zZGsvYmFuay1hY2NvdW50LW1hcHBlci50cwpAQCAtMCwwICsxLDggQEAKK2ltcG9ydCB7IEJhbmtBY2NvdW50IH0gZnJvbSAiLi4vbW9kZWxzL2JhbmstYWNjb3VudCI7CisKK2V4cG9ydCBmdW5jdGlvbiB0b1Nka0JhbmtBY2NvdW50KG1vZGVsOiBCYW5rQWNjb3VudCkgeworICByZXR1cm4geworICAgIGFjY291bnROdW1iZXI6IG1vZGVsLmFjY291bnROdW1iZXIsCisgICAgYmFua05hbWU6IG1vZGVsLmJhbmtOYW1lLAorICB9OworfQpkaWZmIC0tZ2l0IGEvc3JjL3ZhdWx0L2NvbXBvbmVudHMvaXRlbS1mb3JtLmNvbXBvbmVudC50cyBiL3NyYy92YXVsdC9jb21wb25lbnRzL2l0ZW0tZm9ybS5jb21wb25lbnQudHMKaW5kZXggMjIyMjIyMi4uMzMzMzMzMyAxMDA2NDQKLS0tIGEvc3JjL3ZhdWx0L2NvbXBvbmVudHMvaXRlbS1mb3JtLmNvbXBvbmVudC50cworKysgYi9zcmMvdmF1bHQvY29tcG9uZW50cy9pdGVtLWZvcm0uY29tcG9uZW50LnRzCkBAIC0xMCwyICsxMCw0IEBACiAgICAgc3dpdGNoICh0eXBlKSB7CisgICAgICBjYXNlIENpcGhlclR5cGUuQmFua0FjY291bnQ6CisgICAgICAgIHJldHVybiB0aGlzLmJhbmtBY2NvdW50Rm9ybTsKICAgICAgIGNhc2UgQ2lwaGVyVHlwZS5DYXJkOgo=",
+      "chapters": [
+        {
+          "title": "Vault item model",
+          "narrative": "Bank accounts become a first-class cipher type, from the shared model down to the SDK bridge.",
+          "scenes": [
+            {
+              "title": "Model and enum",
+              "narrative": "The new cipher type and the fields it carries.",
+              "paths": [
+                "src/vault/models/bank-account.ts",
+                "src/vault/enums/cipher-type.ts"
+              ]
+            },
+            {
+              "title": "SDK bridge",
+              "narrative": "Mapping between the client model and the SDK view.",
+              "paths": ["src/vault/sdk/bank-account-mapper.ts"]
+            }
+          ]
+        },
+        {
+          "title": "Add/edit form",
+          "narrative": "The item form routes the new type to its own form group, so the edit screen can render bank account fields.",
+          "paths": ["src/vault/components/item-form.component.ts"]
+        }
+      ]
+    },
+    {
+      "key": "1002",
+      "title": "Export bank accounts",
+      "ticket": "PM-1002",
+      "description": "Includes bank account items in vault exports.",
+      "verdict": "approve",
+      "diff_b64": "ZGlmZiAtLWdpdCBhL3NyYy92YXVsdC9zZXJ2aWNlcy9jaXBoZXItZXhwb3J0LnNlcnZpY2UudHMgYi9zcmMvdmF1bHQvc2VydmljZXMvY2lwaGVyLWV4cG9ydC5zZXJ2aWNlLnRzCmluZGV4IDIyMjIyMjIuLjMzMzMzMzMgMTAwNjQ0Ci0tLSBhL3NyYy92YXVsdC9zZXJ2aWNlcy9jaXBoZXItZXhwb3J0LnNlcnZpY2UudHMKKysrIGIvc3JjL3ZhdWx0L3NlcnZpY2VzL2NpcGhlci1leHBvcnQuc2VydmljZS50cwpAQCAtMjAsMyArMjAsNCBAQAogICBwcml2YXRlIGV4cG9ydFR5cGVzID0gWwogICAgIENpcGhlclR5cGUuQ2FyZCwKKyAgICBDaXBoZXJUeXBlLkJhbmtBY2NvdW50LAogICBdOwo=",
+      "comments": [
+        {
+          "author": "reviewer",
+          "body": "Should encrypted JSON exports include this type too, or only the plain formats?",
+          "location": "src/vault/services/cipher-export.service.ts:22",
+          "created_at": "2 hours ago"
+        }
+      ],
+      "chapters": [
+        {
+          "title": "Export coverage",
+          "narrative": "The exporter keeps an allowlist of cipher types. Adding bank accounts to it is the whole change.",
+          "paths": ["src/vault/services/cipher-export.service.ts"]
+        }
+      ]
+    }
+  ]
+}

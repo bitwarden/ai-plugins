@@ -2,6 +2,8 @@
 
 The `scaffold.py` script consumes a single JSON config file. This document is the source of truth for that shape.
 
+[`examples/storybook.json`](../examples/storybook.json) is a complete config that scaffolds without warnings, with findings, a human comment, and chapters both with and without scenes. Start from it when writing a new one.
+
 ## Top-Level Object
 
 | Field               | Type   | Required | Default                          | Notes                                                                                       |
@@ -214,6 +216,8 @@ How the pages and paths fit together:
 - When `scenes` is non-empty, only the scene `paths` decide what renders. A path listed in the chapter's own `paths` but in no scene is not shown under the chapter, and counts as unassigned.
 - An empty `scenes` array behaves as if it were absent: the chapter is one page showing its own `paths`.
 - After all chapters and scenes are laid out, any changed file that no chapter or scene claims renders once in an **Other files** group on the PR's last page, next to the verdict recap. A PR with no `chapters` at all skips this and shows every changed file on its single page.
+
+The first PR in [`examples/storybook.json`](../examples/storybook.json) splits a chapter into scenes and claims every changed file, so it renders no Other files group.
 
 ## `merge_plan[]`
 
