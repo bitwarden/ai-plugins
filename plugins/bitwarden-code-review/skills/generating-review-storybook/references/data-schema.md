@@ -19,22 +19,22 @@ The `scaffold.py` script consumes a single JSON config file. This document is th
 
 ## `stack[]` Item
 
-| Field           | Type   | Required | Default                | Notes                                                                                                                                                  |
-| --------------- | ------ | -------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `key`           | string | **yes**  | —                      | PR number (e.g. `"2573"`) or short commit SHA. Stringified.                                                                                            |
-| `kind`          | enum   | no       | `"pr"`                 | `"pr"` or `"commit"`. Drives the cover label (`PR 2573` vs `commit a1b2c3`).                                                                           |
-| `title`         | string | no       | falls back to `key`    | Short human label.                                                                                                                                     |
-| `ticket`        | string | no       | `""`                   | Jira key, e.g. `"PM-32809"`. Renders next to the title; empty omits.                                                                                   |
-| `description`   | string | no       | `""`                   | One-paragraph PR/commit summary used in the merge plan default.                                                                                        |
-| `verdict`       | enum   | no       | `"pending"`            | One of `approve` / `approve-fix` / `block` / `pending`. See verdict notes below.                                                                       |
-| `verdict_label` | string | no       | derived from `verdict` | Override the badge text (rarely needed).                                                                                                               |
-| `findings`      | object | no       | all zero               | `{ critical, important, debt, suggested, question }` — integers.                                                                                       |
-| `files_changed` | number | no       | `0`                    | Cover stats + cards.                                                                                                                                   |
-| `lines_changed` | number | no       | `0`                    | Cover stats + cards.                                                                                                                                   |
-| `diff_b64`      | string | no       | `""`                   | Base64-encoded unified diff text. Produced by `scripts/capture_diffs.py`.                                                                              |
-| `diff_path`     | string | no       | `""`                   | Read a diff from disk and base64-encode it inline. Use **either** `diff_b64` OR `diff_path`.                                                           |
-| `comments`      | array  | no       | `[]`                   | Human reviewer comments — render as marginalia alongside findings. See below.                                                                          |
-| `chapters`      | array  | no       | `[]`                   | Ordered walkthrough groupings. Files declared here render under chapter headings; anything unlisted falls into a final "Other files" group. See below. |
+| Field           | Type   | Required | Default                | Notes                                                                                                                                                                               |
+| --------------- | ------ | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`           | string | **yes**  | —                      | PR number (e.g. `"2573"`) or short commit SHA. Stringified.                                                                                                                         |
+| `kind`          | enum   | no       | `"pr"`                 | `"pr"` or `"commit"`. Drives the cover label (`PR 2573` vs `commit a1b2c3`).                                                                                                        |
+| `title`         | string | no       | falls back to `key`    | Short human label.                                                                                                                                                                  |
+| `ticket`        | string | no       | `""`                   | Jira key, e.g. `"PM-32809"`. Renders next to the title; empty omits.                                                                                                                |
+| `description`   | string | no       | `""`                   | One-paragraph PR/commit summary used in the merge plan default.                                                                                                                     |
+| `verdict`       | enum   | no       | `"pending"`            | One of `approve` / `approve-fix` / `block` / `pending`. See verdict notes below.                                                                                                    |
+| `verdict_label` | string | no       | derived from `verdict` | Override the badge text (rarely needed).                                                                                                                                            |
+| `findings`      | object | no       | all zero               | `{ critical, important, debt, suggested, question }` — integers.                                                                                                                    |
+| `files_changed` | number | no       | `0`                    | Cover stats + cards.                                                                                                                                                                |
+| `lines_changed` | number | no       | `0`                    | Cover stats + cards.                                                                                                                                                                |
+| `diff_b64`      | string | no       | `""`                   | Base64-encoded unified diff text. Produced by `scripts/capture_diffs.py`.                                                                                                           |
+| `diff_path`     | string | no       | `""`                   | Read a diff from disk and base64-encode it inline. Use **either** `diff_b64` OR `diff_path`.                                                                                        |
+| `comments`      | array  | no       | `[]`                   | Human reviewer comments — render as marginalia alongside findings. See below.                                                                                                       |
+| `chapters`      | array  | no       | `[]`                   | Ordered walkthrough groupings. Files declared here render under chapter headings; changed files no chapter lists render in an "Other files" group on the PR's last page. See below. |
 
 ### Verdict Values
 
@@ -158,11 +158,11 @@ typically belong to the same chapter as the code they cover.
 ]
 ```
 
-| Field       | Type   | Required | Notes                                                                                        |
-| ----------- | ------ | -------- | -------------------------------------------------------------------------------------------- |
-| `title`     | string | yes      | Chapter heading — keep it short and concrete. Avoid generic labels like "Code" or "Other".   |
-| `narrative` | string | yes      | One paragraph (2–4 sentences) explaining what this chapter is about. Talk concept, not file. |
-| `paths`     | array  | yes      | File paths that belong to this chapter (must match `diff_b64` paths exactly).                |
+| Field       | Type   | Required | Notes                                                                                                                                                                              |
+| ----------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`     | string | yes      | Chapter heading — keep it short and concrete. Avoid generic labels like "Code" or "Other".                                                                                         |
+| `narrative` | string | yes      | One paragraph (2–4 sentences) explaining what this chapter is about. Talk concept, not file.                                                                                       |
+| `paths`     | array  | yes      | File paths that belong to this chapter (must match `diff_b64` paths exactly). A path that matches no file in the diff renders nothing, and `scaffold.py` warns about it on stderr. |
 
 **Tip:** if you can't articulate a non-trivial narrative for a chapter, the grouping
 is probably wrong — merge it with another chapter or split it differently. A

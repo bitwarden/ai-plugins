@@ -704,6 +704,26 @@ function renderScenePage(descriptor, pageNumber) {
     );
   }
 
+  // Files in the diff that no chapter or scene claims render once, on the
+  // last scene of the PR, so every changed file appears in the walkthrough.
+  if (chapters && pageNumber === lastScenePageOf(prKey)) {
+    const assigned = new Set();
+    chapters.forEach(c => {
+      const scenes = c.scenes && c.scenes.length ? c.scenes : [{ paths: c.paths || [] }];
+      scenes.forEach(s => (s.paths || []).forEach(p => assigned.add(p)));
+    });
+    const otherFileMetas = allFileMetas.filter(f => !assigned.has(f.path));
+    if (otherFileMetas.length) {
+      const otherSection = el("section", { class: "other-files-section" },
+        el("span", { class: "eyebrow" }, "Other files"));
+      otherFileMetas.forEach(f => {
+        const fileAnnotations = annotationsByFile[f.path] || { fileLevel: [], byLine: {} };
+        otherSection.appendChild(buildFileRow(f, prKey, parsedFiles, fileAnnotations));
+      });
+      pageEl.appendChild(otherSection);
+    }
+  }
+
   // Decision widget — last scene of the PR.
   if (pageNumber === lastScenePageOf(prKey)) {
     pageEl.appendChild(renderVerdictRecap(meta));

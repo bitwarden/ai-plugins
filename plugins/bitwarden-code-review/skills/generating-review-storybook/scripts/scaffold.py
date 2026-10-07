@@ -433,6 +433,51 @@ def generate_merge_plan(config: dict[str, Any], merge_page: int) -> str:
 
 # ---------- data.js generation ----------
 
+def diff_paths(diff_text: str) -> set[str]:
+    """File paths in a unified diff, resolved the same way app.js resolves them."""
+    paths: set[str] = set()
+    path: str | None = None
+    in_header = False
+    for line in diff_text.split("\n"):
+        if line.startswith("diff --git"):
+            if path:
+                paths.add(path)
+            path, in_header = None, True
+        elif line.startswith("@@"):
+            in_header = False
+        elif in_header:
+            if line.startswith("+++ b/"):
+                path = line[6:]
+            elif line.startswith("+++ ") and not path:
+                path = line[4:]
+            elif line.startswith("rename to ") and not path:
+                path = line[len("rename to "):]
+    if path:
+        paths.add(path)
+    return paths
+
+
+def warn_unknown_chapter_paths(item: dict[str, Any], diff_b64: str) -> None:
+    """Warn on stderr about chapter or scene paths that match no file in the diff."""
+    if not diff_b64 or not item.get("chapters"):
+        return
+    try:
+        known = diff_paths(base64.b64decode(diff_b64).decode("utf-8", errors="replace"))
+    except ValueError:
+        return
+    for chapter in item["chapters"]:
+        declared = list(chapter.get("paths") or [])
+        for scene in chapter.get("scenes") or []:
+            declared.extend(scene.get("paths") or [])
+        for path in declared:
+            if path not in known:
+                print(
+                    f"scaffold.py: warning: stack item '{item['key']}' chapter "
+                    f"'{chapter.get('title', '')}' lists '{path}', which is not in the diff",
+                    file=sys.stderr,
+                )
+
+
 def generate_data_js(config: dict[str, Any]) -> str:
     pages_data: dict[str, dict[str, Any]] = {}
     diffs: dict[str, str] = {}
@@ -460,6 +505,7 @@ def generate_data_js(config: dict[str, Any]) -> str:
                 diff_b64 = base64.b64encode(raw.encode("utf-8")).decode("ascii")
             except OSError as e:
                 die(f"unable to read diff_path for {key}: {e}")
+        warn_unknown_chapter_paths(item, diff_b64)
         diffs[key] = diff_b64
 
     page_order = build_page_order(config)

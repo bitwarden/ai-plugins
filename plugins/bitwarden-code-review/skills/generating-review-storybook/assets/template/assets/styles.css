@@ -1427,6 +1427,13 @@ a.link:hover {
 .scene-files-section {
   margin: 8px 0 0;
 }
+.other-files-section {
+  margin: 24px 0 0;
+}
+.other-files-section .eyebrow {
+  display: block;
+  margin-bottom: 8px;
+}
 
 /* ---- cover TOC: chapter group headers + scene rows ---- */
 .toc-chapter-header {
