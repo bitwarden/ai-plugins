@@ -78,9 +78,6 @@ function escapeHtml(s) {
 }
 function jiraUrl(ticket) { return `https://bitwarden.atlassian.net/browse/${ticket}`; }
 function ghPrUrl(pr) { return `https://github.com/__BW_GH_REPO__/pull/${pr}`; }
-function estimateMinutes(linesChanged, newFiles) {
-  return Math.max(1, Math.round((linesChanged / 50) + (newFiles * 0.5)));
-}
 
 // ===== diff parsing =====
 function parseUnifiedDiff(rawText) {
@@ -458,7 +455,6 @@ function verdictMeta(verdict) {
 }
 
 // ===== inline annotations (findings + human comments) =====
-const SEVERITY_ORDER = ["critical", "important", "debt", "suggested", "question"];
 const SEVERITY_META = {
   critical:  { label: "Critical",  emoji: "❌", glossClass: "gloss-c" },
   important: { label: "Important", emoji: "⚠️", glossClass: "gloss-i" },
@@ -766,33 +762,6 @@ function renderVerdictRecap(meta) {
         ? "No AI review pre-baked for this PR. Use this page to record your decision."
         : `${total} finding${total !== 1 ? "s" : ""} surfaced inline at the diff line they reference.`)
   );
-}
-
-// Renders one scene: small heading + narrative + the files that belong to it.
-function renderScene(chapterNum, sceneNum, scene, fileMetas, prKey, parsedFiles, annotationsByFile) {
-  const wrap = el("section", { class: "scene" });
-  if (scene.title) {
-    const head = el("header", { class: "scene-head" },
-      el("span", { class: "scene-num" },
-        chapterNum != null ? `${String(chapterNum).padStart(2, "0")}.${sceneNum}` : `Scene ${sceneNum}`),
-      el("div", { class: "scene-head-text" },
-        el("h3", { class: "scene-title" }, scene.title),
-        el("span", { class: "scene-count" },
-          `${fileMetas.length} file${fileMetas.length !== 1 ? "s" : ""}`)
-      )
-    );
-    wrap.appendChild(head);
-  }
-  if (scene.narrative) {
-    wrap.appendChild(el("p", { class: "scene-narrative" }, scene.narrative));
-  }
-  const files = el("div", { class: "scene-files" });
-  fileMetas.forEach(f => {
-    const fileAnnotations = annotationsByFile[f.path] || { fileLevel: [], byLine: {} };
-    files.appendChild(buildFileRow(f, prKey, parsedFiles, fileAnnotations));
-  });
-  wrap.appendChild(files);
-  return wrap;
 }
 
 function renderDecisionWidget(prKey, meta) {
@@ -1159,11 +1128,6 @@ function init() {
 
   const startBtn = $("#start-btn");
   if (startBtn) startBtn.addEventListener("click", () => navigate(2));
-  const skipRisky = $("#skip-risky-btn");
-  if (skipRisky) skipRisky.addEventListener("click", () => {
-    const target = parseInt(skipRisky.dataset.targetPage || "0", 10);
-    if (target >= 1 && target <= TOTAL_PAGES) navigate(target);
-  });
   const mergeBtn = $("#merge-plan-btn");
   if (mergeBtn) mergeBtn.addEventListener("click", () => navigate(TOTAL_PAGES));
   $("#prev-btn").addEventListener("click", () => navigate(getCurrentPage() - 1));

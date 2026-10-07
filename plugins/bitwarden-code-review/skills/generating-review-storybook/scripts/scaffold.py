@@ -600,7 +600,6 @@ def render_index(config: dict[str, Any]) -> str:
         {
             "__BW_DOC_TITLE__": escape(config["doc_title"]),
             "__BW_BRAND_META__": escape(config["brand_meta"]),
-            "__BW_MERGE_PAGE__": str(merge_page),
             "__BW_SHIELD__": inline_shield(),
         },
     )
