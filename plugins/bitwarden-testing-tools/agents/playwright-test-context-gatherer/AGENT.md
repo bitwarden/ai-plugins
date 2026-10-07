@@ -1,6 +1,6 @@
 ---
 name: playwright-test-context-gatherer
-version: 1.4.0
+version: 1.5.0
 description: |
   Planning-phase agent for Bitwarden web test planning. Given a Jira ticket ID, a plan file path, or a free-form feature description, it acquires the feature source and returns structured context — affected repositories, a feature description, and acceptance criteria — as a markdown response. Use it to turn a feature reference into the structured context the rest of the Playwright test-planning work builds on.
 
