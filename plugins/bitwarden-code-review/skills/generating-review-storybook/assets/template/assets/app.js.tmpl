@@ -94,15 +94,23 @@ function parseUnifiedDiff(rawText) {
     if (!lines[i].startsWith("diff --git")) { i++; continue; }
     const fileHeader = [];
     fileHeader.push(lines[i]); i++;
-    let path = null;
+    // Path precedence: new side (+++), rename target, old side (--- for
+    // deletions, whose +++ side is /dev/null), then the diff --git header for
+    // binary files that carry neither line. scaffold.py diff_paths mirrors this.
+    const gitHeader = /^diff --git a\/(.+) b\/(.+)$/.exec(fileHeader[0]);
+    let newPath = null, oldPath = null, renamePath = null;
     // header lines until first hunk
     while (i < lines.length && !lines[i].startsWith("@@") && !lines[i].startsWith("diff --git")) {
-      fileHeader.push(lines[i]);
-      if (lines[i].startsWith("+++ b/")) path = lines[i].slice(6);
-      else if (lines[i].startsWith("+++ ") && !path) path = lines[i].slice(4);
-      else if (lines[i].startsWith("rename to ") && !path) path = lines[i].slice("rename to ".length);
+      const l = lines[i];
+      fileHeader.push(l);
+      if (l.startsWith("+++ b/")) newPath = l.slice(6);
+      else if (l.startsWith("+++ ") && l !== "+++ /dev/null" && !newPath) newPath = l.slice(4);
+      else if (l.startsWith("--- a/")) oldPath = l.slice(6);
+      else if (l.startsWith("--- ") && l !== "--- /dev/null" && !oldPath) oldPath = l.slice(4);
+      else if (l.startsWith("rename to ")) renamePath = l.slice("rename to ".length);
       i++;
     }
+    const path = newPath || renamePath || oldPath || (gitHeader ? gitHeader[2] : null);
     const hunks = [];
     while (i < lines.length && lines[i].startsWith("@@")) {
       const hunkHead = lines[i];

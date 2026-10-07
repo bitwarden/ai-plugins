@@ -49,6 +49,7 @@ def die(msg: str, code: int = 1) -> None:
 
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 _GH_REPO_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
+_GIT_HEADER_RE = re.compile(r"^diff --git a/(.+) b/(.+)$")
 
 
 def slugify(text: str) -> str:
@@ -470,24 +471,37 @@ def diff_stats(diff_text: str) -> tuple[int, int]:
 def diff_paths(diff_text: str) -> set[str]:
     """File paths in a unified diff, resolved the same way app.js resolves them."""
     paths: set[str] = set()
-    path: str | None = None
+    current: dict[str, str] | None = None
+
+    def resolve(f: dict[str, str] | None) -> None:
+        # Same precedence as app.js: new side, rename target, old side, header.
+        if f is not None:
+            path = f.get("new") or f.get("rename") or f.get("old") or f.get("header")
+            if path:
+                paths.add(path)
+
     in_header = False
     for line in diff_text.split("\n"):
         if line.startswith("diff --git"):
-            if path:
-                paths.add(path)
-            path, in_header = None, True
+            resolve(current)
+            current, in_header = {}, True
+            m = _GIT_HEADER_RE.match(line)
+            if m:
+                current["header"] = m.group(2)
         elif line.startswith("@@"):
             in_header = False
-        elif in_header:
+        elif in_header and current is not None:
             if line.startswith("+++ b/"):
-                path = line[6:]
-            elif line.startswith("+++ ") and not path:
-                path = line[4:]
-            elif line.startswith("rename to ") and not path:
-                path = line[len("rename to "):]
-    if path:
-        paths.add(path)
+                current["new"] = line[6:]
+            elif line.startswith("+++ ") and line != "+++ /dev/null" and "new" not in current:
+                current["new"] = line[4:]
+            elif line.startswith("--- a/"):
+                current["old"] = line[6:]
+            elif line.startswith("--- ") and line != "--- /dev/null" and "old" not in current:
+                current["old"] = line[4:]
+            elif line.startswith("rename to "):
+                current["rename"] = line[len("rename to "):]
+    resolve(current)
     return paths
 
 
