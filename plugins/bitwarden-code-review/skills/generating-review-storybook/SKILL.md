@@ -64,20 +64,20 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
      --output /tmp/verdicts.json
    ```
 
-3b. **(Optional) Pull human reviewer comments.** When the user wants existing GitHub review threads inlined alongside Claude findings, run for each PR:
+4. **(Optional) Pull human reviewer comments.** When the user wants existing GitHub review threads inlined alongside Claude findings, run for each PR:
 
-```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py" --repo <owner/name> --pr 1234 --key 1234 \
-  --output /tmp/threads-1234.json
-```
+   ```bash
+   python3 "${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py" --repo <owner/name> --pr 1234 --key 1234 \
+     --output /tmp/threads-1234.json
+   ```
 
-The output is a `{ key: [...comments] }` map ready to merge into each stack item's `comments[]`. Outdated threads are skipped by default; resolved threads are kept with a `_(resolved)_` suffix so the reviewer can see "this was caught and fixed" context. See `references/data-schema.md` for the comment shape.
+   The output is a `{ key: [...comments] }` map ready to merge into each stack item's `comments[]`. Outdated threads are skipped by default; resolved threads are kept with a `_(resolved)_` suffix so the reviewer can see "this was caught and fixed" context. See `references/data-schema.md` for the comment shape.
 
-4. **Synthesize chapters.** Read the PR body and skim the file list. Break each PR into 2–5 logical chapters that walk the reviewer through the change in a meaningful order — not alphabetical. Each chapter declares a `title`, a `narrative` paragraph that says what this chapter is _about_ (not what each file does), and the `paths[]` that belong to it. Tests usually go in the same chapter as the code they cover. If you can't articulate a narrative for a group, that's a sign the grouping is wrong. **Skip this step only when the PR is genuinely a single concern** — even then, one chapter with a real narrative beats a flat file list.
+5. **Synthesize chapters.** Read the PR body and skim the file list. Break each PR into 2–5 logical chapters that walk the reviewer through the change in a meaningful order — not alphabetical. Each chapter declares a `title`, a `narrative` paragraph that says what this chapter is _about_ (not what each file does), and the `paths[]` that belong to it. Tests usually go in the same chapter as the code they cover. If you can't articulate a narrative for a group, that's a sign the grouping is wrong. **Skip this step only when the PR is genuinely a single concern** — even then, one chapter with a real narrative beats a flat file list.
 
-5. **Compose the config JSON.** See `references/data-schema.md` for the shape. Save to `/tmp/storybook.json`. Inline diffs from step 2 into each stack item's `diff_b64` field; merge verdicts from step 3 into each item's `verdict`, `verdict_label`, and `findings`; attach the chapters from step 4 as `stack[i].chapters`.
+6. **Compose the config JSON.** See `references/data-schema.md` for the shape. Save to `/tmp/storybook.json`. Inline diffs from step 2 into each stack item's `diff_b64` field; merge verdicts from step 3 into each item's `verdict`, `verdict_label`, and `findings`; attach the chapters from step 5 as `stack[i].chapters`.
 
-6. **Run the scaffolder.**
+7. **Run the scaffolder.**
 
    ```bash
    python3 "${CLAUDE_SKILL_DIR}/scripts/scaffold.py" --config /tmp/storybook.json \
@@ -86,7 +86,7 @@ The output is a `{ key: [...comments] }` map ready to merge into each stack item
 
    The storybook is written to a new `<slug>-<timestamp>/` directory under the output root. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` in place of `--output-root` only if the user explicitly asks for a different location; it writes to that exact directory.
 
-7. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR walks through chapters in a logical order with real narrative; AI findings and human comments (if any) appear inline at the diff line they reference; export-notes copies Markdown.
+8. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR walks through chapters in a logical order with real narrative; AI findings and human comments (if any) appear inline at the diff line they reference; export-notes copies Markdown.
 
 ## Output Location Convention
 
