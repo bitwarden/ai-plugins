@@ -20,7 +20,7 @@
     "should_trigger": true
   },
   {
-    "query": "find the email with subject containing 'Verify' and pull out the token",
+    "query": "find the email with subject containing 'Verify' and give me the link that carries the token",
     "should_trigger": true
   },
   {
@@ -60,7 +60,7 @@
     "should_trigger": false
   },
   {
-    "query": "configure the SMTP host and port for my local dev environment",
+    "query": "emails from my local server never show up in mailcatcher, help me figure out why",
     "should_trigger": false
   },
   {

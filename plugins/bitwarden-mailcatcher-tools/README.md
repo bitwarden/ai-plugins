@@ -16,6 +16,7 @@ Bitwarden's local dev environment delivers every outgoing email to Mailcatcher. 
 
 - **Python 3** on `PATH`. The skill's scripts are invoked directly and rely on their shebang.
 - **Mailcatcher running** at `http://localhost:1080`: the `mail` service in `bitwarden/server`'s `dev/docker-compose.yml`, started with `docker compose --profile mail up -d mail` from `server/dev/`.
+- **A `bitwarden/server` checkout** for the Admin Portal magic-link flow. `get_admin_email.py` reads the admin address from its `dev/secrets.json`, by default at `server/dev/secrets.json` relative to the current directory; pass `--secrets-file` to point at a checkout elsewhere.
 - **Optional:** if your environment's emails link to a local hostname other than `localhost`, `127.0.0.1`, `::1`, or `bitwarden.test`, add it to the comma-separated `MAILCATCHER_ALLOWED_HOSTS` environment variable in your shell. It extends the allowlist and never replaces it.
 
 ## Installation

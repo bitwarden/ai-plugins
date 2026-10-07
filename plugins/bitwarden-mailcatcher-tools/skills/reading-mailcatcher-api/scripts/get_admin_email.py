@@ -11,7 +11,8 @@ The secrets file is JSONC by convention (Bitwarden's dev secrets.json carries
 `//` and `/* */` comments and trailing commas), so it is parsed tolerantly.
 
 Exit 0 on success (prints one address per line on stdout).
-Exit 2: usage error (bad arguments).
+Exit 2: usage error (bad arguments, or a --secrets-file that does not resolve to
+        a dev/secrets.json path).
 Exit 3: secrets file not found, unreadable, invalid JSON, or missing the
         adminSettings.admins key.
 
@@ -20,7 +21,9 @@ Usage:
 
 --secrets-file defaults to server/dev/secrets.json, relative to the current
 directory (run from the workspace root that holds your bitwarden/server
-checkout). --all lists every configured admin address; the default prints only
+checkout). Any override must resolve, after symlinks, to a file named
+secrets.json inside a directory named dev: the skill grants this script without
+a prompt, so the argument must not become a probe of arbitrary files. --all lists every configured admin address; the default prints only
 the first, which is the Admin Portal login address.
 """
 import argparse
@@ -34,9 +37,34 @@ EXIT_OK = 0
 EXIT_USAGE = 2
 EXIT_ERROR = 3
 
+# The trailing path components every --secrets-file must resolve to.
+REQUIRED_PATH_TAIL = ("dev", "secrets.json")
+
 
 class SecretsError(Exception):
     """The secrets file could not be read or held no admin address."""
+
+
+class SecretsPathError(Exception):
+    """The --secrets-file argument does not name a dev/secrets.json file."""
+
+
+def check_secrets_path(path):
+    """Refuse any path that does not resolve to a dev/secrets.json file.
+
+    The skill's Bash grant pre-approves every invocation of this script, and a
+    grant cannot constrain an argument, so the constraint lives here. Without
+    it, --secrets-file would answer "does this file exist, and is it JSON?" for
+    any path on disk without a prompt. The path is resolved first, so neither
+    `..` segments nor a symlink can dress another file up as dev/secrets.json.
+    """
+    resolved = os.path.realpath(path)
+    parts = tuple(os.path.normcase(part) for part in resolved.split(os.sep))
+    if parts[-len(REQUIRED_PATH_TAIL):] != REQUIRED_PATH_TAIL:
+        raise SecretsPathError(
+            f"--secrets-file must point at a bitwarden/server checkout's "
+            f"dev/secrets.json, got: {path}"
+        )
 
 
 def extract_admins(data):
@@ -154,6 +182,12 @@ def main(argv):
         args = parser.parse_args(argv)
     except SystemExit as exc:
         return exc.code if isinstance(exc.code, int) else EXIT_USAGE
+
+    try:
+        check_secrets_path(args.secrets_file)
+    except SecretsPathError as err:
+        print(f"ERROR: {err}", file=sys.stderr)
+        return EXIT_USAGE
 
     try:
         admins = read_admins(args.secrets_file)

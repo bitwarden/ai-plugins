@@ -88,6 +88,13 @@ class SelectMessageTest(unittest.TestCase):
             read_mailcatcher.select_message([broken], "a@b.test", "verify")
         )
 
+    def test_non_integer_id_is_skipped_not_compared(self):
+        """Mixed int and str ids used to raise TypeError inside max()."""
+        string_id = message(9, "a@b.test", "Verify your email")
+        string_id["id"] = "9"
+        msgs = [string_id, message(1, "a@b.test", "Verify your email")]
+        self.assertEqual(read_mailcatcher.select_message(msgs, "a@b.test", "verify"), 1)
+
     def test_non_object_entry_is_skipped(self):
         msgs = ["not a message", message(2, "a@b.test", "Verify your email")]
         self.assertEqual(read_mailcatcher.select_message(msgs, "a@b.test", "verify"), 2)

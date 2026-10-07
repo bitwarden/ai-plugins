@@ -8,7 +8,7 @@ Trigger-rate diagnostic for the `bitwarden-mailcatcher-tools:reading-mailcatcher
 
 ## Running
 
-The plugin's shared runner, [`evals/run_real_eval.py`](../../../evals/README.md), spawns parallel `claude -p` subprocesses, parses streamed tool-use events, and computes per-query trigger rates. See its README for prerequisites and for pinning the plugin's skill inventory to this working tree. Then, from this directory:
+The plugin's shared runner, [`evals/run_real_eval.py`](../../../evals/run_real_eval.py), spawns parallel `claude -p` subprocesses, parses streamed tool-use events, and computes per-query trigger rates. See its README for prerequisites and for pinning the plugin's skill inventory to this working tree. Then, from this directory:
 
 ```bash
 python3 ../../../evals/run_real_eval.py --eval-set trigger-eval.json --runs-per-query 3 --num-workers 3 --timeout 90 --model claude-opus-4-8 > result.json
@@ -16,7 +16,7 @@ python3 ../../../evals/run_real_eval.py --eval-set trigger-eval.json --runs-per-
 
 ## Last observed reading
 
-Recorded 2026-10-07 with `claude-opus-4-8` at 3 runs per query, measured against this plugin's own inventory (`reading-mailcatcher-api` alone, loaded with `--setting-sources project --plugin-dir` on this plugin), after the description stopped promising a token (the script returns only URLs): should-trigger 9/9, should-not-trigger 8/10. The two misses, `review this PR that changes the invite email copy` and `what test coverage exists for the password reset email path?`, were re-run at 7 runs against this description and the previous one ("link or token"): 4/7 and 2/7 versus 3/7 and 1/7, a one-run difference on each, within sampling noise. Both are near-misses written for skills that are not installed alongside this plugin (an email-template reviewer, `assessing-test-coverage`), so with no sibling to take them the model sometimes reads this skill to check. Expect them to sit near the threshold in a single-plugin inventory. The should-trigger query that asks to `pull out the token` still triggers 7/7.
+Recorded 2026-10-07 with `claude-opus-4-8` at 3 runs per query, measured against this plugin's own inventory (`reading-mailcatcher-api` alone, loaded with `--setting-sources project --plugin-dir` on this plugin), after the description stopped promising a token (the script returns only URLs): should-trigger 9/9, should-not-trigger 8/10. The two misses, `review this PR that changes the invite email copy` and `what test coverage exists for the password reset email path?`, were re-run at 7 runs against this description and the previous one ("link or token"): 4/7 and 2/7 versus 3/7 and 1/7, a one-run difference on each, within sampling noise. Both are near-misses written for skills that are not installed alongside this plugin (an email-template reviewer, `assessing-test-coverage`), so with no sibling to take them the model sometimes reads this skill to check. Expect them to sit near the threshold in a single-plugin inventory. Two rows were then reworded and measured alone at 7 runs on 2026-10-07: the should-trigger query now asks for `the link that carries the token`, matching the description's link-only promise (7/7), and a duplicate SMTP-configuration negative became a delivery-debugging one, `emails from my local server never show up in mailcatcher, help me figure out why` (0/7).
 
 ## When to run
 
