@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-software-engineer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Software engineer agent for a Bitwarden product team. Implements stories, tasks, and bugs in the team's domain with code quality, performance, and security in mind. Participates in refinement, reviews PRs, collaborates with QA, and follows Git conventions.",
   "author": {
     "name": "Bitwarden",
