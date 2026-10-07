@@ -1,15 +1,15 @@
 ---
 name: generating-review-storybook
-description: Generate a multi-file static "review storybook" website that walks human reviewers through a stack of pull requests one screen at a time, optimized for triage speed against AI-generated PR fatigue. Use whenever the user wants to create a code-review storybook, build a reviewer-friendly walkthrough of stacked PRs or commits, reduce reviewer cognitive load, or speed up a stack review. Triggers on "review storybook", "PR walkthrough", "stack walkthrough", "reviewer storybook", "AI PR review tool", "make these PRs easier to review", or any time the user wants to package a stack for human review.
+description: Generate a static, double-clickable "review storybook" that walks human reviewers through a stack of pull requests or commits one screen at a time, verdict first with diffs as drill-down. Use when the user wants a review storybook, a PR or stack walkthrough, or to make a stack of AI-written PRs faster to review. Not for reviewing a single PR (use code-review-local).
 ---
 
 # Generating a Review Storybook
 
-You are packaging a stack of PRs (or commits) into a self-contained HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/` — your job is to interview the user, build a config, and run the scaffolder.
+Package a stack of PRs (or commits) into a self-contained HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/`; interview the user, build a config, and run the scaffolder.
 
 **What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review — the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
 
-**Core principle:** The scaffolder is deterministic. Your job is synthesis: ask the user enough to fill the config faithfully, then let `${CLAUDE_SKILL_DIR}/scripts/scaffold.py` render the artifact.
+**Core principle:** The scaffolder is deterministic. Synthesis is the judgment step: ask the user enough to fill the config faithfully, then let `${CLAUDE_SKILL_DIR}/scripts/scaffold.py` render the artifact.
 
 ## When to Use
 
