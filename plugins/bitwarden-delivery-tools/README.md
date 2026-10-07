@@ -9,7 +9,7 @@ These skills define delivery **process** — initiative phases, transition playb
 The plugin spans three concerns:
 
 - **Lifecycle** — how cross-cutting initiatives move through phases and how ownership transitions between teams.
-- **Technical design** — how teams apply architectural judgment inside their scope.
+- **Technical design** — how teams apply architectural judgment inside their scope, and how they gate work behind feature flags.
 - **Mechanics** — how individual changes get committed, reviewed, and merged.
 
 Tech Breakdown drafting lives in the [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns) repository, where the templates and per-team folder conventions are canonical.
@@ -30,17 +30,21 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 | Skill                    | Triggers                                                                                          | Purpose                                                                                                                                                           |
 | ------------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `architecting-solutions` | "plan the solution", "assess blast radius", "evaluate trade-offs", "should Architecture weigh in" | Architectural judgment framework: security mindset, blast radius, Bitwarden-specific constraints, and the signals that warrant pulling in the Architecture group. |
+| `managing-feature-flags` | "feature flag", "put it behind a flag", "LaunchDarkly", "gradual rollout", "flag cleanup"         | Flag conventions and lifecycle: when to flag, server and client evaluation, release vs operational, rollout and cleanup.                                          |
 
 ### Mechanics
 
-| Skill                    | Triggers                                             | Purpose                                                                                         |
-| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `committing-changes`     | "commit", "stage changes"                            | Default-branch check, commit message format, staging best practices                             |
-| `creating-pull-request`  | "create PR", "open PR"                               | PR title/body format, draft workflow, AI review labels                                          |
-| `filing-breakdown-tasks` | "tickets from tasks.md", "file the epic and stories" | Turn a breakdown's `tasks.md` into epic + child ticket drafts for `filing-jira-tickets` to file |
-| `force-multiplier`       | "across all repos", "in bulk"                        | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs            |
-| `labeling-changes`       | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                             |
-| `perform-preflight`      | "preflight", "self review"                           | Pre-commit quality gate checklist                                                               |
+| Skill                     | Triggers                                             | Purpose                                                                                            |
+| ------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `applying-pr-conventions` | "PR title", "draft the PR body"                      | Composes one PR's title/type-prefix, template body, and label; never reviews, previews, or submits |
+| `committing-changes`      | "commit", "stage changes"                            | Default-branch check, commit message format, staging best practices                                |
+| `creating-pull-request`   | "create PR", "open PR"                               | Single-branch PR workflow: review gate, conventions, submission preview, `gh pr create`            |
+| `filing-breakdown-tasks`  | "tickets from tasks.md", "file the epic and stories" | Turn a breakdown's `tasks.md` into epic + child ticket drafts for `filing-jira-tickets` to file    |
+| `force-multiplier`        | "across all repos", "in bulk"                        | Fan one change across many repos or monorepo projects as isolated, piloted draft PRs               |
+| `labeling-changes`        | "label", "change type"                               | Conventional commit type keywords, CI label mapping                                                |
+| `perform-preflight`       | "preflight", "self review"                           | Pre-commit quality gate checklist                                                                  |
+
+[Commit and pull request flows](docs/commit-and-pr-flows.md) diagrams how the commit and pull request skills hand off to one another.
 
 ## Design Principle
 
@@ -55,6 +59,7 @@ Several skills in this plugin reference tools or skills provided by sibling plug
 - **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel`, and the `filing-jira-tickets` skill plus its opt-in Jira write tools that `filing-breakdown-tasks` hands off to.
 - **`bitwarden-security-engineer`** — provides `Skill(bitwarden-security-context)`, referenced from `architecting-solutions`.
 - **`bitwarden-code-review`** — provides `/bitwarden-code-review:code-review-local` and `Skill(performing-multi-agent-code-review)`, the code-review gate `creating-pull-request` runs before opening a PR. If it is absent, `creating-pull-request` prompts you to install it rather than skip the review.
+- **`launchdarkly` (optional, third-party)** — provides the `launchdarkly-flag-*` and `launchdarkly-metric-*` skills that `managing-feature-flags` hands off to for driving LaunchDarkly over MCP. Requires the plugin and its hosted [MCP server](https://mcp.launchdarkly.com/mcp/launchdarkly/install). `managing-feature-flags` degrades gracefully without it.
 
 ## Installation
 

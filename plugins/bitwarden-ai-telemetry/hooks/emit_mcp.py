@@ -10,7 +10,7 @@ import json
 import os
 import sys
 
-from emit import emit  # sibling module; script dir is on sys.path[0]
+from emit import emit, flush_warning  # sibling module; script dir is on sys.path[0]
 
 
 def _parse_mcp_tool_name(name):
@@ -56,4 +56,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    flush_warning()
     sys.exit(0)

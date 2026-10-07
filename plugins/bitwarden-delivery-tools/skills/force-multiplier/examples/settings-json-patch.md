@@ -22,7 +22,7 @@ validation: "JSON parses + schema sanity check + Skill(perform-preflight)"
 pr_spec:
   branch: "force-multiplier/claude-settings-<key>"
   title: "[PM-XXXXX] chore: Standardize <key> in .claude/settings.json"
-  body: "<filled from the repo's PULL_REQUEST_TEMPLATE.md>"
+  body: "<filled from the resolved PR template>"
   labels: ["ai-review"]
   draft: true
 safety_policy:

@@ -5,6 +5,88 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-10-06
+
+### Added
+
+- `managing-feature-flags`: Bitwarden's feature-flag conventions and lifecycle — when to flag, server-side evaluation via `Bitwarden.Server.Sdk.Features`, per-client reads from `/config` across clients/Android/iOS, release vs operational categories, rollout, and cleanup. Hands off to the optional third-party `launchdarkly` plugin when it is installed.
+
+### Security
+
+- `managing-feature-flags`: external content is declared untrusted data. The contributing-docs fetch and the flag names, descriptions, and tags returned over the LaunchDarkly MCP can carry prompt injection (CWE-1427), and flag metadata never decides which code to edit, which variation to hardcode, or which command to run.
+- `managing-feature-flags`: only the two read-only LaunchDarkly skills are pre-approved in `allowed-tools`. The four that mutate LaunchDarkly state or the working tree now prompt, so flag creation and rollout changes keep a human checkpoint.
+
+### Changed
+
+- `architecting-solutions`: added a "Feature-flag new work by default" principle that defers to `managing-feature-flags`, plus a Red Flag for feature work landing without a warranted flag.
+- Plugin description and keywords now name feature flags in scope.
+- `managing-feature-flags`: the `RequireFeature` example uses a `FeatureFlagKeys` constant, matching the convention stated two lines above it.
+- `architecting-solutions` evals: added a `feature-flag-placement-new-work` case (4/4 with the skill, 3/4 without).
+- `architecting-solutions` evals: `behavior-baseline.json` rebuilt on `claude-opus-5-5/default`; the stale `claude-opus-4-7/default` series is dropped.
+- `architecting-solutions` evals: README documents the benchmark harness, so future refreshes are comparable.
+
+## [3.4.0] - 2026-09-28
+
+### Added
+
+- `applying-pr-conventions` fetches the canonical PR template from `bitwarden/template` when the target repo has none.
+
+### Security
+
+- The fetch grant is an exact-match `Bash` rule with no trailing wildcard, so it admits that one command and nothing else. A wildcard would have admitted `-X PUT` on a `contents/` endpoint, which writes a file, and `gh` resolves the method last-wins.
+
+### Changed
+
+- The embedded template is now a last resort, reached only when the fetch fails, and the skill says which source produced the body.
+- `creating-pull-request` carries that source back and shows it on a `Template:` line in the submission preview, so a body built from the embedded copy is visible before submission rather than after. The line names the source without asserting a cause, and has a value for the path where the caller supplied a finished body and no template was read.
+- `applying-pr-conventions` quotes its `allowed-tools` value, which now contains spaces and a colon.
+- The template source's possible values are defined in one place, and the only permitted restatement is the preview block that displays them. Every other reference points at the definition instead of re-listing it.
+- `creating-pull-request` and `force-multiplier` no longer describe the body as coming from the target repo's own template, which is now one of several sources rather than the only one.
+- The embedded copy matches `bitwarden/template` verbatim.
+- Both template sources are treated as data rather than as instructions; being canonical does not make the fetched one trusted.
+
+## [3.3.0] - 2026-09-25
+
+### Added
+
+- `docs/commit-and-pr-flows.md`: mermaid diagrams of the `committing-changes`, `creating-pull-request`, and `force-multiplier` flows.
+
+### Changed
+
+- `labeling-changes` owns the type keyword table and selection guidance, so the type-to-`t:` mapping lives in one skill.
+- `committing-changes` and `applying-pr-conventions` invoke `labeling-changes` for the type keyword.
+- `force-multiplier` pre-approves `Skill(labeling-changes)`, so its pilot resolves the type without a permission prompt.
+
+### Fixed
+
+- `labeling-changes` quotes its `description`, which previously failed to parse as YAML because of an unquoted `: `.
+
+### Removed
+
+- `references/change-type-labels.md`, now part of `labeling-changes`.
+
+## [3.2.0] - 2026-09-18
+
+### Added
+
+- **`applying-pr-conventions` skill** — composes one pull request's title, template body, resolved `t:` label, and `ai-review` label choice, and returns them.
+
+### Changed
+
+- `creating-pull-request`: title, body, and label move to `applying-pr-conventions`; steps renumber 1–6 to 1–4.
+- `creating-pull-request`: the review gate no longer exempts callers.
+- `creating-pull-request`: review findings are assessed with the user through `addressing-code-review-comments` before any are acted on.
+- `creating-pull-request`: `when_to_use` folded into `description`, and `description` broadened to cover the natural phrasings for turning a branch into a PR.
+- `creating-pull-request` evals: six should-trigger queries rewritten to drop repo fixtures, `--plugin-dir` added to the runner, baseline re-recorded.
+- `force-multiplier`: takes conventions from `applying-pr-conventions` at its pilot target, and no longer walks `creating-pull-request`.
+
+### Security
+
+- Every path that submits a PR title writes it to a file and passes `--title "$(cat …)"`, never a shell variable.
+- `applying-pr-conventions` declares `allowed-tools: Read, Glob`, so its compose-and-return contract is structural rather than prose.
+- `force-multiplier` states the `--body-file` and title-handoff rules where it opens each PR, rather than inheriting them from `creating-pull-request`.
+- `applying-pr-conventions` treats the target repo's PR template as data rather than as instructions addressed to it, matching `force-multiplier`'s rule for target-repo content.
+
 ## [3.1.0] - 2026-08-19
 
 ### Added

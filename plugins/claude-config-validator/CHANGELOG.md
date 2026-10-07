@@ -5,6 +5,13 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-10-06
+
+### Changed
+
+- `/validate-ai` and `/validate-ai-local` check every finding that calls a field, key, or value invalid, unknown, unsupported, or deprecated against the official Claude Code documentation before reporting it, and drop it when the documentation quotes the field as supported, listing each dropped finding and its quote in a collapsed section of the report. The `plugin-dev` agents judge frontmatter against a fixed schema that omits documented fields such as `disallowed-tools`, so their schema claims are not taken on trust. Both commands pre-approve `WebFetch` scoped to `code.claude.com` for this
+- The command READMEs install `plugin-dev` from the maintained `claude-plugins-official` marketplace
+
 ## [2.0.2] - 2026-08-21
 
 ### Fixed

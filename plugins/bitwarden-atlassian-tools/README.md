@@ -181,4 +181,4 @@ Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can st
 
 - Claude Code with MCP support
 - Atlassian API credentials (see Installation)
-- Node.js 22+ with [Corepack](https://nodejs.org/api/corepack.html) enabled — on first run the bundled MCP server installs and builds itself with [pnpm](https://pnpm.io/installation) via Corepack
+- Node.js 24+ — on first run the bundled MCP server installs and builds itself with [pnpm](https://pnpm.io/installation), resolved through the `npm` that ships with every Node release
