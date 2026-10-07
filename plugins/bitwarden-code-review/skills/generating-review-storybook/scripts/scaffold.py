@@ -6,7 +6,12 @@ sentinel-bracketed block substitution and small token replacement, and
 writes the rendered storybook to the output directory.
 
 Usage:
-    python scripts/scaffold.py --config /tmp/storybook.json --output /tmp/out
+    python3 scripts/scaffold.py --config /tmp/storybook.json --output-root /tmp/storybooks
+    python3 scripts/scaffold.py --config /tmp/storybook.json --output /tmp/out
+
+--output-root writes to <root>/<slug>-<timestamp>/; --output writes to the
+exact directory given. With neither, CLAUDE_PLUGIN_DATA/storybooks is used as
+the root when that variable is set; otherwise the script exits with an error.
 
 The config schema is documented in references/data-schema.md.
 """
@@ -57,18 +62,19 @@ def slugify(text: str) -> str:
     return s or "stack"
 
 
-def default_output_root() -> Path:
-    base = os.environ.get("CLAUDE_PLUGIN_DATA")
-    if base:
-        return Path(base) / "storybooks"
-    return Path.home() / ".claude" / "plugin-data" / "bitwarden-code-review" / "storybooks"
-
-
-def resolve_output(explicit: Path | None, slug: str) -> Path:
+def resolve_output(explicit: Path | None, root: Path | None, slug: str) -> Path:
     if explicit is not None:
         return explicit
+    if root is None:
+        base = os.environ.get("CLAUDE_PLUGIN_DATA")
+        if not base:
+            die(
+                "no output location: pass --output-root <dir> (a timestamped "
+                "subdirectory is created) or --output <dir> (exact directory)"
+            )
+        root = Path(base) / "storybooks"
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    return default_output_root() / f"{slug}-{stamp}"
+    return root / f"{slug}-{stamp}"
 
 
 # ---------- config validation ----------
@@ -623,18 +629,24 @@ def write_storybook(config: dict[str, Any], output: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate a code-review storybook.")
     parser.add_argument("--config", required=True, type=Path, help="Path to JSON config")
-    parser.add_argument(
-        "--output",
+    location = parser.add_mutually_exclusive_group()
+    location.add_argument(
+        "--output-root",
         type=Path,
         help=(
-            "Output directory. Defaults to "
-            "$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/."
+            "Directory under which <slug>-<timestamp>/ is created. Defaults to "
+            "$CLAUDE_PLUGIN_DATA/storybooks when that variable is set."
         ),
+    )
+    location.add_argument(
+        "--output",
+        type=Path,
+        help="Exact output directory, used as given.",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    output = resolve_output(args.output, config["slug"])
+    output = resolve_output(args.output, args.output_root, config["slug"])
     write_storybook(config, output)
 
     print(f"Wrote storybook to {output}")

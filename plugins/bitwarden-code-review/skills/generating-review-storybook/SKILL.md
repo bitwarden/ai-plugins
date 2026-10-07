@@ -80,17 +80,18 @@ The output is a `{ key: [...comments] }` map ready to merge into each stack item
 6. **Run the scaffolder.**
 
    ```bash
-   python3 "${CLAUDE_SKILL_DIR}/scripts/scaffold.py" --config /tmp/storybook.json
+   python3 "${CLAUDE_SKILL_DIR}/scripts/scaffold.py" --config /tmp/storybook.json \
+     --output-root "${CLAUDE_PLUGIN_DATA}/storybooks"
    ```
 
-   By default the storybook is written to `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` only if the user explicitly asks for a different location.
+   The storybook is written to a new `<slug>-<timestamp>/` directory under the output root. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` in place of `--output-root` only if the user explicitly asks for a different location; it writes to that exact directory.
 
 7. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR walks through chapters in a logical order with real narrative; AI findings and human comments (if any) appear inline at the diff line they reference; export-notes copies Markdown.
 
 ## Output Location Convention
 
-- **Default:** `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`. The slug is derived from the config `title` (or override via `slug` field). The timestamp keeps successive regenerations of the same stack from clobbering each other.
-- **Don't override** unless the user asks. Keeping artifacts under `CLAUDE_PLUGIN_DATA` makes them easy to find, keeps them out of the repo, and survives `git clean`.
+- **Default:** `${CLAUDE_PLUGIN_DATA}/storybooks/<slug>-<timestamp>/`, passed to the scaffolder as `--output-root "${CLAUDE_PLUGIN_DATA}/storybooks"`. The plugin data path is only substituted into this skill's text, never exported to the shell, so the scaffolder needs it as an argument. The slug is derived from the config `title` (or override via `slug` field). The timestamp keeps successive regenerations of the same stack from clobbering each other.
+- **Don't override** unless the user asks. Keeping artifacts under the plugin data directory makes them easy to find, keeps them out of the repo, and survives `git clean`.
 
 ## Customization
 
