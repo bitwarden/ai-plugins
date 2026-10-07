@@ -102,7 +102,7 @@ def load_config(path: Path) -> dict[str, Any]:
         die(f"gh_repo must be 'owner/name', got: {config['gh_repo']!r}")
     config.setdefault("estimated_minutes", None)
     config.setdefault("merge_plan", [])
-    config.setdefault("slug", slugify(config["title"]))
+    config["slug"] = slugify(str(config.get("slug") or config["title"]))
 
     for idx, item in enumerate(config["stack"]):
         if not isinstance(item, dict):
