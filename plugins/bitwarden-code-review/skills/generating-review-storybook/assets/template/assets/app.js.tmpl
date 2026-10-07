@@ -1,0 +1,1151 @@
+// app.js — render, navigation, decisions, comments, theme, export.
+// Reads window.DIFFS and window.REVIEW_DATA.
+// Keys are PR numbers (strings) rather than commit SHAs.
+(function(){
+  'use strict';
+
+  const DIFFS_B64 = window.DIFFS || {};
+  const PAGES_DATA = window.REVIEW_DATA || {};
+  const PAGE_ORDER = window.PAGE_ORDER || [];
+
+  // Map prKey → array of scene page numbers (1-based) for this stack.
+  // Used to know the first/last scene page of each PR (decisions, intros).
+  const SCENE_PAGES_BY_PR = {};
+  PAGE_ORDER.forEach((p, i) => {
+    if (p.kind !== "scene") return;
+    (SCENE_PAGES_BY_PR[p.prKey] = SCENE_PAGES_BY_PR[p.prKey] || []).push(i + 1);
+  });
+  function firstScenePageOf(prKey) {
+    const arr = SCENE_PAGES_BY_PR[prKey] || [];
+    return arr[0];
+  }
+  function lastScenePageOf(prKey) {
+    const arr = SCENE_PAGES_BY_PR[prKey] || [];
+    return arr[arr.length - 1];
+  }
+  // First page index of a (prKey, chapterIndex) pair — used to know if the
+  // current page is the FIRST scene of its chapter (chapter intro renders there).
+  function firstPageOfChapter(prKey, chapterIndex) {
+    for (let i = 0; i < PAGE_ORDER.length; i++) {
+      const p = PAGE_ORDER[i];
+      if (p.kind === "scene" && p.prKey === prKey && p.chapterIndex === chapterIndex) {
+        return i + 1;
+      }
+    }
+    return -1;
+  }
+
+
+// page numbering: 1 = cover, 2..N+1 = PAGES_DATA in stack order, N+2 = merge plan.
+// __BW_BLOCK_START__ stack-config
+const STACK_ORDER = __BW_STACK_ORDER__;
+const TOTAL_PAGES = __BW_TOTAL_PAGES__;
+const STORAGE_PREFIX = "__BW_STORAGE_PREFIX__";
+// __BW_BLOCK_END__ stack-config
+
+// ===== utils =====
+function $(sel, root) { return (root || document).querySelector(sel); }
+function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "class") e.className = attrs[k];
+    else if (k === "html") e.innerHTML = attrs[k];
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
+    else if (k === "dataset") Object.assign(e.dataset, attrs[k]);
+    else if (attrs[k] === false || attrs[k] == null) {}
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const c of children) {
+    if (c == null || c === false) continue;
+    if (typeof c === "string") e.appendChild(document.createTextNode(c));
+    else if (Array.isArray(c)) c.forEach(cc => cc && e.appendChild(typeof cc === "string" ? document.createTextNode(cc) : cc));
+    else e.appendChild(c);
+  }
+  return e;
+}
+function decodeB64(b) {
+  const bin = atob(b);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]);
+}
+function jiraUrl(ticket) { return `https://bitwarden.atlassian.net/browse/${ticket}`; }
+function ghPrUrl(pr) { return `https://github.com/__BW_GH_REPO__/pull/${pr}`; }
+function estimateMinutes(linesChanged, newFiles) {
+  return Math.max(1, Math.round((linesChanged / 50) + (newFiles * 0.5)));
+}
+
+// ===== diff parsing =====
+function parseUnifiedDiff(rawText) {
+  // returns array of { path, header (lines), hunks: [{oldStart, newStart, lines: [{type, text, oldLn, newLn}]}] }
+  const files = [];
+  const lines = rawText.split("\n");
+  let i = 0;
+  // skip past any commit/Author/Date/message before first 'diff --git'
+  while (i < lines.length && !lines[i].startsWith("diff --git")) i++;
+  while (i < lines.length) {
+    if (!lines[i].startsWith("diff --git")) { i++; continue; }
+    const fileHeader = [];
+    fileHeader.push(lines[i]); i++;
+    let path = null;
+    // header lines until first hunk
+    while (i < lines.length && !lines[i].startsWith("@@") && !lines[i].startsWith("diff --git")) {
+      fileHeader.push(lines[i]);
+      if (lines[i].startsWith("+++ b/")) path = lines[i].slice(6);
+      else if (lines[i].startsWith("+++ ") && !path) path = lines[i].slice(4);
+      else if (lines[i].startsWith("rename to ") && !path) path = lines[i].slice("rename to ".length);
+      i++;
+    }
+    const hunks = [];
+    while (i < lines.length && lines[i].startsWith("@@")) {
+      const hunkHead = lines[i];
+      const m = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/.exec(hunkHead);
+      let oldLn = m ? parseInt(m[1], 10) : 0;
+      let newLn = m ? parseInt(m[3], 10) : 0;
+      const hunk = { head: hunkHead, lines: [] };
+      i++;
+      while (i < lines.length && !lines[i].startsWith("@@") && !lines[i].startsWith("diff --git")) {
+        const l = lines[i];
+        if (l.startsWith("+")) {
+          hunk.lines.push({ type: "add", text: l.slice(1), oldLn: null, newLn: newLn++ });
+        } else if (l.startsWith("-")) {
+          hunk.lines.push({ type: "del", text: l.slice(1), oldLn: oldLn++, newLn: null });
+        } else if (l.startsWith(" ")) {
+          hunk.lines.push({ type: "ctx", text: l.slice(1), oldLn: oldLn++, newLn: newLn++ });
+        } else if (l.startsWith("\\")) {
+          // \ No newline at end of file
+          hunk.lines.push({ type: "meta", text: l, oldLn: null, newLn: null });
+        }
+        i++;
+      }
+      hunks.push(hunk);
+    }
+    files.push({ path, header: fileHeader, hunks });
+  }
+  return files;
+}
+
+function detectLanguage(path) {
+  if (!path) return "clike";
+  if (path.endsWith(".swift")) return "swift";
+  if (path.endsWith(".json")) return "json";
+  if (path.endsWith(".strings")) return "clike";
+  if (path.endsWith(".xml") || path.endsWith(".plist")) return "markup";
+  return "clike";
+}
+
+function highlightLine(text, lang) {
+  try {
+    if (window.Prism && Prism.languages[lang]) {
+      return Prism.highlight(text, Prism.languages[lang], lang);
+    }
+  } catch (e) {}
+  return escapeHtml(text);
+}
+
+function renderFileDiff(file, prKey, annotations) {
+  const lang = detectLanguage(file.path);
+  const view = el("div", { class: "diff-view" });
+
+  // File-level annotations render as a prologue above the first hunk.
+  if (annotations && annotations.fileLevel && annotations.fileLevel.length) {
+    const fileNotes = el("div", { class: "diff-file-notes" });
+    annotations.fileLevel.forEach(a => fileNotes.appendChild(renderGloss(a)));
+    view.appendChild(fileNotes);
+  }
+  const byLine = (annotations && annotations.byLine) || {};
+  // header meta lines (index, ---/+++ etc) collapsed to a single small row
+  const metaSummary = file.header.filter(h => h.startsWith("index ") || h.startsWith("rename ") || h.startsWith("similarity ")).join(" · ");
+  if (metaSummary) {
+    const r = el("div", { class: "diff-row meta" });
+    r.appendChild(el("div", { class: "diff-ln" }));
+    r.appendChild(el("div", { class: "diff-rn" }));
+    r.appendChild(el("div", { class: "diff-marker" }));
+    r.appendChild(el("div", { class: "diff-content", html: escapeHtml(metaSummary) }));
+    r.appendChild(el("div", { class: "diff-action" }));
+    view.appendChild(r);
+  }
+  for (const hunk of file.hunks) {
+    const hr = el("div", { class: "diff-row hunk" });
+    hr.appendChild(el("div", { class: "diff-ln" }));
+    hr.appendChild(el("div", { class: "diff-rn" }));
+    hr.appendChild(el("div", { class: "diff-marker" }));
+    hr.appendChild(el("div", { class: "diff-content", html: escapeHtml(hunk.head) }));
+    hr.appendChild(el("div", { class: "diff-action" }));
+    view.appendChild(hr);
+    for (const ln of hunk.lines) {
+      const row = el("div", { class: "diff-row " + ln.type });
+      row.dataset.sha = prKey;
+      row.dataset.path = file.path || "";
+      row.dataset.lineKey = `${ln.oldLn || ""}_${ln.newLn || ""}`;
+      row.appendChild(el("div", { class: "diff-ln" }, ln.oldLn != null ? String(ln.oldLn) : ""));
+      row.appendChild(el("div", { class: "diff-rn" }, ln.newLn != null ? String(ln.newLn) : ""));
+      const marker = ln.type === "add" ? "+" : ln.type === "del" ? "−" : " ";
+      row.appendChild(el("div", { class: "diff-marker" }, marker));
+      const code = el("div", { class: "diff-content", html: highlightLine(ln.text, lang) });
+      row.appendChild(code);
+      // action button
+      const action = el("div", { class: "diff-action" });
+      if (ln.type !== "meta") {
+        const btn = el("button", { type: "button", "aria-label": "Add inline comment", title: "Comment on line" }, "+");
+        btn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openInlineCommentEditor(row, prKey, file.path, row.dataset.lineKey);
+        });
+        action.appendChild(btn);
+      }
+      row.appendChild(action);
+      view.appendChild(row);
+      // restore existing comment if any
+      const existing = loadInlineComment(prKey, file.path, row.dataset.lineKey);
+      if (existing) renderExistingCommentBelow(row, prKey, file.path, row.dataset.lineKey, existing);
+      // inline annotations anchored to this new-file line number
+      if (ln.newLn != null && byLine[ln.newLn]) {
+        byLine[ln.newLn].forEach(a => {
+          const glossRow = el("div", { class: "diff-row gloss-row" });
+          glossRow.appendChild(el("div", { class: "diff-ln" }));
+          glossRow.appendChild(el("div", { class: "diff-rn" }));
+          glossRow.appendChild(el("div", { class: "diff-marker" }));
+          const content = el("div", { class: "diff-content" });
+          content.appendChild(renderGloss(a));
+          glossRow.appendChild(content);
+          glossRow.appendChild(el("div", { class: "diff-action" }));
+          view.appendChild(glossRow);
+        });
+      }
+    }
+  }
+  return view;
+}
+
+// ===== inline comment storage =====
+function inlineKey(prKey, path, lineKey) { return `${STORAGE_PREFIX}:inline:${prKey}:${path}:${lineKey}`; }
+function loadInlineComment(prKey, path, lineKey) { return localStorage.getItem(inlineKey(prKey, path, lineKey)); }
+function saveInlineComment(prKey, path, lineKey, text) {
+  if (text && text.trim()) localStorage.setItem(inlineKey(prKey, path, lineKey), text.trim());
+  else localStorage.removeItem(inlineKey(prKey, path, lineKey));
+}
+function deleteInlineComment(prKey, path, lineKey) { localStorage.removeItem(inlineKey(prKey, path, lineKey)); }
+
+// thread management: append after diff-row
+function openInlineCommentEditor(row, prKey, path, lineKey, prefill) {
+  // remove any existing thread/editor immediately following this row first
+  let next = row.nextElementSibling;
+  if (next && next.classList && next.classList.contains("comment-thread")) next.remove();
+  const thread = el("div", { class: "comment-thread" });
+  const ta = el("textarea", { class: "comment-textarea", placeholder: "Inline note for this line…" });
+  if (prefill) ta.value = prefill;
+  const actions = el("div", { class: "comment-form-actions" });
+  const cancel = el("button", { class: "btn btn-ghost", type: "button" }, "Cancel");
+  const save = el("button", { class: "btn btn-primary", type: "button" }, "Save");
+  cancel.addEventListener("click", () => {
+    thread.remove();
+    const existing = loadInlineComment(prKey, path, lineKey);
+    if (existing) renderExistingCommentBelow(row, prKey, path, lineKey, existing);
+    refreshFileCommentCounts();
+  });
+  save.addEventListener("click", () => {
+    saveInlineComment(prKey, path, lineKey, ta.value);
+    thread.remove();
+    const existing = loadInlineComment(prKey, path, lineKey);
+    if (existing) renderExistingCommentBelow(row, prKey, path, lineKey, existing);
+    refreshFileCommentCounts();
+    showToast("Saved.");
+  });
+  actions.append(cancel, save);
+  thread.append(ta, actions);
+  row.parentNode.insertBefore(thread, row.nextElementSibling);
+  ta.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { e.preventDefault(); cancel.click(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); save.click(); }
+  });
+  setTimeout(() => ta.focus(), 0);
+}
+function renderExistingCommentBelow(row, prKey, path, lineKey, text) {
+  let next = row.nextElementSibling;
+  if (next && next.classList && next.classList.contains("comment-thread")) next.remove();
+  const thread = el("div", { class: "comment-thread" });
+  const card = el("div", { class: "comment-existing" }, text);
+  const actions = el("div", { class: "comment-actions" });
+  const editBtn = el("button", { type: "button" }, "Edit");
+  const delBtn = el("button", { type: "button" }, "Delete");
+  editBtn.addEventListener("click", () => {
+    thread.remove();
+    openInlineCommentEditor(row, prKey, path, lineKey, text);
+  });
+  delBtn.addEventListener("click", () => {
+    if (confirm("Delete this comment?")) {
+      deleteInlineComment(prKey, path, lineKey);
+      thread.remove();
+      refreshFileCommentCounts();
+    }
+  });
+  actions.append(editBtn, delBtn);
+  thread.append(card, actions);
+  row.parentNode.insertBefore(thread, row.nextElementSibling);
+}
+
+// counts per file
+function refreshFileCommentCounts() {
+  $$(".file-row").forEach(fr => {
+    const prKey = fr.dataset.sha;
+    const path = fr.dataset.path;
+    let count = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`${STORAGE_PREFIX}:inline:${prKey}:${path}:`)) count++;
+    }
+    const cmtEl = $(".cmt", fr);
+    if (cmtEl) {
+      cmtEl.textContent = count > 0 ? `· ${count} 💬` : "";
+    }
+  });
+}
+
+// ===== page-level comments =====
+function pageCommentKey(pageKey) { return `${STORAGE_PREFIX}:page:${pageKey}`; }
+function loadPageComment(pageKey) { return localStorage.getItem(pageCommentKey(pageKey)) || ""; }
+function savePageComment(pageKey, txt) {
+  if (txt && txt.trim()) localStorage.setItem(pageCommentKey(pageKey), txt.trim());
+  else localStorage.removeItem(pageCommentKey(pageKey));
+}
+
+// ===== decisions =====
+function decisionKey(prKey) { return `${STORAGE_PREFIX}:decision:${prKey}`; }
+function loadDecision(prKey) { return localStorage.getItem(decisionKey(prKey)); }
+function saveDecision(prKey, decision) {
+  if (decision) localStorage.setItem(decisionKey(prKey), decision);
+  else localStorage.removeItem(decisionKey(prKey));
+  refreshTriageList();
+  refreshDots();
+  refreshProgressReadout();
+}
+
+// ===== copy to clipboard =====
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((res, rej) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); res(); } catch (e) { rej(e); }
+    finally { document.body.removeChild(ta); }
+  });
+}
+
+// ===== toast =====
+let toastTimer = null;
+function showToast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ===== file row builder =====
+function deriveFileMeta(parsedFile) {
+  let added = 0, removed = 0;
+  for (const h of parsedFile.hunks) {
+    for (const ln of h.lines) {
+      if (ln.type === "add") added++;
+      else if (ln.type === "del") removed++;
+    }
+  }
+  const headerJoined = parsedFile.header.join("\n");
+  const isNew = /(^|\n)new file mode\b/.test(headerJoined);
+  const isRename = /(^|\n)rename (from|to)\b/.test(headerJoined);
+  const path = parsedFile.path || "";
+  const isTest = /(^|\/|_)(tests?|specs?|__tests__)(\/|\b|\.)/i.test(path);
+  return { path, added, removed, isNew, isRename, isTest };
+}
+
+function buildFileRow(file, prKey, parsedFiles, annotations) {
+  const matched = parsedFiles.find(p => p.path === file.path);
+  const fr = el("div", { class: "file-row" });
+  fr.dataset.sha = prKey;
+  fr.dataset.path = file.path;
+  if (file.isTest) fr.dataset.test = "1";
+  const tags = [];
+  if (file.isNew) tags.push(el("span", { class: "file-tag file-tag-new" }, "NEW"));
+  if (file.isTest) tags.push(el("span", { class: "file-tag file-tag-test" }, "TEST"));
+  if (file.isRename) tags.push(el("span", { class: "file-tag file-tag-role" }, "RENAME"));
+
+  // Severity dot indicators: one dot per finding/comment touching this file.
+  const dots = el("div", { class: "file-dots", "aria-label": "Inline notes on this file" });
+  if (annotations) {
+    const items = [];
+    annotations.fileLevel.forEach(a => items.push(a));
+    Object.values(annotations.byLine).forEach(arr => arr.forEach(a => items.push(a)));
+    items.forEach(a => {
+      const cls = a.kind === "finding"
+        ? `file-dot file-dot-${a.severity}`
+        : "file-dot file-dot-human";
+      const title = a.kind === "finding"
+        ? `${a.label}: ${a.body}`
+        : `${a.author}: ${a.body}`;
+      dots.appendChild(el("span", { class: cls, title }));
+    });
+  }
+
+  const dirAndName = file.path.lastIndexOf("/");
+  const dirPart = dirAndName >= 0 ? file.path.slice(0, dirAndName + 1) : "";
+  const namePart = dirAndName >= 0 ? file.path.slice(dirAndName + 1) : file.path;
+
+  const header = el("button", { class: "file-row-header", type: "button", "aria-expanded": "false" },
+    el("svg", { class: "file-chev", viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", "stroke-width": "1.5", html: '<path d="M6 4l4 4-4 4"/>' }),
+    el("div", { class: "file-name" },
+      el("span", { class: "file-name-dim" }, dirPart),
+      namePart
+    ),
+    el("div", { class: "file-tags" }, ...tags),
+    dots,
+    el("div", { class: "file-stats" },
+      el("span", { class: "add" }, `+${file.added}`),
+      " ",
+      el("span", { class: "del" }, `−${file.removed}`),
+      el("span", { class: "cmt" })
+    )
+  );
+  fr.appendChild(header);
+  const body = el("div", { class: "file-row-body" });
+  fr.appendChild(body);
+  let renderedDiff = false;
+  header.addEventListener("click", () => {
+    fr.classList.toggle("open");
+    const expanded = fr.classList.contains("open");
+    header.setAttribute("aria-expanded", String(expanded));
+    if (expanded && !renderedDiff && matched) {
+      body.appendChild(renderFileDiff(matched, prKey, annotations));
+      renderedDiff = true;
+    }
+  });
+  return fr;
+}
+
+// ===== verdict mapping =====
+function verdictMeta(verdict) {
+  switch (verdict) {
+    case "approve":      return { class: "verdict-approve", label: "Approve" };
+    case "approve-fix":  return { class: "verdict-fix",     label: "Fix applied — re-review" };
+    case "block":        return { class: "verdict-block",   label: "Request changes" };
+    case "pending":
+    default:             return { class: "verdict-pending", label: "Pending review" };
+  }
+}
+
+// ===== inline annotations (findings + human comments) =====
+const SEVERITY_ORDER = ["critical", "important", "debt", "suggested", "question"];
+const SEVERITY_META = {
+  critical:  { label: "Critical",  emoji: "❌", glossClass: "gloss-c" },
+  important: { label: "Important", emoji: "⚠️", glossClass: "gloss-i" },
+  debt:      { label: "Debt",      emoji: "♻️", glossClass: "gloss-d" },
+  suggested: { label: "Suggested", emoji: "🎨", glossClass: "gloss-s" },
+  question:  { label: "Question",  emoji: "❓", glossClass: "gloss-q" },
+};
+
+function parseLocation(loc) {
+  // Accept "path/to/file.ext:42" or "path/to/file.ext" or "" → null
+  if (!loc) return { path: "", line: null };
+  const m = /^(.+?):(\d+)$/.exec(loc.trim());
+  if (m) return { path: m[1], line: parseInt(m[2], 10) };
+  return { path: loc.trim(), line: null };
+}
+
+function buildAnnotations(meta) {
+  // Returns { byFile: { path: { fileLevel: [...], byLine: { newLn: [...] } } } }
+  // Each annotation: { kind: "finding"|"comment", severity?, emoji, label, body, location, author?, created_at? }
+  const byFile = {};
+  function ensureFile(path) {
+    if (!byFile[path]) byFile[path] = { fileLevel: [], byLine: {} };
+    return byFile[path];
+  }
+  const findings = (meta.findings && meta.findings.items) || [];
+  const comments = meta.comments || [];
+
+  findings.forEach(f => {
+    const sev = SEVERITY_META[f.severity] || SEVERITY_META.question;
+    const ann = {
+      kind: "finding",
+      severity: f.severity,
+      emoji: sev.emoji,
+      label: sev.label,
+      glossClass: sev.glossClass,
+      body: f.message,
+      suggestion: f.suggestion,
+      location: f.location,
+    };
+    const { path, line } = parseLocation(f.location);
+    if (path && line) {
+      const bucket = ensureFile(path);
+      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
+    } else if (path) {
+      ensureFile(path).fileLevel.push(ann);
+    } else {
+      // No location at all — fall through to a per-page orphans bucket
+      ensureFile("__orphans__").fileLevel.push(ann);
+    }
+  });
+
+  comments.forEach(c => {
+    const ann = {
+      kind: "comment",
+      glossClass: "gloss-human",
+      author: c.author || "Reviewer",
+      created_at: c.created_at || "",
+      body: c.body,
+      location: c.location,
+    };
+    const { path, line } = parseLocation(c.location);
+    if (path && line) {
+      const bucket = ensureFile(path);
+      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
+    } else if (path) {
+      ensureFile(path).fileLevel.push(ann);
+    } else {
+      ensureFile("__orphans__").fileLevel.push(ann);
+    }
+  });
+
+  return byFile;
+}
+
+function renderGloss(ann) {
+  const wrap = el("div", { class: `gloss ${ann.glossClass || ""}` });
+  const head = el("div", { class: "gloss-head" });
+  if (ann.kind === "finding") {
+    head.appendChild(el("span", { class: "gloss-tag" },
+      el("span", { class: "gloss-emoji" }, ann.emoji), ann.label));
+    head.appendChild(el("span", { class: "gloss-source" }, "AI review"));
+  } else {
+    head.appendChild(el("span", { class: "gloss-tag gloss-tag-human" },
+      el("span", { class: "gloss-author-dot" }), ann.author));
+    if (ann.created_at) {
+      head.appendChild(el("span", { class: "gloss-source" }, ann.created_at));
+    }
+  }
+  wrap.appendChild(head);
+  if (ann.body) {
+    wrap.appendChild(el("p", { class: "gloss-body" }, ann.body));
+  }
+  if (ann.suggestion) {
+    wrap.appendChild(el("p", { class: "gloss-suggestion" },
+      el("span", { class: "gloss-suggestion-label" }, "Suggested fix"),
+      ann.suggestion));
+  }
+  return wrap;
+}
+
+// ===== per-PR page renderer =====
+function tickets(meta) {
+  // Accept either a single `ticket` string or an array `tickets`. Returns array.
+  if (Array.isArray(meta.tickets)) return meta.tickets.filter(Boolean);
+  if (meta.ticket) return [meta.ticket];
+  return [];
+}
+
+function renderScenePage(descriptor, pageNumber) {
+  const prKey = descriptor.prKey;
+  const meta = PAGES_DATA[prKey] || { kind: "pr", title: prKey, verdict: "pending", findings: {} };
+  const pageEl = $(`#page-${pageNumber}`);
+  if (!pageEl) return;
+  pageEl.dataset.pageKey = prKey;
+  pageEl.dataset.chapterIndex = String(descriptor.chapterIndex);
+  pageEl.dataset.sceneIndex = String(descriptor.sceneIndex);
+  pageEl.innerHTML = "";
+
+  const chapters = (meta.chapters && meta.chapters.length) ? meta.chapters : null;
+  const chapter = chapters && descriptor.chapterIndex >= 0 ? chapters[descriptor.chapterIndex] : null;
+  const chapterNum = chapter ? (descriptor.chapterIndex + 1) : null;
+  const chapterCount = chapters ? chapters.length : null;
+
+  const parsedFiles = DIFFS_B64[prKey]
+    ? parseUnifiedDiff(decodeB64(DIFFS_B64[prKey]))
+    : [];
+  const allFileMetas = parsedFiles.map(deriveFileMeta);
+  const fileByPath = new Map(allFileMetas.map(f => [f.path, f]));
+
+  // Resolve THIS scene. Three flavors:
+  //   - chapter has scenes[] → pick scenes[sceneIndex]
+  //   - chapter has paths only → implicit single scene = chapter.paths
+  //   - no chapter → implicit single scene = all PR files
+  let scene;
+  let sceneNum = null;
+  let sceneCount = null;
+  if (chapter) {
+    const scenes = chapter.scenes && chapter.scenes.length ? chapter.scenes : null;
+    if (scenes) {
+      scene = scenes[descriptor.sceneIndex];
+      sceneNum = descriptor.sceneIndex + 1;
+      sceneCount = scenes.length;
+    } else {
+      scene = { title: "", narrative: "", paths: chapter.paths || [] };
+    }
+  } else {
+    scene = { title: "", narrative: "", paths: allFileMetas.map(f => f.path) };
+  }
+
+  const sceneFileMetas = (scene.paths || [])
+    .map(p => fileByPath.get(p))
+    .filter(Boolean);
+  const totalAdded = sceneFileMetas.reduce((a, f) => a + f.added, 0);
+  const totalRemoved = sceneFileMetas.reduce((a, f) => a + f.removed, 0);
+
+  const ticketList = tickets(meta);
+  const ticketPills = ticketList.map(t =>
+    el("a", { class: "ticket-pill", href: jiraUrl(t), target: "_blank", rel: "noopener" }, t)
+  );
+  const kindLabel = meta.kind === "commit" ? "commit" : "PR";
+  const refLabel = meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`;
+
+  // Eyebrow tells the reader where they are in the larger story.
+  const eyebrowParts = [];
+  if (meta.title) eyebrowParts.push(meta.title);
+  if (chapter) {
+    eyebrowParts.push(`Chapter ${chapterNum}${chapterCount ? ` of ${chapterCount}` : ""}: ${chapter.title || ""}`.trim());
+    if (sceneNum != null && sceneCount != null) {
+      eyebrowParts.push(`Scene ${sceneNum} of ${sceneCount}`);
+    }
+  }
+  const headerTitle = (scene && scene.title)
+    || (chapter && chapter.title)
+    || meta.title
+    || prKey;
+
+  const header = el("header", { class: "page-header" },
+    el("div", { class: "page-header-row" },
+      el("span", null, `Page ${pageNumber} of ${TOTAL_PAGES}`),
+      ticketPills.length ? el("div", { class: "ph-tickets" }, ...ticketPills) : null
+    ),
+    eyebrowParts.length
+      ? el("span", { class: "eyebrow" }, eyebrowParts.join(" · "))
+      : null,
+    el("h1", { class: "ph-title display display-l", style: "margin-top: 8px;" }, headerTitle),
+    el("div", { class: "ph-meta-row" },
+      el("span", { class: "ph-meta" },
+        el("span", { class: "ph-meta-key" }, kindLabel),
+        meta.kind === "commit"
+          ? el("code", { class: "mono" }, refLabel)
+          : el("a", { class: "link", href: ghPrUrl(prKey), target: "_blank", rel: "noopener" }, refLabel)
+      ),
+      sceneFileMetas.length
+        ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "files"),
+            String(sceneFileMetas.length))
+        : null,
+      (totalAdded + totalRemoved) > 0
+        ? el("span", { class: "ph-meta" }, el("span", { class: "ph-meta-key" }, "Δ"),
+            `+${totalAdded} / −${totalRemoved}`)
+        : null
+    )
+  );
+  pageEl.appendChild(header);
+
+  // Chapter intro — show the chapter's narrative on the FIRST scene page of
+  // each chapter only, so the reader gets the act-level framing once.
+  const isFirstSceneOfChapter = chapter
+    ? pageNumber === firstPageOfChapter(prKey, descriptor.chapterIndex)
+    : false;
+  if (isFirstSceneOfChapter && chapter && chapter.narrative) {
+    pageEl.appendChild(
+      el("aside", { class: "chapter-intro" },
+        el("span", { class: "eyebrow" }, `Chapter ${chapterNum}${chapterCount ? ` of ${chapterCount}` : ""}`),
+        el("h2", { class: "chapter-intro-title" }, chapter.title || ""),
+        el("p", { class: "chapter-intro-narrative" }, chapter.narrative)
+      )
+    );
+  }
+
+  // Scene narrative
+  if (scene && scene.narrative) {
+    pageEl.appendChild(
+      el("p", { class: "scene-page-narrative" }, scene.narrative)
+    );
+  } else if (!chapter && meta.description) {
+    // No structured chapters/scenes → fall back to the PR description.
+    pageEl.appendChild(
+      el("p", { class: "scene-page-narrative" }, meta.description)
+    );
+  }
+
+  // Build all inline annotations (findings + human comments) keyed by file.
+  const annotationsByFile = buildAnnotations(meta);
+
+  // Orphan annotations (no path) — show only on the FIRST scene of the PR.
+  const isFirstSceneOfPr = pageNumber === firstScenePageOf(prKey);
+  if (isFirstSceneOfPr) {
+    const orphans = (annotationsByFile.__orphans__ && annotationsByFile.__orphans__.fileLevel) || [];
+    if (orphans.length) {
+      const orphanSection = el("section", { class: "orphan-notes" },
+        el("span", { class: "eyebrow" }, "Reviewer notes — not anchored to a file"));
+      orphans.forEach(a => orphanSection.appendChild(renderGloss(a)));
+      pageEl.appendChild(orphanSection);
+    }
+  }
+
+  if (sceneFileMetas.length) {
+    const filesWrap = el("section", { class: "scene-files-section" });
+    sceneFileMetas.forEach(f => {
+      const fileAnnotations = annotationsByFile[f.path] || { fileLevel: [], byLine: {} };
+      filesWrap.appendChild(buildFileRow(f, prKey, parsedFiles, fileAnnotations));
+    });
+    pageEl.appendChild(filesWrap);
+  } else {
+    pageEl.appendChild(
+      el("p", { class: "small", style: "color: var(--ink-soft); padding: 16px 0;" },
+        "No files declared for this scene.")
+    );
+  }
+
+  // Decision widget — last scene of the PR.
+  if (pageNumber === lastScenePageOf(prKey)) {
+    pageEl.appendChild(renderVerdictRecap(meta));
+    pageEl.appendChild(renderDecisionWidget(prKey, meta));
+  }
+}
+
+// ===== verdict recap (renders on the last chapter page of each PR) =====
+function renderVerdictRecap(meta) {
+  const v = verdictMeta(meta.verdict);
+  const findings = meta.findings || {};
+  const isPending = meta.verdict === "pending";
+  const total = ["critical", "important", "debt", "suggested", "question"]
+    .reduce((a, k) => a + (findings[k] || 0), 0);
+  return el("aside", { class: `verdict-recap verdict-card ${v.class}` },
+    el("span", { class: "eyebrow" }, "Verdict"),
+    el("h2", { class: "verdict-headline" }, meta.verdictLabel || v.label),
+    el("p", { class: "small", style: "color: var(--ink-soft); margin: 8px 0 0;" },
+      isPending
+        ? "No AI review pre-baked for this PR. Use this page to record your decision."
+        : `${total} finding${total !== 1 ? "s" : ""} surfaced inline at the diff line they reference.`)
+  );
+}
+
+// Renders one scene: small heading + narrative + the files that belong to it.
+function renderScene(chapterNum, sceneNum, scene, fileMetas, prKey, parsedFiles, annotationsByFile) {
+  const wrap = el("section", { class: "scene" });
+  if (scene.title) {
+    const head = el("header", { class: "scene-head" },
+      el("span", { class: "scene-num" },
+        chapterNum != null ? `${String(chapterNum).padStart(2, "0")}.${sceneNum}` : `Scene ${sceneNum}`),
+      el("div", { class: "scene-head-text" },
+        el("h3", { class: "scene-title" }, scene.title),
+        el("span", { class: "scene-count" },
+          `${fileMetas.length} file${fileMetas.length !== 1 ? "s" : ""}`)
+      )
+    );
+    wrap.appendChild(head);
+  }
+  if (scene.narrative) {
+    wrap.appendChild(el("p", { class: "scene-narrative" }, scene.narrative));
+  }
+  const files = el("div", { class: "scene-files" });
+  fileMetas.forEach(f => {
+    const fileAnnotations = annotationsByFile[f.path] || { fileLevel: [], byLine: {} };
+    files.appendChild(buildFileRow(f, prKey, parsedFiles, fileAnnotations));
+  });
+  wrap.appendChild(files);
+  return wrap;
+}
+
+function renderDecisionWidget(prKey, meta) {
+  const widget = el("div", { class: "decision-widget" });
+  widget.appendChild(el("h3", { class: "decision-title" }, "Your decision"));
+  widget.appendChild(el("p", { class: "decision-sub" },
+    `Captured locally. Tally appears on the cover and in the export.`));
+
+  const decisions = [
+    { id: "approve", label: "Approve", desc: "Ship as-is" },
+    { id: "changes", label: "Request changes", desc: "Blocker before merge" },
+    { id: "discuss", label: "Needs discussion", desc: "Clarify before deciding" },
+  ];
+  const buttonsRow = el("div", { class: "decision-buttons" });
+  decisions.forEach(d => {
+    const current = loadDecision(prKey);
+    const btn = el("button", {
+      class: "decision-btn", type: "button", "data-decision": d.id,
+      "aria-pressed": String(current === d.id),
+    },
+      el("span", { class: "check" }),
+      el("span", null,
+        el("div", null, d.label),
+        el("div", { class: "small", style: "color: var(--ink-mute); font-weight: 400;" }, d.desc))
+    );
+    btn.addEventListener("click", () => {
+      const newVal = (loadDecision(prKey) === d.id) ? null : d.id;
+      saveDecision(prKey, newVal);
+      $$(".decision-btn", buttonsRow).forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.decision === newVal)));
+      if (newVal) showToast(`Marked: ${d.label}`);
+      else showToast("Decision cleared.");
+    });
+    buttonsRow.appendChild(btn);
+  });
+  widget.appendChild(buttonsRow);
+
+  const pageComments = el("div", { class: "page-comments" });
+  pageComments.appendChild(el("label", { for: `pc-${prKey}` }, "Page-level note (optional)"));
+  const ta = el("textarea", {
+    class: "comment-textarea", id: `pc-${prKey}`,
+    placeholder: "Anything not tied to a specific line — overall reasoning, follow-up suggestions…",
+  });
+  ta.value = loadPageComment(prKey);
+  ta.addEventListener("input", () => savePageComment(prKey, ta.value));
+  ta.addEventListener("keydown", (e) => { if (e.key === "Escape") ta.blur(); });
+  pageComments.appendChild(ta);
+  widget.appendChild(pageComments);
+
+  return widget;
+}
+
+// ===== chapter / scene table-of-contents (cover) =====
+// Renders chapter group headers with their scenes as clickable rows.
+function refreshTriageList() {
+  const list = $("#triage-list");
+  if (!list) return;
+  list.innerHTML = "";
+  let lastPr = null;
+  let lastChapterKey = null;
+  PAGE_ORDER.forEach((descriptor, idx) => {
+    if (descriptor.kind !== "scene") return;
+    const pageNum = idx + 1;
+    const prKey = descriptor.prKey;
+    const meta = PAGES_DATA[prKey] || {};
+    const chapters = (meta.chapters && meta.chapters.length) ? meta.chapters : null;
+    const chapter = chapters && descriptor.chapterIndex >= 0 ? chapters[descriptor.chapterIndex] : null;
+    const chapterNum = chapter ? (descriptor.chapterIndex + 1) : null;
+    const chapterCount = chapters ? chapters.length : null;
+
+    // PR header — render once per PR when in a multi-PR stack.
+    if (STACK_ORDER.length > 1 && prKey !== lastPr) {
+      const tList = tickets(meta);
+      const v = verdictMeta(meta.verdict);
+      list.appendChild(el("div", { class: "toc-pr-header" },
+        el("span", { class: "toc-pr-key mono" },
+          meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`),
+        el("span", { class: "toc-pr-title" }, meta.title || prKey),
+        tList.length ? el("span", { class: "toc-pr-ticket" }, tList.join(" · ")) : null,
+        el("span", { class: `toc-pr-verdict ${v.class}` }, meta.verdictLabel || v.label)
+      ));
+      lastChapterKey = null;
+    }
+    lastPr = prKey;
+
+    // Chapter group header — render once per chapter as a divider/title.
+    const chapterKey = `${prKey}::${descriptor.chapterIndex}`;
+    if (chapter && chapterKey !== lastChapterKey) {
+      const synopsis = chapter.narrative
+        ? chapter.narrative.split(/(?<=[.!?])\s+/)[0]
+        : "";
+      list.appendChild(el("div", { class: "toc-chapter-header" },
+        el("span", { class: "toc-chapter-num mono" }, String(chapterNum).padStart(2, "0")),
+        el("div", { class: "toc-chapter-text" },
+          el("span", { class: "toc-chapter-title" }, chapter.title || `Chapter ${chapterNum}`),
+          el("span", { class: "toc-chapter-meta" },
+            `Chapter ${chapterNum} of ${chapterCount}`),
+          synopsis ? el("span", { class: "toc-chapter-synopsis" }, synopsis) : null
+        )
+      ));
+      lastChapterKey = chapterKey;
+    }
+
+    // Scene row.
+    const scenes = chapter && chapter.scenes && chapter.scenes.length ? chapter.scenes : null;
+    const scene = scenes && descriptor.sceneIndex >= 0 ? scenes[descriptor.sceneIndex] : null;
+    const sceneNum = scene ? (descriptor.sceneIndex + 1) : null;
+    const sceneCount = scenes ? scenes.length : null;
+    const sceneTitle = (scene && scene.title)
+      || (chapter && chapter.title)
+      || (meta.title || prKey);
+    const sceneFiles = (scene && scene.paths && scene.paths.length)
+      || (chapter && (!scenes ? (chapter.paths || []).length : 0))
+      || 0;
+    const decision = loadDecision(prKey);
+    const numLabel = sceneNum != null
+      ? `${String(chapterNum).padStart(2, "0")}.${sceneNum}`
+      : String(idx).padStart(2, "0");
+
+    const row = el("button", {
+      class: "toc-row toc-scene-row" + (decision ? " decided" : ""),
+      type: "button",
+      "aria-label": `Go to ${sceneTitle}`,
+    },
+      el("span", { class: "toc-num mono" }, numLabel),
+      el("span", { class: "toc-body" },
+        el("span", { class: "toc-title" }, sceneTitle),
+        scene && scene.narrative
+          ? el("span", { class: "toc-synopsis" }, scene.narrative.split(/(?<=[.!?])\s+/)[0])
+          : null,
+        el("span", { class: "toc-meta" },
+          sceneNum != null ? `Scene ${sceneNum} of ${sceneCount}` : "Walkthrough",
+          sceneFiles ? ` · ${sceneFiles} file${sceneFiles !== 1 ? "s" : ""}` : ""
+        )
+      )
+    );
+    row.addEventListener("click", () => navigate(pageNum));
+    list.appendChild(row);
+  });
+}
+
+// ===== navigation =====
+function getCurrentPage() {
+  const m = /^#\/page\/(\d+)$/.exec(location.hash);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    if (n >= 1 && n <= TOTAL_PAGES) return n;
+  }
+  return 1;
+}
+function navigate(n) {
+  if (n < 1) n = 1; if (n > TOTAL_PAGES) n = TOTAL_PAGES;
+  location.hash = `#/page/${n}`;
+}
+function applyCurrentPage() {
+  const n = getCurrentPage();
+  $$(".page").forEach(p => p.classList.remove("active"));
+  $(`#page-${n}`).classList.add("active");
+  refreshDots();
+  refreshProgressReadout();
+  if (n > 1) {
+    localStorage.setItem(`${STORAGE_PREFIX}:lastVisited`, String(n));
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+window.addEventListener("hashchange", applyCurrentPage);
+
+function refreshDots() {
+  const dots = $("#dots");
+  if (!dots) return;
+  dots.innerHTML = "";
+  const current = getCurrentPage();
+  for (let i = 1; i <= TOTAL_PAGES; i++) {
+    const descriptor = PAGE_ORDER[i - 1] || {};
+    let classes = "dot";
+    if (i === current) classes += " active";
+    if (descriptor.kind === "scene") {
+      const prKey = descriptor.prKey;
+      const meta = PAGES_DATA[prKey] || {};
+      const findings = meta.findings || {};
+      const importantCount = (findings.critical || 0) + (findings.important || 0);
+      const suggestedCount = findings.suggested || 0;
+      const questionCount = findings.question || 0;
+      const decision = loadDecision(prKey);
+      if (decision) classes += " decided";
+      if ((importantCount > 0 || suggestedCount > 0 || questionCount > 0) && !decision) classes += " has-finding";
+    }
+    const dot = el("button", { class: classes, type: "button", "aria-label": `Go to page ${i}`, role: "tab" });
+    dot.addEventListener("click", () => navigate(i));
+    dots.appendChild(dot);
+  }
+}
+
+function refreshProgressReadout() {
+  const r = $("#progress-readout");
+  if (!r) return;
+  const current = getCurrentPage();
+  const decisions = STACK_ORDER.filter(s => loadDecision(s)).length;
+  const pending = STACK_ORDER.length - decisions;
+  r.textContent = `Page ${current} of ${TOTAL_PAGES}` +
+    (decisions > 0 ? ` · ${decisions}/${STACK_ORDER.length} decided` : "") +
+    (pending > 0 && decisions > 0 ? ` · ${pending} remaining` : "");
+}
+
+// ===== resume banner =====
+function refreshResumeBanner() {
+  const last = parseInt(localStorage.getItem(`${STORAGE_PREFIX}:lastVisited`) || "0", 10);
+  const banner = $("#resume-banner");
+  if (!banner) return;
+  if (last && last > 1 && last <= TOTAL_PAGES && getCurrentPage() === 1) {
+    let label;
+    const descriptor = PAGE_ORDER[last - 1] || {};
+    if (descriptor.kind === "merge") label = `Page ${last} — Merge plan`;
+    else if (descriptor.kind === "scene") {
+      const meta = PAGES_DATA[descriptor.prKey] || {};
+      const chapters = meta.chapters && meta.chapters.length ? meta.chapters : null;
+      const chapter = chapters && descriptor.chapterIndex >= 0 ? chapters[descriptor.chapterIndex] : null;
+      const scenes = chapter && chapter.scenes && chapter.scenes.length ? chapter.scenes : null;
+      const scene = scenes && descriptor.sceneIndex >= 0 ? scenes[descriptor.sceneIndex] : null;
+      const sceneLabel = (scene && scene.title)
+        || (chapter && chapter.title)
+        || (meta.title || descriptor.prKey);
+      label = `Page ${last} — ${sceneLabel}`;
+    } else label = `Page ${last}`;
+    $("#resume-detail").textContent = label;
+    $("#resume-btn").onclick = () => navigate(last);
+    banner.hidden = false;
+  } else {
+    banner.hidden = true;
+  }
+}
+
+// ===== export to markdown =====
+function buildExportMarkdown() {
+  const lines = [];
+  const heading = (document.title || "Stack review").replace(/\s+/g, " ").trim();
+  lines.push(`# ${heading} — Reviewer notes`);
+  lines.push("");
+  lines.push(`Generated: ${new Date().toISOString()}`);
+  lines.push("");
+
+  // Decisions tally
+  lines.push("## Decisions");
+  STACK_ORDER.forEach(prKey => {
+    const meta = PAGES_DATA[prKey] || {};
+    const dec = loadDecision(prKey);
+    const decLabel = dec === "approve" ? "Approve" : dec === "changes" ? "Request changes" : dec === "discuss" ? "Needs discussion" : "(none)";
+    const ticketSuffix = tickets(meta).length ? ` · ${tickets(meta).join(" · ")}` : "";
+    lines.push(`- **#${prKey}${ticketSuffix}** — ${meta.title || prKey} → ${decLabel}`);
+  });
+  lines.push("");
+
+  // Per-PR notes
+  STACK_ORDER.forEach(prKey => {
+    const meta = PAGES_DATA[prKey] || {};
+    const pageNote = loadPageComment(prKey);
+    const inlineEntries = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`${STORAGE_PREFIX}:inline:${prKey}:`)) {
+        const rest = k.slice(`${STORAGE_PREFIX}:inline:${prKey}:`.length);
+        const lastColon = rest.lastIndexOf(":");
+        const path = rest.slice(0, lastColon);
+        const lineKey = rest.slice(lastColon + 1);
+        inlineEntries.push({ path, lineKey, text: localStorage.getItem(k) });
+      }
+    }
+    if (!pageNote && inlineEntries.length === 0 && !loadDecision(prKey)) return;
+    lines.push("");
+    const ticketSuffix = tickets(meta).length ? ` · ${tickets(meta).join(" · ")}` : "";
+    lines.push(`## #${prKey}${ticketSuffix} — ${meta.title || prKey}`);
+    if (meta.kind !== "commit") lines.push(`PR: ${ghPrUrl(prKey)}`);
+    if (pageNote) {
+      lines.push("");
+      lines.push("### Page-level note");
+      lines.push("");
+      lines.push(pageNote);
+    }
+    if (inlineEntries.length > 0) {
+      const byFile = {};
+      inlineEntries.forEach(e => { (byFile[e.path] = byFile[e.path] || []).push(e); });
+      lines.push("");
+      lines.push("### Inline comments");
+      Object.keys(byFile).sort().forEach(path => {
+        lines.push("");
+        lines.push(`**\`${path}\`**`);
+        byFile[path].sort((a, b) => a.lineKey.localeCompare(b.lineKey)).forEach(e => {
+          const [oldLn, newLn] = e.lineKey.split("_");
+          const lnLabel = newLn ? `L${newLn}` : `L${oldLn} (deleted)`;
+          lines.push("");
+          lines.push(`- ${lnLabel} — ${e.text}`);
+        });
+      });
+    }
+  });
+
+  const mergeNote = localStorage.getItem(pageCommentKey("merge"));
+  if (mergeNote) {
+    lines.push("");
+    lines.push("## Overall (merge plan page)");
+    lines.push("");
+    lines.push(mergeNote);
+  }
+  return lines.join("\n");
+}
+
+// ===== theme =====
+function applyTheme(theme) {
+  document.body.dataset.theme = theme || "";
+  $("#theme-icon").textContent = theme === "dark" ? "☾" : "☼";
+}
+function initTheme() {
+  const saved = localStorage.getItem(`${STORAGE_PREFIX}:theme`);
+  if (saved === "dark" || saved === "light") { applyTheme(saved); return; }
+  const dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(dark ? "dark" : "light");
+}
+
+// ===== keyboard nav =====
+function onKey(e) {
+  if (e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT")) return;
+  if (e.key === "ArrowRight") { navigate(getCurrentPage() + 1); }
+  else if (e.key === "ArrowLeft") { navigate(getCurrentPage() - 1); }
+  else if (e.key === "Home") { navigate(1); }
+  else if (e.key === "End") { navigate(TOTAL_PAGES); }
+  else if (e.key === "Escape") {
+    $$(".comment-thread").forEach(t => {
+      const ta = $(".comment-textarea", t);
+      if (ta && document.activeElement === ta) {
+        const cancel = $(".btn-ghost", t);
+        if (cancel) cancel.click();
+      }
+    });
+  }
+}
+
+// ===== bootstrap =====
+function init() {
+  initTheme();
+  refreshTriageList();
+  PAGE_ORDER.forEach((descriptor, idx) => {
+    if (descriptor.kind !== "scene") return;
+    const pageNumber = idx + 1;
+    try {
+      renderScenePage(descriptor, pageNumber);
+    } catch (e) {
+      console.error(`renderScenePage failed for ${descriptor.prKey} ch=${descriptor.chapterIndex} s=${descriptor.sceneIndex}:`, e);
+    }
+  });
+  const mergeTa = $("#merge-comment-final");
+  if (mergeTa) {
+    mergeTa.value = localStorage.getItem(pageCommentKey("merge")) || "";
+    mergeTa.addEventListener("input", () => {
+      if (mergeTa.value && mergeTa.value.trim()) localStorage.setItem(pageCommentKey("merge"), mergeTa.value.trim());
+      else localStorage.removeItem(pageCommentKey("merge"));
+    });
+  }
+  refreshDots();
+  refreshFileCommentCounts();
+  refreshProgressReadout();
+  refreshResumeBanner();
+
+  applyCurrentPage();
+
+  const startBtn = $("#start-btn");
+  if (startBtn) startBtn.addEventListener("click", () => navigate(2));
+  const skipRisky = $("#skip-risky-btn");
+  if (skipRisky) skipRisky.addEventListener("click", () => {
+    const target = parseInt(skipRisky.dataset.targetPage || "0", 10);
+    if (target >= 1 && target <= TOTAL_PAGES) navigate(target);
+  });
+  const mergeBtn = $("#merge-plan-btn");
+  if (mergeBtn) mergeBtn.addEventListener("click", () => navigate(TOTAL_PAGES));
+  $("#prev-btn").addEventListener("click", () => navigate(getCurrentPage() - 1));
+  $("#next-btn").addEventListener("click", () => navigate(getCurrentPage() + 1));
+  $("#theme-btn").addEventListener("click", () => {
+    const next = document.body.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem(`${STORAGE_PREFIX}:theme`, next);
+    applyTheme(next);
+  });
+  $("#export-btn").addEventListener("click", async () => {
+    const md = buildExportMarkdown();
+    try {
+      await copyToClipboard(md);
+      showToast("Notes copied as Markdown.");
+    } catch (e) {
+      showToast("Copy failed; check console.");
+      console.error(e);
+    }
+  });
+
+  document.addEventListener("keydown", onKey);
+}
+
+  init();
+})();
