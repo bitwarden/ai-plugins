@@ -110,6 +110,18 @@
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.3.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+    },
+    {
+      "name": "bitwarden-mailcatcher-tools",
+      "source": "./plugins/bitwarden-mailcatcher-tools",
+      "version": "1.0.0",
+      "description": "Mailcatcher tools for Bitwarden — reading verification links, magic links, and tokens from the local dev inbox."
+    },
+    {
+      "name": "bitwarden-stripe-tools",
+      "source": "./plugins/bitwarden-stripe-tools",
+      "version": "1.0.0",
+      "description": "Stripe tools for Bitwarden — read-only test-mode queries, invoice previews, and test-clock advancement through a guarded Stripe CLI wrapper."
     }
   ]
 }

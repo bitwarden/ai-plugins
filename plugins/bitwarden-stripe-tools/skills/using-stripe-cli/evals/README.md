@@ -1,6 +1,6 @@
 # using-stripe-cli evals
 
-Trigger-rate diagnostic for the `bitwarden-testing-tools:using-stripe-cli` skill, plus a behavior-eval case set that documents its load-bearing decisions as worked examples in the `skill-creator` schema.
+Trigger-rate diagnostic for the `bitwarden-stripe-tools:using-stripe-cli` skill, plus a behavior-eval case set that documents its load-bearing decisions as worked examples in the `skill-creator` schema.
 
 ## Files
 

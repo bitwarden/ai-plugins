@@ -1,6 +1,6 @@
 # reading-mailcatcher-api trigger evals
 
-Trigger-rate diagnostic for the `bitwarden-testing-tools:reading-mailcatcher-api` skill: whether the phrasings it names actually trigger it, and whether near-miss queries asking for SMTP configuration, email-template work, container management, or server-side flow explanation stay quiet.
+Trigger-rate diagnostic for the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill: whether the phrasings it names actually trigger it, and whether near-miss queries asking for SMTP configuration, email-template work, container management, or server-side flow explanation stay quiet.
 
 ## Files
 

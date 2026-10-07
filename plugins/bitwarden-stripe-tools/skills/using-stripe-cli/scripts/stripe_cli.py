@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Policy-guarded Stripe CLI access for the bitwarden-testing-tools plugin.
+"""Policy-guarded Stripe CLI access for the bitwarden-stripe-tools plugin.
 The only sanctioned way for a skill or automated test run to reach Stripe.
 
 A Bash grant of the shape Bash(stripe get:*) cannot exclude a flag, so it can

@@ -17,10 +17,6 @@
     "test-strategy",
     "test-cases",
     "gherkin",
-    "qa",
-    "stripe",
-    "billing",
-    "email",
-    "mailcatcher"
+    "qa"
   ]
 }
