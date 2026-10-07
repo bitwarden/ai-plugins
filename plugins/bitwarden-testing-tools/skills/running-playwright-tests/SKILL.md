@@ -4,7 +4,6 @@ description: Execute Bitwarden web test cases step-by-step using the playwright-
 allowed-tools: >
   Bash(${CLAUDE_SKILL_DIR}/scripts/external_trigger.py *),
   Bash(${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py *),
-  Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py *),
   Bash(ls *)
 ---
 
@@ -27,6 +26,15 @@ If the test cases are missing or empty, or come from a `<!-- TEST-CASES START --
 ### Read the tool policy
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`. It governs which tools you may use throughout the run. Follow it without exception.
+
+### Email and Stripe steps
+
+Email reads (Category 2) and Stripe queries (Category 4) run through skills in the vendor plugins this plugin depends on. Invoking a skill is what grants its script, and one invocation covers every later call in this run, so invoke each one once, right before the first step that needs it:
+
+- Before the first email-reading step: `Skill(bitwarden-mailcatcher-tools:reading-mailcatcher-api)`
+- Before the first Stripe step: `Skill(bitwarden-stripe-tools:using-stripe-cli)`
+
+Skip a skill when no step in your input needs it. Run each script exactly as the invoked skill shows it, and never write a path to another plugin's script yourself.
 
 ### Resume context (conditional)
 
@@ -176,16 +184,12 @@ Toasts can auto-dismiss in well under a second. Capture the text reliably from t
 
 External trigger results (external_trigger.py responses), email reads, and URL extractions are intermediate working steps, not stopping points. After each, proceed immediately to the next test step.
 
-For email-driven flows (verification, magic-link login, trial activation, OTP), call the mailcatcher reader script directly via Bash (canonical path in `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`):
-
-```
-${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> --pattern <subject-keyword>
-```
+For email-driven flows (verification, magic-link login, trial activation, OTP), run the reader script the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill shows (see Email and Stripe steps), with `--recipient <email> --pattern <subject-keyword>`.
 
 stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`. Branch on the exit code:
 
 - **Exit 1** (`NO_MATCH`) after the script's own retry: mark the test case FAIL immediately with the `NO_MATCH` diagnostic in `Notes:`.
-- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable, returned unparseable JSON, or `MAILCATCHER_URL` names a disallowed host. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return an aborted object that carries every test case you completed before the fault, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/aborted-with-cases.json`:
+- **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable or returned unparseable JSON. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return an aborted object that carries every test case you completed before the fault, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/aborted-with-cases.json`:
 
   ```json
   {
@@ -199,7 +203,7 @@ stdout is the URL — use it as input to the next browser step. The script alrea
 
 - **Exit 2**: your invocation was wrong. Correct it and retry once; if it still fails, report the obstacle.
 
-Do not attempt to read Mailcatcher via any other means (curl, direct API calls, or sub-agent). Do not invoke `Skill(reading-mailcatcher-api)` (it is documentation for the underlying API; the co-located script is the only sanctioned transport).
+Do not attempt to read Mailcatcher via any other means (curl, direct API calls, or sub-agent).
 
 ### Human step halt
 
