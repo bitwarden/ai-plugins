@@ -36,7 +36,3 @@ Convention: `<jira-or-tag>-storybook-v1`, e.g. `pm32009-storybook-v1`. Keep the 
 `scaffold.py --output-root <root>` writes to `<root>/<slug>-<timestamp>/`, and the skill passes the plugin data directory's `storybooks/` as the root. The timestamp suffix lets the same stack regenerate cleanly (e.g. after fresh review verdicts arrive) without clobbering an open browser tab. `--output <dir>` writes to that exact directory instead. With neither option, the script uses `$CLAUDE_PLUGIN_DATA/storybooks` as the root when that variable is set in its environment, and otherwise exits with an error rather than guessing a location.
 
 Don't override unless the user has a specific reason — keeping artifacts under the plugin data directory prevents stray storybooks from accumulating in working directories or PR branches.
-
-## Re-Running Against an Existing Output
-
-The block sentinels (`<!-- __BW_BLOCK_START__ ... -->`) are preserved in the rendered `index.html` and `app.js`. This means you can point `scaffold.py` at an existing output directory and re-render only the parts that changed (cover, pages, merge plan, stack-config). The sentinels make the rendered files idempotent — re-running with the same config produces an identical output.
