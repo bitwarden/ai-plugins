@@ -8,7 +8,7 @@ This plugin holds Bitwarden's testing and quality tooling in two families.
 
 **Standalone analysis skills** are invoked directly and work on their own. `assessing-test-coverage` determines what a change is already tested by.
 
-**The web test pipeline** is driven by one entry point, `start-playwright-test`, which orchestrates six agents to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run against a local dev environment. Its component skills are composed by that pipeline rather than invoked directly, with one exception: `reading-mailcatcher-api` is also useful on its own for reading a single Bitwarden email outside a test run.
+**The web test pipeline** is driven by one entry point, `start-playwright-test`, which orchestrates six agents to take a Jira ticket, implementation plan, or feature description and turn it into a full Playwright test run against a local dev environment. Its component skills are composed by that pipeline rather than invoked directly. It reads email and Stripe data through two vendor plugins it depends on, `bitwarden-mailcatcher-tools` and `bitwarden-stripe-tools`, whose skills are also useful on their own outside a test run.
 
 ## Prerequisites
 

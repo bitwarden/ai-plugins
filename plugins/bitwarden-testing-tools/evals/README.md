@@ -42,6 +42,10 @@ timeout — `--timeout` bounds anything that stalls.
   Omit it and the runner infers it from the eval-set path (the plugin root is the eval file's
   great-great-grandparent directory), so a run from a skill's `evals/` dir needs no flag. Pass
   it explicitly when running the engine from a layout the path inference does not fit.
+- `--agent` — measure an agent instead of a skill: the target becomes a plugin-qualified
+  `Agent` (or legacy `Task`) dispatch naming this agent, or a `Read` of its own `AGENT.md`.
+  Mutually exclusive with `--skill`. Used by suites that check an orchestrator-only agent's
+  "do not invoke directly" description holds.
 - `--runs-per-query` (default `3`) — samples per query; use `7` for a baseline.
 - `--num-workers` (default `3`) — concurrency, and the memory knob. Each `claude -p`
   subprocess holds ~1GB while it runs, so raising this raises peak memory.
@@ -70,6 +74,35 @@ python3 ../../../evals/run_real_eval.py \
   --model claude-opus-4-8 \
   > result.json
 ```
+
+### Measuring the working tree instead of the installed copy
+
+To read a branch's `SKILL.md` without reinstalling, pin the inventory per invocation with two
+`claude` flags: `--setting-sources project` drops your user-level plugins, skills, hooks, and MCP
+servers, and `--plugin-dir` loads this plugin and the two vendor plugins it depends on,
+`bitwarden-mailcatcher-tools` and `bitwarden-stripe-tools`, from the working tree. Pass all three:
+with only this plugin's directory, `claude` reports its dependencies as not installed and loads
+none of its skills, so every query records a false non-trigger. The runner
+launches `claude` through a direct `PATH` lookup, so a shell alias is never consulted; inject
+the flags with a shim first on `PATH`:
+
+```bash
+ROOT="$(git rev-parse --show-toplevel)/plugins"
+REAL="$(type -P claude)"                       # real binary, bypassing any shell alias
+SHIM="$(mktemp -d)"; chmod 700 "$SHIM"
+cat > "$SHIM/claude" <<EOF
+#!/bin/bash
+exec "$REAL" "\$@" --setting-sources project \\
+  --plugin-dir "$ROOT/bitwarden-mailcatcher-tools" --plugin-dir "$ROOT/bitwarden-stripe-tools" \\
+  --plugin-dir "$ROOT/bitwarden-testing-tools"
+EOF
+chmod +x "$SHIM/claude"
+export PATH="$SHIM:$PATH"
+```
+
+Remove it when done with `rm -rf "$SHIM"`. Do **not** relocate `CLAUDE_CONFIG_DIR` to isolate the
+inventory instead: on macOS the login token is keyed to the config directory, so a relocated
+directory reads an empty Keychain entry and every query records a false non-trigger.
 
 A 20-query set at `--runs-per-query 7` is 140 `claude -p` invocations; with 3 workers it takes
 several minutes. `--num-workers` is the memory knob (see _Arguments_). The two coverage skills

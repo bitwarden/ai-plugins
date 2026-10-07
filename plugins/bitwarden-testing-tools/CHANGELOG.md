@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The plugin README now describes two families of tooling: standalone analysis skills, and the web test pipeline whose components are composed rather than invoked.
+- The shared trigger-eval runner, `evals/run_real_eval.py`, also measures agents: `--agent <name>` counts a plugin-qualified `Agent` (or legacy `Task`) dispatch naming that agent, or a `Read` of its own `AGENT.md`, as a trigger, with unit tests. The agent non-trigger suite uses it. Its `evals/README.md` adds a recipe for measuring the working tree instead of the installed copy, which loads this plugin together with the two vendor plugins it depends on.
 
 ## [1.5.0] - 2026-10-07
 
