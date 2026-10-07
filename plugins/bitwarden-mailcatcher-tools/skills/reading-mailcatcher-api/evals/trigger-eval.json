@@ -60,7 +60,7 @@
     "should_trigger": false
   },
   {
-    "query": "emails aren't showing up in mailcatcher at all, what's broken?",
+    "query": "configure the SMTP host and port for my local dev environment",
     "should_trigger": false
   },
   {

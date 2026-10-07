@@ -1,6 +1,6 @@
 ---
 name: reading-mailcatcher-api
-description: This skill should be used when a local testing or debugging flow needs a link or token from an email, such as account verification links, magic-link logins, trial activations, organization invites, emergency access, and other email-driven flows. It reads an email from the local Bitwarden Mailcatcher inbox and extracts a URL or token, querying the Mailcatcher REST API at http://localhost:1080 by recipient and subject; preferred over the browser UI in automation because Playwright CORS blocks direct fetch. Do NOT use it to configure SMTP, start Mailcatcher, or debug delivery.
+description: Retrieves a link or token from Mailcatcher. Use when a local testing or debugging flow needs a link or token from an email, such as account verification links, magic-link logins, trial activations, organization invites, emergency access, and other email-driven flows. Preferred over the Mailcatcher browser UI in automation, where Playwright's CORS blocks a direct fetch. Do NOT use it to configure SMTP, start Mailcatcher, or debug delivery.
 argument-hint: "--recipient <email> [--pattern <subject-keyword>] [--link-filter <regex>]"
 allowed-tools: "Read, Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py:*), Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/get_admin_email.py:*)"
 ---
@@ -9,7 +9,7 @@ allowed-tools: "Read, Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/
 
 ## Quick reference — use the script
 
-For all programmatic uses (test runs, ad-hoc fetches, debugging), call the co-located script directly. It is user-invocable: trigger it from any Claude Code session with the arguments below and Claude runs the script and returns the extracted URL (or the `NO_MATCH` diagnostic).
+For all programmatic uses (test runs, ad-hoc fetches, debugging), call the co-located script directly.
 
 ```
 ${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py --recipient <email> [--pattern <subject-keyword>] [--link-filter <regex>]
