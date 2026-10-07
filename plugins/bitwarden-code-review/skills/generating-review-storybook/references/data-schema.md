@@ -40,19 +40,19 @@ The `scaffold.py` script consumes a single JSON config file. This document is th
 
 ### Verdict Values
 
-| Value         | Meaning                                                                | Cover badge           |
-| ------------- | ---------------------------------------------------------------------- | --------------------- |
-| `approve`     | Reviewer signed off. No critical/important findings.                   | Green "Approved"      |
-| `approve-fix` | Approve, but follow-up findings exist (typically debt or suggestions). | Amber "Approve+"      |
-| `block`       | Blocked — change requested, do not merge.                              | Red "Blocked"         |
-| `pending`     | Review not yet performed.                                              | Grey "Pending review" |
+| Value         | Meaning                                                     | Cover badge           |
+| ------------- | ----------------------------------------------------------- | --------------------- |
+| `approve`     | Reviewer signed off. No critical/important findings.        | Green "Approved"      |
+| `approve-fix` | Approve, but critical or important findings need follow-up. | Amber "Approve+"      |
+| `block`       | Blocked — change requested, do not merge.                   | Red "Blocked"         |
+| `pending`     | Review not yet performed.                                   | Grey "Pending review" |
 
 `scripts/parse_review_md.py` derives these from a Bitwarden code-review summary:
 
-- "Overall Assessment: APPROVE" + no critical/important findings → `approve`
-- "Overall Assessment: APPROVE" + ❌ or ⚠️ finding → `approve-fix`
-- "Overall Assessment: REQUEST CHANGES" → `block`
-- No "Overall Assessment" line → `pending`
+- "Overall Assessment: REQUEST CHANGES" (or BLOCK) is `block`.
+- "Overall Assessment: APPROVE" with at least one ❌ critical or ⚠️ important finding is `approve-fix`. Debt, suggested, and question findings never produce it.
+- "Overall Assessment: APPROVE" with no critical or important findings is `approve`.
+- No "Overall Assessment" line, or PENDING, is `pending`.
 
 ### `findings` Object
 

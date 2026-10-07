@@ -12,11 +12,11 @@ Examples:
     python scripts/parse_review_md.py 2573=reviews/pr-2573.md 2576=reviews/pr-2576.md
     python scripts/parse_review_md.py --output verdicts.json a1b2c3=reviews/commit-a1b2c3.md
 
-Verdict rules (in order):
-    1. "**Overall Assessment:** APPROVE"          → approve
-    2. "**Overall Assessment:** REQUEST CHANGES"  → block
-    3. APPROVE present but ❌/⚠️ findings exist   → approve-fix
-    4. Otherwise                                  → pending
+Verdict rules (first match wins):
+    1. "**Overall Assessment:** REQUEST CHANGES" or BLOCK      -> block
+    2. "**Overall Assessment:** APPROVE" with ❌/⚠️ findings    -> approve-fix
+    3. "**Overall Assessment:** APPROVE" otherwise             -> approve
+    4. Otherwise                                               -> pending
 
 Severity-emoji mapping covers ❌ CRITICAL / ⚠️ IMPORTANT / ♻️ DEBT / 🎨 SUGGESTED / ❓ QUESTION.
 
