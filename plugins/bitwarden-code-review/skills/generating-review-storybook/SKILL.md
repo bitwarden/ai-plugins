@@ -102,7 +102,8 @@ For brand overrides, language imports, and storage-prefix hygiene, see `referenc
 Before reporting "done":
 
 - [ ] `index.html` opens and the cover renders.
-- [ ] Per-PR pages count = stack size; each has its diff.
+- [ ] Every PR has at least one page, and each page shows its diff.
+- [ ] Every changed file appears exactly once. An "Other files" group means a chapter missed paths; add them to the right chapter and re-run.
 - [ ] Per-PR walkthrough is grouped into chapters with narrative — not a flat alphabetical file list.
 - [ ] Verdicts on the cover match what the user expects (pending / approve / approve-fix / block).
 - [ ] Inline-comment +/save flow works on at least one diff line.
