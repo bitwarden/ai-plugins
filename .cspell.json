@@ -216,7 +216,6 @@
     "**/dist/**",
     "**/node_modules/**",
     "**/pnpm-lock.yaml",
-    "/project-words.txt",
-    "plugins/bitwarden-code-review/skills/generating-review-storybook/assets/template/assets/vendor/**"
+    "/project-words.txt"
   ]
 }

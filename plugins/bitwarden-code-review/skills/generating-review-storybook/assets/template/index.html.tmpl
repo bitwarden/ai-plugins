@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/prismjs@1.30.0/; style-src 'self' https://cdn.jsdelivr.net/npm/prismjs@1.30.0/ https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>__BW_DOC_TITLE__</title>
-<link rel="stylesheet" href="assets/vendor/prism/prism.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism.min.css" integrity="sha384-rCCjoCPCsizaAAYVoz1Q0CmCTvnctK0JkfCSjx7IIxexTBg+uCKtFYycedUjMyA2" crossorigin="anonymous" />
 <link rel="stylesheet" href="assets/styles.css" />
 <link rel="icon" type="image/svg+xml" href="assets/bw-shield.svg" />
 </head>
@@ -79,16 +83,16 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<!-- Prism.js, vendored; components load after the ones they extend -->
-<script src="assets/vendor/prism/prism-core.min.js"></script>
-<script src="assets/vendor/prism/prism-clike.min.js"></script>
-<script src="assets/vendor/prism/prism-markup.min.js"></script>
-<script src="assets/vendor/prism/prism-json.min.js"></script>
-<script src="assets/vendor/prism/prism-swift.min.js"></script>
-<script src="assets/vendor/prism/prism-kotlin.min.js"></script>
-<script src="assets/vendor/prism/prism-csharp.min.js"></script>
-<script src="assets/vendor/prism/prism-javascript.min.js"></script>
-<script src="assets/vendor/prism/prism-typescript.min.js"></script>
+<!-- Prism.js 1.30.0, pinned by integrity hash; components load after the ones they extend -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-core.min.js" integrity="sha384-zLRFO4dwowZvh8kzutOb5AWhH7f39HeJp+N7PtHF1SQtTBnifRx0AtmvTYs3F4YV" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-clike.min.js" integrity="sha384-7LHwxHIDSHTBleLmgDWZbC/IMJsfYfFVOihKhvsrxYW4j47YQcRwZja4ToFE3bA8" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-swift.min.js" integrity="sha384-4RYbFVFN0J24/jfNL9Olk5/pS71bzqjKebX+ZvzzMQ+uDl2T4k/DOuGY6Znxqj8N" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-kotlin.min.js" integrity="sha384-zz49ukKZF8e3sr9aiW45Ju61sb9hptYyPOufuu9eutOrjwnOK3D1CGRU+eb12fGy" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-csharp.min.js" integrity="sha384-nMKYzg6yfy0qgpaRpVhHvZp0gT5sgvmZYlFC0XAKZSp+zFUB9rE6zsdmIEiou4bV" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous"></script>
 
 <!-- Storybook scripts: data → app -->
 <script src="assets/data.js"></script>

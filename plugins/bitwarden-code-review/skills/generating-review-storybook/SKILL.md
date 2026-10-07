@@ -5,7 +5,9 @@ description: Generate a static, double-clickable "review storybook" that walks h
 
 # Generating a Review Storybook
 
-Package a stack of PRs (or commits) into a self-contained HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/`; interview the user, build a config, and run the scaffolder.
+Package a stack of PRs (or commits) into a static HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/`; interview the user, build a config, and run the scaffolder.
+
+The page loads the Prism highlighter from jsDelivr, pinned by integrity hash, and the Inter font from Google Fonts. Its Content-Security-Policy admits only those sources and blocks every outbound connection and form submission, so the private diffs and notes it holds stay in the browser.
 
 **What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review; the storybook just packages it for fast triage. Claude findings (from `performing-multi-agent-code-review` or `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates each PR's verdict and inline findings; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
 

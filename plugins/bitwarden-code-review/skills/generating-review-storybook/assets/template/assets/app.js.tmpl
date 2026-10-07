@@ -814,7 +814,7 @@ function renderScenePage(descriptor, pageNumber) {
     eyebrowParts.length
       ? el("span", { class: "eyebrow" }, eyebrowParts.join(" · "))
       : null,
-    el("h1", { class: "ph-title display display-l", style: "margin-top: 8px;" }, headerTitle),
+    el("h1", { class: "ph-title display display-l" }, headerTitle),
     el("div", { class: "ph-meta-row" },
       el("span", { class: "ph-meta" },
         el("span", { class: "ph-meta-key" }, kindLabel),
@@ -885,7 +885,7 @@ function renderScenePage(descriptor, pageNumber) {
     pageEl.appendChild(filesWrap);
   } else {
     pageEl.appendChild(
-      el("p", { class: "small", style: "color: var(--ink-soft); padding: 16px 0;" },
+      el("p", { class: "small scene-empty" },
         "No files declared for this scene.")
     );
   }
@@ -940,7 +940,7 @@ function renderVerdictRecap(meta) {
   return el("aside", { class: `verdict-recap verdict-card ${v.class}` },
     el("span", { class: "eyebrow" }, "Verdict"),
     el("h2", { class: "verdict-headline" }, meta.verdictLabel || v.label),
-    el("p", { class: "small", style: "color: var(--ink-soft); margin: 8px 0 0;" }, summary),
+    el("p", { class: "small verdict-summary" }, summary),
     gap
   );
 }
@@ -966,7 +966,7 @@ function renderDecisionWidget(prKey, meta) {
       el("span", { class: "check" }),
       el("span", null,
         el("div", null, d.label),
-        el("div", { class: "small", style: "color: var(--ink-mute); font-weight: 400;" }, d.desc))
+        el("div", { class: "small decision-desc" }, d.desc))
     );
     btn.addEventListener("click", () => {
       const newVal = (loadDecision(prKey) === d.id) ? null : d.id;

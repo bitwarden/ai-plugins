@@ -15,13 +15,14 @@ Every shield in the storybook comes from `assets/template/assets/bw-shield.svg`:
 
 ## Language Imports for Code Highlighting
 
-Prism is vendored under `assets/template/assets/vendor/prism/` so the storybook loads nothing from the network. `index.html.tmpl` loads `prism-core` first, then the language components in dependency order: `clike` (also the fallback `detectLanguage` returns for unknown extensions), `markup` (HTML, XML, plist), `json`, `swift`, `kotlin`, `csharp`, `javascript`, and `typescript`.
+`index.html.tmpl` loads Prism from jsDelivr at a pinned release: `prism-core` first, then the language components in dependency order: `clike` (also the fallback `detectLanguage` returns for unknown extensions), `markup` (HTML, XML, plist), `json`, `swift`, `kotlin`, `csharp`, `javascript`, and `typescript`. Every `<script>` and the Prism theme `<link>` carry an `integrity` hash and `crossorigin="anonymous"`, so the browser refuses any file whose bytes differ from the release, and the page's Content-Security-Policy admits scripts only from the storybook's own files and that release's path on jsDelivr.
 
 To highlight another language:
 
-1. Copy `components/prism-<lang>.min.js` from the same `prismjs` release recorded in `vendor/prism/README.md` into `vendor/prism/`, along with any component it requires (Prism's `components.json` lists each component's `require` and `modify` dependencies).
-2. Add a `<script>` for it in `index.html.tmpl` after every component it requires or modifies.
-3. Extend `detectLanguage()` in `app.js.tmpl` with the file extension to language mapping.
+1. Add a `<script>` for `components/prism-<lang>.min.js` from the same pinned release, after every component it requires or modifies (Prism's `components.json` lists each component's `require` and `modify` dependencies, and those load the same way).
+2. Give each new tag an `integrity="sha384-..."` computed from the exact bytes jsDelivr serves for that URL, cross-checked against the same file in the `prismjs` npm tarball, plus `crossorigin="anonymous"`.
+3. Make sure the CSP `script-src` in `index.html.tmpl` allows the new URL. Components from the pinned release path are already allowed; anything from another path or host needs its own source added.
+4. Extend `detectLanguage()` in `app.js.tmpl` with the file extension to language mapping.
 
 `detectLanguage` is intentionally simple: it inspects the file path's extension only. If you need fancier detection (shebangs, content sniffing), do it in `data.js` at scaffold time and store the resolved language alongside the diff. That keeps `app.js` deterministic.
 

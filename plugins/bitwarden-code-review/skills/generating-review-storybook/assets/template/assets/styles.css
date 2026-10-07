@@ -1,12 +1,3 @@
-@font-face {
-  font-family: Inter;
-  src:
-    url("vendor/inter/inter.woff2") format("woff2") tech(variations),
-    url("vendor/inter/inter.woff2") format("woff2-variations");
-  font-display: swap;
-  font-weight: 100 900;
-}
-
 /* ---- design tokens (Bitwarden brand) ---- */
 :root {
   /* type */
@@ -382,11 +373,80 @@ a.link:hover {
   margin: 0 0 48px;
   /* required brand spacing: at least the shield's own width on each side */
 }
+.cover-shield {
+  width: 44px;
+  height: 52px;
+}
+.cover-wordmark {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--accent);
+  letter-spacing: -0.022em;
+}
+.cover-title {
+  margin: 24px 0 0;
+}
+.cover-lead {
+  margin-top: 28px;
+}
 .cover-grid {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: 64px;
   align-items: start;
+  margin-top: 56px;
+}
+.cover-triage-title {
+  margin: 12px 0 8px;
+}
+.cover-actions {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cover-rollup-title {
+  margin: 12px 0 18px;
+}
+.rollup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.rollup-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+.rollup-label {
+  color: var(--ink-mute);
+}
+.rollup-value {
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.rollup-value.rollup-crit {
+  color: var(--crit);
+}
+.rollup-value.rollup-warn {
+  color: var(--warn);
+}
+.rollup-value.rollup-info {
+  color: var(--info);
+}
+.cover-stat-unit {
+  font-size: 16px;
+  color: var(--ink-mute);
+  font-weight: 400;
+  margin-left: 4px;
+}
+.cover-footnote {
+  margin-top: 56px;
+  color: var(--ink-faint);
+  text-align: center;
 }
 @media (max-width: 900px) {
   .cover-grid {
@@ -450,6 +510,11 @@ a.link:hover {
 .resume-text strong {
   color: var(--info);
   font-weight: 700;
+}
+.resume-detail {
+  display: block;
+  color: var(--ink-soft);
+  margin-top: 2px;
 }
 
 /* ---- triage list ---- */
@@ -530,7 +595,7 @@ a.link:hover {
   color: var(--ink-faint);
 }
 .ph-title {
-  margin: 24px 0 16px;
+  margin: 8px 0 16px;
 }
 
 /* verdict card - the visual anchor */
@@ -551,6 +616,10 @@ a.link:hover {
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.022em;
+}
+.verdict-summary {
+  color: var(--ink-soft);
+  margin: 8px 0 0;
 }
 .verdict-approve .verdict-headline {
   color: var(--good);
@@ -937,6 +1006,10 @@ a.link:hover {
   outline: none;
   box-shadow: var(--focus);
 }
+.decision-desc {
+  color: var(--ink-mute);
+  font-weight: 400;
+}
 .decision-btn .check {
   width: 18px;
   height: 18px;
@@ -1139,6 +1212,10 @@ a.link:hover {
   line-height: 1.7;
   color: var(--ink-soft);
   max-width: 72ch;
+}
+.scene-empty {
+  color: var(--ink-soft);
+  padding: 16px 0;
 }
 .scene-files-section {
   margin: 8px 0 0;
@@ -1595,11 +1672,17 @@ a.link:hover {
 }
 
 /* ---- merge plan grid ---- */
+.merge-title {
+  margin: 16px 0 0;
+}
+.merge-lead {
+  margin-top: 24px;
+}
 .step-list {
   list-style: none;
   counter-reset: stp;
   padding: 0;
-  margin: 0;
+  margin: 48px 0 0;
 }
 .step-item {
   counter-increment: stp;
@@ -1644,6 +1727,16 @@ a.link:hover {
   color: var(--warn);
   margin-top: 6px;
   font-weight: 600;
+}
+.page-comments.page-comments-flush {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.merge-footnote {
+  margin-top: 64px;
+  text-align: center;
+  color: var(--ink-faint);
 }
 
 /* ---- print ---- */

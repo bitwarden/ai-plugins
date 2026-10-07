@@ -226,7 +226,7 @@ def replace_tokens(text: str, tokens: dict[str, str]) -> str:
 
 # ---------- HTML generation ----------
 
-def inline_shield(style: str = "") -> str:
+def inline_shield(extra_class: str = "") -> str:
     """The shield from bw-shield.svg as inline markup, so styles.css can theme its fills."""
     if not SHIELD_PATH.is_file():
         die(f"template asset missing: {SHIELD_PATH}")
@@ -234,9 +234,9 @@ def inline_shield(style: str = "") -> str:
     if not m:
         die(f"no <svg> element with a viewBox in {SHIELD_PATH}")
     body = _SVG_TITLE_RE.sub("", m.group("body")).strip()
-    style_attr = f' style="{style}"' if style else ""
+    classes = f"brand-shield {extra_class}".strip()
     return (
-        f'<svg class="brand-shield" viewBox="{m.group("box")}" aria-hidden="true"{style_attr}>'
+        f'<svg class="{classes}" viewBox="{m.group("box")}" aria-hidden="true">'
         f"{body}</svg>"
     )
 
@@ -262,48 +262,47 @@ def generate_cover(config: dict[str, Any]) -> str:
             totals[k] += int(item["findings"].get(k, 0))
 
     aside_rows = []
-    for label, key, css in (
-        ("Critical", "critical", "danger"),
-        ("Important", "important", "warning"),
+    for label, key, tone in (
+        ("Critical", "critical", "crit"),
+        ("Important", "important", "warn"),
         ("Debt", "debt", "info"),
         ("Suggested", "suggested", "info"),
         ("Question", "question", "info"),
     ):
         value = totals[key]
         cell = str(value) if value else "—"
-        color = f"var(--{css})" if value else "var(--ink-faint)"
+        value_class = f"rollup-value rollup-{tone}" if value else "rollup-value"
         aside_rows.append(
-            f'<div style="display: flex; justify-content: space-between; padding: 8px 0; '
-            f'border-bottom: 1px dashed var(--rule);">'
-            f'<span style="color: var(--ink-mute);">{label}</span>'
-            f'<span style="color: {color}; font-variant-numeric: tabular-nums;">{cell}</span>'
+            f'<div class="rollup-row">'
+            f'<span class="rollup-label">{label}</span>'
+            f'<span class="{value_class}">{cell}</span>'
             f"</div>"
         )
 
     return f"""<!-- __BW_BLOCK_START__ cover -->
 <section class="page" id="page-1" data-page-key="cover">
   <div class="cover-hero-mark" aria-hidden="true">
-    {inline_shield("width: 44px; height: 52px;")}
-    <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 28px; color: var(--accent); letter-spacing: -0.022em;">Bitwarden</span>
+    {inline_shield("cover-shield")}
+    <span class="cover-wordmark">Bitwarden</span>
   </div>
   <span class="eyebrow">{eyebrow}</span>
-  <h1 class="display display-xl" style="margin: 24px 0 0;">{title}</h1>
-  <p class="lead" style="margin-top: 28px;">{summary}</p>
+  <h1 class="display display-xl cover-title">{title}</h1>
+  <p class="lead cover-lead">{summary}</p>
 
   <div class="resume-banner" id="resume-banner" hidden>
     <div class="resume-text">
       <strong>Resume where you left off.</strong>
-      <span id="resume-detail" class="small" style="display:block;color:var(--ink-soft);margin-top:2px;"></span>
+      <span id="resume-detail" class="small resume-detail"></span>
     </div>
     <button class="btn btn-primary" id="resume-btn">Resume →</button>
   </div>
 
-  <div class="cover-grid" style="margin-top: 56px;">
+  <div class="cover-grid">
     <div>
       <span class="eyebrow">Triage list</span>
-      <h2 class="display display-m" style="margin: 12px 0 8px;">Decide each in order. Skip with verdict pending.</h2>
+      <h2 class="display display-m cover-triage-title">Decide each in order. Skip with verdict pending.</h2>
       <ul class="triage-list" id="triage-list" role="list"></ul>
-      <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <div class="cover-actions">
         <button class="btn btn-primary" id="start-btn">Start review →</button>
         <button class="btn btn-ghost" id="merge-plan-btn">See merge plan</button>
       </div>
@@ -312,8 +311,8 @@ def generate_cover(config: dict[str, Any]) -> str:
     <aside>
       <div class="cover-aside">
         <span class="eyebrow">Verdicts &amp; findings</span>
-        <h3 class="display display-m" style="margin: 12px 0 18px;">Stack rollup</h3>
-        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+        <h3 class="display display-m cover-rollup-title">Stack rollup</h3>
+        <div class="rollup">
           {''.join(aside_rows)}
         </div>
       </div>
@@ -330,13 +329,13 @@ def generate_cover(config: dict[str, Any]) -> str:
       <div class="cover-stat-label">Lines changed</div>
     </div>
     <div class="cover-stat">
-      <div class="cover-stat-num">~{minutes}<span style="font-size: 16px; color: var(--ink-mute); font-weight: 400; margin-left: 4px;">min</span></div>
+      <div class="cover-stat-num">~{minutes}<span class="cover-stat-unit">min</span></div>
       <div class="cover-stat-label">Estimated read time</div>
     </div>
   </div>
 
-  <p class="small" style="margin-top: 56px; color: var(--ink-faint); text-align: center;">
-    Built locally from captured review data. This page loads nothing from the network. Inline comments and decisions persist in your
+  <p class="small cover-footnote">
+    Built locally from captured review data. Inline comments and decisions persist in your
     browser only. Use <kbd>→</kbd> and <kbd>←</kbd> to navigate, <kbd>Esc</kbd> to close any open editor.
   </p>
 </section>
@@ -426,26 +425,26 @@ def generate_merge_plan(config: dict[str, Any], merge_page: int) -> str:
     return f"""<!-- __BW_BLOCK_START__ merge-plan -->
 <section class="page" id="page-{merge_page}" data-page-key="merge">
   <span class="eyebrow">Page {merge_page} · Merge plan</span>
-  <h1 class="display display-l" style="margin: 16px 0 0;">Recommended integration sequence</h1>
-  <p class="lead" style="margin-top: 24px;">
+  <h1 class="display display-l merge-title">Recommended integration sequence</h1>
+  <p class="lead merge-lead">
     Work through the stack in order. Hold any PR with an unresolved blocker; merge the rest as their reviews land.
   </p>
 
-  <ol class="step-list" style="margin-top: 48px;">
+  <ol class="step-list">
     {''.join(steps)}
   </ol>
 
   <div class="decision-widget">
     <h3 class="decision-title">Final disposition</h3>
     <p class="decision-sub">Use the running tally above each page; this is space for an overall note.</p>
-    <div class="page-comments" style="border: none; padding: 0; margin: 0;">
+    <div class="page-comments page-comments-flush">
       <label for="merge-comment-final">Overall reviewer note (optional)</label>
       <textarea class="comment-textarea" id="merge-comment-final" data-page-comment="merge"
         placeholder="e.g., 'Approved 1 → 2 → 3 once dependency ships; 4 holds for design.'"></textarea>
     </div>
   </div>
 
-  <p class="small" style="margin-top: 64px; text-align: center; color: var(--ink-faint);">
+  <p class="small merge-footnote">
     End of stack · Use <strong>Export notes</strong> in the toolbar to copy all decisions and comments as Markdown.
   </p>
 </section>
@@ -624,10 +623,6 @@ def write_storybook(config: dict[str, Any], output: Path) -> None:
         if not src.is_file():
             die(f"template asset missing: {src}")
         shutil.copyfile(src, assets_out / name)
-    vendor = template_assets / "vendor"
-    if not vendor.is_dir():
-        die(f"template asset missing: {vendor}")
-    shutil.copytree(vendor, assets_out / "vendor", dirs_exist_ok=True)
 
 
 def main() -> None:
