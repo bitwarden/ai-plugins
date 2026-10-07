@@ -2,7 +2,7 @@
 name: using-stripe-cli
 description: Query read-only Stripe test-mode data and advance an already-attached test clock. Use when a local test or debugging task needs Stripe data Bitwarden's own web vault and Admin portal cannot show, for example listing coupon or price IDs, checking a subscription's status or attached test clock, previewing a subscription's next invoice, or tracing why a test-mode payment failed. Read-only except for advancing an existing test clock. Do NOT use it to write Stripe integration code, to create, update, or delete any Stripe object, or to query live or production data.
 argument-hint: "read --path /v1/<resource> [--param k=v] | preview-invoice --subscription <subscription_id> | advance-clock --clock <clock_id> --days <n>"
-allowed-tools: "Read, Bash(${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py:*)"
+allowed-tools: "Read(/${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/references/**), Bash(${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py:*)"
 ---
 
 # Using the Stripe CLI
@@ -101,7 +101,7 @@ Unlike `read`, a Stripe API error (an unknown or mistyped subscription id) fails
 
 ## The one permitted write: advancing an already-attached test clock
 
-You may advance a test clock that is already attached to the subscription. You may NOT attach a clock to an existing subscription: the Stripe CLI cannot do it (a test clock can only be set on a customer at creation time, via `customers create --test-clock`), so attaching to an existing subscription remains a manual step in the Stripe Dashboard ("Run simulation").
+You may advance a test clock that is already attached to the subscription. You may NOT attach a clock to an existing subscription. The Stripe CLI and API can set a clock only when creating a customer (`customers create --test-clock`), so attaching one to an existing subscription is a manual step the user takes in the Stripe Dashboard ("Run simulation").
 
 Get the clock id from the subscription itself: read `/v1/subscriptions/<id>` and take its `test_clock` field. If that field is null, no clock is attached yet. You cannot attach one, so stop and tell the user: "Attach a clock in the Stripe dashboard before continuing. Once attached, say so and I will continue." Do not try to reach the Dashboard yourself. When the user confirms, re-read the subscription to get the clock id.
 

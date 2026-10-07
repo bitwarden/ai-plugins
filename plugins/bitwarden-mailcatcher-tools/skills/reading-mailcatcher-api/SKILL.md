@@ -2,7 +2,7 @@
 name: reading-mailcatcher-api
 description: Retrieves a link or token from Mailcatcher. Use when a local testing or debugging flow needs a link or token from an email, such as account verification links, magic-link logins, trial activations, organization invites, emergency access, and other email-driven flows. Preferred over the Mailcatcher browser UI in automation, where Playwright's CORS blocks a direct fetch. Do NOT use it to configure SMTP, start Mailcatcher, or debug delivery.
 argument-hint: "--recipient <email> [--pattern <subject-keyword>] [--link-filter <regex>]"
-allowed-tools: "Read, Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py:*), Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/get_admin_email.py:*)"
+allowed-tools: "Read(/${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/references/**), Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/read_mailcatcher.py:*), Bash(${CLAUDE_PLUGIN_ROOT}/skills/reading-mailcatcher-api/scripts/get_admin_email.py:*)"
 ---
 
 # Reading the Mailcatcher API
