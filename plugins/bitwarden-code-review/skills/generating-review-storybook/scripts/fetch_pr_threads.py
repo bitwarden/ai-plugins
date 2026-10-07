@@ -32,30 +32,53 @@ import sys
 from pathlib import Path
 from typing import Any
 
-GRAPHQL = """
-query($owner: String!, $repo: String!, $pr: Int!) {
-  repository(owner: $owner, name: $repo) {
-    pullRequest(number: $pr) {
-      reviewThreads(first: 100) {
-        nodes {
+# Review threads are fetched a page at a time. A thread whose first page of
+# comments is full is completed with COMMENTS_QUERY, addressed by its node id.
+PAGE_SIZE = 100
+
+COMMENT_FIELDS = """
+  pageInfo { hasNextPage endCursor }
+  nodes {
+    body
+    author { login }
+    createdAt
+  }
+"""
+
+THREADS_QUERY = f"""
+query($owner: String!, $repo: String!, $pr: Int!, $cursor: String) {{
+  repository(owner: $owner, name: $repo) {{
+    pullRequest(number: $pr) {{
+      reviewThreads(first: {PAGE_SIZE}, after: $cursor) {{
+        pageInfo {{ hasNextPage endCursor }}
+        nodes {{
+          id
           isResolved
           isOutdated
           path
           line
           startLine
           diffSide
-          comments(first: 50) {
-            nodes {
-              body
-              author { login }
-              createdAt
-            }
-          }
-        }
-      }
-    }
-  }
-}
+          comments(first: {PAGE_SIZE}) {{
+            {COMMENT_FIELDS}
+          }}
+        }}
+      }}
+    }}
+  }}
+}}
+"""
+
+COMMENTS_QUERY = f"""
+query($id: ID!, $cursor: String) {{
+  node(id: $id) {{
+    ... on PullRequestReviewThread {{
+      comments(first: {PAGE_SIZE}, after: $cursor) {{
+        {COMMENT_FIELDS}
+      }}
+    }}
+  }}
+}}
 """
 
 
@@ -69,22 +92,52 @@ def need(binary: str) -> None:
         die(f"required binary not found on PATH: {binary}")
 
 
-def fetch(repo: str, pr: int) -> dict[str, Any]:
+def graphql(query: str, variables: dict[str, str | int]) -> dict[str, Any]:
+    cmd = ["gh", "api", "graphql", "-f", f"query={query}"]
+    for name, value in variables.items():
+        # -F types integers; -f keeps strings (cursors, ids) as strings.
+        flag = "-F" if isinstance(value, int) else "-f"
+        cmd += [flag, f"{name}={value}"]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        die(f"gh api graphql failed: {result.stderr.strip()}")
+    payload = json.loads(result.stdout)
+    if payload.get("errors"):
+        die(f"gh api graphql returned errors: {json.dumps(payload['errors'])}")
+    return payload.get("data") or {}
+
+
+def fetch_remaining_comments(thread: dict[str, Any]) -> None:
+    """Append every comment page after the first to ``thread['comments']['nodes']``."""
+    comments = thread.setdefault("comments", {})
+    nodes = comments.setdefault("nodes", [])
+    page_info = comments.get("pageInfo") or {}
+    while page_info.get("hasNextPage"):
+        data = graphql(COMMENTS_QUERY, {"id": thread["id"], "cursor": page_info["endCursor"]})
+        page = ((data.get("node") or {}).get("comments")) or {}
+        nodes.extend(page.get("nodes") or [])
+        page_info = page.get("pageInfo") or {}
+
+
+def fetch(repo: str, pr: int) -> list[dict[str, Any]]:
+    """Every review thread on the PR, each with its complete comment list."""
     need("gh")
     owner, _, name = repo.partition("/")
     if not owner or not name:
         die(f"--repo must be 'owner/name', got: {repo}")
-    cmd = [
-        "gh", "api", "graphql",
-        "-f", f"query={GRAPHQL}",
-        "-f", f"owner={owner}",
-        "-f", f"repo={name}",
-        "-F", f"pr={pr}",
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        die(f"gh api graphql failed: {result.stderr.strip()}")
-    return json.loads(result.stdout)
+    threads: list[dict[str, Any]] = []
+    variables: dict[str, str | int] = {"owner": owner, "repo": name, "pr": pr}
+    while True:
+        data = graphql(THREADS_QUERY, variables)
+        pull = ((data.get("repository") or {}).get("pullRequest")) or {}
+        page = pull.get("reviewThreads") or {}
+        for thread in page.get("nodes") or []:
+            fetch_remaining_comments(thread)
+            threads.append(thread)
+        page_info = page.get("pageInfo") or {}
+        if not page_info.get("hasNextPage"):
+            return threads
+        variables["cursor"] = page_info["endCursor"]
 
 
 def thread_to_comments(thread: dict[str, Any], resolved_suffix: str) -> list[dict[str, Any]]:
@@ -123,18 +176,13 @@ def main() -> None:
     parser.add_argument("--output", type=Path, help="Write JSON to this file (default: stdout)")
     args = parser.parse_args()
 
-    payload = fetch(args.repo, args.pr)
-    threads = (((payload.get("data") or {}).get("repository") or {}).get("pullRequest") or {}).get("reviewThreads", {}).get("nodes", [])
-    if not threads:
-        comments: list[dict[str, Any]] = []
-    else:
-        comments = []
-        for t in threads:
-            if t.get("isOutdated") and not args.include_outdated:
-                continue
-            if t.get("isResolved") and args.skip_resolved:
-                continue
-            comments.extend(thread_to_comments(t, args.resolved_suffix))
+    comments: list[dict[str, Any]] = []
+    for t in fetch(args.repo, args.pr):
+        if t.get("isOutdated") and not args.include_outdated:
+            continue
+        if t.get("isResolved") and args.skip_resolved:
+            continue
+        comments.extend(thread_to_comments(t, args.resolved_suffix))
 
     out: Any = comments if not args.key else {args.key: comments}
     text = json.dumps(out, indent=2, ensure_ascii=False)
