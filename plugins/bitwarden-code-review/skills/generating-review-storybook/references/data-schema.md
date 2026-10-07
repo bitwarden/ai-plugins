@@ -245,6 +245,7 @@ After `scaffold.py` runs:
     data.js           ← generated: window.REVIEW_DATA, window.DIFFS
     styles.css        ← copied verbatim
     bw-shield.svg     ← copied verbatim
+    vendor/           ← copied verbatim (Prism, the Inter font, and their licenses)
 ```
 
 `window.REVIEW_DATA` is a map keyed by `stack[].key`:

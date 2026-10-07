@@ -337,7 +337,7 @@ def generate_cover(config: dict[str, Any]) -> str:
   </div>
 
   <p class="small" style="margin-top: 56px; color: var(--ink-faint); text-align: center;">
-    Built locally — no GitHub or Jira data was fetched at runtime. Inline comments and decisions persist in your
+    Built locally from captured review data. This page loads nothing from the network. Inline comments and decisions persist in your
     browser only. Use <kbd>→</kbd> and <kbd>←</kbd> to navigate, <kbd>Esc</kbd> to close any open editor.
   </p>
 </section>
@@ -624,6 +624,10 @@ def write_storybook(config: dict[str, Any], output: Path) -> None:
         if not src.is_file():
             die(f"template asset missing: {src}")
         shutil.copyfile(src, assets_out / name)
+    vendor = template_assets / "vendor"
+    if not vendor.is_dir():
+        die(f"template asset missing: {vendor}")
+    shutil.copytree(vendor, assets_out / "vendor", dirs_exist_ok=True)
 
 
 def main() -> None:

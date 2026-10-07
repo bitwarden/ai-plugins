@@ -11,3 +11,6 @@ dist
 # Coverage and caches
 coverage
 .cache
+
+# Vendored third-party files, kept byte-identical to upstream
+plugins/bitwarden-code-review/skills/generating-review-storybook/assets/template/assets/vendor

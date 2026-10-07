@@ -143,6 +143,10 @@ function parseUnifiedDiff(rawText) {
 function detectLanguage(path) {
   if (!path) return "clike";
   if (path.endsWith(".swift")) return "swift";
+  if (/\.kts?$/.test(path)) return "kotlin";
+  if (path.endsWith(".cs")) return "csharp";
+  if (/\.(ts|tsx|mts|cts)$/.test(path)) return "typescript";
+  if (/\.(js|jsx|mjs|cjs)$/.test(path)) return "javascript";
   if (path.endsWith(".json")) return "json";
   if (path.endsWith(".strings")) return "clike";
   if (path.endsWith(".xml") || path.endsWith(".plist")) return "markup";

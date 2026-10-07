@@ -15,20 +15,13 @@ The header lockup uses an inline SVG defined in `index.html.tmpl`. Swap the `pat
 
 ## Language Imports for Code Highlighting
 
-The bundled `index.html.tmpl` loads Prism components for:
+Prism is vendored under `assets/template/assets/vendor/prism/` so the storybook loads nothing from the network. `index.html.tmpl` loads `prism-core` first, then the language components in dependency order: `clike` (also the fallback `detectLanguage` returns for unknown extensions), `markup` (HTML, XML, plist), `json`, `swift`, `kotlin`, `csharp`, `javascript`, and `typescript`.
 
-- `prism-core` (always required)
-- `prism-clike` (C-style fallback used by `detectLanguage` for unknown extensions)
-- `prism-swift`
-- `prism-markup` (HTML / XML / plist)
-- `prism-json`
+To highlight another language:
 
-If your stack uses a language Prism does not yet load (TypeScript, Kotlin, Rust, etc.):
-
-1. Add a `<script>` for `prism-<lang>.min.js` in `index.html.tmpl` next to the others.
-2. Extend `detectLanguage()` in `app.js.tmpl` with the file extension → language mapping.
-
-Available components: <https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/>
+1. Copy `components/prism-<lang>.min.js` from the same `prismjs` release recorded in `vendor/prism/README.md` into `vendor/prism/`, along with any component it requires (Prism's `components.json` lists each component's `require` and `modify` dependencies).
+2. Add a `<script>` for it in `index.html.tmpl` after every component it requires or modifies.
+3. Extend `detectLanguage()` in `app.js.tmpl` with the file extension to language mapping.
 
 `detectLanguage` is intentionally simple — it inspects the file path's extension only. If you need fancier detection (shebangs, content sniffing), do it in `data.js` at scaffold time and store the resolved language alongside the diff. That keeps `app.js` deterministic.
 
