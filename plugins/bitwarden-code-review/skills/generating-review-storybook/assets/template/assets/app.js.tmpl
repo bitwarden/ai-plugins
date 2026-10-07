@@ -533,6 +533,169 @@ function buildAnnotations(meta, parsedFiles) {
   return byFile;
 }
 
+// ===== markdown (comment and finding bodies) =====
+// Bodies come from GitHub review threads and review files, so they are
+// untrusted. The whole input is escaped before any parsing; markup is produced
+// only for a fixed subset, and anything outside it stays visible as text.
+const MD_MAX_QUOTE_DEPTH = 8;
+const MD_FENCE = /^ {0,3}(`{3,})([^`]*)$/;
+const MD_QUOTE = /^ {0,3}&gt; ?/;
+const MD_UL = /^\s*[-*+]\s+/;
+const MD_OL = /^\s*(\d{1,9})[.)]\s+/;
+
+// Exact inverse of escapeHtml, for text that went through it.
+function unescapeHtml(s) {
+  return s.replace(/&(amp|lt|gt|quot|#39);/g, (m, e) =>
+    ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[e]);
+}
+
+// An escaped link target becomes an href only as a plain http(s) URL; quotes,
+// whitespace, and control characters are refused outright.
+function safeHref(escapedUrl) {
+  const raw = unescapeHtml(escapedUrl);
+  if (!/^https?:\/\/[^\s"'<>\\`\u0000-\u001f\u007f]+$/i.test(raw)) return null;
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+  } catch (e) {
+    return null;
+  }
+  return escapeHtml(raw);
+}
+
+function mdEmphasis(s, hold) {
+  const italics = t => t
+    .replace(/\*(?=[^\s*])([^*]*?[^\s*])\*/g, (m, x) => hold(`<em>${x}</em>`))
+    .replace(/(^|[^\w])_(?=[^\s_])([^_]*?[^\s_])_(?!\w)/g, (m, pre, x) => pre + hold(`<em>${x}</em>`));
+  return italics(s
+    .replace(/\*\*\*(?=\S)([\s\S]*?\S)\*\*\*/g, (m, x) => hold(`<strong><em>${x}</em></strong>`))
+    .replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, (m, x) => hold(`<strong>${italics(x)}</strong>`))
+    .replace(/(^|[^\w])__(?=\S)([\s\S]*?\S)__(?!\w)/g, (m, pre, x) => pre + hold(`<strong>${italics(x)}</strong>`)));
+}
+
+// A code span closes at the next backtick run of the same length. Scanning by
+// hand keeps this linear where a backreference regex backtracks on long runs.
+function mdCodeSpans(text, hold) {
+  let out = "";
+  let i = 0;
+  const unclosed = new Set();
+  while (i < text.length) {
+    const open = text.indexOf("`", i);
+    if (open < 0) break;
+    let end = open;
+    while (text[end] === "`") end++;
+    const run = end - open;
+    let close = -1;
+    if (!unclosed.has(run)) {
+      for (let k = text.indexOf("`", end); k >= 0; k = text.indexOf("`", k)) {
+        let e = k;
+        while (text[e] === "`") e++;
+        if (e - k === run) { close = k; break; }
+        k = e;
+      }
+      if (close < 0) unclosed.add(run);
+    }
+    if (close < 0) {
+      out += text.slice(i, end);
+      i = end;
+      continue;
+    }
+    let code = text.slice(end, close).replace(/\n/g, " ");
+    if (/^ [\s\S]* $/.test(code) && code.trim()) code = code.slice(1, -1);
+    out += text.slice(i, open) + hold(`<code>${code}</code>`);
+    i = close + run;
+  }
+  return out + text.slice(i);
+}
+
+// Code spans and links are set aside as placeholders before emphasis runs, so
+// emphasis never reaches inside code or an href.
+function mdInline(text) {
+  const held = [];
+  const hold = html => `\u0000${held.push(html) - 1}\u0000`;
+  let s = mdCodeSpans(text, hold);
+  s = s.replace(/\[([^\[\]]*)\]\(([^()\s\u0000]+)\)/g, (m, label, url) => {
+    const href = safeHref(url);
+    if (!href) return m;
+    return hold(`<a href="${href}" target="_blank" rel="noopener noreferrer">${label ? mdEmphasis(label, hold) : href}</a>`);
+  });
+  s = mdEmphasis(s, hold).replace(/\n/g, "<br>");
+  const restore = t => t.replace(/\u0000(\d+)\u0000/g, (m, n) => restore(held[n]));
+  return restore(s);
+}
+
+function mdFence(lines, lang) {
+  if (lang === "suggestion") {
+    const body = lines.length
+      ? `<pre class="md-code"><code>${lines.map(l => `<span class="md-add-line">${l}</span>`).join("")}</code></pre>`
+      : `<p class="md-suggestion-empty">Removes the commented lines.</p>`;
+    return `<div class="md-suggestion"><div class="md-suggestion-label">Suggested change</div>${body}</div>`;
+  }
+  const code = lines.join("\n");
+  const known = /^[\w+-]+$/.test(lang) && window.Prism
+    && Object.prototype.hasOwnProperty.call(Prism.languages, lang)
+    && typeof Prism.languages[lang] === "object";
+  return `<pre class="md-code"><code>${known ? highlightLine(unescapeHtml(code), lang) : code}</code></pre>`;
+}
+
+function mdStartsBlock(line) {
+  return MD_FENCE.test(line) || MD_QUOTE.test(line) || MD_UL.test(line) || MD_OL.test(line);
+}
+
+// lines are already escaped.
+function mdBlocks(lines, depth) {
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    const fence = MD_FENCE.exec(line);
+    if (fence) {
+      const close = new RegExp(`^ {0,3}\`{${fence[1].length},}\\s*$`);
+      const lang = (fence[2].trim().split(/\s+/)[0] || "").toLowerCase();
+      const body = [];
+      i++;
+      while (i < lines.length && !close.test(lines[i])) body.push(lines[i++]);
+      i++; // the closing fence; an unclosed fence runs to the end of the body
+      out.push(mdFence(body, lang));
+      continue;
+    }
+    if (MD_QUOTE.test(line) && depth < MD_MAX_QUOTE_DEPTH) {
+      const inner = [];
+      while (i < lines.length && MD_QUOTE.test(lines[i])) inner.push(lines[i++].replace(MD_QUOTE, ""));
+      out.push(`<blockquote>${mdBlocks(inner, depth + 1)}</blockquote>`);
+      continue;
+    }
+    if (MD_UL.test(line) || MD_OL.test(line)) {
+      const marker = MD_UL.test(line) ? MD_UL : MD_OL;
+      const start = marker === MD_OL ? parseInt(MD_OL.exec(line)[1], 10) : 1;
+      const items = [];
+      while (i < lines.length && lines[i].trim()) {
+        if (marker.test(lines[i])) items.push([lines[i].replace(marker, "")]);
+        else if (mdStartsBlock(lines[i])) break;
+        else items[items.length - 1].push(lines[i].trim());
+        i++;
+      }
+      const lis = items.map(it => `<li>${mdInline(it.join("\n"))}</li>`).join("");
+      out.push(marker === MD_OL
+        ? `<ol${start !== 1 ? ` start="${start}"` : ""}>${lis}</ol>`
+        : `<ul>${lis}</ul>`);
+      continue;
+    }
+    const para = [];
+    while (i < lines.length && lines[i].trim() && !(para.length && mdStartsBlock(lines[i]))) {
+      para.push(lines[i++].trim());
+    }
+    out.push(`<p>${mdInline(para.join("\n"))}</p>`);
+  }
+  return out.join("");
+}
+
+function renderMarkdown(src) {
+  const text = String(src).replace(/\u0000/g, "�").replace(/\r\n?/g, "\n");
+  return mdBlocks(escapeHtml(text).split("\n"), 0);
+}
+
 function renderGloss(ann) {
   const wrap = el("div", { class: `gloss ${ann.glossClass || ""}` });
   const head = el("div", { class: "gloss-head" });
@@ -552,12 +715,12 @@ function renderGloss(ann) {
   }
   wrap.appendChild(head);
   if (ann.body) {
-    wrap.appendChild(el("p", { class: "gloss-body" }, ann.body));
+    wrap.appendChild(el("div", { class: "gloss-body md", html: renderMarkdown(ann.body) }));
   }
   if (ann.suggestion) {
-    wrap.appendChild(el("p", { class: "gloss-suggestion" },
+    wrap.appendChild(el("div", { class: "gloss-suggestion" },
       el("span", { class: "gloss-suggestion-label" }, "Suggested fix"),
-      ann.suggestion));
+      el("div", { class: "md", html: renderMarkdown(ann.suggestion) })));
   }
   return wrap;
 }

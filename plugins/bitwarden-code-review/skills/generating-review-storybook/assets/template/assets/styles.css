@@ -1494,6 +1494,99 @@ a.link:hover {
   color: var(--ink-mute);
   margin-bottom: 4px;
 }
+/* Markdown rendered in comment and finding bodies */
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md p,
+.md ul,
+.md ol,
+.md blockquote,
+.md pre,
+.md-suggestion {
+  margin: 0 0 8px;
+}
+.md ul,
+.md ol {
+  padding-left: 22px;
+}
+.md blockquote {
+  padding-left: 12px;
+  border-left: 3px solid var(--rule);
+  color: var(--ink-soft);
+}
+.md a {
+  color: var(--accent);
+}
+.md code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--bg-sunk);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.md pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+}
+.md pre code {
+  font-size: inherit;
+  background: none;
+  padding: 0;
+}
+.md-suggestion {
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.md-suggestion-label {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-mute);
+  padding: 6px 12px;
+  background: var(--bg-sunk);
+  border-bottom: 1px solid var(--code-border);
+}
+.md .md-suggestion pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+/* each suggested line reads like an added diff line, wrapping under itself */
+.md-add-line {
+  display: block;
+  min-height: 1.5em;
+  padding: 0 12px 0 calc(9px + 2ch);
+  text-indent: -2ch;
+  background: var(--diff-add-bg);
+  border-left: 3px solid var(--diff-add-marker);
+}
+.md-add-line::before {
+  content: "+";
+  display: inline-block;
+  width: 2ch;
+  text-indent: 0;
+  color: var(--diff-add-text);
+  user-select: none;
+}
+.md-suggestion-empty {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--ink-mute);
+}
 .diff-file-notes {
   padding: 10px 12px;
   border-bottom: 1px solid var(--rule-soft);

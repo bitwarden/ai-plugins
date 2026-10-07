@@ -106,6 +106,8 @@ Each item:
 
 A location the diff cannot show still renders, labeled with the location as written: a line outside the diff's hunks moves to the top of its file, and a path outside the diff joins the PR's notes that are not anchored to a file. Human comments follow the same rule.
 
+A finding's `message` and `suggestion` and a comment's `body` render as Markdown limited to paragraphs, lists, bold, italic, inline code, fenced code (a `suggestion` fence shows as a suggested change), block quotes, and http or https links. Raw HTML and any other syntax show as plain text, since review threads carry contributor-written content.
+
 ### `comments[]`
 
 Human reviewer comments on this PR/commit. Rendered inline at the diff line they
