@@ -45,7 +45,9 @@ DEFAULT_LINK_FILTER = "verify|confirm|signup|token|trial|login|finish-signup"
 DEFAULT_ALLOWED_HOSTS = ("localhost", "127.0.0.1", "::1", "bitwarden.test")
 # Whitespace terminates a URL. grep is line-based, so the bash original could
 # never match across a newline; excluding all whitespace preserves that.
-URL_PATTERN = re.compile(r'https?://[^\s>")]+')
+# Quotes and angle brackets end a URL inside an HTML attribute or tag, and a
+# backslash ends one so a browser and urlparse never see different hosts.
+URL_PATTERN = re.compile(r'https?://[^\s>"\'<)\\]+')
 REQUEST_TIMEOUT = 5
 RETRY_DELAY = 3
 
@@ -222,6 +224,20 @@ def _hostname(url):
 
 
 def is_local(url, allowed):
+    """Whether url points at an allowed local dev host.
+
+    Browsers end the authority at a backslash and urlparse does not, so
+    "https://evil.com\\@localhost/" parses as localhost here but navigates to
+    evil.com. Dev email links carry neither a backslash nor userinfo, so either
+    one rejects the URL before the host is checked.
+    """
+    if "\\" in url:
+        return False
+    try:
+        if "@" in urllib.parse.urlparse(url).netloc:
+            return False
+    except ValueError:
+        return False
     return _hostname(url) in allowed
 
 

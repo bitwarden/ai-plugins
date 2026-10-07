@@ -156,6 +156,27 @@ class MatchingUrlsTest(unittest.TestCase):
         body = "https://localhost:8080/#/verify?t=1"
         self.assertEqual(read_mailcatcher.matching_urls(body, "("), [])
 
+    def test_backslash_ends_url(self):
+        body = "https://evil.com/verify\\@localhost:8080/x"
+        self.assertEqual(
+            read_mailcatcher.matching_urls(body, self.link_filter),
+            ["https://evil.com/verify"],
+        )
+
+    def test_single_quoted_href_excludes_quote(self):
+        body = "<a href='https://localhost:8080/#/verify?t=1'>Verify</a>"
+        self.assertEqual(
+            read_mailcatcher.matching_urls(body, self.link_filter),
+            ["https://localhost:8080/#/verify?t=1"],
+        )
+
+    def test_angle_bracket_ends_url(self):
+        body = "https://localhost:8080/#/verify?t=1<br>"
+        self.assertEqual(
+            read_mailcatcher.matching_urls(body, self.link_filter),
+            ["https://localhost:8080/#/verify?t=1"],
+        )
+
 
 class IsLocalTest(unittest.TestCase):
     def setUp(self):
@@ -170,6 +191,20 @@ class IsLocalTest(unittest.TestCase):
 
     def test_userinfo_trick_rejected(self):
         self.assertFalse(read_mailcatcher.is_local("https://localhost@evil.com/x", self.allowed))
+
+    def test_userinfo_on_allowed_host_rejected(self):
+        self.assertFalse(read_mailcatcher.is_local("https://evil.com@localhost/x", self.allowed))
+
+    def test_backslash_userinfo_rejected(self):
+        # urlparse reads this as localhost; a browser navigates to evil.com.
+        self.assertFalse(
+            read_mailcatcher.is_local("https://evil.com\\@localhost:8080/verify", self.allowed)
+        )
+
+    def test_backslash_userinfo_on_bitwarden_test_rejected(self):
+        self.assertFalse(
+            read_mailcatcher.is_local("https://evil.com\\@bitwarden.test/login", self.allowed)
+        )
 
     def test_env_extension_honored(self):
         allowed = read_mailcatcher.allowed_hosts({"MAILCATCHER_ALLOWED_HOSTS": "dev.local"})
@@ -273,6 +308,19 @@ class MainTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("local dev host", err)
         self.assertIn("evil.com", err)
+
+    def test_backslash_bypass_url_exits_1(self):
+        # The backslash ends the extracted URL at "https://evil.com", which no
+        # longer matches the link filter, so nothing reaches stdout.
+        code, out, err, _fake, _sleep = self._run(
+            {
+                f"{BASE}/messages": messages_json(message(1, "user@bitwarden.test", "Verify your email")),
+                f"{BASE}/messages/1.plain": "Please verify: https://evil.com\\@localhost:8080/#/verify?token=abc123",
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("contained no URL", err)
 
     def test_multiple_non_local_urls_report_all_rejected_hosts(self):
         # Several external links all match the filter; the diagnostic must name
