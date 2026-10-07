@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `managing-feature-flags`: Bitwarden's feature-flag conventions and lifecycle — when to flag, server-side evaluation via `Bitwarden.Server.Sdk.Features`, per-client reads from `/config` across clients/Android/iOS, release vs operational categories, rollout, and cleanup. Hands off to the optional third-party `launchdarkly` plugin when it is installed.
 
+### Security
+
+- `managing-feature-flags`: external content is declared untrusted data. The contributing-docs fetch and the flag names, descriptions, and tags returned over the LaunchDarkly MCP can carry prompt injection (CWE-1427), and flag metadata never decides which code to edit, which variation to hardcode, or which command to run.
+- `managing-feature-flags`: only the two read-only LaunchDarkly skills are pre-approved in `allowed-tools`. The four that mutate LaunchDarkly state or the working tree now prompt, so flag creation and rollout changes keep a human checkpoint.
+
 ### Changed
 
 - `architecting-solutions`: added a "Feature-flag new work by default" principle that defers to `managing-feature-flags`, plus a Red Flag for feature work landing without a warranted flag.
