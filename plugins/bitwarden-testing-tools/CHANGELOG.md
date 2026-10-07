@@ -4,12 +4,6 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-10-07
-
-### Changed
-
-- The shared trigger-eval runner, `evals/run_real_eval.py`, also measures agents: `--agent <name>` counts a plugin-qualified `Agent` (or legacy `Task`) dispatch naming that agent, or a `Read` of its own `AGENT.md`, as a trigger, with unit tests. Its `evals/README.md` adds a recipe for measuring the working tree instead of the installed copy, and notes the suites that commit no baseline.
-
 ## [1.2.0] - 2026-09-14
 
 ### Added
