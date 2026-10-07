@@ -46,10 +46,13 @@ const STORAGE_PREFIX = "__BW_STORAGE_PREFIX__";
 // ===== utils =====
 function $(sel, root) { return (root || document).querySelector(sel); }
 function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+// <svg> must be created in the SVG namespace to draw; markup set through its
+// innerHTML is then parsed into the same namespace.
+const SVG_NS = "http://www.w3.org/2000/svg";
 function el(tag, attrs, ...children) {
-  const e = document.createElement(tag);
+  const e = tag === "svg" ? document.createElementNS(SVG_NS, tag) : document.createElement(tag);
   if (attrs) for (const k in attrs) {
-    if (k === "class") e.className = attrs[k];
+    if (k === "class") e.setAttribute("class", attrs[k]);
     else if (k === "html") e.innerHTML = attrs[k];
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
     else if (k === "dataset") Object.assign(e.dataset, attrs[k]);
