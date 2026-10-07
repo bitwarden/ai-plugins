@@ -126,6 +126,16 @@ def load_config(path: Path) -> dict[str, Any]:
         item.setdefault("lines_changed", 0)
         item.setdefault("diff_b64", "")
         item.setdefault("diff_path", "")
+        if not item["diff_b64"] and item["diff_path"]:
+            try:
+                raw = Path(item["diff_path"]).read_text(encoding="utf-8")
+                item["diff_b64"] = base64.b64encode(raw.encode("utf-8")).decode("ascii")
+            except OSError as e:
+                die(f"unable to read diff_path for {item['key']}: {e}")
+        if item["diff_b64"] and not (item["files_changed"] and item["lines_changed"]):
+            files, lines = diff_stats(decode_diff(item["diff_b64"]))
+            item["files_changed"] = item["files_changed"] or files
+            item["lines_changed"] = item["lines_changed"] or lines
         comments = item.setdefault("comments", [])
         for c in comments:
             c.setdefault("author", "")
@@ -433,6 +443,30 @@ def generate_merge_plan(config: dict[str, Any], merge_page: int) -> str:
 
 # ---------- data.js generation ----------
 
+def decode_diff(diff_b64: str) -> str:
+    """Decode a base64 diff, returning an empty string when it is not valid base64."""
+    try:
+        return base64.b64decode(diff_b64).decode("utf-8", errors="replace")
+    except ValueError:
+        return ""
+
+
+def diff_stats(diff_text: str) -> tuple[int, int]:
+    """(files, added + removed lines) in a unified diff, counted the same way app.js counts them."""
+    files = 0
+    lines = 0
+    in_hunks = False
+    for line in diff_text.split("\n"):
+        if line.startswith("diff --git"):
+            files += 1
+            in_hunks = False
+        elif line.startswith("@@"):
+            in_hunks = files > 0
+        elif in_hunks and line.startswith(("+", "-")):
+            lines += 1
+    return files, lines
+
+
 def diff_paths(diff_text: str) -> set[str]:
     """File paths in a unified diff, resolved the same way app.js resolves them."""
     paths: set[str] = set()
@@ -461,9 +495,8 @@ def warn_unknown_chapter_paths(item: dict[str, Any], diff_b64: str) -> None:
     """Warn on stderr about chapter or scene paths that match no file in the diff."""
     if not diff_b64 or not item.get("chapters"):
         return
-    try:
-        known = diff_paths(base64.b64decode(diff_b64).decode("utf-8", errors="replace"))
-    except ValueError:
+    known = diff_paths(decode_diff(diff_b64))
+    if not known:
         return
     for chapter in item["chapters"]:
         declared = list(chapter.get("paths") or [])
@@ -499,12 +532,6 @@ def generate_data_js(config: dict[str, Any]) -> str:
             "linesChanged": int(item.get("lines_changed") or 0),
         }
         diff_b64 = item.get("diff_b64") or ""
-        if not diff_b64 and item.get("diff_path"):
-            try:
-                raw = Path(item["diff_path"]).read_text(encoding="utf-8")
-                diff_b64 = base64.b64encode(raw.encode("utf-8")).decode("ascii")
-            except OSError as e:
-                die(f"unable to read diff_path for {key}: {e}")
         warn_unknown_chapter_paths(item, diff_b64)
         diffs[key] = diff_b64
 
