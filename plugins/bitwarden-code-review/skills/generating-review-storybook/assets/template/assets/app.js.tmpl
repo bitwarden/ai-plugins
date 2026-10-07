@@ -556,6 +556,11 @@ function renderGloss(ann) {
 }
 
 // ===== per-PR page renderer =====
+// Display label for a stack key: "#2573" for a PR, a short SHA for a commit.
+function keyLabel(prKey, meta) {
+  return meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`;
+}
+
 function tickets(meta) {
   // Accept either a single `ticket` string or an array `tickets`. Returns array.
   if (Array.isArray(meta.tickets)) return meta.tickets.filter(Boolean);
@@ -615,7 +620,7 @@ function renderScenePage(descriptor, pageNumber) {
     el("a", { class: "ticket-pill", href: jiraUrl(t), target: "_blank", rel: "noopener" }, t)
   );
   const kindLabel = meta.kind === "commit" ? "commit" : "PR";
-  const refLabel = meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`;
+  const refLabel = keyLabel(prKey, meta);
 
   // Eyebrow tells the reader where they are in the larger story.
   const eyebrowParts = [];
@@ -860,7 +865,7 @@ function refreshTriageList() {
       const v = verdictMeta(meta.verdict);
       list.appendChild(el("div", { class: "toc-pr-header" },
         el("span", { class: "toc-pr-key mono" },
-          meta.kind === "commit" ? prKey.slice(0, 12) : `#${prKey}`),
+          keyLabel(prKey, meta)),
         el("span", { class: "toc-pr-title" }, meta.title || prKey),
         tList.length ? el("span", { class: "toc-pr-ticket" }, tList.join(" · ")) : null,
         el("span", { class: `toc-pr-verdict ${v.class}` }, meta.verdictLabel || v.label)
@@ -1032,7 +1037,7 @@ function buildExportMarkdown() {
     const dec = loadDecision(prKey);
     const decLabel = dec === "approve" ? "Approve" : dec === "changes" ? "Request changes" : dec === "discuss" ? "Needs discussion" : "(none)";
     const ticketSuffix = tickets(meta).length ? ` · ${tickets(meta).join(" · ")}` : "";
-    lines.push(`- **#${prKey}${ticketSuffix}** — ${meta.title || prKey} → ${decLabel}`);
+    lines.push(`- **${keyLabel(prKey, meta)}${ticketSuffix}** — ${meta.title || prKey} → ${decLabel}`);
   });
   lines.push("");
 
@@ -1054,7 +1059,7 @@ function buildExportMarkdown() {
     if (!pageNote && inlineEntries.length === 0 && !loadDecision(prKey)) return;
     lines.push("");
     const ticketSuffix = tickets(meta).length ? ` · ${tickets(meta).join(" · ")}` : "";
-    lines.push(`## #${prKey}${ticketSuffix} — ${meta.title || prKey}`);
+    lines.push(`## ${keyLabel(prKey, meta)}${ticketSuffix} — ${meta.title || prKey}`);
     if (meta.kind !== "commit") lines.push(`PR: ${ghPrUrl(prKey)}`);
     if (pageNote) {
       lines.push("");

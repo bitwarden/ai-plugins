@@ -387,10 +387,15 @@ def generate_pr_pages(config: dict[str, Any]) -> str:
     )
 
 
+def key_label(item: dict[str, Any]) -> str:
+    """Display label for a stack key, matching keyLabel() in app.js."""
+    return item["key"][:12] if item["kind"] == "commit" else f"#{item['key']}"
+
+
 def generate_merge_plan(config: dict[str, Any], merge_page: int) -> str:
     items = config.get("merge_plan") or [
         {
-            "title": f"#{it['key']} — {it['title']}",
+            "title": f"{key_label(it)} — {it['title']}",
             "body": it.get("description") or "Merge order to be decided after review.",
         }
         for it in config["stack"]
