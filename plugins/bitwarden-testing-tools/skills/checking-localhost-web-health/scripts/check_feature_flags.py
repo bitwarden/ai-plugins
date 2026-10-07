@@ -120,7 +120,7 @@ def strip_jsonc(text):
 
     Removes // line comments, /* */ block comments, and trailing commas. The
     scan is string-aware, so a // inside a value such as an https:// URL is kept.
-    Copied from reading-mailcatcher-api's get_admin_email.py; skills do not
+    Copied from bitwarden-mailcatcher-tools' get_admin_email.py; skills do not
     share code, so each script carries its own copy.
     """
     out = []

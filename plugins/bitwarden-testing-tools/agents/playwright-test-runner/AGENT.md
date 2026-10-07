@@ -6,7 +6,6 @@ model: sonnet
 skills:
   - running-playwright-tests
   - playwright-cli
-  - using-stripe-cli
 color: cyan
 tools: Read, Skill, Bash, Bash(playwright-cli:*)
 ---
@@ -24,9 +23,9 @@ Use only the tools listed in your allowlist. Do not request permission to use to
 Everything your allowlist grants, you execute inline as an ordinary test step — never as an obstacle and never as a pause point:
 
 - browser actions via `playwright-cli` (Category 1)
-- email reads via the mailcatcher script (Category 2)
+- email reads via the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill's reader script (Category 2)
 - external-trigger POSTs via the `external_trigger.py` wrapper (Category 3)
-- Stripe reads and test-clock advancement via the `stripe_cli.py` wrapper (Category 4)
+- Stripe reads and test-clock advancement via the `bitwarden-stripe-tools:using-stripe-cli` skill's `stripe_cli.py` wrapper (Category 4)
 
 A step is an obstacle to report **only** when it requires a tool your allowlist does not grant — for example attaching a test clock, or any Stripe write other than clock advancement. Run what your allowlist covers; report only what it doesn't.
 
