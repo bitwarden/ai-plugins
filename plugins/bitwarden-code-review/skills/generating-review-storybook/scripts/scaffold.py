@@ -41,13 +41,6 @@ VERDICT_LABELS = {
     "no-verdict": "No verdict",
     "pending": "Pending review",
 }
-VERDICT_BADGE_CLASS = {
-    "approve": "badge-approve",
-    "approve-fix": "badge-approve-fix",
-    "block": "badge-block",
-    "no-verdict": "badge-no-verdict",
-    "pending": "badge-pending",
-}
 # Appended to the derived label when a reached verdict carries a verdict_note, so a
 # review that left ground uncovered never reads as a clean verdict on the cover.
 COVERAGE_GAP_SUFFIX = ", coverage gap"
@@ -263,24 +256,6 @@ def generate_cover(config: dict[str, Any]) -> str:
         "Verdicts and findings populate as each PR is reviewed."
     )
 
-    triage_rows = []
-    for item in stack:
-        key = escape(item["key"])
-        title_text = escape(item["title"])
-        ticket = escape(item.get("ticket") or "")
-        verdict = item["verdict"]
-        verdict_label = escape(item.get("verdict_label") or VERDICT_LABELS[verdict])
-        badge_cls = VERDICT_BADGE_CLASS[verdict]
-        ticket_html = f' · <span class="mono small">{ticket}</span>' if ticket else ""
-        kind_label = "PR" if item["kind"] == "pr" else "commit"
-        triage_rows.append(
-            f'<li class="triage-row">'
-            f'<span class="triage-key mono">{kind_label} {key}</span>'
-            f'<span class="triage-title">{title_text}{ticket_html}</span>'
-            f'<span class="triage-status {badge_cls}">{verdict_label}</span>'
-            f"</li>"
-        )
-
     totals = {"critical": 0, "important": 0, "debt": 0, "suggested": 0, "question": 0}
     for item in stack:
         for k in totals:
@@ -327,9 +302,7 @@ def generate_cover(config: dict[str, Any]) -> str:
     <div>
       <span class="eyebrow">Triage list</span>
       <h2 class="display display-m" style="margin: 12px 0 8px;">Decide each in order. Skip with verdict pending.</h2>
-      <ul class="triage-list" id="triage-list" role="list">
-        {''.join(triage_rows)}
-      </ul>
+      <ul class="triage-list" id="triage-list" role="list"></ul>
       <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
         <button class="btn btn-primary" id="start-btn">Start review →</button>
         <button class="btn btn-ghost" id="merge-plan-btn">See merge plan</button>

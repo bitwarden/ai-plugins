@@ -464,62 +464,6 @@ a.link:hover {
   border-radius: var(--radius-card);
   overflow: hidden;
 }
-.triage-row {
-  background: var(--bg-elev);
-  padding: 20px 28px;
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto auto;
-  gap: 16px;
-  align-items: center;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    padding-left 0.18s ease;
-  text-align: left;
-  width: 100%;
-  border: none;
-  font: inherit;
-  color: inherit;
-}
-.triage-row:hover {
-  background: var(--bg-sunk);
-  padding-left: 32px;
-}
-.triage-row:focus-visible {
-  outline: none;
-  box-shadow: var(--focus) inset;
-  position: relative;
-  z-index: 1;
-}
-.triage-title {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.triage-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  padding: 5px 12px;
-  border-radius: var(--radius-pill);
-  text-transform: uppercase;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.triage-row.decided {
-  position: relative;
-}
-.triage-row.decided::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--accent);
-}
 
 /* ---- page header ---- */
 .page-header {
