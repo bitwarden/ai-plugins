@@ -39,7 +39,7 @@ plus all six agents (`playwright-test-context-gatherer`, `playwright-application
 
 ### Orchestrator trigger suite: last observed reading
 
-On-demand diagnostic, not a committed regression control. Last run 2026-08-01, model `claude-opus-4-8`, against the ten-skill inventory and six agents named above: should_trigger 10/10, should_not_trigger 10/10 at `--runs-per-query 7`, with no query in the 0.35-0.65 band. There is no committed `baseline.json` for the orchestrator trigger suite; the query set and shared harness are kept and re-run on demand when the skill's description changes.
+On-demand diagnostic, not a committed regression control. Last run 2026-10-07, model `claude-opus-4-8`, at `--runs-per-query 7`, against the inventory above with the three plugins loaded from the working tree (`--plugin-dir` for this plugin and both dependency plugins): should_trigger 10/10, should_not_trigger 10/10. One query sat in the 0.35-0.65 band: `generate playwright test cases for this feature and actually run them against localhost` passed at 4/7. Two should-not-trigger queries timed out on all 7 runs and were counted as non-triggers, so their passes carry no signal: `review the PR for the org billing banner change` and `write QA testing notes for this branch so a human can test it manually`. Re-run those two with a longer `--timeout` before relying on them. The previous reading, 2026-08-01 against the same ten skills when all of them shipped in this plugin, was 10/10 and 10/10 with no query in the band. There is no committed `baseline.json` for the orchestrator trigger suite; the query set and shared harness are kept and re-run on demand when the skill's description changes.
 
 ### Agent suite result: last observed reading
 
