@@ -2208,33 +2208,6 @@ a.link:hover {
   box-shadow: var(--focus);
 }
 
-/* ===== role-aware page hiding ===== */
-body[data-view="designer"]
-  .page[data-page-relevance]:not([data-page-relevance~="designer"]) {
-  display: none !important;
-}
-body[data-view="pm"]
-  .page[data-page-relevance]:not([data-page-relevance~="pm"]) {
-  display: none !important;
-}
-/* PM view: hide diffs behind a single expander */
-body[data-view="pm"] .files-section,
-body[data-view="pm"] .subtab-panel .file-row,
-body[data-view="pm"] .subtabs {
-  display: none;
-}
-body[data-view="pm"] .files-section.bw-pm-revealed,
-body[data-view="pm"] .files-section.bw-pm-revealed * {
-  display: revert;
-}
-body[data-view="pm"] .page::after {
-  /* visual hint that diffs are hidden (decorative only; the real CTA is in JS if needed later) */
-}
-/* designer view emphasizes the open-questions panel and collapses diffs by default */
-body[data-view="designer"] .files-section .file-row {
-  /* keep visible but folded by app default */
-}
-
 /* ===== flag composer & flag list ===== */
 .flag-stakeholder-row {
   margin-top: 24px;
