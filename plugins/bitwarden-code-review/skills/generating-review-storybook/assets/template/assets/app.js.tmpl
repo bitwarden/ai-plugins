@@ -473,13 +473,32 @@ function parseLocation(loc) {
   return { path: loc.trim(), line: null };
 }
 
-function buildAnnotations(meta) {
+function buildAnnotations(meta, parsedFiles) {
   // Returns { byFile: { path: { fileLevel: [...], byLine: { newLn: [...] } } } }
   // Each annotation: { kind: "finding"|"comment", severity?, emoji, label, body, location, author?, created_at? }
   const byFile = {};
   function ensureFile(path) {
     if (!byFile[path]) byFile[path] = { fileLevel: [], byLine: {} };
     return byFile[path];
+  }
+  // New-side line numbers each diff file shows, so a location the diff cannot
+  // display falls back to its file's prologue, or to the PR's unanchored notes
+  // when the file is not in the diff, instead of rendering nowhere.
+  const shownLines = new Map((parsedFiles || []).map(f => [f.path,
+    new Set(f.hunks.flatMap(h => h.lines.map(l => l.newLn).filter(n => n != null)))]));
+  function place(ann) {
+    const { path, line } = parseLocation(ann.location);
+    const lines = shownLines.get(path);
+    if (lines && line && lines.has(line)) {
+      const bucket = ensureFile(path);
+      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
+    } else if (lines) {
+      ann.displaced = line != null;
+      ensureFile(path).fileLevel.push(ann);
+    } else {
+      ann.displaced = Boolean(path);
+      ensureFile("__orphans__").fileLevel.push(ann);
+    }
   }
   const findings = (meta.findings && meta.findings.items) || [];
   const comments = meta.comments || [];
@@ -496,16 +515,7 @@ function buildAnnotations(meta) {
       suggestion: f.suggestion,
       location: f.location,
     };
-    const { path, line } = parseLocation(f.location);
-    if (path && line) {
-      const bucket = ensureFile(path);
-      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
-    } else if (path) {
-      ensureFile(path).fileLevel.push(ann);
-    } else {
-      // No location at all — fall through to a per-page orphans bucket
-      ensureFile("__orphans__").fileLevel.push(ann);
-    }
+    place(ann);
   });
 
   comments.forEach(c => {
@@ -517,15 +527,7 @@ function buildAnnotations(meta) {
       body: c.body,
       location: c.location,
     };
-    const { path, line } = parseLocation(c.location);
-    if (path && line) {
-      const bucket = ensureFile(path);
-      (bucket.byLine[line] = bucket.byLine[line] || []).push(ann);
-    } else if (path) {
-      ensureFile(path).fileLevel.push(ann);
-    } else {
-      ensureFile("__orphans__").fileLevel.push(ann);
-    }
+    place(ann);
   });
 
   return byFile;
@@ -544,6 +546,9 @@ function renderGloss(ann) {
     if (ann.created_at) {
       head.appendChild(el("span", { class: "gloss-source" }, ann.created_at));
     }
+  }
+  if (ann.displaced) {
+    head.appendChild(el("span", { class: "gloss-source mono" }, ann.location));
   }
   wrap.appendChild(head);
   if (ann.body) {
@@ -694,7 +699,7 @@ function renderScenePage(descriptor, pageNumber) {
   }
 
   // Build all inline annotations (findings + human comments) keyed by file.
-  const annotationsByFile = buildAnnotations(meta);
+  const annotationsByFile = buildAnnotations(meta, parsedFiles);
 
   // Orphan annotations (no path) — show only on the FIRST scene of the PR.
   const isFirstSceneOfPr = pageNumber === firstScenePageOf(prKey);

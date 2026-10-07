@@ -104,6 +104,8 @@ Each item:
 | `location`   | string | no       | `path/to/file.ext:lineno`; a range `:start-end` anchors at its first line.  |
 | `suggestion` | string | no       | Free-form follow-up text: the explanation or suggested fix from the review. |
 
+A location the diff cannot show still renders, labeled with the location as written: a line outside the diff's hunks moves to the top of its file, and a path outside the diff joins the PR's notes that are not anchored to a file. Human comments follow the same rule.
+
 ### `comments[]`
 
 Human reviewer comments on this PR/commit. Rendered inline at the diff line they

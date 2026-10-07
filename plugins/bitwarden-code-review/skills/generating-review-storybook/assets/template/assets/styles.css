@@ -1432,6 +1432,12 @@ a.link:hover {
   text-transform: none;
   letter-spacing: 0;
 }
+/* the location of a note that could not anchor at its line */
+.gloss-source + .gloss-source {
+  margin-left: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .gloss-body {
   margin: 8px 0 0;
   font-size: 13.5px;
