@@ -8,9 +8,9 @@ Bitwarden's local dev environment delivers every outgoing email to Mailcatcher. 
 
 ## Skills
 
-| Skill                     | What It Does                                                                                                                                                                                                                                    |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `reading-mailcatcher-api` | Reads a Bitwarden email from Mailcatcher by recipient and subject and returns its verification link, magic link, or token URL. Extracted URLs are limited to local dev hosts. Also prints the dev Admin Portal address for the magic-link flow. |
+| Skill                     | What It Does                                                                                                                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reading-mailcatcher-api` | Reads a Bitwarden email from Mailcatcher by recipient and subject and returns its verification link, magic link, or other action link. Extracted URLs are limited to local dev hosts. Also prints the dev Admin Portal address for the magic-link flow. |
 
 ## Prerequisites
 
