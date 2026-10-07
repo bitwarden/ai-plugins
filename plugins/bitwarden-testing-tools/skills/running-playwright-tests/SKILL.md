@@ -36,6 +36,8 @@ Email reads (Category 2) and Stripe queries (Category 4) run through skills in t
 
 Skip a skill when no step in your input needs it. Run each script exactly as the invoked skill shows it, and never write a path to another plugin's script yourself.
 
+You run as a subagent and cannot ask the user anything mid-run. Where an invoked skill's guidance differs from this skill's, such as its exit-code responses, follow this skill: the exit-code handling under Continuity rule, and the Human step halt below for anything an invoked skill tells you to ask the user.
+
 ### Resume context (conditional)
 
 Only when a `Resume:` block is present in your inputs: extract and hold:
@@ -81,7 +83,7 @@ ${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py --secrets-path <bitwarden git ro
 
 `<bitwarden git root>` is the working directory: the directory holding the `clients/` and `server/` checkouts.
 
-Use its stdout verbatim as the address. Do NOT `Read` `server/dev/secrets.json`. That file also holds the Stripe test mode API key, the SQL password, and the installation id and key, and a whole-file read puts all of it in your context. The script prints only the one address. On exit 4 (file missing or no `admins` entry), mark the affected test case FAIL with the script's stderr as the reason.
+Use its stdout verbatim as the address. Use this script for the admin address even after invoking the mailcatcher skill, which offers its own `get_admin_email.py`. Do NOT `Read` `server/dev/secrets.json`. That file also holds the Stripe test mode API key, the SQL password, and the installation id and key, and a whole-file read puts all of it in your context. The script prints only the one address. On exit 4 (file missing or no `admins` entry), mark the affected test case FAIL with the script's stderr as the reason.
 
 - Use `setup-{description}-{timestamp}.png` screenshot names during setup (e.g., `setup-login-complete-20260409-2057.png`)
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
@@ -188,7 +190,7 @@ For email-driven flows (verification, magic-link login, trial activation, OTP), 
 
 stdout is the URL — use it as input to the next browser step. The script already retries once on `NO_MATCH`. Branch on the exit code:
 
-- **Exit 1** (`NO_MATCH`) after the script's own retry: mark the test case FAIL immediately with the `NO_MATCH` diagnostic in `Notes:`.
+- **Exit 1**: mark the test case FAIL immediately with the script's stderr in `Notes:`. This covers every exit-1 cause: no matching email (`NO_MATCH`, already retried once by the script), a matched email with no URL passing the link filter, and filter-matched URLs on hosts outside the local dev allowlist.
 - **Exit 3**: this is an environment fault, not a test failure. Mailcatcher is unreachable or returned unparseable JSON. Every subsequent email-driven case will fail the same way, and there is no `NO_MATCH` diagnostic to record. Stop and return an aborted object that carries every test case you completed before the fault, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/aborted-with-cases.json`:
 
   ```json
@@ -207,7 +209,7 @@ Do not attempt to read Mailcatcher via any other means (curl, direct API calls, 
 
 ### Human step halt
 
-When executing any step (Setup or Test) whose text begins with `[HUMAN]`, halt immediately. Do not retry, infer, or skip.
+When executing any step (Setup or Test) whose text begins with `[HUMAN]`, halt immediately. Do not retry, infer, or skip. Halt the same way when an invoked skill tells you to stop and ask the user to do something, for example to attach a Stripe test clock because the subscription's `test_clock` is null: treat that request as the `[HUMAN]` step, with its text as `need_user_input`.
 
 Return a single JSON object with the cases completed so far and the pause signal, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/paused-segment.json`:
 
