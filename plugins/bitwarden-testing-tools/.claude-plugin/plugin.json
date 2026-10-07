@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-testing-tools",
   "repository": "https://github.com/bitwarden/ai-plugins",
+  "dependencies": ["bitwarden-mailcatcher-tools", "bitwarden-stripe-tools"],
   "keywords": [
     "testing",
     "test-engineering",
