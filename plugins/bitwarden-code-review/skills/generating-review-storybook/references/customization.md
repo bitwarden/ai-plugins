@@ -23,11 +23,11 @@ To highlight another language:
 2. Add a `<script>` for it in `index.html.tmpl` after every component it requires or modifies.
 3. Extend `detectLanguage()` in `app.js.tmpl` with the file extension to language mapping.
 
-`detectLanguage` is intentionally simple — it inspects the file path's extension only. If you need fancier detection (shebangs, content sniffing), do it in `data.js` at scaffold time and store the resolved language alongside the diff. That keeps `app.js` deterministic.
+`detectLanguage` is intentionally simple: it inspects the file path's extension only. If you need fancier detection (shebangs, content sniffing), do it in `data.js` at scaffold time and store the resolved language alongside the diff. That keeps `app.js` deterministic.
 
 ## Storage-Prefix Hygiene
 
-Every `localStorage` key the storybook writes is namespaced with `STORAGE_PREFIX`. **Use a different prefix per stack.** Otherwise opening two storybooks in the same browser shares state — comments from stack A leak into stack B's diffs at the same line keys.
+Every `localStorage` key the storybook writes is namespaced with `STORAGE_PREFIX`. **Use a different prefix per stack.** Otherwise opening two storybooks in the same browser shares state, and comments from stack A leak into stack B's diffs at the same line keys.
 
 Convention: `<jira-or-tag>-storybook-v1`, e.g. `pm32009-storybook-v1`. Keep the `-v1` suffix; if you ever change the storage shape, bump to `-v2` so old reviewers don't read incompatible state on resume.
 
@@ -35,4 +35,4 @@ Convention: `<jira-or-tag>-storybook-v1`, e.g. `pm32009-storybook-v1`. Keep the 
 
 `scaffold.py --output-root <root>` writes to `<root>/<slug>-<timestamp>/`, and the skill passes the plugin data directory's `storybooks/` as the root. The timestamp suffix lets the same stack regenerate cleanly (e.g. after fresh review verdicts arrive) without clobbering an open browser tab. `--output <dir>` writes to that exact directory instead. With neither option, the script uses `$CLAUDE_PLUGIN_DATA/storybooks` as the root when that variable is set in its environment, and otherwise exits with an error rather than guessing a location.
 
-Don't override unless the user has a specific reason — keeping artifacts under the plugin data directory prevents stray storybooks from accumulating in working directories or PR branches.
+Don't override unless the user has a specific reason. Keeping artifacts under the plugin data directory prevents stray storybooks from accumulating in working directories or PR branches.

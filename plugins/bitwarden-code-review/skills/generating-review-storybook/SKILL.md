@@ -7,7 +7,7 @@ description: Generate a static, double-clickable "review storybook" that walks h
 
 Package a stack of PRs (or commits) into a self-contained HTML walkthrough that a reviewer can open by double-clicking. Verdict-first, diffs as drill-down, copy-as-Markdown handoffs. The artifact is bundled in `assets/template/`; interview the user, build a config, and run the scaffolder.
 
-**What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review — the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
+**What the storybook is for.** A human reviewing AI-written code. The PR/commit stack itself is the thing under review; the storybook just packages it for fast triage. Claude findings (from `bitwarden-code-review:code-review-local`) are an optional pre-baking step that populates the per-PR Findings section; without them, every PR shows as `pending` and the reviewer drives the decision unaided. Existing human reviewer threads from the GitHub PR can be pulled in optionally via `${CLAUDE_SKILL_DIR}/scripts/fetch_pr_threads.py` and rendered inline at the diff line they reference.
 
 **Core principle:** The scaffolder is deterministic. Synthesis is the judgment step: ask the user enough to fill the config faithfully, then let `${CLAUDE_SKILL_DIR}/scripts/scaffold.py` render the artifact.
 
@@ -21,19 +21,19 @@ Use when the user wants:
 
 ## When NOT to Use
 
-- **A single PR review** — that's `bitwarden-code-review:code-review` or `code-review-local`, not this skill.
-- **Posting comments to GitHub** — the storybook is a local artifact; reviewer notes export as Markdown.
-- **Generating per-PR review verdicts from scratch** — this skill consumes verdicts; it does not produce them. To get verdicts, run code review first (manually or via the bitwarden-code-review agent), then feed the resulting `review-summary.md` files in via `${CLAUDE_SKILL_DIR}/scripts/parse_review_md.py`.
+- **A single PR review**: that's `bitwarden-code-review:code-review` or `code-review-local`, not this skill.
+- **Posting comments to GitHub**: the storybook is a local artifact; reviewer notes export as Markdown.
+- **Generating per-PR review verdicts from scratch**: this skill consumes verdicts; it does not produce them. To get verdicts, run code review first (manually or via the bitwarden-code-review agent), then feed the resulting `review-summary.md` files in via `${CLAUDE_SKILL_DIR}/scripts/parse_review_md.py`.
 
 ## Inputs You Need from the User
 
 Ask only what you don't already have. Reasonable defaults exist for most fields.
 
-- **Stack list** — PR numbers (in stack order) or commit SHAs. Required.
-- **GitHub repo** — `owner/name` (defaults to `bitwarden/server`). Ask if not obvious from context.
-- **Title and short summary** — one line + 2–3 sentences for the cover. Synthesize from PR titles if the user doesn't dictate one.
-- **Tickets per PR** — Jira keys (optional). Lifts the "Why this exists" framing.
-- **Verdicts** (optional, three modes — see below).
+- **Stack list**: PR numbers (in stack order) or commit SHAs. Required.
+- **GitHub repo**: `owner/name` (defaults to `bitwarden/server`). Ask if not obvious from context.
+- **Title and short summary**: one line + 2-3 sentences for the cover. Synthesize from PR titles if the user doesn't dictate one.
+- **Tickets per PR**: Jira keys (optional). Lifts the "Why this exists" framing.
+- **Verdicts** (optional, three modes; see below).
 
 ## Verdict Modes
 
@@ -41,7 +41,7 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 | ------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | Pending       | No reviews exist yet (default)   | Set every PR's `verdict` to `pending`. Cover and per-page cards show "Pending review."                                  |
 | Pre-baked     | User has review markdown files   | Run `python3 "${CLAUDE_SKILL_DIR}/scripts/parse_review_md.py" KEY=path ...` and merge the result into the stack config. |
-| Inline review | User wants reviews generated now | Out of scope for v1 — instead, run `bitwarden-code-review:code-review-local` per PR first, then use Pre-baked.          |
+| Inline review | User wants reviews generated now | Out of scope for v1. Instead, run `bitwarden-code-review:code-review-local` per PR first, then use Pre-baked.           |
 
 ## Workflow
 
@@ -73,7 +73,7 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
 
    The output is a `{ key: [...comments] }` map ready to merge into each stack item's `comments[]`. Outdated threads are skipped by default; resolved threads are kept with a `_(resolved)_` suffix so the reviewer can see "this was caught and fixed" context. See `references/data-schema.md` for the comment shape.
 
-5. **Synthesize chapters.** Read the PR body and skim the file list. Break each PR into 2–5 logical chapters that walk the reviewer through the change in a meaningful order — not alphabetical. Each chapter declares a `title`, a `narrative` paragraph that says what this chapter is _about_ (not what each file does), and the `paths[]` that belong to it. Tests usually go in the same chapter as the code they cover. If you can't articulate a narrative for a group, that's a sign the grouping is wrong. **Skip this step only when the PR is genuinely a single concern** — even then, one chapter with a real narrative beats a flat file list. When a chapter has more files than one screen holds, or reads best as ordered steps (contract, then implementation, then tests), split it into `scenes[]` so each step gets its own page; the scenes subsection of `references/data-schema.md` covers the shape, and `examples/storybook.json` shows a chapter split this way.
+5. **Synthesize chapters.** Read the PR body and skim the file list. Break each PR into 2-5 logical chapters that walk the reviewer through the change in a meaningful order, not alphabetical. Each chapter declares a `title`, a `narrative` paragraph that says what this chapter is _about_ (not what each file does), and the `paths[]` that belong to it. Tests usually go in the same chapter as the code they cover. If you can't articulate a narrative for a group, that's a sign the grouping is wrong. **Skip this step only when the PR is genuinely a single concern**. Even then, one chapter with a real narrative beats a flat file list. When a chapter has more files than one screen holds, or reads best as ordered steps (contract, then implementation, then tests), split it into `scenes[]` so each step gets its own page; the scenes subsection of `references/data-schema.md` covers the shape, and `examples/storybook.json` shows a chapter split this way.
 
 6. **Compose the config JSON.** See `references/data-schema.md` for the shape. Save to `/tmp/storybook.json`. Inline diffs from step 2 into each stack item's `diff_b64` field; merge verdicts from step 3 into each item's `verdict`, `verdict_label`, and `findings`; attach the chapters from step 5 as `stack[i].chapters`.
 
@@ -84,7 +84,7 @@ Ask only what you don't already have. Reasonable defaults exist for most fields.
      --output-root "${CLAUDE_PLUGIN_DATA}/storybooks"
    ```
 
-   The storybook is written to a new `<slug>-<timestamp>/` directory under the output root. The script prints the `file://` URL — share that with the user. Pass `--output <dir>` in place of `--output-root` only if the user explicitly asks for a different location; it writes to that exact directory.
+   The storybook is written to a new `<slug>-<timestamp>/` directory under the output root. The script prints the `file://` URL; share that with the user. Pass `--output <dir>` in place of `--output-root` only if the user explicitly asks for a different location; it writes to that exact directory.
 
 8. **Verify locally.** Open the printed URL. Sanity-check: cover renders with the right title; each PR walks through chapters in a logical order with real narrative; AI findings and human comments (if any) appear inline at the diff line they reference; export-notes copies Markdown.
 
@@ -104,14 +104,14 @@ Before reporting "done":
 - [ ] `index.html` opens and the cover renders.
 - [ ] Every PR has at least one page, and each page shows its diff.
 - [ ] Every changed file appears exactly once. An "Other files" group means a chapter missed paths; add them to the right chapter and re-run.
-- [ ] Per-PR walkthrough is grouped into chapters with narrative — not a flat alphabetical file list.
+- [ ] Per-PR walkthrough is grouped into chapters with narrative, not a flat alphabetical file list.
 - [ ] Verdicts on the cover match what the user expects (pending / approve / approve-fix / block).
 - [ ] Inline-comment +/save flow works on at least one diff line.
 - [ ] Export-notes button copies the running tally as Markdown.
 
-If any of these fail, do not claim success — fix and re-run scaffold.
+If any of these fail, do not claim success. Fix and re-run scaffold.
 
 ## Anti-Patterns
 
-- **Don't hand-edit the generated `data.js`** — it is regenerated on every scaffold run. Edit the config, re-run.
+- **Don't hand-edit the generated `data.js`**: it is regenerated on every scaffold run. Edit the config, re-run.
 - **Don't bundle verdicts you can't justify.** If review files don't exist, leave verdicts as `pending`. The cover visibly signals that and the reviewer expects it.
