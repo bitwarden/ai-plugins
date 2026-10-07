@@ -20,6 +20,10 @@ Given the test cases, artifacts output dir, and the absolute path to `${CLAUDE_S
 | Config path          | The absolute path to `${CLAUDE_SKILL_DIR}/playwright.config.json` you received as input |
 | Timestamp            | Generate once now as `YYYYMMDD-HHmm` and reuse across all screenshots                   |
 
+### Check the test cases
+
+If the test cases are missing or empty, or come from a `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence that is unterminated or ambiguous, execute nothing. Return the aborted object with no `cases` (Step 4), with an `abort_reason` naming the malformed input. Never run a partial or guessed set of test cases.
+
 ### Read the tool policy
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`. It governs which tools you may use throughout the run. Follow it without exception.
@@ -67,6 +71,8 @@ Any login, magic-link flow, or account/org creation required before the first te
 ${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py --secrets-path <bitwarden git root>/server/dev/secrets.json
 ```
 
+`<bitwarden git root>` is the working directory: the directory holding the `clients/` and `server/` checkouts.
+
 Use its stdout verbatim as the address. Do NOT `Read` `server/dev/secrets.json`. That file also holds the Stripe test mode API key, the SQL password, and the installation id and key, and a whole-file read puts all of it in your context. The script prints only the one address. On exit 4 (file missing or no `admins` entry), mark the affected test case FAIL with the script's stderr as the reason.
 
 - Use `setup-{description}-{timestamp}.png` screenshot names during setup (e.g., `setup-login-complete-20260409-2057.png`)
@@ -90,7 +96,7 @@ Some test cases contain lines labeled `SETUP:`. Execute all of them before any T
 - Use `setup-tc-N-step-M-{timestamp}.png` screenshot names (N = test case number, M = setup step number)
 - If any SETUP step fails — including any HTTP 4xx or 5xx response — stop this test case (not the whole run):
   1. Do NOT retry or modify parameters
-  2. Mark the test case FAILED with the setup failure as the reason
+  2. Mark the test case `FAIL` with the setup failure as the reason
   3. Do NOT run this test case's Test Steps; continue to the next test case
   4. Put the exact request and response body in `Notes:`
 
@@ -154,7 +160,7 @@ Run `playwright-cli screenshot` to take a full-page screenshot **after every vis
 - After a modal, dialog, or overlay opens or closes
 - After a checkbox, toggle, accordion, or other element reveals or hides content
 - After a form is submitted and a result or error appears
-- After a toast or notification appears — capture immediately before it auto-dismisses (toasts last 2-5 seconds). Watch for up to 3 seconds after any state-changing action; if no toast appears, continue
+- After a toast or notification appears — take it best-effort, since a toast can dismiss before the screenshot lands. Assert a toast's text from the DOM per "Asserting transient toasts" below, never from a screenshot. Watch for up to 3 seconds after any state-changing action; if no toast appears, continue
 
 Always save screenshots in the artifact output directory and pass `--full-page`: `screenshot --filename=<artifacts-output-dir>/screenshots/<name>.png --full-page`
 

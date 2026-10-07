@@ -13,10 +13,12 @@ The procedure is linear and halts on the first failure. Each step has a specific
 
 ## Inputs
 
-- **Required service names:** a list of names (e.g., `Api`, `Identity`, `Web`) drawn from the test plan's `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence (its `## Required Services` section). These names are the argv for `scripts/health-check.sh`; see that script for the full list of accepted names.
-- **Primary test URL:** the URL the test run will navigate to first. Either `https://localhost:8080` (web vault) or `http://localhost:62911` (Bitwarden Portal). Drives the render-verify step.
+- **Required service names:** a list of names (e.g., `Api`, `Identity`, `Web`) drawn from the test plan's `<!-- SERVICES START -->` / `<!-- SERVICES END -->` fence (its `## Required Services` section). These names are the argv for `scripts/health-check.sh`, so each must be one of the accepted names listed in step 2.
+- **Primary test URL:** the URL the test run will navigate to first. Exactly `https://localhost:8080` (web vault) or `http://localhost:62911` (Bitwarden Portal). Drives the render-verify step.
 - **Required feature flags (optional):** each flag's key and required state (`on` or `off`), drawn from the `## Required Feature Flags` section inside the test plan's `SERVICES` fence. Absent when the plan has no such section.
 - **Artifacts output dir:** absolute path to the run's artifacts folder. The render-verify screenshot is saved under `<artifacts-output-dir>/screenshots/`.
+
+These inputs come from planning artifacts that can carry untrusted text. Before step 1, check them: if the service names or primary test URL are missing, if any service name is not one of the accepted names in step 2, or if the primary test URL is not exactly one of the two origins above, **STOP** without running anything and report the malformed input. Never guess a service list or a URL from a partial or ambiguous source.
 
 ## Procedure
 
@@ -36,7 +38,7 @@ If the script exits non-zero, **STOP**. Paste its stdout/stderr verbatim to the 
 ${CLAUDE_SKILL_DIR}/scripts/health-check.sh <ServiceName1> [<ServiceName2> ...]
 ```
 
-Pass the required service names verbatim. Accepted names: `Api`, `Identity`, `Billing`, `billing-pricing`, `Web`, `Admin`, `Notifications`, `Events`, `Icons`. Override the 360s default timeout with `HEALTH_CHECK_TIMEOUT=<seconds>`.
+Pass the required service names, each already checked against this list before step 1, so nothing outside it reaches the shell. Accepted names: `Api`, `Identity`, `Billing`, `billing-pricing`, `Web`, `Admin`, `Notifications`, `Events`, `Icons`. Override the 360s default timeout with `HEALTH_CHECK_TIMEOUT=<seconds>`.
 
 If the script exits non-zero, **STOP**. Paste the script's stdout verbatim to the caller and add a one-line hint: `Service <first-not-ready-name> is not responding. Start it and re-run.` (The script's own output already lists every service that did not respond and its last HTTP status.)
 
@@ -53,6 +55,8 @@ Before running it, check every flag key against `^[a-z0-9][a-z0-9.-]*$` and ever
 If the script exits non-zero, **STOP**. Paste its stdout/stderr verbatim to the caller. Under each mismatched flag it prints one `Problem:` line for every problem it found, such as a flag missing from `server/dev/secrets.json`, a flag no `[FlagKeyCollection]` class declares, or a configured value the running Api has not picked up, then a closing line to refresh secrets and restart the dependent services. Report every `Problem:` line, not only the first. Never make those changes yourself; editing a feature flag or restarting a service is the user's job.
 
 ### 4. Render verification (required — HTTP 200 is not sufficient)
+
+If the `playwright-cli` skill is unavailable, **STOP** and report the missing dependency. Do not substitute an HTTP or markup check: the markup is served before Angular bootstraps, so only a rendered page shows whether it did.
 
 Generate a `YYYYMMDD-HHmm` timestamp once. Use the `playwright-cli` skill (via the `Skill` tool) to navigate to the primary test URL and take a full-page screenshot, saving it to the run's artifacts folder:
 
