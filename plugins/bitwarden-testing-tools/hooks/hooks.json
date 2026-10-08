@@ -10,6 +10,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Bash|Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_health_checker.py\" ] || exit 1; python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_health_checker.py\"",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
