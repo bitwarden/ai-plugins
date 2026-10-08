@@ -1,0 +1,12 @@
+{
+  "name": "bitwarden-mailcatcher-tools",
+  "version": "1.0.0",
+  "description": "Mailcatcher tools for Bitwarden — reading verification links, magic links, and other action links from the local dev inbox.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-mailcatcher-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["mailcatcher", "email", "local-development", "testing"]
+}
