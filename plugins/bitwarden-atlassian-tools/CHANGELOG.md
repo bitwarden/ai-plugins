@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.5] - 2026-10-07
+
+### Fixed
+
+- `get_issue` now renders an "Issue Links" section (link type, linked issue key, summary, and status), so links such as "is blocked by" are visible. Passing `fields: ["issuelinks"]` returns them too.
+
 ## [2.7.4] - 2026-09-23
 
 ### Changed
