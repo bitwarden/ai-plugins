@@ -23,7 +23,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
   - Selector: heading "All vaults"
     - Selector type: role
     - Expectation: visible
-    - Source: clients/apps/web/src/app/vault/individual-vault/vault-header/vault-header.component.ts:187 (default title from the `allVaults` i18n key, rendered as the page `<h1>` via clients/libs/components/src/header/header.component.html:7)
+    - Source: `clients/apps/web/src/app/vault/individual-vault/vault-header/vault-header.component.ts` (`return this.i18nService.t("allVaults");`); `clients/libs/components/src/header/header.component.html` (`<h1`, `{{ title() }}`; in order) — the default title from the `allVaults` i18n key, rendered as the page `<h1>`
 
 ---
 

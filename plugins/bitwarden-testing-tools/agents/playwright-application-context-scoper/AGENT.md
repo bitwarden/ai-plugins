@@ -24,7 +24,7 @@ description: |
 model: sonnet
 skills:
   - bitwarden-testing-tools:scoping-playwright-application-context
-color: magenta
+color: purple
 tools: Read, Skill, Grep, Glob
 ---
 

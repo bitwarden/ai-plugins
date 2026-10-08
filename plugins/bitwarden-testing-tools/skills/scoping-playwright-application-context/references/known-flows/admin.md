@@ -23,7 +23,7 @@ Curated reference of validated, reusable test states and UI flows for the Bitwar
   - Selector: heading "Dashboard"
     - Selector type: role
     - Expectation: visible
-    - Source: server/src/Admin/Views/Home/Index.cshtml:55 (static `<h1>Dashboard</h1>` on the authenticated Admin home, served by server/src/Admin/Controllers/HomeController.cs:30)
+    - Source: `server/src/Admin/Views/Home/Index.cshtml` (`<h1>Dashboard</h1>`); `server/src/Admin/Controllers/HomeController.cs` (`[Authorize]`, `public IActionResult Index()`; in order) — the static heading on the authenticated Admin home
 
 ---
 
