@@ -61,8 +61,8 @@ the union of:
 
 - **`git`**, with the base ref fetchable or already local.
 - **`plugin-dev` plugin** for the plugin and skill validation sections. Install it with
-  `/plugin install plugin-dev@claude-code-plugins`, from the `claude-code-plugins`
-  marketplace at `anthropics/claude-code`. Without it those sections are reported as
+  `/plugin install plugin-dev@claude-plugins-official`, from the `claude-plugins-official`
+  marketplace at `anthropics/claude-plugins-official`. Without it those sections are reported as
   skipped, not silently dropped.
 - **A `bitwarden/gh-actions` checkout** for the three shell checks. The command looks at
   `$BW_GH_ACTIONS_PATH/validate-ai/scripts`, then a sibling `../gh-actions` checkout, and
@@ -80,13 +80,15 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 The command pre-approves read-only inspection only — `git diff`, `git fetch origin`,
 `git rev-parse`, `git symbolic-ref`, `git ls-files`, `date`, `ls` — plus an `Edit` rule
 scoped to `~/.claude/plugins/data/claude-config-validator*/ai-validation/*`, the only
-directory it writes to. Cloning
+directory it writes to. `WebFetch` is scoped to `code.claude.com`, the one host it needs to
+check a finding's claim about Claude Code's schema against the official documentation.
+Cloning
 `gh-actions` and running its scripts are left out on purpose and will be asked for: that
 step executes shell code from outside this repository, and a blanket `Bash(bash:*)` grant
 would pre-approve arbitrary commands on the one path that fetches code from the network.
 If you run this often, allowlist the exact script invocations yourself.
 
-Three details in that rule are deliberate. It is an `Edit` rule even though the command uses
+Three details in the `Edit` rule are deliberate. It is an `Edit` rule even though the command uses
 `Write`, because Claude Code checks file permissions against `Edit(path)` and `Read(path)`
 rules only: a path rule written for `Write` is accepted, never consulted, and warned about
 at startup, while an `Edit` rule applies to every built-in tool that edits files. That
@@ -173,4 +175,4 @@ overridden to point at the repository being validated.
 ### Plugin or skill sections reported as skipped
 
 The `plugin-dev` plugin is not installed. Install it with
-`/plugin install plugin-dev@claude-code-plugins`.
+`/plugin install plugin-dev@claude-plugins-official`.

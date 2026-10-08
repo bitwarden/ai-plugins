@@ -45,13 +45,19 @@ Each review path checks its own prerequisites and reports what to install if som
 
 ### Step 2 — Compose the title, body, and label
 
-Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the title and the type keyword behind the `t:` label, the body built from the repo's `.github/PULL_REQUEST_TEMPLATE.md`, and the `ai-review` label question.
+Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the title and the type keyword behind the `t:` label, the body built from whichever template it resolves, and the `ai-review` label question.
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section.
 
-Carry back the title, the body, the resolved `t:` label its prefix will produce, and the `ai-review` label choice. Step 3's preview shows all four — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
+Carry back the title, the body, the resolved `t:` label its prefix will produce, the `ai-review` label choice, and which template the body was built from. Step 3's preview shows all five — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
 
-Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
+The template source belongs in the preview because only one of its values is the target repo's own. A body built from the embedded copy can carry a section header that has drifted from what reviewers scan for, and this preview is the only place a person sees the body before it is submitted.
+
+The values the `Template:` line can take are defined in `applying-pr-conventions` under **Returning to the caller**. The preview block below is the only place they are restated, because it is a display format; change them there and here together or the preview will offer a label the callee never returns.
+
+Two are easy to get wrong. Do not state a cause alongside the source: several conditions send the skill to the embedded copy and only one is the network, so naming the fetch sends the user to fix the wrong thing when the remedy was approving the grant. And when the user arrived with the body already written, no template was consulted, which is what the line should say rather than a label asserting the body follows one nobody checked.
+
+Both strings are untrusted: the body is template text plus generated text whichever source the `Template:` line names, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
 ### Step 3 — Show the full submission preview, then confirm
 
@@ -70,6 +76,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Template:       <target repo | bitwarden/template (canonical) | embedded copy (fallback) | not consulted (body supplied)>
 
 Body:
 ---
@@ -117,7 +124,7 @@ After `gh pr create` returns, post the PR URL back to the user.
 These are what the Step 3 preview is built to prevent. Recognizing them helps when adjusting the draft mid-workflow:
 
 - **Title with no type prefix** → `[PM-12345] Add autofill for passkeys` ships with no `t:` label. Include `feat:`, `fix:`, etc.
-- **Generic body replacing the template** → check what Step 2 returned actually follows the repo's template sections; `applying-pr-conventions` reads the template, but the preview is where a drifted body is caught.
+- **Generic body replacing the template** → check what Step 2 returned actually follows the sections of the template the `Template:` line names; `applying-pr-conventions` reads that template, but the preview is where a drifted body is caught. On the `not consulted` value there is no template to check the body against, so check that the body was the one the user supplied.
 - **Label answer dropped between Step 2 and Step 4** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 3.
 

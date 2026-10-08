@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `authoring-jira-tickets` skill: drafts a Jira ticket as a local `.md` file ready to copy into Jira fields. Covers all five ticket types (Epic, Story, Task, Spike, Bug) with type-appropriate sections, Gherkin Scenarios for Stories, and field-separated formatting that maps to Jira's paste targets. Supports a preferences file (`~/.claude/jira-drafting-preferences.md`) for persistent defaults and `--type` / `--no-scenarios` invocation arguments. Optionally performs codebase exploration (with user consent) to inform the Technical Breakdown.
 - `/author-jira-ticket` slash command: thin entry point that routes to `authoring-jira-tickets` with any provided arguments.
 
+## [2.7.5] - 2026-10-07
+
+### Fixed
+
+- `get_issue` now renders an "Issue Links" section (link type, linked issue key, summary, and status), so links such as "is blocked by" are visible. Passing `fields: ["issuelinks"]` returns them too.
+
 ## [2.7.4] - 2026-09-23
 
 ### Changed

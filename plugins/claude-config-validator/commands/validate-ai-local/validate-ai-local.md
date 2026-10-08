@@ -1,6 +1,6 @@
 ---
 argument-hint: "[base-ref] (defaults to the repository default branch)"
-allowed-tools: Read, Edit(~/.claude/plugins/data/claude-config-validator*/ai-validation/*), Grep, Glob, Task, Skill, Bash(git diff:*), Bash(git fetch origin:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
+allowed-tools: Read, Edit(~/.claude/plugins/data/claude-config-validator*/ai-validation/*), Grep, Glob, Task, Skill, WebFetch(domain:code.claude.com), Bash(git diff:*), Bash(git fetch origin:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
 description: Validate the Claude Code material you changed locally and write a timestamped report to the plugin's data directory
 ---
 
@@ -154,6 +154,11 @@ Unlike a pull request review, the working tree here **is** the change: read ever
 directly from the working tree. There is no `.claude-pr/` snapshot to redirect to.
 
 ## 7. Write the report
+
+Before writing, check every finding that says a field, key, or value is invalid, unknown,
+unsupported, or deprecated against the official documentation, as the scope reference's
+schema-claims section describes. Sections 4 through 6 work from a fixed schema, so this is
+what keeps a documented field from being reported as a defect.
 
 Write the full report to
 `${CLAUDE_PLUGIN_DATA}/ai-validation/<repo>-<timestamp>-validation.md`, where `<repo>` is

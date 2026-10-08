@@ -54,6 +54,7 @@ If the ADR suggests a solution that does not match the patterns in the code bein
 
 ## Bitwarden-Specific Principles
 
+- **Feature-flag new work by default:** Start from the assumption that new work ships behind a flag; `managing-feature-flags` holds the narrow set of exceptions. Decide up front where the flag lives — server-side, client-side, or both — because placement shapes the design. Give each independently releasable feature its own flag, default it off, and plan a gradual rollout rather than a binary flip. Invoke `Skill(managing-feature-flags)` for the conventions and lifecycle.
 - **Multi-client reality:** Changes ripple across web, browser, desktop, CLI, and self-hosted deployments. Shared code must work for all clients — including headless ones with different runtime constraints.
 - **Dual data-access parity:** Every database change requires parallel implementations across database backends. Never ship one without the other.
 - **Open-source stewardship:** Code is public. Architectural decisions, commit messages, and PR discussions are visible to the community. Write them with that audience in mind.
@@ -80,4 +81,5 @@ If any of these apply, surface it to the human and recommend pulling Architectur
 - Silent behavior changes in shared libraries (`libs/common`, `src/Core`)
 - Missing test coverage for new code paths
 - Security shortcuts in the name of velocity
+- New feature work landing without a feature flag when one is warranted
 - Refactors bundled with feature work without explicit scope approval
