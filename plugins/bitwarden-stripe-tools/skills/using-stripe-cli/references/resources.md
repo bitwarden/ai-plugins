@@ -1,6 +1,6 @@
-# Supported Stripe Resources (read-only)
+# Supported Stripe Resources
 
-Only read operations are listed. Creating, updating, deleting, attaching, detaching, paying, voiding, finalizing, cancelling, refunding, or closing any resource is out of scope for this read-only skill. The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
+The one permitted write, advancing an already-attached test clock, is documented in the skill body, not here.
 
 Every operation below is a `${CLAUDE_PLUGIN_ROOT}/skills/using-stripe-cli/scripts/stripe_cli.py read --path <path>` call, except the invoice preview, which has its own `preview-invoice` subcommand (see `## invoices`). The base path retrieves or lists depending on whether an ID is appended; append `/search` for search, and append `/<id>/<sub-resource>` for a nested list such as a customer's payment methods.
 
