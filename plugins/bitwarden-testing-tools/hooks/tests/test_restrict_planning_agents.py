@@ -162,10 +162,10 @@ class PassThroughTest(unittest.TestCase):
         self.assertPassesThrough(bash("echo hi", agent_type=None))
 
     def test_other_agent_in_this_plugin(self):
-        self.assertPassesThrough(bash("echo hi", "bitwarden-testing-tools:playwright-test-runner"))
+        self.assertPassesThrough(bash("echo hi", "bitwarden-testing-tools:unrestricted-agent"))
 
     def test_other_agent_invokes_any_skill(self):
-        self.assertPassesThrough(skill(FORKED_SKILL, "bitwarden-testing-tools:playwright-test-runner"))
+        self.assertPassesThrough(skill(FORKED_SKILL, "bitwarden-testing-tools:unrestricted-agent"))
 
     def test_same_agent_name_in_another_plugin(self):
         self.assertPassesThrough(bash("echo hi", "other-plugin:services-under-test-mapper"))

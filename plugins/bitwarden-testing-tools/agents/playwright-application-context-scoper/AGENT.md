@@ -23,7 +23,7 @@ description: |
   </example>
 model: sonnet
 skills:
-  - scoping-playwright-application-context
+  - bitwarden-testing-tools:scoping-playwright-application-context
 color: magenta
 tools: Read, Skill, Grep, Glob
 ---

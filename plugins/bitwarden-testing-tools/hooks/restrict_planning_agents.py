@@ -3,9 +3,7 @@
 
 A Skill call from a restricted planning agent, other than the agent's own skill,
 is blocked, because a skill that runs in a forked context executes its Bash as a
-different agent type, outside the agent's `tools:` allowlist. The agents hold no
-`Bash` themselves: the orchestrator runs `scripts/repo-diff.sh` and hands the
-scoper and mapper a diff artifact instead.
+different agent type, outside the agent's `tools:` allowlist.
 
 A block exits 2, which Claude Code applies before permission rules are
 evaluated. Every other agent, and the main session, passes through (exit 0).

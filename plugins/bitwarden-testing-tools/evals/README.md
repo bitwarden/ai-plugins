@@ -5,6 +5,9 @@ only its own eval data — `trigger-eval.json` (the query set) and `baseline.jso
 known-good run) under `skills/<skill>/evals/`. There is no per-skill copy of the engine, so
 an engine fix lands once and applies everywhere.
 
+This runner covers trigger suites only. A skill's `evals/behavior-eval.json` is a different
+schema, run through `/skill-creator:skill-creator` in Benchmark mode, and has no baseline here.
+
 ## Why a custom runner
 
 The upstream `skill-creator` harness measures triggering by registering a temporary copy of
