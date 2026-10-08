@@ -27,8 +27,6 @@ MAPPER_SKILL = "bitwarden-testing-tools:mapping-services-under-test"
 SCOPER_SKILL = "bitwarden-testing-tools:scoping-playwright-application-context"
 GATHERER_SKILL = "bitwarden-atlassian-tools:researching-jira-issues"
 FORKED_SKILL = "bitwarden-security-engineer:auditing-external-claude-plugins"
-REPO_DIFF = ROOT + "/scripts/repo-diff.sh server"
-BASH_BLOCK = "No Bash command may run in this agent"
 SKILL_BLOCK = "skill may be invoked in this agent"
 
 
@@ -103,77 +101,48 @@ class AllowedTest(unittest.TestCase):
 
 
 class BlockedTest(unittest.TestCase):
-    def assertBlocked(self, stdin, root=ROOT, message=BASH_BLOCK):
+    def assertBlocked(self, stdin, root=ROOT, message=SKILL_BLOCK):
         code, err = run_hook(stdin, root)
         self.assertEqual(code, 2)
         self.assertIn(message, err)
 
-    def test_unrelated_command(self):
-        self.assertBlocked(bash("echo hi"))
-
-    def test_scoper_unrelated_command(self):
-        self.assertBlocked(bash("cat ~/.ssh/id_rsa", SCOPER))
-
     def test_directory_form_agent_type_is_blocked_too(self):
-        self.assertBlocked(bash("echo hi", MAPPER_DIR_FORM))
+        self.assertBlocked(skill(FORKED_SKILL, MAPPER_DIR_FORM))
 
-    def test_mapper_repo_diff_is_blocked(self):
-        self.assertBlocked(bash(REPO_DIFF))
+    def test_skill_blocks_without_a_plugin_root(self):
+        self.assertBlocked(skill(FORKED_SKILL), root=None)
 
-    def test_scoper_repo_diff_is_blocked(self):
-        self.assertBlocked(bash(ROOT + "/scripts/repo-diff.sh /Users/dev/bitwarden/clients", SCOPER))
-
-    def test_scoper_grep_command_is_blocked(self):
-        self.assertBlocked(bash("grep -rn CohortService server/src", SCOPER))
-
-    def test_scoper_find_command_is_blocked(self):
-        self.assertBlocked(bash("find clients -name '*.ts'", SCOPER))
-
-    def test_bash_blocks_without_a_plugin_root(self):
-        self.assertBlocked(bash(REPO_DIFF), root=None)
-
-    def test_bash_block_message_says_to_report_an_obstacle(self):
-        self.assertBlocked(bash("echo hi", SCOPER), message="report this step as an obstacle")
+    def test_skill_block_message_says_to_report_an_obstacle(self):
+        self.assertBlocked(skill(FORKED_SKILL, SCOPER), message="report this step as an obstacle")
 
     def test_deeply_nested_input_is_blocked(self):
         # Deep enough to exhaust the JSON parser's recursion on every supported Python.
         nested = "[" * 1000000 + "]" * 1000000
-        body = bash("echo hi")[:-1] + ', "x": ' + nested + "}"
+        body = skill(FORKED_SKILL)[:-1] + ', "x": ' + nested + "}"
         self.assertBlocked(body)
 
-    def test_missing_command(self):
-        self.assertBlocked(json.dumps({"tool_name": "Bash", "agent_type": MAPPER, "tool_input": {}}))
-
-    def test_non_utf8_command_is_blocked(self):
-        data = bash("echo x").encode("utf-8").replace(b"echo x", b"echo \xff")
+    def test_non_utf8_skill_name_is_blocked(self):
+        data = skill(FORKED_SKILL).encode("utf-8").replace(b"auditing", b"\xff")
         self.assertBlocked(data)
 
-    def test_gatherer_bash_is_blocked(self):
-        self.assertBlocked(bash("echo hi", GATHERER))
-
-    def test_bash_block_message_does_not_mention_the_diff_artifact(self):
-        # The gatherer gets the same message and has no diff artifact.
-        _code, err = run_hook(bash("echo hi", GATHERER))
-        self.assertNotIn("diff artifact", err)
-
     def test_foreign_forked_skill_is_blocked(self):
-        self.assertBlocked(skill(FORKED_SKILL), message=SKILL_BLOCK)
+        self.assertBlocked(skill(FORKED_SKILL))
 
     def test_gatherer_foreign_forked_skill_is_blocked(self):
-        self.assertBlocked(skill(FORKED_SKILL, GATHERER), message=SKILL_BLOCK)
+        self.assertBlocked(skill(FORKED_SKILL, GATHERER))
 
     def test_other_planning_skill_is_blocked(self):
-        self.assertBlocked(skill(SCOPER_SKILL), message=SKILL_BLOCK)
+        self.assertBlocked(skill(SCOPER_SKILL))
 
     def test_bare_own_skill_name_is_blocked(self):
-        self.assertBlocked(skill("mapping-services-under-test"), message=SKILL_BLOCK)
+        self.assertBlocked(skill("mapping-services-under-test"))
 
     def test_own_skill_name_under_another_plugin_is_blocked(self):
-        self.assertBlocked(skill("other-plugin:mapping-services-under-test"), message=SKILL_BLOCK)
+        self.assertBlocked(skill("other-plugin:mapping-services-under-test"))
 
     def test_missing_skill_name_is_blocked(self):
         body = json.dumps({"tool_name": "Skill", "tool_input": {}, "agent_type": MAPPER})
-        self.assertBlocked(body, message=SKILL_BLOCK)
+        self.assertBlocked(body)
 
     def test_skill_block_message_names_the_allowed_skill(self):
         self.assertBlocked(skill(FORKED_SKILL, GATHERER), message=GATHERER_SKILL)
@@ -184,6 +153,10 @@ class PassThroughTest(unittest.TestCase):
         code, err = run_hook(stdin)
         self.assertEqual(code, 0, err)
         self.assertEqual(err, "")
+
+    def test_restricted_agent_bash_is_left_to_the_allowlist(self):
+        # The hook's matcher is Skill; an agent's `tools:` allowlist keeps Bash out.
+        self.assertPassesThrough(bash("echo hi", SCOPER))
 
     def test_main_session_has_no_agent_type(self):
         self.assertPassesThrough(bash("echo hi", agent_type=None))
@@ -230,11 +203,6 @@ class FailClosedTest(unittest.TestCase):
         code, err = self.run_main(skill(MAPPER_SKILL))
         self.assertEqual(code, 2)
         self.assertIn(SKILL_BLOCK, err)
-
-    def test_bash_call_blocks_with_the_bash_message(self):
-        code, err = self.run_main(bash(REPO_DIFF))
-        self.assertEqual(code, 2)
-        self.assertIn(BASH_BLOCK, err)
 
     def test_unrestricted_agent_passes(self):
         code, err = self.run_main(bash("echo hi", agent_type=None))
