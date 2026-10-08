@@ -5,6 +5,15 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-10-08
+
+### Changed
+
+- `/validate-ai` posts CRITICAL and IMPORTANT findings as inline comments on the diff, each with a one-line severity title and its details and fix collapsed, and skips any finding an existing thread on the pull request already raised. A CRITICAL or IMPORTANT finding whose thread was resolved while the problem is still on the diff gets one reply in that thread, so its history stays in one place. The sticky comment is a short summary: the verdict, a `Not covered` line when a check could not run, and one collapsed line per finding. Reviewers act on a finding where it sits in the diff and take in the result at a glance, rather than reading one long comment end to end
+- Findings carry the ❌ CRITICAL, ⚠️ IMPORTANT, and 🎨 SUGGESTED labels bitwarden-code-review uses, so both reviews speak one severity vocabulary. OPTIONAL findings report as SUGGESTED
+- `/validate-ai-local` reports in the same summary form, with every finding's details and fix nested under its one-liner
+- The report has no checks table: the workflow reports the structure, marketplace, and version-bump scripts as its own steps
+
 ## [2.1.0] - 2026-10-06
 
 ### Changed
