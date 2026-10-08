@@ -44,7 +44,7 @@ Curated reference of validated, reusable test states and UI flows for the Bitwar
 2. Enter `<bitwarden-portal-admin-email>` in the login field
 3. Submit the form
    - Feedback: form clears; magic-link email sent
-4. Use the `reading-mailcatcher-api` skill (`--recipient <bitwarden-portal-admin-email> --pattern "Continue Logging In"`) to read the magic link (subject contains "Admin" or "Continue Logging In"); stdout is the URL
+4. Use the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill (`--recipient <bitwarden-portal-admin-email> --pattern "Continue Logging In"`) to read the magic link (subject contains "Admin" or "Continue Logging In"); stdout is the URL
 5. Navigate directly to the extracted magic-link URL
    - Feedback: Admin portal home loads, authenticated
 

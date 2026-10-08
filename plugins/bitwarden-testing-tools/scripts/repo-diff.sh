@@ -18,8 +18,13 @@
 # The repo argument is allowlisted by basename to the three canonical Bitwarden
 # repos the pipeline knows. The check holds no matter how the caller's Bash grant is
 # written, but it matches the basename only: it restricts the diff to a repo *named*
-# clients, server, or billing-pricing, not to one under the bitwarden root. The
-# argument is always quoted and the output is filenames only.
+# clients, server, or billing-pricing, not to one under the bitwarden root, so a repo
+# planted under one of those names is still diffed. The argument is always quoted and
+# the output is filenames only.
+#
+# git reads the repo's own config, and `core.fsmonitor` runs a command when git diffs
+# the working tree. The call below turns it off and compares commits only. Re-check what
+# a planted repo's config can run before adding any working-tree diff.
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then
@@ -35,4 +40,4 @@ case "$(basename "$1")" in
     ;;
 esac
 
-git -C "$1" diff --name-only origin/main...HEAD
+git -c core.fsmonitor=false -C "$1" diff --name-only origin/main...HEAD

@@ -23,7 +23,7 @@ description: |
   </example>
 model: sonnet
 skills:
-  - mapping-services-under-test
+  - bitwarden-testing-tools:mapping-services-under-test
 color: blue
 tools: Read, Skill
 ---

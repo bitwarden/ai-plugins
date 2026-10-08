@@ -46,7 +46,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 3. (Optional) Fill the Name field
 4. Click Continue
    - Feedback: "Check your email" confirmation state appears
-5. Use the `reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`) to fetch the verification email; stdout is the magic-link URL
+5. Use the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`) to fetch the verification email; stdout is the magic-link URL
 6. Navigate to the magic-link URL (it targets `https://localhost:8080/#/finish-signup?...`)
    - Feedback: finish-signup form appears
 7. Fill the Master Password field with `<password>` (the fixed dev master password `test-master-password-12`)
