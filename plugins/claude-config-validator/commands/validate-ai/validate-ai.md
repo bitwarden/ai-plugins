@@ -163,7 +163,9 @@ file type to a targeted review skill.
 
 `validate-plugin-structure.sh`, `validate-marketplace.sh`, and `validate-version-bump.sh` are
 not run here. The workflow runs them as dedicated steps before this review, and each reports
-its own result there. To run them yourself against a local checkout, use `/validate-ai-local`.
+its own result there. In interactive mode nothing runs them, so name all three on the
+report's `**Not covered:**` line. To run them yourself against a local checkout, use
+`/validate-ai-local`.
 
 ## 5. Post inline comments and write the report
 

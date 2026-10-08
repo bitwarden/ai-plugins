@@ -63,7 +63,8 @@ piling up new ones.
 
 Structure, marketplace, and version-bump validation are **not** run here. The workflow
 runs those three shell scripts as dedicated steps before this review, and each reports its
-own result there. To run them against a checkout, use `/validate-ai-local`.
+own result there. In interactive mode nothing runs them, so the report names all three on
+its `**Not covered:**` line. To run them against a checkout, use `/validate-ai-local`.
 
 Scope rules, gating, and the report format are defined once in
 [`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
