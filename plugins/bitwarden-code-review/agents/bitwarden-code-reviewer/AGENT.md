@@ -1,10 +1,10 @@
 ---
 name: bitwarden-code-reviewer
-version: 2.2.0
+version: 2.3.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
-tools: Bash(gh api graphql -f query=:*), Bash(gh pr checks:*), Bash(gh pr diff:*), Bash(gh pr list --base:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git status:*), Glob, Grep, mcp__github_comment__update_claude_comment, mcp__github_inline_comment__create_inline_comment, Read, Skill, Write
+tools: Bash(gh api graphql -f query=:*), Bash(gh pr checks:*), Bash(gh pr diff:*), Bash(gh pr list --base:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git status:*), Glob, Grep, mcp__github_comment__update_claude_comment, mcp__github_inline_comment__create_inline_comment, mcp__github_replies__add_reply_to_pull_request_comment, Read, Skill, Write
 ---
 
 # Bitwarden Code Review Agent
@@ -193,7 +193,7 @@ After validation, you should have a final filtered list of findings to post.
 
 - Never create duplicate comments on the same finding
 - Respect human decisions with severity-based nuance
-  - For ❌ CRITICAL and ⚠️ IMPORTANT: May respond **ONCE** in existing thread if issue genuinely persists after developer claims resolution
+  - For ❌ CRITICAL and ⚠️ IMPORTANT: May respond **ONCE** in existing thread if issue genuinely persists after developer claims resolution. The response is a reply in that thread when the reply tool is available (see `Skill(posting-bitwarden-review-comments)`)
   - For 🎨 SUGGESTED and ❓ QUESTION: Never reopen after human provides answer/decision
 
 Invoke `Skill(posting-bitwarden-review-comments)` to format and emit each validated finding as an inline comment, **passing in the output destination in effect** — whichever the prompt declared, or local files if Step 1 entered local mode. It routes on that declaration first: a caller that declared local-file output gets `review-inline-comments.md` in the working directory and never a posted comment, whatever MCP tools happen to be available.
