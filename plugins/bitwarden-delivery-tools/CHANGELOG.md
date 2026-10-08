@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2026-10-08
+
+### Fixed
+
+- `creating-pull-request`: the submission preview is passed as the `preview` field of the `Submit as shown` option, so it renders inside the confirmation dialog. Printed on its own, the preview could be hidden behind the dialog and the user was asked to approve a PR they could not see.
+
 ## [3.5.0] - 2026-10-06
 
 ### Added
