@@ -5,6 +5,17 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-10-07
+
+### Added
+
+- `generating-review-storybook` skill, which packages a stack of PRs or commits into a static, double-clickable HTML walkthrough for humans reviewing AI-written code: verdict-first hierarchy, narrative chapters per PR, findings and human review threads rendered as marginalia at the diff line they reference, and copy-as-Markdown export
+- `scripts/scaffold.py` renders the storybook from a JSON config into `$CLAUDE_PLUGIN_DATA/storybooks/<slug>-<timestamp>/`. It validates `gh_repo` against `^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$` because the value is substituted into a JS template literal
+- `scripts/capture_diffs.py` fetches PR diffs via `gh` or commit diffs via `git show`, base64-encoded for inlining into the config
+- Pre-baked verdicts come from `performing-multi-agent-code-review` reports and `/code-review-local` summaries, which Claude reads directly into each PR's verdict and findings, copying finding locations verbatim so they anchor to the diff. A review that reached no verdict renders as `no-verdict` with its reason, and a `Not covered` gap shows on that PR's verdict so a partial review never reads as a clean one
+- `scripts/fetch_pr_threads.py` pulls GitHub review threads into the storybook `comments[]` shape, skipping outdated threads and marking resolved ones
+- The storybook loads Prism 1.30.0 from jsDelivr with a `sha384` integrity hash on every file and the Inter font from Google Fonts, under a Content-Security-Policy that admits only those sources and the storybook's own files and blocks all outbound connections, so third-party code cannot run unverified on a page holding private diffs and reviewer notes
+
 ## [2.2.0] - 2026-09-28
 
 ### Added

@@ -1,0 +1,657 @@
+#!/usr/bin/env python3
+"""Generate a code-review storybook from a JSON config.
+
+Reads the bundled template under ../assets/template/, performs
+sentinel-bracketed block substitution and small token replacement, and
+writes the rendered storybook to the output directory.
+
+Usage:
+    python3 scripts/scaffold.py --config /tmp/storybook.json --output-root /tmp/storybooks
+    python3 scripts/scaffold.py --config /tmp/storybook.json --output /tmp/out
+
+--output-root writes to <root>/<slug>-<timestamp>/; --output writes to the
+exact directory given. With neither, CLAUDE_PLUGIN_DATA/storybooks is used as
+the root when that variable is set; otherwise the script exits with an error.
+
+The config schema is documented in references/data-schema.md.
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import re
+import shutil
+import sys
+from datetime import datetime
+from html import escape
+from pathlib import Path
+from typing import Any
+
+SKILL_ROOT = Path(__file__).resolve().parent.parent
+TEMPLATE_ROOT = SKILL_ROOT / "assets" / "template"
+SHIELD_PATH = TEMPLATE_ROOT / "assets" / "bw-shield.svg"
+
+VALID_VERDICTS = {"approve", "approve-fix", "block", "no-verdict", "pending"}
+VERDICT_LABELS = {
+    "approve": "Approved",
+    "approve-fix": "Approve with follow-up",
+    "block": "Blocked",
+    "no-verdict": "No verdict",
+    "pending": "Pending review",
+}
+# Appended to the derived label when a reached verdict carries a verdict_note, so a
+# review that left ground uncovered never reads as a clean verdict on the cover.
+COVERAGE_GAP_SUFFIX = ", coverage gap"
+
+
+def die(msg: str, code: int = 1) -> None:
+    print(f"scaffold.py: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+
+_SLUG_RE = re.compile(r"[^a-z0-9]+")
+_GH_REPO_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
+_GIT_HEADER_RE = re.compile(r"^diff --git a/(.+) b/(.+)$")
+_SVG_RE = re.compile(r'<svg\b[^>]*\bviewBox="(?P<box>[^"]+)"[^>]*>(?P<body>.*?)</svg>', re.DOTALL)
+_SVG_TITLE_RE = re.compile(r"<title>.*?</title>", re.DOTALL)
+
+
+def slugify(text: str) -> str:
+    s = _SLUG_RE.sub("-", text.lower()).strip("-")
+    return s or "stack"
+
+
+def resolve_output(explicit: Path | None, root: Path | None, slug: str) -> Path:
+    if explicit is not None:
+        return explicit
+    if root is None:
+        base = os.environ.get("CLAUDE_PLUGIN_DATA")
+        if not base:
+            die(
+                "no output location: pass --output-root <dir> (a timestamped "
+                "subdirectory is created) or --output <dir> (exact directory)"
+            )
+        root = Path(base) / "storybooks"
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return root / f"{slug}-{stamp}"
+
+
+# ---------- config validation ----------
+
+def load_config(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        die(f"config not found: {path}")
+    try:
+        config = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        die(f"config is not valid JSON: {e}")
+
+    if not isinstance(config, dict):
+        die("config must be a JSON object")
+    if not isinstance(config.get("stack"), list) or not config["stack"]:
+        die("config.stack must be a non-empty array")
+
+    config.setdefault("title", "Stack review")
+    config.setdefault("doc_title", config["title"])
+    config.setdefault("brand_meta", config["title"])
+    config.setdefault("summary", "")
+    config.setdefault("storage_prefix", "review-storybook-v1")
+    config.setdefault("gh_repo", "bitwarden/server")
+    if not _GH_REPO_RE.match(config["gh_repo"]):
+        die(f"gh_repo must be 'owner/name', got: {config['gh_repo']!r}")
+    config.setdefault("estimated_minutes", None)
+    config.setdefault("merge_plan", [])
+    config["slug"] = slugify(str(config.get("slug") or config["title"]))
+
+    for idx, item in enumerate(config["stack"]):
+        if not isinstance(item, dict):
+            die(f"stack[{idx}] must be an object")
+        if not item.get("key"):
+            die(f"stack[{idx}].key is required (PR number or commit short-sha)")
+        item["key"] = str(item["key"])
+        item.setdefault("kind", "pr")
+        if item["kind"] not in {"pr", "commit"}:
+            die(f"stack[{idx}].kind must be 'pr' or 'commit'")
+        item.setdefault("title", item["key"])
+        item.setdefault("ticket", "")
+        item.setdefault("description", "")
+        verdict = item.setdefault("verdict", "pending")
+        if verdict not in VALID_VERDICTS:
+            die(f"stack[{idx}].verdict must be one of {sorted(VALID_VERDICTS)}")
+        note = item.setdefault("verdict_note", "")
+        if not isinstance(note, str):
+            die(f"stack[{idx}].verdict_note must be a string")
+        label = VERDICT_LABELS[verdict]
+        if note and verdict not in {"no-verdict", "pending"}:
+            label += COVERAGE_GAP_SUFFIX
+        item.setdefault("verdict_label", label)
+        findings = item.setdefault("findings", {})
+        for k in ("critical", "important", "debt", "suggested", "question"):
+            findings.setdefault(k, 0)
+        items = findings.setdefault("items", [])
+        for entry in items:
+            entry.setdefault("severity", "question")
+            entry.setdefault("message", "")
+            entry.setdefault("location", "")
+            entry.setdefault("suggestion", "")
+        item.setdefault("files_changed", 0)
+        item.setdefault("lines_changed", 0)
+        item.setdefault("diff_b64", "")
+        item.setdefault("diff_path", "")
+        if not item["diff_b64"] and item["diff_path"]:
+            try:
+                raw = Path(item["diff_path"]).read_text(encoding="utf-8")
+                item["diff_b64"] = base64.b64encode(raw.encode("utf-8")).decode("ascii")
+            except OSError as e:
+                die(f"unable to read diff_path for {item['key']}: {e}")
+        if item["diff_b64"] and not (item["files_changed"] and item["lines_changed"]):
+            files, lines = diff_stats(decode_diff(item["diff_b64"]))
+            item["files_changed"] = item["files_changed"] or files
+            item["lines_changed"] = item["lines_changed"] or lines
+        comments = item.setdefault("comments", [])
+        for c in comments:
+            c.setdefault("author", "")
+            c.setdefault("body", "")
+            c.setdefault("location", "")
+            c.setdefault("created_at", "")
+        chapters = item.setdefault("chapters", [])
+        for chapter in chapters:
+            chapter.setdefault("title", "")
+            chapter.setdefault("narrative", "")
+            chapter.setdefault("paths", [])
+            chapter.setdefault("scenes", [])
+            if not isinstance(chapter["paths"], list):
+                die(f"stack item '{item['key']}' chapter.paths must be an array")
+            if not isinstance(chapter["scenes"], list):
+                die(f"stack item '{item['key']}' chapter.scenes must be an array")
+            for scene in chapter["scenes"]:
+                scene.setdefault("title", "")
+                scene.setdefault("narrative", "")
+                scene.setdefault("paths", [])
+                if not isinstance(scene["paths"], list):
+                    die(f"stack item '{item['key']}' scene.paths must be an array")
+
+    return config
+
+
+# ---------- template substitution ----------
+
+BLOCK_RE = re.compile(
+    r"<!--\s*__BW_BLOCK_START__\s+(?P<name>[\w-]+)\s*-->.*?<!--\s*__BW_BLOCK_END__\s+(?P=name)\s*-->",
+    re.DOTALL,
+)
+JS_BLOCK_RE = re.compile(
+    r"//\s*__BW_BLOCK_START__\s+(?P<name>[\w-]+)\n.*?//\s*__BW_BLOCK_END__\s+(?P=name)",
+    re.DOTALL,
+)
+
+
+def replace_html_block(template: str, name: str, replacement: str) -> str:
+    found = {"hit": False}
+
+    def sub(m: re.Match) -> str:
+        if m.group("name") == name:
+            found["hit"] = True
+            return replacement
+        return m.group(0)
+
+    out = BLOCK_RE.sub(sub, template)
+    if not found["hit"]:
+        die(f"HTML block '{name}' not found in template")
+    return out
+
+
+def replace_js_block(template: str, name: str, replacement: str) -> str:
+    found = {"hit": False}
+
+    def sub(m: re.Match) -> str:
+        if m.group("name") == name:
+            found["hit"] = True
+            return replacement
+        return m.group(0)
+
+    out = JS_BLOCK_RE.sub(sub, template)
+    if not found["hit"]:
+        die(f"JS block '{name}' not found in template")
+    return out
+
+
+def replace_tokens(text: str, tokens: dict[str, str]) -> str:
+    for key, value in tokens.items():
+        text = text.replace(key, value)
+    return text
+
+
+# ---------- HTML generation ----------
+
+def inline_shield(extra_class: str = "") -> str:
+    """The shield from bw-shield.svg as inline markup, so styles.css can theme its fills."""
+    if not SHIELD_PATH.is_file():
+        die(f"template asset missing: {SHIELD_PATH}")
+    m = _SVG_RE.search(SHIELD_PATH.read_text(encoding="utf-8"))
+    if not m:
+        die(f"no <svg> element with a viewBox in {SHIELD_PATH}")
+    body = _SVG_TITLE_RE.sub("", m.group("body")).strip()
+    classes = f"brand-shield {extra_class}".strip()
+    return (
+        f'<svg class="{classes}" viewBox="{m.group("box")}" aria-hidden="true">'
+        f"{body}</svg>"
+    )
+
+
+def generate_cover(config: dict[str, Any]) -> str:
+    stack = config["stack"]
+    pr_count = len(stack)
+    total_lines = sum(int(it.get("lines_changed") or 0) for it in stack)
+    minutes = config.get("estimated_minutes")
+    if not minutes:
+        minutes = max(1, round(total_lines / 50) + pr_count)
+
+    eyebrow = escape(f"Stack review · {pr_count} {'PR' if pr_count == 1 else 'PRs'}")
+    title = escape(config["title"])
+    summary = escape(config["summary"]) if config["summary"] else (
+        f"{pr_count} change{'s' if pr_count != 1 else ''} packaged for review. "
+        "Verdicts and findings populate as each PR is reviewed."
+    )
+
+    totals = {"critical": 0, "important": 0, "debt": 0, "suggested": 0, "question": 0}
+    for item in stack:
+        for k in totals:
+            totals[k] += int(item["findings"].get(k, 0))
+
+    aside_rows = []
+    for label, key, tone in (
+        ("Critical", "critical", "crit"),
+        ("Important", "important", "warn"),
+        ("Debt", "debt", "info"),
+        ("Suggested", "suggested", "info"),
+        ("Question", "question", "info"),
+    ):
+        value = totals[key]
+        cell = str(value) if value else "—"
+        value_class = f"rollup-value rollup-{tone}" if value else "rollup-value"
+        aside_rows.append(
+            f'<div class="rollup-row">'
+            f'<span class="rollup-label">{label}</span>'
+            f'<span class="{value_class}">{cell}</span>'
+            f"</div>"
+        )
+
+    return f"""<!-- __BW_BLOCK_START__ cover -->
+<section class="page" id="page-1" data-page-key="cover">
+  <div class="cover-hero-mark" aria-hidden="true">
+    {inline_shield("cover-shield")}
+    <span class="cover-wordmark">Bitwarden</span>
+  </div>
+  <span class="eyebrow">{eyebrow}</span>
+  <h1 class="display display-xl cover-title">{title}</h1>
+  <p class="lead cover-lead">{summary}</p>
+
+  <div class="resume-banner" id="resume-banner" hidden>
+    <div class="resume-text">
+      <strong>Resume where you left off.</strong>
+      <span id="resume-detail" class="small resume-detail"></span>
+    </div>
+    <button class="btn btn-primary" id="resume-btn">Resume →</button>
+  </div>
+
+  <div class="cover-grid">
+    <div>
+      <span class="eyebrow">Triage list</span>
+      <h2 class="display display-m cover-triage-title">Decide each in order. Skip with verdict pending.</h2>
+      <ul class="triage-list" id="triage-list" role="list"></ul>
+      <div class="cover-actions">
+        <button class="btn btn-primary" id="start-btn">Start review →</button>
+        <button class="btn btn-ghost" id="merge-plan-btn">See merge plan</button>
+      </div>
+    </div>
+
+    <aside>
+      <div class="cover-aside">
+        <span class="eyebrow">Verdicts &amp; findings</span>
+        <h3 class="display display-m cover-rollup-title">Stack rollup</h3>
+        <div class="rollup">
+          {''.join(aside_rows)}
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="cover-stat-grid">
+    <div class="cover-stat">
+      <div class="cover-stat-num">{pr_count}</div>
+      <div class="cover-stat-label">{'PR' if pr_count == 1 else 'PRs'} in stack</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num">~{total_lines}</div>
+      <div class="cover-stat-label">Lines changed</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num">~{minutes}<span class="cover-stat-unit">min</span></div>
+      <div class="cover-stat-label">Estimated read time</div>
+    </div>
+  </div>
+
+  <p class="small cover-footnote">
+    Built locally from captured review data. Inline comments and decisions persist in your
+    browser only. Use <kbd>→</kbd> and <kbd>←</kbd> to navigate, <kbd>Esc</kbd> to close any open editor.
+  </p>
+</section>
+<!-- __BW_BLOCK_END__ cover -->"""
+
+
+def build_page_order(config: dict[str, Any]) -> list[dict[str, Any]]:
+    """One page per scene: cover → (per-PR, per-chapter, per-scene) → merge.
+
+    Chapters without scenes contribute a single implicit scene (the chapter's
+    own paths). PRs without chapters contribute a single implicit scene.
+    """
+    order: list[dict[str, Any]] = [{"kind": "cover"}]
+    for item in config["stack"]:
+        chapters = item.get("chapters") or []
+        if not chapters:
+            order.append({
+                "kind": "scene",
+                "prKey": item["key"],
+                "chapterIndex": -1,
+                "sceneIndex": -1,
+            })
+            continue
+        for ci, chapter in enumerate(chapters):
+            scenes = chapter.get("scenes") or []
+            if not scenes:
+                order.append({
+                    "kind": "scene",
+                    "prKey": item["key"],
+                    "chapterIndex": ci,
+                    "sceneIndex": -1,
+                })
+            else:
+                for si in range(len(scenes)):
+                    order.append({
+                        "kind": "scene",
+                        "prKey": item["key"],
+                        "chapterIndex": ci,
+                        "sceneIndex": si,
+                    })
+    order.append({"kind": "merge"})
+    return order
+
+
+def generate_pr_pages(config: dict[str, Any]) -> str:
+    page_order = build_page_order(config)
+    scene_indices = [i + 1 for i, p in enumerate(page_order) if p["kind"] == "scene"]
+    sections = [f'<section class="page" id="page-{n}"></section>' for n in scene_indices]
+    return (
+        "<!-- __BW_BLOCK_START__ pr-pages -->\n"
+        + "\n".join(sections)
+        + "\n<!-- __BW_BLOCK_END__ pr-pages -->"
+    )
+
+
+def key_label(item: dict[str, Any]) -> str:
+    """Display label for a stack key, matching keyLabel() in app.js."""
+    return item["key"][:12] if item["kind"] == "commit" else f"#{item['key']}"
+
+
+def generate_merge_plan(config: dict[str, Any], merge_page: int) -> str:
+    items = config.get("merge_plan") or [
+        {
+            "title": f"{key_label(it)} — {it['title']}",
+            "body": it.get("description") or "Merge order to be decided after review.",
+        }
+        for it in config["stack"]
+    ]
+    steps = []
+    for entry in items:
+        title = escape(entry.get("title") or "")
+        body = escape(entry.get("body") or "")
+        zone = entry.get("zone")
+        zone_html = (
+            f'<div class="step-zone">↳ {escape(zone)}</div>' if zone else ""
+        )
+        steps.append(
+            f'<li class="step-item">'
+            f'<div class="step-num"></div>'
+            f'<div class="step-content">'
+            f"<h3>{title}</h3>"
+            f"<p>{body}</p>"
+            f"{zone_html}"
+            f"</div></li>"
+        )
+
+    return f"""<!-- __BW_BLOCK_START__ merge-plan -->
+<section class="page" id="page-{merge_page}" data-page-key="merge">
+  <span class="eyebrow">Page {merge_page} · Merge plan</span>
+  <h1 class="display display-l merge-title">Recommended integration sequence</h1>
+  <p class="lead merge-lead">
+    Work through the stack in order. Hold any PR with an unresolved blocker; merge the rest as their reviews land.
+  </p>
+
+  <ol class="step-list">
+    {''.join(steps)}
+  </ol>
+
+  <div class="decision-widget">
+    <h3 class="decision-title">Final disposition</h3>
+    <p class="decision-sub">Use the running tally above each page; this is space for an overall note.</p>
+    <div class="page-comments page-comments-flush">
+      <label for="merge-comment-final">Overall reviewer note (optional)</label>
+      <textarea class="comment-textarea" id="merge-comment-final" data-page-comment="merge"
+        placeholder="e.g., 'Approved 1 → 2 → 3 once dependency ships; 4 holds for design.'"></textarea>
+    </div>
+  </div>
+
+  <p class="small merge-footnote">
+    End of stack · Use <strong>Export notes</strong> in the toolbar to copy all decisions and comments as Markdown.
+  </p>
+</section>
+<!-- __BW_BLOCK_END__ merge-plan -->"""
+
+
+# ---------- data.js generation ----------
+
+def decode_diff(diff_b64: str) -> str:
+    """Decode a base64 diff, returning an empty string when it is not valid base64."""
+    try:
+        return base64.b64decode(diff_b64).decode("utf-8", errors="replace")
+    except ValueError:
+        return ""
+
+
+def diff_stats(diff_text: str) -> tuple[int, int]:
+    """(files, added + removed lines) in a unified diff, counted the same way app.js counts them."""
+    files = 0
+    lines = 0
+    in_hunks = False
+    for line in diff_text.split("\n"):
+        if line.startswith("diff --git"):
+            files += 1
+            in_hunks = False
+        elif line.startswith("@@"):
+            in_hunks = files > 0
+        elif in_hunks and line.startswith(("+", "-")):
+            lines += 1
+    return files, lines
+
+
+def diff_paths(diff_text: str) -> set[str]:
+    """File paths in a unified diff, resolved the same way app.js resolves them."""
+    paths: set[str] = set()
+    current: dict[str, str] | None = None
+
+    def resolve(f: dict[str, str] | None) -> None:
+        # Same precedence as app.js: new side, rename target, old side, header.
+        if f is not None:
+            path = f.get("new") or f.get("rename") or f.get("old") or f.get("header")
+            if path:
+                paths.add(path)
+
+    in_header = False
+    for line in diff_text.split("\n"):
+        if line.startswith("diff --git"):
+            resolve(current)
+            current, in_header = {}, True
+            m = _GIT_HEADER_RE.match(line)
+            if m:
+                current["header"] = m.group(2)
+        elif line.startswith("@@"):
+            in_header = False
+        elif in_header and current is not None:
+            if line.startswith("+++ b/"):
+                current["new"] = line[6:]
+            elif line.startswith("+++ ") and line != "+++ /dev/null" and "new" not in current:
+                current["new"] = line[4:]
+            elif line.startswith("--- a/"):
+                current["old"] = line[6:]
+            elif line.startswith("--- ") and line != "--- /dev/null" and "old" not in current:
+                current["old"] = line[4:]
+            elif line.startswith("rename to "):
+                current["rename"] = line[len("rename to "):]
+    resolve(current)
+    return paths
+
+
+def warn_unknown_chapter_paths(item: dict[str, Any], diff_b64: str) -> None:
+    """Warn on stderr about chapter or scene paths that match no file in the diff."""
+    if not diff_b64 or not item.get("chapters"):
+        return
+    known = diff_paths(decode_diff(diff_b64))
+    if not known:
+        return
+    for chapter in item["chapters"]:
+        declared = list(chapter.get("paths") or [])
+        for scene in chapter.get("scenes") or []:
+            declared.extend(scene.get("paths") or [])
+        for path in declared:
+            if path not in known:
+                print(
+                    f"scaffold.py: warning: stack item '{item['key']}' chapter "
+                    f"'{chapter.get('title', '')}' lists '{path}', which is not in the diff",
+                    file=sys.stderr,
+                )
+
+
+def generate_data_js(config: dict[str, Any]) -> str:
+    pages_data: dict[str, dict[str, Any]] = {}
+    diffs: dict[str, str] = {}
+
+    for item in config["stack"]:
+        key = item["key"]
+        pages_data[key] = {
+            "key": key,
+            "kind": item["kind"],
+            "title": item["title"],
+            "ticket": item.get("ticket") or "",
+            "description": item.get("description") or "",
+            "verdict": item["verdict"],
+            "verdictLabel": item.get("verdict_label") or VERDICT_LABELS[item["verdict"]],
+            "verdictNote": item.get("verdict_note") or "",
+            "findings": item["findings"],
+            "comments": item.get("comments") or [],
+            "chapters": item.get("chapters") or [],
+            "filesChanged": int(item.get("files_changed") or 0),
+            "linesChanged": int(item.get("lines_changed") or 0),
+        }
+        diff_b64 = item.get("diff_b64") or ""
+        warn_unknown_chapter_paths(item, diff_b64)
+        diffs[key] = diff_b64
+
+    page_order = build_page_order(config)
+    return (
+        "// data.js — generated by scaffold.py. Do not hand-edit.\n"
+        f"window.REVIEW_DATA = {json.dumps(pages_data, indent=2)};\n"
+        f"window.DIFFS = {json.dumps(diffs, indent=2)};\n"
+        f"window.PAGE_ORDER = {json.dumps(page_order, indent=2)};\n"
+    )
+
+
+# ---------- main ----------
+
+def render_index(config: dict[str, Any]) -> str:
+    template = (TEMPLATE_ROOT / "index.html.tmpl").read_text(encoding="utf-8")
+    page_order = build_page_order(config)
+    merge_page = len(page_order)
+
+    template = replace_html_block(template, "cover", generate_cover(config))
+    template = replace_html_block(template, "pr-pages", generate_pr_pages(config))
+    template = replace_html_block(template, "merge-plan", generate_merge_plan(config, merge_page))
+
+    return replace_tokens(
+        template,
+        {
+            "__BW_DOC_TITLE__": escape(config["doc_title"]),
+            "__BW_BRAND_META__": escape(config["brand_meta"]),
+            "__BW_SHIELD__": inline_shield(),
+        },
+    )
+
+
+def render_app_js(config: dict[str, Any]) -> str:
+    template = (TEMPLATE_ROOT / "assets" / "app.js.tmpl").read_text(encoding="utf-8")
+    stack_keys = [item["key"] for item in config["stack"]]
+    total_pages = len(build_page_order(config))
+
+    config_block = (
+        "// __BW_BLOCK_START__ stack-config\n"
+        f"const STACK_ORDER = {json.dumps(stack_keys)};\n"
+        f"const TOTAL_PAGES = {total_pages};\n"
+        f"const STORAGE_PREFIX = {json.dumps(config['storage_prefix'])};\n"
+        "// __BW_BLOCK_END__ stack-config"
+    )
+    template = replace_js_block(template, "stack-config", config_block)
+    return replace_tokens(template, {"__BW_GH_REPO__": config["gh_repo"]})
+
+
+def write_storybook(config: dict[str, Any], output: Path) -> None:
+    if not TEMPLATE_ROOT.is_dir():
+        die(f"template directory missing: {TEMPLATE_ROOT}")
+
+    output.mkdir(parents=True, exist_ok=True)
+    assets_out = output / "assets"
+    assets_out.mkdir(exist_ok=True)
+
+    (output / "index.html").write_text(render_index(config), encoding="utf-8")
+    (assets_out / "app.js").write_text(render_app_js(config), encoding="utf-8")
+    (assets_out / "data.js").write_text(generate_data_js(config), encoding="utf-8")
+
+    template_assets = TEMPLATE_ROOT / "assets"
+    for name in ("styles.css", "bw-shield.svg"):
+        src = template_assets / name
+        if not src.is_file():
+            die(f"template asset missing: {src}")
+        shutil.copyfile(src, assets_out / name)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate a code-review storybook.")
+    parser.add_argument("--config", required=True, type=Path, help="Path to JSON config")
+    location = parser.add_mutually_exclusive_group()
+    location.add_argument(
+        "--output-root",
+        type=Path,
+        help=(
+            "Directory under which <slug>-<timestamp>/ is created. Defaults to "
+            "$CLAUDE_PLUGIN_DATA/storybooks when that variable is set."
+        ),
+    )
+    location.add_argument(
+        "--output",
+        type=Path,
+        help="Exact output directory, used as given.",
+    )
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    output = resolve_output(args.output, args.output_root, config["slug"])
+    write_storybook(config, output)
+
+    print(f"Wrote storybook to {output}")
+    print(f"  Stack:   {len(config['stack'])} items")
+    print(f"  Open:    file://{output.resolve()}/index.html")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/prismjs@1.30.0/; style-src 'self' https://cdn.jsdelivr.net/npm/prismjs@1.30.0/ https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>__BW_DOC_TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism.min.css" integrity="sha384-rCCjoCPCsizaAAYVoz1Q0CmCTvnctK0JkfCSjx7IIxexTBg+uCKtFYycedUjMyA2" crossorigin="anonymous" />
+<link rel="stylesheet" href="assets/styles.css" />
+<link rel="icon" type="image/svg+xml" href="assets/bw-shield.svg" />
+</head>
+<body data-theme="">
+<div class="app">
+
+<!-- ===== TOPBAR ===== -->
+<header class="topbar" role="banner">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-lockup" aria-label="Bitwarden">
+        __BW_SHIELD__
+        <span class="brand-wordmark">Bitwarden</span>
+      </span>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-meta">__BW_BRAND_META__</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="export-btn" title="Copy all comments and decisions to clipboard">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 5h2v9H3V5h2M5 5V2h6v3M8 8v5M5.5 10.5L8 13l2.5-2.5"/></svg>
+        Export notes
+      </button>
+      <button class="btn btn-ghost" id="wrap-btn" aria-pressed="true" title="Wrap long diff lines, or scroll them sideways when off">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h12M2 8h9.5a2.5 2.5 0 0 1 0 5H8M9.5 11.5L8 13l1.5 1.5M2 12h3"/></svg>
+        Wrap lines
+      </button>
+      <button class="btn btn-ghost" id="theme-btn" aria-label="Toggle theme">
+        <span id="theme-icon">☼</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main role="main">
+
+<!-- ============================================================ -->
+<!-- PAGE 1: COVER -->
+<!-- ============================================================ -->
+<!-- __BW_BLOCK_START__ cover -->
+<!-- scaffold.py renders the cover page here. -->
+<!-- __BW_BLOCK_END__ cover -->
+
+<!-- ============================================================ -->
+<!-- PER-PR PAGES (rendered by JS) -->
+<!-- ============================================================ -->
+<!-- __BW_BLOCK_START__ pr-pages -->
+<!-- scaffold.py emits one empty page per scene here; app.js renders each one. -->
+<!-- __BW_BLOCK_END__ pr-pages -->
+
+<!-- ============================================================ -->
+<!-- MERGE PLAN (final page) -->
+<!-- ============================================================ -->
+<!-- __BW_BLOCK_START__ merge-plan -->
+<!-- scaffold.py renders the merge plan page here. -->
+<!-- __BW_BLOCK_END__ merge-plan -->
+
+</main>
+
+<!-- ===== FOOTBAR ===== -->
+<footer class="footbar" role="navigation">
+  <div class="footbar-inner">
+    <div class="footbar-progress" id="progress-readout">Page 1 of 8</div>
+    <div class="pagination-dots" id="dots" role="tablist" aria-label="Page navigation"></div>
+    <div class="footbar-nav">
+      <button class="btn btn-ghost" id="prev-btn">← Prev</button>
+      <button class="btn" id="next-btn">Next →</button>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Prism.js 1.30.0, pinned by integrity hash; components load after the ones they extend -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-core.min.js" integrity="sha384-zLRFO4dwowZvh8kzutOb5AWhH7f39HeJp+N7PtHF1SQtTBnifRx0AtmvTYs3F4YV" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-clike.min.js" integrity="sha384-7LHwxHIDSHTBleLmgDWZbC/IMJsfYfFVOihKhvsrxYW4j47YQcRwZja4ToFE3bA8" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-swift.min.js" integrity="sha384-4RYbFVFN0J24/jfNL9Olk5/pS71bzqjKebX+ZvzzMQ+uDl2T4k/DOuGY6Znxqj8N" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-kotlin.min.js" integrity="sha384-zz49ukKZF8e3sr9aiW45Ju61sb9hptYyPOufuu9eutOrjwnOK3D1CGRU+eb12fGy" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-csharp.min.js" integrity="sha384-nMKYzg6yfy0qgpaRpVhHvZp0gT5sgvmZYlFC0XAKZSp+zFUB9rE6zsdmIEiou4bV" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous"></script>
+
+<!-- Storybook scripts: data → app -->
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>
