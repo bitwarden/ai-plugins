@@ -69,9 +69,9 @@ The table below shows which Jira fields are available for authoring by ticket ty
 
 The Purpose section appears in the Description field and is always present. Its content varies by type.
 
-**Epic:** A paragraph describing what this epic accomplishes and why. Followed by outcome-oriented goal bullets.
+**Epic:** A `# Purpose` heading containing a paragraph describing what this epic accomplishes and why.
 
-**Story:** Not sub-sectioned. Separated by blank lines in this order:
+**Story:** A `# Purpose` heading followed by, in order:
 
 1. (Optional) User Story sentence: `**User Story:** As a [role], I want to [action] so that [outcome].`
 2. Purpose paragraph — what this ticket covers and the context a reader needs to complete the work
@@ -81,9 +81,9 @@ The Purpose section appears in the Description field and is always present. Its 
 
 **Task:** Same as Story but without the User Story sentence.
 
-**Spike:** A paragraph describing what question or problem prompted the spike and what will be possible once the spike is complete.
+**Spike:** A `# Purpose` heading containing a paragraph describing what question or problem prompted the spike and what will be possible once it is complete.
 
-**Bug:** A paragraph describing what is broken and where, without restating the replication steps.
+**Bug:** A `# Purpose` heading containing a paragraph describing what is broken and where, without restating the replication steps.
 
 ---
 

@@ -6,9 +6,33 @@ Every output `.md` file has the same outer structure:
 
 1. **Title line** — `# [Ticket Title]` at the top
 2. **Metadata block** — type and links, immediately below the title
-3. **Field blocks** — each Jira field or Description section separated by `---`
+3. **Field blocks** — each standalone Jira field separated by `---`
 
-Field labels use `**BOLD ALL-CAPS**`. This makes them easy to find when copy-pasting into Jira. Content inside a field may use `#` for Jira H1 headings freely — the field label itself is not a markdown heading.
+### Two kinds of sections
+
+| Kind                        | Label style                            | How it maps to Jira                                                   |
+| --------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| **Standalone Jira field**   | `**BOLD ALL-CAPS**`, preceded by `---` | Pasted into its own named field in Jira                               |
+| **Description sub-section** | `# H1 heading`, no `---`               | Flows into the Description field; `# H1` renders as a heading in Jira |
+
+`---` dividers mark Jira field boundaries only. All content between two `---` dividers is the value for one Jira field. Description sub-sections (Scenarios, Scope, Risks / Considerations, Questions and Answers, External References) flow together inside the DESCRIPTION block without `---` separators — the `# H1` headings render as headings in Jira's rich text editor.
+
+**Standalone Jira fields by type:**
+
+- Story, Task: ACCEPTANCE CRITERIA, QA TESTING NOTES (when justified), TECHNICAL BREAKDOWN (when justified)
+- Spike: GOALS / DELIVERABLES
+- Bug: REPLICATION STEPS, QA TESTING NOTES (when justified)
+- All types: DESCRIPTION
+
+**Description sub-sections** (all live inside the Description field, labeled with `# H1`):
+
+- Purpose (all types — always)
+- Goals (Epic only)
+- Scenarios (Story only)
+- Scope (Story, Task, Epic — when justified)
+- Risks / Considerations (all types — when justified)
+- Questions and Answers (all types — when justified)
+- External References (all types — when justified)
 
 ---
 
@@ -19,16 +43,18 @@ Derive from the ticket title:
 1. Lowercase
 2. Replace spaces and non-alphanumeric characters with hyphens
 3. Collapse consecutive hyphens to one
-4. Truncate to 50 characters at a word boundary
-5. Prefix with type: `story-`, `task-`, `epic-`, `spike-`, `bug-`
+4. If the result is 50 characters or fewer, use it as-is
+5. If longer than 50 characters: derive a concise semantic slug of 3–5 key words (noun + action) rather than truncating mechanically; present the derived slug to the user for confirmation
+6. Prefix with type: `story-`, `task-`, `epic-`, `spike-`, `bug-`
 
 Examples:
 
-| Title                                    | Filename                                     |
-| ---------------------------------------- | -------------------------------------------- |
-| Add CSV export to the item list (web)    | `story-add-csv-export-to-the-item-list.md`   |
-| Investigate offline sync conflict model  | `spike-investigate-offline-sync-conflict.md` |
-| Vault item thumbnail renders blank image | `bug-vault-item-thumbnail-renders-blank.md`  |
+| Title                                                                                      | Filename                                                                    |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| [Web] Add CSV export to the item list                                                      | `story-web-add-csv-export-to-the-item-list.md`                              |
+| Investigate offline sync conflict model                                                    | `spike-investigate-offline-sync-conflict.md`                                |
+| Vault item thumbnail renders blank image                                                   | `bug-vault-item-thumbnail-renders-blank.md`                                 |
+| Add the Active members and Sponsored Families Plan usage cards to the Member Adoption page | `story-add-metric-cards-member-adoption.md` _(slug derived, not truncated)_ |
 
 ---
 
@@ -36,11 +62,12 @@ Examples:
 
 Use these consistently so the user can find and replace them when pasting into Jira:
 
-| What it represents           | Placeholder format           | Example                                             |
-| ---------------------------- | ---------------------------- | --------------------------------------------------- |
-| Jira status/label element    | `[STATUS: value]`            | `[STATUS: Open]`, `[STATUS: Resolved: Yes]`         |
-| Jira callout (panel) element | `[CALLOUT: type \| message]` | `[CALLOUT: info \| Only affects web vault]`         |
-| Link not yet available       | `(LINK TO BE PROVIDED)`      | `**Design:** [Export Designs](LINK TO BE PROVIDED)` |
+| What it represents             | Placeholder format           | Example                                             |
+| ------------------------------ | ---------------------------- | --------------------------------------------------- |
+| Jira status/label element      | `[STATUS: value]`            | `[STATUS: Open]`, `[STATUS: Resolved: Yes]`         |
+| Jira callout (panel) element   | `[CALLOUT: type \| message]` | `[CALLOUT: info \| Only affects web vault]`         |
+| Link not yet available         | `(LINK TO BE PROVIDED)`      | `**Design:** [Export Designs](LINK TO BE PROVIDED)` |
+| Scalar value not yet available | `(VALUE TO BE PROVIDED)`     | `**Feature Flag:** (VALUE TO BE PROVIDED)`          |
 
 Callout types: `info`, `warning`, `success`, `error`.
 
@@ -60,6 +87,8 @@ Callout types: `info`, `warning`, `success`, `error`.
 
 **DESCRIPTION**
 
+# Purpose
+
 **User Story:** As a [role], I want to [action] so that [outcome].
 
 [Purpose paragraph — what this ticket covers and the context a reader needs to complete the work]
@@ -68,20 +97,7 @@ Callout types: `info`, `warning`, `success`, `error`.
 **Design:** [Figma title](url)
 **Tech Breakdown:** [Document or PR title](url)
 
----
-
-**ACCEPTANCE CRITERIA**
-
-- [Observable change]
-- [Observable change]
-
-**Out of Scope:**
-
-- [Item a reader could assume is included but isn't]
-
----
-
-**SCENARIOS**
+# Scenarios
 
 ```gherkin
 Scenario: [Primary path name]
@@ -93,7 +109,37 @@ Scenario: [Error / edge case name]
   Given [starting context]
   When [action that triggers the edge]
   Then [observable outcome]
-` `` `
+` ``
+
+# Scope
+
+- [Observable change this ticket makes]
+
+**Stretch Goals:**
+- [Related work deferred to its own ticket]
+
+# Risks / Considerations
+
+- [Risk: description]
+
+# Questions and Answers
+
+[STATUS: Open] **[Question directed at product or design]**
+> [Answer or current best understanding]
+
+# External References
+
+- [Link text](url)
+
+---
+
+**ACCEPTANCE CRITERIA**
+
+- [Observable change]
+
+**Out of Scope:**
+
+- [Item a reader could assume is included but isn't]
 
 ---
 
@@ -107,36 +153,7 @@ Scenario: [Error / edge case name]
 
 [Intent and constraints paragraph. Captures trade-offs, non-obvious decisions, and constraints. Points to where the behavior lives using real links — never a step-by-step implementation guide.]
 
----
-
-**SCOPE**
-
-- [Observable change this ticket makes]
-
-**Stretch Goals:**
-- [Related work deferred to its own ticket]
-
-**Out of Scope:**
-- [Item a reader could assume is included but isn't]
-
----
-
-**RISKS / CONSIDERATIONS**
-
-- [Risk: description]
-
----
-
-**QUESTIONS AND ANSWERS**
-
-[STATUS: Open] **[Question directed at product or design]**
-> [Answer or current best understanding]
-
----
-
-**EXTERNAL REFERENCES**
-
-- [Link text](url)
+- **Pending:** [Decision question — see Questions and Answers for current options]
 ```
 ````
 
@@ -147,7 +164,7 @@ Scenario: [Error / edge case name]
 Same as Story except:
 
 - No `**User Story:**` line in Description
-- No `**SCENARIOS**` field — Tasks never get Gherkin Scenarios
+- No Scenarios sub-section — Tasks never get Gherkin Scenarios
 
 ```markdown
 # [Ticket Title]
@@ -159,11 +176,35 @@ Same as Story except:
 
 **DESCRIPTION**
 
+# Purpose
+
 [Purpose paragraph]
 
 **Feature Flag:** `[launchdarkly-flag-value]`
 **Design:** [Figma title](url)
 **Tech Breakdown:** [Document or PR title](url)
+
+# Scope
+
+- [Observable change this ticket makes]
+
+**Stretch Goals:**
+
+- [Related work deferred to its own ticket]
+
+# Risks / Considerations
+
+- [Risk: description]
+
+# Questions and Answers
+
+[STATUS: Open] **[Question]**
+
+> [Answer]
+
+# External References
+
+- [Link text](url)
 
 ---
 
@@ -187,31 +228,7 @@ Same as Story except:
 
 [Intent and constraints paragraph.]
 
----
-
-**SCOPE**
-
-- [Observable change]
-
----
-
-**RISKS / CONSIDERATIONS**
-
-- [Risk]
-
----
-
-**QUESTIONS AND ANSWERS**
-
-[STATUS: Open] **[Question]**
-
-> [Answer]
-
----
-
-**EXTERNAL REFERENCES**
-
-- [Link text](url)
+- **Pending:** [Decision question — see Questions and Answers for current options]
 ```
 
 ---
@@ -227,6 +244,8 @@ Same as Story except:
 
 **DESCRIPTION**
 
+# Purpose
+
 [Purpose paragraph — what this epic accomplishes and why]
 
 # Goals
@@ -234,9 +253,7 @@ Same as Story except:
 - [Outcome-oriented goal — what is true when this epic is complete]
 - [Outcome-oriented goal]
 
----
-
-**SCOPE**
+# Scope
 
 - [Observable change this epic delivers]
 
@@ -244,23 +261,17 @@ Same as Story except:
 
 - [Item]
 
----
-
-**RISKS / CONSIDERATIONS**
+# Risks / Considerations
 
 - [Risk]
 
----
-
-**QUESTIONS AND ANSWERS**
+# Questions and Answers
 
 [STATUS: Open] **[Question]**
 
 > [Answer]
 
----
-
-**EXTERNAL REFERENCES**
+# External References
 
 - [Link text](url)
 ```
@@ -278,7 +289,23 @@ Same as Story except:
 
 **DESCRIPTION**
 
+# Purpose
+
 [Purpose paragraph — what question or problem prompted this spike and what will be possible once it is complete]
+
+# Risks / Considerations
+
+- [Risk]
+
+# Questions and Answers
+
+[STATUS: Open] **[Question]**
+
+> [Answer]
+
+# External References
+
+- [Link text](url)
 
 ---
 
@@ -286,26 +313,6 @@ Same as Story except:
 
 - [Artifact or confirmed answer the spike must produce]
 - [Artifact or confirmed answer]
-
----
-
-**RISKS / CONSIDERATIONS**
-
-- [Risk]
-
----
-
-**QUESTIONS AND ANSWERS**
-
-[STATUS: Open] **[Question]**
-
-> [Answer]
-
----
-
-**EXTERNAL REFERENCES**
-
-- [Link text](url)
 ```
 
 ---
@@ -322,7 +329,23 @@ Same as Story except:
 
 **DESCRIPTION**
 
+# Purpose
+
 [Purpose paragraph — what is broken and where, without restating the replication steps]
+
+# Risks / Considerations
+
+- [Risk]
+
+# Questions and Answers
+
+[STATUS: Open] **[Question]**
+
+> [Answer]
+
+# External References
+
+- [Link text](url)
 
 ---
 
@@ -343,26 +366,6 @@ Same as Story except:
 **QA TESTING NOTES**
 
 - [Note that helps QA beyond the replication steps]
-
----
-
-**RISKS / CONSIDERATIONS**
-
-- [Risk]
-
----
-
-**QUESTIONS AND ANSWERS**
-
-[STATUS: Open] **[Question]**
-
-> [Answer]
-
----
-
-**EXTERNAL REFERENCES**
-
-- [Link text](url)
 ```
 
 ---
@@ -371,33 +374,35 @@ Same as Story except:
 
 Quick reference for which sections to include per type. "Always" = include regardless of content (use a placeholder if needed). "When justified" = include only when you have real content for it. "Never" = omit entirely.
 
-| Section                   | Epic           | Story          | Task           | Spike          | Bug            |
-| ------------------------- | -------------- | -------------- | -------------- | -------------- | -------------- |
-| Title                     | always         | always         | always         | always         | always         |
-| Type metadata             | always         | always         | always         | always         | always         |
-| Links metadata            | when justified | when justified | when justified | when justified | when justified |
-| DESCRIPTION               | always         | always         | always         | always         | always         |
-| — User Story line         | never          | when justified | never          | never          | never          |
-| — Purpose paragraph       | always         | always         | always         | always         | always         |
-| — Feature Flag line       | never          | when justified | when justified | never          | never          |
-| — Design line             | never          | when justified | when justified | never          | never          |
-| — Tech Breakdown line     | never          | when justified | when justified | never          | never          |
-| — Goals (epic only)       | always         | never          | never          | never          | never          |
-| ACCEPTANCE CRITERIA       | never          | always         | always         | never          | never          |
-| — Out of Scope subsection | never          | when justified | when justified | never          | never          |
-| SCENARIOS                 | never          | always*        | never          | never          | never          |
-| QA TESTING NOTES          | never          | when justified | when justified | never          | when justified |
-| TECHNICAL BREAKDOWN       | never          | when justified | when justified | never          | never          |
-| GOALS / DELIVERABLES      | never          | never          | never          | always         | never          |
-| REPLICATION STEPS         | never          | never          | never          | never          | always         |
-| SCOPE                     | when justified | when justified | when justified | never          | never          |
-| — Stretch Goals           | when justified | when justified | when justified | never          | never          |
-| — Out of Scope            | when justified | when justified | when justified | never          | never          |
-| RISKS / CONSIDERATIONS    | when justified | when justified | when justified | when justified | when justified |
-| QUESTIONS AND ANSWERS     | when justified | when justified | when justified | when justified | when justified |
-| EXTERNAL REFERENCES       | when justified | when justified | when justified | when justified | when justified |
+The "Kind" column shows how the section maps to Jira: **Field** = standalone Jira field (preceded by `---`, `**BOLD ALL-CAPS**` label); **Desc** = sub-section inside the Description field (`# H1` heading, no `---`); **Meta** = file-level metadata, not a Jira field.
 
-*SCENARIOS for Story: omit when `--no-scenarios` is passed or preferences set `Never include: Scenarios`.
+| Section                   | Kind           | Epic           | Story          | Task           | Spike          | Bug            |
+| ------------------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- |
+| Title                     | Meta           | always         | always         | always         | always         | always         |
+| Type metadata             | Meta           | always         | always         | always         | always         | always         |
+| Links metadata            | Meta           | when justified | when justified | when justified | when justified | when justified |
+| **DESCRIPTION**           | Field          | always         | always         | always         | always         | always         |
+| — Purpose sub-section     | Desc (H1)      | always         | always         | always         | always         | always         |
+| — — User Story line       | Desc content   | never          | when justified | never          | never          | never          |
+| — — Feature Flag line     | Desc content   | never          | when justified | when justified | never          | never          |
+| — — Design line           | Desc content   | never          | when justified | when justified | never          | never          |
+| — — Tech Breakdown line   | Desc content   | never          | when justified | when justified | never          | never          |
+| — Goals sub-section       | Desc (H1)      | always         | never          | never          | never          | never          |
+| — Scenarios sub-section   | Desc (H1)      | never          | always\*       | never          | never          | never          |
+| — Scope sub-section       | Desc (H1)      | when justified | when justified | when justified | never          | never          |
+| — — Stretch Goals         | Desc sub-item  | when justified | when justified | when justified | never          | never          |
+| — Risks / Considerations  | Desc (H1)      | when justified | when justified | when justified | when justified | when justified |
+| — Questions and Answers   | Desc (H1)      | when justified | when justified | when justified | when justified | when justified |
+| — External References     | Desc (H1)      | when justified | when justified | when justified | when justified | when justified |
+| **ACCEPTANCE CRITERIA**   | Field          | never          | always         | always         | never          | never          |
+| — Out of Scope subsection | Field sub-item | never          | when justified | when justified | never          | never          |
+| **QA TESTING NOTES**      | Field          | never          | when justified | when justified | never          | when justified |
+| **TECHNICAL BREAKDOWN**   | Field          | never          | when justified | when justified | never          | never          |
+| — Pending bullet          | Field sub-item | never          | when justified | when justified | never          | never          |
+| **GOALS / DELIVERABLES**  | Field          | never          | never          | never          | always         | never          |
+| **REPLICATION STEPS**     | Field          | never          | never          | never          | never          | always         |
+
+\*Scenarios for Story: omit when `--no-scenarios` is passed or preferences set `Never include: Scenarios`.
 
 ---
 
@@ -413,6 +418,11 @@ The skill reads `~/.claude/jira-drafting-preferences.md` at the start of each in
 - Default ticket type: Story
 - Always include: Technical Breakdown
 - Never include: Scope
+
+## Field Overrides
+
+- Risks / Considerations: standalone field
+- Scope: Acceptance Criteria sub-section
 
 ## Team Conventions
 
@@ -430,6 +440,13 @@ The skill reads `~/.claude/jira-drafting-preferences.md` at the start of each in
 - `Default ticket type:` — one of Epic, Story, Task, Spike, Bug
 - `Always include:` — comma-separated section names (e.g., `Technical Breakdown, QA Testing Notes`)
 - `Never include:` — comma-separated section names (e.g., `Scope, External References`)
+
+**Recognized keys under Field Overrides:**
+
+- `[Section name]: standalone field` — treat as a standalone Jira field (`**BOLD ALL-CAPS**`, preceded by `---`)
+- `[Section name]: [field name] sub-section` — treat as a `# H1` sub-section inside the named field (e.g., `Acceptance Criteria sub-section`, `Technical Breakdown sub-section`)
+
+Any section listed in the Section Presence Reference can be overridden. Use this when your Jira project exposes a section as a dedicated custom field, or when your team places a section inside a field other than Description.
 
 **Team Conventions** is free text. The skill reads each bullet and applies it as an override to its default behavior.
 

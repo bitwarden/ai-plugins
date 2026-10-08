@@ -28,7 +28,8 @@ Tickets describe what the user or system should **do**, not how the code does it
 - **Describe the broad outcome, not a single granular case.** "The report loads when it contains invalid data" is a criterion. "A single application with an empty name is skipped" is a reproduction step for a bug ticket. Granular single-case detail belongs in Bug replication steps, not Scope or Acceptance Criteria.
 - **Plain language over technical terms.** Use the words QA, product, and design use: "version" not "envelope"; "data" not "payload"; "shown", "visible", or "appears" not "rendered". When naming a feature flag, use its LaunchDarkly value, not the code enum name.
 - **No placeholder scaffolding.** Do not mention hooks, stubs, or empty entry points for work owned by another ticket. That ticket adds its own integration point; placeholders create merge conflicts and drift.
-- **Feature flags are assumed.** All new feature code is flagged, so do not state the flag in Scenarios or as a Gherkin Background precondition. Record the LaunchDarkly value in the Purpose block only.
+- **Technical Breakdown documents effects, not decisions.** When a decision is pending, document what the implementation requires under each option — cost, constraints, and trade-offs. The decision question lives in Questions and Answers; Technical Breakdown covers what changes depending on which path is taken.
+- **Feature flags are assumed for new features.** Do not state the flag in Scenarios or as a Gherkin Background precondition. Record the LaunchDarkly value in the Purpose block only — specifically the flag that gates this ticket's deliverable, not every flag that affects the area. Secondary flags (for example, a structural layout flag) belong in QA Testing Notes if QA must toggle them, or Risks / Considerations if the implementation must account for them.
 - **Scope Acceptance Criteria and Scenarios to this increment.** Do not restate general platform behavior that is always true. That is assumed background, not this ticket's criteria.
 
 ---
@@ -55,7 +56,7 @@ Apply by default. Override only when the ticket genuinely needs the extra contex
 - **Table cells are phrases, not paragraphs.** Pros/cons and trade-off cells should be one short sentence each, ideally under 25 words.
 - **No restating across sections.** If the Purpose says X, do not say X again in a later section in different words. Merge or drop.
 - **Prefer tables and bullets over prose** for any content that has structure. Reserve prose for context the reader cannot infer from structure.
-- **Titles: imperative verb, outcome, area.** Example: `Add CSV export to the item list (web)`. Not a noun phrase. Not a question. Matches sibling ticket style under the same parent.
+- **Titles: [Area] imperative verb, outcome.** When the ticket is client-specific, prefix with the area in brackets: `[Web]`, `[Server]`, `[Browser]`, or `[SDK]`. Example: `[Web] Add CSV export to the item list`. Omit the prefix when the ticket is not specific to one client. Not a noun phrase. Not a question. Matches sibling ticket style under the same parent.
 
 ---
 
