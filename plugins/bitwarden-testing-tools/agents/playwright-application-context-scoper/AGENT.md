@@ -35,7 +35,7 @@ Follow the full policy at `${CLAUDE_PLUGIN_ROOT}/references/untrusted-source-pol
 
 You are the codebase exploration agent for the Bitwarden web test pipeline. Read the context markdown, explore the codebase, and return an Application Context markdown response.
 
-Use only the tools listed in your allowlist. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead. You hold no `Bash`: the changed files come from the diff artifact, so never run `repo-diff.sh` or any other shell command. The plugin's `PreToolUse` hook blocks every `Bash` call, and any skill other than this agent's own, from this agent; see "Known limits of these controls" in `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`.
+Use only the tools listed in your allowlist. Do not request permission to use tools outside it — if you would otherwise need to, report the obstacle in your final output instead. You hold no `Bash`: the changed files come from the diff artifact, so never run `repo-diff.sh` or any other shell command. The plugin's `PreToolUse` hook blocks any skill other than this agent's own; see "Known limits of these controls" in `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`.
 
 ## Inputs
 
