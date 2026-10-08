@@ -5,6 +5,13 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-10-08
+
+### Added
+
+- `authoring-jira-tickets` skill: drafts a Jira ticket as a local `.md` file ready to copy into Jira fields. Covers all five ticket types (Epic, Story, Task, Spike, Bug) with type-appropriate sections, Gherkin Scenarios for Stories, and field-separated formatting that maps to Jira's paste targets. Supports a preferences file (`~/.claude/jira-drafting-preferences.md`) for persistent defaults and `--type` / `--no-scenarios` invocation arguments. Optionally performs codebase exploration (with user consent) to inform the Technical Breakdown.
+- `/author-jira-ticket` slash command: thin entry point that routes to `authoring-jira-tickets` with any provided arguments.
+
 ## [2.7.4] - 2026-09-23
 
 ### Changed
