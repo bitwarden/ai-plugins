@@ -85,7 +85,7 @@ Body:
 ═══════════════════════════════════════
 ```
 
-Then use the `AskUserQuestion` tool to confirm, passing the complete preview block verbatim as the `preview` field of the `Submit as shown` option. Text printed just before the dialog can be hidden behind it, so the option preview is the only place the user is guaranteed to see what they are approving.
+Then use the `AskUserQuestion` tool to confirm, passing the complete preview block verbatim as the `preview` field of the `Submit as shown` option.
 
 - **Question**: "Submit this PR as previewed?"
 - **Options**:
