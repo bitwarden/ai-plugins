@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: confine the planning agents' Bash and Skill use.
+"""PreToolUse hook: confine the planning agents' Skill use.
 
-For each restricted planning agent:
-
-- every Bash command is blocked. None of these agents lists `Bash` in `tools:`;
-  the orchestrator runs `scripts/repo-diff.sh` and hands the scoper and mapper a
-  diff artifact instead. The block is a second layer in case a later edit adds
-  `Bash` back.
-- a Skill call other than the agent's own skill is blocked, because a skill
-  that runs in a forked context executes its Bash as a different agent type,
-  outside this check.
+A Skill call from a restricted planning agent, other than the agent's own skill,
+is blocked, because a skill that runs in a forked context executes its Bash as a
+different agent type, outside the agent's `tools:` allowlist. The agents hold no
+`Bash` themselves: the orchestrator runs `scripts/repo-diff.sh` and hands the
+scoper and mapper a diff artifact instead.
 
 A block exits 2, which Claude Code applies before permission rules are
 evaluated. Every other agent, and the main session, passes through (exit 0).
@@ -29,10 +25,6 @@ AGENT_SKILLS = {
     "services-under-test-mapper": "bitwarden-testing-tools:mapping-services-under-test",
     "playwright-test-context-gatherer": "bitwarden-atlassian-tools:researching-jira-issues",
 }
-BASH_BLOCK_MESSAGE = (
-    "No Bash command may run in this agent (bitwarden-testing-tools policy); "
-    "report this step as an obstacle."
-)
 SKILL_BLOCK_TEMPLATE = (
     "Only the {skill} skill may be invoked in this agent (bitwarden-testing-tools "
     "policy). If you invoked it under a different name, retry once as exactly "
@@ -60,10 +52,8 @@ def is_allowed_skill(skill, allowed):
     return name == allowed
 
 
-def block_message(tool, agent):
-    if tool == "Skill":
-        return SKILL_BLOCK_TEMPLATE.format(skill=AGENT_SKILLS[agent])
-    return BASH_BLOCK_MESSAGE
+def block_message(agent):
+    return SKILL_BLOCK_TEMPLATE.format(skill=AGENT_SKILLS[agent])
 
 
 def decide(payload, env):
@@ -75,12 +65,8 @@ def decide(payload, env):
     tool_input = payload.get("tool_input")
     if not isinstance(tool_input, dict):
         tool_input = {}
-    if tool == "Bash":
-        return 2, block_message(tool, agent)
-    if tool == "Skill":
-        if is_allowed_skill(tool_input.get("skill"), AGENT_SKILLS[agent]):
-            return 0, ""
-        return 2, block_message(tool, agent)
+    if tool == "Skill" and not is_allowed_skill(tool_input.get("skill"), AGENT_SKILLS[agent]):
+        return 2, block_message(agent)
     return 0, ""
 
 
@@ -90,12 +76,12 @@ def main(stdin, env):
     except ValueError:
         return 0
     except RecursionError:
-        # No Bash or Skill input is nested this deeply. Block if it could come
+        # No Skill input is nested this deeply. Block if it could come
         # from a restricted agent rather than let the crash exit 1 and fail open.
         agent = next((a for a in AGENT_SKILLS if PLUGIN_NAME in stdin and a in stdin), None)
         if agent is None:
             return 0
-        print(block_message(None, agent), file=sys.stderr)
+        print(block_message(agent), file=sys.stderr)
         return 2
     if not isinstance(payload, dict):
         return 0
@@ -106,7 +92,7 @@ def main(stdin, env):
         agent = restricted_agent(payload.get("agent_type"))
         if agent is None:
             return 0
-        code, message = 2, block_message(payload.get("tool_name"), agent)
+        code, message = 2, block_message(agent)
     if code == 2:
         print(message, file=sys.stderr)
     return code
