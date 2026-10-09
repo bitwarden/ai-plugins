@@ -85,7 +85,7 @@ Body:
 ═══════════════════════════════════════
 ```
 
-Then use the `AskUserQuestion` tool to confirm:
+Then use the `AskUserQuestion` tool to confirm, passing the complete preview block verbatim as the `preview` field of the `Submit as shown` option.
 
 - **Question**: "Submit this PR as previewed?"
 - **Options**:
