@@ -99,8 +99,7 @@ per changed plugin, one review per changed skill. Work out the full set across b
 sections and dispatch it in a single message with several tool calls, so they run
 concurrently. Keep them synchronous (`run_in_background: false`, where that parameter
 exists), and never describe a subagent's findings before it has returned them. Section 6 is
-yours to carry out once their results come back. The numbering is for the report's order,
-not for execution.
+yours to carry out once their results come back. The numbering is not an execution order.
 
 Every subagent prompt must state that findings are limited to **what this changeset
 introduced or worsened — never a pre-existing finding on a line the diff did not touch.**
@@ -173,7 +172,9 @@ instead. Never fall back to the working directory: landing the report in whichev
 repository you validated is the outcome this path exists to avoid.
 
 Follow the report contract in the scope reference, and end the report with
-`<!-- validation-complete -->` on a line of its own. One Write call, once, after every
+`<!-- validation-complete -->` on a line of its own. There is no pull request diff to comment
+on, so every finding takes the fallback form, with its details and fix nested under its
+one-liner. One Write call, once, after every
 subagent has returned. Writing it is mandatory — write it even when everything passed and
 even when every section was skipped.
 
@@ -181,6 +182,6 @@ The marker matters less locally than in CI, where it is what tells the `validate
 a report is finished. Keeping it here means a local report and a pull request report are the
 same document, and that a report cut short is recognizable as one.
 
-Then print a short console summary: the overall result, the count of critical/major/minor
-findings, and the path to the report. If any check failed, say plainly that validation
+Then print a short console summary: the overall result, the count of CRITICAL, IMPORTANT,
+and SUGGESTED findings, and the path to the report. If any check failed, say plainly that validation
 failed and which check failed.

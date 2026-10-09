@@ -18,7 +18,7 @@
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Routes CLAUDE.md, agents, commands, hooks, and settings to targeted review skills, reporting only what a changeset introduced."
     },
     {
@@ -78,7 +78,7 @@
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "3.5.0",
+      "version": "3.5.2",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, feature flags, commits, pull requests, preflight checks, change labeling, and Jira ticket filing."
     },
     {
@@ -110,6 +110,18 @@
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.2.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+    },
+    {
+      "name": "bitwarden-mailcatcher-tools",
+      "source": "./plugins/bitwarden-mailcatcher-tools",
+      "version": "1.0.0",
+      "description": "Mailcatcher tools for Bitwarden — reading verification links, magic links, and other action links from the local dev inbox."
+    },
+    {
+      "name": "bitwarden-stripe-tools",
+      "source": "./plugins/bitwarden-stripe-tools",
+      "version": "1.0.0",
+      "description": "Stripe tools for Bitwarden — read-only test-mode queries, invoice previews, and test-clock advancement through a guarded Stripe CLI wrapper."
     }
   ]
 }

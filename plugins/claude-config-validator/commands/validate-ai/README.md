@@ -38,16 +38,20 @@ For your own uncommitted work, use [`/validate-ai-local`](../validate-ai-local/R
 
 ## Two modes
 
-The command detects its context and changes only where the report goes.
+The command detects its context and changes only where findings and the report go.
 
-**Workflow mode** — a `STICKY COMMENT ID:` was supplied in the prompt, or
-`GITHUB_ACTIONS` is set. The command writes `/tmp/validation-summary.md` and posts
-nothing; the workflow replaces its sticky comment with that file's contents. This is how
-the action drives it.
+**Workflow mode:** a `STICKY COMMENT ID:` was supplied in the prompt, or
+`GITHUB_ACTIONS` is set. The command posts CRITICAL and IMPORTANT findings as inline
+comments on the diff, skipping any an existing thread already raised. When such a thread
+was resolved but the problem is still on the diff, it replies in that thread once. It writes
+the summary to `/tmp/validation-summary.md`; the workflow replaces its sticky comment with that
+file's contents. This is how the action drives it.
 
-**Interactive mode** — anything else. The command writes the same file and then upserts
-the sticky comment itself, matching on the `<!-- bitwarden-ai-validation -->` marker so
-repeat runs update one comment instead of piling up new ones.
+**Interactive mode:** anything else. There is no inline comment tool outside the action,
+so the command writes the same file with each finding's details and fix nested in the
+summary, then upserts the sticky comment itself, matching on the
+`<!-- bitwarden-ai-validation -->` marker so repeat runs update one comment instead of
+piling up new ones.
 
 ## What it covers
 
@@ -58,10 +62,9 @@ repeat runs update one comment instead of piling up new ones.
 | Configuration and security | `reviewing-claude-config` skill     | Any agent, skill, command, hook, `CLAUDE.md`, or `.claude/` file changed |
 
 Structure, marketplace, and version-bump validation are **not** run here. The workflow
-runs those three shell scripts as dedicated steps before this review, and their results
-reach the pull request through the job log and check status. The report's checks table
-says so explicitly, so their absence is never read as a pass. To run them against a
-checkout, use `/validate-ai-local`.
+runs those three shell scripts as dedicated steps before this review, and each reports its
+own result there. In interactive mode nothing runs them, so the report names all three on
+its `**Not covered:**` line. To run them against a checkout, use `/validate-ai-local`.
 
 Scope rules, gating, and the report format are defined once in
 [`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
@@ -95,9 +98,11 @@ content.
 
 `/tmp/validation-summary.md`, containing:
 
-- Overall result and what was validated
-- Findings grouped as critical, major, and minor, each with `file:line` and a fix
-- A checks table showing what ran, what failed, and what was skipped and why
+- The overall result and up to three sentences on what was validated and what drove it
+- A `**Not covered:**` line for any check that could not run, and why
+- A collapsed list of findings, one line each with its ❌ CRITICAL, ⚠️ IMPORTANT, or
+  🎨 SUGGESTED label and `file:line`, with details and fix nested under any finding that
+  did not go inline
 
 The file is always written, including when everything passes and when every section was
 skipped — in workflow mode it is the only path results have to the pull request.
@@ -130,7 +135,9 @@ rule scopes the one file the command produces, `/tmp/validation-summary.md` — 
 slash is permission-rule syntax for "absolute from the filesystem root", not part of the
 path. It is an `Edit` rule rather than a `Write` one because Claude Code consults
 `Edit(path)` and `Read(path)` rules only, and an `Edit` rule covers every built-in tool that
-edits files; that needs Claude Code 2.1.210 or later. The `gh api`
+edits files; that needs Claude Code 2.1.210 or later. The inline comment and reply
+tools are not listed: only `claude-code-action` provides them, and the workflow's own tool
+allowlist grants them there. The `gh api`
 calls that create or edit the sticky comment in interactive mode are left out on purpose,
 so writing to a pull request is a decision you see and approve. Allowlist them yourself if
 you run this often.
@@ -164,9 +171,9 @@ The current branch has no open pull request. Pass a number or URL explicitly, or
 
 ### The sticky comment did not update
 
-In workflow mode the command never posts — check that the workflow's comment step ran and
-that `/tmp/validation-summary.md` was produced. In interactive mode, confirm `gh auth
-status` and that the token can write pull request comments.
+In workflow mode the command never posts the sticky comment itself. Check that the
+workflow's comment step ran and that `/tmp/validation-summary.md` was produced. In
+interactive mode, confirm `gh auth status` and that the token can write pull request comments.
 
 ### Findings quote lines the contributor did not write
 

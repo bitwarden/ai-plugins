@@ -175,7 +175,7 @@ bypass that. Take the first case below that applies:
 - **`/validate-ai` or `/validate-ai-local`**: use the scope rules and severity source in
   `reference/validate-ai-scope.md`, and hand back findings in the four-level CRITICAL /
   IMPORTANT / SUGGESTED / OPTIONAL classification. The command owns the single write of the
-  report document and the mapping down to its critical/major/minor severities.
+  report document, the labels it gives each severity, and any inline comments.
 - **Anything else**: return the findings as text in the format below, for the invoking
   context to route. This is the default, and what a direct invocation always does.
 

@@ -1,0 +1,12 @@
+{
+  "name": "bitwarden-stripe-tools",
+  "version": "1.0.0",
+  "description": "Stripe tools for Bitwarden — read-only test-mode queries, invoice previews, and test-clock advancement through a guarded Stripe CLI wrapper.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-stripe-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["stripe", "billing", "test-clocks", "testing"]
+}

@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-delivery-tools",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, feature flags, commits, pull requests, preflight checks, change labeling, and Jira ticket filing.",
   "author": {
     "name": "Bitwarden",
