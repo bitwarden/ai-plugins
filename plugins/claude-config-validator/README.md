@@ -88,7 +88,7 @@ headless workflow run means no report and a failed check.
 | Command                                                      | Purpose                                                                                                                                              |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`/validate-ai-local`](commands/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
-| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report to a sticky pull request comment                                                   |
+| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report its findings inline on the diff, with a sticky summary comment                     |
 
 Both commands run the same review the
 [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub
