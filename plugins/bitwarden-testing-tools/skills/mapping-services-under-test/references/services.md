@@ -2,7 +2,7 @@
 
 ## About `<bitwarden git root>`
 
-In the `Repo` fields below, `<bitwarden git root>` denotes the directory containing the Bitwarden `clients/` and `server/` checkouts. The mapping procedure receives an explicit `<repo-path>` for each affected repo, so it never resolves this itself; the notation only documents where each service's code lives.
+In the `Repo` fields below, `<bitwarden git root>` denotes the directory containing the Bitwarden `clients/` and `server/` checkouts.
 
 The `Required by (paths):` globs are keyed to each repo's **canonical name** (`clients`, `server`, `billing-pricing`), e.g. `server/src/Admin/**`. The mapping skill prefixes each repo-relative diff path with its canonical name before matching, so a path carrying any other prefix — for example a non-canonical checkout directory such as `bw-server` — matches none of these globs and would silently under-report the path-based services.
 
