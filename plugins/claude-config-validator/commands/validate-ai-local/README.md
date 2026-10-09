@@ -67,7 +67,7 @@ the union of:
 - **A `bitwarden/gh-actions` checkout** for the three shell checks. The command looks at
   `$BW_GH_ACTIONS_PATH/validate-ai/scripts`, then a sibling `../gh-actions` checkout, and
   otherwise offers to shallow-clone the repository to a temporary directory. Decline and
-  those checks are recorded as skipped.
+  the report names those checks on its `**Not covered:**` line.
 - **`jq`**, used by the bundled scripts.
 
 The scripts are never vendored into this repository —
@@ -146,7 +146,7 @@ skipped, and it ends with `<!-- validation-complete -->` so a local report match
 | Input                    | Working tree + branch commits                                     | A pull request                                                                       |
 | Shell script checks      | Runs them                                                         | Left to the workflow's own steps                                                     |
 | `.claude-pr/` trust rule | Not applicable                                                    | Applied when the snapshot exists                                                     |
-| Output                   | A timestamped report under `${CLAUDE_PLUGIN_DATA}/ai-validation/` | `/tmp/validation-summary.md`, plus inline comments in CI or a sticky comment locally |
+| Output                   | A timestamped report under `${CLAUDE_PLUGIN_DATA}/ai-validation/` | `/tmp/validation-summary.md` and the sticky comment, plus inline comments in CI runs |
 
 ## Related documentation
 
@@ -173,7 +173,7 @@ repository.
 its own `scripts/` directory — `validate-ai/` inside `gh-actions` — so it must be
 overridden to point at the repository being validated.
 
-### Plugin or skill sections reported as skipped
+### Plugin or skill sections listed as not covered
 
 The `plugin-dev` plugin is not installed. Install it with
 `/plugin install plugin-dev@claude-plugins-official`.

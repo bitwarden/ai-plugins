@@ -132,7 +132,8 @@ It owns manifest correctness, semantic versioning, directory structure, componen
 frontmatter, hook schema, MCP configuration, and hardcoded credentials.
 
 Validate every changed plugin directory even when only some component types changed. If
-`plugin-dev` is not installed, record the section as skipped with that reason.
+`plugin-dev` is not installed, name the section on the `**Not covered:**` line with that
+reason.
 
 ### 4b. Skill review (skill-reviewer agent from plugin-dev)
 
@@ -140,9 +141,9 @@ Invoke the `plugin-dev:skill-reviewer` agent, once per changed `SKILL.md`. It ow
 frontmatter, description and trigger quality, word count and writing style, progressive
 disclosure, and referenced files that do not exist.
 
-If `plugin-dev` is not installed, record this section as skipped with that reason, the same as
-4a. It is the pipeline's only skill review, so a silent omission here reads as a skill review
-that passed.
+If `plugin-dev` is not installed, name this section on the `**Not covered:**` line with that
+reason, the same as 4a. It is the pipeline's only skill review, so a silent omission here
+reads as a skill review that passed.
 
 4c deliberately does not review `SKILL.md` files — a second rule set over the same file
 produces duplicate findings a reader cannot tell from independent confirmation.

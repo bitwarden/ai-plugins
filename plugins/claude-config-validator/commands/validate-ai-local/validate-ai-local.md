@@ -66,8 +66,8 @@ Locate the scripts, in order:
 2. A sibling checkout: `<repo-root>/../gh-actions/validate-ai/scripts`
 3. Neither found — tell the user you need a `gh-actions` checkout, and offer to shallow
    clone it: `git clone --depth 1 https://github.com/bitwarden/gh-actions <tmpdir>`.
-   Ask before cloning. If the user declines, skip the script checks and record them as
-   skipped in the report.
+   Ask before cloning. If the user declines, skip the script checks and name them on the
+   report's `**Not covered:**` line.
 
 Cloning and running these scripts is deliberately not pre-approved in this command's
 `allowed-tools`, so both will be asked for. They execute shell code that lives outside
@@ -123,8 +123,8 @@ hardcoded credentials.
 
 Validate every changed plugin directory even when only some component types changed.
 
-If the `plugin-dev` plugin is not installed, record this section as skipped with that
-reason — do not silently approximate it.
+If the `plugin-dev` plugin is not installed, name this section on the report's
+`**Not covered:**` line with that reason. Do not silently approximate it.
 
 ## 5. Skill review (skill-reviewer agent from plugin-dev)
 

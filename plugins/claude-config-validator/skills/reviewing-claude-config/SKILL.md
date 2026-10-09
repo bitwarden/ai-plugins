@@ -264,8 +264,8 @@ Load only when a specific question calls for it:
   model selection, tool names, progressive disclosure, settings conventions)
 - **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude
   material, which validations each bucket gates, and the report contract used by the
-  `/validate-ai` and `/validate-ai-local` commands). Its report-writing and subagent
-  instructions address those commands, which hold grants this skill does not.
+  `/validate-ai` and `/validate-ai-local` commands). Its report-writing, inline-comment, and
+  subagent instructions address those commands, which hold grants this skill does not.
 
 ## Cross-Plugin Enrichment
 
