@@ -2,7 +2,7 @@
 
 Behavior test cases for the `mapping-services-under-test` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds six cases covering the skill's substantive decisions: taking the union of route-based and file-path-based dependencies rather than one alone, running its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD`) rather than relying on the caller, sourcing names, URLs, and ports from `references/services.md` rather than recall, returning a minimal set matched by the documented rules rather than a defensively padded one, prefixing repo-relative diff paths with the canonical repo name so the path-based globs match, and carrying a supplied `## Required Feature Flags` section into the services artifact while adding `Api`.
+`behavior-eval.json` holds six cases covering the skill's substantive decisions: taking the union of route-based and file-path-based dependencies rather than one alone, running its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD`) when the caller supplies no changed files, rather than proceeding on routes alone, sourcing names, URLs, and ports from `references/services.md` rather than recall, returning a minimal set matched by the documented rules rather than a defensively padded one, prefixing repo-relative diff paths with the canonical repo name so the path-based globs match, and carrying a supplied `## Required Feature Flags` section into the services artifact while adding `Api`.
 
 Each case's `expectations` are the pass criteria. Cases are **advice-only** and start no services, so re-runs are mutation-safe.
 
