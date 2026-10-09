@@ -10,9 +10,11 @@
   "repository": "https://github.com/bitwarden/ai-plugins",
   "dependencies": ["bitwarden-mailcatcher-tools", "bitwarden-stripe-tools"],
   "agents": [
+    "./agents/localhost-web-health-checker/AGENT.md",
     "./agents/playwright-application-context-scoper/AGENT.md",
     "./agents/playwright-test-case-writer/AGENT.md",
     "./agents/playwright-test-context-gatherer/AGENT.md",
+    "./agents/playwright-test-runner/AGENT.md",
     "./agents/services-under-test-mapper/AGENT.md"
   ],
   "keywords": [

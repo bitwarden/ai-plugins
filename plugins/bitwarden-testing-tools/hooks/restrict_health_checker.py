@@ -13,9 +13,8 @@ the allowed forms below.
 A block exits 2, which Claude Code applies before permission rules are
 evaluated. Every other agent, and the main session, passes through (exit 0).
 
-A plugin subagent's `agent_type` has been observed as `plugin:agent` (installed
-from a marketplace) and `plugin:agent:agent` (loaded with --plugin-dir), so the
-caller is matched on its first and last `:`-separated segments.
+The caller is matched on the first and last `:`-separated segments of its
+`agent_type`.
 """
 import json
 import os
