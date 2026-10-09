@@ -3,7 +3,9 @@
 `run_real_eval.py` is the one eval runner for every skill in this plugin. Each skill ships
 only its own eval data — `trigger-eval.json` (the query set) and `baseline.json` (the last
 known-good run) under `skills/<skill>/evals/`. There is no per-skill copy of the engine, so
-an engine fix lands once and applies everywhere.
+an engine fix lands once and applies everywhere. `mapping-services-under-test` and
+`scoping-playwright-application-context` ship a `trigger-eval.json` with no `baseline.json`
+yet; their first run records one.
 
 This runner covers trigger suites only. A skill's `evals/behavior-eval.json` is a different
 schema, run through `/skill-creator:skill-creator` in Benchmark mode, and has no baseline here.

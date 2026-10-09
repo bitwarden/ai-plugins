@@ -278,7 +278,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 **Select only when:** a marketing-initiated trial is called for (a trial started from the bitwarden.com marketing site, including acceptance criteria that describe the `/#/trial-initiation` signup pages), or Stripe must record the trial as marketing-initiated
 
-**Parameters:** `password`, `orgName`, `cadence`, `trialInitiationUrl` (the URL captured from `flow:trigger-marketing-trial-verification-email`)
+**Parameters:** `password` (see Note), `orgName`, `cadence`, `trialInitiationUrl` (the URL captured from `flow:trigger-marketing-trial-verification-email`)
 
 **Precondition state:** state:marketing-trial-verification-email-received
 
@@ -286,7 +286,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 1. Navigate to `<trialInitiationUrl>` while logged out
    - Feedback: "Email verified" toast appears; the "Create Account" step is open
-2. Fill the master password and confirm-master-password fields with `<password>` (the fixed dev master password `test-master-password-12`); click "Create account"
+2. Fill the master password and confirm-master-password fields with `<password>`; click "Create account"
    - Feedback: the "Organization Information" step opens
 3. Fill "Organization name" with `<orgName>`; click "Next"
    - Feedback: the "Billing" step opens
@@ -304,6 +304,8 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 - Default: state:trialing-org-marketing-with-payment
 
+**Note:** `<password>` is the fixed dev master password `test-master-password-12`, a local dev fixture, never a real account credential.
+
 **Sources:**
 
 - `clients/apps/web/src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html` (`label="Create Account"`, `{ key: 'createAccount' }`, `label="Organization Information"`, `[nameOnly]="true"`, `("startTrial" | i18n) : ("next" | i18n)`, `label="Billing"`, `label="Confirmation Details"`, `"getStarted" | i18n | titlecase`; in order) — the wizard's step order and buttons
@@ -319,7 +321,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 **Select only when:** a marketing-initiated trial is called for (a trial started from the bitwarden.com marketing site, including acceptance criteria that describe the `/#/trial-initiation` signup pages), or the organization must have no payment method on file
 
-**Parameters:** `password`, `orgName`, `trialInitiationUrl` (the URL captured from `flow:trigger-marketing-trial-verification-email` invoked with `paymentOptional=true`)
+**Parameters:** `password` (see Note), `orgName`, `trialInitiationUrl` (the URL captured from `flow:trigger-marketing-trial-verification-email` invoked with `paymentOptional=true`)
 
 **Precondition state:** state:marketing-trial-verification-email-received
 
@@ -327,7 +329,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 1. Navigate to `<trialInitiationUrl>` while logged out
    - Feedback: "Email verified" toast appears; the "Create Account" step is open
-2. Fill the master password and confirm-master-password fields with `<password>` (the fixed dev master password `test-master-password-12`); click "Create account"
+2. Fill the master password and confirm-master-password fields with `<password>`; click "Create account"
    - Feedback: the "Organization Information" step opens
 3. Fill "Organization name" with `<orgName>`; click "Start trial" (the billing step is skipped because the trigger used `paymentOptional=true`)
    - Feedback: the "Confirmation Details" step opens
@@ -337,6 +339,8 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 **Post-condition state(s):**
 
 - Default: state:trialing-org-marketing-without-payment
+
+**Note:** `<password>` is the fixed dev master password `test-master-password-12`, a local dev fixture, never a real account credential.
 
 **Sources:**
 
@@ -444,7 +448,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 **Select only when:** a sales-assisted trial is called for (a trial sent from the Admin portal), or the vault must show the free-trial banner's "Contact your Bitwarden sales representative to set up billing." text, or Stripe must record the trial as sales-assisted
 
-**Parameters:** `password`, `orgName`, `trialInvitationUrl` (the URL captured from `flow:send-sales-assisted-trial-invitation`)
+**Parameters:** `password` (see Note), `orgName`, `trialInvitationUrl` (the URL captured from `flow:send-sales-assisted-trial-invitation`)
 
 **Precondition state:** state:sales-assisted-trial-invitation-received
 
@@ -452,7 +456,7 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 
 1. Navigate to `<trialInvitationUrl>` while logged out
    - Feedback: "Email verified" toast appears; the "Create Account" step is open
-2. Fill the master password and confirm-master-password fields with `<password>` (the fixed dev master password `test-master-password-12`); click "Create account"
+2. Fill the master password and confirm-master-password fields with `<password>`; click "Create account"
    - Feedback: the "Organization Information" step opens
 3. Fill "Organization name" with `<orgName>`; click "Start trial" (the link carries `paymentOptional=true`, so the billing step is skipped)
    - Feedback: the "Confirmation Details" step opens
@@ -462,6 +466,8 @@ Curated reference of reusable test states and UI flows for Bitwarden billing, su
 **Post-condition state(s):**
 
 - Default: state:trialing-org-sales-assisted
+
+**Note:** `<password>` is the fixed dev master password `test-master-password-12`, a local dev fixture, never a real account credential.
 
 **Sources:**
 

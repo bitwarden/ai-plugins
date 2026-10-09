@@ -9,6 +9,11 @@
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-testing-tools",
   "repository": "https://github.com/bitwarden/ai-plugins",
   "dependencies": ["bitwarden-mailcatcher-tools", "bitwarden-stripe-tools"],
+  "agents": [
+    "./agents/playwright-application-context-scoper/AGENT.md",
+    "./agents/playwright-test-context-gatherer/AGENT.md",
+    "./agents/services-under-test-mapper/AGENT.md"
+  ],
   "keywords": [
     "testing",
     "test-engineering",

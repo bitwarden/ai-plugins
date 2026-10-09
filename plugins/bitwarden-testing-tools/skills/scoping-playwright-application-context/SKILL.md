@@ -155,3 +155,4 @@ Just before serializing, run these checks once against your notes. They are read
 4. **Text-content selector basis.** Every verification point whose `Expectation` is `text contains "..."` has `Selector type: text`.
 5. **Route form.** Every `Route` is `n/a` or a URL with scheme and host. Every `:<name>` segment meets its placeholder rule: in a Route, the state has a producer, the value comes from that producer or its precondition chain, and a parenthetical follows; in a flow step's URL, the value comes from an earlier step or the precondition chain, and the segment is not in `Parameters:`.
 6. **Feature flags.** Every `## Required Feature Flags` bullet has a key matching `^[a-z0-9][a-z0-9.-]*$` and a `Source:` citation, and no `[HUMAN]` step or verification point mentions a feature flag.
+7. **Catalog-only fields dropped.** No emitted state or flow carries a `**Select only when:**` or `**Sources:**` line.
