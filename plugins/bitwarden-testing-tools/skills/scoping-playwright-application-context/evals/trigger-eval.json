@@ -1,0 +1,82 @@
+[
+  {
+    "query": "scope the application context for the past-due billing banner change in clients and server",
+    "should_trigger": true
+  },
+  {
+    "query": "map the flows for this change: the families org upgrade dialog in clients",
+    "should_trigger": true
+  },
+  {
+    "query": "what UI states do I need to test for the sales-assisted trial banner?",
+    "should_trigger": true
+  },
+  {
+    "query": "build the application context for PM-31234 before we write the playwright tests; it changes the subscription page in clients and the invoice endpoint in server",
+    "should_trigger": true
+  },
+  {
+    "query": "map the reachable UI states and flows for the new payment method warning on the org billing page",
+    "should_trigger": true
+  },
+  {
+    "query": "before authoring playwright test cases for the trial-initiation wizard change, map out the states, routes, and selectors",
+    "should_trigger": true
+  },
+  {
+    "query": "which states and flows should the E2E cover for the change to the premium upgrade page, and how does a test reach each one?",
+    "should_trigger": true
+  },
+  {
+    "query": "AC: the trial banner shows the days remaining and hides once a payment method is added. produce a state-centric application context for playwright tests",
+    "should_trigger": true
+  },
+  {
+    "query": "what setup state and producing flow does a playwright test need to reach a trialing Teams org with no payment method?",
+    "should_trigger": true
+  },
+  {
+    "query": "explore clients and server to map the UI states the new seat-limit warning can be in, with a verification point for each",
+    "should_trigger": true
+  },
+  {
+    "query": "which local services do I need running for these tests, and what should I start?",
+    "should_trigger": false
+  },
+  {
+    "query": "write manual Gherkin test cases for PM-35944 that I can import into Testmo",
+    "should_trigger": false
+  },
+  {
+    "query": "what test coverage already exists for the subscription page changes on my branch?",
+    "should_trigger": false
+  },
+  {
+    "query": "should the trial banner tests be unit, component, or E2E?",
+    "should_trigger": false
+  },
+  {
+    "query": "write the Playwright spec for the trial banner and run it",
+    "should_trigger": false
+  },
+  {
+    "query": "the playwright login test is flaky in CI, help me fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "explain how Angular routing is set up in clients/apps/web",
+    "should_trigger": false
+  },
+  {
+    "query": "review my PR for the billing banner change before I request approval",
+    "should_trigger": false
+  },
+  {
+    "query": "draw an architecture diagram of how the web vault talks to Api and Identity",
+    "should_trigger": false
+  },
+  {
+    "query": "read Jira ticket PM-31234 and summarize its acceptance criteria",
+    "should_trigger": false
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_planning_agents.py\" ] || exit 1; python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_planning_agents.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

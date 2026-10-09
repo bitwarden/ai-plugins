@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-testing-tools",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories.",
   "author": {
     "name": "Bitwarden",
@@ -8,6 +8,12 @@
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-testing-tools",
   "repository": "https://github.com/bitwarden/ai-plugins",
+  "dependencies": ["bitwarden-mailcatcher-tools", "bitwarden-stripe-tools"],
+  "agents": [
+    "./agents/playwright-application-context-scoper/AGENT.md",
+    "./agents/playwright-test-context-gatherer/AGENT.md",
+    "./agents/services-under-test-mapper/AGENT.md"
+  ],
   "keywords": [
     "testing",
     "test-engineering",
@@ -17,6 +23,9 @@
     "test-strategy",
     "test-cases",
     "gherkin",
-    "qa"
+    "qa",
+    "playwright",
+    "e2e",
+    "test-planning"
   ]
 }
