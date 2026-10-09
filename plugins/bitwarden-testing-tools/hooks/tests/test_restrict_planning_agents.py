@@ -188,7 +188,7 @@ class FailClosedTest(unittest.TestCase):
         self.module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.module)
 
-        def boom(_payload, _env):
+        def boom(_payload):
             raise RuntimeError("unexpected")
 
         self.module.decide = boom
@@ -196,7 +196,7 @@ class FailClosedTest(unittest.TestCase):
     def run_main(self, stdin):
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
-            code = self.module.main(stdin, {"CLAUDE_PLUGIN_ROOT": ROOT})
+            code = self.module.main(stdin)
         return code, err.getvalue()
 
     def test_skill_call_blocks_with_the_skill_message(self):

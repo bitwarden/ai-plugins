@@ -13,7 +13,6 @@ from a marketplace) and `plugin:agent:agent` (loaded with --plugin-dir), so the
 caller is matched on its first and last `:`-separated segments.
 """
 import json
-import os
 import sys
 
 PLUGIN_NAME = "bitwarden-testing-tools"
@@ -54,7 +53,7 @@ def block_message(agent):
     return SKILL_BLOCK_TEMPLATE.format(skill=AGENT_SKILLS[agent])
 
 
-def decide(payload, env):
+def decide(payload):
     """Return (exit code, stderr message) for one hook invocation."""
     agent = restricted_agent(payload.get("agent_type"))
     if agent is None:
@@ -68,7 +67,7 @@ def decide(payload, env):
     return 0, ""
 
 
-def main(stdin, env):
+def main(stdin):
     try:
         payload = json.loads(stdin)
     except ValueError:
@@ -84,7 +83,7 @@ def main(stdin, env):
     if not isinstance(payload, dict):
         return 0
     try:
-        code, message = decide(payload, env)
+        code, message = decide(payload)
     except Exception:
         # Fail closed for the agents this hook exists to restrict.
         agent = restricted_agent(payload.get("agent_type"))
@@ -97,4 +96,4 @@ def main(stdin, env):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.stdin.buffer.read().decode("utf-8", "replace"), os.environ))
+    sys.exit(main(sys.stdin.buffer.read().decode("utf-8", "replace")))

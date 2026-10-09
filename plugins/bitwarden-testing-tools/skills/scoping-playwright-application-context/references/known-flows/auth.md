@@ -35,8 +35,6 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 **Parameters:** `email`, `password` (the fixed dev master password `test-master-password-12`; see Note)
 
-**Note:** The dev master password is fixed at `test-master-password-12` for every test account, so credentials can be reconstructed from the email alone. It is a local dev fixture, never a real account credential. Any value of at least 12 characters is valid, but this is the convention. A test case needing a distinct password writes that value into its own SETUP step.
-
 **Precondition state:** none
 
 **Steps:**
@@ -57,3 +55,5 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 **Post-condition state(s):**
 
 - Default: state:authenticated-free-user
+
+**Note:** The dev master password is fixed at `test-master-password-12` for every test account, so credentials can be reconstructed from the email alone. It is a local dev fixture, never a real account credential. Any value of at least 12 characters is valid, but this is the convention. A test case needing a distinct password writes that value into its own SETUP step.
