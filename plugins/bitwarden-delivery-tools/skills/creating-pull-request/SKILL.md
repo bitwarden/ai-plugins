@@ -17,7 +17,7 @@ Follow these steps in order. Each one produces information the next step needs, 
 
 A PR opened on broken work, or on work that skipped review, wastes reviewer time and buries the real problem under comment threads. Settle preflight first, then run the review.
 
-**1a — Confirm preflight passed.** Use the `AskUserQuestion` tool:
+**1a — Confirm preflight passed.** Its checks have often already run by this point, while committing or finishing the work, so judge from the session whether they cover the current diff. Use the `AskUserQuestion` tool, listing the option you recommend first with ` (Recommended)` appended:
 
 - **Question**: "Has `perform-preflight` passed on this branch?"
 - **Options**:
@@ -26,7 +26,7 @@ A PR opened on broken work, or on work that skipped review, wastes reviewer time
 
 If preflight cannot be made to pass, stop and report the failure rather than opening the PR. Only continue once preflight is green: running preflight can change code, and the review should see the final diff.
 
-**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR. Use the `AskUserQuestion` tool:
+**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR. Use the `AskUserQuestion` tool, listing the depth you judge the change to need first with ` (Recommended)` appended:
 
 - **Question**: "How deep is this change? (sets review depth)"
 - **Options**:
