@@ -86,6 +86,18 @@
         "Surfaces the malformed/missing fence as a failure",
         "Does not return a run_status of complete"
       ]
+    },
+    {
+      "id": 8,
+      "name": "fails-on-unresolved-route-placeholder",
+      "prompt": "Test case 2's Starting URL is `https://localhost:8080/#/organizations/:organizationId/billing/subscription`. Its setup steps only log in an existing user, and no step in this run has created an organization. Two more cases follow it. Execute test case 2.",
+      "expected_output": "Does not navigate to the URL with the literal placeholder and does not guess an organization ID. No earlier step in the run created the organization, so the value cannot be read from the browser's URL. Marks test case 2 FAIL, naming the unresolved `:organizationId` placeholder, and continues with the remaining cases.",
+      "expectations": [
+        "Does not navigate to the URL with the literal `:organizationId` segment",
+        "Does not guess or invent an organization ID",
+        "Marks test case 2 FAIL, naming the unresolved `:organizationId` placeholder as the reason",
+        "Does not abort the whole run over the unresolved placeholder"
+      ]
     }
   ]
 }
