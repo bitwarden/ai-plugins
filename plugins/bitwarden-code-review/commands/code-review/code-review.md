@@ -56,7 +56,7 @@ You must invoke the bitwarden-code-review:bitwarden-code-reviewer agent to perfo
    ```
    ## Existing PR Threads (Pre-fetched)
 
-   The following threads already exist on this PR. Use this data to avoid duplicate comments.
+   The following threads already exist on this PR. Use this data to avoid duplicate comments, and to reply in the thread when a finding is raised again.
    Do NOT re-fetch threads via API - this data is authoritative.
 
    <threads>

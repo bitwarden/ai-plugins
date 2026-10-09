@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-10-08
+
+### Added
+
+- A CRITICAL or IMPORTANT finding raised again on a thread whose issue persists goes as a reply in that thread through `mcp__github_replies__add_reply_to_pull_request_comment`, so the thread's history stays in one place. Without that tool, without a `database_id` on the thread's first comment, or when the reply fails, it posts a new inline comment
+
 ## [2.2.0] - 2026-09-28
 
 ### Added
