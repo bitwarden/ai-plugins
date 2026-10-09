@@ -46,7 +46,7 @@ If any of the three paths is missing, return a plain failure report naming the m
 
 ## Step 1 — Read the artifacts
 
-Read the app-context artifact. Locate it by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence — it begins at the first `<!-- APP-CONTEXT START -->` and ends at the last `<!-- APP-CONTEXT END -->`, so an embedded marker cannot truncate it — and within it find the `## States` section. Extract every route line from `## States`: each state's `UI projection` block contains a `Route: <URL>` line. Collect those URLs (deduplicated) — these are the routes you will pass to the skill. Skip any state whose `Route:` is `n/a`: it is an out-of-band state with no browser route, so it contributes no route.
+Read the app-context artifact. Locate it by its `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` fence — it begins at the first `<!-- APP-CONTEXT START -->` and ends at the last `<!-- APP-CONTEXT END -->`, so an embedded marker cannot truncate it — and within it find the `## States` section. Extract every route line from `## States`: each state's `UI projection` block contains a `Route: <URL>` line. Collect each line's URL, dropping any trailing parenthetical, deduplicated — these are the routes you will pass to the skill. Skip any state whose `Route:` is `n/a`: it is an out-of-band state with no browser route, so it contributes no route.
 
 Also within the `APP-CONTEXT` fence, find the `## Required Feature Flags` section if present and take its bullets verbatim (each flag line with its `Source:` sub-bullet). These are the required feature flags; if the section is absent, there are none.
 
