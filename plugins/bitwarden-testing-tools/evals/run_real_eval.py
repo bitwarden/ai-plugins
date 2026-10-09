@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Trigger-rate evaluator: runs `claude -p` per eval query and counts a trigger
 only on a plugin-qualified Skill invocation (`<plugin>:<skill>`) or a Read of the
-skill's own `SKILL.md`.
+skill's own `SKILL.md`. With `--agent`, the target is an agent instead: a trigger
+is a plugin-qualified Agent (or legacy Task) dispatch or a Read of the agent's own
+`AGENT.md`.
 
 Shared by every skill under `bitwarden-testing-tools`. See evals/README.md for the
 rationale, arguments, and how to add evals for a new skill.
@@ -69,7 +71,7 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
     # own SKILL.md, never a bare token substring: the eval runs from the skill's
     # evals/ dir, so an exploratory read there carries the token in its path.
     skill_needle = f"{plugin}:{skill_token}"
-    read_needle = f"/{skill_token}/SKILL.md"
+    read_needles = (f"/{skill_token}/SKILL.md", f"/{skill_token}/AGENT.md")
 
     first_skill_seen = None
     start = time.time()
@@ -102,8 +104,8 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
                 delta = se.get("delta", {})
                 if delta.get("type") == "input_json_delta":
                     accum += delta.get("partial_json", "")
-                    needle = skill_needle if pending == "Skill" else read_needle
-                    if needle in accum:
+                    needles = (skill_needle,) if pending == "Skill" else read_needles
+                    if any(n in accum for n in needles):
                         return {"triggered": True, "first_skill": accum}
             elif se.get("type") == "content_block_stop" and pending:
                 if first_skill_seen is None:
@@ -122,8 +124,13 @@ def run_query(query: str, timeout: int, model: str, skill_token: str, plugin: st
                 inp = item.get("input", {})
                 if name == "Skill" and skill_needle in inp.get("skill", ""):
                     return {"triggered": True, "first_skill": inp.get("skill")}
-                if name == "Read" and read_needle in inp.get("file_path", ""):
+                if name == "Read" and any(n in inp.get("file_path", "") for n in read_needles):
                     return {"triggered": True, "first_skill": inp.get("file_path")}
+                # A direct agent dispatch surfaces as an Agent (or legacy Task)
+                # tool_use naming the agent in subagent_type. Only an --agent
+                # target can match: a skill token never names an agent.
+                if name in ("Agent", "Task") and skill_needle in inp.get("subagent_type", ""):
+                    return {"triggered": True, "first_skill": inp.get("subagent_type")}
         elif event.get("type") == "result":
             return {"triggered": False, "first_skill": first_skill_seen}
         return None
@@ -208,6 +215,8 @@ def runs_for(query, should_trigger, runs, timeout, model, skill_token, plugin):
 
 
 def resolve_skill_token(args) -> str:
+    if args.agent:
+        return args.agent
     if args.skill:
         return args.skill
     # The eval file lives at skills/<skill>/evals/<file>; the skill directory is
@@ -226,7 +235,9 @@ def resolve_plugin(args) -> str:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-set", required=True)
-    parser.add_argument("--skill", help="Target skill token; inferred from --eval-set path when omitted.")
+    target = parser.add_mutually_exclusive_group()
+    target.add_argument("--skill", help="Target skill token; inferred from --eval-set path when omitted.")
+    target.add_argument("--agent", help="Target agent token, for a suite measuring direct agent dispatch.")
     parser.add_argument("--plugin", help="Plugin token qualifying a Skill invocation; inferred from --eval-set path when omitted.")
     parser.add_argument("--runs-per-query", type=int, default=3)
     # Each worker holds one ~1GB `claude -p` Node process open at a time; cap the

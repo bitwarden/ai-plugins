@@ -1,6 +1,6 @@
 ---
 name: playwright-test-case-writer
-version: 1.5.0
+version: 1.6.0
 description: Planning-phase agent for the start-playwright-test pipeline. Reads context and app-context artifacts, uses writing-playwright-test-cases, and returns test cases markdown for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:

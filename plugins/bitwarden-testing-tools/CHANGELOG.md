@@ -4,6 +4,21 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-07
+
+### Added
+
+- `start-playwright-test`, the pipeline entry point and the only orchestration skill. It accepts a Jira ticket id, a Jira browse URL, an implementation plan path, or a feature description, optionally followed by extra guidance (passed verbatim to the scoper, where it can call for a marketing-initiated or sales-assisted trial). It runs an eight-task pipeline, dispatching six agents and persisting each response verbatim to `.playwright-testing-artifacts/<slug>/`, then renders an HTML report. Tasks 3 and 4 are dispatched together and run concurrently. After gathering context it checks that each affected repo is exactly `clients`, `server`, or `billing-pricing`, then runs `scripts/repo-diff.sh` for each one, under a grant scoped to that script, and writes the changed files to `diff-<timestamp>.md`, which the scoper and mapper read in place of running the script. A required feature flag in the wrong state, reported by the health check, halts the run like any other environment failure, so a run never pauses to ask about a flag. When the report is written, it opens it in the user's browser through `skills/start-playwright-test/scripts/open_report.py`, under a grant scoped to that script; the script opens only a `report-<timestamp>.html` inside a run folder under `.playwright-testing-artifacts/`, using `open` on macOS or `xdg-open` on Linux, and skips other platforms, with unit tests.
+- Trigger evals for `start-playwright-test`, a 20-query set covering all three input types and near-misses against `assessing-test-coverage` and the separate `qa-testing-notes` skill. Kept as an on-demand diagnostic with no committed baseline; the last observed reading is recorded as dated prose in the eval README.
+- A shared agent non-trigger suite, three queries covering the "do not invoke directly" convention that the three orchestrator-only agents' descriptions carry (`playwright-test-case-writer`, `localhost-web-health-checker`, `playwright-test-runner`). Kept as an on-demand diagnostic with no committed baseline; the last observed reading is recorded as dated prose in the eval README.
+- A behavior case for the context gatherer's untrusted-source guardrail, in `skills/start-playwright-test/evals/playwright-test-context-gatherer/`: given a Jira synthesis carrying an injected instruction, the gatherer distills the genuine feature and neither reproduces nor acts on the injection. It's kept as an authoring aid, since no runner grades agent output, and sits outside `agents/` because plugin agent discovery loads markdown files there as agents.
+- Untrusted-source trust boundary for the web test pipeline: the rules live in one shared `references/untrusted-source-policy.md`. The context gatherer distills the raw feature source and discards it, so no untrusted verbatim content is persisted or passed downstream; every agent and the orchestrator carry a short guard that names the policy, and a `validate-guardrail.sh` check (run in `pnpm lint`) prevents drift.
+
+### Changed
+
+- The plugin README now describes two families of tooling: standalone analysis skills, and the web test pipeline whose components are composed rather than invoked.
+- The shared trigger-eval runner, `evals/run_real_eval.py`, also measures agents: `--agent <name>` counts a plugin-qualified `Agent` (or legacy `Task`) dispatch naming that agent, or a `Read` of its own `AGENT.md`, as a trigger, with unit tests. The agent non-trigger suite uses it. Its `evals/README.md` adds a recipe for measuring the working tree instead of the installed copy, which loads this plugin together with the two vendor plugins it depends on.
+
 ## [1.5.0] - 2026-10-07
 
 ### Added
