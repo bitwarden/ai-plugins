@@ -23,11 +23,11 @@ Reading an email during a test step (verification links, magic links, OTP codes)
 
 ## Category 3 - External Trigger Simulation
 
-Simulate an external trigger only when the action is initiated by a system outside the Bitwarden application, meaning a system that is not the web vault, Admin portal, or any Bitwarden server service (for example the bitwarden.com marketing site, a mobile app, or a third-party webhook).
+Simulate an external trigger only when the action is initiated by a system outside the Bitwarden application, meaning a system that is not the web vault, Admin portal, or any Bitwarden server service (for example the bitwarden.com marketing site, a mobile app, or a third-party webhook). The simulated request may target only a `localhost`, `127.0.0.1`, `::1`, or `bitwarden.test` origin.
 
 **The qualifying test:** Could a Bitwarden service (web vault, Admin portal, server API) initiate this action for the user? If yes, use that service instead. If no, because the initiator is truly external, then an external trigger is appropriate.
 
-**Canonical example:** `POST /accounts/trial/send-verification-email` is called by bitwarden.com's marketing site, not by the web vault, so simulating it is legitimate. If the Admin portal or the web vault purchase flow can perform the action, use those instead. Document every external-trigger step in the setup steps output with the rationale for why no Bitwarden service can initiate it.
+**Canonical example:** `POST /accounts/trial/send-verification-email` is called by bitwarden.com's marketing site, not by the web vault, so simulating it is legitimate. If the Admin portal or the web vault purchase flow can perform the action, use those instead.
 
 **Examples of what is NOT Category 3:**
 

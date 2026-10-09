@@ -30,11 +30,11 @@ Both expectations are still falsifiable (a `Notes:` line either contains the sta
 
 ## Did-not-take-an-action checks
 
-None of this suite's 31 expectations require tool-call trace capture to grade, unlike `mapping-services-under-test`'s suite (which needs trace visibility because that skill's documented job includes actually running `git diff` itself). `writing-playwright-test-cases` takes no live actions of its own during construction beyond reading two static reference files, the shared `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md` and its own `references/billing-test-data.md`; everything it is graded on here is a decision about what text goes into the single markdown document it returns. Every "does not include a step that..." expectation in this suite (direct database queries, Stripe API writes, feature-flag edits, third-party navigation) is satisfied or violated entirely within that returned document, so artifact inspection is sufficient and no trace capture is needed to score this suite.
+None of this suite's 30 expectations require tool-call trace capture to grade, unlike `mapping-services-under-test`'s suite (which needs trace visibility because that skill's documented job includes actually running `git diff` itself). `writing-playwright-test-cases` takes no live actions of its own during construction beyond reading its static reference files; everything it is graded on here is a decision about what text goes into the single markdown document it returns. Every "does not include a step that..." expectation in this suite (direct database queries, Stripe API writes, feature-flag edits, third-party navigation) is satisfied or violated entirely within that returned document, so artifact inspection is sufficient and no trace capture is needed to score this suite.
 
 ## Files
 
-- `behavior-eval.json` - the nine cases and their 31 expectations, described above.
+- `behavior-eval.json` - the nine cases and their 30 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running

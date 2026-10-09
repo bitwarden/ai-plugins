@@ -91,6 +91,10 @@ Scope the application context for the past-due billing banner change in clients 
 ```
 
 ```
+Write the Playwright test cases for the past-due billing banner from this application context.
+```
+
+```
 Which local services do I need running for these tests, and what should I start?
 ```
 
