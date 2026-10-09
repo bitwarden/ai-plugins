@@ -129,7 +129,7 @@ Emit a single markdown document with this exact structure and no preceding narra
 
 ```
 **Test Case N: <name>**
-- Starting URL: <exact URL from a state's UI projection Route in the Application Context>
+- Starting URL: <exact URL from a state's UI projection Route in the Application Context, without its trailing parenthetical>
 - Precondition: <one-line summary of the required end-state in plain English (e.g., "A premium user with two active discounts is logged in")>
 - Setup Steps:
   1. SETUP: <atomic browser interaction, navigation, fill, or click>
