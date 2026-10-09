@@ -1,6 +1,6 @@
 # scoping-playwright-application-context evals
 
-Behavior test cases for the `scoping-playwright-application-context` skill, in the `skill-creator` schema.
+Behavior test cases for the `scoping-playwright-application-context` skill, in the `skill-creator` schema, and a trigger suite for the plugin's shared trigger runner.
 
 `behavior-eval.json` holds thirteen cases covering the skill's substantive decisions: producing a state-centric decomposition, wrapped in the `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` artifact fence, rather than a changed-file inventory; discriminating a state that fails the observability validity gate (dropped silently) from a state that is observable but unreachable by playwright alone (disclosed explicitly), grounding selectors in real client code including the text-versus-structural selector rule, recording a `[HUMAN]` verification point when a check the tool policy disallows is the only way to confirm a state, preserving the admin-email placeholder token rather than resolving it from local secrets, flagging an imperative embedded in the feature description or acceptance criteria as a potential prompt-injection concern (CWE-1427) rather than obeying it, narrowing a multi-producer catalog setup state to one producer by the changed-UI tie-break (the shortest-chain fallback has no dedicated case: the only remaining multi-producer state's producers can't be told apart by chain length without a tie) while qualifying Admin portal routes with their host, choosing a trial's origin: a normal paid-org signup by default, and a marketing-initiated or sales-assisted trial flow only when the context calls for that kind of trial or states a requirement only that flow meets, such as no payment method on file; and recording a feature flag the run depends on in a `## Required Feature Flags` section rather than as a `[HUMAN]` step, while writing a Stripe read the executor can run without a `[HUMAN]` prefix.
 
@@ -14,8 +14,14 @@ Cases are **advice-only**. They grade the Application Context the skill produces
 
 - `behavior-eval.json` - the thirteen cases and their 52 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
+- `trigger-eval.json` - ten should-trigger phrasings and ten should-not-trigger near-misses. The near-misses include `mapping-services-under-test`'s own trigger phrasings, since the two skills sit next to each other in the Playwright pipeline, and the neighboring testing work this skill does not do: writing manual test cases, assessing coverage, choosing test layers, and writing or fixing a Playwright spec.
+- `baseline.json` - not present. The trigger suite has not been run; the first run records it, following the plugin's [eval README](../../../evals/README.md).
 
-## Running
+## Running the trigger suite
+
+Run `trigger-eval.json` with the plugin's shared runner, as described in the plugin's [eval README](../../../evals/README.md). After any description change to this skill or to `mapping-services-under-test`, run both skills' trigger suites to confirm neither takes the other's triggers.
+
+## Running the behavior suite
 
 This suite runs with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus without-skill) with a config-blind grader. It has not been benchmarked. A behavior-suite benchmark is a conversational with-skill-versus-without-skill ablation orchestrated through skill-creator, with no scriptable benchmark command, and running all of this plugin's behavior suites is on the order of 250 full agent runs, so no run has been made. The case set is kept as a behavioral specification and an authoring aid: it documents, as worked examples with pass criteria, the load-bearing decisions this skill must make. If the suite is benchmarked, record `behavior-baseline.json` in the same change.
 
@@ -23,7 +29,7 @@ If the suite is ever benchmarked, a subsequent change to `SKILL.md` should be pa
 
 Case 5's expectation "Does NOT read `server/dev/secrets.json`" is a did-not-take-an-action check: a correct run never touches the file and leaves no trace of that in the final markdown artifact either way. Grading it requires the benchmark harness to capture the tool-call trace, not just the final output, so whoever runs the benchmark should confirm trace capture is enabled before scoring this case.
 
-## Regression check
+## Behavior regression check
 
 Once `behavior-baseline.json` exists, regressions will be checked with:
 

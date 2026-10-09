@@ -1,6 +1,6 @@
 # mapping-services-under-test evals
 
-Behavior test cases for the `mapping-services-under-test` skill, in the `skill-creator` schema.
+Behavior test cases for the `mapping-services-under-test` skill, in the `skill-creator` schema, and a trigger suite for the plugin's shared trigger runner.
 
 `behavior-eval.json` holds six cases covering the skill's substantive decisions: taking the union of route-based and file-path-based dependencies rather than one alone, running its own `repo-diff.sh <repo-path>` (the plugin's diff script, which runs `git diff --name-only origin/main...HEAD`) when the caller supplies no changed files, rather than proceeding on routes alone, sourcing names, URLs, and ports from `references/services.md` rather than recall, returning a minimal set matched by the documented rules rather than a defensively padded one, prefixing repo-relative diff paths with the canonical repo name so the path-based globs match, and carrying a supplied `## Required Feature Flags` section into the services artifact while adding `Api`.
 
@@ -14,14 +14,20 @@ Case 3's expectation about sourcing ports from `references/services.md` is only 
 
 - `behavior-eval.json` - the six cases and their 25 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
+- `trigger-eval.json` - ten should-trigger phrasings and ten should-not-trigger near-misses. The near-misses include `scoping-playwright-application-context`'s own trigger phrasings, since the two skills sit next to each other in the Playwright pipeline, and requests to start, health-check, or debug a service, which this skill's description rules out.
+- `baseline.json` - not present. The trigger suite has not been run; the first run records it, following the plugin's [eval README](../../../evals/README.md).
 
-## Running
+## Running the trigger suite
+
+Run `trigger-eval.json` with the plugin's shared runner, as described in the plugin's [eval README](../../../evals/README.md). After any description change to this skill or to `scoping-playwright-application-context`, run both skills' trigger suites to confirm neither takes the other's triggers.
+
+## Running the behavior suite
 
 This suite runs with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus without-skill) with a config-blind grader. It has not been benchmarked. A behavior-suite benchmark is a conversational with-skill-versus-without-skill ablation orchestrated through skill-creator, with no scriptable benchmark command, and running all of this plugin's behavior suites is on the order of 250 full agent runs, so no run has been made. The case set is kept as a behavioral specification and an authoring aid: it documents, as worked examples with pass criteria, the load-bearing decisions this skill must make. If the suite is benchmarked, record `behavior-baseline.json` in the same change.
 
 If the suite is ever benchmarked, a subsequent change to `SKILL.md` should be paired with a re-run and a refresh of `behavior-baseline.json`.
 
-## Regression check
+## Behavior regression check
 
 Once `behavior-baseline.json` exists, regressions will be checked with:
 

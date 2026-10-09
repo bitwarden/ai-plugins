@@ -33,7 +33,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 
 **Use when:** Any test that requires a fresh authenticated user account with no prior subscription or organization state.
 
-**Parameters:** `email`, `password` (the fixed dev master password `test-master-password-12`; see Note)
+**Parameters:** `email`, `password` (see Note)
 
 **Precondition state:** none
 
@@ -47,7 +47,7 @@ Curated reference of validated, reusable test states and UI flows for Bitwarden 
 5. Use the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill (`--recipient <email> --pattern "Verify"`) to fetch the verification email; stdout is the magic-link URL
 6. Navigate to the magic-link URL (it targets `https://localhost:8080/#/finish-signup?...`)
    - Feedback: finish-signup form appears
-7. Fill the Master Password field with `<password>` (the fixed dev master password `test-master-password-12`)
+7. Fill the Master Password field with `<password>`
 8. Fill the Confirm Master Password field with `<password>`
 9. Click Create Account
    - Feedback: redirect to the vault
