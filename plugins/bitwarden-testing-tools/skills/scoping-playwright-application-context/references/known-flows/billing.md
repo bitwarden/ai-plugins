@@ -2,13 +2,11 @@
 
 <!-- cspell:ignore Inititaion -->
 
-Curated reference of reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations. `scoping-playwright-application-context` copies these entries as written once their cited literals check out, dropping the catalog-only fields below, and the downstream test-case authoring step consumes them.
+Curated reference of reusable test states and UI flows for Bitwarden billing, subscriptions, and organizations. `scoping-playwright-application-context` copies these entries as written once their cited literals check out, dropping the catalog-only `**Select only when:**` and `**Sources:**` fields, and the downstream test-case authoring step consumes them.
 
 ## Catalog conventions
 
-- **Citations.** A citation is `` `<workspace path>` (`<literal>`) ``. The path is relative to the bitwarden root (`clients/…`, `server/…`). Each literal in backticks is an exact substring of that file that encodes the fact, searched as plain text (many contain regex metacharacters). When several literals end with `in order`, they appear in that order in the file. States cite on each verification point's `Source:` line; flows cite in a `**Sources:**` block.
-- **`**Select only when:**`** (flows only; catalog-only). The scoper uses the flow only when the context's feature description or acceptance criteria, or the user's extra instructions, meet the condition. A condition names the explicit call for that kind of trial and the requirements only that flow can meet; anything a normal paid-org signup can already do (a card, a cadence, a seat count, a trial length) never counts. Dropped on copy.
-- **`**Sources:**`** (flows only; catalog-only). One bullet per cited fact: the citation, then the fact it grounds. Dropped on copy.
+- A flow's `**Select only when:**` condition names the explicit call for that kind of trial and the requirements only that flow can meet; anything a normal paid-org signup can already do (a card, a cadence, a seat count, a trial length) never counts.
 - Card iframe titles (`Secure card number input frame` and the like) are rendered by Stripe, not Bitwarden code, so they are not cited.
 
 ---
