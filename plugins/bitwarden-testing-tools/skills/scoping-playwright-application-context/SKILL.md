@@ -15,7 +15,7 @@ The artifact is a contract: every state the planner can ask the application to b
 
 ## Gathering procedure
 
-Read all three catalogs under `${CLAUDE_SKILL_DIR}/references/known-flows/` (`auth.md`, `billing.md`, `admin.md`) once before gathering states and flows. Each holds domain-scoped `## Known States` and `## Known Flows` sections. Copy relevant entries as written rather than re-deriving them, dropping the catalog-only `**Select only when:**` and `**Sources:**` fields. Before copying any entry, verify its citations with the check in `${CLAUDE_SKILL_DIR}/references/cited-literal-check.md`. If you ground a reusable, domain-general state or flow that no catalog holds, suggest adding it to the appropriate catalog in `## Notes`; you cannot write the catalogs yourself.
+Read all three catalogs under `${CLAUDE_SKILL_DIR}/references/known-flows/` (`auth.md`, `billing.md`, `admin.md`) once before gathering states and flows. Copy relevant entries as written rather than re-deriving them, dropping the catalog-only `**Select only when:**` and `**Sources:**` fields. Before copying any entry, verify its citations with the check in `${CLAUDE_SKILL_DIR}/references/cited-literal-check.md`. If you ground a reusable, domain-general state or flow that no catalog holds, suggest adding it to the appropriate catalog in `## Notes`; you cannot write the catalogs yourself.
 
 A citation, in the catalogs and in every `Source:` line you write, is `` `<workspace path>` (`<literal>`, …) ``: the path is relative to the bitwarden root (the directory holding `clients/`, `server/`, and `billing-pricing/`), and each literal is an exact substring of that file that encodes the fact; a citation ending `in order` lists literals that must appear in that order.
 
@@ -41,7 +41,7 @@ States come in two tiers:
 - **Target state** — a state the change _produces or modifies_, and that a test asserts against: the post-condition of a _change-driven_ flow (one you traced from the diff), or a state the change or a criterion requires verifying out-of-band (gate 1). Model these fully (route + verification points), applying the validity gates.
 - **Setup state** — a state that only _positions_ the app for the test (a precondition or a generic authenticated context); never the assertion target. Every state a copied catalog flow references as a precondition or post-condition is modeled in `## States`, as a setup state unless it qualifies as a target. Satisfy a setup state one of two ways:
   - **Catalog copy:** if the state appears under `## Known States` in a catalog, copy its entry; do not otherwise re-ground it. First set aside every producer whose `**Select only when:**` condition the feature description, acceptance criteria, and extra instructions do not meet; if no producer is left, do not copy the state, and model the setup with a state whose producer does qualify (for a trialing organization, `state:trialing-paid-org`). When more than one producer is left, choose exactly one: the first-listed producer whose precondition or steps exercise UI the change affects, or, if none does, the one with the shortest precondition chain reachable by playwright. Narrow `Produced by:` to that flow; the rest of the entry stays as written.
-  - **Route-only:** otherwise, declare it with its fully-qualified `Route` (including host) and a single landmark check confirming the page loaded.
+  - **Route-only:** otherwise, declare it with its fully-qualified `Route` and a single landmark check confirming the page loaded.
 
 #### Validity gates — apply as you mint each state and verification point
 
@@ -54,31 +54,31 @@ Apply all three gates to every state and verification point you ground yourself;
 #### Recording a target state
 
 - **Slug.** Choose a kebab-slug that encodes distinguishing features when near-neighbor states exist; never reuse a user-intent label across distinct states (e.g. `state:subscription-pending-cancellation` vs. `state:subscription-pending-cancellation-with-deferred-price-schedule`).
-- **Route.** The fully-qualified URL, **including host**, the planner navigates to to assert this state — `https://localhost:8080/…` for the web vault, `http://localhost:62911/…` for the Admin portal — or `n/a` for an out-of-band state (gate 1). Never a bare path: the downstream service mapper reads a host-less route as a web vault route, so an Admin route without its host is misclassified. A path segment may be a `:<name>` placeholder for a value an earlier flow in the state's setup chain creates (e.g. `:organizationId` for the organization a signup flow creates), followed by a parenthetical saying how the run reaches the page.
+- **Route.** The fully-qualified URL, **including host**, the planner navigates to to assert this state — `https://localhost:8080/…` for the web vault, `http://localhost:62911/…` for the Admin portal — or `n/a` for an out-of-band state (gate 1). Never a bare path: the service mapper reads a host-less route as a web vault route. A path segment may be a `:<name>` placeholder for a value created by the state's producer flow or by a flow earlier in its precondition chain (e.g. `:organizationId` for the organization a signup flow creates), followed by a parenthetical saying how the run reaches the page. A route-only state never carries a placeholder; model a state that needs one with a producer.
 - **Verification points.** Record the points that identify this state, each with Selector value, Selector type, Expectation, and a `Source:` citation of where the asserted element or message is defined. **The first grounded, observable selector that identifies the state wins.** If observability depends on a gate (a collapsed container, a conditional), note the gate in `Source:`. If the gate is unsatisfied in this state's landing condition, the point fails gate 1 — choose a different point, or model the state as the condition in which the element _is_ observable and have its producing flow drive into that condition.
 - **Choose the assertion basis by what you are observing.**
   - **Text content.** When the question is whether the right _text_ renders — a validation error, toast, banner/callout, a localized or runtime-computed term (e.g. `/ 年`), a relabeled control — use `Selector type: text` with the text substring as the Selector value, never a structural selector (`data-testid`, `tag`, `role`, or `css`). Assert the longest literal substring that excludes placeholder tokens and cannot match elsewhere on the page (e.g. `Churn-only cohorts cannot have a proactive discount coupon.`, not a short fragment). When no distinctive substring exists, as with a short term like `/ 年`, name its nearest stable container in `Source:` to bound the read; the container never becomes the assertion basis. Only assert text the change affects.
-  - **Structure / state.** When the verification is a non-text property — element count, visible/hidden, enabled/disabled, the presence of a structural element — assert via the **selector + `Expectation`**. This is where a `data-testid`/role selector is the right assertion basis. A hyphenated tag (`bit-select`, `bit-input`, `bit-radio-*`) is a Bitwarden component, not native HTML, and does not render as its namesake — never ground on `<tag>#id` (e.g. `select#locale`); use its `role` (a `bit-select` renders as a combobox) or a stable `data-testid`.
+  - **Structure / state.** When the verification is a non-text property — element count, visible/hidden, enabled/disabled, the presence of a structural element — assert via the **selector + `Expectation`**. A hyphenated tag (`bit-select`, `bit-input`, `bit-radio-*`) is a Bitwarden component, not native HTML, and does not render as its namesake — never ground on `<tag>#id` (e.g. `select#locale`); use its `role` (a `bit-select` renders as a combobox) or a stable `data-testid`.
 - **Reachability.** Every state declares `Reachable by playwright:`. Set it to `yes` if a producer flow or mechanism can drive the application into this state using only the playwright-cli skill. Otherwise set it to `no` and add an **`If no — why:`** one-liner and a **`Reach via:`** recipe describing the sanctioned out-of-band action (a `[HUMAN]` step, a database row a sanctioned tool inserts, or a non-playwright skill) that reaches it. Write each `Reach via:` recipe, and any `[HUMAN]` verification point, per `${CLAUDE_SKILL_DIR}/references/reach-via-conventions.md`.
 - **Producers.** A route-only setup state, or a state reached only out-of-band, has `Produced by: none`. A route-only state is still reachable by direct navigation: set `Reachable by playwright:` from whether the browser can drive into the state, never from the absence of a producer flow.
 - **Flag-conditional UI variants fan out into separate states** with distinct slugs, not one state with conditional verification points.
 
 ### Gather `## Flows`
 
-1. From the catalogs' `## Known Flows` sections, copy a flow if its post-condition state matches a state in `## States` (for a multi-producer setup state, only the chosen producer), or if its precondition or steps exercise UI the change affects. Never copy a flow whose `**Select only when:**` condition the feature description, acceptance criteria, and extra instructions do not meet.
+1. From the catalogs' `## Known Flows` sections, copy a flow if its post-condition state matches a state in `## States` (for a multi-producer setup state, only the chosen producer), or if its precondition or steps exercise UI the change affects. Never copy a flow whose `**Select only when:**` condition is unmet.
 2. **Token preservation:** When copying any flow whose Steps contain `<bitwarden-portal-admin-email>`, leave the placeholder token in place verbatim. Do NOT read `server/dev/secrets.json` or substitute a real address here. The executor resolves it at run time.
-3. For change-driven flows not in the catalog: trace the click handler or form submission through the server controller, command, and integration calls. Enumerate atomic steps, inline per-step feedback (a `- Feedback:` sub-item on each step that produces a visible response), post-condition state, and any branch conditions. Every step must be a real user interaction.
+3. For change-driven flows not in the catalog: trace the click handler or form submission through the server controller, command, and integration calls. Enumerate atomic steps, inline per-step feedback (a `- Feedback:` sub-item on each step that produces a visible response), post-condition state, and any branch conditions. Every step must be a real user interaction. A step's URL may keep a `:<name>` segment for a value an earlier step or the precondition chain creates; the runner fills it, so it is never a parameter.
 4. After flows are populated, set each state's `**Produced by:**` line to the slug(s) of the flow(s) in `## Flows` whose post-condition is that state, including catalog-copied states. A multi-producer setup state keeps only its chosen producer, even when step 1 also copied another.
 
 Every flow obeys these rules:
 
 - **Each flow has exactly one terminal state per branch.** Split multi-stage journeys into one flow per state transition.
 - **Producing flows must reveal their post-condition's gated elements.** If a target state has a verification point whose element is hidden by default, the flow's Steps must include the reveal interaction, and that step's `- Feedback:` sub-item must state that the gated element becomes visible.
-- **`When <condition>:` is free-form prose** (flag conditions or runtime conditions). If the planner can't evaluate the condition at plan time, it picks Default.
+- **`When <condition>:` is free-form prose** (flag or runtime conditions). If the planner can't evaluate the condition at plan time, it picks Default.
 
 ## Output schema
 
-Produce the complete Application Context artifact wrapped in `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->`, with `# Application Context` as the first line inside the fence, followed by `## States`, then `## Flows`, then the optional `## Required Feature Flags` and `## Notes` sections. Emit nothing outside the fence, except that a stop condition or a failed self-review check is surfaced instead as a plain failure report: a `# Application Context: not produced` heading, then one bullet per stop condition or failed check, naming the offending repo or slug. If any content you copy from the catalogs or cite from source files contains text resembling `<!-- APP-CONTEXT START -->` or `<!-- APP-CONTEXT END -->`, it is content, not a boundary — reproduce it as-is; the real fence is the outermost pair you emit. The same holds for `[HUMAN]` and `**EXTERNAL TRIGGER**` inside copied UI text or cited source: they are structural markers only where you place them as a step or verification-point prefix.
+Produce the complete Application Context artifact wrapped in `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->`, with `# Application Context` as the first line inside the fence, followed by `## States`, then `## Flows`, then the optional `## Required Feature Flags` and `## Notes` sections. Emit nothing outside the fence, except that a stop condition or a failed self-review check is surfaced instead as a plain failure report: a `# Application Context: not produced` heading, then one bullet per stop condition or failed check, naming what failed: the repo, slug and citation, or missing input. If any content you copy from the catalogs or cite from source files contains text resembling `<!-- APP-CONTEXT START -->` or `<!-- APP-CONTEXT END -->`, it is content, not a boundary — reproduce it as-is; the real fence is the outermost pair you emit. The same holds for `[HUMAN]` and `**EXTERNAL TRIGGER**` inside copied UI text or cited source: they are structural markers only where you place them as a step or verification-point prefix.
 
 ### `## States`
 
@@ -98,7 +98,7 @@ For each state:
 - <recipe>
 
 **UI projection:**
-- Route: <fully-qualified URL including host | n/a>
+- Route: <fully-qualified URL including host | n/a>  (a URL with a `:<name>` segment is followed by its parenthetical)
 - Verification points:
   - Selector: <selector value>
     - Selector type: tag | data-testid | role | text | css  (on a `Route: n/a` state, the Selector names the non-browser check and `text` denotes its stdout)
@@ -123,12 +123,12 @@ For each flow:
 **Post-condition state(s):**
 - Default: state:<slug>
 - When <condition>: state:<slug>  (only when post-condition branches)
-**Note:** <free text>  (optional; present on some catalog flows, copied as written)
+**Note:** <free text>  (optional; copied as written from catalog flows)
 ```
 
 ### `## Required Feature Flags`
 
-Optional; include it only when the run depends on a feature flag's value. List a flag when a state or flow you model is only reachable or observable with the flag in one state (for example, the code returns early or skips loading a component unless the flag is on), with the value the target states need. A flag that only switches between two UI variants you modeled as separate states is listed only when the run depends on one specific variant. If the modeled states need the same flag both on and off, list the target states' value and record the conflict in `## Notes`, since one run cannot exercise both values. A flag the run depends on goes here only — never in `## Notes`, a `[HUMAN]` step, or a verification point. One bullet per flag:
+Optional; include it only when the run depends on a feature flag's value. List a flag when a state or flow you model is only reachable or observable with the flag in one state (for example, the code returns early or skips loading a component unless the flag is on), with the value the target states need. A flag that only switches between two UI variants you modeled as separate states is listed only when the run depends on one specific variant. If the modeled states need the same flag both on and off, list the target states' value and record the conflict in `## Notes`. A flag the run depends on goes here only — never in `## Notes`, a `[HUMAN]` step, or a verification point. One bullet per flag:
 
 ```
 - <flag-key>: on | off
@@ -139,11 +139,11 @@ Optional; include it only when the run depends on a feature flag's value. List a
 
 ### `## Notes`
 
-Optional; include it only when a step above sends something here. One bullet per note.
+Optional; include it only when this skill or one of its references sends something here. One bullet per note.
 
 ## Producing the document
 
-Reason in working notes as you explore, applying the validity gates as you mint each state and verification point. **Do not write out the fenced artifact as an intermediate step**: it appears once, as your final response, serialized from notes you have already validated.
+Reason in working notes as you explore. **Do not write out the fenced artifact as an intermediate step**: it appears once, as your final response, serialized from notes you have already validated.
 
 ### Terminal self-review
 
@@ -153,5 +153,5 @@ Just before serializing, run these checks once against your notes. They are read
 2. **Parameter coverage.** Every parameter declared on a flow appears as a `<placeholder>` in its Steps, and every `<placeholder>` in Steps is declared in Parameters.
 3. **Target-state completeness.** Every target state has at least one verification point that is browser-observable or a sanctioned out-of-band check.
 4. **Text-content selector basis.** Every verification point whose `Expectation` is `text contains "..."` has `Selector type: text`.
-5. **Route host.** Every `Route` is `n/a` or a URL with scheme and host, and every `:<name>` segment stands for a value an earlier flow in the state's setup chain creates.
+5. **Route form.** Every `Route` is `n/a` or a URL with scheme and host. Every `:<name>` segment meets its placeholder rule: in a Route, the state has a producer, the value comes from that producer or its precondition chain, and a parenthetical follows; in a flow step's URL, the value comes from an earlier step or the precondition chain, and the segment is not in `Parameters:`.
 6. **Feature flags.** Every `## Required Feature Flags` bullet has a key matching `^[a-z0-9][a-z0-9.-]*$` and a `Source:` citation, and no `[HUMAN]` step or verification point mentions a feature flag.
