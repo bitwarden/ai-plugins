@@ -5,6 +5,86 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-10-08
+
+### Added
+
+- A CRITICAL or IMPORTANT finding raised again on a thread whose issue persists goes as a reply in that thread through `mcp__github_replies__add_reply_to_pull_request_comment`, so the thread's history stays in one place. Without that tool, without a `database_id` on the thread's first comment, or when the reply fails, it posts a new inline comment
+
+## [2.2.0] - 2026-09-28
+
+### Added
+
+- `/code-review-local` accepts `--base <ref>`, passed to the agent as a `BASE:` line and used in place of `origin/HEAD` for the local-mode diff. Local changes only; dropped with a PR target
+- The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`, checked in the command turn and again in the agent. A rejected ref is No Verdict, not a fallback to `origin/HEAD`
+- A supplied ref that passes the pattern but does not resolve is also No Verdict; it skips the pending-changes fallback, which on a dirty tree would report a verdict on a scope the caller never asked for
+- Only the space-separated `--base <ref>` pair is accepted. Any other appearance of the token, `--base=<ref>` among them, is an error rather than a fall-through to the default base
+
+### Changed
+
+- Local-mode summaries name the base ref they diffed against
+- The unresolvable-base abort gives different advice for a supplied ref than for the `origin/HEAD` default, and names the remote-tracking ref in its remedy. A fetch writes no local branch, so advising a bare branch name would return the caller to the same abort
+
+## [2.1.0] - 2026-09-04
+
+### Added
+
+- `avoiding-false-positives`: do-not-flag pattern for a confirmed layer of a stacked PR, gated on a four-condition check. Both the PR under review and the PR confirming it must be same-repository, so no one without push access can suppress a finding; draft status is not tested, since upper layers are normally drafts; the relaxation is scoped to the symbols the upper diff references
+- The gate resolves once per review in the agent's Step 1 rather than per finding
+- `references/stacked-pull-requests.md`, holding the rationale behind each condition and what the gate does not defend against
+- `Bash(gh pr list --base:*)` grant, used by the layer check
+
+## [2.0.0] - 2026-09-04
+
+### Added
+
+- `agents/bitwarden-code-reviewer/references/local-mode-diff.md`, holding the rationale behind each local-mode gate
+- A `## No Verdict` output form in `posting-review-summary`, used when nothing was reviewed. It replaces the standard template rather than adding a third assessment value
+
+### Changed
+
+- **`/code-review` no longer resolves a pull request from the checkout.** It takes the number from the pre-fetched threads file, the workflow-authored `PR NUMBER:` line, or `$ARGUMENTS`, in that order, and reports No Verdict when none yields one. Previously a blank invocation fell through to a bare `gh pr view`, which resolved whatever pull request the checkout belonged to — and which fails outright under the detached HEAD `actions/checkout` leaves on a `pull_request` event
+- Both commands pass the resolved target to the agent as a `TARGET: PR #<number>` or `TARGET: local changes` line, and the `^[0-9]+$` check on that number is stated on both sides of the delegation
+- `/code-review-local` additionally passes `OUTPUT: local files` on both targets, and the agent carries it into Steps 5 and 6 whether or not the prompt supplied it. `posting-review-summary` and `posting-bitwarden-review-comments` each gained routing rows ahead of their GitHub rows that key on that declaration rather than on which tools are available, so neither destination depends on the target resolving to local changes
+
+### Fixed
+
+- Local mode diffs against `origin/HEAD` instead of a hardcoded `main`, passing the symbolic ref to git rather than interpolating a resolved name
+- Local mode gates on content as well as exit status: a three-dot diff ignores the working tree, so it succeeds with no output when the branch is level with `origin/HEAD`, and that now falls through rather than producing a verdict over nothing
+- Where no reviewable diff can be produced at all, local mode aborts to the mode's summary destination with no verdict
+- `argument-hint` quoted in both commands; the unquoted `|` stopped their frontmatter parsing, so neither `allowed-tools` list was in effect
+- `code-review` cut to `Read(//tmp/pr-threads.json)` and `Task`, and `code-review-local` to `AskUserQuestion` and `Task`, since each only settles its target and delegates. This removes their `Bash(gh api graphql -f query=:*)` grant, which the frontmatter fix had just made live on the command turn. The reviewer agent keeps that grant, because thread detection needs GraphQL and a prefix rule cannot separate a query from a mutation
+- Two `Write(<path>)` rules dropped from `code-review-local`; Claude Code consults path rules for `Edit` and `Read` only
+- Agent `Write` left unscoped, since Claude Code consults path rules for `Edit` and `Read` only, so a `Write(<path>)` specifier confines nothing
+- Tool grants alphabetized in the agent and both commands, and `tools:` stays a comma-separated string in all three, matching the repo's other six agents; the block-sequence form loads correctly but `plugin-dev`'s `validate-agent.sh` reads it with `sed` and reports the agent as unscoped
+
+## [1.14.1] - 2026-08-26
+
+### Fixed
+
+- `Bash(git status:*)` granted to `code-review-local` and to the reviewer agent, which were both told to run `git status` for a local review without being allowed to
+
+## [1.14.0] - 2026-08-21
+
+### Added
+
+- Agent 5 in `performing-multi-agent-code-review` Step 3, routing changed `SKILL.md` to `plugin-dev:skill-reviewer`
+- Review Rules carve-out for Agent 5, with the orchestrator translating its prose report into Finding Shape objects
+- `references/agent-5-skill-review.md`, holding Agent 5's two verbatim prompt blocks and the translation procedure
+- `source_agent: "skill"` and `id` prefix `skl` in `finding-shape.md`, rendered as "Skill review agent"
+- `**Not covered:**` line in both report formats, rendered whenever a lens the diff called for returns nothing reviewable, and owned by the orchestrator so one gap is reported once
+- CWE-1427 observations survive Agent 5's scope fence, so an injection on a line the diff did not touch still reaches the report
+- `plugin-dev` as a second optional enhancer, detected by resolvability and excluded from the abort check
+
+### Changed
+
+- `SKILL.md` leaves the Claude-configuration bucket for content review, but stays in scope for its credential scan
+- The single-agent reviewer reports that skill content review did not run, rather than delegating to it
+
+### Fixed
+
+- Neither path describes `reviewing-claude-config` as covering `SKILL.md` or progressive-disclosure structure
+
 ## [1.13.1] - 2026-07-01
 
 ### Changed

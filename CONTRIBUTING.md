@@ -6,7 +6,7 @@ For general Bitwarden contribution practices, see our [Contributing Guidelines](
 
 ## Where Does Your Claude Tooling Belong?
 
-Plugins in this marketplace fall into three families. Repo-specific patterns usually belong closer to the code — see each repo's `.claude/CONTRIBUTING.md` for that. If your work is cross-repo and fits one of the families below, you're in the right place. If you're still unsure after reading them, raise a draft PR and maintainers will help find the right home.
+Plugins in this marketplace fall into three families. Repo-specific patterns usually belong closer to the code, in that repo's `.claude/` directory. If your work is cross-repo and fits one of the families below, you're in the right place. If you're still unsure after reading them, raise a draft PR and maintainers will help find the right home.
 
 ### Persona Plugins
 
@@ -100,7 +100,7 @@ Update the version in every place it appears:
 - the plugin catalog table in the root `README.md`,
 - any agent frontmatter (`AGENT.md`), if the plugin has agents.
 
-A helper script that updates all of these at once (`bump-plugin-version.sh`) lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts) and is what CI uses. Run it from a checkout of that repository. The script defaults `REPO_ROOT` to the parent of its own `scripts/` directory, which inside a gh-actions checkout is `validate-ai/` — so you must set `REPO_ROOT` to this repository or it will look for plugins in gh-actions and fail with "Plugin directory not found":
+A helper script that updates all of these at once (`bump-plugin-version.sh`) lives in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai/scripts). Run it from a checkout of that repository. The script defaults `REPO_ROOT` to the parent of its own `scripts/` directory, which inside a gh-actions checkout is `validate-ai/` — so you must set `REPO_ROOT` to this repository or it will look for plugins in gh-actions and fail with "Plugin directory not found":
 
 ```bash
 REPO_ROOT=/path/to/ai-plugins validate-ai/scripts/bump-plugin-version.sh <plugin-name> <new-version>
@@ -121,9 +121,9 @@ See the [validate-ai scripts README](https://github.com/bitwarden/gh-actions/tre
 
 ## Validating Changes
 
-Plugin structure, marketplace consistency, and version-bump checks run automatically on every pull request through the **Validate AI** workflow, which calls the reusable workflow in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai). The validation scripts (`validate-plugin-structure.sh`, `validate-marketplace.sh`) live there under `validate-ai/scripts/`.
+Plugin structure, marketplace consistency, and version-bump checks are covered by the validation scripts (`validate-plugin-structure.sh`, `validate-marketplace.sh`) in [`bitwarden/gh-actions`](https://github.com/bitwarden/gh-actions/tree/main/validate-ai), under `validate-ai/scripts/`.
 
-To run them locally before pushing, invoke them from a checkout of that repository with `REPO_ROOT` pointed at this one. Each script defaults `REPO_ROOT` to the parent of its own `scripts/` directory — `validate-ai/` inside a gh-actions checkout — so without the override it inspects gh-actions instead of this repository and fails on a path that isn't there (`validate-plugin-structure.sh` reports "Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not found at"). CI passes the same override as `github.workspace`. Each script accepts a plugin name or `plugins/<name>` path, and validates all plugins when given no arguments:
+To run them locally before pushing, invoke them from a checkout of that repository with `REPO_ROOT` pointed at this one. Each script defaults `REPO_ROOT` to the parent of its own `scripts/` directory — `validate-ai/` inside a gh-actions checkout — so without the override it inspects gh-actions instead of this repository and fails on a path that isn't there (`validate-plugin-structure.sh` reports "Plugins directory not found", `validate-marketplace.sh` reports "marketplace.json not found at"). Each script accepts a plugin name or `plugins/<name>` path, and validates all plugins when given no arguments:
 
 ```bash
 REPO_ROOT=/path/to/ai-plugins validate-ai/scripts/validate-plugin-structure.sh bitwarden-code-review

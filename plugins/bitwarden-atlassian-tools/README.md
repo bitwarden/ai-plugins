@@ -2,7 +2,9 @@
 
 ## Overview
 
-Read-only Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads. All operations are read-only — the server never creates, updates, or deletes any Atlassian resource.
+Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
+
+Read access is the default and always available. Jira write access (creating work items, links, and comments) is **opt-in per install**: `create_issue`, `link_issues`, and `add_issue_comment` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
 
 ## Installation
 
@@ -14,6 +16,10 @@ export ATLASSIAN_CLOUD_ID="your-cloud-id"
 export ATLASSIAN_EMAIL="your-email@company.com"
 export ATLASSIAN_JIRA_READ_ONLY_TOKEN="your-jira-scoped-token"
 export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
+
+# Optional — enables the Jira write tools (create_issue, link_issues, add_issue_comment).
+# Omit to keep this install read-only.
+export ATLASSIAN_JIRA_WRITE_TOKEN="your-jira-write-scoped-token"
 ```
 
 API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
@@ -67,17 +73,60 @@ The Jira Agile (Software) endpoints behind `list_boards`, `get_sprints`, and `ge
 
 ### Jira
 
-| Tool                     | Purpose                                                              |
-| ------------------------ | -------------------------------------------------------------------- |
-| `get_issue`              | Read a Jira issue by key or ID                                       |
-| `search_issues`          | Search issues using JQL                                              |
-| `get_issue_comments`     | Get comments for an issue                                            |
-| `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs) |
-| `list_projects`          | List accessible Jira projects                                        |
-| `list_boards`            | List Agile boards, optionally filtered by project                    |
-| `get_sprints`            | List sprints for a board (filter by active/future/closed)            |
-| `get_sprint_issues`      | List all issues in a sprint                                          |
-| `download_attachment`    | Download a Jira attachment as Base64                                 |
+| Tool                     | Purpose                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `get_issue`              | Read a Jira issue by key or ID                                                                                           |
+| `search_issues`          | Search issues using JQL                                                                                                  |
+| `get_issue_comments`     | Get comments for an issue                                                                                                |
+| `get_issue_remote_links` | Get remote links for an issue (Confluence pages, PRs, external URLs)                                                     |
+| `list_projects`          | List accessible Jira projects                                                                                            |
+| `list_boards`            | List Agile boards, optionally filtered by project                                                                        |
+| `get_sprints`            | List sprints for a board (filter by active/future/closed)                                                                |
+| `get_sprint_issues`      | List all issues in a sprint                                                                                              |
+| `download_attachment`    | Download a Jira attachment as Base64                                                                                     |
+| `get_create_fields`      | Report a project's creatable issue types, and a type's create-screen fields with ids, required flags, and allowed values |
+
+### Jira (write, requires `ATLASSIAN_JIRA_WRITE_TOKEN`)
+
+All three tools default to a dry run that returns the exact payload without sending it. A live write requires an explicit `dryRun: false`. Dry runs need no write token.
+
+| Tool                | Purpose                                                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_issue`      | Create one work item in any project. Carries no project-specific field knowledge: pass anything beyond the common core through `fields`, keyed by field id from `get_create_fields` |
+| `link_issues`       | Link two work items. For a dependency, takes `blockerKey` and `blockedKey` and maps them onto Jira's inward/outward sides internally so the direction cannot be inverted            |
+| `add_issue_comment` | Add a plain-text comment to an existing issue. Blank lines split the text into separate paragraphs                                                                                  |
+
+The classic `write:jira-work` scope alone covers all three write tools — it grants creating and editing issues and posting comments as the user. For a **scoped (granular)** write token, add these instead, on top of the read scopes above:
+
+| Scope                         | Required for                                                       |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `read:issue:jira`             | `create_issue`                                                     |
+| `read:issue:jira-software`    | `create_issue`                                                     |
+| `write:issue:jira`            | `create_issue`, `link_issues`                                      |
+| `write:issue:jira-software`   | `create_issue`, `link_issues`                                      |
+| `write:issue-link:jira`       | `link_issues`                                                      |
+| `write:comment:jira`          | `create_issue`, `link_issues` (scope-only), `add_issue_comment`    |
+| `write:comment.property:jira` | `create_issue` (required even though it never sends a comment)     |
+| `write:attachment:jira`       | `create_issue` (required even though it never sends an attachment) |
+
+Grant the **whole** set, not a subset — a token holding only some of them fails every write with `401 Unauthorized; scope does not match`. For a scoped write token covering all three write tools, that's:
+
+```
+read:issue:jira
+read:issue:jira-software
+write:attachment:jira
+write:comment.property:jira
+write:comment:jira
+write:issue-link:jira
+write:issue:jira-software
+write:issue:jira
+```
+
+`get_create_fields` needs no additional scope. It calls the createmeta endpoints, which the existing read-only token already satisfies.
+
+Token scope is separate from Jira project permission. Creating also requires the **Create Issues** permission in the target project, linking requires **Link Issues**, and commenting requires **Add Comments**. In a project where the user lacks Create Issues, Jira answers `You cannot create issues in this project`, which `get_create_fields` reports as an ordinary result rather than an error.
+
+A leaked write token permits more than any one tool uses: `write:comment.property:jira` and `write:attachment:jira` are granted only because Atlassian rejects a narrower scope set, so the token can also set comment properties and add attachments across every project the user can reach, in addition to the comments `add_issue_comment` itself sends. Treat this token as higher-blast-radius than the read-only token and rotate it accordingly.
 
 ### Confluence
 
@@ -98,6 +147,8 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Search with JQL: `mcp__bitwarden-atlassian__search_issues` with `jql: "project = PROJ AND status = Open"`
 - Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
 - Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
+- Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
+- Preview a comment before posting it: `mcp__bitwarden-atlassian__add_issue_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
 
 ## Skills
 
@@ -113,8 +164,21 @@ Features:
 - Automatic Confluence page follow-through from remote links
 - Context budget guidance and graceful degradation
 
+### `filing-jira-tickets`
+
+Files Jira work items that stand on their own. Reads the target project's create screen before drafting, so no project's field layout is assumed, previews each payload before writing it, then wires and verifies dependency links. Triggered by intent to create or link tickets (e.g., "file a bug for this", "create a story for this work", "wire the blocked-by relationship").
+
+Features:
+
+- Discovers issue types, required fields, and allowed values per project rather than hardcoding them, which matters because Bitwarden's projects differ (PM and SM expose an Acceptance criteria field, QA and VULN do not; VULN has no Story type; PLT's only creatable type is `Platform Initiative`)
+- Dry-run preview of the exact payload before every live write
+- Approval required before each create, unless explicitly told to skip it
+- Role-named link arguments (`blockerKey`, `blockedKey`) so dependency direction cannot be inverted
+
+Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can still draft and preview.
+
 ## Requirements
 
 - Claude Code with MCP support
 - Atlassian API credentials (see Installation)
-- Node.js 22+ with [Corepack](https://nodejs.org/api/corepack.html) enabled — on first run the bundled MCP server installs and builds itself with [pnpm](https://pnpm.io/installation) via Corepack
+- Node.js 24+ — on first run the bundled MCP server installs and builds itself with [pnpm](https://pnpm.io/installation), resolved through the `npm` that ships with every Node release

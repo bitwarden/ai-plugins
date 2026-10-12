@@ -5,6 +5,59 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.5] - 2026-10-07
+
+### Fixed
+
+- `get_issue` now renders an "Issue Links" section (link type, linked issue key, summary, and status), so links such as "is blocked by" are visible. Passing `fields: ["issuelinks"]` returns them too.
+
+## [2.7.4] - 2026-09-23
+
+### Changed
+
+- The MCP launch sequence reads the Corepack version it fetches from the server manifest's `devDependencies`. Declaring Corepack as a dependency puts its version under the same update tooling as every other package, so the launch command never carries a version of its own that could drift from the one CI runs.
+
+## [2.7.3] - 2026-09-17
+
+### Fixed
+
+- The optional `ATLASSIAN_JIRA_WRITE_TOKEN` is no longer reported among the plugin's missing environment variables. The MCP config now declares it with an empty default, which is how an optional variable is distinguished from a required one: a read-only install intends to omit it, so listing it alongside genuinely absent configuration read as a setup failure. Whether a live write can proceed is decided by the write tools themselves, where it already was. A dry run notes the absent token in its preview, and a `dryRun: false` call refuses before opening a connection.
+
+## [2.7.2] - 2026-09-17
+
+### Fixed
+
+- The bundled MCP server now starts on Node.js releases that do not ship Corepack. The launch sequence fetches Corepack as a package through the `npm` bundled with every Node release, so the server manifest's `packageManager` field remains the single place the pnpm version is declared and its pinned integrity hash is still verified before pnpm runs.
+- First launch installs only the packages needed to build and run the server. `typescript` and `@types/node` are declared alongside the runtime dependencies because the launch compiles from source, which leaves `vitest` as the only development-time package and keeps its dependency tree out of the startup path. A package published within the registry's minimum-age window anywhere in that tree, down to a transitive dependency of the test runner's bundler, would otherwise stop the server from starting.
+- Dropped the server manifest's `devEngines.packageManager` declaration. `npm` treats a foreign package manager declared there as a hard failure and refuses to run in the directory at all, and pnpm ignores `packageManager` whenever both fields are present.
+
+## [2.7.1] - 2026-09-14
+
+### Changed
+
+- Updated the MCP server runtime dependencies: `@modelcontextprotocol/sdk` to 1.30.0, `axios` to 1.20.0, and `zod` to 4.5.4.
+
+## [2.7.0] - 2026-08-26
+
+### Added
+
+- **`add_issue_comment` MCP tool** (write, opt-in) — adds a plain-text comment to an existing Jira issue. Blank lines in the input split the text into separate ADF paragraphs. Defaults to a dry run that returns the exact payload without sending it; a live post requires an explicit `dryRun: false` and `ATLASSIAN_JIRA_WRITE_TOKEN`, matching the existing `create_issue`/`link_issues` write tools. Rejects a whitespace-only body so a live post can never send an empty comment payload.
+
+## [2.6.0] - 2026-08-04
+
+### Added
+
+- **`filing-jira-tickets` skill** — files work items that stand on their own: reads the target project's create screen first, translates work into real ticket titles and criteria placed in whatever field the project provides, previews each payload and takes approval before writing it, then wires and verifies dependency links. Approval is the default and only an explicit instruction skips it.
+
+## [2.5.0] - 2026-08-03
+
+### Added
+
+- **`get_create_fields` MCP tool** (read-only) — reports a project's creatable issue types, and for a given type every field on the create screen with its field id, required flag, and allowed values. Lets callers discover a project's shape instead of hardcoding it, which matters because Bitwarden's projects differ: PM and SM expose an Acceptance criteria field, QA and VULN do not; VULN has no Story type; PLT's only creatable type is `Platform Initiative`.
+- **`create_issue` MCP tool** (write, opt-in) — creates a single work item in any project. Defaults to a dry run that returns the exact payload without sending it; a live create requires an explicit `dryRun: false`. Carries no project-specific field knowledge: the issue type is a name Jira resolves, and anything beyond project/type/summary/description/parent/labels is passed through a `fields` object keyed by Jira field id.
+- **`link_issues` MCP tool** (write, opt-in) — links two work items. For a dependency it takes `blockerKey` and `blockedKey` and applies Jira's inward/outward mapping internally, so the direction cannot be inverted by argument order. Also defaults to a dry run.
+- **Optional `ATLASSIAN_JIRA_WRITE_TOKEN`** — write capability is opt-in per install. The write tools are always listed and their dry-run paths always work; without this variable, a live write refuses to execute.
+
 ## [2.4.0] - 2026-07-24
 
 ### Added

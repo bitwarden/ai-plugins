@@ -119,6 +119,7 @@ export interface JiraIssueFields {
   attachment?: JiraAttachment[];
   subtasks?: JiraIssue[];
   parent?: JiraIssue;
+  issuelinks?: JiraIssueLink[];
   [key: string]: any; // Custom fields
 }
 
@@ -249,4 +250,50 @@ export interface JiraRemoteLink {
       };
     };
   };
+}
+
+/**
+ * An entry in an issue's `issuelinks` field. Only one of `inwardIssue` /
+ * `outwardIssue` is present per entry — each end of a link names the other
+ * end and labels it with the other end's role (see `JiraClient.createIssueLink`).
+ */
+export interface JiraIssueLink {
+  id: string;
+  self: string;
+  type: {
+    id: string;
+    name: string;
+    inward: string;
+    outward: string;
+  };
+  inwardIssue?: { id: string; key: string; self: string };
+  outwardIssue?: { id: string; key: string; self: string };
+}
+
+/**
+ * An issue type a project can create, from
+ * `GET /issue/createmeta/{project}/issuetypes`.
+ */
+export interface JiraCreateMetaIssueType {
+  id: string;
+  name: string;
+  subtask: boolean;
+  description?: string;
+}
+
+/**
+ * A field on a project's create screen, from
+ * `GET /issue/createmeta/{project}/issuetypes/{issueTypeId}`.
+ */
+export interface JiraCreateMetaField {
+  fieldId: string;
+  name: string;
+  required: boolean;
+  hasDefaultValue?: boolean;
+  schema?: { type?: string; custom?: string; items?: string };
+  allowedValues?: Array<{
+    id?: string;
+    value?: string;
+    name?: string;
+  }>;
 }
