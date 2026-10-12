@@ -4,7 +4,7 @@ description: This skill should be used when the user mentions doc drift, documen
 agent: general-purpose
 context: fork
 background: false
-allowed-tools: WebFetch(domain:contributing.bitwarden.com)
+allowed-tools: Bash(git diff:*), Bash(git ls-files:*), Read, Grep, Glob, Edit, WebFetch(domain:contributing.bitwarden.com)
 ---
 
 # Verifying documentation parity
@@ -28,7 +28,7 @@ Before walking the tree, consider whether the change qualifies as a tripwire fal
 
 ### Step 2: Enumerate every documented ancestor scope
 
-For each changed file, walk its directory chain from the file's own directory up to and including the repo root. A directory is a documented scope when it contains a `README.md`, a `docs/` directory, or diagram sources. Below component scope, the documentation surface is source-embedded: Rust `//!` module docs, C# XML doc comments, JSDoc/TSDoc on public symbols. When the changed area of a source file carries such doc comments, treat that file as its own documented surface. Collect the union of documented scopes and surfaces across all changed files.
+For each changed file, walk its directory chain from the file's own directory up to and including the repo root. A directory is a documented scope when it contains a `README.md`, a `CLAUDE.md`, a `docs/` directory, or diagram sources (`.mmd`, `.mermaid`). Below component scope, the documentation surface is source-embedded: Rust `//!` module docs, C# XML doc comments, JSDoc/TSDoc on public symbols. When the changed area of a source file carries such doc comments, treat that file as its own documented surface. Collect the union of documented scopes and surfaces across all changed files.
 
 Check every documented ancestor, not just the nearest one, since documentation layers by altitude: higher views sand off detail while still describing the changed behavior. A change can be current in its component README yet drift a root-level guide or a container diagram two scopes up.
 

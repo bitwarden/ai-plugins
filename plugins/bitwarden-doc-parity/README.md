@@ -28,7 +28,7 @@ The outcome, per documented scope, is either an update or an explicit attestatio
 
 The same skill logic run as a PR reviewer through the consuming repository's ai-review workflow, covering human-authored changes that no in-session layer sees. This layer also owns out-of-repo discovery. Search terms are derived from the diff and used to search contributing-docs for references that need to be addressed. The callout triggers the standard's external-docs flow: a work item before merge and a stale marker on the page.
 
-This layer is inert until the review pipeline invokes `verifying-doc-parity`. When installed alongside `bitwarden-code-review` (from 1.14.0), the reviewer agent's Cross-Plugin Enrichment picks the skill up automatically. If the consuming repository uses a different review workflow, wire the skill into that workflow's documentation pass.
+This layer is inert until the review pipeline invokes `verifying-doc-parity`. Automatic pickup by the `bitwarden-code-review` reviewer agent is planned; until then, wire the skill into your review workflow's documentation pass.
 
 ## Installation
 

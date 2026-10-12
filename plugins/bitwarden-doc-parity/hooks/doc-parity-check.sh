@@ -4,8 +4,9 @@
 #
 # Trigger rule: fire when a changed file has a documented ancestor scope
 # below the repo root and no documentation along its ancestor chain was
-# touched. A directory is a documented scope when it contains a README.md
-# or a docs/ directory. Root-scope docs do not arm the tripwire, since the
+# touched. A directory is a documented scope when it contains a README.md,
+# a CLAUDE.md, a docs/ directory, or diagram sources (.mmd, .mermaid), the
+# same definition SKILL.md uses. Root-scope docs do not arm the tripwire, since the
 # root is an ancestor of every file; their verification belongs to the
 # semantic layer.
 #
@@ -110,14 +111,15 @@ is_covered() {
 }
 
 # Documented ancestor scopes of a file, strictly below the repo root.
-# Match README case-insensitively; CLAUDE.md and docs/ are the other markers,
-# aligning with SKILL.md's scope definition.
+# README is matched case-insensitively.
 documented_ancestors() {
   local dir
   dir=$(dirname "$1")
   while [[ "$dir" != "." && "$dir" != "/" ]]; do
     if compgen -G "$REPO_ROOT/$dir/[Rr][Ee][Aa][Dd][Mm][Ee].md" >/dev/null 2>&1 \
-        || [[ -f "$REPO_ROOT/$dir/CLAUDE.md" || -d "$REPO_ROOT/$dir/docs" ]]; then
+        || [[ -f "$REPO_ROOT/$dir/CLAUDE.md" || -d "$REPO_ROOT/$dir/docs" ]] \
+        || compgen -G "$REPO_ROOT/$dir/*.mmd" >/dev/null 2>&1 \
+        || compgen -G "$REPO_ROOT/$dir/*.mermaid" >/dev/null 2>&1; then
       echo "$dir"
     fi
     dir=$(dirname "$dir")
