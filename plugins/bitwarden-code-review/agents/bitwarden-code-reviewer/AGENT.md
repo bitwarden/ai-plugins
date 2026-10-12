@@ -4,7 +4,7 @@ version: 2.4.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
-tools: Bash(gh api graphql -f query=:*), Bash(gh pr checks:*), Bash(gh pr diff:*), Bash(gh pr list --base:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git status:*), Glob, Grep, mcp__github_comment__update_claude_comment, mcp__github_inline_comment__create_inline_comment, mcp__github_replies__add_reply_to_pull_request_comment, Read, Skill, Write
+tools: Bash(gh api graphql -f query=:*), Bash(gh pr checks:*), Bash(gh pr diff:*), Bash(gh pr list --base:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git status:*), Glob, Grep, mcp__github_comment__update_claude_comment, mcp__github_inline_comment__create_inline_comment, mcp__github_replies__add_reply_to_pull_request_comment, Read, Skill, WebFetch(domain:contributing.bitwarden.com), WebSearch, Write
 ---
 
 # Bitwarden Code Review Agent
@@ -110,7 +110,7 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 
 - invoke `Skill(reviewing-claude-config)` to validate YAML frontmatter, prompt-engineering quality, and config-specific security issues (committed `settings.local.json`, hardcoded secrets, broken file references, overly broad agent tool access). Include any changed `SKILL.md` files in the scope you hand it: its credential scan covers every file whatever the type, and it declines `SKILL.md` only for the quality review. Fold its findings into your own classification and validation in Steps 3–4.
 
-**Documentation parity** (any code change with a documented ancestor scope — a `README.md`, `docs/` directory, or source-embedded doc comments in the change's ancestor chain — which covers most substantive PRs):
+**Documentation parity** (any code change with a documented ancestor scope — a `README.md`, `CLAUDE.md`, `docs/` directory, diagram source, or source-embedded doc comments in the change's ancestor chain — which covers most substantive PRs):
 
 - invoke `Skill(verifying-doc-parity)` to run the documentation pass in review context: identify drifted in-repo docs at every documented ancestor scope of the change, and discover out-of-repo pages the change invalidates. Report drift as findings — do not edit files in the PR — and fold them into your classification and validation in Steps 3–4, applying the documentation standard's external-docs flow (work item before merge, stale marker on the page) when applicable.
 
