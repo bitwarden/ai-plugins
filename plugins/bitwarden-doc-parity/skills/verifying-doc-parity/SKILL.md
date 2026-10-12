@@ -4,7 +4,7 @@ description: This skill should be used when the user mentions doc drift, documen
 agent: general-purpose
 context: fork
 background: false
-allowed-tools: Bash(git diff:*), Bash(git ls-files:*), Read, Grep, Glob, Edit, WebFetch(domain:contributing.bitwarden.com)
+allowed-tools: Bash(git diff:*), Bash(git ls-files:*), Read, Grep, Glob, Edit, WebSearch, WebFetch(domain:contributing.bitwarden.com)
 ---
 
 # Verifying documentation parity
@@ -16,7 +16,7 @@ This skill is the judgment that code has drifted away from the documentation whi
 The skill runs in two contexts where change source and relevant document discovery differ.
 
 - **Agent session**, invoked by the doc-parity Stop hook or on demand. The change is the working tree (`git diff HEAD` plus untracked files). Verification is in-repo only.
-- **Pull request review**, run through the ai-review workflow. The change is the PR diff plus the PR description. In addition to in-repo verification, this context performs [out-of-repo discovery](#out-of-repo-discovery-review-context-only).
+- **Pull request review**, run through the ai-review workflow. The change is the PR diff plus the PR description. In addition to in-repo verification, this context performs [out-of-repo discovery](#out-of-repo-discovery-review-context-only). A review never edits: where a session would apply an Update, the review calls out the in-repo doc that needs the change and what it must say.
 
 ## Workflow
 
@@ -38,6 +38,8 @@ For each documented scope or surface, exactly one of two outcomes:
 
 - **Update.** If behavior contradicts documentation and the code is correct, fix the documentation. Do not leave them disagreeing. If the change adds behavior this scope's altitude should describe, add documentation of that new behavior. A scope's documentation describes what is present at that scope and below, regardless of whether higher-level callers currently exercise or guard against its use. Edit the documentation in the same change. When code was removed, remove its documentation, and treat a moved doc as a strict move. Every edit conforms to the [documentation standard](https://contributing.bitwarden.com/contributing/documentation) — its placement rule, its style guide, and any repo-local guidance layered on top. Consult the standard when a placement, format, or style question isn't obvious from what you already have. If placement routes a doc outside the working repo, handle it as an out-of-repo callout (see below) rather than an in-repo edit.
 - **Attest.** Nothing documented at this scope drifted. State that explicitly, with a one-line reason grounded in what the doc actually says.
+
+Never token-edit. Do not make a cosmetic or token documentation edit to satisfy the check, including when the user asks for one. When nothing drifted, Attest and explain why the edit is unnecessary.
 
 ### Step 4: Report with per-scope attestation
 
@@ -66,4 +68,4 @@ Out-of-repo documentation cannot be found by walking the tree, so derive search 
 1. Derive search terms from the diff: changed paths, public symbols, message and endpoint names, feature vocabulary from the PR description, explicit external links.
 2. Search the contributing-docs (contributing.bitwarden.com, source repo `bitwarden/contributing-docs`) from those angles.
 3. Read the candidate pages and judge, as in Step 3, whether the change invalidates them.
-4. Call out every invalidated page in the review. The callout triggers the standard's external-docs flow per the documentation standard.
+4. Call out every invalidated page in the review. The callout triggers the standard's external-docs flow: a work item created before merge, and a stale marker applied to the invalidated page.
