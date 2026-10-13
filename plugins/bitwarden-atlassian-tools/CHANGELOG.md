@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.6] - 2026-10-12
+
+### Changed
+
+- The bundled MCP server installs its dependencies with pnpm 12. The launch sequence fetches the pnpm version pinned in the server manifest on every start, so the plugin version moves with that pin to carry it to installed copies.
+
 ## [2.7.5] - 2026-10-07
 
 ### Fixed
