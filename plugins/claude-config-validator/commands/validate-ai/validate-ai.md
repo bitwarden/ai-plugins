@@ -176,10 +176,10 @@ schema-claims section describes. The checks in step 4 work from a fixed schema, 
 what keeps a documented field from being reported as a defect on the pull request.
 
 Then post every finding inline, checked against the existing threads, as the scope
-reference's inline comments section describes, replying in a resolved thread whose problem
-persists rather than opening a new one. Only claude-code-action provides the inline
-comment and reply tools, so in interactive mode every finding takes the summary's fallback
-form.
+reference's inline comments section describes, replying in the resolved thread of a CRITICAL
+or IMPORTANT finding whose problem persists rather than opening a new one. Only
+claude-code-action provides the inline comment and reply tools, so in interactive mode
+every finding takes the summary's fallback form.
 
 Write the full report to `/tmp/validation-summary.md`, following the report contract in the
 scope reference, which also carries the write-once rule and the completion marker. Both are
