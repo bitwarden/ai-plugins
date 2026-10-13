@@ -5,6 +5,14 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-10-09
+
+### Fixed
+
+- A check that does not run is named on the report's `Not covered` line in every case that skips one, so a reader never takes its absence for a pass
+- The `reviewing-claude-config` note on which scope-reference instructions address the commands includes inline comments, so the skill does not read the posting instruction as its own
+- The `/validate-ai-local` comparison table shows that `/validate-ai` produces a sticky comment in every mode
+
 ## [2.2.0] - 2026-10-08
 
 ### Changed
