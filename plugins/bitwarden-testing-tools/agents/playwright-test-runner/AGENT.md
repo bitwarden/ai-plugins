@@ -1,10 +1,29 @@
 ---
 name: playwright-test-runner
 version: 1.5.0
-description: Execution-phase agent for the start-playwright-test pipeline. Reads the test plan, runs Playwright tests via running-playwright-tests, and returns the test-run results JSON for the orchestrator to persist. Do not invoke directly; dispatched by the start-playwright-test skill.
+description: |
+  Execution-phase agent for Bitwarden web test execution. Given a test plan, it runs the Playwright test cases through running-playwright-tests and returns the results JSON for its run segment, as complete, paused at a [HUMAN] step, or aborted.
+
+  <example>
+  Context: An engineer has a test plan with test cases and the local environment is up.
+  user: "Run the Playwright test cases in ./test-plan.md; write artifacts to ./artifacts."
+  assistant: "I'll use the playwright-test-runner agent to execute each test case in the browser and return the results JSON."
+  <commentary>
+  Executing the plan's test cases in the browser is exactly this agent's job.
+  </commentary>
+  </example>
+
+  <example>
+  Context: A previous run paused at a [HUMAN] step and the user has now done it.
+  user: "I attached the test clock. Resume the run from the checkpoint at ./artifacts/test-results-20261008-1030.json."
+  assistant: "I'll use the playwright-test-runner agent to resume from the paused step with your answer."
+  <commentary>
+  Resuming a paused run is a runner dispatch with a checkpoint and a Resume block.
+  </commentary>
+  </example>
 model: sonnet
 skills:
-  - running-playwright-tests
+  - bitwarden-testing-tools:running-playwright-tests
   - playwright-cli
 color: cyan
 tools: Read, Skill, Bash, Bash(playwright-cli:*)

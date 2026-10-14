@@ -12,11 +12,11 @@
         ]
       },
       {
-        "matcher": "Bash|Skill",
+        "matcher": "Bash|Skill|Read",
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f \"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_health_checker.py\" ] || exit 1; python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_health_checker.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_execution_agents.py\"; command -v python3 >/dev/null 2>&1 && [ -f \"$H\" ] || { echo 'restrict_execution_agents: handler or python3 unavailable - execution-agent confinement is NOT in effect' >&2; exit 1; }; python3 \"$H\"",
             "timeout": 5
           }
         ]

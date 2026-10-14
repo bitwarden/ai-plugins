@@ -11,9 +11,10 @@ Usage:
   external_trigger.py --url <url> --rationale <text> [--data <json>] [--content-type <ct>]
 
 Method is always POST (Category 3 triggers are POSTs). Allowed hosts default to
-localhost/127.0.0.1/::1/bitwarden.test and can be extended (never replaced) via
-the comma-separated env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS. Allowed schemes
-are http and https. Every permitted call is logged; if
+localhost/127.0.0.1/::1/bitwarden.test. An operator can extend them (never
+replace them) through the comma-separated env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS,
+set before the run; the calling agent has no way to set it. Allowed schemes are
+http and https. Every permitted call is logged; if
 PLAYWRIGHT_TESTING_ARTIFACTS_DIR is set, the log line is appended to
 <dir>/external-trigger.log.
 
@@ -105,8 +106,7 @@ def check_request(url, method, allowed):
             EXIT_HOST,
             f"host '{host}' is not an allowed local dev host.\n"
             f"       Allowed: {' '.join(allowed)}\n"
-            "       For a custom local hostname, set "
-            "PLAYWRIGHT_TESTING_ALLOWED_HOSTS=<host>[,<host>...].",
+            "       Report this step as an obstacle.",
         )
     return scheme, host
 
