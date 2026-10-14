@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Category 3 external-trigger simulation for the bitwarden-testing-tools
 pipeline. The ONLY sanctioned way for the playwright-test-runner to issue an outbound
-request. Enforces, in code, the localhost-only policy that
-${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md describes: a plan step (which may be derived from
-untrusted Jira/Confluence content) cannot drive a request to a metadata
+request. Enforces, in code, the host policy that
+${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md describes: unless an
+operator has added hosts, a plan step (which may be derived from untrusted
+Jira/Confluence content) cannot drive a request through this script to a metadata
 endpoint, a private-network host, an external host, or a remote Bitwarden
-QA/cloud domain.
+QA/cloud domain. It guards only its own requests.
 
 Usage:
   external_trigger.py --url <url> --rationale <text> [--data <json>] [--content-type <ct>]
@@ -13,8 +14,8 @@ Usage:
 Method is always POST (Category 3 triggers are POSTs). Allowed hosts default to
 localhost/127.0.0.1/::1/bitwarden.test. An operator can extend them (never
 replace them) through the comma-separated env var PLAYWRIGHT_TESTING_ALLOWED_HOSTS,
-set before the run; the calling agent has no way to set it. Allowed schemes are
-http and https. Every permitted call is logged; if
+set before the run; the execution-agent hook blocks a calling agent from setting
+it. Allowed schemes are http and https. Every permitted call is logged; if
 PLAYWRIGHT_TESTING_ARTIFACTS_DIR is set, the log line is appended to
 <dir>/external-trigger.log.
 

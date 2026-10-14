@@ -174,6 +174,11 @@ class HealthCheckerBlockedBashTest(AssertionsMixin, unittest.TestCase):
             with self.subTest(command=command):
                 self.assertBashBlocked(command)
 
+    def test_block_message_tells_the_checker_to_quote_and_retry(self):
+        code, err = run_hook(bash(HEALTH_SCRIPTS + "/preflight-check.sh --x"))
+        self.assertEqual(code, 2)
+        self.assertIn("Quote a script path", err)
+
     def test_non_string_command(self):
         code, err = run_hook(json.dumps({"agent_type": CHECKER, "tool_name": "Bash", "tool_input": {"command": 1}}))
         self.assertEqual(code, 2, err)
@@ -204,7 +209,7 @@ class RunnerAllowedTest(AssertionsMixin, unittest.TestCase):
     def test_interaction_and_inspection(self):
         for command in ("playwright-cli close", "playwright-cli snapshot", "playwright-cli click e15",
                         "playwright-cli fill e5 'user@example.com'", 'playwright-cli type "page.click"',
-                        "playwright-cli press Enter", "playwright-cli upload ./document.pdf", "playwright-cli mousewheel 0 -100",
+                        "playwright-cli press Enter", "playwright-cli mousewheel 0 -100",
                         "playwright-cli console warning", "playwright-cli cookie-get session_id"):
             self.allowed(command)
 
@@ -294,7 +299,7 @@ class RunnerBlockedBashTest(AssertionsMixin, unittest.TestCase):
     def test_subcommands_outside_the_list(self):
         for command in ("playwright-cli state-save x.json", "playwright-cli state-load x.json",
                         "playwright-cli pdf --filename=x.pdf", "playwright-cli route '**/*' --status=404",
-                        "playwright-cli tracing-start", "playwright-cli video-start",
+                        "playwright-cli tracing-start", "playwright-cli video-start", "playwright-cli upload /etc/passwd",
                         "playwright-cli cookie-set a b", "playwright-cli delete-data", "playwright-cli kill-all",
                         "playwright-cli close-all", "playwright-cli list", "playwright-cli -s=a close",
                         "playwright-cli --version", "playwright-cli"):

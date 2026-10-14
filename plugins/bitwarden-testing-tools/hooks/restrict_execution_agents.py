@@ -79,11 +79,11 @@ NO_ARGUMENT_SUBCOMMANDS = frozenset(
 )
 # Subcommands whose arguments are element refs, text, keys, numbers, or names.
 # Writing or mocking subcommands (state-save, pdf, route, tracing, video,
-# delete-data, and the cookie and storage setters) are left out.
+# upload, delete-data, and the cookie and storage setters) are left out.
 ARGUMENT_SUBCOMMANDS = frozenset(
     {
         "click", "dblclick", "fill", "type", "press", "hover", "select", "check", "uncheck", "drag",
-        "upload", "dialog-accept", "resize", "keydown", "keyup", "mousemove", "mousedown", "mouseup",
+        "dialog-accept", "resize", "keydown", "keyup", "mousemove", "mousedown", "mouseup",
         "mousewheel", "console", "tab-close", "tab-select", "cookie-list", "cookie-get",
         "localstorage-list", "localstorage-get", "sessionstorage-list", "sessionstorage-get",
     }
@@ -97,8 +97,9 @@ SKILL_BLOCK = (
 BASH_BLOCK = {
     CHECKER: (
         "This command is not allowed in this agent (bitwarden-testing-tools policy). Allowed: "
-        "the checking-localhost-web-health scripts, one simple command at a time. Report this "
-        "step as an obstacle."
+        "the checking-localhost-web-health scripts, one simple command at a time. Quote a "
+        "script path that has a space or any character beyond letters, digits, and _ . / : = , "
+        "@ % + - and retry once; otherwise report this step as an obstacle."
     ),
     RUNNER: (
         "This command is not allowed in this agent (bitwarden-testing-tools policy). Allowed, "
