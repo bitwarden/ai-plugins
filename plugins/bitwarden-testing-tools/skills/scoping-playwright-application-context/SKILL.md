@@ -101,7 +101,7 @@ For each state:
 - Route: <fully-qualified URL including host | n/a>  (a URL with a `:<name>` segment is followed by its parenthetical)
 - Verification points:
   - Selector: <selector value>
-    - Selector type: tag | data-testid | role | text | css  (on a `Route: n/a` state, the Selector names the non-browser check and `text` denotes its stdout)
+    - Selector type: tag | data-testid | role | text | css  (on a `Route: n/a` state, the Selector names the non-browser check and `text` denotes its stdout; a `[HUMAN]` check prefixes its Selector with `[HUMAN]` and uses `text`)
     - Expectation: <visible | hidden | enabled | disabled | text contains "..." | count = N | stdout contains "..." (out-of-band checks only)>
     - Source: <citation; note any gate affecting observability in this state>
 ```

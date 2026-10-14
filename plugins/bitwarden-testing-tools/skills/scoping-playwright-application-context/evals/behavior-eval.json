@@ -18,13 +18,14 @@
     {
       "id": 2,
       "name": "discriminates-gate-failure-from-unreachable",
-      "prompt": "The change adds two things. First, a new SubscriptionStatus enum value, Unpaid, that is only ever set by a Stripe webhook and currently has no UI surface anywhere. Second, a \"past due\" banner on the org billing page that only renders once a subscription has actually failed payment, which in local dev requires advancing an attached Stripe test clock. Build the application context.",
-      "expected_output": "Handles the two conditions differently, because they fail different tests. The Unpaid enum value has no UI surface at all, so it fails the observability validity gate: the state and its producing flow are dropped from the artifact entirely, with no disclaimer left behind. The past-due banner IS observable, so it is modeled as a real state, but it cannot be reached with playwright alone, so it is recorded with `Reachable by playwright: no`, an `If no — why:` one-liner, and a `Reach via:` recipe naming the sanctioned out-of-band action.",
+      "prompt": "The change adds two things. First, a new SubscriptionStatus enum value, Unpaid, that is only ever set by a Stripe webhook and currently has no UI surface anywhere. Second, a \"past due\" banner on the org billing page that only renders once a subscription has actually failed payment. In local dev that requires attaching a Stripe test clock to the organization's existing subscription, which can only be done in the Stripe Dashboard, and then advancing the clock. Build the application context.",
+      "expected_output": "Handles the two conditions differently, because they fail different tests. The Unpaid enum value has no UI surface at all, so it fails the observability validity gate: the state and its producing flow are dropped from the artifact entirely, with no disclaimer left behind. The past-due banner IS observable, so it is modeled as a real state, but it cannot be reached with playwright alone, so it is recorded with `Reachable by playwright: no`, an `If no — why:` one-liner, and a `Reach via:` recipe that marks attaching the test clock as a `[HUMAN]` step and advances the clock through the bitwarden-stripe-tools:using-stripe-cli skill with no `[HUMAN]` prefix.",
       "expectations": [
         "Drops the Unpaid enum state and its producing flow from the artifact entirely, rather than emitting it",
         "Does NOT emit the dropped state with a disclaimer explaining that it is not really reachable, since recognizing the failure in prose is explicitly not sufficient",
         "Models the past-due banner as a real state rather than dropping it, because it is observable even though playwright cannot reach it unaided",
-        "Records the past-due banner with `Reachable by playwright: no` plus an `If no — why:` line and a `Reach via:` recipe naming the out-of-band action"
+        "Records the past-due banner with `Reachable by playwright: no` plus an `If no — why:` line and a `Reach via:` recipe whose test-clock attach step is prefixed with `[HUMAN]`",
+        "Writes the test-clock advance in the `Reach via:` recipe as a step naming the bitwarden-stripe-tools:using-stripe-cli skill, with no `[HUMAN]` prefix, since advancing an already-attached clock is a step the test executor runs itself"
       ]
     },
     {
