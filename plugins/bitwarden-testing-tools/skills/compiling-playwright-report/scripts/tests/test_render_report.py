@@ -142,6 +142,22 @@ class RenderValidationTest(unittest.TestCase):
         )
         self.assertEqual(self._main_expecting_exit(text), 3)
 
+    def test_totals_of_the_wrong_type_exit_3(self):
+        case = {"number": 1, "name": "x", "status": "PASS", "test_steps": []}
+        for totals in ([1], "five", 7):
+            with self.subTest(totals=totals):
+                text = json.dumps({"run_status": "complete", "totals": totals, "cases": [case]})
+                self.assertEqual(self._main_expecting_exit(text), 3)
+
+    def test_non_numeric_total_exits_3(self):
+        case = {"number": 1, "name": "x", "status": "PASS", "test_steps": []}
+        for value in ("many", None, [1]):
+            with self.subTest(value=value):
+                text = json.dumps(
+                    {"run_status": "complete", "totals": {"total": value}, "cases": [case]}
+                )
+                self.assertEqual(self._main_expecting_exit(text), 3)
+
     def test_bad_enum_exits_3(self):
         text = json.dumps(
             {"run_status": "complete", "cases": [{"number": 1, "name": "x", "status": "NOPE", "test_steps": []}]}

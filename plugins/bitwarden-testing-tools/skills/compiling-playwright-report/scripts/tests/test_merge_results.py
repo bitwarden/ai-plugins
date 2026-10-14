@@ -93,6 +93,16 @@ class MergeTest(unittest.TestCase):
             )
         self.assertEqual(cm.exception.code, 3)
 
+    def test_segment_cases_must_be_a_list_of_objects(self):
+        d = tempfile.mkdtemp()
+        for index, cases in enumerate(({"1": "x"}, "abc", [1, 2], [{"number": 1}, "x"])):
+            seg = os.path.join(d, f"s{index}.json")
+            with open(seg, "w", encoding="utf-8") as f:
+                json.dump({"run_status": "complete", "cases": cases}, f)
+            with self.subTest(cases=cases), self.assertRaises(SystemExit) as cm:
+                merge_results.load_segment(seg)
+            self.assertEqual(cm.exception.code, 3)
+
     def test_main_writes_and_reports_status(self):
         d = tempfile.mkdtemp()
         seg = os.path.join(d, "s1.json")

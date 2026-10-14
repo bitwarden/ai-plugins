@@ -18,17 +18,17 @@ An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. Any ab
 
 ## Case object
 
-| Field         | Type   | Notes                                                                 |
-| ------------- | ------ | --------------------------------------------------------------------- |
-| `number`      | int    | 1-based                                                               |
-| `name`        | string |                                                                       |
-| `status`      | string | `PASS`, `PASS (adaptive)`, `FAIL`, or `ERROR`                         |
-| `url`         | string | Optional; the page under test                                         |
-| `setup_steps` | array  | Step objects; omit or use `[]` when there are none                    |
-| `test_steps`  | array  | Step objects                                                          |
-| `notes`       | string | Optional                                                              |
-| `adaptive`    | object | `{ specified, found }`; present only when status is `PASS (adaptive)` |
-| `account`     | object | Optional; `{ email, password }` for an account the case created       |
+| Field         | Type   | Notes                                                                                                                                                                                        |
+| ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `number`      | int    | 1-based                                                                                                                                                                                      |
+| `name`        | string |                                                                                                                                                                                              |
+| `status`      | string | `PASS`, `PASS (adaptive)`, `FAIL`, or `ERROR`                                                                                                                                                |
+| `url`         | string | Optional; the page under test                                                                                                                                                                |
+| `setup_steps` | array  | Step objects; omit or use `[]` when there are none                                                                                                                                           |
+| `test_steps`  | array  | Step objects                                                                                                                                                                                 |
+| `notes`       | string | Optional                                                                                                                                                                                     |
+| `adaptive`    | object | `{ specified, found }`; present only when status is `PASS (adaptive)`                                                                                                                        |
+| `account`     | object | Optional; `{ email, password }` for an account the case created. The password is a disposable local-dev credential, written to `test-results-*.json` in cleartext, so never commit that file |
 
 ## Step object
 

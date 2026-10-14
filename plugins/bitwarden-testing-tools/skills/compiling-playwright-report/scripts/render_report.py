@@ -8,7 +8,7 @@
 # Usage:
 #   render_report.py --results <path> --template-dir <dir> --output <path>
 #     --plan-name <str> --date <str> --slug <str> --services-tested <str>
-#     --base-url <str>
+#     --base-url <str> --plan-file <path>
 #
 # Exit codes: 0 report written; 2 usage error or aborted run (caller skips
 # rendering); 3 invalid or malformed results JSON.
@@ -82,8 +82,14 @@ def validate(data):
     counted = tally(cases)
     stored = data.get("totals")
     if stored is not None:
+        if not isinstance(stored, dict):
+            fail("'totals' must be a JSON object")
         for key, value in counted.items():
-            if int(stored.get(key, -1)) != value:
+            try:
+                stored_value = int(stored.get(key, -1))
+            except (TypeError, ValueError):
+                fail(f"totals.{key} is not an integer: {stored.get(key)!r}")
+            if stored_value != value:
                 fail(f"totals.{key}={stored.get(key)} does not match counted {value}")
 
 

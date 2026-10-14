@@ -41,6 +41,9 @@ def load_segment(path):
             f"segment {path} run_status must be one of "
             f"{sorted(VALID_RUN_STATUS)}, got {run_status!r}"
         )
+    cases = data.get("cases", [])
+    if not isinstance(cases, list) or not all(isinstance(case, dict) for case in cases):
+        fail(f"segment {path} 'cases' must be a list of objects")
     return data
 
 
