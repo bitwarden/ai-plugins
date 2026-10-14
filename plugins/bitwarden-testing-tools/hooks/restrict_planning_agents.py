@@ -69,11 +69,9 @@ def decide(payload):
 def main(stdin):
     try:
         payload = json.loads(stdin)
-    except ValueError:
-        return 0
-    except RecursionError:
-        # No Skill input is nested this deeply. Block if it could come
-        # from a restricted agent rather than let the crash exit 1 and fail open.
+    except (ValueError, RecursionError):
+        # An unparseable or too-deeply-nested payload hides the caller. Block if
+        # it could come from a restricted agent rather than fail open.
         agent = next((a for a in AGENT_SKILLS if PLUGIN_NAME in stdin and a in stdin), None)
         if agent is None:
             return 0

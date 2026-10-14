@@ -121,6 +121,9 @@ class BlockedTest(unittest.TestCase):
         body = skill(FORKED_SKILL)[:-1] + ', "x": ' + nested + "}"
         self.assertBlocked(body)
 
+    def test_invalid_json_from_a_restricted_agent_is_blocked(self):
+        self.assertBlocked(skill(FORKED_SKILL)[:-1] + ",")
+
     def test_non_utf8_skill_name_is_blocked(self):
         data = skill(FORKED_SKILL).encode("utf-8").replace(b"auditing", b"\xff")
         self.assertBlocked(data)

@@ -2,7 +2,7 @@
 name: playwright-application-context-scoper
 version: 1.3.0
 description: |
-  Planning-phase agent for Bitwarden web test planning. Given a context artifact (affected repos, feature description, acceptance criteria), it explores the affected clients and server code and returns a state-centric Application Context — a `## States` section of real-user-reachable UI conditions with verification points, and a `## Flows` section of the sequences that transition between them — as a markdown response. Use it to produce the grounded Application Context that Playwright test-case authoring consumes.
+  Planning-phase agent for Bitwarden web test planning. Given a context artifact (affected repos, feature description, acceptance criteria) and a diff artifact of the changed files per repo, it explores the affected clients and server code and returns a state-centric Application Context — a `## States` section of real-user-reachable UI conditions with verification points, and a `## Flows` section of the sequences that transition between them — as a markdown response. Use it to produce the grounded Application Context that Playwright test-case authoring consumes.
 
   <example>
   Context: An engineer has the structured context for a change and needs the reachable UI states and flows scoped before writing Playwright cases.
