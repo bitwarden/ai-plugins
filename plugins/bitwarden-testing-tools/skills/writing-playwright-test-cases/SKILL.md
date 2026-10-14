@@ -35,7 +35,7 @@ The Bitwarden Admin portal at `http://localhost:62911` is a legitimate applicati
 
 Any test case that creates a user account must write the exact email address into the SETUP step. Use the format `testuser-s<N>-<YYYYMMDDHHMMSS>@example.com` where `<N>` is the test case number and `<YYYYMMDDHHMMSS>` is a timestamp generated at plan-writing time. Never use a generic placeholder or reuse the same address across test cases in the same run.
 
-Any test case that creates a user account must also write the exact master password into that same SETUP step. Use the fixed dev master password `test-master-password-12`, a local dev fixture and never a real account credential (the value `flow:create-new-user-and-login` documents), so a resumed segment can reconstruct the credentials from the plan alone. If a test case's flow requires a distinct password, write that exact value into the SETUP step instead.
+Any test case that creates a user account must also write the exact master password into that same SETUP step. Use the fixed dev master password `test-master-password-12`, a local dev fixture and never a real account credential (the value `flow:create-new-user-and-login` documents), so the credentials can be reconstructed from the plan alone. If a test case's flow requires a distinct password, write that exact value into the SETUP step instead.
 
 Before writing any setup steps or test step sequences, read the Application Context's `## States` and `## Flows` sections. For each test case:
 
