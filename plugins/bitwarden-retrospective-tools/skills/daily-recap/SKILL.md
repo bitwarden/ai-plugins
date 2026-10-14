@@ -91,8 +91,9 @@ Copy the template into the output directory from step 1, then fill every `{{...}
 cp assets/template.html "$out_dir/recap-YYYY-MM-DD.html"
 ```
 
-`references/render-guide.md` has the HTML shapes for project sections, stream cards, timeline events, and the Today banner. Read it before filling those placeholders. Two rules from it matter most:
+`references/render-guide.md` has the HTML shapes for project sections, stream cards, timeline events, and the Today banner. Read it before filling those placeholders. Three rules matter most:
 
+- Never copy credentials, tokens, API keys, `.env` values, or connection strings out of session prompts or tool output into the page; summarize around them. The page is built to be shared, and escaping leaves a secret perfectly readable.
 - HTML-escape every piece of text that comes from GitHub or session logs (titles, comment bodies, commit messages, branch names, prompts). Other people write much of that text, and unescaped markup would render as live HTML.
 - Leave the `<script>` block and the Content-Security-Policy meta tag untouched. The policy pins the script by hash, so any edit disables the page's filters and Copy button.
 
