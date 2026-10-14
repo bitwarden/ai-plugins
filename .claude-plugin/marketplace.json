@@ -122,6 +122,12 @@
       "source": "./plugins/bitwarden-stripe-tools",
       "version": "1.0.0",
       "description": "Stripe tools for Bitwarden — read-only test-mode queries, invoice previews, and test-clock advancement through a guarded Stripe CLI wrapper."
+    },
+    {
+      "name": "bitwarden-retrospective-tools",
+      "source": "./plugins/bitwarden-retrospective-tools",
+      "version": "1.0.0",
+      "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs and your GitHub activity."
     }
   ]
 }
