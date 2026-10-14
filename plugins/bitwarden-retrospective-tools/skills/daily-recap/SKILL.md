@@ -28,15 +28,18 @@ Choosing the date to pass:
 
 ### 1. Gather data
 
-Run the GitHub step first because the session step needs its window. Write outputs to a fresh temporary directory (for example `mktemp -d`) rather than fixed `/tmp` names.
+Run the GitHub step first because the session step needs its window. Everything the skill writes goes in one output directory: `DAILY_RECAP_OUTPUT_DIR` when set, otherwise `${CLAUDE_PLUGIN_DATA}/daily-recaps`. That keeps recaps in the plugin's persistent data and out of any repository. The gathered JSON sits beside the pages and is replaced on each run.
 
 ```bash
+out_dir="${DAILY_RECAP_OUTPUT_DIR:-${CLAUDE_PLUGIN_DATA}/daily-recaps}"
+mkdir -p "$out_dir"
+
 # (a) GitHub events for the workday, plus the computed window
-scripts/gather-gh-events.sh [YYYY-MM-DD] > "$WORK/events.json"
+scripts/gather-gh-events.sh [YYYY-MM-DD] > "$out_dir/events.json"
 
 # (b) Claude Code sessions with activity inside that window
-scripts/find-sessions.sh "$(jq -r .window.start_utc "$WORK/events.json")" \
-  "$(jq -r .window.end_utc "$WORK/events.json")" > "$WORK/sessions.json"
+scripts/find-sessions.sh "$(jq -r .window.start_utc "$out_dir/events.json")" \
+  "$(jq -r .window.end_utc "$out_dir/events.json")" > "$out_dir/sessions.json"
 ```
 
 `gather-gh-events.sh` emits `login`, `window` (date, cutoff hour, timezone label, UTC and local bounds), `feed_complete`, `event_count`, and `events`. GitHub's events feed only holds the most recent 300 events from the last 30 days; when `feed_complete` is `false`, say in the recap that early events in the window may be missing.
@@ -82,11 +85,9 @@ Derive project labels from each session's `cwd` (the repository name) rather tha
 
 ### 6. Render the HTML
 
-Copy the template into the output directory, then fill every `{{...}}` placeholder. The output directory is `DAILY_RECAP_OUTPUT_DIR` when set, otherwise `~/Documents/daily-recap`:
+Copy the template into the output directory from step 1, then fill every `{{...}}` placeholder:
 
 ```bash
-out_dir="${DAILY_RECAP_OUTPUT_DIR:-$HOME/Documents/daily-recap}"
-mkdir -p "$out_dir"
 cp assets/template.html "$out_dir/recap-YYYY-MM-DD.html"
 ```
 

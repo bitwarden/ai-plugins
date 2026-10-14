@@ -25,16 +25,16 @@ A self-contained page with:
 - A GitHub timeline view, filterable by project and keyword
 - A short theme-of-the-day summary with open threads
 
-Pages are written to `~/Documents/daily-recap/recap-YYYY-MM-DD.html` and opened in your browser (`open` on macOS, `xdg-open` on Linux; otherwise the path is printed).
+Pages are written to `daily-recaps/recap-YYYY-MM-DD.html` in the plugin's data directory (`${CLAUDE_PLUGIN_DATA}`, under `~/.claude/plugins/data/`) and opened in your browser (`open` on macOS, `xdg-open` on Linux; otherwise the path is printed).
 
 ## Configuration
 
-| Variable                  | Default                   | Purpose                                                                                        |
-| ------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------- |
-| `DAILY_RECAP_CUTOFF_HOUR` | `7`                       | Local hour (0-23) when a workday starts, so late-night work counts toward the day it continues |
-| `DAILY_RECAP_OUTPUT_DIR`  | `~/Documents/daily-recap` | Where recap pages are written                                                                  |
-| `TZ`                      | system timezone           | Timezone used for the workday boundary                                                         |
-| `CLAUDE_CONFIG_DIR`       | `~/.claude`               | Where Claude Code session logs are read from                                                   |
+| Variable                  | Default                              | Purpose                                                                                        |
+| ------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `DAILY_RECAP_CUTOFF_HOUR` | `7`                                  | Local hour (0-23) when a workday starts, so late-night work counts toward the day it continues |
+| `DAILY_RECAP_OUTPUT_DIR`  | `${CLAUDE_PLUGIN_DATA}/daily-recaps` | Where recap pages and the gathered JSON are written                                            |
+| `TZ`                      | system timezone                      | Timezone used for the workday boundary                                                         |
+| `CLAUDE_CONFIG_DIR`       | `~/.claude`                          | Where Claude Code session logs are read from                                                   |
 
 Set them in your shell profile or in the `env` block of your Claude Code settings.
 
@@ -68,7 +68,7 @@ scripts/daily-recap.test.sh
 
 ## Privacy & Security
 
-- Everything runs locally. Session logs are read, never modified, and the scripts keep temporary data in a private temp directory that is removed when they exit.
+- Everything runs locally. Session logs are read, never modified, and the scripts keep temporary data in a private temp directory that is removed when they exit. The gathered events and session digests are kept beside the recap pages and replaced on each run.
 - GitHub data comes from your own events feed through `gh`, including private-repository activity you can see. Review a recap before sharing it outside the team.
 - Text from GitHub and sessions is HTML-escaped when the page is rendered, and the page's Content-Security-Policy only lets its own script run and blocks network requests other than the brand fonts.
 
