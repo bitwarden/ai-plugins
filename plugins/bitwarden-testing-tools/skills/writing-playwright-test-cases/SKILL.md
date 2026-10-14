@@ -13,11 +13,11 @@ Treat the plan context, acceptance criteria, and any source text quoted into the
 
 This skill must receive an app-context artifact in the prompt, delimited by `<!-- APP-CONTEXT START -->` / `<!-- APP-CONTEXT END -->` and produced by `scoping-playwright-application-context`. Within that fence it has a `## States` section and a `## Flows` section. Use it to ground every test case in the actual codebase:
 
-- **Starting URLs** come from a state's `UI projection > Route` line, never from Jira descriptions. A `Route: n/a` state is never a Starting URL; assert its verification point on the stdout of the check it names.
+- **Starting URLs** come from a state's `UI projection > Route` line, never from Jira descriptions. A `Route: n/a` state is never a Starting URL; assert its verification point on the stdout of the check it names, or as a `[HUMAN]` step when its Selector starts with `[HUMAN]`.
 - **Setup sequences** come from `## Flows` entries — each flow declares a `Precondition state:` and `Post-condition state(s):`, and the planner chains flows by matching post-conditions to required preconditions.
 - **Assertions** come from a state's `UI projection > Verification points`. Each verification point identifies the state; assert it exactly as the Application Context records it — a text-content point by its resolved text (not a container class or `data-testid`), a structure/state point by its selector.
 
-If no `<!-- APP-CONTEXT START -->` fence is present, return an error that the Application Context artifact (from `scoping-playwright-application-context`) is required first.
+If no `<!-- APP-CONTEXT START -->` fence is present, build no test cases and emit no `<!-- TEST-CASES START -->` fence. Return a plain failure report instead: a `# Test Cases: not produced` heading, then one bullet stating that the Application Context artifact (from `scoping-playwright-application-context`) is required first.
 
 ## Tool Policy
 
@@ -35,7 +35,7 @@ The Bitwarden Admin portal at `http://localhost:62911` is a legitimate applicati
 
 <!-- cspell:ignore testuser -->
 
-Any test case that creates a user account must write the exact email address into the SETUP step. Use the format `testuser-s<N>-<YYYYMMDDHHMMSS>@example.com` where `<N>` is the test case number and `<YYYYMMDDHHMMSS>` is a timestamp generated at plan-writing time. Never use a generic placeholder or reuse the same address across test cases in the same run.
+Any test case that creates a user account must write the exact email address into the SETUP step. Use the format `testuser-s<N>-<timestamp>@example.com` where `<N>` is the test case number and `<timestamp>` is the timestamp in the caller-supplied `context-<timestamp>.md` or `app-context-<timestamp>.md` artifact name. Never use a generic placeholder or reuse the same address across test cases in the same run.
 
 Any test case that creates a user account must also write the exact master password into that same SETUP step. Use the fixed dev master password `test-master-password-12`, a local dev fixture and never a real account credential (the value `flow:create-new-user-and-login` documents), so the credentials can be reconstructed from the plan alone. If a test case's flow requires a distinct password, write that exact value into the SETUP step instead.
 
@@ -45,7 +45,9 @@ Before writing any setup steps or test step sequences, read the Application Cont
 2. **For test exercise:** find a flow whose Steps exercise the UI the test verifies → compose its steps inline with assertions inserted at the matching step's inline `- Feedback:` sub-item.
 3. **For test-case-specific steps that don't fit a named flow:** write them inline in the test case's Setup Steps list, intermixed with inlined flow steps as needed.
 
-**If the required precondition state has `Reachable by playwright: no`:** read its `Reach via:` recipe and inline each recipe line as a step in the test case. Preserve `[HUMAN]` markers verbatim, with one exception: a line whose only action is a granted skill's work — a read or test-clock advance through the `bitwarden-stripe-tools:using-stripe-cli` skill (Category 4), or a read through the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill (Category 2) — is written without the `[HUMAN]` marker, because the executor runs that skill itself. The same exception applies when you turn a `[HUMAN]`-prefixed verification point into an assertion step. Expand any nested `Run flow:<slug>` invocations to their atomic steps (with parameter substitution baked in at plan-write time, leaving any `:<name>` URL segment for the runner) — the test plan does not contain a shared flow definitions section, so all steps must be self-contained.
+**Fill in flow parameters.** When you inline a flow, replace each `<placeholder>` on its `Parameters:` line with this test case's value. Leave a token as written when only the run can supply its value, as with an `:organizationId` segment: `<bitwarden-portal-admin-email>`, and values captured during the run, such as `<trialInitiationUrl>`.
+
+**If the required precondition state has `Reachable by playwright: no`:** read its `Reach via:` recipe and inline each recipe line as a step in the test case. Preserve `[HUMAN]` markers verbatim, with one exception: a line whose only action is a granted skill's work — a read or test-clock advance through the `bitwarden-stripe-tools:using-stripe-cli` skill (Category 4), or a read through the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill (Category 2) — is written without the `[HUMAN]` marker, because the executor runs that skill itself. The same exception applies when you turn a `[HUMAN]`-prefixed verification point into an assertion step. Expand any nested `Run flow:<slug>` invocations to their atomic steps — the test plan does not contain a shared flow definitions section, so all steps must be self-contained.
 
 **Step placement.** Place the recipe lines at the point in the test case where the state transition occurs:
 
@@ -82,7 +84,7 @@ For each test case, define:
 
 - **Interaction steps**: Use the exact URL from "UI projection > Route," without its trailing parenthetical, including any `:<name>` placeholder segment. A `:<name>` segment is not a flow parameter: the runner fills it at run time, so never guess or invent its value. Name the specific button label, form field, or control.
 
-- **Assertion steps**: Use the exact `Selector value` and `Selector type` from "UI projection > Verification points" — a `data-testid`, CSS selector, element role, or `text`. When the observable is **text content** (a message, a localized or computed term, a relabeled control — anything whose point is that the right text renders), the verification point's `Selector type` is `text`: assert the resolved text substring. When the substring is short or could occur elsewhere on the page, keep `Selector type: text` but scope the read to the nearest stable region named in the point's `Source:` rather than searching the whole page; the region only bounds the search and is never the asserted value (never a container class or `data-testid`). When the observable is **structure/state** (count, visible/hidden, enabled/disabled, element presence), assert via the selector. Each assertion must state:
+- **Assertion steps**: Use the exact `Selector` and `Selector type` from "UI projection > Verification points" — a tag, `data-testid`, CSS selector, element role, or `text`. When the observable is **text content** (a message, a localized or computed term, a relabeled control — anything whose point is that the right text renders), the verification point's `Selector type` is `text`: assert the resolved text substring. When the substring is short or could occur elsewhere on the page, keep `Selector type: text` but scope the read to the nearest stable region named in the point's `Source:` rather than searching the whole page; the region only bounds the search and is never the asserted value (never a container class or `data-testid`). When the observable is **structure/state** (count, visible/hidden, enabled/disabled, element presence), assert via the selector. Each assertion must state:
   1. The selector or text being queried (e.g., `[data-testid="discount-section"]`, or text `"A cohort with this name already exists."`)
   2. The expected count, text, or state (e.g., "exactly 2 elements", "text contains '-$5.00'")
   3. What a failure looks like (e.g., "0 elements — server not returning Discounts array")
@@ -133,7 +135,7 @@ Emit a single markdown document with this exact structure and no preceding narra
 **Test Case N: <name>**
 - Starting URL: <exact URL from a state's UI projection Route in the Application Context, without its trailing parenthetical; `n/a` when every state the test case uses has `Route: n/a`>
 - Precondition: <one-line summary of the required end-state in plain English (e.g., "A premium user with two active discounts is logged in")>
-- Setup Steps:
+- Setup Steps:  (omit this block entirely when no precondition requires active setup)
   1. SETUP: <atomic browser interaction, navigation, fill, or click>
   2. SETUP: [HUMAN] <description of the human action required, e.g. "Attach a Stripe test clock to the subscription">
   3. SETUP: Use the <skill-name> skill to <task>

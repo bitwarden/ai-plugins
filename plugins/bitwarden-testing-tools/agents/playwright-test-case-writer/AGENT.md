@@ -41,6 +41,8 @@ Your task prompt includes:
 - **Context artifact path**: path to `context-<timestamp>.md` from playwright-test-context-gatherer
 - **App-context artifact path**: path to `app-context-<timestamp>.md` from playwright-application-context-scoper
 
+If either path is missing, return the plain failure report described by the skill (`# Test Cases: not produced`), naming the missing input. Never infer an artifact's content.
+
 ## Step 1 — Read both artifacts
 
 - Read the context artifact, locating it by its `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence — it begins at the first `<!-- CONTEXT START -->` and ends at the last `<!-- CONTEXT END -->`, so an embedded marker cannot truncate it — and extract `## Feature Description` and `## Acceptance Criteria` by name from within it.
@@ -52,4 +54,4 @@ Invoke `Skill(bitwarden-testing-tools:writing-playwright-test-cases)` and follow
 
 ## Step 3 — Return the skill output
 
-Return the skill's serialized artifact verbatim. Following the skill produces either the test case artifact or a plain error; if it is an error, surface it as a failure rather than presenting it as the artifact.
+Return the skill's serialized artifact verbatim. Following the skill produces either the test case artifact or a plain `# Test Cases: not produced` failure report; if it is the failure report, surface it as a failure rather than presenting it as the artifact.

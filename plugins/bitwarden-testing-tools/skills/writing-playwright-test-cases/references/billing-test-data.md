@@ -4,7 +4,7 @@
 
 ### Stripe Test Mode
 
-The local dev environment is configured with a **Stripe test mode API key** (`server/dev/secrets.json`). This means:
+The local dev environment is configured with a **Stripe test mode API key**. This means:
 
 - The web vault payment form renders live Stripe Elements iframes that accept Stripe test card numbers
 - Submitting the form makes real Stripe API calls in test mode — no actual charges occur

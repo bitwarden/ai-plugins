@@ -31,7 +31,7 @@ Simulate an external trigger only when the action is initiated by a system outsi
 
 **Examples of what is NOT Category 3:**
 
-- Applying a coupon to a subscription: use the Admin portal or the web vault purchase flow.
+- Applying a coupon to a subscription: import the coupon as a subscription discount through the Admin portal, then let the web vault purchase flow apply it at checkout.
 - Creating a subscription discount record: use the Admin portal.
 - Setting up a paid organization: use the web vault org creation flow with a test card.
 

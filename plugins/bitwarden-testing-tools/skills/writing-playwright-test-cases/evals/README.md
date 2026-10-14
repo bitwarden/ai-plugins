@@ -15,7 +15,7 @@ Run with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus wit
 Every expectation is objectively checkable against the produced markdown document alone:
 
 - Case 1's expectations are the most exactly checkable in the suite: the `EXTERNAL TRIGGER: POST <endpoint> — <rationale>` string, including the em dash separator, is an exact literal from `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`, so a grader can do a substring match rather than a semantic judgment.
-- Case 2's expectations are checkable by scanning the coupon step: it carries no `EXTERNAL TRIGGER` label and runs through the Admin portal or the web vault purchase flow.
+- Case 2's expectations are checkable by scanning the coupon step: it carries no `EXTERNAL TRIGGER` label and imports the coupon as a subscription discount through the Admin portal, leaving the web vault purchase flow to apply it.
 - Cases 3's and 4's expectations about step content (browser actions only, concrete card values, `frameLocator` usage, no decline-trigger card) are checkable by scanning the Setup/Test Steps for the presence or absence of specific text.
 - Case 5's expectations are checkable against the synthetic `Reach via:` recipe supplied in its own prompt: the `[HUMAN]` line either appears verbatim in Setup Steps or it does not.
 - Case 6's expectations are checkable by scanning for the absence of a flag-edit step and a third-party-navigation step.
@@ -24,11 +24,11 @@ Every expectation is objectively checkable against the produced markdown documen
 
 ## Did-not-take-an-action checks
 
-None of this suite's 30 expectations require tool-call trace capture to grade, unlike `mapping-services-under-test`'s suite (which needs trace visibility because that skill's documented job includes actually running `git diff` itself). `writing-playwright-test-cases` takes no live actions of its own during construction beyond reading its static reference files; everything it is graded on here is a decision about what text goes into the single markdown document it returns. Every "does not include a step that..." expectation in this suite (direct database queries, Stripe API writes, feature-flag edits, third-party navigation) is satisfied or violated entirely within that returned document, so artifact inspection is sufficient and no trace capture is needed to score this suite.
+None of this suite's 29 expectations require tool-call trace capture to grade, unlike `mapping-services-under-test`'s suite (which needs trace visibility because that skill's documented job includes actually running `git diff` itself). `writing-playwright-test-cases` takes no live actions of its own during construction beyond reading its static reference files; everything it is graded on here is a decision about what text goes into the single markdown document it returns. Every "does not include a step that..." expectation in this suite (direct database queries, Stripe API writes, feature-flag edits, third-party navigation) is satisfied or violated entirely within that returned document, so artifact inspection is sufficient and no trace capture is needed to score this suite.
 
 ## Files
 
-- `behavior-eval.json` - the nine cases and their 30 expectations, described above.
+- `behavior-eval.json` - the nine cases and their 29 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running
