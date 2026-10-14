@@ -79,11 +79,11 @@ NO_ARGUMENT_SUBCOMMANDS = frozenset(
 )
 # Subcommands whose arguments are element refs, text, keys, numbers, or names.
 # Writing or mocking subcommands (state-save, pdf, route, tracing, video,
-# upload, delete-data, and the cookie and storage setters) are left out.
+# delete-data, and the cookie and storage setters) are left out.
 ARGUMENT_SUBCOMMANDS = frozenset(
     {
         "click", "dblclick", "fill", "type", "press", "hover", "select", "check", "uncheck", "drag",
-        "dialog-accept", "resize", "keydown", "keyup", "mousemove", "mousedown", "mouseup",
+        "upload", "dialog-accept", "resize", "keydown", "keyup", "mousemove", "mousedown", "mouseup",
         "mousewheel", "console", "tab-close", "tab-select", "cookie-list", "cookie-get",
         "localstorage-list", "localstorage-get", "sessionstorage-list", "sessionstorage-get",
     }
