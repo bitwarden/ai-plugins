@@ -1,6 +1,8 @@
 ---
 name: writing-playwright-test-cases
 description: Build structured Playwright test cases for Bitwarden web changes from plan context and an Application Context artifact. Triggers on "write the Playwright test cases" and "turn this application context into test cases". Do NOT use it to write manual Gherkin test cases (use writing-manual-test-cases) or to scope the Application Context itself (use scoping-playwright-application-context). Returns a test case list.
+argument-hint: "[plan context] [Application Context artifact]"
+allowed-tools: "Read"
 ---
 
 Given the plan context and Application Context, build concrete test cases for Playwright execution.
@@ -85,7 +87,7 @@ For each test case, define:
   2. The expected count, text, or state (e.g., "exactly 2 elements", "text contains '-$5.00'")
   3. What a failure looks like (e.g., "0 elements — server not returning Discounts array")
 
-- **All verification points must appear**: Every item under "UI projection > Verification points" in the Application Context must map to at least one explicit assertion step. If a verification point has no corresponding assertion, the test case is incomplete.
+- **All target-state verification points must appear**: Every item under "UI projection > Verification points" on a `**State type:** target` state must map to at least one explicit assertion step. If one has no corresponding assertion, the test case is incomplete. A setup state only positions the app and is never the assertion target, so its verification points need no assertion step.
 
 **Interactive elements must be exercised.** When the plan describes collapsible sections, accordions, tabs, expandable cards, or modal triggers, each must have a dedicated step that:
 
@@ -129,7 +131,7 @@ Emit a single markdown document with this exact structure and no preceding narra
 
 ```
 **Test Case N: <name>**
-- Starting URL: <exact URL from a state's UI projection Route in the Application Context, without its trailing parenthetical>
+- Starting URL: <exact URL from a state's UI projection Route in the Application Context, without its trailing parenthetical; `n/a` when every state the test case uses has `Route: n/a`>
 - Precondition: <one-line summary of the required end-state in plain English (e.g., "A premium user with two active discounts is logged in")>
 - Setup Steps:
   1. SETUP: <atomic browser interaction, navigation, fill, or click>

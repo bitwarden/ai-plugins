@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Category 3 (external trigger simulation) planning content in `references/playwright-tool-policy.md`: the qualifying test, the examples, and the `EXTERNAL TRIGGER` labeling rule.
 - Behavior evals for `writing-playwright-test-cases`, nine advice-only cases covering external-trigger labeling in the exact `EXTERNAL TRIGGER:` format, the Category 3 qualifying test, web-first setup from scratch, the billing test card, preserving a `[HUMAN]` marker from an unreachable state's recipe, refusing out-of-category steps, erroring when no Application Context is provided, never writing a feature-flag step, and dropping `[HUMAN]` from a granted skill's read. The suite is kept as an authoring aid and has not been benchmarked.
 
+### Changed
+
+- `hooks/restrict_planning_agents.py` now also confines `playwright-test-case-writer` to its own skill.
+
 ## [1.3.0] - 2026-10-07
 
 ### Added

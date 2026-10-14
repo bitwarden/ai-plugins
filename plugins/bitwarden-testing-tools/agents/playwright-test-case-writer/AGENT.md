@@ -52,4 +52,4 @@ Invoke `Skill(bitwarden-testing-tools:writing-playwright-test-cases)` and follow
 
 ## Step 3 — Return the skill output
 
-Return the skill's serialized artifact verbatim.
+Return the skill's serialized artifact verbatim. Following the skill produces either the test case artifact or a plain error; if it is an error, surface it as a failure rather than presenting it as the artifact.
