@@ -12,21 +12,15 @@ Run with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus wit
 
 ## Grading notes
 
-Most expectations are objectively checkable against the produced markdown document alone:
+Every expectation is objectively checkable against the produced markdown document alone:
 
 - Case 1's expectations are the most exactly checkable in the suite: the `EXTERNAL TRIGGER: POST <endpoint> — <rationale>` string, including the em dash separator, is an exact literal from `${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`, so a grader can do a substring match rather than a semantic judgment.
+- Case 2's expectations are checkable by scanning the coupon step: it carries no `EXTERNAL TRIGGER` label and runs through the Admin portal or the web vault purchase flow.
 - Cases 3's and 4's expectations about step content (browser actions only, concrete card values, `frameLocator` usage, no decline-trigger card) are checkable by scanning the Setup/Test Steps for the presence or absence of specific text.
 - Case 5's expectations are checkable against the synthetic `Reach via:` recipe supplied in its own prompt: the `[HUMAN]` line either appears verbatim in Setup Steps or it does not.
 - Case 6's expectations are checkable by scanning for the absence of a flag-edit step and a third-party-navigation step.
 - Case 7's expectation is checkable by scanning for the absence of any `<!-- TEST-CASES START -->` fence or `## Test Cases` heading and the presence of an error referring the caller back to `scoping-playwright-application-context`.
 - Cases 8 and 9 are checkable by scanning the steps: case 8 for the absence of any step about the feature flag, and case 9 for a using-stripe-cli SETUP step that carries no `[HUMAN]` marker.
-
-Two expectations carry a real grading caveat worth flagging before this suite is scored, both arising from the same tension: `writing-playwright-test-cases`'s own Output section requires the response to be wrapped in the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence with "no preceding narrative or commentary," and the only sanctioned free-text channel inside that format is the optional `Notes:` line on an individual test case (the pattern the skill already uses for a documented coverage gap). Both of the following expectations ask the model to state a piece of reasoning, and the only place that reasoning can legally appear is that `Notes:` line:
-
-- Case 2's "States the reasoning for the classification... rather than leaving the routing unexplained." A run that correctly omits the EXTERNAL TRIGGER label and correctly routes through the Admin portal, but never writes a `Notes:` line naming the qualifying test, produces a plan indistinguishable from one that got the routing right by luck. A config-blind grader has to decide whether silent-but-correct routing passes this expectation on its own, or whether the naming is truly required. Treat this as the more subjective half of case 2.
-- Case 3's "States that direct database access is never permitted" has the identical shape: a run that never emits a database-seeding step, and never explains why, is behaviorally correct but may fail a strict reading of this expectation.
-
-Both expectations are still falsifiable (a `Notes:` line either contains the stated reasoning or it does not), but graders should decide up front whether silent compliance counts as a pass, since the skill's own output contract does not require it to narrate itself.
 
 ## Did-not-take-an-action checks
 

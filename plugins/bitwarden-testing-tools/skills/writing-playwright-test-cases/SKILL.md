@@ -143,6 +143,8 @@ Emit a single markdown document with this exact structure and no preceding narra
   1. <atomic browser interaction or navigation>
   2. Assert: <selector> — <expected value/count/state> | Fail: <what failure looks like>
   3. [HUMAN] <description of the human action required, when the test exercise itself includes one>
+  4. Use the <skill-name> skill to <task>
+  5. EXTERNAL TRIGGER: POST <endpoint> — <why no Bitwarden service can initiate it>
   ...
 - Notes: <optional free-form notes>
 ```
