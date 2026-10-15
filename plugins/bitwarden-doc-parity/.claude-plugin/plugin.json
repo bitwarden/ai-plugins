@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-doc-parity",
+  "version": "1.0.0",
+  "description": "Enforces the documentation standard's base obligations — docs and diagrams update in the same change as the code they describe. Session instructions, a Stop-hook tripwire, a semantic verification skill, and a CI review face.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-doc-parity",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "documentation",
+    "doc-parity",
+    "doc-drift",
+    "hooks",
+    "standards",
+    "review"
+  ]
+}
