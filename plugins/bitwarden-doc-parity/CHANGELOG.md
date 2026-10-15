@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- README Layer 4 documents the automatic pickup by `bitwarden-code-review` 2.4.0's reviewer agent, replacing the note that the integration was planned.
+- README Layer 4 no longer says `bitwarden-code-review` integration is planned, since `bitwarden-code-review` 2.4.0 now implements it.
 
 ## [1.0.0] - 2026-08-04
 
