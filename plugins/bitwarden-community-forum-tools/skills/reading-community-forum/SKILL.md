@@ -28,8 +28,8 @@ It needs Python 3.9+ and no API key or configuration. It cannot post, reply, vot
 
 ## Workflow
 
-1. **Find candidates** with `search`, `latest`, or `top`. Each hit shows its topic ID, post count, views, likes, and votes.
-2. **Rank by engagement.** Posts, views, and votes show what the community cares about. Dates show what is current.
+1. **Find candidates** with `search`, `latest`, or `top`. `latest` and `top` show each topic's posts, views, likes, and votes. `search` hits show the matching post's likes and the topic's post count, last activity, and solved state, but not views or votes.
+2. **Rank by engagement.** Posts, views, and votes show what the community cares about; dates show what is current. To rank search hits by views or votes, read each thread's header (`thread <id> --brief`) or browse the same category with `top`/`latest`.
 3. **Read the best 1 to 3 threads**, starting with `thread <id> --brief` (about 1k tokens). Drop `--brief` for the full discussion: up to 40 posts, with Discourse's "best of" selection for longer threads. Add `--chrono` for posts in order or `--max-posts 0` for all.
 4. **Answer from what you read** and cite the thread URLs. Every topic carries its URL; post N is that URL plus `/N`.
 
@@ -51,6 +51,14 @@ It needs Python 3.9+ and no API key or configuration. It cannot post, reply, vot
 - `STAFF` marks a Bitwarden employee and is an official statement. `MOD` marks a volunteer moderator: experienced, not official. Treat every other post as user opinion or anecdote, and say which is which.
 - `ACCEPTED ANSWER` marks the chosen solution in a support thread. It can be outdated, so check the date.
 - Vote counts exist only on feature-request topics. Do not call a thread representative from one post; say how many posts and views support the claim.
+
+## Other options
+
+- `search`: `--pages N`, `--one-per-topic` (first hit per topic).
+- `thread`: `--raw` (Markdown source, not rendered HTML), `--best` (always the "best of" selection).
+- `latest` and `top`: `--tag TAG`, `--page N` (0-based), and `--limit N`. `latest` also takes `--ascending`.
+- `user`: `--limit N` for activity items.
+- Global: `-v` logs requests to stderr. Run `<command> --help` for the full option list.
 
 ## Untrusted content
 

@@ -20,7 +20,8 @@ import urllib.request
 from html.parser import HTMLParser
 
 VERSION = "1.0.0"
-BASE_URL = os.environ.get("BW_COMMUNITY_URL", "https://community.bitwarden.com").rstrip("/")
+DEFAULT_BASE_URL = "https://community.bitwarden.com"
+BASE_URL = os.environ.get("BW_COMMUNITY_URL", DEFAULT_BASE_URL).rstrip("/")
 UA_TOKEN = "bwcommunity-cli"
 _contact = os.environ.get("BW_COMMUNITY_CONTACT")
 USER_AGENT = f"{UA_TOKEN}/{VERSION} (read-only research tool" + (f"; contact: {_contact})" if _contact else ")")
@@ -58,17 +59,15 @@ class Client:
         self._robots = None
         self.robots_exempt = ()  # path prefixes a command may fetch despite robots.txt
         os.makedirs(CACHE_DIR, mode=0o700, exist_ok=True)
+        os.chmod(CACHE_DIR, 0o700)  # makedirs leaves an existing directory's mode alone
 
     def _log(self, msg):
         if self.verbose:
             print(f"[bwcommunity] {msg}", file=sys.stderr)
 
     def _headers(self, want_json):
-        h = {"User-Agent": USER_AGENT, "Accept": "application/json" if want_json else "text/plain, */*"}
-        key, user = os.environ.get("DISCOURSE_API_KEY"), os.environ.get("DISCOURSE_API_USERNAME")
-        if key and user:
-            h["Api-Key"], h["Api-Username"] = key, user
-        return h
+        # Anonymous by design: no credential headers are ever sent, whatever BW_COMMUNITY_URL points at.
+        return {"User-Agent": USER_AGENT, "Accept": "application/json" if want_json else "text/plain, */*"}
 
     def _cache_path(self, url):
         return os.path.join(CACHE_DIR, hashlib.sha256(url.encode()).hexdigest()[:32] + ".cache")
@@ -662,7 +661,7 @@ def cmd_search(client, args):
             "username": p.get("username"), "created_at": p.get("created_at"),
             "like_count": p.get("like_count"), "blurb": snippet(strip_tags(p.get("blurb")).strip(". ")),
             "category": nt["category"], "tags": nt["tags"], "topic_solved": nt["solved"],
-            "topic_posts_count": nt["posts_count"],
+            "topic_posts_count": nt["posts_count"], "topic_last_posted_at": nt["last_posted_at"],
         })
 
     out = {"query": q, "count": len(results), "more_results": more, "results": results}
@@ -673,6 +672,8 @@ def cmd_search(client, args):
             meta.append(",".join(shown_tags(r["tags"])))
         meta.append(f"#{r['post_number']} @{r['username']} {day(r['created_at'])}"
                     + (f" · {r['like_count']} likes" if r["like_count"] else ""))
+        if r.get("topic_posts_count"):
+            meta.append(f"topic: {num(r['topic_posts_count'])} posts, last {day(r.get('topic_last_posted_at'))}")
         if r["topic_solved"]:
             meta.append("SOLVED")
         lines.append(f"- **{r['title']}** · " + " · ".join(meta) + f"\n  {r['url']}"
@@ -849,7 +850,7 @@ def _list_path(client, args, kind):
     if args.tag:
         if kind == "latest":
             return f"/tag/{urllib.parse.quote(args.tag)}.json", f"tag {args.tag}"
-        return f"/top.json", f"tag {args.tag}"
+        return "/top.json", f"tag {args.tag}"
     return f"/{kind}.json", "all categories"
 
 
@@ -1031,13 +1032,24 @@ def build_parser():
     return p
 
 
+def validate_base_url(url):
+    """BW_COMMUNITY_URL must be a bare https origin, so the env var cannot point requests at arbitrary schemes or paths."""
+    u = urllib.parse.urlparse(url)
+    if u.scheme != "https" or not u.hostname or u.username or u.password or u.path not in ("", "/") or u.query or u.fragment:
+        raise CLIError(f"BW_COMMUNITY_URL must be an https origin such as {DEFAULT_BASE_URL}, got {url!r}", EXIT_USAGE)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    try:
+        validate_base_url(BASE_URL)
+    except CLIError as e:
+        print(f"bwcommunity: {e}", file=sys.stderr)
+        return e.code
     if args.max_chars < 0:
         print("bwcommunity: error: --max-chars must be >= 0", file=sys.stderr)
         return EXIT_USAGE
-    ignore = args.ignore_robots or os.environ.get("BWCOMMUNITY_IGNORE_ROBOTS") == "1"
-    client = Client(use_cache=not args.no_cache, honour_robots=not ignore, verbose=args.verbose)
+    client = Client(use_cache=not args.no_cache, honour_robots=not args.ignore_robots, verbose=args.verbose)
     try:
         args.func(client, args)
     except CLIError as e:

@@ -1,4 +1,4 @@
-# Bitwarden Community Tools Plugin
+# Bitwarden Community Forum Tools Plugin
 
 Reads the public Bitwarden Community forum ([community.bitwarden.com](https://community.bitwarden.com)) for product research through a read-only CLI wrapper.
 
@@ -15,12 +15,12 @@ Product questions often start with what users are already saying: which feature 
 ## Read-only contract
 
 - **Anonymous GETs only:** the wrapper sends anonymous GET requests and never posts, replies, votes or logs in. Any write capability would ship as a separate script and skill, never as a new wrapper subcommand.
-- **Credentials:** none are needed. If `DISCOURSE_API_KEY` and `DISCOURSE_API_USERNAME` are set, they are sent as headers and never logged.
+- **Credentials:** none are needed or sent. `BW_COMMUNITY_URL`, used for testing against another Discourse instance, must be an `https` origin.
 
 ## Being a good API client
 
 - **Rate:** at most 1 request per second, shared across processes. 429 and 5xx responses are retried with exponential backoff, and `Retry-After` is honoured.
-- **Cache:** responses are cached for 1 hour in `~/.cache/bwcommunity` (directory 0700, files 0600). Pass `--no-cache` to bypass it.
+- **Cache:** responses are cached for 1 hour in `~/.cache/bwcommunity`. The directory is set to 0700 on every run and files are 0600. Pass `--no-cache` to bypass it.
 - **`robots.txt`:** enforced for every path except `/search.json`. The site disallows `/search` for all agents. `search` is exempt by default because it is an on-demand lookup made for a user, not a crawl. Pass `--strict-robots` to refuse instead.
 
 ## Token budget
@@ -37,7 +37,7 @@ Product questions often start with what users are already saying: which feature 
 ## Installation
 
 ```bash
-/plugin install bitwarden-community-tools@bitwarden-marketplace
+/plugin install bitwarden-community-forum-tools@bitwarden-marketplace
 ```
 
 ## Usage
@@ -55,7 +55,7 @@ Is there a known workaround for autofill not working in Brave? What did staff sa
 ## Tests
 
 ```bash
-python3 -m unittest discover plugins/bitwarden-community-tools/skills/reading-community-forum/scripts/tests
+python3 -m unittest discover plugins/bitwarden-community-forum-tools/skills/reading-community-forum/scripts/tests
 ```
 
 The tests run offline and make no network calls.

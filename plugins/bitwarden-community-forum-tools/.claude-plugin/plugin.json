@@ -1,12 +1,12 @@
 {
-  "name": "bitwarden-community-tools",
+  "name": "bitwarden-community-forum-tools",
   "version": "1.0.0",
   "description": "Bitwarden Community forum tools — read-only search and reading of community.bitwarden.com threads, feature-request votes, staff replies, and accepted answers for product research.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-community-tools",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-community-forum-tools",
   "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": [
     "community",
