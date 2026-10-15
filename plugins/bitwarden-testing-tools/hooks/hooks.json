@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/hooks/restrict_planning_agents.py\"; command -v python3 >/dev/null 2>&1 && [ -f \"$H\" ] || { echo 'restrict_planning_agents: handler or python3 unavailable - planning-agent skill confinement is NOT in effect' >&2; exit 1; }; python3 \"$H\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

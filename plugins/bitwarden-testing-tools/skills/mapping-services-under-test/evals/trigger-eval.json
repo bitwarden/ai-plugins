@@ -1,0 +1,82 @@
+[
+  {
+    "query": "which services do I need running to test the new billing banner on /#/organizations/:organizationId/billing/subscription?",
+    "should_trigger": true
+  },
+  {
+    "query": "what should I start locally for E2E tests that hit /#/settings/subscription and the Admin portal's sales-assisted-trial page?",
+    "should_trigger": true
+  },
+  {
+    "query": "given these routes from the application context (/#/login, /#/vault), which local Bitwarden services are required?",
+    "should_trigger": true
+  },
+  {
+    "query": "my branch changes server/src/Billing and the web billing components in clients. which local dev services do the playwright tests need, with their ports?",
+    "should_trigger": true
+  },
+  {
+    "query": "list the URLs and ports of the services I need up to run tests against the web vault signup page",
+    "should_trigger": true
+  },
+  {
+    "query": "do I need Identity and Api running for tests on the trial-initiation pages, or just Web?",
+    "should_trigger": true
+  },
+  {
+    "query": "map the services under test for the clients and server changes on my current branch; the tests navigate to /#/organizations/:organizationId/billing/payment-details",
+    "should_trigger": true
+  },
+  {
+    "query": "which local Bitwarden services does a test of the Admin portal's sales-assisted trial page depend on?",
+    "should_trigger": true
+  },
+  {
+    "query": "what services should be running before I execute these web tests? routes: /#/signup, /#/finish-signup",
+    "should_trigger": true
+  },
+  {
+    "query": "work out the minimal set of local services for testing the families org upgrade flow on my branch",
+    "should_trigger": true
+  },
+  {
+    "query": "start Api, Identity, and Web locally so I can run the tests",
+    "should_trigger": false
+  },
+  {
+    "query": "Identity is running on localhost:33656 but login keeps returning 500, help me debug it",
+    "should_trigger": false
+  },
+  {
+    "query": "is the local web vault at https://localhost:8080 healthy right now?",
+    "should_trigger": false
+  },
+  {
+    "query": "scope the application context for the past-due billing banner change in clients and server",
+    "should_trigger": false
+  },
+  {
+    "query": "what UI states and flows do I need to test for the new trial banner?",
+    "should_trigger": false
+  },
+  {
+    "query": "write manual Gherkin test cases for the sales-assisted trial invitation",
+    "should_trigger": false
+  },
+  {
+    "query": "write a Playwright spec that logs in and checks the vault loads",
+    "should_trigger": false
+  },
+  {
+    "query": "which behaviors in the families upgrade PR already have test coverage?",
+    "should_trigger": false
+  },
+  {
+    "query": "explain how the Bitwarden server's Api and Identity services split responsibilities",
+    "should_trigger": false
+  },
+  {
+    "query": "set up docker compose for the Bitwarden server dev environment with MSSQL and mailcatcher",
+    "should_trigger": false
+  }
+]
