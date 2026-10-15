@@ -5,6 +5,12 @@ All notable changes to the bitwarden-doc-parity plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-10-12
+
+### Changed
+
+- README Layer 4 no longer says `bitwarden-code-review` integration is planned, since `bitwarden-code-review` 2.4.0 now implements it.
+
 ## [1.0.0] - 2026-08-04
 
 ### Added

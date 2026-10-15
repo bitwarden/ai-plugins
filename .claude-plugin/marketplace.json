@@ -24,7 +24,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "2.3.0",
+      "version": "2.4.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -114,7 +114,7 @@
     {
       "name": "bitwarden-doc-parity",
       "source": "./plugins/bitwarden-doc-parity",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Enforces the documentation standard's base obligations — docs and diagrams update in the same change as the code they describe. Session instructions, a Stop-hook tripwire, a semantic verification skill, and a CI review face."
     },
     {
