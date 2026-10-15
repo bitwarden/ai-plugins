@@ -42,7 +42,7 @@ It needs Python 3.9+ and no API key or configuration. It cannot post, reply, vot
 ## Reading output
 
 - Output is compact Markdown for LLMs. Use `--json` only to process fields in a script; it drops null, empty, and false fields.
-- Posts are truncated at 2500 characters and end with `[truncated: N more chars; full text at URL]`. Use `post <id> <n>` for one post as raw Markdown, or `--max-chars 0`.
+- Posts are truncated at 2500 characters and end with `[truncated: N more chars; full text at URL]`. Use `post <id> <n> --max-chars 0` for one post in full as raw Markdown, or `--max-chars 0` on any command.
 - Quotes of posts in the same thread collapse to one line (`--full-quotes` keeps them). `@system` and auto-action posts are hidden (`--include-system` shows them).
 - Responses are cached for 1 hour. Use `--no-cache` for something that just changed.
 

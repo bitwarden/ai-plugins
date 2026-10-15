@@ -110,6 +110,13 @@ class Misc(unittest.TestCase):
         self.assertEqual(bw.truncate("short", 50, "U"), ("short", False))
         self.assertEqual(bw.truncate("x" * 99, 0, "U")[1], False)
 
+    def test_post_role(self):
+        self.assertEqual(bw.post_role({"admin": True, "staff": True, "user_title": "Bitwarden Employee"}), "staff")
+        self.assertEqual(bw.post_role({"primary_group_name": "All_Bitwarden"}), "staff")
+        self.assertEqual(bw.post_role({"moderator": True, "staff": True, "user_title": "Volunteer Moderator"}), "mod")
+        self.assertEqual(bw.post_role({"primary_group_name": "Volunteer_Moderator"}), "mod")
+        self.assertIsNone(bw.post_role({"username": "someone"}))
+
     def test_num(self):
         self.assertEqual((bw.num(950), bw.num(9999), bw.num(12345), bw.num(216187), bw.num(None)), ("950", "9999", "12.3k", "216.2k", "?"))
 

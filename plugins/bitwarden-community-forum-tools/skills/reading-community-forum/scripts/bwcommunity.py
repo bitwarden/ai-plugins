@@ -582,10 +582,16 @@ def prune(obj):
 
 
 def post_role(p):
-    """'staff' for Bitwarden employees, 'mod' for volunteer/category moderators, else None."""
-    if p.get("staff") or p.get("admin") or p.get("moderator"):
+    """'staff' for Bitwarden employees, 'mod' for volunteer/category moderators, else None.
+
+    Discourse's `staff`/`moderator` flags are also true for global volunteer moderators,
+    so employees are identified by admin rights or the Bitwarden title/group instead.
+    """
+    title = (p.get("user_title") or "").lower()
+    group = (p.get("primary_group_name") or "").lower()
+    if p.get("admin") or "bitwarden employee" in title or group == "all_bitwarden":
         return "staff"
-    if "moderator" in (p.get("user_title") or "").lower() or "moderator" in (p.get("primary_group_name") or "").lower():
+    if p.get("moderator") or p.get("staff") or "moderator" in title or "moderator" in group:
         return "mod"
     return None
 
@@ -851,7 +857,7 @@ def _list_path(client, args, kind):
         return f"/c/{c['path']}/{c['id']}/l/{kind}.json", c["path"]
     if args.tag:
         if kind == "latest":
-            return f"/tag/{urllib.parse.quote(args.tag, safe="")}.json", f"tag {args.tag}"
+            return f"/tag/{urllib.parse.quote(args.tag, safe='')}.json", f"tag {args.tag}"
         return "/top.json", f"tag {args.tag}"
     return f"/{kind}.json", "all categories"
 
@@ -906,8 +912,8 @@ def cmd_tags(client, args):
 
 def cmd_user(client, args):
     name = args.username.lstrip("@")
-    u = client.get(f"/u/{urllib.parse.quote(name, safe="")}.json")["user"]
-    s = client.get(f"/u/{urllib.parse.quote(name, safe="")}/summary.json").get("user_summary") or {}
+    u = client.get(f"/u/{urllib.parse.quote(name, safe='')}.json")["user"]
+    s = client.get(f"/u/{urllib.parse.quote(name, safe='')}/summary.json").get("user_summary") or {}
     profile = {
         "username": u.get("username"), "name": u.get("name"), "title": u.get("title"),
         "url": f"{BASE_URL}/u/{u.get('username')}",
