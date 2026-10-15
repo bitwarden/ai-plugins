@@ -237,10 +237,10 @@ under its one-liner instead:
 
 ## Inline comments
 
-Post each CRITICAL and IMPORTANT finding as an inline comment with
-`mcp__github_inline_comment__create_inline_comment` when that tool is available. SUGGESTED
-findings stay in the summary only: a comment on the diff asks the author to act, and a
-suggestion does not carry that weight.
+Post every finding, SUGGESTED included, as an inline comment with
+`mcp__github_inline_comment__create_inline_comment` when that tool is available. A finding
+that lives only in the collapsed summary is easy to miss, and an author who never sees a
+suggestion cannot weigh it before merge.
 
 Each comment shows one line and collapses the rest:
 
