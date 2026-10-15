@@ -4,7 +4,25 @@ version: 2.4.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
-tools: Bash(gh api graphql -f query=:*), Bash(gh pr checks:*), Bash(gh pr diff:*), Bash(gh pr list --base:*), Bash(gh pr view:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git status:*), Glob, Grep, mcp__github_comment__update_claude_comment, mcp__github_inline_comment__create_inline_comment, mcp__github_replies__add_reply_to_pull_request_comment, Read, Skill, WebFetch(domain:contributing.bitwarden.com), Write
+tools:
+  - Bash(gh api graphql -f query=:*)
+  - Bash(gh pr checks:*)
+  - Bash(gh pr diff:*)
+  - Bash(gh pr list --base:*)
+  - Bash(gh pr view:*)
+  - Bash(git diff:*)
+  - Bash(git log:*)
+  - Bash(git show:*)
+  - Bash(git status:*)
+  - Glob
+  - Grep
+  - mcp__github_comment__update_claude_comment
+  - mcp__github_inline_comment__create_inline_comment
+  - mcp__github_replies__add_reply_to_pull_request_comment
+  - Read
+  - Skill
+  - WebFetch(domain:contributing.bitwarden.com)
+  - Write
 ---
 
 # Bitwarden Code Review Agent
