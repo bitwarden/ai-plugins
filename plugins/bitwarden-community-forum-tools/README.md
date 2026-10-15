@@ -15,7 +15,7 @@ Product questions often start with what users are already saying: which feature 
 ## Read-only contract
 
 - **Anonymous GETs only:** the wrapper sends anonymous GET requests and never posts, replies, votes or logs in. Any write capability would ship as a separate script and skill, never as a new wrapper subcommand.
-- **Credentials:** none are needed or sent. `BW_COMMUNITY_URL`, used for testing against another Discourse instance, must be an `https` origin.
+- **Credentials and host:** no credentials are needed or sent. Every request goes to `https://community.bitwarden.com`, which is checked before each request is sent. User-supplied tag and user names are fully percent-encoded.
 
 ## Being a good API client
 

@@ -20,8 +20,8 @@ import urllib.request
 from html.parser import HTMLParser
 
 VERSION = "1.0.0"
-DEFAULT_BASE_URL = "https://community.bitwarden.com"
-BASE_URL = os.environ.get("BW_COMMUNITY_URL", DEFAULT_BASE_URL).rstrip("/")
+BASE_URL = "https://community.bitwarden.com"
+BASE_HOST = urllib.parse.urlparse(BASE_URL).hostname
 UA_TOKEN = "bwcommunity-cli"
 _contact = os.environ.get("BW_COMMUNITY_CONTACT")
 USER_AGENT = f"{UA_TOKEN}/{VERSION} (read-only research tool" + (f"; contact: {_contact})" if _contact else ")")
@@ -66,7 +66,6 @@ class Client:
             print(f"[bwcommunity] {msg}", file=sys.stderr)
 
     def _headers(self, want_json):
-        # Anonymous by design: no credential headers are ever sent, whatever BW_COMMUNITY_URL points at.
         return {"User-Agent": USER_AGENT, "Accept": "application/json" if want_json else "text/plain, */*"}
 
     def _cache_path(self, url):
@@ -103,6 +102,9 @@ class Client:
 
     def _fetch(self, url, want_json):
         """One GET with retries. Returns body text. Raises CLIError."""
+        u = urllib.parse.urlparse(url)
+        if u.scheme != "https" or u.hostname != BASE_HOST:
+            raise CLIError(f"refusing request outside {BASE_URL}: {url}", EXIT_USAGE)
         delay = 2.0
         for attempt in range(MAX_RETRIES + 1):
             self._throttle()
@@ -849,7 +851,7 @@ def _list_path(client, args, kind):
         return f"/c/{c['path']}/{c['id']}/l/{kind}.json", c["path"]
     if args.tag:
         if kind == "latest":
-            return f"/tag/{urllib.parse.quote(args.tag)}.json", f"tag {args.tag}"
+            return f"/tag/{urllib.parse.quote(args.tag, safe="")}.json", f"tag {args.tag}"
         return "/top.json", f"tag {args.tag}"
     return f"/{kind}.json", "all categories"
 
@@ -904,8 +906,8 @@ def cmd_tags(client, args):
 
 def cmd_user(client, args):
     name = args.username.lstrip("@")
-    u = client.get(f"/u/{urllib.parse.quote(name)}.json")["user"]
-    s = client.get(f"/u/{urllib.parse.quote(name)}/summary.json").get("user_summary") or {}
+    u = client.get(f"/u/{urllib.parse.quote(name, safe="")}.json")["user"]
+    s = client.get(f"/u/{urllib.parse.quote(name, safe="")}/summary.json").get("user_summary") or {}
     profile = {
         "username": u.get("username"), "name": u.get("name"), "title": u.get("title"),
         "url": f"{BASE_URL}/u/{u.get('username')}",
@@ -1032,20 +1034,8 @@ def build_parser():
     return p
 
 
-def validate_base_url(url):
-    """BW_COMMUNITY_URL must be a bare https origin, so the env var cannot point requests at arbitrary schemes or paths."""
-    u = urllib.parse.urlparse(url)
-    if u.scheme != "https" or not u.hostname or u.username or u.password or u.path not in ("", "/") or u.query or u.fragment:
-        raise CLIError(f"BW_COMMUNITY_URL must be an https origin such as {DEFAULT_BASE_URL}, got {url!r}", EXIT_USAGE)
-
-
 def main(argv=None):
     args = build_parser().parse_args(argv)
-    try:
-        validate_base_url(BASE_URL)
-    except CLIError as e:
-        print(f"bwcommunity: {e}", file=sys.stderr)
-        return e.code
     if args.max_chars < 0:
         print("bwcommunity: error: --max-chars must be >= 0", file=sys.stderr)
         return EXIT_USAGE
