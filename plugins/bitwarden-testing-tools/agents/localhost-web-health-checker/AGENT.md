@@ -1,26 +1,7 @@
 ---
 name: localhost-web-health-checker
-version: 1.5.0
-description: |
-  Execution-phase agent for Bitwarden web test execution. Given a test plan with a services fence, it verifies the local dev environment is ready through checking-localhost-web-health and returns the skill's success line or its failure block.
-
-  <example>
-  Context: An engineer has a test plan and wants to know whether the local environment can run it.
-  user: "Is my local environment ready for the plan at ./test-plan.md?"
-  assistant: "I'll use the localhost-web-health-checker agent to read the plan's services fence and verify the containers, services, and required feature flags."
-  <commentary>
-  Confirming the environment against a plan's required services is exactly this agent's job.
-  </commentary>
-  </example>
-
-  <example>
-  Context: A test plan lists a required feature flag.
-  user: "Check that the services and the annual-billing flag from ./test-plan.md are up before I run it."
-  assistant: "I'll use the localhost-web-health-checker agent to run the health and feature-flag checks for the plan."
-  <commentary>
-  Verifying services and flags before a run is a health check, not a test execution.
-  </commentary>
-  </example>
+version: 1.6.0
+description: Execution-phase agent for the start-playwright-test pipeline. Reads the test plan, verifies the Bitwarden local dev environment is ready via checking-localhost-web-health, and signals readiness (or surfaces a failure). Do not invoke directly; dispatched by the start-playwright-test skill.
 model: sonnet
 skills:
   - bitwarden-testing-tools:checking-localhost-web-health
