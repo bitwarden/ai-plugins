@@ -102,6 +102,32 @@ class HtmlToText(unittest.TestCase):
         self.assertIn("after", out)
 
 
+class FakeThreadClient:
+    """Serves a 250-post stream; posts.json returns the requested ids."""
+
+    def __init__(self, n=250):
+        self.n = n
+
+    def get(self, path, params=None, want_json=True):
+        stream = list(range(1, self.n + 1))
+        mk = lambda i: {"id": i, "post_number": i}
+        if path.endswith("/posts.json"):
+            return {"post_stream": {"posts": [mk(v) for k, v in params]}}
+        return {"post_stream": {"stream": stream, "posts": [mk(i) for i in stream[:20]]}}
+
+
+class FetchThread(unittest.TestCase):
+    def test_start_at_past_max_posts_returns_posts(self):
+        _, posts, total, _, _ = bw._fetch_thread(FakeThreadClient(), 1, 100, False, "chrono", 150)
+        self.assertEqual(total, 250)
+        self.assertEqual([p["post_number"] for p in posts][:2], [150, 151])
+        self.assertEqual(len(posts), 100)
+
+    def test_start_at_beyond_stream_is_empty(self):
+        _, posts, _, _, _ = bw._fetch_thread(FakeThreadClient(), 1, 100, False, "chrono", 400)
+        self.assertEqual(posts, [])
+
+
 class Misc(unittest.TestCase):
     def test_truncate(self):
         text, cut = bw.truncate("word " * 100, 50, "U")
@@ -116,6 +142,11 @@ class Misc(unittest.TestCase):
         self.assertEqual(bw.post_role({"moderator": True, "staff": True, "user_title": "Volunteer Moderator"}), "mod")
         self.assertEqual(bw.post_role({"primary_group_name": "Volunteer_Moderator"}), "mod")
         self.assertIsNone(bw.post_role({"username": "someone"}))
+
+    def test_post_role_user_profile(self):
+        # /u/<name>.json carries `title`, not `user_title`; a volunteer moderator is not staff.
+        self.assertEqual(bw.post_role({"moderator": True, "title": "Volunteer Moderator", "user_title": "Volunteer Moderator"}), "mod")
+        self.assertEqual(bw.post_role({"admin": True, "user_title": "Bitwarden Employee"}), "staff")
 
     def test_num(self):
         self.assertEqual((bw.num(950), bw.num(9999), bw.num(12345), bw.num(216187), bw.num(None)), ("950", "9999", "12.3k", "216.2k", "?"))

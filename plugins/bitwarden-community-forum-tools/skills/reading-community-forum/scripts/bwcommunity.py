@@ -689,8 +689,13 @@ def cmd_search(client, args):
     emit(args, out, "\n".join(lines))
 
 
-def _fetch_thread(client, topic_id, max_posts, raw, mode):
-    """Return (topic, posts, total, raw_map, used_best). mode: auto | best | chrono."""
+def _fetch_thread(client, topic_id, max_posts, raw, mode, start_at=0):
+    """Return (topic, posts, total, raw_map, used_best). mode: auto | best | chrono.
+
+    start_at windows the stream to post #start_at onward before max_posts is applied, so a
+    deep link past the first max_posts posts still returns posts. Post numbers can exceed stream
+    positions when posts were deleted, so the caller re-filters on post_number.
+    """
     data = client.get(f"/t/{topic_id}.json")
     stream = data["post_stream"].get("stream") or []
     posts = {p["id"]: p for p in data["post_stream"]["posts"]}
@@ -702,12 +707,14 @@ def _fetch_thread(client, topic_id, max_posts, raw, mode):
         for p in best["post_stream"]["posts"]:
             posts[p["id"]] = p
         wanted = best["post_stream"].get("stream") or stream
+    if start_at:
+        wanted = wanted[start_at - 1:]
     if max_posts:
         wanted = wanted[:max_posts]
     accepted = data.get("accepted_answer") or next(iter(data.get("accepted_answers") or []), {})
-    if accepted.get("id") and accepted["id"] in stream and accepted["id"] not in wanted:
+    if not start_at and accepted.get("id") and accepted["id"] in stream and accepted["id"] not in wanted:
         wanted = sorted(wanted + [accepted["id"]], key=stream.index)
-    if stream and stream[0] not in wanted:
+    if not start_at and stream and stream[0] not in wanted:
         wanted = [stream[0]] + wanted
     missing = [pid for pid in wanted if pid not in posts]
     for i in range(0, len(missing), CHUNK):
@@ -741,7 +748,7 @@ def cmd_thread(client, args):
     mode = "chrono" if args.chrono or start_at else ("best" if args.best else "auto")
     # --brief scans a wider window (whole thread up to 100 posts, else the best-of set) and keeps only key posts.
     fetch_n = max(args.max_posts, BRIEF_SCAN) if args.brief and args.max_posts else args.max_posts
-    data, posts, total, raw_map, used_best = _fetch_thread(client, topic_id, fetch_n, args.raw, mode)
+    data, posts, total, raw_map, used_best = _fetch_thread(client, topic_id, fetch_n, args.raw, mode, start_at)
     t = norm_topic(data, cats)
     accepted = data.get("accepted_answer") or next(iter(data.get("accepted_answers") or []), {})
     accepted_no = accepted.get("post_number")
@@ -787,8 +794,10 @@ def cmd_thread(client, args):
                   + f"; scanned {scanned}" + (" best-of posts, others may exist" if used_best else " posts") + ")")
     elif used_best:
         shown += " (Discourse 'best of' selection; --chrono for posts in order)"
-    elif total > len(posts) + hidden and not start_at:
-        shown += " (raise --max-posts, 0 = all, or --best)"
+    elif total - max(start_at - 1, 0) > len(posts) + hidden:
+        shown += " (raise --max-posts, 0 = all" + ("" if start_at else ", or --best") + ")"
+    if start_at:
+        shown += f"; from #{start_at}" + (f". No posts at or after #{start_at}" if not norm_posts else "")
     if hidden:
         shown += f"; {hidden} system posts hidden"
     out = dict(t, total_posts=total, selection="best" if used_best else "chrono",
@@ -828,10 +837,10 @@ def cmd_post(client, args):
     out = {"topic_id": topic_id, "post_number": n, "title": topic.get("title"), "url": url,
            "username": meta.get("username") if meta else None,
            "created_at": meta.get("created_at") if meta else None,
-           "staff": bool(meta.get("staff")) if meta else None, "text": text, "truncated": truncated}
+           "role": post_role(meta) if meta else None, "text": text, "truncated": truncated}
     head = f"# {topic.get('title')} — post #{n}\n{url}"
     if meta:
-        head += f"\n@{meta.get('username')}" + (" [STAFF]" if meta.get("staff") else "") + f" · {day(meta.get('created_at'))}"
+        head += f"\n@{meta.get('username')}" + (f" [{post_role(meta).upper()}]" if post_role(meta) else "") + f" · {day(meta.get('created_at'))}"
     emit(args, out, f"{head}\n\n{text}")
 
 
@@ -917,7 +926,7 @@ def cmd_user(client, args):
     profile = {
         "username": u.get("username"), "name": u.get("name"), "title": u.get("title"),
         "url": f"{BASE_URL}/u/{u.get('username')}",
-        "staff": bool(u.get("admin") or u.get("moderator")), "trust_level": u.get("trust_level"),
+        "role": post_role(dict(u, user_title=u.get("title"))), "trust_level": u.get("trust_level"),
         "created_at": u.get("created_at"), "last_posted_at": u.get("last_posted_at"),
         "bio": " ".join(strip_tags(u.get("bio_cooked")).split()) or None,
         "topic_count": s.get("topic_count"), "post_count": s.get("post_count"),
@@ -926,7 +935,7 @@ def cmd_user(client, args):
     }
     lines = [f"# @{profile['username']}" + (f" ({profile['name']})" if profile["name"] else ""), profile["url"],
              " · ".join(x for x in [
-                 profile["title"], "STAFF" if profile["staff"] else None, f"trust level {profile['trust_level']}",
+                 profile["title"], profile["role"].upper() if profile["role"] else None, f"trust level {profile['trust_level']}",
                  f"joined {day(profile['created_at'])}", f"last post {day(profile['last_posted_at'])}"] if x),
              f"{profile['topic_count']} topics · {profile['post_count']} posts · {profile['likes_received']} likes received"
              + (f" · {profile['solutions']} solutions" if profile["solutions"] is not None else "")]
