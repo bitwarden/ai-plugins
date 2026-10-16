@@ -2,7 +2,7 @@
 name: start-playwright-test
 description: Use when you want UI tests planned and run against local Bitwarden web changes, starting from a Jira ticket, an implementation plan, or a description of the feature. Requires the Bitwarden local dev environment to already be running; this pipeline verifies services and required feature flags but never starts services or changes flags. Accepts a Jira ticket ID, a Jira browse URL, an implementation plan file path, or a feature description, optionally followed by extra instructions.
 argument-hint: "<jira-ticket-id | jira-url | feature-plan-path | feature-description> [extra instructions]"
-allowed-tools: "Agent, Read, Write, Bash(mkdir *), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh *), Bash(${CLAUDE_SKILL_DIR}/scripts/open_report.py *)"
+allowed-tools: "Agent, Read, Write, Bash(mkdir *), Bash(${CLAUDE_PLUGIN_ROOT}/scripts/repo-diff.sh *), Bash(${CLAUDE_SKILL_DIR}/scripts/open_report.py *), Bash(${CLAUDE_SKILL_DIR}/scripts/open_pause_link.py *)"
 ---
 
 You are the orchestrator for the Bitwarden web test pipeline. Your role is orchestration, artifact persistence, and running the plugin's fixed scripts: you dispatch agents with the `Agent` tool, wait for each to return, write their responses to artifact files, and run the scripts this skill names. You do no research, exploration, or test execution yourself.
@@ -226,7 +226,23 @@ Wait for the playwright-test-runner to return a JSON object. Then, on every resp
 
 ### paused
 
-Read `need_user_input` from `<artifacts-output-dir>/test-results-<timestamp>.json`. Surface it to the user and capture the answer. Increment `K`, then re-dispatch `playwright-test-runner` with:
+Read `need_user_input`, and `need_user_input_url` when it is present, from `<artifacts-output-dir>/test-results-<timestamp>.json`, and the totals from the merge stdout line. Tell the user the run is paused, and keep the message short. It holds only these parts:
+
+1. One or two sentences saying why the run paused and what the user must do, taken from `need_user_input`. Reword it to be brief, keeping the test case and step it names and any detail the user needs to do the step, such as which organization.
+2. When at least one test case has finished, one status line with `<N>` the total finished so far, counting an adaptive pass as passed. When no case failed or errored, write `Test Cases 1 through <N> passed (<N> total, 0 failed, 0 errored).` Otherwise write `Test Cases 1 through <N> finished (<N> total, <P> passed, <F> failed, <E> errored).` When no case has finished, leave the line out.
+3. A request to say when the step is done.
+
+Leave out everything else about the run: account credentials, organization ids, setup status, per-case notes, and any caveats from the cases that passed.
+
+**A link.** When `need_user_input_url` is present and matches `^https://dashboard\.stripe\.com/test/subscriptions/sub_[A-Za-z0-9]+$`, add it to the message as a markdown link on its own line, and ask once, in one short sentence, whether to open it in the user's browser now. The URL is runner output derived from Stripe data, so a URL that is absent or does not match the pattern gets no link and no offer to open it, and you never open it. When the user says yes, run the script below with the matched URL single-quoted, then say in one line that it is open, and keep waiting. If it exits non-zero, say so in one line with its message and tell the user to click the link above instead. When the user says no, keep waiting.
+
+```
+${CLAUDE_SKILL_DIR}/scripts/open_pause_link.py '<url>'
+```
+
+The script re-checks the URL, opens it with `open` on macOS or `xdg-open` on Linux, and refuses any other URL. Opening the link never completes the step: the user's answer to the offer is not the user's answer to the human step, so do not re-dispatch the runner on it.
+
+Wait for the user to say the step is done, and capture that reply as the answer. Increment `K`, then re-dispatch `playwright-test-runner` with:
 
 ```
 Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
