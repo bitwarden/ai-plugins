@@ -1,0 +1,30 @@
+---
+name: compiling-playwright-report
+description: 'Compile the Bitwarden Playwright test results into an HTML report: merge_results.py (runner segments to canonical results JSON) and render_report.py (results JSON to HTML), with the report templates and the results-schema reference. Triggers on "compile the Playwright report" and "merge the runner segments". Do NOT use it to run the tests (use running-playwright-tests). There is no report-compiler agent: invoke this skill and run its scripts.'
+allowed-tools: >
+  Bash(${CLAUDE_SKILL_DIR}/scripts/merge_results.py *),
+  Bash(${CLAUDE_SKILL_DIR}/scripts/render_report.py *)
+---
+
+This skill is the home for the deterministic report pipeline. It contains no LLM assembly instructions; the two scripts do the parsing, escaping, and rendering.
+
+## Contract
+
+The results JSON contract is defined in `references/results-schema.md`, with concrete examples in `references/examples/`. Those examples are the producer's reference (see `running-playwright-tests`) and the scripts' golden test fixtures.
+
+## Scripts
+
+Both are stdlib-only Python, executable, and invoked by absolute path. They share `scripts/results_common.py` (the `fail` and `tally` helpers), which is imported, not invoked directly.
+
+- `${CLAUDE_SKILL_DIR}/scripts/merge_results.py <segment.json> [<segment.json> ...] --output <path>`: assembles one or more runner segment files into the canonical results JSON, deriving totals from the per-case statuses. `run_status` follows the last segment. Cases accumulate across all segments regardless of the last segment's status, so an aborted result carries `abort_reason` alongside whatever cases completed before the abort. A paused result carries `need_user_input`. Prints a `run_status=... | N total | ...` summary line to stdout.
+- `${CLAUDE_SKILL_DIR}/scripts/render_report.py --results <path> --template-dir <dir> --output <path> --plan-name <str> --date <str> --slug <str> --services-tested <str> --base-url <str> --plan-file <path> [--context-file <path>]`: renders the canonical results JSON to an HTML report, writing the file directly. Every interpolated value is HTML-escaped by the script; template markup is not. `--date` is shown as 12-hour time when it is a `YYYYMMDD-HHmm` timestamp. Each `http(s)` URL in the report text becomes a link, except one still holding an unresolved `:placeholder`. `--context-file` is the context artifact: the script reads its `**Title:**` line (inside the `<!-- CONTEXT START -->` / `<!-- CONTEXT END -->` fence) as the report's headline and shows `--plan-name` as a small key above it. It takes a path rather than the title text so untrusted text never reaches the command line. The option is optional, and a missing file or title falls back to `--plan-name` as the headline. Exits 2 when an aborted run has no cases (the caller skips rendering), and also on a missing or malformed argument, which argparse reports with exit 2; read stderr to tell the two apart. An aborted run that carries cases renders normally with an abort banner. Exits 3 on invalid results JSON.
+
+Invoke this skill before running either script, because the anchored `${CLAUDE_SKILL_DIR}` grants in this file's frontmatter are what let them run without a prompt. A skill's `allowed-tools` grant applies to the invoking turn only and clears on the user's next message, so it is re-invoked after every `[HUMAN]` pause.
+
+## Templates
+
+`templates/report.html` is the shell: the dark theme's styles, a summary card (pass-rate ring, verdict, headline, and count tiles that filter the cases), the case list, the Issues Summary and Recommendations panels, a collapsed "Run details" section, and a small inline script for Expand all / Collapse all. Filtering is CSS-only, using hidden radio buttons and `:has()`. `templates/test-case.html` is one case, a `<details>` accordion that starts collapsed. The document shell and the per-case structure live in these templates; the script composes the repeating pieces (the count tiles, each step `<li>`, its screenshot thumbnail, and the Issues Summary and Recommendations lists) as small HTML fragments, escaping every interpolated value.
+
+## Tests
+
+`scripts/tests/test_results_common.py`, `scripts/tests/test_render_report.py`, and `scripts/tests/test_merge_results.py` run with `python3 -m unittest discover -s scripts/tests` from the skill directory. They cover the shared helpers, rendering fidelity, HTML-escaping of malicious payloads, validation and invariant failures, and segment merge.

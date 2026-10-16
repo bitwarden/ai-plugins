@@ -1,6 +1,6 @@
 ---
 name: playwright-test-case-writer
-version: 1.4.0
+version: 1.5.0
 description: |
   Planning-phase agent for Bitwarden web test planning. Given a context artifact and an Application Context artifact, it builds grounded Playwright test cases through writing-playwright-test-cases and returns them as a markdown response.
 
