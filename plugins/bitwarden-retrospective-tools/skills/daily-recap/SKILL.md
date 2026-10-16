@@ -1,5 +1,7 @@
 ---
 name: daily-recap
+context: fork
+agent: general-purpose
 description: Generates an interactive HTML recap of the user's own engineering work over a past workday, combining their Claude Code sessions with their GitHub activity, ready for standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, pushed, or reviewed over a time window ("yesterday", "this morning", "last night", "since standup", "this week", a specific date), or asks for a "recap", "daily summary", "standup notes", "morning recap", or "1:1 prep", including phrasings like "throw together what I did yesterday" or "something I can show my manager". Produce the HTML file rather than an inline chat summary. Not for looking up a specific PR, commit, or ticket, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
 ---
 
