@@ -279,10 +279,11 @@ For `--plan-name`, pass the ticket key when the input type is `jira-ticket`, and
   --slug '<slug>' \
   --services-tested '<services with ports, e.g. web (8080)>' \
   --base-url '<primary test URL, e.g. https://localhost:8080>' \
-  --plan-file '<artifacts-output-dir>/test-plan-<timestamp>.md'
+  --plan-file '<artifacts-output-dir>/test-plan-<timestamp>.md' \
+  --context-file '<artifacts-output-dir>/context-<timestamp>.md'
 ```
 
-where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to the final summary.
+where `<plugin>` is `${CLAUDE_PLUGIN_ROOT}`. `--context-file` is the context artifact persisted earlier in this run. The script reads the title for the report headline from its `**Title:**` line and escapes it, so pass the path and never the title text, which is agent output derived from untrusted feature source. If the artifact has no title, the headline is the plan name. The script writes `report-<timestamp>.html` directly. If it exits non-zero, surface its stderr to the user as a report-generation failure and proceed to the final summary.
 
 ---
 
