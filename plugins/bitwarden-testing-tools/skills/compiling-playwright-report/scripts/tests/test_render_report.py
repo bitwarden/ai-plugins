@@ -46,24 +46,53 @@ class RenderCompleteRunTest(unittest.TestCase):
             {"total": 3, "passed": 1, "adaptive": 1, "failed": 0, "errored": 1},
         )
 
-    def test_summary_table_total_cell(self):
-        self.assertIn("<td>3</td>", self.out)
+    def test_summary_tile_counts(self):
+        self.assertIn('<span class="tile-n">3</span><span class="tile-l">Total</span>', self.out)
+        self.assertIn('<span class="tile-n">1</span><span class="tile-l">Errors</span>', self.out)
 
-    def test_status_emoji_mapping(self):
-        self.assertIn("✅ PASS", self.out)
-        self.assertIn("⚠️ ERROR", self.out)
-        self.assertIn("⚠️ PASS (adaptive)", self.out)
+    def test_zero_count_tile_is_dimmed(self):
+        self.assertIn('class="tile tile-fail tile-zero"', self.out)
+        self.assertNotIn('class="tile tile-error tile-zero"', self.out)
 
-    def test_setup_and_test_lists_present(self):
-        self.assertIn("<strong>Setup Steps</strong>", self.out)
-        self.assertIn("<strong>Test Steps</strong>", self.out)
+    def test_status_labels_and_data_attributes(self):
+        self.assertIn('data-status="pass"', self.out)
+        self.assertIn('data-status="error"', self.out)
+        self.assertIn('data-status="adaptive"', self.out)
+        self.assertRegex(self.out, r'status-text t-adaptive">Passed \(adaptive\)<')
+
+    def test_every_case_starts_collapsed(self):
+        self.assertNotIn('<details class="case case-pass" id="case-1" data-status="pass" open', self.out)
+        self.assertNotRegex(self.out, r'<details class="case[^>]* open')
+
+    def test_adaptive_case_shows_specified_and_found(self):
+        self.assertIn("<dt>Plan specified</dt><dd>badge reads 'Inactive'</dd>", self.out)
+        self.assertIn("<dt>Runner found</dt><dd>badge reads 'Canceled'</dd>", self.out)
+
+    def test_setup_and_test_sections_present(self):
+        self.assertIn("Setup steps", self.out)
+        self.assertIn("Test steps", self.out)
 
     def test_setup_section_only_when_present(self):
         # Only case 1 has setup steps.
-        self.assertEqual(self.out.count("<strong>Setup Steps</strong>"), 1)
+        self.assertEqual(self.out.count('<details class="sub"'), 1)
+
+    def test_setup_section_opens_when_a_setup_step_failed(self):
+        data = {
+            "run_status": "complete",
+            "cases": [
+                {
+                    "number": 1,
+                    "name": "x",
+                    "status": "FAIL",
+                    "setup_steps": [{"text": "log in", "outcome": "FAIL"}],
+                    "test_steps": [],
+                }
+            ],
+        }
+        self.assertIn('<details class="sub" open>', render_report.render(data, HEADER))
 
     def test_human_step_class(self):
-        self.assertIn('class="human-step"', self.out)
+        self.assertIn('class="step step-human"', self.out)
         self.assertIn("Attach a Stripe test clock", self.out)
 
     def test_screenshot_thumbnail_relative_path(self):
@@ -74,18 +103,23 @@ class RenderCompleteRunTest(unittest.TestCase):
             '<img src="screenshots/setup-tc-1-step-1-20260724-0930.png"', self.out
         )
 
-    def test_step_separator_is_hyphen(self):
-        self.assertIn("Clicked Tools dropdown - PASS", self.out)
+    def test_step_outcome_is_a_pill(self):
+        self.assertIn("Clicked Tools dropdown</span>", self.out)
+        self.assertIn('<span class="pill pill-pass">', self.out)
 
     def test_observed_value_rendered(self):
-        self.assertIn("(500 response)", self.out)
+        self.assertIn("<code>500 response</code>", self.out)
 
     def test_issues_summary_lists_error_with_notes(self):
         self.assertIn("Test Case 2:", self.out)
         self.assertIn("Server returned 500 on export request.", self.out)
 
+    def test_issue_links_to_its_case(self):
+        self.assertIn('<a href="#case-2">Test Case 2:', self.out)
+        self.assertIn('id="case-2"', self.out)
+
     def test_recommendations_fix_adaptive_retest(self):
-        self.assertIn("Fix: Test Case 2", self.out)
+        self.assertIn('Fix: <a href="#case-2">Test Case 2</a>', self.out)
         self.assertIn(
             "Update test plan: TC3 asserted badge reads 'Inactive', "
             "actual rendering is badge reads 'Canceled'.",
@@ -109,7 +143,8 @@ class RenderEscapingTest(unittest.TestCase):
             ],
         }
         out = render_report.render(data, HEADER)
-        self.assertNotIn("<script>", out)
+        # The report carries its own inline script, so check the payload, not the tag.
+        self.assertNotIn("<script>alert(1)", out)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", out)
         self.assertNotIn("<img", out)
         self.assertIn("&lt;img src=x onerror=alert(1)&gt;", out)
@@ -277,6 +312,216 @@ class PlanFileHeaderTest(unittest.TestCase):
     def test_header_does_not_hardcode_an_unversioned_plan_name(self):
         out = render_report.render(load_example("complete-run.json"), HEADER)
         self.assertNotIn("/test-plan.md", out)
+
+
+def case_with(status, **extra):
+    return {"number": 1, "name": "n", "status": status, "test_steps": [], **extra}
+
+
+def run_of(*statuses):
+    return {
+        "run_status": "complete",
+        "cases": [dict(case_with(status), number=i) for i, status in enumerate(statuses, start=1)],
+    }
+
+
+class FormatDateTest(unittest.TestCase):
+    def test_afternoon_timestamp_is_12_hour_pm(self):
+        self.assertEqual(render_report.format_date("20261005-1653"), "Oct 5, 2026 \u00b7 4:53 PM")
+
+    def test_morning_timestamp_is_am(self):
+        self.assertEqual(render_report.format_date("20260729-0905"), "Jul 29, 2026 \u00b7 9:05 AM")
+
+    def test_midnight_and_noon(self):
+        self.assertEqual(render_report.format_date("20260101-0000"), "Jan 1, 2026 \u00b7 12:00 AM")
+        self.assertEqual(render_report.format_date("20260101-1200"), "Jan 1, 2026 \u00b7 12:00 PM")
+
+    def test_other_shapes_are_shown_as_given(self):
+        for raw in ("2026-07-24", "yesterday", "20261305-1653", "20261005-2561"):
+            with self.subTest(raw=raw):
+                self.assertEqual(render_report.format_date(raw), raw)
+
+
+class EscLinkedTest(unittest.TestCase):
+    def test_url_becomes_a_new_tab_link(self):
+        self.assertEqual(
+            render_report.esc_linked("see https://localhost:8080/a"),
+            'see <a href="https://localhost:8080/a" target="_blank" rel="noopener noreferrer">'
+            "https://localhost:8080/a</a>",
+        )
+
+    def test_trailing_punctuation_stays_outside_the_link(self):
+        out = render_report.esc_linked("(https://localhost:8080/a).")
+        self.assertIn('href="https://localhost:8080/a"', out)
+        self.assertTrue(out.endswith("</a>)."))
+
+    def test_url_with_an_unresolved_placeholder_is_not_linked(self):
+        out = render_report.esc_linked("https://localhost:8080/#/organizations/:organizationId/billing")
+        self.assertNotIn("<a ", out)
+
+    def test_only_http_and_https_are_linked(self):
+        for text in ("javascript:alert(1)", "data:text/html,x", "ftp://host/x", "file:///etc/passwd"):
+            with self.subTest(text=text):
+                self.assertNotIn("<a ", render_report.esc_linked(text))
+
+    def test_surrounding_text_and_url_are_escaped(self):
+        out = render_report.esc_linked('<b>x</b> https://localhost:8080/?a=1&b=2')
+        self.assertIn("&lt;b&gt;x&lt;/b&gt;", out)
+        self.assertIn('href="https://localhost:8080/?a=1&amp;b=2"', out)
+
+    # cspell:ignore onmouseover
+    def test_quote_cannot_break_out_of_the_href(self):
+        out = render_report.esc_linked('https://localhost:8080/x"onmouseover="alert(1)')
+        self.assertIn('<a href="https://localhost:8080/x" target="_blank"', out)
+        self.assertNotRegex(out, r"<a [^>]*onmouseover")
+
+    def test_urls_are_linked_in_a_rendered_report(self):
+        data = run_of("PASS")
+        data["cases"][0]["url"] = "https://localhost:8080/#/vault"
+        data["cases"][0]["test_steps"] = [
+            {"text": "open https://localhost:8080/#/x", "outcome": "PASS", "observed": "landed on https://localhost:8080/#/y"}
+        ]
+        out = render_report.render(data, HEADER)
+        for url in ("https://localhost:8080/#/vault", "https://localhost:8080/#/x", "https://localhost:8080/#/y"):
+            with self.subTest(url=url):
+                self.assertIn(f'<a href="{url}"', out)
+
+    def test_base_url_in_the_header_is_linked(self):
+        out = render_report.render(run_of("PASS"), HEADER)
+        self.assertIn('<a href="https://localhost:8080"', out)
+
+
+class HeroTest(unittest.TestCase):
+    def render_hero(self, *statuses, header=HEADER):
+        return render_report.render(run_of(*statuses), header)
+
+    def test_all_pass(self):
+        out = self.render_hero("PASS", "PASS")
+        self.assertIn('class="hero hero-pass"', out)
+        self.assertIn("All tests passed", out)
+        self.assertIn("<b>100%</b>", out)
+        self.assertIn("2 of 2 passed", out)
+
+    def test_failure_wins_over_error(self):
+        out = self.render_hero("PASS", "FAIL", "ERROR")
+        self.assertIn('class="hero hero-fail"', out)
+        self.assertIn("Run has failures", out)
+        self.assertIn("1 failed, 1 error across 3 test cases", out)
+
+    def test_error_without_failure(self):
+        out = self.render_hero("PASS", "ERROR")
+        self.assertIn('class="hero hero-error"', out)
+        self.assertIn("Run had errors", out)
+
+    def test_adaptive_counts_toward_the_pass_rate(self):
+        out = self.render_hero("PASS", "PASS (adaptive)", "FAIL", "FAIL")
+        self.assertIn("<b>50%</b>", out)
+        self.assertIn("2 of 4 passed", out)
+
+    def test_a_run_with_a_failure_never_reads_100_percent(self):
+        out = self.render_hero(*(["PASS"] * 199 + ["FAIL"]))
+        self.assertIn("<b>99%</b>", out)
+
+    def test_aborted_run_is_flagged(self):
+        out = render_report.render(ABORTED_WITH_CASES, HEADER)
+        self.assertIn('class="hero hero-error"', out)
+        self.assertIn("Run aborted", out)
+
+    def test_empty_complete_run_does_not_divide_by_zero(self):
+        out = render_report.render({"run_status": "complete", "cases": []}, HEADER)
+        self.assertIn("No test cases ran", out)
+        self.assertIn("<b>0%</b>", out)
+
+    def test_ring_has_one_arc_per_non_empty_status(self):
+        style = render_report.ring_style({"total": 4, "passed": 3, "adaptive": 0, "failed": 0, "errored": 1})
+        self.assertEqual(
+            style,
+            "background: conic-gradient(var(--pass) 0.00% 75.00%, var(--error) 75.00% 100.00%)",
+        )
+
+    def test_date_is_shown_in_12_hour_time_in_the_hero_and_run_details(self):
+        header = dict(HEADER, date="20261005-1653")
+        out = self.render_hero("PASS", header=header)
+        self.assertEqual(out.count("Oct 5, 2026 \u00b7 4:53 PM"), 2)
+        self.assertNotIn("16:53", out)
+
+    def test_services_become_chips(self):
+        header = dict(HEADER, services_tested="api (4000), web (8080)")
+        out = self.render_hero("PASS", header=header)
+        self.assertIn('<span class="chip">api (4000)</span><span class="chip">web (8080)</span>', out)
+
+
+class TitleTest(unittest.TestCase):
+    def write_context(self, text):
+        handle = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8")
+        handle.write(text)
+        handle.close()
+        self.addCleanup(os.unlink, handle.name)
+        return handle.name
+
+    def test_title_is_read_from_the_context_fence(self):
+        path = self.write_context(
+            "<!-- CONTEXT START -->\n\n# Context\n\n**Input Type:** jira-ticket\n"
+            "**Title:** Switch to annual billing\n\n## Feature Description\n\nx\n<!-- CONTEXT END -->\n"
+        )
+        self.assertEqual(render_report.read_title(path), "Switch to annual billing")
+
+    def test_no_title_line_yields_none(self):
+        path = self.write_context("<!-- CONTEXT START -->\n# Context\n<!-- CONTEXT END -->\n")
+        self.assertIsNone(render_report.read_title(path))
+
+    def test_title_outside_the_fence_is_ignored(self):
+        path = self.write_context("**Title:** outside\n<!-- CONTEXT START -->\n# Context\n<!-- CONTEXT END -->\n")
+        self.assertIsNone(render_report.read_title(path))
+
+    def test_embedded_end_marker_cannot_hide_the_title(self):
+        path = self.write_context(
+            "<!-- CONTEXT START -->\n**Title:** real\n<!-- CONTEXT END -->\nnoise\n<!-- CONTEXT END -->\n"
+        )
+        self.assertEqual(render_report.read_title(path), "real")
+
+    def test_missing_file_yields_none_and_a_warning(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(render_report.read_title(os.path.join(d, "absent.md")))
+
+    def test_long_title_is_truncated(self):
+        path = self.write_context("<!-- CONTEXT START -->\n**Title:** " + "word " * 60 + "\n<!-- CONTEXT END -->\n")
+        title = render_report.read_title(path)
+        self.assertEqual(len(title), render_report.TITLE_MAX_LENGTH)
+        self.assertTrue(title.endswith("\u2026"))
+
+    def test_title_is_the_heading_with_the_plan_name_as_a_key(self):
+        out = render_report.render(run_of("PASS"), dict(HEADER, title="Switch to annual billing"))
+        self.assertIn('<div class="hero-key">Billing UI</div><h1>Switch to annual billing</h1>', out)
+
+    def test_without_a_title_the_plan_name_is_the_heading(self):
+        out = render_report.render(run_of("PASS"), HEADER)
+        self.assertIn("<h1>Billing UI</h1>", out)
+        self.assertNotIn("hero-key\">", out)
+
+    def test_title_is_escaped(self):
+        out = render_report.render(run_of("PASS"), dict(HEADER, title="<img src=x onerror=alert(1)>"))
+        self.assertNotIn("<img src=x", out)
+        self.assertIn("&lt;img src=x onerror=alert(1)&gt;", out)
+
+    def test_main_takes_the_title_from_context_file(self):
+        context = self.write_context("<!-- CONTEXT START -->\n**Title:** From the artifact\n<!-- CONTEXT END -->\n")
+        d = tempfile.mkdtemp()
+        out = os.path.join(d, "report.html")
+        rc = render_report.main(
+            [
+                "--results", os.path.join(EXAMPLES, "complete-run.json"),
+                "--template-dir", TEMPLATES, "--output", out,
+                "--plan-name", "Billing UI", "--date", "20260724-0930",
+                "--slug", "billing-ui", "--services-tested", "web (8080)",
+                "--base-url", "https://localhost:8080",
+                "--plan-file", "/tmp/test-plan-20260724-0930.md",
+                "--context-file", context,
+            ]
+        )
+        self.assertEqual(rc, 0)
+        with open(out, encoding="utf-8") as f:
+            self.assertIn("<h1>From the artifact</h1>", f.read())
 
 
 if __name__ == "__main__":

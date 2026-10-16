@@ -177,6 +177,24 @@ Run `playwright-cli screenshot` to take a full-page screenshot **after every vis
 
 Always save screenshots in the artifact output directory and pass `--full-page`: `screenshot --filename=<artifacts-output-dir>/screenshots/<name>.png --full-page`
 
+`--full-page` only captures the document's scroll height. The web vault scrolls inside a container (`<main>`) while the document stays viewport-sized, so on those pages `--full-page` alone returns a viewport-sized shot with the rest of the page cut off. Capture the full scrollable view in three commands:
+
+1. Measure the content height, capped at 8000px so a runaway page cannot produce an enormous image:
+
+   ```
+   playwright-cli eval "() => Math.min(8000, Math.max(innerHeight, document.documentElement.scrollHeight, ...[...document.querySelectorAll('*')].filter(e => /auto|scroll/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight).map(e => Math.ceil(e.getBoundingClientRect().top + e.scrollHeight))))"
+   ```
+
+2. Resize to that height, take the screenshot with `--full-page`, then restore the default viewport:
+
+   ```
+   playwright-cli resize 1280 <height>
+   playwright-cli screenshot --filename=<artifacts-output-dir>/screenshots/<name>.png --full-page
+   playwright-cli resize 1280 720
+   ```
+
+When the measured height equals the viewport, skip the resizes and take the screenshot as usual.
+
 Do NOT screenshot after: `run-code`, `eval`, `console`, `cookie-get`, or any pure-inspection action; or a step where nothing visible changed.
 
 When in doubt, take the screenshot.

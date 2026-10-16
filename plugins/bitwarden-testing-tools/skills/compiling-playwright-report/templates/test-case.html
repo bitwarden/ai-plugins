@@ -1,6 +1,24 @@
-<h3>Test Case {{NUMBER}}: {{NAME}}</h3>
-<p><strong>Status</strong>: {{STATUS}}</p>
-{{URL_BLOCK}} {{SETUP_BLOCK}}
-<p><strong>Test Steps</strong>:</p>
-{{TEST_STEPS}} {{NOTES_BLOCK}}
-<hr />
+<details
+  class="case case-{{STATUS_CLASS}}"
+  id="case-{{NUMBER}}"
+  data-status="{{STATUS_CLASS}}"
+>
+  <summary>
+    <span class="badge badge-{{STATUS_CLASS}}" title="{{STATUS_LABEL}}"
+      ><svg viewBox="0 0 20 20" aria-hidden="true">{{STATUS_ICON}}</svg></span
+    >
+    <span class="case-title"
+      ><span class="case-num">Test Case {{NUMBER}}</span
+      ><span class="case-name">{{NAME}}</span></span
+    >
+    <span class="case-meta"
+      ><span class="status-text t-{{STATUS_CLASS}}">{{STATUS_LABEL}}</span
+      ><span class="case-counts">{{STEP_COUNTS}}</span></span
+    >
+    <span class="chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="case-body">
+    {{URL_BLOCK}} {{CALLOUT_BLOCK}} {{SETUP_BLOCK}} {{TEST_STEPS_BLOCK}}
+    {{NOTES_BLOCK}}
+  </div>
+</details>
