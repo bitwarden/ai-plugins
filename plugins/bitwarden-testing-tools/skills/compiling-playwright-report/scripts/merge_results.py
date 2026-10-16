@@ -11,7 +11,8 @@
 # (complete | paused | aborted). Cases are concatenated across ALL segments
 # regardless of the last segment's status, so an aborted resume still reports
 # the work earlier segments completed. For a paused result, need_user_input is
-# carried forward from the last segment; for an aborted result, abort_reason is.
+# carried forward from the last segment, along with need_user_input_url when
+# that segment supplied one as a string; for an aborted result, abort_reason is.
 # Totals are derived, never trusted from the runner.
 #
 # Exit codes: 0 written; 2 usage error; 3 invalid or malformed segment JSON.
@@ -66,6 +67,8 @@ def merge(segments):
         result["abort_reason"] = last.get("abort_reason", "")
     if run_status == "paused":
         result["need_user_input"] = last.get("need_user_input", "")
+        if isinstance(last.get("need_user_input_url"), str):
+            result["need_user_input_url"] = last["need_user_input_url"]
     return result
 
 

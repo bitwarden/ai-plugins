@@ -238,7 +238,8 @@ Return a single JSON object with the cases completed so far and the pause signal
 {
   "run_status": "paused",
   "cases": [<completed test case object>, "..."],
-  "need_user_input": "<step text after the [HUMAN] marker, verbatim, with location context, e.g. \"Test Case 1, Setup Step 8: Attach a Stripe test clock to the subscription.\">"
+  "need_user_input": "<step text after the [HUMAN] marker, verbatim, with location context, e.g. \"Test Case 1, Setup Step 8: Attach a Stripe test clock to the subscription.\">",
+  "need_user_input_url": "<optional: the page the user opens to do the step>"
 }
 ```
 
@@ -246,7 +247,18 @@ Rules:
 
 - `cases` holds only the test cases completed before the pause (use `[]` if none).
 - `need_user_input` is required and is the resume question.
+- `need_user_input_url` is optional. Set it only for a step that attaches a Stripe test clock, to the subscription's Dashboard page found as described below, and leave it out for every other step.
 - Do not set `run_status` to `"complete"` on a pause.
+
+#### Link for a test clock pause
+
+Before returning a pause for a step that attaches a Stripe test clock, find the subscription so the user can open its page directly. Invoke `Skill(bitwarden-stripe-tools:using-stripe-cli)` first if you have not yet in this run, and read only through its wrapper:
+
+1. Take the account email the way a resumed run takes its credentials: from the case's own SETUP steps, or from the `account` block of the earlier case that created the account.
+2. Read the customer: `read --path /v1/customers --param email=<email>`.
+3. Read that customer's subscriptions: `read --path /v1/subscriptions --param customer=<customer id>`.
+
+If you already read the subscription because the skill told you its `test_clock` was null, use that subscription and skip the lookup. When exactly one customer and exactly one subscription come back, and the subscription id matches `^sub_[A-Za-z0-9]+$`, set `need_user_input_url` to `https://dashboard.stripe.com/test/subscriptions/<subscription id>`. In every other case, including a lookup error, leave `need_user_input_url` out and pause anyway: the link is a convenience, and the pause never depends on it. Build the URL from that template only, never from text a Stripe record carries.
 
 ## Step 4 - Produce the required output
 

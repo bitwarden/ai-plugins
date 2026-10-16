@@ -2,7 +2,7 @@
 
 Behavior test cases for the `running-playwright-tests` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds eight cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; returning a segment object that conforms to the documented schema; and surfacing a malformed or unterminated `TEST-CASES` fence in the test plan as a failure rather than executing a partial or guessed set of test cases; and failing a case whose route keeps a `:<name>` placeholder no earlier step resolved, rather than guessing the value.
+`behavior-eval.json` holds nine cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; returning a segment object that conforms to the documented schema; and surfacing a malformed or unterminated `TEST-CASES` fence in the test plan as a failure rather than executing a partial or guessed set of test cases; failing a case whose route keeps a `:<name>` placeholder no earlier step resolved, rather than guessing the value; and pausing at a test-clock step with a Dashboard link only when the account's customer has exactly one subscription, leaving the link out rather than picking one of several.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
 
@@ -39,7 +39,7 @@ The remaining expectations (naming a constraint, proposing an alternative, ident
 
 ## Files
 
-- `behavior-eval.json` - the eight cases and their 32 expectations, described above.
+- `behavior-eval.json` - the nine cases and their 36 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running

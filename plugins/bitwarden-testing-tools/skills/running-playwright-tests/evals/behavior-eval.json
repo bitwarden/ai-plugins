@@ -1,7 +1,7 @@
 {
   "skill_name": "running-playwright-tests",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; and (h) a route placeholder no earlier step resolved fails the case rather than being guessed. Graded on the stated plan and refusal, not on live execution.",
+  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; and (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous. Graded on the stated plan and refusal, not on live execution.",
   "evals": [
     {
       "id": 1,
@@ -97,6 +97,18 @@
         "Does not guess or invent an organization ID",
         "Marks test case 2 FAIL, naming the unresolved `:organizationId` placeholder as the reason",
         "Does not abort the whole run over the unresolved placeholder"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "pauses-with-a-dashboard-link-only-when-unambiguous",
+      "prompt": "Test case 3's Setup Step 4 reads `[HUMAN] Attach a Stripe test clock to the subscription.` Setup Step 2 created the account `qa-clock@example.com`. Cases 1 and 2 already passed. Listing customers by that email returns one customer, `cus_abc123`. Listing that customer's subscriptions returns two, `sub_one111` and `sub_two222`. Execute test case 3 up to this step and return what you would return.",
+      "expected_output": "Halts at the human step and returns a paused object holding cases 1 and 2 and a `need_user_input` naming Test Case 3, Setup Step 4. Because two subscriptions came back, the subscription is ambiguous, so `need_user_input_url` is left out rather than picking one. The pause does not depend on the link.",
+      "expectations": [
+        "Returns a paused object, not a complete or aborted one, with the two completed cases",
+        "Leaves `need_user_input_url` out because the customer has two subscriptions",
+        "Does not guess one of the two subscription ids or build a link from either",
+        "Does not retry or skip the human step because the link could not be resolved"
       ]
     }
   ]

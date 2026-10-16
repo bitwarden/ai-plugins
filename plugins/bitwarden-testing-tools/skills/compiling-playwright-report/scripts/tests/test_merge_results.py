@@ -43,6 +43,31 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(result["totals"]["total"], 1)
         self.assertIn("Attach a Stripe test clock", result["need_user_input"])
 
+    def test_paused_segment_carries_the_link(self):
+        result = merge_results.merge([load_example("paused-segment.json")])
+        self.assertEqual(
+            result["need_user_input_url"],
+            "https://dashboard.stripe.com/test/subscriptions/sub_1234",
+        )
+
+    def test_paused_segment_without_a_link_omits_it(self):
+        segment = load_example("paused-segment.json")
+        del segment["need_user_input_url"]
+        result = merge_results.merge([segment])
+        self.assertNotIn("need_user_input_url", result)
+
+    def test_paused_segment_drops_a_non_string_link(self):
+        segment = load_example("paused-segment.json")
+        segment["need_user_input_url"] = ["https://dashboard.stripe.com/test/subscriptions/sub_1234"]
+        result = merge_results.merge([segment])
+        self.assertNotIn("need_user_input_url", result)
+
+    def test_resumed_run_does_not_carry_the_earlier_link(self):
+        result = merge_results.merge(
+            [load_example("paused-segment.json"), load_example("resume-segment.json")]
+        )
+        self.assertNotIn("need_user_input_url", result)
+
     def test_aborted_segment(self):
         result = merge_results.merge([load_example("aborted-run.json")])
         self.assertEqual(result["run_status"], "aborted")

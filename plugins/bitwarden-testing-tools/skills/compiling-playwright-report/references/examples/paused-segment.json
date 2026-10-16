@@ -8,5 +8,6 @@
       "test_steps": [{ "text": "did a thing", "outcome": "PASS" }]
     }
   ],
-  "need_user_input": "Test Case 2, Setup Step 3: Attach a Stripe test clock to the subscription."
+  "need_user_input": "Test Case 2, Setup Step 3: Attach a Stripe test clock to the subscription.",
+  "need_user_input_url": "https://dashboard.stripe.com/test/subscriptions/sub_1234"
 }

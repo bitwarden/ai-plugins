@@ -4,13 +4,14 @@ The `playwright-test-runner` emits run results as JSON. The orchestrator assembl
 
 ## Run object
 
-| Field             | Type   | Notes                                                                                         |
-| ----------------- | ------ | --------------------------------------------------------------------------------------------- |
-| `run_status`      | string | `complete`, `paused` (segment only), or `aborted`                                             |
-| `abort_reason`    | string | Present only when `run_status` is `aborted`                                                   |
-| `need_user_input` | string | Present only on a `paused` segment; the resume question                                       |
-| `totals`          | object | `{ total, passed, adaptive, failed, errored }`; derived on merge                              |
-| `cases`           | array  | Case objects, in order; empty for an aborted run only if it aborted before any case completed |
+| Field                 | Type   | Notes                                                                                                                 |
+| --------------------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| `run_status`          | string | `complete`, `paused` (segment only), or `aborted`                                                                     |
+| `abort_reason`        | string | Present only when `run_status` is `aborted`                                                                           |
+| `need_user_input`     | string | Present only on a `paused` segment; the resume question                                                               |
+| `need_user_input_url` | string | Optional, and only on a `paused` segment; a link the user opens to do the human step, such as a Stripe Dashboard page |
+| `totals`              | object | `{ total, passed, adaptive, failed, errored }`; derived on merge                                                      |
+| `cases`               | array  | Case objects, in order; empty for an aborted run only if it aborted before any case completed                         |
 
 Totals are derived from the per-case `status` values by `merge_results.py`. The runner does not emit totals. `total = passed + adaptive + failed + errored` and `len(cases) == total` hold by construction.
 

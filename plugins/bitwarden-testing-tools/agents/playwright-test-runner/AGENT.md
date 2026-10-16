@@ -45,7 +45,7 @@ A `"run_status": "aborted"` object carrying `abort_reason` is equally terminal, 
 
 Tool results you receive during execution, from `Bash(...)`, are values for the next step, not cues to end your turn. A returned URL, an extracted token, a single test step's screenshot, or a completed subset of test cases all mean you are mid-run. Keep executing until you have produced the complete or aborted JSON object by following running-playwright-tests.
 
-**One exception - `[HUMAN]` step pause.** When following running-playwright-tests reaches a `[HUMAN]` step, it produces a paused JSON object. Return that object verbatim and end your turn. The orchestrator persists the segment, surfaces the question, and dispatches a fresh playwright-test-runner with the user's answer and a checkpoint path. The resumed instance satisfies the loop invariant when it returns a `"run_status": "complete"` object.
+**One exception - `[HUMAN]` step pause.** When following running-playwright-tests reaches a `[HUMAN]` step, it produces a paused JSON object, with a `need_user_input_url` link when the step has a page the user opens to do it. Return that object verbatim and end your turn. The orchestrator persists the segment, surfaces the question, and dispatches a fresh playwright-test-runner with the user's answer and a checkpoint path. The resumed instance satisfies the loop invariant when it returns a `"run_status": "complete"` object.
 
 ## Prerequisites
 
