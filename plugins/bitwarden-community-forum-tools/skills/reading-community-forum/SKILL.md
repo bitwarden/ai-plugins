@@ -17,14 +17,14 @@ It needs Python 3.9+ and no API key or configuration. It cannot post, reply, vot
 
 ## Pick the command by question
 
-| Question                              | Command                                                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Is problem X known? Is there a fix?   | `search "X" --solved --order latest`                                                                       |
-| How much demand does a feature have?  | `top --period yearly --category pm-feature-requests` or `latest --category feature-requests --order votes` |
-| What is hot right now?                | `latest --order views --limit 15` or `top --period weekly`                                                 |
-| What did staff say? What was the fix? | `thread <id> --brief` (first post, accepted answer, staff posts, top 3 moderator posts, from the first 100 posts or the best-of set; if the output says "others may exist", confirm with `thread <id> --chrono --max-posts 0`)                    |
-| What does one person post?            | `user <name> --activity replies`                                                                           |
-| Which categories or tags exist?       | `categories` or `tags`                                                                                     |
+| Question                              | Command                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Is problem X known? Is there a fix?   | `search "X" --solved --order latest`                                                                                                                                                                                           |
+| How much demand does a feature have?  | `top --period yearly --category pm-feature-requests` or `latest --category feature-requests --order votes`                                                                                                                     |
+| What is hot right now?                | `latest --order views --limit 15` or `top --period weekly`                                                                                                                                                                     |
+| What did staff say? What was the fix? | `thread <id> --brief` (first post, accepted answer, staff posts, top 3 moderator posts, from the first 100 posts or the best-of set; if the output says "others may exist", confirm with `thread <id> --chrono --max-posts 0`) |
+| What does one person post?            | `user <name> --activity replies`                                                                                                                                                                                               |
+| Which categories or tags exist?       | `categories` or `tags`                                                                                                                                                                                                         |
 
 ## Workflow
 
