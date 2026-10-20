@@ -32,7 +32,7 @@ Pages are written to `daily-recaps/recap-YYYY-MM-DD.html` in the plugin's data d
 | Variable                  | Default                              | Purpose                                                                                        |
 | ------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | `DAILY_RECAP_CUTOFF_HOUR` | `7`                                  | Local hour (0-23) when a workday starts, so late-night work counts toward the day it continues |
-| `DAILY_RECAP_OUTPUT_DIR`  | `${CLAUDE_PLUGIN_DATA}/daily-recaps` | Where recap pages and the gathered JSON are written                                            |
+| `DAILY_RECAP_OUTPUT_DIR`  | `${CLAUDE_PLUGIN_DATA}/daily-recaps` | Where recap pages are written                                                                  |
 | `TZ`                      | system timezone                      | Timezone used for the workday boundary                                                         |
 | `CLAUDE_CONFIG_DIR`       | `~/.claude`                          | Where Claude Code session logs are read from                                                   |
 

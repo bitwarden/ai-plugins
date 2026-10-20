@@ -24,24 +24,25 @@ Choosing the date to pass:
 - "yesterday", "standup", or no time given: omit the date. The script defaults to the most recently completed workday.
 - A specific date: pass it as `YYYY-MM-DD`.
 - "this morning", "today", "since standup": pass today's date. The window then ends in the future, which is fine.
-- "this week" or another range: run the gather step once per workday, merge the results, and title the page with the range.
+- "this week" or another range: run the gather step once per workday, with each day's files named by its date inside the work directory from step 1, merge the results, and title the page with the range.
 
 ## Workflow
 
 ### 1. Gather data
 
-Run the GitHub step first because the session step needs its window. Everything the skill writes goes in one output directory: `DAILY_RECAP_OUTPUT_DIR` when set, otherwise `${CLAUDE_PLUGIN_DATA}/daily-recaps`. That keeps recaps in the plugin's persistent data and out of any repository. The gathered JSON sits beside the pages and is replaced on each run.
+Run the GitHub step first because the session step needs its window. Everything the skill writes goes in one output directory: `DAILY_RECAP_OUTPUT_DIR` when set, otherwise `${CLAUDE_PLUGIN_DATA}/daily-recaps`. That keeps recaps in the plugin's persistent data and out of any repository. Every other file the run creates goes in its `work/` subdirectory: the gathered JSON, PR lookups, digests, and any script written to build the page, never `/tmp` or a directory of your own. Delete `work/` before reporting back, even when the run stops early, so raw prompts and comment bodies do not outlive the run.
 
 ```bash
 out_dir="${DAILY_RECAP_OUTPUT_DIR:-${CLAUDE_PLUGIN_DATA}/daily-recaps}"
-mkdir -p "$out_dir"
+work_dir="$out_dir/work"
+mkdir -p "$work_dir"
 
 # (a) GitHub events for the workday, plus the computed window
-scripts/gather-gh-events.sh [YYYY-MM-DD] > "$out_dir/events.json"
+scripts/gather-gh-events.sh [YYYY-MM-DD] > "$work_dir/events.json"
 
 # (b) Claude Code sessions with activity inside that window
-scripts/find-sessions.sh "$(jq -r .window.start_utc "$out_dir/events.json")" \
-  "$(jq -r .window.end_utc "$out_dir/events.json")" > "$out_dir/sessions.json"
+scripts/find-sessions.sh "$(jq -r .window.start_utc "$work_dir/events.json")" \
+  "$(jq -r .window.end_utc "$work_dir/events.json")" > "$work_dir/sessions.json"
 ```
 
 `gather-gh-events.sh` emits `login`, `window` (date, cutoff hour, timezone label, UTC and local bounds), `feed_complete`, `event_count`, and `events`. GitHub's events feed only holds the most recent 300 events from the last 30 days; when `feed_complete` is `false`, say in the recap that early events in the window may be missing.
@@ -108,9 +109,10 @@ f="$out_dir/recap-YYYY-MM-DD.html"
 if [ "$(uname -s)" = "Darwin" ]; then open "$f"
 elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$f"
 else echo "$f"; fi
+rm -rf "$work_dir"
 ```
 
-Then tell the user the file path, the headline stats, the theme of the day, and that the standup card has a Copy button.
+Then delete the work directory and tell the user the file path, the headline stats, the theme of the day, and that the standup card has a Copy button.
 
 ## Style
 
