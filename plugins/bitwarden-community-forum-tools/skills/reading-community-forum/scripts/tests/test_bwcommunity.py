@@ -138,7 +138,58 @@ class FetchThread(unittest.TestCase):
         self.assertEqual(posts, [])
 
 
+class HostPin(unittest.TestCase):
+    def test_off_host_url_refused(self):
+        with self.assertRaises(bw.CLIError) as cm:
+            bw.Client(use_cache=False)._fetch("https://evil.example/t/1.json", True)
+        self.assertEqual(cm.exception.code, bw.EXIT_USAGE)
+
+    def test_http_scheme_refused(self):
+        with self.assertRaises(bw.CLIError):
+            bw.Client(use_cache=False)._fetch("http://community.bitwarden.com/t/1.json", True)
+
+    def test_redirect_refused(self):
+        handler = bw._NoRedirect()
+        req = bw.urllib.request.Request("https://community.bitwarden.com/t/1.json")
+        with self.assertRaises(bw.CLIError):
+            handler.redirect_request(req, None, 302, "Found", {}, "https://evil.example/x")
+
+
+class AcceptedAnswer(unittest.TestCase):
+    class Client(FakeThreadClient):
+        def __init__(self, accepted_key, accepted):
+            super().__init__(250)
+            self.key, self.accepted = accepted_key, accepted
+
+        def get(self, path, params=None, want_json=True):
+            if path.startswith("/posts/by_number/"):
+                n = int(path.rsplit("/", 1)[1].split(".")[0])
+                return {"id": n, "post_number": n}
+            data = super().get(path, params, want_json)
+            if not path.endswith("/posts.json"):
+                data[self.key] = self.accepted
+            return data
+
+    def numbers(self, client):
+        _, posts, _, _, _ = bw._fetch_thread(client, 1, 10, False, "chrono")
+        return [p["post_number"] for p in posts]
+
+    def test_kept_when_entry_has_id(self):
+        client = self.Client("accepted_answers", [{"id": 200, "post_number": 200}])
+        self.assertIn(200, self.numbers(client))
+
+    def test_kept_when_entry_has_only_post_number(self):
+        client = self.Client("accepted_answer", {"post_number": 200, "username": "u"})
+        self.assertIn(200, self.numbers(client))
+
+
 class Misc(unittest.TestCase):
+    def test_version_matches_plugin_manifest(self):
+        import json
+        manifest = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", ".claude-plugin", "plugin.json")
+        with open(manifest) as f:
+            self.assertEqual(bw.VERSION, json.load(f)["version"])
+
     def test_truncate(self):
         text, cut = bw.truncate("word " * 100, 50, "U")
         self.assertTrue(cut)

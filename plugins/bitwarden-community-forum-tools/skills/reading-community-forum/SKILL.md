@@ -36,13 +36,13 @@ It needs Python 3.9+ and no API key or configuration. It cannot post, reply, vot
 ## Search tips
 
 - Filters: `--category SLUG`, `--tag TAG` (repeatable), `--user NAME`, `--solved`, `--after/--before YYYY-MM-DD`, `--in-title`.
-- `--order` is `latest`, `views`, or `likes`. Search returns 15 hits by default; raise `--limit` or `--pages N` (50 posts per page) for more.
+- `search --order` is `latest`, `views`, or `likes`; `latest --order` is `activity`, `created`, `views`, `posts`, `likes`, `op_likes`, or `votes`; `top` has no `--order`, only `--period`. Search returns 15 hits by default; raise `--limit` or `--pages N` (50 posts per page) for more.
 - Run `categories` for slugs, for example `pm-feature-requests` and `pm-ask-the-community`. Tags follow patterns such as `app:browser`, `os:linux`, and `autofill`.
 
 ## Reading output
 
 - Output is compact Markdown for LLMs. Use `--json` only to process fields in a script; it drops null, empty, and false fields.
-- Posts are truncated at 2500 characters and end with `[truncated: N more chars; full text at URL]`. Use `post <id> <n> --max-chars 0` for one post in full as raw Markdown, or `--max-chars 0` on any command.
+- Posts are truncated at 2500 characters and end with `[truncated: N more chars; full text at URL]`. Use `post <id> <n> --max-chars 0` for one post in full as raw Markdown, or `--max-chars 0` on `thread`. Search and list excerpts are fixed at 220 characters.
 - Quotes of posts in the same thread collapse to one line (`--full-quotes` keeps them). `@system` and auto-action posts are hidden (`--include-system` shows them).
 - Responses are cached for 1 hour. Use `--no-cache` for something that just changed.
 

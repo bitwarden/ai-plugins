@@ -20,7 +20,8 @@ Product questions often start with what users are already saying: which feature 
 ## Being a good API client
 
 - **Rate:** at most 1 request per second, shared across processes. 429 and 5xx responses are retried with exponential backoff, and `Retry-After` is honoured.
-- **Cache:** responses are cached for 1 hour in `~/.cache/bwcommunity`. The directory is set to 0700 on every run and files are 0600. Pass `--no-cache` to bypass it.
+- **Cache:** responses are cached for 1 hour in `$XDG_CACHE_HOME/bwcommunity`, falling back to `~/.cache/bwcommunity`. The directory is set to 0700 on every run and files are 0600. Pass `--no-cache` to bypass it.
+- **Contact:** set `BW_COMMUNITY_CONTACT` (optional) to append a contact address to the `User-Agent`, so forum operators can reach whoever is running the tool.
 - **`robots.txt`:** enforced for every path except `/search.json`. The site disallows `/search` for all agents. `search` is exempt by default because it is an on-demand lookup made for a user, not a crawl. Pass `--strict-robots` to refuse instead.
 
 ## Token budget

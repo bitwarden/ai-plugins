@@ -19,7 +19,11 @@ import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
 
-VERSION = "1.0.0"
+try:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".claude-plugin", "plugin.json")) as _f:
+        VERSION = json.load(_f)["version"]
+except (OSError, ValueError, KeyError):
+    VERSION = "unknown"
 BASE_URL = "https://community.bitwarden.com"
 BASE_HOST = urllib.parse.urlparse(BASE_URL).hostname
 UA_TOKEN = "bwcommunity-cli"
@@ -40,6 +44,16 @@ BRIEF_MODS = 3  # volunteer-moderator posts kept by --brief (most liked); staff 
 HIDDEN_TAGS = {"server:default-cloud"}  # on ~every topic; absence of server:self-hosted already says it
 
 EXIT_OK, EXIT_USAGE, EXIT_NOT_FOUND, EXIT_BLOCKED, EXIT_NETWORK = 0, 1, 2, 3, 4
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """The host pin is checked before a request; never follow a redirect off it."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise CLIError(f"refusing redirect from {req.full_url} to {newurl}", EXIT_USAGE)
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
 
 
 class CLIError(Exception):
@@ -111,7 +125,7 @@ class Client:
             self._log(f"GET {url}")
             req = urllib.request.Request(url, headers=self._headers(want_json), method="GET")
             try:
-                with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+                with _OPENER.open(req, timeout=TIMEOUT) as resp:
                     body = resp.read().decode("utf-8", errors="replace")
                     ctype = resp.headers.get("Content-Type", "")
                     if want_json and "json" not in ctype:
@@ -689,6 +703,13 @@ def cmd_search(client, args):
     emit(args, out, "\n".join(lines))
 
 
+def _post_id_by_number(client, topic_id, number):
+    """Id of post #number, for payloads whose accepted_answer carries only post_number."""
+    if not number:
+        return None
+    return (client.get(f"/posts/by_number/{topic_id}/{number}.json") or {}).get("id")
+
+
 def _window_start(client, topic_id, wanted, posts, start_at):
     """Index in wanted at or before the first post numbered >= start_at.
 
@@ -731,8 +752,9 @@ def _fetch_thread(client, topic_id, max_posts, raw, mode, start_at=0):
     if max_posts:
         wanted = wanted[:max_posts]
     accepted = data.get("accepted_answer") or next(iter(data.get("accepted_answers") or []), {})
-    if not start_at and accepted.get("id") and accepted["id"] in stream and accepted["id"] not in wanted:
-        wanted = sorted(wanted + [accepted["id"]], key=stream.index)
+    accepted_id = accepted.get("id") or _post_id_by_number(client, topic_id, accepted.get("post_number"))
+    if not start_at and accepted_id in stream and accepted_id not in wanted:
+        wanted = sorted(wanted + [accepted_id], key=stream.index)
     if not start_at and stream and stream[0] not in wanted:
         wanted = [stream[0]] + wanted
     missing = [pid for pid in wanted if pid not in posts]
@@ -853,6 +875,8 @@ def cmd_post(client, args):
     topic = client.get(f"/t/{topic_id}.json")
     url = topic_url(topic.get("slug"), topic_id, n)
     meta = next((p for p in topic["post_stream"]["posts"] if p["post_number"] == n), None)
+    if meta is None:  # /t/{id}.json only carries the first ~20 posts
+        meta = client.get(f"/posts/by_number/{topic_id}/{n}.json")
     text, truncated = truncate(raw.strip(), args.max_chars, url)
     out = {"topic_id": topic_id, "post_number": n, "title": topic.get("title"), "url": url,
            "username": meta.get("username") if meta else None,
@@ -887,6 +911,7 @@ def _list_path(client, args, kind):
     if args.tag:
         if kind == "latest":
             return f"/tag/{urllib.parse.quote(args.tag, safe='')}.json", f"tag {args.tag}"
+        # /tag/{tag}/l/top is disallowed by robots.txt; /top.json honours the `tags` param instead.
         return "/top.json", f"tag {args.tag}"
     return f"/{kind}.json", "all categories"
 
