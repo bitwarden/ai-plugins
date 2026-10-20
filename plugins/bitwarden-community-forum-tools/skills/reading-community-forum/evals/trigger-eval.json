@@ -1,0 +1,50 @@
+[
+  {
+    "query": "what are users saying on the Bitwarden community forum about passkeys?",
+    "should_trigger": true
+  },
+  {
+    "query": "find the most-voted feature requests on community.bitwarden.com this year",
+    "should_trigger": true
+  },
+  {
+    "query": "is there a known workaround for autofill not working in Brave? check the community forum",
+    "should_trigger": true
+  },
+  {
+    "query": "what did Bitwarden staff say in the auto-type feature request thread?",
+    "should_trigger": true
+  },
+  {
+    "query": "summarize the complaints in the redesigned browser extension UI forum thread",
+    "should_trigger": true
+  },
+  {
+    "query": "which community feature requests are tagged in-progress?",
+    "should_trigger": true
+  },
+  {
+    "query": "reply to the forum thread about SSH keys with our release date",
+    "should_trigger": false
+  },
+  {
+    "query": "search Jira for open bugs about autofill in the browser extension",
+    "should_trigger": false
+  },
+  {
+    "query": "write a Discourse plugin that adds voting to topics",
+    "should_trigger": false
+  },
+  {
+    "query": "review this pull request in bitwarden/clients",
+    "should_trigger": false
+  },
+  {
+    "query": "what does our Confluence page say about the passkey roadmap?",
+    "should_trigger": false
+  },
+  {
+    "query": "look up the price IDs for our test products in Stripe",
+    "should_trigger": false
+  }
+]

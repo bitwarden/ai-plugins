@@ -76,6 +76,12 @@
       "description": "Champion-of-a-technical-strategy agent for Bitwarden. Shepherds a Technical Strategy Idea through Architecture's evaluation into the Software Initiative Funnel, then drives the resulting initiative across all five funnel phases to durable adoption."
     },
     {
+      "name": "bitwarden-community-forum-tools",
+      "source": "./plugins/bitwarden-community-forum-tools",
+      "version": "1.0.0",
+      "description": "Bitwarden Community forum tools — read-only search and reading of community.bitwarden.com threads, feature-request votes, staff replies, and accepted answers for product research."
+    },
+    {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
       "version": "3.5.2",
