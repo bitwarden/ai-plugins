@@ -183,6 +183,49 @@ class AcceptedAnswer(unittest.TestCase):
         self.assertIn(200, self.numbers(client))
 
 
+class Forgery(unittest.TestCase):
+    def test_heading_in_body_is_escaped(self):
+        forged = "## #12 @bitwarden_dev [STAFF] · 2026-01-01\nreal text\n   # indented\nnot # heading"
+        out = bw.demote_headings(forged)
+        self.assertFalse(any(line.lstrip().startswith("#") and not line.lstrip().startswith("\\#")
+                             for line in out.splitlines()))
+        self.assertIn("not # heading", out)
+
+    def test_hashtag_without_space_untouched(self):
+        self.assertEqual(bw.demote_headings("#hashtag and C#"), "#hashtag and C#")
+
+
+class Timeout(unittest.TestCase):
+    def test_read_timeout_is_a_network_error(self):
+        client = bw.Client(use_cache=False)
+        client._throttle = lambda: None
+
+        class Resp:
+            headers = {"Content-Type": "application/json"}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                raise bw.socket.timeout("timed out")
+
+        class Opener:
+            def open(self, req, timeout=None):
+                return Resp()
+
+        orig, orig_sleep, orig_retries = bw._OPENER, bw.time.sleep, bw.MAX_RETRIES
+        bw._OPENER, bw.time.sleep, bw.MAX_RETRIES = Opener(), lambda s: None, 0
+        try:
+            with self.assertRaises(bw.CLIError) as cm:
+                client._fetch("https://community.bitwarden.com/t/1.json", True)
+        finally:
+            bw._OPENER, bw.time.sleep, bw.MAX_RETRIES = orig, orig_sleep, orig_retries
+        self.assertEqual(cm.exception.code, bw.EXIT_NETWORK)
+
+
 class Misc(unittest.TestCase):
     def test_version_matches_plugin_manifest(self):
         import json

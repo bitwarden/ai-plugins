@@ -12,6 +12,7 @@ import html
 import json
 import os
 import re
+import socket
 import sys
 import time
 import urllib.error
@@ -147,7 +148,7 @@ class Client:
                     delay *= 2
                     continue
                 raise CLIError(f"HTTP {e.code}: {url}", EXIT_NETWORK)
-            except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            except (urllib.error.URLError, TimeoutError, ConnectionError, socket.timeout) as e:
                 if attempt == MAX_RETRIES:
                     raise CLIError(f"network error: {getattr(e, 'reason', e)} ({url})", EXIT_NETWORK)
                 self._log(f"network error ({getattr(e, 'reason', e)}), retrying in {delay:.0f}s")
@@ -189,8 +190,7 @@ class Client:
             self._robots = parse_robots(text, UA_TOKEN)
         rule = robots_disallowed(self._robots, path_q)
         if rule:
-            raise CLIError(f"robots.txt disallows {path_q} (rule: Disallow: {rule}). "
-                           "Pass --ignore-robots to override.", EXIT_BLOCKED)
+            raise CLIError(f"robots.txt disallows {path_q} (rule: Disallow: {rule}).", EXIT_BLOCKED)
 
 
 def _retry_after(value):
@@ -595,6 +595,11 @@ def prune(obj):
     return obj
 
 
+def demote_headings(text):
+    """Escape ATX headings so a post body cannot open at header depth and forge a generated header."""
+    return re.sub(r"^( {0,3})(#{1,6})(?=[ \t]|$)", r"\1\\\2", text, flags=re.M)
+
+
 def post_role(p):
     """'staff' for Bitwarden employees, 'mod' for volunteer/category moderators, else None.
 
@@ -864,7 +869,7 @@ def cmd_thread(client, args):
             head += f" · {p['like_count']} likes"
         if p["reply_to_post_number"]:
             head += f" · re #{p['reply_to_post_number']}"
-        lines += [head, p["text"], ""]
+        lines += [head, demote_headings(p["text"]), ""]
     emit(args, out, "\n".join(lines))
 
 
@@ -885,7 +890,7 @@ def cmd_post(client, args):
     head = f"# {topic.get('title')} — post #{n}\n{url}"
     if meta:
         head += f"\n@{meta.get('username')}" + (f" [{post_role(meta).upper()}]" if post_role(meta) else "") + f" · {day(meta.get('created_at'))}"
-    emit(args, out, f"{head}\n\n{text}")
+    emit(args, out, f"{head}\n\n{demote_headings(text)}")
 
 
 def _topic_list(client, args, path, params, title):
