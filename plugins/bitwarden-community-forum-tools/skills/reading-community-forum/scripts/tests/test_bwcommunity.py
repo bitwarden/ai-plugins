@@ -183,6 +183,59 @@ class AcceptedAnswer(unittest.TestCase):
         self.assertIn(200, self.numbers(client))
 
 
+class SearchPaging(unittest.TestCase):
+    """Each page holds 50 posts spread over `per_topic`-sized topic groups; 3 pages are available."""
+
+    class Client:
+        robots_exempt = ()
+
+        def __init__(self, per_topic=1):
+            self.per_topic, self.requested = per_topic, []
+
+        def get(self, path, params=None, want_json=True):
+            if path == "/categories.json":
+                return {"category_list": {"categories": []}}
+            page = (params or {}).get("page", 1)
+            self.requested.append(page)
+            base = (page - 1) * 50
+            posts = [{"topic_id": (base + i) // self.per_topic, "post_number": 1, "username": "u"} for i in range(50)]
+            topics = [{"id": p["topic_id"], "title": "t"} for p in posts]
+            return {"posts": posts, "topics": topics, "grouped_search_result": {"more_full_page_results": page < 3}}
+
+    def run_search(self, client, **kw):
+        args = bw.argparse.Namespace(strict_robots=False, query="x", category=None, tag=None, user=None, solved=False,
+                                     after=None, before=None, in_title=False, order=None, pages=1, limit=15,
+                                     include_system=False, one_per_topic=False, json=True)
+        for k, v in kw.items():
+            setattr(args, k, v)
+        captured = {}
+        orig = bw.emit
+        bw.emit = lambda a, out, text: captured.update(out)
+        try:
+            bw.cmd_search(client, args)
+        finally:
+            bw.emit = orig
+        return captured
+
+    def test_limit_zero_follows_pages(self):
+        client = self.Client()
+        out = self.run_search(client, limit=0, pages=3)
+        self.assertEqual(out["count"], 150)
+        self.assertEqual(client.requested, [1, 2, 3])
+
+    def test_one_per_topic_fetches_until_enough_topics(self):
+        client = self.Client(per_topic=25)  # 2 topics per page
+        out = self.run_search(client, one_per_topic=True, limit=5, pages=3)
+        self.assertEqual(out["count"], 5)
+        self.assertEqual(client.requested, [1, 2, 3])
+
+    def test_default_limit_stops_after_first_page(self):
+        client = self.Client()
+        out = self.run_search(client, pages=3)
+        self.assertEqual(out["count"], 15)
+        self.assertEqual(client.requested, [1])
+
+
 class Forgery(unittest.TestCase):
     def test_heading_in_body_is_escaped(self):
         forged = "## #12 @bitwarden_dev [STAFF] · 2026-01-01\nreal text\n   # indented\nnot # heading"

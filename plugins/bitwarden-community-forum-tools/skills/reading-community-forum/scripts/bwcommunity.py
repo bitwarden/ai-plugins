@@ -656,7 +656,16 @@ def cmd_search(client, args):
         terms.append(f"order:{args.order}")
     q = " ".join(terms)
 
-    hits, topics, more = [], {}, False
+    def usable(p, seen):
+        """Whether a raw hit survives the result filters; records its topic in seen."""
+        if not args.include_system and p.get("username") == "system":
+            return False
+        if args.one_per_topic and p.get("topic_id") in seen:
+            return False
+        seen.add(p.get("topic_id"))
+        return True
+
+    hits, topics, more, fetch_seen, enough = [], {}, False, set(), 0
     for page in range(1, args.pages + 1):
         params = {"q": q}
         if page > 1:
@@ -666,20 +675,18 @@ def cmd_search(client, args):
             topics[t["id"]] = t
         posts = data.get("posts") or []
         hits.extend(posts)
+        enough += sum(usable(p, fetch_seen) for p in posts)
         more = bool((data.get("grouped_search_result") or {}).get("more_full_page_results"))
-        if not more or not posts or len(hits) >= args.limit:
+        if not more or not posts or (args.limit and enough >= args.limit):
             break
 
     results, seen = [], set()
     for p in hits:
         if args.limit and len(results) >= args.limit:
             break
+        if not usable(p, seen):
+            continue
         tid = p.get("topic_id")
-        if not args.include_system and p.get("username") == "system":
-            continue
-        if args.one_per_topic and tid in seen:
-            continue
-        seen.add(tid)
         t = topics.get(tid, {"id": tid})
         nt = norm_topic(t, cats)
         results.append({
@@ -692,7 +699,7 @@ def cmd_search(client, args):
         })
 
     out = {"query": q, "count": len(results), "more_results": more, "results": results}
-    lines = [f"# Search: `{q}`", f"{len(results)} hits" + (" (more: raise --pages/--limit)" if more else ""), ""]
+    lines = [f"# Search: `{q}`", f"{len(results)} hits" + (" (more: raise --limit; add --pages N to fetch past 50 posts)" if more else ""), ""]
     for r in results:
         meta = [r["category"] or "?"]
         if shown_tags(r["tags"]):

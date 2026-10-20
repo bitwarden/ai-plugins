@@ -36,7 +36,7 @@ It needs Python 3.9+ and no API key or configuration. It cannot post, reply, vot
 ## Search tips
 
 - Filters: `--category SLUG`, `--tag TAG` (repeatable), `--user NAME`, `--solved`, `--after/--before YYYY-MM-DD`, `--in-title`.
-- `search --order` is `latest`, `views`, or `likes`; `latest --order` is `activity`, `created`, `views`, `posts`, `likes`, `op_likes`, or `votes`; `top` has no `--order`, only `--period`. Search returns 15 hits by default; raise `--limit` or `--pages N` (50 posts per page) for more.
+- `search --order` is `latest`, `views`, or `likes`; `latest --order` is `activity`, `created`, `views`, `posts`, `likes`, `op_likes`, or `votes`; `top` has no `--order`, only `--period`. Search returns 15 hits by default; raise `--limit` for more (0 = no cap). Each page holds 50 posts, so add `--pages N` as well when you want more than 50.
 - Run `categories` for slugs, for example `pm-feature-requests` and `pm-ask-the-community`. Tags follow patterns such as `app:browser`, `os:linux`, and `autofill`.
 
 ## Reading output
