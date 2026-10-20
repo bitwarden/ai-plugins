@@ -9,13 +9,13 @@ description: Use this skill when posting the final summary comment, including it
 
 Check contexts **in this order** — use the first match:
 
-| Context                             | How to Detect                                                                                                                                                                                                         | Action                                            |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **Local output in effect**          | An `OUTPUT: local files` line in the prompt's leading directive block, **or** a caller that passes local files as the destination in effect. Check this first, and never key it on which tools happen to be available | Write to `review-summary.md` in working directory |
-| Local target, no GitHub destination | The review target is local changes and no caller declared a GitHub destination                                                                                                                                        | Write to `review-summary.md` in working directory |
-| **Agent Mode**                      | Sticky comment context provided in prompt (comment ID + `<!-- bitwarden-code-review -->` marker)                                                                                                                      | Write summary to `/tmp/review-summary.md`         |
-| GitHub Actions (tag mode)           | `mcp__github_comment__update_claude_comment` available AND no sticky comment context                                                                                                                                  | Update sticky comment via MCP tool                |
-| Local review                        | Neither agent mode context nor MCP tool available                                                                                                                                                                     | Write to `review-summary.md` in working directory |
+| Context                             | How to Detect                                                                                                                                                                                                         | Action                                                     |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Local output in effect**          | An `OUTPUT: local files` line in the prompt's leading directive block, **or** a caller that passes local files as the destination in effect. Check this first, and never key it on which tools happen to be available | Write to `review-summary.md` in the local output directory |
+| Local target, no GitHub destination | The review target is local changes and no caller declared a GitHub destination                                                                                                                                        | Write to `review-summary.md` in the local output directory |
+| **Agent Mode**                      | Sticky comment context provided in prompt (comment ID + `<!-- bitwarden-code-review -->` marker)                                                                                                                      | Write summary to `/tmp/review-summary.md`                  |
+| GitHub Actions (tag mode)           | `mcp__github_comment__update_claude_comment` available AND no sticky comment context                                                                                                                                  | Update sticky comment via MCP tool                         |
+| Local review                        | Neither agent mode context nor MCP tool available                                                                                                                                                                     | Write to `review-summary.md` in the local output directory |
 
 **FORBIDDEN:** Do not use `gh pr comment` to create summary comments.
 
@@ -201,5 +201,7 @@ Use mcp__github_comment__update_claude_comment to update the sticky comment with
 ### Local
 
 ```
-Write summary to review-summary.md in working directory.
+Write summary to review-summary.md in the local output directory.
 ```
+
+The caller resolves that directory and passes it in (`bitwarden-code-reviewer` AGENT.md, "Local output directory"): `${CLAUDE_PLUGIN_DATA}/code-review-local/<repo>-<timestamp>/`. If no directory was passed, resolve it the same way. Never write to the working directory, where the file could be committed with the repository under review.

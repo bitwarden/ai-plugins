@@ -1,7 +1,7 @@
 ---
 argument-hint: "[PR#] | [PR URL] | [--base <ref>] | (blank to choose interactively)"
-allowed-tools: AskUserQuestion, Task
-description: Review a GitHub pull request or local changes and write the review to local files instead of posting
+allowed-tools: AskUserQuestion, Task, Edit(~/.claude/plugins/data/bitwarden-code-review*/code-review-local/**)
+description: Review a GitHub pull request or local changes and write the review to the plugin's data directory instead of posting
 ---
 
 **Take `--base <ref>` out of `$ARGUMENTS` first**, before anything below reads it. The accepted form is exactly that — `--base`, a space, then the ref — and nothing else. Remove the pair and resolve the target from what is left, so `--base origin/rc` on its own still reaches the interactive path instead of being read as a target. It names the ref local mode diffs against, and it applies to local changes only — with a pull request target, drop it and say you did. A pull request's base is the one GitHub records, and `gh pr diff` already uses it.
@@ -30,7 +30,7 @@ On the line after it, add `BASE: <ref>` — only when the target is local change
 
 On the next line, always add `OUTPUT: local files` — both targets. This command writes to local files and never posts, so that declaration, not the target, is what `Skill(posting-review-summary)` routes on.
 
-That line is the only carrier — `$ARGUMENTS` is empty on the interactive path, so an agent left to re-derive the target from it would find nothing. This command's own turn holds only `AskUserQuestion` and `Task`: it settles the target and delegates. Thread pre-fetching belongs to the workflow-driven `/bitwarden-code-review:code-review`, not here. Do not run the `gh`, `git`, `Skill`, or `Write` operations described below yourself — they are the agent's, and it carries its own grants for them.
+That line is the only carrier — `$ARGUMENTS` is empty on the interactive path, so an agent left to re-derive the target from it would find nothing. This command's own turn holds `AskUserQuestion` and `Task`, plus an `Edit` rule scoped to the plugin data directory. That rule exists only to pre-approve the agent's `Write` into its run directory; this turn does not write files itself. It settles the target and delegates. Thread pre-fetching belongs to the workflow-driven `/bitwarden-code-review:code-review`, not here. Do not run the `gh`, `git`, `Skill`, or `Write` operations described below yourself — they are the agent's, and it carries its own grants for them.
 
 Invoke the bitwarden-code-reviewer agent now with the instructions below.
 
@@ -90,9 +90,11 @@ Invoke the bitwarden-code-reviewer agent now with the instructions below.
 
 3. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
 
-4. **Output Destination**: Write to local files:
+4. **Output Destination**: Write to local files in the run directory your AGENT.md defines under "Local output directory", never in the working directory:
    - `review-summary.md` - Summary (via `Skill(posting-review-summary)` in local mode)
    - `review-inline-comments.md` - Inline comments (same format as GitHub)
+
+   End your final message with the full path of that directory, so the caller can find the files.
 
 5. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
    - If no inline comments would be left, leave `review-inline-comments.md` blank.
