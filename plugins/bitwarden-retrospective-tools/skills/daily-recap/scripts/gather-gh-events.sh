@@ -30,9 +30,7 @@ die() {
   exit 1
 }
 
-for cmd in gh jq; do
-  command -v "$cmd" >/dev/null 2>&1 || die "'$cmd' is required but not installed"
-done
+command -v jq >/dev/null 2>&1 || die "'jq' is required but not installed"
 
 # GitHub's user events feed holds at most 300 events (3 pages of 100) from the last 30 days.
 readonly PER_PAGE=100
@@ -70,6 +68,8 @@ TZ_LABEL="$(epoch_fmt "$START_EPOCH" '%Z')"
 
 echo "# Window: ${START_UTC} -> ${END_UTC} (${CUTOFF_HH}:00 ${TZ_LABEL} boundary)" >&2
 
+# Checked only after the window is printed, so a recap built without GitHub still has it.
+command -v gh >/dev/null 2>&1 || die "'gh' is required but not installed"
 LOGIN="$(gh api user --jq .login 2>/dev/null)" \
   || die "could not read your GitHub login; run 'gh auth login' and try again"
 

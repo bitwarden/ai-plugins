@@ -48,7 +48,7 @@ scripts/find-sessions.sh "$(jq -r .window.start_utc "$out_dir/events.json")" \
 
 `find-sessions.sh` emits one digest per session: project directory, `cwd`, branches, first and last activity, prompt count, the first few user prompts, tool call count, and edited files, counting only entries inside the window. It skips sessions launched from the home directory or temp directories, because those collect ad-hoc and tool-launched sessions. Pass `--include-home` when the user says they work from their home directory or the digest list looks too thin.
 
-If `gh` is missing or not authenticated, the gather script exits with a message. Build the recap from sessions alone, compute the window by hand, and state that GitHub activity is not included.
+If `gh` is missing or not authenticated, the gather script prints the window line to stderr, then exits with a message. Pass that line's UTC bounds to `find-sessions.sh`, build the recap from sessions alone, and state that GitHub activity is not included.
 
 ### 2. Read every GitHub event type
 

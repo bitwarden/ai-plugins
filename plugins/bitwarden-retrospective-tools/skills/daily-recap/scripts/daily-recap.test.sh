@@ -225,22 +225,24 @@ done
 echo ""
 
 echo "[9] gh missing or signed out"
-# A PATH holding only the tools the script needs before its dependency check, so no
-# installed gh can be found.
+# A PATH holding only the tools the script needs to compute the window, so no installed
+# gh can be found.
 NO_GH_BIN="${WORK_DIR}/no-gh-bin"
 mkdir -p "${NO_GH_BIN}"
 for tool in jq dirname date; do
   ln -s "$(command -v "${tool}")" "${NO_GH_BIN}/${tool}"
 done
-OUT="$(env PATH="${NO_GH_BIN}" "${BASH}" "${GATHER}" 2026-10-13 2>"${WORK_DIR}/stderr")"
+OUT="$(env PATH="${NO_GH_BIN}" TZ=America/New_York "${BASH}" "${GATHER}" 2026-10-13 2>"${WORK_DIR}/stderr")"
 STATUS=$?
 ERR="$(cat "${WORK_DIR}/stderr")"
 assert_eq "without gh: exits 1" 1 "${STATUS}"
 assert_contains "without gh: names the missing tool" "'gh' is required but not installed" "${ERR}"
 assert_eq "without gh: nothing on stdout" "" "${OUT}"
+assert_contains "without gh: still prints the window" "# Window: 2026-10-13T11:00:00Z -> 2026-10-14T11:00:00Z" "${ERR}"
 gather TZ=America/New_York GH_STUB_FAIL=1 -- 2026-10-13
 assert_eq "signed out: exits 1" 1 "${STATUS}"
 assert_contains "signed out: points at gh auth login" "run 'gh auth login' and try again" "${ERR}"
+assert_contains "signed out: still prints the window" "# Window: 2026-10-13T11:00:00Z -> 2026-10-14T11:00:00Z" "${ERR}"
 assert_eq "signed out: stops after the login lookup" "api user --jq .login" "$(cat "${GH_LOG}")"
 echo ""
 
