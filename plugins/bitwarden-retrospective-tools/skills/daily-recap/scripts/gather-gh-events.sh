@@ -76,23 +76,18 @@ LOGIN="$(gh api user --jq .login 2>/dev/null)" \
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/daily-recap.XXXXXX")"
 trap 'rm -rf "$WORK_DIR"' EXIT
 
-# Pages arrive newest first. Stop once a page reaches back past the window start, or the
-# feed runs out, so a quiet day costs one request and a busy one at most three.
+# The feed is in delivery order, not created_at order: events from private repositories
+# often arrive late carrying their original, older timestamps. An old timestamp on a page
+# says nothing about how far back the feed reaches, and a page can come back a few events
+# short mid-feed, so only an empty page marks the end.
 feed_exhausted=false
 page=1
 while ((page <= MAX_PAGES)); do
   page_file="${WORK_DIR}/page-${page}.json"
   gh api "users/${LOGIN}/events?per_page=${PER_PAGE}&page=${page}" >"$page_file" \
     || die "GitHub events request failed on page ${page}"
-  count="$(jq 'length' "$page_file")"
-  if ((count < PER_PAGE)); then
+  if (($(jq 'length' "$page_file") == 0)); then
     feed_exhausted=true
-  fi
-  if ((count == 0)); then
-    break
-  fi
-  oldest_on_page="$(jq -r 'map(.created_at) | min' "$page_file")"
-  if [[ "$oldest_on_page" < "$START_UTC" ]] || [[ "$feed_exhausted" == true ]]; then
     break
   fi
   page=$((page + 1))
@@ -101,18 +96,20 @@ done
 RAW="${WORK_DIR}/events.json"
 jq -s 'add // []' "$WORK_DIR"/page-*.json >"$RAW"
 
-# The window is fully covered when the feed reached back past its start, or when the feed
-# ended naturally and the window is recent enough to fall inside the feed's retention.
-oldest_overall="$(jq -r 'map(.created_at) | min // ""' "$RAW")"
+# How far back the feed reaches is read from its tail, taking the newest of the last few
+# events so one late arrival there cannot overstate the reach. The window is fully covered
+# when that point is before its start, or when the feed ended naturally and the window is
+# recent enough to fall inside the feed's retention.
+reach_back="$(jq -r '.[-10:] | map(.created_at) | max // ""' "$RAW")"
 retention_floor=$(($(date +%s) - FEED_MAX_AGE_DAYS * 86400))
 feed_complete=false
-if [[ -n "$oldest_overall" && "$oldest_overall" < "$START_UTC" ]]; then
+if [[ -n "$reach_back" && "$reach_back" < "$START_UTC" ]]; then
   feed_complete=true
 elif [[ "$feed_exhausted" == true ]] && ((START_EPOCH >= retention_floor)); then
   feed_complete=true
 fi
 if [[ "$feed_complete" != true ]]; then
-  echo "# Warning: GitHub's events feed only reaches back to ${oldest_overall:-nothing} (300 events or ${FEED_MAX_AGE_DAYS} days at most), so events early in this window may be missing." >&2
+  echo "# Warning: GitHub's events feed only reaches back to about ${reach_back:-nothing} (300 events or ${FEED_MAX_AGE_DAYS} days at most), so events early in this window may be missing." >&2
 fi
 
 jq \

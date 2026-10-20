@@ -9,7 +9,7 @@
 # config directory, and `gh` is a stub on PATH, so no real session data is read and the
 # GitHub API is never called. Requires jq, like the scripts themselves.
 
-# cspell:ignore Kolkata
+# cspell:ignore Kolkata fromdate todate
 
 set -uo pipefail
 
@@ -72,9 +72,10 @@ date_utils() {
 
 # ---------------------------------------------------------------------------
 # A stub `gh` that answers the two calls gather-gh-events.sh makes: the login lookup
-# and an empty events feed. Each call is logged so cases can assert that input
-# validation fails before anything would reach GitHub. GH_STUB_FAIL makes every call
-# fail, as an unauthenticated `gh` does.
+# and the events feed, which is empty unless GH_STUB_FEED names a directory of
+# page-<n>.json files. Each call is logged so cases can assert that input validation
+# fails before anything would reach GitHub. GH_STUB_FAIL makes every call fail, as an
+# unauthenticated `gh` does.
 # ---------------------------------------------------------------------------
 STUB_BIN="${WORK_DIR}/stub-bin"
 GH_LOG="${WORK_DIR}/gh-calls.log"
@@ -85,7 +86,10 @@ echo "$*" >>"${GH_LOG}"
 [ -n "${GH_STUB_FAIL:-}" ] && exit 1
 case "$2" in
   user) echo "recap-tester" ;;
-  users/*) echo "[]" ;;
+  users/*)
+    page_file="${GH_STUB_FEED:-/nonexistent}/page-${2##*page=}.json"
+    if [ -f "$page_file" ]; then cat "$page_file"; else echo "[]"; fi
+    ;;
   *) exit 1 ;;
 esac
 EOF
@@ -241,6 +245,48 @@ assert_eq "signed out: stops after the login lookup" "api user --jq .login" "$(c
 echo ""
 
 # ---------------------------------------------------------------------------
+# Events feed paging. GitHub returns the feed in delivery order rather than by
+# created_at, so an event with a long-past timestamp can sit anywhere in it, and a page
+# can come back short mid-feed. The window under test is 2026-10-13T11:00:00Z to
+# 2026-10-14T11:00:00Z.
+# ---------------------------------------------------------------------------
+FEED="${WORK_DIR}/feed"
+mkdir -p "${FEED}"
+
+# feed <events> <oldest-utc> [stray-utc]
+# Writes <events> events an hour apart, newest first and ending at <oldest-utc>, as pages
+# of 100. A stray timestamp replaces the 51st event, in the middle of page 1.
+feed() {
+  rm -f "${FEED}"/page-*.json
+  jq -n --argjson n "$1" --arg oldest "$2" --arg stray "${3:-}" '
+    [range(0; $n) as $i
+      | {type: "PushEvent", repo: {name: "bitwarden/x"}, payload: {},
+         created_at: ($oldest | fromdate + ($n - 1 - $i) * 3600 | todate)}]
+    | if $stray != "" then .[50].created_at = $stray else . end' >"${FEED}/all.json"
+  local p
+  for p in 1 2 3; do
+    jq ".[$(((p - 1) * 100)):$((p * 100))]" "${FEED}/all.json" >"${FEED}/page-${p}.json"
+  done
+}
+
+echo "[10] events feed paging"
+feed 300 2026-10-12T13:00:00Z 2026-09-23T13:09:38Z
+jq 'del(.[0])' "${FEED}/page-2.json" >"${FEED}/short.json" && mv "${FEED}/short.json" "${FEED}/page-2.json"
+gather TZ=America/New_York "GH_STUB_FEED=${FEED}" -- 2026-10-13
+assert_eq "stray old event and short page 2: still reads all three pages" 3 "$(grep -c '/events' "${GH_LOG}")"
+assert_eq "stray old event and short page 2: keeps every in-window event" 24 "$(jq .event_count <<<"${OUT}")"
+assert_eq "stray old event and short page 2: feed reaching past the window is complete" true "$(jq .feed_complete <<<"${OUT}")"
+feed 300 2026-10-14T00:00:00Z 2026-09-23T13:09:38Z
+gather TZ=America/New_York "GH_STUB_FEED=${FEED}" -- 2026-10-13
+assert_eq "feed ends inside the window: incomplete despite the stray" false "$(jq .feed_complete <<<"${OUT}")"
+assert_contains "feed ends inside the window: warns" "events early in this window may be missing" "${ERR}"
+feed 40 2026-10-13T00:00:00Z
+gather TZ=America/New_York "GH_STUB_FEED=${FEED}" -- 2026-10-13
+assert_eq "short feed: stops at the first empty page" 2 "$(grep -c '/events' "${GH_LOG}")"
+assert_eq "short feed: keeps every in-window event" 24 "$(jq .event_count <<<"${OUT}")"
+echo ""
+
+# ---------------------------------------------------------------------------
 # find-sessions.sh. The window under test is 2026-01-05T11:00:00Z to
 # 2026-01-06T11:00:00Z. HOME is a path that does not exist, so its project slug is not
 # mistaken for a temp directory; the logs live under CLAUDE_CONFIG_DIR.
@@ -310,7 +356,7 @@ sessions_found() {
   jq -r '[.[].session] | join(",")' <<<"${OUT}"
 }
 
-echo "[10] find-sessions.sh session selection"
+echo "[11] find-sessions.sh session selection"
 find_sessions "${START}" "${END}"
 assert_eq "exits 0" 0 "${STATUS}"
 assert_eq "keeps only the project session with in-window activity" s-window "$(sessions_found)"
@@ -320,7 +366,7 @@ assert_eq "--include-home adds the home session, ordered by first activity" s-wi
 assert_eq "home digest names its project" -Users-recap-tester "$(jq -r '.[1].project' <<<"${OUT}")"
 echo ""
 
-echo "[11] find-sessions.sh window boundaries and the half-written line"
+echo "[12] find-sessions.sh window boundaries and the half-written line"
 find_sessions "${START}" "${END}"
 DIGEST="$(jq '.[0]' <<<"${OUT}")"
 assert_eq "first activity is the entry 250 ms into the window" 2026-01-05T11:00:00.250Z "$(jq -r .first_activity <<<"${DIGEST}")"
@@ -331,7 +377,7 @@ assert_eq "branches skip HEAD and out-of-window entries" feature/sync,main "$(jq
 assert_eq "path points at the session log" "${APP}/s-window.jsonl" "$(jq -r .path <<<"${DIGEST}")"
 echo ""
 
-echo "[12] find-sessions.sh prompt filter"
+echo "[13] find-sessions.sh prompt filter"
 assert_eq "keeps only real prompts" 4 "$(jq -r .prompt_count <<<"${DIGEST}")"
 assert_eq "real prompts in order" \
   "Fix the flaky login test|Refactor the sync service|Explain what a <system-reminder> tag is|Last prompt of the workday" \
@@ -347,14 +393,14 @@ assert_eq "counts tool calls" 2 "$(jq -r .tool_calls <<<"${DIGEST}")"
 assert_eq "lists edited files" /Users/recap-tester/dev/app/sync.ts "$(jq -r '.files_edited | join(",")' <<<"${DIGEST}")"
 echo ""
 
-echo "[13] find-sessions.sh default log location"
+echo "[14] find-sessions.sh default log location"
 DEFAULT_HOME="${WORK_DIR}/home"
 session_file "${DEFAULT_HOME}/.claude/projects/-Users-someone-dev-api" s-default 2026-01-05T15:00:00.000Z
 OUT="$(env -u CLAUDE_CONFIG_DIR HOME="${DEFAULT_HOME}" bash "${FIND}" "${START}" "${END}" 2>/dev/null)"
 assert_eq "reads ~/.claude/projects when CLAUDE_CONFIG_DIR is unset" s-default "$(sessions_found)"
 echo ""
 
-echo "[14] find-sessions.sh argument checks"
+echo "[15] find-sessions.sh argument checks"
 find_sessions "${START}"
 assert_eq "one timestamp: exits 2" 2 "${STATUS}"
 assert_contains "one timestamp: prints usage" "Usage: find-sessions.sh" "${ERR}"
