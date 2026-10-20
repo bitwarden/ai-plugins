@@ -14,4 +14,7 @@ Use the plugin's runner, [`evals/run_real_eval.py`](../../../evals/run_real_eval
 
 ## Last reading
 
-Not yet recorded.
+2026-10-20, `claude-opus-4-8`, 3 runs per query, inventory pinned to this plugin with `--setting-sources project --plugin-dir`.
+
+- **Should trigger:** 6/6 queries, 3/3 runs each.
+- **Should not trigger:** 6/6 queries, 0/3 runs each. Four runs timed out at 90 seconds and count as non-triggers: 1 of 3 for the Stripe query and 3 of 3 for the Discourse-plugin query. Those two rows are weaker evidence than the other four.
