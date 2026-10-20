@@ -104,6 +104,8 @@ run_check() {
       [[ -n "$sel" ]] && ! grep -Ev -- "$(arg "$c" pattern)" <<<"$sel" | grep -q . ;;
     agents_ran_without_line)
       [[ "$(agent_calls)" -gt 0 ]] && ! tool_inputs Agent | jq -r .prompt | grep $flags -- "$(arg "$c" pattern)" ;;
+    agent_prompts_have_line)
+      tool_inputs Agent | jq -r .prompt | grep $flags -- "$(arg "$c" pattern)" ;;
     stub_called)
       while IFS= read -r sub; do
         grep -Eq -- "^$sub( |$)" "$FIXTURE/gh-stub/calls.log" || return 1

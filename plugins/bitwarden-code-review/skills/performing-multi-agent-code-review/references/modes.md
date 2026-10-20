@@ -6,13 +6,23 @@ Determine review mode from the invocation. Inspect both the slash-command argume
 
 ## Mode 1 — PR mode
 
-**Trigger:** the user supplied a GitHub pull request reference. Recognize a bare number (`123`), a `#`-prefixed reference (`#123`, `PR #123`), or a pull-request URL (`https://github.com/owner/repo/pull/123`).
+**Trigger:** the user supplied a GitHub pull request reference: a bare number (`123`), a `#`-prefixed reference (`#123`, `PR #123`), or a URL.
+
+**URL form:** `^https://github\.com/([A-Za-z0-9][A-Za-z0-9-]*)/([A-Za-z0-9._-]+)/pull/([0-9]+)/?$`. The groups are the owner, the repo, and the number. Any other URL aborts the review. When a URL was given, pass `--repo <owner>/<repo>` to every `gh pr` command.
 
 **Diff sources:**
 
-- Title & description: `gh pr view <number>`
+- Metadata: `gh pr view <number> --json title,body,url,headRefOid,baseRefOid`. Validate the number against `^[0-9]+$` and each SHA against `^[0-9a-f]{40}$` before using them in a command.
 - Changed files: `gh pr diff <number> --name-only`
 - Diff: `gh pr diff <number>`
+
+**Full-file reads.** The checkout may not be at the PR's head. Choose where the architect reads whole files:
+
+1. `git rev-parse HEAD` equals `headRefOid` and `git status --porcelain` returns empty: read from the working tree.
+2. The URL of `origin` (`git remote get-url origin`) ends in the PR's `owner/repo`, case-insensitive, with or without `.git`: run `git fetch origin pull/<number>/head`, then `git rev-parse --verify <headRefOid>^{commit}`. If both succeed, read each file with `git show <headRefOid>:<path>`.
+3. Otherwise read no changed path from the working tree, and render the `**Not covered:**` line with "architect full-file context unavailable".
+
+The `owner/repo` comes from the `url` field of the metadata, so a bare number resolves the same way as a URL.
 
 ## Mode 2 — Local changes mode
 
@@ -20,8 +30,10 @@ Determine review mode from the invocation. Inspect both the slash-command argume
 
 **Diff sources:**
 
-- Changed files: `git diff HEAD --name-only`
-- Diff: `git diff HEAD` (combines staged + unstaged)
+- Changed files: `git diff HEAD --name-only`, then the untracked files below
+- Diff: `git diff HEAD` (staged and unstaged), then `git diff --no-index -- /dev/null <path>` for each untracked file. Exit status 1 means the file differs from nothing. It is not a failure.
+
+**Untracked files.** `git ls-files --others --exclude-standard` lists them. Skip a path when any component starts with `.env` or equals `.npmrc`, `.netrc`, `.pgpass`, `.aws`, `.ssh` or `.gnupg`; when its extension is `pem`, `key`, `p12`, `pfx`, `jks`, `keystore` or `kdbx`; or when its name starts with `id_rsa`, `id_ed25519` or `credentials`. An untracked file can hold credentials that were never meant to leave the machine, and every kept file goes to subagents. Name each skipped path on the `**Not covered:**` line.
 
 ## Mode 3 — Branch comparison mode
 
@@ -62,3 +74,7 @@ The user is expected to invoke this skill from inside the target repo's working 
 - Diff (cumulative across the range): `git diff <from>..<to>`
 
 **Interpretation of "introduced by this change" in commit-range mode:** "introduced" means present in the cumulative diff of `<from>..<to>`; "pre-existing" means present at the parent of `<from>`. Step 4 validation subagents must use this interpretation when applying the dismissal rules.
+
+## Before launching agents
+
+Run the mode's changed-files and diff commands. Stop before Step 2 when a command fails, other than `git diff --no-index` exiting 1, or when the diff is empty. Print one line naming the command and the cause. Launch no agent and write no report. When `origin/HEAD` is unset, the line says to run `git remote set-head origin -a`. When untracked files were skipped and nothing else changed, the line names them.

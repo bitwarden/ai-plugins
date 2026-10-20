@@ -5,11 +5,20 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1] - 2026-10-17
+## [2.5.0] - 2026-10-19
 
 ### Added
 
-- Evals for `performing-multi-agent-code-review` under its `evals/` directory. `catch-rate-eval.json` runs the review against five merged Bitwarden pull requests whose bug a later pull request fixed. `catch-rate-baseline.json` records how often a validated finding names that bug and how many validated findings are false, for the skill and for a plain review prompt. `behavior-eval.json` holds one case per gap named in the skill's improvement plan; two fail against 2.4.0 as intended, one fails intermittently, and the rest pass so far
+- Catch-rate and behavior evals for `performing-multi-agent-code-review`
+- Local mode reviews untracked files, skipping credential paths
+
+### Fixed
+
+- PR mode has the architect read files at PR head and accepts other repos' PR URLs
+- Empty or failed diffs stop the review
+- Failed review stages are reported
+- Forwarding guidance read at the diff base, including `.claude/CLAUDE.md`
+- Untrusted-input boundary covers PR title, description, and opened files
 
 ## [2.4.0] - 2026-10-12
 
