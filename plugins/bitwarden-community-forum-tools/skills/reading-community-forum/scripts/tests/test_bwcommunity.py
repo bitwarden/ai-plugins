@@ -103,13 +103,17 @@ class HtmlToText(unittest.TestCase):
 
 
 class FakeThreadClient:
-    """Serves a 250-post stream; posts.json returns the requested ids."""
+    """Serves a 250-post stream; posts.json returns the requested ids.
 
-    def __init__(self, n=250):
+    deleted post numbers are absent from the stream, as Discourse omits them; ids are post numbers.
+    """
+
+    def __init__(self, n=250, deleted=()):
         self.n = n
+        self.deleted = set(deleted)
 
     def get(self, path, params=None, want_json=True):
-        stream = list(range(1, self.n + 1))
+        stream = [i for i in range(1, self.n + 1) if i not in self.deleted]
         mk = lambda i: {"id": i, "post_number": i}
         if path.endswith("/posts.json"):
             return {"post_stream": {"posts": [mk(v) for k, v in params]}}
@@ -122,6 +126,12 @@ class FetchThread(unittest.TestCase):
         self.assertEqual(total, 250)
         self.assertEqual([p["post_number"] for p in posts][:2], [150, 151])
         self.assertEqual(len(posts), 100)
+
+    def test_start_at_with_deleted_posts_skips_nothing(self):
+        client = FakeThreadClient(250, deleted=range(10, 60))
+        _, posts, _, _, _ = bw._fetch_thread(client, 1, 100, False, "chrono", 100)
+        numbers = [p["post_number"] for p in posts if p["post_number"] >= 100]
+        self.assertEqual(numbers[:3], [100, 101, 102])
 
     def test_start_at_beyond_stream_is_empty(self):
         _, posts, _, _, _ = bw._fetch_thread(FakeThreadClient(), 1, 100, False, "chrono", 400)

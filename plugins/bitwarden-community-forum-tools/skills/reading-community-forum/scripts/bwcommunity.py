@@ -689,12 +689,31 @@ def cmd_search(client, args):
     emit(args, out, "\n".join(lines))
 
 
+def _window_start(client, topic_id, wanted, posts, start_at):
+    """Index in wanted at or before the first post numbered >= start_at.
+
+    Deleted posts leave gaps in post numbers but not in the stream, so wanted[start_at - 1] is at
+    or past post #start_at. Stepping back by the number gap there cannot skip the target.
+    """
+    idx = min(start_at - 1, len(wanted) - 1)
+    pid = wanted[idx]
+    if pid not in posts:
+        more = client.get(f"/t/{topic_id}/posts.json", [("post_ids[]", pid)])
+        for p in more["post_stream"]["posts"]:
+            posts[p["id"]] = p
+    if pid not in posts:
+        return idx
+    number = posts[pid]["post_number"]
+    return idx + 1 if number < start_at else max(idx - (number - start_at), 0)
+
+
 def _fetch_thread(client, topic_id, max_posts, raw, mode, start_at=0):
     """Return (topic, posts, total, raw_map, used_best). mode: auto | best | chrono.
 
     start_at windows the stream to post #start_at onward before max_posts is applied, so a
     deep link past the first max_posts posts still returns posts. Post numbers can exceed stream
-    positions when posts were deleted, so the caller re-filters on post_number.
+    positions when posts were deleted, so the window start is corrected from the post number found
+    at the candidate position; the caller still re-filters on post_number to trim any excess.
     """
     data = client.get(f"/t/{topic_id}.json")
     stream = data["post_stream"].get("stream") or []
@@ -707,8 +726,8 @@ def _fetch_thread(client, topic_id, max_posts, raw, mode, start_at=0):
         for p in best["post_stream"]["posts"]:
             posts[p["id"]] = p
         wanted = best["post_stream"].get("stream") or stream
-    if start_at:
-        wanted = wanted[start_at - 1:]
+    if start_at and wanted:
+        wanted = wanted[_window_start(client, topic_id, wanted, posts, start_at):]
     if max_posts:
         wanted = wanted[:max_posts]
     accepted = data.get("accepted_answer") or next(iter(data.get("accepted_answers") or []), {})
@@ -744,6 +763,7 @@ def parse_raw_topic(text):
 
 def cmd_thread(client, args):
     topic_id, start_at = parse_topic_ref(args.topic)
+    start_at = start_at or 0
     cats = Categories(client)
     mode = "chrono" if args.chrono or start_at else ("best" if args.best else "auto")
     # --brief scans a wider window (whole thread up to 100 posts, else the best-of set) and keeps only key posts.
