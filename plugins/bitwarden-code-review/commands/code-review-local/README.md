@@ -50,7 +50,15 @@ The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` age
 
 ## Output Files
 
-The command generates two markdown files in your current working directory:
+The command generates two markdown files in a run directory under the plugin's data directory, not in your working directory:
+
+```
+${CLAUDE_PLUGIN_DATA}/code-review-local/<repo>-<timestamp>/
+```
+
+`<repo>` is the name of the repository you ran the review in and `<timestamp>` is `YYYY-MM-DD-HHMMSS`. `${CLAUDE_PLUGIN_DATA}` resolves to this plugin's directory under `~/.claude/plugins/data/`. Because that is outside any repository, the files can never be picked up by `git add` and no checkout needs a `.gitignore` entry for them. If the variable arrives unexpanded, which can happen on a local `--plugin-dir` load, the command uses `~/.claude/plugins/data/bitwarden-code-review/code-review-local/<repo>-<timestamp>/`. It never falls back to the working directory. The command ends by printing the directory it wrote to. `claude plugin uninstall` deletes the data directory unless you pass `--keep-data`.
+
+The commands below use `$REVIEW_DIR` for that printed path.
 
 ### 1. `review-summary.md`
 
@@ -148,12 +156,13 @@ Review the generated files before manually posting to GitHub:
 
 ```bash
 /code-review-local 123
-# Review the generated files
-cat review-summary.md
-cat review-inline-comments.md
+# Review the generated files, in the directory the command printed
+REVIEW_DIR=~/.claude/plugins/data/bitwarden-code-review/code-review-local/<repo>-<timestamp>
+cat "$REVIEW_DIR/review-summary.md"
+cat "$REVIEW_DIR/review-inline-comments.md"
 # Manually post if satisfied
-gh pr comment 123 --body-file review-summary.md
-gh pr review 123 --comment --body "$(cat review-inline-comments.md)"
+gh pr comment 123 --body-file "$REVIEW_DIR/review-summary.md"
+gh pr review 123 --comment --body "$(cat "$REVIEW_DIR/review-inline-comments.md")"
 ```
 
 ### Offline Review Workflow
@@ -174,7 +183,7 @@ Integrate with custom tooling or approval processes:
 # Generate review
 /code-review-local 789
 # Process with custom scripts
-python process_review.py review-summary.md review-inline-comments.md
+python process_review.py "$REVIEW_DIR/review-summary.md" "$REVIEW_DIR/review-inline-comments.md"
 ```
 
 ### Pre-Commit Validation

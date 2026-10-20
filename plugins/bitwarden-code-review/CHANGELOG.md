@@ -5,6 +5,15 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-10-20
+
+### Changed
+
+- `/code-review-local` writes `review-summary.md` and `review-inline-comments.md` to `${CLAUDE_PLUGIN_DATA}/code-review-local/<repo>-<timestamp>/` instead of the working directory, so a local review no longer leaves untracked files in the repository under review. The two files share one run directory, and the command ends by printing its path
+- The `bitwarden-code-reviewer` agent resolves that directory once ("Local output directory" in `AGENT.md`) and passes it to `posting-review-summary` and `posting-bitwarden-review-comments`. If `${CLAUDE_PLUGIN_DATA}` arrives unexpanded, as it can on a local `--plugin-dir` load, it uses `~/.claude/plugins/data/bitwarden-code-review/code-review-local/` and never falls back to the working directory
+- `Edit(~/.claude/plugins/data/bitwarden-code-review*/code-review-local/**)` added to `code-review-local`'s `allowed-tools`. It is an `Edit` rule because Claude Code checks file permissions against `Edit(path)` rules, which cover the `Write` tool, and it is written literally because `${CLAUDE_PLUGIN_DATA}` is not substituted in a rule on a local `--plugin-dir` load. It ends in `**` rather than `*` because the files sit one level down, in the run directory
+- `Bash(date:*)` and `Bash(git rev-parse:*)` added to the agent's tools, for the timestamp and the repository name in the directory name. The `code-review` workflow's `/tmp` output is unchanged
+
 ## [2.4.0] - 2026-10-12
 
 ### Added
