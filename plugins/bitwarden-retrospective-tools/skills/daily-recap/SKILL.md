@@ -43,6 +43,9 @@ scripts/gather-gh-events.sh [YYYY-MM-DD] > "$work_dir/events.json"
 # (b) Claude Code sessions with activity inside that window
 scripts/find-sessions.sh "$(jq -r .window.start_utc "$work_dir/events.json")" \
   "$(jq -r .window.end_utc "$work_dir/events.json")" > "$work_dir/sessions.json"
+
+# (c) Only when (a) omitted the date: today's events since the cutoff, for the Today banner
+scripts/gather-gh-events.sh "$(date +%Y-%m-%d)" > "$work_dir/today.json"
 ```
 
 `gather-gh-events.sh` emits `login`, `window` (date, cutoff hour, timezone label, UTC and local bounds), `feed_complete`, `event_count`, and `events`. GitHub's events feed only holds the most recent 300 events from the last 30 days; when `feed_complete` is `false`, say in the recap that early events in the window may be missing.
@@ -100,7 +103,7 @@ cp assets/template.html "$out_dir/recap-YYYY-MM-DD.html"
 - HTML-escape every piece of text that comes from GitHub or session logs (titles, comment bodies, commit messages, branch names, prompts). Other people write much of that text, and unescaped markup would render as live HTML.
 - Leave the `<script>` block and the Content-Security-Policy meta tag untouched. The policy pins the script by hash, so any edit disables the page's filters and Copy button.
 
-Always pair PR numbers with titles; a bare `#1234` tells the reader nothing. Link them as `<a class="pr-ref" href="...">#1234</a>`. Events after midnight but before the cutoff belong to the recap's workday and go under the "After Midnight" divider in the timeline. The Today banner is only for events after today's cutoff hour.
+Always pair PR numbers with titles; a bare `#1234` tells the reader nothing. Link them as `<a class="pr-ref" href="...">#1234</a>`. Events after midnight but before the cutoff belong to the recap's workday and go under the "After Midnight" divider in the timeline. Fill the Today banner from `today.json` alone, so it stays empty on runs that skip step (c).
 
 ### 7. Open it
 

@@ -32,7 +32,7 @@ Self-explanatory: `{{DATE}}`, `{{SUBTITLE}}`, `{{STAT_*}}`, `{{STANDUP_SHIPPED}}
 
 The script fills in the counts. `{slug}` must match the `data-project` value used on that project's section and timeline events.
 
-`{{TODAY_BANNER}}`: an empty string when nothing happened after today's cutoff hour. Otherwise:
+`{{TODAY_BANNER}}`: an empty string when step 1 did not gather `today.json` or it holds no events. Otherwise, built from those events:
 
 ```html
 <div class="today-banner">

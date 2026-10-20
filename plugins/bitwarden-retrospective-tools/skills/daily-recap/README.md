@@ -68,7 +68,7 @@ scripts/daily-recap.test.sh
 
 ## Privacy & Security
 
-- Everything runs locally. Session logs are read, never modified, and the scripts keep temporary data in a private temp directory that is removed when they exit. The gathered events and session digests are kept beside the recap pages and replaced on each run.
+- Everything runs locally. Session logs are read, never modified, and the scripts keep temporary data in a private temp directory that is removed when they exit. The gathered events and session digests go in a `work/` subdirectory of the output directory, which the skill deletes at the end of every run, so only the rendered page is left behind.
 - GitHub data comes from your own events feed through `gh`, including private-repository activity you can see. Review a recap before sharing it outside the team.
 - Text from GitHub and sessions is HTML-escaped when the page is rendered, and the page's Content-Security-Policy only lets its own script run and blocks network requests other than the brand fonts.
 
