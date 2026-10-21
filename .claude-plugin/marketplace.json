@@ -139,7 +139,7 @@
       "name": "bitwarden-beads-tools",
       "source": "./plugins/bitwarden-beads-tools",
       "version": "0.1.0",
-      "description": "Shows the project's open, in-progress, and blocked beads in a pane and the status line, kept current as bd commands run."
+      "description": "Tools that complement the beads (bd) issue tracker in Claude Code, including a live pane and status line of the project's open, in-progress, and blocked beads."
     }
   ]
 }
