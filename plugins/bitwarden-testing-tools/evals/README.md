@@ -94,7 +94,11 @@ description change.
 
 ## Known below-threshold queries
 
-None. On `claude-opus-4-8` both baselines pass every query: `recommending-test-layers` at 10/10
+- `assessing-requirement-readiness`: `is CL-1221 actually testable or is it hand-wavy`, 0/7 should-trigger on `claude-opus-4-8`. Too short and vague to route.
+- `assessing-requirement-readiness`: `the autofill story we're refining next has a figma link and two lines of description. will that hold up or should I send it back to the PO now?`, 0/7 should-trigger on `claude-opus-4-8`. Names no Jira ticket, and the skill starts from a Jira story.
+- `designing-test-plans`: `the vault-unlock rework story says the PIN has to be 4 to 8 digits. what test cases does the story need overall, edge values included?`, 1/7 should-trigger on `claude-opus-4-8`. Names no Jira ticket, and the skill starts from a Jira story.
+
+On `claude-opus-4-8` the `recommending-test-layers` and `assessing-test-coverage` baselines pass every query: `recommending-test-layers` at 10/10
 should-trigger and 10/10 should-not-trigger, `assessing-test-coverage` likewise 10/10 and 10/10.
 The mechanism still allows a baseline to _record_ a should-trigger query below threshold and diff
 clean; when the model was `claude-sonnet-5`, `assessing-test-coverage`'s branch-audit phrasing
