@@ -66,6 +66,9 @@ while IFS= read -r cite; do
 done < <(grep -oE '`[^` ]+:[0-9]+(-[0-9]+)?`' <<<"$findings" | tr -d '`' || true)
 
 checkout="$run_dir/repo"
+# --setting-sources local reads .claude/settings.local.json from the checkout, which a corpus PR can commit.
+[[ ! -e "$checkout/.claude/settings.local.json" && ! -L "$checkout/.claude/settings.local.json" ]] \
+  || { echo "corpus checkout carries .claude/settings.local.json; refusing to load it" >&2; exit 1; }
 schema='{"type":"object","additionalProperties":false,"required":["findings","describes_known_bug"],"properties":{"describes_known_bug":{"type":"boolean"},"findings":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["location","verdict","reason"],"properties":{"location":{"type":"string"},"verdict":{"enum":["real","false"]},"reason":{"type":"string"}}}}}}'
 grader_prompt="$(cat <<EOF
 You are grading a code review of $pr_url. The working tree is checked out at the pull request's head commit. You can read files and run \`gh pr diff\`.

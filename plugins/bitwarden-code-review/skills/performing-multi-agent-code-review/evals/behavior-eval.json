@@ -1,7 +1,7 @@
 {
   "skill_name": "performing-multi-agent-code-review",
   "eval_type": "behavior",
-  "purpose": "One case per gap fixed in 2.5.0, plus cases 10, 11 and 12 that guard the fixes. Against 2.4.0, cases 2, 3, 4 and 10 fail as intended and case 1 fails intermittently. Cases 5-9 and 11 passed every valid run; they guard the behavior the fixes make explicit. `fixture` names a builder in fixtures/setup.sh. `{T}` in a prompt is replaced with the run's report directory. `checks` are deterministic (D), each a `kind` that run-behavior.sh implements; `expectations` are graded (G) against the report. See ./README.md.",
+  "purpose": "One case per gap fixed in 2.5.0, plus cases 10, 11 and 12 that guard the fixes, and case 4, skipped until `--base` lands. Against 2.4.0, cases 2, 3, 4 and 10 fail as intended and case 1 fails intermittently. Cases 5-9 and 11 passed every valid run; they guard the behavior the fixes make explicit. `fixture` names a builder in fixtures/setup.sh. `{T}` in a prompt is replaced with the run's report directory. `checks` are deterministic (D), each a `kind` that run-behavior.sh implements; `expectations` are graded (G) against the report. See ./README.md.",
   "evals": [
     {
       "id": 1,

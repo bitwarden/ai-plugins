@@ -1,7 +1,7 @@
 # performing-multi-agent-code-review evals
 
 - `catch-rate-eval.json`: five merged Bitwarden pull requests, each with a bug a later pull request fixed. Measures how often the review names the bug and how many of its findings are false. `catch-rate-baseline.json` holds the recorded results.
-- `behavior-eval.json`: one case per gap fixed in 2.5.0, plus three guards for the fixes, built on local fixtures and two real pull requests.
+- `behavior-eval.json`: one case per gap fixed in 2.5.0, plus three guards for the fixes and case 4, skipped until `--base` lands, built on local fixtures and two real pull requests.
 
 ## Catch-rate eval
 
@@ -48,7 +48,7 @@ At four parallel runs, sessions failed on credential-lock and connection errors.
 
 ### Permissions
 
-A corpus pull request is untrusted input. Runs use `--permission-mode dontAsk`, which denies any tool call not on the allow-list: read tools, `gh pr view`, `gh pr diff`, read-only `git` subcommands, `ls`, `cat`, `head`, `wc`, and edits inside the run's report directory. A deny list blocks `git` options that write files (`--output`) or run commands (`--upload-pack`) under an allowed prefix. File reads are not confined to the checkout.
+A corpus pull request is untrusted input. Runs use `--permission-mode dontAsk`, which denies any tool call not on the allow-list: read tools, `gh pr view`, `gh pr diff`, read-only `git` subcommands, `ls`, `cat`, `head`, `wc`, and edits inside the run's report directory. A deny list blocks `git` options that write files (`--output`) or run commands (`--upload-pack`, which git also accepts abbreviated down to `--upl`) under an allowed prefix. File reads are not confined to the checkout. The catch-rate runner and grader load only `local` settings, and refuse a checkout that carries `.claude/settings.local.json`.
 
 ### Regression gate
 

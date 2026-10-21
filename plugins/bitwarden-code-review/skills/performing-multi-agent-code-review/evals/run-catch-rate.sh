@@ -54,7 +54,7 @@ else
 fi
 
 # A corpus PR is untrusted input. dontAsk denies every call not allowed here. The deny list closes
-# options that write files (--output) or run commands (--upload-pack) under an allowed git prefix.
+# options that write files (--output) or run commands (--upload-pack, which git also accepts abbreviated down to --upl) under an allowed git prefix.
 allowed=(
   Read Grep Glob Skill Agent
   "Edit(/$report_dir/**)"
@@ -65,12 +65,15 @@ allowed=(
 )
 denied=(
   "Bash(git * --output*)" "Bash(git *--output=*)"
-  "Bash(git * --upload-pack*)" "Bash(git *--upload-pack=*)"
+  "Bash(git *--upl*)"
 )
 
 # Without this note, one denied compound command led a run to stop using Bash altogether.
 harness_note="Tool permissions in this session are an allow-list, enforced per command. Allowed Bash commands: gh pr view, gh pr diff, and read-only git subcommands (diff, status, log, show, rev-parse, merge-base, ls-files), plus ls, cat, head, and wc. Run each command on its own, not chained with && or ;. A denied command does not mean Bash is unavailable."
 
+# --setting-sources local reads .claude/settings.local.json from the checkout, which a corpus PR can commit.
+[[ ! -e "$checkout/.claude/settings.local.json" && ! -L "$checkout/.claude/settings.local.json" ]] \
+  || { echo "corpus checkout carries .claude/settings.local.json; refusing to load it" >&2; exit 1; }
 cd "$checkout"
 env -u CLAUDECODE claude -p "$prompt" \
   --model "$model" \

@@ -34,6 +34,7 @@ if [[ -n "$skip_reason" ]]; then
 fi
 
 if [[ -z "${RESCORE:-}" ]]; then
+  [[ ! -e "$FIXTURE" ]] || { echo "$run_dir already holds a run; delete it to re-run, or set RESCORE=1 to re-score it" >&2; exit 1; }
   "$EVALS_DIR/fixtures/setup.sh" "$(jq -r .fixture <<<"$case_json")" "$FIXTURE" >/dev/null
   prompt="$(jq -r .prompt <<<"$case_json")"
   prompt="${prompt//\{T\}/$T}"
@@ -46,10 +47,11 @@ if [[ -z "${RESCORE:-}" ]]; then
     "Bash(git merge-base:*)" "Bash(git fetch origin:*)" "Bash(git ls-files:*)"
     "Bash(ls:*)" "Bash(cat:*)" "Bash(head:*)" "Bash(wc:*)"
   )
-  # Options that write files (--output) or run commands (--upload-pack) under an allowed git prefix.
+  # Options that write files (--output) or run commands (--upload-pack, which git also accepts abbreviated
+  # down to --upl) under an allowed git prefix.
   denied=(
     "Bash(git * --output*)" "Bash(git *--output=*)"
-    "Bash(git * --upload-pack*)" "Bash(git *--upload-pack=*)"
+    "Bash(git *--upl*)"
   )
 
   # Without this note, one denied compound command led a run to stop using Bash altogether.

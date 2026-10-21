@@ -17,7 +17,6 @@
     "ASVS",
     "atlassian",
     "azcopy",
-    "behaviour",
     "Bitwarden",
     "blocklist",
     "blogposts",
@@ -223,6 +222,7 @@
     "**/dist/**",
     "**/node_modules/**",
     "**/pnpm-lock.yaml",
+    "plugins/bitwarden-code-review/skills/performing-multi-agent-code-review/evals/catch-rate-baseline.json",
     "/project-words.txt"
   ]
 }

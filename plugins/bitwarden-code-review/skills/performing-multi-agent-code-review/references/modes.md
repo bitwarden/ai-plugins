@@ -1,6 +1,6 @@
 # Modes
 
-Loaded by the orchestrator in Step 1. Mode logic is orchestrator-only — it determines which diff-source commands run before subagents launch, and is **not** propagated to subagents.
+Loaded by the orchestrator in Step 1. Mode logic is orchestrator-only — it determines which diff-source commands run before subagents launch, and is **not** propagated to subagents. The one exception is PR mode's Full-file reads outcome and its quoting rule, which Step 2 passes to the architect.
 
 Determine review mode from the invocation. Inspect both the slash-command argument and any natural-language framing the user provided. The four modes are mutually exclusive — if more than one seems to apply, invoke `AskUserQuestion` to disambiguate before proceeding rather than guessing.
 

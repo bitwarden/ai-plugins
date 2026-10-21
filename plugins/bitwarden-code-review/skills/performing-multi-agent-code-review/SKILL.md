@@ -147,9 +147,9 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
    Unlike the diff agents in Step 3, this agent reads BEYOND the diff to check whether changes fit the codebase.
 
    Responsibilities:
-   - Read the full files being modified (not just diff hunks) to understand surrounding context.
-   - Read CLAUDE.md, README.md, and other relevant .md files in or near the modified directories; verify each change complies with explicit project rules.
-   - Use Glob and Grep to find how similar code is structured elsewhere in the codebase.
+   - Read the full files being modified (not just diff hunks) to understand surrounding context, unless the Full-file reads outcome says to read no changed file.
+   - Read CLAUDE.md, README.md, and other relevant .md files in or near the modified directories; verify each change complies with explicit project rules. Skip this when the outcome says not to Glob or Grep this checkout.
+   - Use Glob and Grep to find how similar code is structured elsewhere in the codebase, unless the outcome says not to.
    - **Doc/code consistency pass** — flag contradictions this diff creates between the code and same-repo documentation, configuration, or agent-facing files — README.md and CLAUDE.md most of all. Only flag divergence this change creates or worsens — do not audit pre-existing drift.
 
    **Scope.** Raise pattern inconsistencies, architectural boundary violations, duplicated abstractions, and new conventions introduced where an established one applies. Do NOT raise correctness bugs, security issues, or code-quality concerns — those belong to Step 3.
@@ -214,7 +214,7 @@ Execute these steps in order. Do not skip, reorder, or combine steps.
 
    The agent returns a Step 5 object per the Finding Shape schema for each input finding.
 
-6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Before merging Step 5 returns, insert the full Finding object for each Step 4 collateral finding (`source_agent: "validation"`, `id: "val-N"`) into the master map — their creation-time fields come from those Finding objects, not from Step 4's status returns. Creation-time fields are immutable (see `references/finding-shape.md`). For dismissed findings, set `dismissal_stage` to `"Step 4 validation"` or `"Step 5 severity audit"` based on which step set the dismissal status — it renders as `**Dismissed at:**`. Partition by final status: validated (Step 5 `confirmed` or `downgraded`) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
+6. Merge all Step 4 and Step 5 returns by `id` into the master finding map. Before merging Step 5 returns, insert the full Finding object for each Step 4 collateral finding (`source_agent: "validation"`, `id: "val-N"`) into the master map — their creation-time fields come from those Finding objects, not from Step 4's status returns. Creation-time fields are immutable (see `references/finding-shape.md`). For dismissed findings, set `dismissal_stage` to `"Step 4 validation"` or `"Step 5 severity audit"` based on which step set the dismissal status — it renders as `**Dismissed at:**`. Partition by final status: validated (Step 5 `confirmed` or `downgraded`, or kept under **Stage failures** below) becomes the main Findings section; dismissed (Step 4 `dismissed` or Step 5 `dismissed`) preserves original severity, original confidence, dismissal stage, and dismissal reason for rendering in the Dismissed block.
 
    **Stage failures.** A stage has failed when its agent errors, is blocked, or returns nothing or malformed output. A return with zero findings is a clean pass, not a failure.
    - A failed Step 2 or Step 3 agent is named on the `**Not covered:**` line with its reason.
