@@ -134,6 +134,12 @@
       "source": "./plugins/bitwarden-retrospective-tools",
       "version": "1.0.0",
       "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs and your GitHub activity."
+    },
+    {
+      "name": "bitwarden-beads-tools",
+      "source": "./plugins/bitwarden-beads-tools",
+      "version": "0.1.0",
+      "description": "Shows the project's open, in-progress, and blocked beads in a pane and the status line, kept current as bd commands run."
     }
   ]
 }

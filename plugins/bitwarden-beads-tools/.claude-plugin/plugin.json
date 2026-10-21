@@ -1,0 +1,12 @@
+{
+  "name": "bitwarden-beads-tools",
+  "version": "0.1.0",
+  "description": "Shows the project's open, in-progress, and blocked beads in a pane and the status line, kept current as bd commands run.",
+  "author": {
+    "name": "Bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-beads-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["beads", "bd", "issue-tracking", "pane", "status-line"],
+  "types": "./types/index.d.ts"
+}
