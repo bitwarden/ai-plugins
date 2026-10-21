@@ -106,6 +106,37 @@ test("output that is not JSON reads as an error in the status line", async ($, o
   expect(statuses).toContain("beads: error reading bd list");
 });
 
+test("a project with no open beads clears the status line", async ($, on) => {
+  const statuses: (string | undefined)[] = [];
+  let issues: unknown[] = [];
+  on("session.cwd", () => ({ value: "/work/demo" }));
+  on("process.run", () => ({
+    value: {
+      exitCode: 0,
+      stdout: JSON.stringify({ issues }),
+      stderr: "",
+      isStdoutTruncated: false,
+      isStderrTruncated: false,
+    },
+  }));
+  on("ui.status", ($, e) => {
+    statuses.push(e.text);
+
+    return { value: undefined };
+  });
+  on("ui.open", () => ({ value: { isPlaced: true } }));
+
+  await $.command.run(RUN);
+  expect(statuses).toEqual([undefined]);
+
+  issues = BEADS;
+  await $.command.run(RUN);
+  expect(statuses).toEqual([
+    undefined,
+    "beads: 1 in progress, 1 blocked, 1 open",
+  ]);
+});
+
 test("a headless session neither runs bd nor opens the pane", async ($, on) => {
   let runs = 0;
   let opens = 0;

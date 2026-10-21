@@ -23,11 +23,17 @@ const snapshot = atom(
 );
 
 // A null snapshot means the session's directory is not a beads project, so
-// the pane and status line stay out of the way.
+// the pane and status line stay out of the way. A project with nothing open
+// also leaves the status line empty, so the line only appears when there is
+// work or an error to report.
 async function refresh($: EngineInterface): Promise<BeadsSnapshot | null> {
   const next = await load($);
   await update($, snapshot, () => next);
-  $.ui.status(next === null ? undefined : summary(next));
+  $.ui.status(
+    next === null || (next.error === undefined && next.beads.length === 0)
+      ? undefined
+      : summary(next),
+  );
 
   return next;
 }

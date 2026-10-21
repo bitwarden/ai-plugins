@@ -31,11 +31,11 @@ The pane refreshes when an interactive session starts, every 30 seconds after th
 
 #### What It Shows
 
-| Surface     | What It Shows                                                                                                                                                                                           |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pane        | A **Beads** pane grouped into In progress, Blocked, and Open, each with its count. Every row shows the priority, the bead id, and the title, sorted by priority and then id within each group.          |
-| Status line | A one-line count such as `beads: 1 in progress, 2 blocked, 4 open`, or `beads: none open` when the project has nothing outstanding, or `beads: error reading bd list` when its output cannot be parsed. |
-| Command     | `/beads-pane` refreshes the list and opens the pane, replying with the same count. Outside a beads project it replies that there is nothing to read.                                                    |
+| Surface     | What It Shows                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Pane        | A **Beads** pane grouped into In progress, Blocked, and Open, each with its count. Every row shows the priority, the bead id, and the title, sorted by priority and then id within each group.         |
+| Status line | A one-line count such as `beads: 1 in progress, 2 blocked, 4 open`, or `beads: error reading bd list` when its output cannot be parsed. The line stays empty when the project has nothing outstanding. |
+| Command     | `/beads-pane` refreshes the list and opens the pane, replying with the same count. Outside a beads project it replies that there is nothing to read.                                                   |
 
 The pane opens on its own at session start when the directory is a beads project. Headless runs (`claude -p` and the SDK) skip the pane and the 30-second poll.
 
