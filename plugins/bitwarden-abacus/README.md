@@ -9,9 +9,9 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 
 ## What it does today
 
-| Abacus slot | Bitwarden skill                                    | Effect                                                                                |
-| ----------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `land.pr`   | `bitwarden-delivery-tools:applying-pr-conventions` | Each bead's draft PR gets Bitwarden's conventional title, PR template body and labels |
+| Abacus slot | Bitwarden skill                                    | Effect                                                                                         |
+| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `land.pr`   | `bitwarden-delivery-tools:applying-pr-conventions` | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
 
 Abacus still opens the pull request itself (through `abacus-finalize`), so stacking, cleanup on failure and the
 evidence checks stay in place. The skill only supplies the content. Each result is recorded on the bead together
@@ -53,5 +53,5 @@ the concierge:
 build PM-1234
 ```
 
-Each bead's draft PR then carries Bitwarden's title, template body and labels. A repository can leave the profile
-out with `"profile": "none"` in its `.abacus/config.json`.
+Each bead's draft PR then carries Bitwarden's title, template body and `t:` type label. A repository can leave the
+profile out with `"profile": "none"` in its `.abacus/config.json`.
