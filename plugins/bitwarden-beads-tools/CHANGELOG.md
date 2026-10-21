@@ -12,4 +12,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Beads pane**: lists open, in-progress, and blocked beads from `bd list --json`, grouped by status and sorted by priority, so the state of the work is visible without running `bd` by hand.
 - **Status line**: a one-line count of beads by status.
 - **`/beads-pane` command**: refreshes the list and opens the pane on demand.
-- Refreshes at session start, every 30 seconds, after any Bash tool call that runs `bd`, and when the working directory changes; stays hidden outside a beads project.
+- Refreshes at the start of an interactive session, every 30 seconds after that, after any Bash tool call that runs `bd`, and when the working directory changes; stays hidden outside a beads project.

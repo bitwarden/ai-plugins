@@ -54,11 +54,8 @@ async function load($: EngineInterface): Promise<BeadsSnapshot | null> {
   }
 
   try {
-    // bd 1.3 wraps the list as { issues: [...] }; older releases print a bare array.
-    const parsed: unknown = JSON.parse(ran.stdout || "[]");
-    const rows = Array.isArray(parsed)
-      ? parsed
-      : (parsed as { issues?: unknown } | null)?.issues;
+    const parsed: unknown = JSON.parse(ran.stdout || "{}");
+    const rows = (parsed as { issues?: unknown } | null)?.issues;
 
     return {
       beads: Array.isArray(rows) ? rows.map(toBead).filter(isBead) : [],
@@ -95,7 +92,11 @@ function isBead(bead: Bead | null): bead is Bead {
   return bead !== null;
 }
 
-export function summary({ beads }: BeadsSnapshot): string {
+export function summary({ beads, error }: BeadsSnapshot): string {
+  if (error !== undefined) {
+    return "beads: error reading bd list";
+  }
+
   const counts = STATUSES.map(
     (status) =>
       [status, beads.filter((bead) => bead.status === status).length] as const,
@@ -120,12 +121,14 @@ export const register: Register = (on) => {
       description: "Show this project's beads in a pane",
     });
 
-    void refresh($).then((found) => {
-      if (found !== null) {
-        void $.ui.open({ id: PANE, title: "Beads" });
-      }
-    });
-    $.clock.every(POLL_MS, () => void refresh($));
+    if (e.isInteractive) {
+      void refresh($).then((found) => {
+        if (found !== null) {
+          void $.ui.open({ id: PANE, title: "Beads" });
+        }
+      });
+      $.clock.every(POLL_MS, () => void refresh($));
+    }
 
     return next(e);
   });

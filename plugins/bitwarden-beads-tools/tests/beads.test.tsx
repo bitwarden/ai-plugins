@@ -1,4 +1,4 @@
-import { expect, test } from "claude-code/testing";
+import { expect, mock, test } from "claude-code/testing";
 
 const BEADS = [
   {
@@ -50,7 +50,7 @@ test("the beads command lists beads by status", async ($, on) => {
   on("process.run", () => ({
     value: {
       exitCode: 0,
-      stdout: JSON.stringify(BEADS),
+      stdout: JSON.stringify({ issues: BEADS }),
       stderr: "",
       isStdoutTruncated: false,
       isStderrTruncated: false,
@@ -82,24 +82,65 @@ test("the beads command lists beads by status", async ($, on) => {
   }
 });
 
-test("bd 1.3 output wrapped in an issues object is read", async ($, on) => {
+test("output that is not JSON reads as an error in the status line", async ($, on) => {
+  const statuses: (string | undefined)[] = [];
   on("session.cwd", () => ({ value: "/work/demo" }));
   on("process.run", () => ({
     value: {
       exitCode: 0,
-      stdout: JSON.stringify({ issues: BEADS }),
+      stdout: "not json",
       stderr: "",
       isStdoutTruncated: false,
       isStderrTruncated: false,
     },
   }));
-  on("ui.status", () => ({ value: undefined }));
+  on("ui.status", ($, e) => {
+    statuses.push(e.text);
+
+    return { value: undefined };
+  });
   on("ui.open", () => ({ value: { isPlaced: true } }));
 
   const ran = await $.command.run(RUN);
-  expect(JSON.stringify(ran)).toContain(
-    "beads: 1 in progress, 1 blocked, 1 open",
-  );
+  expect(JSON.stringify(ran)).toContain("beads: error reading bd list");
+  expect(statuses).toContain("beads: error reading bd list");
+});
+
+test("a headless session neither runs bd nor opens the pane", async ($, on) => {
+  let runs = 0;
+  let opens = 0;
+  const clock = mock.clock(on);
+  on("command.register", () => ({ value: { command: "beads-pane" } }));
+  on("session.start", (_, e) => ({ cwd: e.cwd }));
+  on("session.cwd", () => ({ value: "/work/demo" }));
+  on("process.run", () => {
+    runs += 1;
+
+    return {
+      value: {
+        exitCode: 0,
+        stdout: JSON.stringify({ issues: BEADS }),
+        stderr: "",
+        isStdoutTruncated: false,
+        isStderrTruncated: false,
+      },
+    };
+  });
+  on("ui.status", () => ({ value: undefined }));
+  on("ui.open", () => {
+    opens += 1;
+
+    return { value: { isPlaced: true } };
+  });
+
+  await $.session.start({
+    cwd: "/work/demo",
+    surface: null,
+    isInteractive: false,
+  });
+  await clock.advance(30_000);
+  expect(runs).toBe(0);
+  expect(opens).toBe(0);
 });
 
 test("outside a beads project the command says so", async ($, on) => {
