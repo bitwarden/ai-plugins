@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Abacus profile for Bitwarden. Abacus runs orchestrated, multi-agent development process. 
+The Abacus profile for Bitwarden. Abacus runs an orchestrated, multi-agent development process.
 Features include one worker per repository, gates, an independent reviewer, and verified evidence before anything
 lands. This plugin tells Abacus which Bitwarden skills to use at each step of that process, so work Abacus does
 follows the same conventions as work a Bitwarden engineer does by hand.
@@ -18,7 +18,7 @@ evidence checks stay in place. The skill only supplies the content. Each result 
 with the plugin versions that produced it.
 
 The other slots (`plan.source`, `plan.analyze`, `implement.guide`, `review`, `retro.analyze`) are listed but empty
-until Abacus uses them. 
+until Abacus uses them.
 
 ## Coordinating roles
 
