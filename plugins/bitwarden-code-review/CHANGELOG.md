@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Catch-rate and behavior evals for `performing-multi-agent-code-review`
-- Local mode reviews untracked files, skipping credential paths
+- Local mode reviews untracked source files, skipping config, dotfiles, and credential paths
 
 ### Fixed
 

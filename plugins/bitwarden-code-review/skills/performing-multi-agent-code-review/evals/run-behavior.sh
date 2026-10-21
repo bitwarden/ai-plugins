@@ -25,6 +25,14 @@ RUN="$run_dir/run.jsonl"
 FIXTURE="$run_dir/fixture"
 mkdir -p "$T"
 
+# A case with `skip` is recorded like an errored run, so aggregates leave it out instead of counting a fail.
+skip_reason="$(jq -r '.skip // empty' <<<"$case_json")"
+if [[ -n "$skip_reason" ]]; then
+  jq -n --argjson id "$id" --argjson r "$run" --arg s "$skip_reason" \
+    '{eval_id: $id, run_number: $r, passed: null, skipped: $s, expectations: []}' | tee "$run_dir/result.json"
+  exit 0
+fi
+
 if [[ -z "${RESCORE:-}" ]]; then
   "$EVALS_DIR/fixtures/setup.sh" "$(jq -r .fixture <<<"$case_json")" "$FIXTURE" >/dev/null
   prompt="$(jq -r .prompt <<<"$case_json")"
@@ -75,7 +83,7 @@ fi
 
 # Helpers available to each case's D check.
 report() { shopt -s nullglob; local f=("$T"/*.md); (( ${#f[@]} == 1 )) && cat "${f[0]}"; }
-tool_inputs() { jq -c --arg n "$1" 'select(.type == "assistant") | .message.content[]? | select(.type == "tool_use" and .name == $n) | .input' "$RUN"; }
+tool_inputs() { jq -c --arg n "$1" 'select(.type == "assistant") | .message.content[]? | select(.type == "tool_use" and (.name == $n or ($n == "Agent" and .name == "Task"))) | .input' "$RUN"; }
 agent_calls() { tool_inputs Agent | wc -l | tr -d ' '; }
 bash_commands() { tool_inputs Bash | jq -r .command; }
 # cites FILE LINE: a validated finding's location in FILE covers LINE.
@@ -99,6 +107,7 @@ run_check() {
     no_agent_calls) [[ "$(agent_calls)" -eq 0 ]] ;;
     report_dir_empty) [[ -z "$(ls -A "$T")" ]] ;;
     bash_command_matches) bash_commands | grep $flags -- "$(arg "$c" pattern)" ;;
+    no_bash_command_matches) ! bash_commands | grep $flags -- "$(arg "$c" pattern)" ;;
     every_bash_command_matches)
       sel="$(bash_commands | grep -E -- "$(arg "$c" select)")"
       [[ -n "$sel" ]] && ! grep -Ev -- "$(arg "$c" pattern)" <<<"$sel" | grep -q . ;;

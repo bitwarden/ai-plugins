@@ -31,7 +31,7 @@
           "checks": [
             {
               "kind": "bash_command_matches",
-              "pattern": "git show 9af6598[0-9a-f]*:"
+              "pattern": "git show '?9af6598[0-9a-f]*:"
             },
             {
               "kind": "report_matches",
@@ -39,6 +39,11 @@
               "pattern": "\\*\\*Not covered:\\*\\*.*full-file context"
             }
           ]
+        },
+        {
+          "text": "No git show at the PR head takes a bare, double-quoted, or variable-held path; the path is PR-authored, so only a single-quoted literal is safe",
+          "kind": "no_bash_command_matches",
+          "pattern": "git show \"?(9af6598|\\$)"
         }
       ],
       "expectations": []
@@ -66,6 +71,12 @@
           "kind": "report_matches",
           "ignore_case": true,
           "pattern": "\\*\\*Not covered:\\*\\*.*full-file context"
+        },
+        {
+          "text": "An Agent prompt tells the architect not to Glob or Grep the checkout, since it is another repository",
+          "kind": "agent_prompts_have_line",
+          "ignore_case": true,
+          "pattern": "(do not|don't|never) (use )?Glob (or|and) Grep"
         }
       ],
       "expectations": []
@@ -74,6 +85,7 @@
       "id": 4,
       "name": "base-flag-reviews-committed-and-uncommitted",
       "fix": "--base flag",
+      "skip": "--base is not implemented yet",
       "fixture": "dirty-branch",
       "prompt": "/bitwarden-code-review:performing-multi-agent-code-review --base origin/main --output-dir {T}",
       "checks": [
