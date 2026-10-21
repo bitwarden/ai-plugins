@@ -1,0 +1,12 @@
+{
+  "name": "bitwarden-abacus",
+  "version": "0.1.0",
+  "description": "Abacus profile for Bitwarden: tells Abacus which Bitwarden skills to use at each step of its process, starting with pull request conventions for draft PRs.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-abacus",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": ["abacus", "orchestration", "profile", "pull-request", "multi-agent"]
+}
