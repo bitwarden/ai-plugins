@@ -18,6 +18,7 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 ## Steps
 
 1. Resolve the input.
+   - If the bitwarden-atlassian `get_issue` tool or `Skill(bitwarden-atlassian-tools:researching-jira-issues)` is not available, stop and tell the user to install and configure `bitwarden-atlassian-tools`.
    - **Story key.** Read the story itself with the bitwarden-atlassian `get_issue` tool, and take acceptance criteria, scenarios, and stated scope from that response only. Use `Skill(bitwarden-atlassian-tools:researching-jira-issues)` for linked issues, the parent epic, and Confluence context. Every run, read all of these: every sub-task and every linked issue, including their comments, and the parent epic. Check each AC against what they say. List every source you read in the report under "Sources read". That skill reads and synthesizes; this skill judges. If get_issue fails, say so and stop. If a sub-task, linked issue, or sibling read fails, list that item under "Sources not checked" and name it in the verdict line, the same way an unreadable design is handled.
    - **Sibling stories.** When the story has a parent epic, list every other child of that epic (search for parent = <epic key>, excluding the story itself). For each sibling, compare its title and description with this story's:
      - Same action and same or near-identical description: same requirement. List it under Sources read as "sibling, same requirement." A shared Figma link alone never makes a sibling the same requirement. If a sibling shares a Figma link but not the action or description, note the shared link in its Sources read line and classify it by action and description only.
@@ -43,7 +44,7 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
    - **Attachments.** List every attachment on the ticket by file name and type. The skill cannot read image attachments, so never state or imply what an image shows. For each attachment, look for text on the ticket that explains it (a comment, description sentence, or label that says what it is or why it is there). If such text exists, list the attachment with that text quoted as its reason. If none exists, list it as "attached with no explanation." Attachments are informational. They never change the verdict.
    - **Epic key.** Enumerate the child stories. If the epic has no child stories, there is nothing to iterate on, so return NOT READY with the single gap "epic has no child stories" and route to refinement. If the child search fails, stop and report the failure. Only a search that succeeds and returns zero children counts as "no child stories." Then the next step depends on the caller:
      - **Run headless by another skill:** return the child story keys and stop (step 9). Do not run the story steps for the children.
-     - **Run by a person:** run the story path of this step and steps 2 to 7 for each child story, then report the verdicts as step 9 describes. Do not give a verdict for the epic itself.
+     - **Run by a person:** run the story path of this step and steps 2 to 7 for each child story, then write one epic report with step 8 using the epic template, and report as step 9 describes. Do not give a verdict for the epic itself.
    - **No key supplied.** Ask for one and stop.
 
 2. Restate the acceptance criteria as understood, using only what the ticket contains. Do not add detail the ticket does not state, and do not make a vague criterion read as more concrete than the original. The restatement is a mirror, not a rewrite. Acceptance criteria are every item in an "Acceptance criteria" field, an "Acceptance Criteria" section, or a "Scenarios" section, wherever the ticket has them. Number them AC-1, AC-2, AC-3 in one list, in the order they appear, and note each item's source (field or section name) next to it. Always use this exact format. If the ticket states its criteria as prose rather than a list, split them into one item per expected behavior, without adding detail.
@@ -62,7 +63,7 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 4. Identify the non-functional dimensions in play. For each of performance, security, data migration, and observability and alerting, state whether the change touches it and whether the ticket addresses it: Yes, No, Partially, or N/A. "Partially" is the common real case (the ticket states the end state but not the path, for example "encrypt the secrets" with no key handling). Every in-play dimension that is not fully addressed (No or Partially) becomes a row in the Gaps table in step 6 and is graded there by the severity list in step 6, so the table and the verdict always line up. Grade such a gap by the severity list in step 6. A bare link is not proof that a concern is handled, so an unread "probably covered elsewhere" counts as nothing addressing it. The Jira "Security Approver" field is set on every story, so it is not evidence that security is in play; decide that from the ticket text, its sources, and what the change does.
 
 5. List assumptions and open questions. This section is required.
-   - **Assumptions.** For every ambiguity an implementer could resolve by picking a reasonable default, state the default they (or this skill) would otherwise assume, so the assumption is visible in the report rather than built in silently.
+   - **Assumptions.** For every ambiguity an implementer could resolve by picking a reasonable default, state the default they (or this skill) would otherwise assume, so the assumption is visible in the report rather than built in silently. Tag each assumption with the AC it affects (AC-n, comma-separated if several, or None), the same way open questions are tagged.
    - **Open questions.** Record as an open question anything an implementer cannot resolve by picking a default (for example a production row count, which clients are in scope, or a conditional conflict from step 3). These need a human answer, not a default. Tie each open question to the AC whose test would depend on the answer (AC-n). If more than one AC depends on it, list each one, comma-separated (for example AC-1, AC-3). Use None only when it affects no AC.
    - **Behavior stated outside the ACs.** When an AC names a case or behavior but its expected outcome is written only elsewhere on the ticket (the description or another field), list that outcome. Quote it exactly, note its source, and tag the AC it answers (AC-n). Do not restate or combine passages. If no single passage states the outcome, do not list it; record it as a gap or open question instead.
    - "None" is valid only when the story genuinely has no ambiguity.
@@ -77,7 +78,7 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 
    When two sources describe the same behavior differently, always record it as a gap. Quote both and tag both AC IDs. Grade it by the list above. Never drop a mismatch without recording it.
 
-   Tie each gap to the AC it affects (AC-n), even when the gap is non-functional. If it affects more than one AC, list each one, comma-separated (for example AC-1, AC-3). Use NFR only for a non-functional gap that affects no AC, and None only when a gap affects no AC.
+   Tie each gap to the AC it affects (AC-n), even when the gap is non-functional. If it affects more than one AC, list each one, comma-separated (for example AC-1, AC-3). Use NFR for a non-functional gap that affects no AC; use None for any other gap that affects no AC.
 
    The count of not-severe gaps never triggers a stop. A ticket with several small gaps that all resolve to reasonable defaults is still READY.
 
@@ -92,7 +93,7 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 
 9. Return the result.
    - **Run by a person.** Present the verdict, the checklist results, the non-functional dimensions, the assumptions and open questions, and the gaps. Recommend the next step (route to refinement on NOT READY). Do not block: the person decides what to do, including proceeding over a NOT READY verdict. If they proceed, record it. If the input was an epic, present one row per child story in the epic template's story verdict table, with its verdict and severe gaps, and give no verdict for the epic. Each story's sources not checked go in its verdict cell.
-   - **Run headless by another skill.** Return the verdict, the restated acceptance criteria with their AC IDs, the Stated scope line, the non-functional dimensions table, the Gaps table, the open questions with their AC tags, the behavior stated outside the ACs, the Sources not checked list (same format as the template's Sources not checked section, or "none"), and the full path of the report file (or, if the step 8 write failed, the full report inline), then stop. Do not ask a question. The calling skill treats READY as the gate to proceed and NOT READY as the gate to stop. If the input was an epic, return the child story keys instead, then stop. If the epic has no child stories, return NOT READY with the gap 'epic has no child stories'.
+   - **Run headless by another skill.** Return the verdict, the restated acceptance criteria with their AC IDs, the Stated scope line, the non-functional dimensions table, the Gaps table, the assumptions and the open questions, each with its AC tags, the behavior stated outside the ACs, the Sources not checked list (same format as the template's Sources not checked section, or "none"), and the full path of the report file (or, if the step 8 write failed, the full report inline), then stop. Do not ask a question. The calling skill treats READY as the gate to proceed and NOT READY as the gate to stop. If the input was an epic, return the child story keys instead, then stop. If the epic has no child stories, return NOT READY with the gap 'epic has no child stories'.
 
 ## Grading guidance
 
@@ -143,7 +144,7 @@ Verdict: READY | NOT READY, with sources not checked: <list> (write the list whe
 
 Assumptions (an implementer would resolve these by picking a default):
 
-- <assumption, tied to the specific silence in the ticket that forces it>
+- <assumption, tied to the specific silence in the ticket that forces it> (AC-n, comma-separated if several | None)
 
 Open questions (need a human answer, cannot be defaulted):
 

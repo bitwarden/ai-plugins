@@ -22,16 +22,17 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 
 2. Gate on readiness. Invoke `Skill(bitwarden-testing-tools:assessing-requirement-readiness)` headless with the key.
    - Epic key: it returns the child story keys. Invoke it once per child.
-   - A story that returns NOT READY gets no tests. Record it as excluded, with its severe gaps as the reason.
+   - A story that returns NOT READY gets no tests. Record it as excluded, with its severe gaps as the reason, or, when it has no severe gap, the design-only criteria the readiness skill could not confidently read.
    - If the readiness call errors for a story, design no tests for that story and report why.
    - If the readiness verdict is missing or unclear, treat the story as NOT READY, exclude it, and state the reason.
    - Every excluded story gets a row in the excluded-stories table, whatever its reason.
-   - If assessing-requirement-readiness returns NOT READY for the input itself, or no story ends up READY, write no plan. Tell the user why, and list each excluded story with its reason: NOT READY, with its severe gaps and readiness report path (or "readiness report returned inline, not saved" when the readiness write failed); readiness call failed; or readiness verdict missing. Then stop.
+   - If assessing-requirement-readiness returns NOT READY for the input itself, or no story ends up READY, write no plan. Tell the user why, and list each excluded story with its reason: NOT READY, with its severe gaps (or, when it has none, the design-only criteria it could not confidently read) and readiness report path (or "readiness report returned inline, not saved" when the readiness write failed); readiness call failed; or readiness verdict missing. Then stop.
    - From each READY story, keep only: the restated acceptance criteria (AC-1, AC-2), the Stated scope line, the Gaps table, the assumptions, the open questions, the non-functional dimensions, the behavior stated outside the ACs, and the sources not checked list. Build tests from nothing else, and report that story's sources not checked on the plan's Sources not checked line (or "none").
    - List each assumption in the Unspecified table with its stated default in the Item cell and "readiness assumption" in the Source cell. Put the AC it affects in the AC cell, or "none" if it isn't tied to one. Design no test for an assumption. The team confirms it at Plan review.
 
 3. Mark what cannot be tested. Every gap and open question tagged to an AC makes that part of the AC unspecified. Record it in the Unspecified table and design no test for it.
    Every gap tagged NFR also goes in the Unspecified table, named by its dimension, for example "Performance: no AC states a requirement, so there's nothing to test against." Design no test for it.
+   Every gap tagged None also goes in the Unspecified table, with "none" in the AC cell and "readiness gap" in the Source cell. Design no test for it.
 
 4. Sort each AC.
    - Behavior AC: describes something the system does. Design tests for it.
@@ -60,7 +61,8 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
    - Assistive technology output, such as a screen reader announcement.
    - A visual judgement the AC states with nothing measurable to assert, such as "looks aligned" or "matches the design." Checking whether something is present, or what text it shows, is measurable and stays automated. Only a judgement with nothing measurable to assert is manual.
    - Hardware or device behavior a test run can't control, such as biometrics.
-     Nothing else makes a test manual. A test whose Layer is "not assigned: layer recommendation unavailable" gets its Method from the expected-result rule alone. Method is set per row. When a test splits into layer rows (T-3a, T-3b), each row gets its own Method from this rule.
+
+   Nothing else makes a test manual. A test whose Layer is "not assigned: layer recommendation unavailable" gets its Method from the expected-result rule alone. Method is set per row. When a test splits into layer rows (T-3a, T-3b), each row gets its own Method from this rule. List every row whose Method is manual on the plan's Manual tests line, or "none".
 
 9. Set timing from the pipeline role: "Pre-merge gate" is build with the code. Anything else is build once the feature is working.
 
@@ -89,9 +91,9 @@ Manual tests: <story key: test rows>, or none.
 
 ## Unspecified (no test designed)
 
-| Story                                                                                                                                  | AC  | Item | Source |
-| -------------------------------------------------------------------------------------------------------------------------------------- | --- | ---- | ------ |
-| <Source: readiness gap, readiness open question, readiness assumption, readiness non-functional with no AC, or not defined in the AC.> |
+| Story                                                                                                                                                   | AC  | Item | Source |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---- | ------ |
+| <Source: readiness gap, readiness open question, readiness assumption, readiness non-functional with no AC, not defined in the AC, or no test derived.> |
 
 ## Excluded stories
 
