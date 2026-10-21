@@ -8,7 +8,7 @@ set -euo pipefail
 
 find "$OUT_DIR" -name result.json -print0 | xargs -0 cat | jq -s \
   --arg model "$1" --arg grader "$2" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
-  def ratio(a; b): if b == 0 then null else (a / b * 1000 | round / 1000) end;
+  def ratio(a; b): (b // 0) as $b | if $b == 0 then null else (((a // 0) / $b * 1000) | round / 1000) end;
   # An errored run measured nothing, so it is left out of every rate rather than scored as a miss.
   def summary:
     ([.[] | select(.error)] | length) as $errored

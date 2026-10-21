@@ -30,6 +30,7 @@ scaffold() {
 
 ai_plugins_checkout() {
   : "${AI_PLUGINS_CLONE:?set AI_PLUGINS_CLONE}"
+  [[ "$AI_PLUGINS_CLONE" == /* ]] || { echo "AI_PLUGINS_CLONE must be an absolute path" >&2; exit 1; }
   git -C "$AI_PLUGINS_CLONE" cat-file -e "$1^{commit}" 2>/dev/null || git -C "$AI_PLUGINS_CLONE" fetch -q origin "$1"
   git clone -q --shared --no-checkout "$AI_PLUGINS_CLONE" work
   git -C work remote set-url origin https://github.com/bitwarden/ai-plugins.git

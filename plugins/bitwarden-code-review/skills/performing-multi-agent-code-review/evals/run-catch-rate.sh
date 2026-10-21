@@ -15,6 +15,7 @@ config="$2"
 run="$3"
 : "${CLONES_DIR:?set CLONES_DIR}"
 : "${OUT_DIR:?set OUT_DIR}"
+[[ "$OUT_DIR" == /* ]] || { echo "OUT_DIR must be an absolute path" >&2; exit 1; }
 model="${MODEL:-opus}"
 
 [[ "$id" =~ ^[0-9]+$ ]] || { echo "eval id must be numeric" >&2; exit 1; }

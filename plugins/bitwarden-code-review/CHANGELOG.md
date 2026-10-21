@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Catch-rate and behavior evals for `performing-multi-agent-code-review`
 - Local mode reviews untracked source files, skipping config, dotfiles, and credential paths
+- `git` grants in `allowed-tools`: `ls-files`, `merge-base`, `show`, `remote get-url origin`, `fetch origin pull/*/head`
 
 ### Fixed
 

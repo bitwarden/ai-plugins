@@ -14,6 +14,7 @@ EVAL_SET="$EVALS_DIR/behavior-eval.json"
 id="$1"
 run="$2"
 : "${OUT_DIR:?set OUT_DIR}"
+[[ "$OUT_DIR" == /* ]] || { echo "OUT_DIR must be an absolute path" >&2; exit 1; }
 model="${MODEL:-opus}"
 [[ "$id" =~ ^[0-9]+$ ]] || { echo "case id must be numeric" >&2; exit 1; }
 [[ "$run" =~ ^[0-9]+$ ]] || { echo "run number must be numeric" >&2; exit 1; }
