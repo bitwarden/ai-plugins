@@ -78,5 +78,9 @@
   {
     "query": "write a spec from this ticket, PM-223",
     "should_trigger": false
+  },
+  {
+    "query": "write the Playwright tests for the acceptance criteria on PM-345",
+    "should_trigger": false
   }
 ]

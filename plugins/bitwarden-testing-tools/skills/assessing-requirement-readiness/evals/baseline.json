@@ -64,16 +64,16 @@
     {
       "query": "is CL-1221 actually testable or is it hand-wavy",
       "should_trigger": true,
-      "triggers": 0,
+      "triggers": 2,
       "runs": 7,
-      "trigger_rate": 0.0
+      "trigger_rate": 0.2857142857142857
     },
     {
       "query": "the autofill story we're refining next has a figma link and two lines of description. will that hold up or should I send it back to the PO now?",
       "should_trigger": true,
-      "triggers": 0,
+      "triggers": 2,
       "runs": 7,
-      "trigger_rate": 0.0
+      "trigger_rate": 0.2857142857142857
     },
     {
       "query": "what's PM-123 about, and what's blocking it?",

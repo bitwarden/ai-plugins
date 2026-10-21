@@ -1,9 +1,9 @@
 {
   "model": "claude-opus-4-8",
-  "should_trigger_pass_rate": 0.9,
+  "should_trigger_pass_rate": 1.0,
   "should_not_trigger_pass_rate": 1.0,
-  "should_trigger_pass": "9/10",
-  "should_not_trigger_pass": "10/10",
+  "should_trigger_pass": "10/10",
+  "should_not_trigger_pass": "11/11",
   "results": [
     {
       "query": "PM-41861 passed refinement. what do I need to test?",
@@ -22,9 +22,9 @@
     {
       "query": "for every acceptance criterion in the passkey enrollment epic, list the scenarios that would prove it works, including boundaries and invalid input",
       "should_trigger": true,
-      "triggers": 6,
+      "triggers": 7,
       "runs": 7,
-      "trigger_rate": 0.8571428571428571
+      "trigger_rate": 1.0
     },
     {
       "query": "the PO wants a test plan for CL-1221 before sign-off, showing the tests we'll need for each requirement. can you put that together?",
@@ -36,9 +36,9 @@
     {
       "query": "the vault-unlock rework story says the PIN has to be 4 to 8 digits. what test cases does the story need overall, edge values included?",
       "should_trigger": true,
-      "triggers": 1,
+      "triggers": 7,
       "runs": 7,
-      "trigger_rate": 0.14285714285714285
+      "trigger_rate": 1.0
     },
     {
       "query": "emergency-access revamp epic is ready. give me the test design for each child story and show where gaps in the requirements leave nothing to test against",
@@ -50,9 +50,9 @@
     {
       "query": "what scenarios should QA cover for PM-42838 now that the design question got answered?",
       "should_trigger": true,
-      "triggers": 6,
+      "triggers": 7,
       "runs": 7,
-      "trigger_rate": 0.8571428571428571
+      "trigger_rate": 1.0
     },
     {
       "query": "need a plan of what to test for the billing upgrade flow story, traced back to its acceptance criteria, so I can show coverage in refinement",
@@ -140,6 +140,13 @@
     },
     {
       "query": "write a spec from this ticket, PM-223",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write the Playwright tests for the acceptance criteria on PM-345",
       "should_trigger": false,
       "triggers": 0,
       "runs": 7,
