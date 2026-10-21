@@ -22,11 +22,11 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 
 2. Gate on readiness. Invoke `Skill(bitwarden-testing-tools:assessing-requirement-readiness)` headless with the key.
    - Epic key: it returns the child story keys. Invoke it once per child.
-   - A story that returns NOT READY gets no tests. Record it as excluded, with its severe gaps as the reason, or, when it has no severe gap, the design-only criteria the readiness skill could not confidently read.
+   - A story that returns NOT READY gets no tests. Record it as excluded, with its severe gaps (if any) and the design-only criteria that could not be confidently read (AC IDs, if any) as the reason. If it has neither, keep the existing reason.
    - If the readiness call errors for a story, design no tests for that story and report why.
    - If the readiness verdict is missing or unclear, treat the story as NOT READY, exclude it, and state the reason.
    - Every excluded story gets a row in the excluded-stories table, whatever its reason.
-   - If assessing-requirement-readiness returns NOT READY for the input itself, or no story ends up READY, write no plan. Tell the user why, and list each excluded story with its reason: NOT READY, with its severe gaps (or, when it has none, the design-only criteria it could not confidently read) and readiness report path (or "readiness report returned inline, not saved" when the readiness write failed); readiness call failed; or readiness verdict missing. Then stop.
+   - If assessing-requirement-readiness returns NOT READY for the input itself, or no story ends up READY, write no plan. Tell the user why, and list each excluded story with its reason: NOT READY, with its severe gaps (if any) and the design-only criteria that could not be confidently read (AC IDs, if any), or the existing reason when it has neither, and readiness report path (or "readiness report returned inline, not saved" when the readiness write failed); readiness call failed; or readiness verdict missing. Then stop.
    - From each READY story, keep only: the restated acceptance criteria (AC-1, AC-2), the Stated scope line, the Gaps table, the assumptions, the open questions, the non-functional dimensions, the behavior stated outside the ACs, and the sources not checked list. Build tests from nothing else, and report that story's sources not checked on the plan's Sources not checked line (or "none").
    - List each assumption in the Unspecified table with its stated default in the Item cell and "readiness assumption" in the Source cell. Put the AC it affects in the AC cell, or "none" if it isn't tied to one. Design no test for an assumption. The team confirms it at Plan review.
 
