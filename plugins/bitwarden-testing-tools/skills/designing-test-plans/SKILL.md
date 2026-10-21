@@ -64,9 +64,9 @@ When a step fails, report it as one plain sentence. Name the item by its Jira ke
 
    Nothing else makes a test manual. A test whose Layer is "not assigned: layer recommendation unavailable" gets its Method from the expected-result rule alone. Method is set per row. When a test splits into layer rows (T-3a, T-3b), each row gets its own Method from this rule. List every row whose Method is manual on the plan's Manual tests line, or "none".
 
-9. Set timing from the pipeline role: "Pre-merge gate" is build with the code. Anything else is build once the feature is working.
+9. Set timing from the pipeline role: "Pre-merge gate" is build with the code. Anything else is build once the feature is working. A row whose Layer is "not assigned: layer recommendation unavailable" gets Timing "not assigned: layer recommendation unavailable".
 
-10. Before writing the plan, check that every behavior AC (scope ACs excluded) appears in at least one test row or in the Unspecified table. Add any missing AC to the Unspecified table with "no test derived" in the Source column. Write the plan using the template below to `${CLAUDE_PLUGIN_DATA}/designing-test-plans/<key>-<timestamp>-test-plan.md` (`<timestamp>` from `date +%Y-%m-%d-%H%M%S`). If `CLAUDE_PLUGIN_DATA` is not set, write to `./designing-test-plans/<key>-<timestamp>-test-plan.md`. State the full path when done. If the write fails, say so and return the full plan inline instead of a path.
+10. Before writing the plan, check that every behavior AC (scope ACs excluded) appears in at least one test row or in the Unspecified table. Add any missing AC to the Unspecified table with "no test derived" in the Source column. Write the plan using the template below to `${CLAUDE_PLUGIN_DATA}/designing-test-plans/<key>-<timestamp>-test-plan.md`. Get `<timestamp>` by running `date +%Y-%m-%d-%H%M%S` as a single command with nothing else in it (no echo, pipes, or command substitution), then use its output. If `CLAUDE_PLUGIN_DATA` is not set, write to `./designing-test-plans/<key>-<timestamp>-test-plan.md`. State the full path when done. If the write fails, say so and return the full plan inline instead of a path.
 
 ## Output template
 
