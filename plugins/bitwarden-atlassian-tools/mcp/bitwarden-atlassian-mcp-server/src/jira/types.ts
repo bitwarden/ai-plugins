@@ -254,8 +254,9 @@ export interface JiraRemoteLink {
 
 /**
  * An entry in an issue's `issuelinks` field. Only one of `inwardIssue` /
- * `outwardIssue` is present per entry — each end of a link names the other
- * end and labels it with the other end's role (see `JiraClient.createIssueLink`).
+ * `outwardIssue` is present per entry, naming the other end of the link. On
+ * issue X's record, `outwardIssue: Y` reads "X <type.outward> Y" and
+ * `inwardIssue: Y` reads "X <type.inward> Y" (see `JiraClient.createIssueLink`).
  */
 export interface JiraIssueLink {
   id: string;
