@@ -58,7 +58,7 @@ On a GitHub pull request, a finding raised again in an existing thread goes as a
 5. Use collapsed sections for comments over 5 lines
 6. Include both opening `<details>` AND closing `</details>` tags
 
-**Visibility Rule:** Only severity + one-line description visible; everything else inside `<details>` tags.
+**Visibility Rule:** Only severity + one-line description and the source line visible; everything else inside `<details>` tags.
 
 ### Template for long comments
 
@@ -74,6 +74,8 @@ On a GitHub pull request, a finding raised again in an existing thread goes as a
 
 Reference: [docs link if applicable]
 </details>
+
+<sub>code-review</sub>
 ```
 
 ## Summary Output
