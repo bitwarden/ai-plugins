@@ -375,7 +375,7 @@ export class JiraClient {
   /**
    * Link two work items.
    *
-   * Jira's create payload reads "inwardIssue <inward description>
+   * Jira's create payload reads "inwardIssue <outward description>
    * outwardIssue". For type "Blocks" (outward "blocks", inward "is blocked
    * by") that means inwardIssue blocks outwardIssue: the blocker goes on
    * `inwardIssue` and the blocked item on `outwardIssue`.
