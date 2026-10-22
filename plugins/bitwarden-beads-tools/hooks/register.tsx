@@ -22,18 +22,36 @@ const snapshot = atom(
   null,
 );
 
+// Set when an interactive session starts and cleared once the poll begins, so
+// the poll waits for the first refresh that finds a beads project.
+let canPoll = false;
+
+// Counts refreshes, so one that a newer refresh overtook leaves the snapshot
+// and status line to it.
+let generation = 0;
+
 // A null snapshot means the session's directory is not a beads project, so
 // the pane and status line stay out of the way. A project with nothing open
 // also leaves the status line empty, so the line only appears when there is
 // work or an error to report.
 async function refresh($: EngineInterface): Promise<BeadsSnapshot | null> {
+  const mine = ++generation;
   const next = await load($);
+
+  if (mine !== generation) {
+    return next;
+  }
+
   await update($, snapshot, () => next);
-  $.ui.status(
-    next === null || (next.error === undefined && next.beads.length === 0)
-      ? undefined
-      : summary(next),
-  );
+
+  const isQuiet =
+    next === null || (next.error === undefined && next.beads.length === 0);
+  $.ui.status(isQuiet ? undefined : summary(next));
+
+  if (next !== null && canPoll) {
+    canPoll = false;
+    $.clock.every(POLL_MS, () => void refresh($));
+  }
 
   return next;
 }
@@ -103,10 +121,11 @@ export function summary({ beads, error }: BeadsSnapshot): string {
     return "beads: error reading bd list";
   }
 
-  const counts = STATUSES.map(
-    (status) =>
-      [status, beads.filter((bead) => bead.status === status).length] as const,
-  );
+  const counts = STATUSES.map((status) => {
+    const count = beads.filter((bead) => bead.status === status).length;
+
+    return [status, count] as const;
+  });
   const parts = counts
     .filter(([, n]) => n > 0)
     .map(([status, n]) => `${n} ${LABELS[status].toLowerCase()}`);
@@ -128,16 +147,28 @@ export const register: Register = (on) => {
     });
 
     if (e.isInteractive) {
+      canPoll = true;
       void refresh($).then((found) => {
         if (found !== null) {
           void $.ui.open({ id: PANE, title: "Beads" });
         }
       });
-      $.clock.every(POLL_MS, () => void refresh($));
     }
 
     return next(e);
   });
+
+  // /clear, /resume, and /branch reset the snapshot to null without firing
+  // session.start again, so read the beads again for the reset session.
+  on(
+    "classic.SessionStart",
+    { source: ["clear", "resume", "fork"] },
+    async ($, e, next) => {
+      void refresh($);
+
+      return next(e);
+    },
+  );
 
   on("command.run", { command: "beads-pane" }, async ($) => {
     const found = await refresh($);

@@ -27,7 +27,7 @@ Tools that complement the beads issue tracker in Claude Code.
 
 Reads the current project's open, in-progress, and blocked beads with `bd list --json` and shows them beside the conversation.
 
-The pane refreshes when an interactive session starts, every 30 seconds after that, whenever a Bash tool call runs a `bd` command, and when the session's working directory changes. In a directory that is not a beads project, `bd list` fails and the tool stays out of the way: no pane opens and the status line is left empty.
+The pane refreshes when an interactive session starts, every 30 seconds once it has found a beads project, whenever a Bash tool call runs a `bd` command, and when the session's working directory changes. In a directory that is not a beads project, `bd list` fails and the tool stays out of the way: no pane opens, the status line is left empty, and nothing polls `bd`.
 
 #### What It Shows
 
@@ -37,7 +37,7 @@ The pane refreshes when an interactive session starts, every 30 seconds after th
 | Status line | A one-line count such as `beads: 1 in progress, 2 blocked, 4 open`, or `beads: error reading bd list` when its output cannot be parsed. The line stays empty when the project has nothing outstanding. |
 | Command     | `/beads-pane` refreshes the list and opens the pane, replying with the same count. Outside a beads project it replies that there is nothing to read.                                                   |
 
-The pane opens on its own at session start when the directory is a beads project. Headless runs (`claude -p` and the SDK) skip the pane and the 30-second poll.
+The pane opens on its own at session start when the directory is a beads project and the terminal is at least 144 columns wide, or 110 once you have opened it yourself. `/beads-pane` opens it at any width. Headless runs (`claude -p` and the SDK) skip the pane and the 30-second poll.
 
 #### Usage
 
