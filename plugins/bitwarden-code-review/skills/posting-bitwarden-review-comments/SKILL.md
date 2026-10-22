@@ -57,6 +57,7 @@ On a GitHub pull request, a finding raised again in an existing thread goes as a
 4. Be brief yet clear
 5. Use collapsed sections for comments over 5 lines
 6. Include both opening `<details>` AND closing `</details>` tags
+7. End with the source line `<sub>code-review</sub>`, short comments and thread replies included
 
 **Visibility Rule:** Only severity + one-line description and the source line visible; everything else inside `<details>` tags.
 
