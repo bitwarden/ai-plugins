@@ -5,6 +5,16 @@ All notable changes to the `bitwarden-abacus` plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-23
+
+### Added
+
+- `plan.source` mapped to `bitwarden-atlassian-tools:researching-jira-issues`, so "plan PM-1234" makes the Abacus planner read the Jira issue, its linked issues and Confluence pages, and draft beads from them. Requires Abacus 0.15 or later.
+
+### Changed
+
+- Minimum supported Abacus version is now 0.15, up from 0.13. On Abacus 0.13 or 0.14 the profile no longer applies, including `land.commit` and `land.pr`, so update Abacus along with this plugin.
+
 ## [0.2.0] - 2026-10-22
 
 ### Added
