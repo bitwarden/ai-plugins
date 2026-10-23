@@ -24,7 +24,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
