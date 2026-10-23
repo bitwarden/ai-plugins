@@ -24,7 +24,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -134,6 +134,12 @@
       "source": "./plugins/bitwarden-retrospective-tools",
       "version": "1.0.0",
       "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs and your GitHub activity."
+    },
+    {
+      "name": "bitwarden-abacus",
+      "source": "./plugins/bitwarden-abacus",
+      "version": "0.1.0",
+      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with pull request conventions for draft PRs."
     }
   ]
 }

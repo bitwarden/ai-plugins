@@ -1,0 +1,24 @@
+{
+  "profile": "bitwarden",
+  "version": "0.1.0",
+  "abacus": ">=0.11",
+  "plugins": {
+    "workers": [
+      "bitwarden-delivery-tools",
+      "bitwarden-code-review",
+      "bitwarden-security-engineer",
+      "bitwarden-software-engineer"
+    ],
+    "planner": ["bitwarden-atlassian-tools", "bitwarden-product-analyst"],
+    "concierge": [],
+    "orchestrator": []
+  },
+  "slots": {
+    "plan.source": "",
+    "plan.analyze": "",
+    "implement.guide": "",
+    "review": [],
+    "land.pr": "bitwarden-delivery-tools:applying-pr-conventions",
+    "retro.analyze": ""
+  }
+}
