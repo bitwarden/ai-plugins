@@ -97,7 +97,7 @@ It's a deliberately different lens from the `bitwarden-code-reviewer` agent. Tha
 
 Agents start cold — a sub-agent inherits none of the main session's context — so the skill briefs every one of them explicitly. Each receives Bitwarden's zero-knowledge invariant and the P01–P06 threat-model directive verbatim, bar the conditional skill-review agent, which returns prose for the orchestrator to classify and never reasons about vault data itself. Feature context — the PR's intent, the ticket, the product framing — is handed out deliberately: the architecture and security agents get the full "why" so they can reason adversarially from intent, while the quality and bug agents see only the diff, so their first read stays unbiased.
 
-For the whole process at a glance, see the [review flow diagrams](./docs/multi-agent-review-flows.md).
+For the whole process at a glance, see the [review flow diagrams](./docs/multi-agent-code-review-flows.md).
 
 The `performing-multi-agent-code-review` skill slots cleanly into a [Claude Code agent-teams](https://code.claude.com/docs/en/agent-teams) loop — run it at the end of a coding session, address what it finds, refactor — or as a depth-of-review gate on a draft PR before you publish.
 
