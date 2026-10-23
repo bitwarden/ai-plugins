@@ -1,7 +1,7 @@
 {
   "skill_name": "running-playwright-tests",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous; (j) a 4xx or 5xx response on a step that achieved its outcome is recorded in error_details without changing the step's PASS; and (k) such a response on a setup step does not stop the case. Graded on the stated plan and refusal, not on live execution.",
+  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous; (j) a 4xx or 5xx response on a step that achieved its outcome is recorded in error_details without changing the step's PASS; (k) such a response on a setup step does not stop the case; and (l) a failed static file such as an image is not recorded as an API error. Graded on the stated plan and refusal, not on live execution.",
   "evals": [
     {
       "id": 1,
@@ -133,6 +133,17 @@
         "Records the setup step outcome as PASS",
         "Records an error_details entry for the 400 on the setup step",
         "Continues to the case's test steps"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "skips-failed-static-files",
+      "prompt": "After test step 1 opens the billing page, the action output lists new console entries. The log lines read 'Failed to load resource: the server responded with a status of 404 (Not Found) @ https://localhost:8080/images/plan-badge.svg' and 'Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ https://localhost:8080/api/organizations/abc/billing/metadata'. playwright-cli requests lists both. What error details do you record?",
+      "expected_output": "Records one error_details entry, for GET /api/organizations/abc/billing/metadata with status 500, read through playwright-cli response-body. Skips the failed .svg because it is a static file, not an API call, and does not run response-body on it.",
+      "expectations": [
+        "Records an error_details entry for the /api/organizations/abc/billing/metadata 500",
+        "Does not record an entry for the failed .svg image",
+        "Does not run response-body on the static file"
       ]
     }
   ]
