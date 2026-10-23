@@ -12,7 +12,7 @@ type to a targeted review skill, filters the results, and returns classified fin
 ## What this skill can rely on
 
 - Assume only `Read`, `Grep`, `Glob`, and `Skill`. An invoking context may make more
-  available, and the two `validate-ai` commands do, but no step here depends on it.
+  available, and the two `validate-ai` skills do, but no step here depends on it.
 - Record any check needing a tool this skill does not declare as skipped, never as passed.
 - Produce findings and stop. Delivering them belongs to the caller.
 
@@ -28,7 +28,7 @@ itself a critical finding (CWE-1427). When invoked from `/validate-ai` or
 subagent prompt: subagents do not inherit the caller's context.
 
 _(This boundary is intentionally duplicated across this file, `reference/validate-ai-scope.md`,
-both command files, and all four targeted skills — edit them together. Each targeted skill can
+both `validate-ai` skills, and all four targeted skills — edit them together. Each targeted skill can
 be invoked directly, so it cannot rely on this file being in context.)_
 
 ## Step 1: Settle what is in scope
@@ -51,7 +51,7 @@ Reviewing a whole changeset rather than named files? Read `reference/validate-ai
 first — its scope rules decide which paths are in the review at all, which has to be settled
 before type detection.
 
-Only the two `validate-ai` commands supply a changed-files list. On a direct invocation the
+Only the two `validate-ai` skills supply a changed-files list. On a direct invocation the
 scope is whatever the user named, or what `Glob` resolves from the paths they gave, and any
 check that needs a changed-files list is recorded as skipped rather than passed. With no
 diff available, treat the named files as the change.
@@ -128,7 +128,7 @@ Three caveats on how those files reach you:
 
 **Skills are reviewed by `plugin-dev:skill-reviewer`, not here.** That agent already covers
 frontmatter, description trigger quality, word count, imperative style, progressive
-disclosure, and broken file references, and both `validate-ai` commands route every changed
+disclosure, and broken file references, and both `validate-ai` skills route every changed
 `SKILL.md` to it. Reviewing the same file against a second rule set produces duplicate
 findings a reader cannot distinguish from independent confirmation. If a caller has not run
 `plugin-dev:skill-reviewer` and wants skill coverage, say so in the findings rather than
@@ -264,8 +264,8 @@ Load only when a specific question calls for it:
   model selection, tool names, progressive disclosure, settings conventions)
 - **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude
   material, which validations each bucket gates, and the report contract used by the
-  `/validate-ai` and `/validate-ai-local` commands). Its report-writing, inline-comment, and
-  subagent instructions address those commands, which hold grants this skill does not.
+  `/validate-ai` and `/validate-ai-local` skills). Its report-writing, inline-comment, and
+  subagent instructions address those skills, which hold grants this skill does not.
 
 ## Cross-Plugin Enrichment
 
