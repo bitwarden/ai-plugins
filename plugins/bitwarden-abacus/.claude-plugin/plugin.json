@@ -8,9 +8,5 @@
   },
   "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-abacus",
   "repository": "https://github.com/bitwarden/ai-plugins",
-  "keywords": [
-    "abacus",
-    "orchestration",
-    "multi-agent"
-  ]
+  "keywords": ["abacus", "orchestration", "multi-agent"]
 }
