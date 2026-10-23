@@ -5,11 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.0] - 2026-10-19
+## [2.5.0] - 2026-10-23
 
 ### Added
 
 - Catch-rate and behavior evals for `performing-multi-agent-code-review`
+- Mermaid flow diagrams for `performing-multi-agent-code-review` in `docs/`
 - Local mode reviews untracked source files, skipping config, dotfiles, and credential paths
 - `git` grants in `allowed-tools`: `ls-files`, `merge-base`, `show`, `remote get-url origin`, `fetch origin pull/*/head`
 
