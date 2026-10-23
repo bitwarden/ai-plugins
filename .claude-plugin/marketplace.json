@@ -140,6 +140,12 @@
       "source": "./plugins/bitwarden-abacus",
       "version": "0.2.0",
       "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with commit message and pull request conventions."
+    },
+    {
+      "name": "bitwarden-beads-tools",
+      "source": "./plugins/bitwarden-beads-tools",
+      "version": "0.1.0",
+      "description": "Tools that complement the beads (bd) issue tracker in Claude Code, including a live pane and status line of the project's open, in-progress, and blocked beads."
     }
   ]
 }
