@@ -341,6 +341,20 @@ class RenderAbortedWithCasesTest(unittest.TestCase):
         )
         self.assertEqual(rc, 2)
 
+    def test_abort_banner_shows_run_level_error_details(self):
+        data = dict(
+            ABORTED_WITH_CASES,
+            error_details=[{"request": "POST /identity/connect/token", "status": 500,
+                            "exception_message": "Invalid object name 'dbo.User'."}],
+        )
+        out = render_report.render(data, HEADER)
+        self.assertIn('class="errdet errdet-fail"', out)
+        self.assertIn("Invalid object name", out)
+
+    def test_abort_banner_without_error_details_unchanged(self):
+        out = render_report.render(ABORTED_WITH_CASES, HEADER)
+        self.assertNotIn('class="errdet', out)
+
     def test_complete_run_has_no_abort_banner(self):
         out = render_report.render(load_example("complete-run.json"), HEADER)
         self.assertNotIn("Run aborted", out)

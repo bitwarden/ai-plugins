@@ -74,6 +74,21 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(result["cases"], [])
         self.assertIn("login failed", result["abort_reason"])
 
+    def test_aborted_segment_carries_error_details(self):
+        result = merge_results.merge([load_example("aborted-run.json")])
+        self.assertEqual(result["error_details"][0]["request"], "POST /identity/connect/token")
+
+    def test_aborted_segment_drops_non_list_error_details(self):
+        segment = load_example("aborted-run.json")
+        segment["error_details"] = "x"
+        self.assertNotIn("error_details", merge_results.merge([segment]))
+
+    def test_complete_run_drops_error_details(self):
+        paused = load_example("paused-segment.json")
+        paused["error_details"] = [{"request": "GET /a"}]
+        result = merge_results.merge([paused, load_example("resume-segment.json")])
+        self.assertNotIn("error_details", result)
+
     def test_single_aborted_segment_retains_its_own_cases(self):
         """A mid-run environment fault aborts one segment that carries cases.
 

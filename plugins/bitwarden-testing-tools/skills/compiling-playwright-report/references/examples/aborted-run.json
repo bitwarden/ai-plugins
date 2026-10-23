@@ -1,4 +1,12 @@
 {
   "run_status": "aborted",
-  "abort_reason": "setup failure before test cases (login failed: invalid credentials)"
+  "abort_reason": "setup failure before test cases (login failed: the server returned 500)",
+  "error_details": [
+    {
+      "request": "POST /identity/connect/token",
+      "status": 500,
+      "status_text": "Internal Server Error",
+      "exception_message": "Invalid object name 'dbo.User'."
+    }
+  ]
 }

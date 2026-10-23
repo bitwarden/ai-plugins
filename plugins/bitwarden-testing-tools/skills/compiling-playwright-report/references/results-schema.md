@@ -4,18 +4,19 @@ The `playwright-test-runner` emits run results as JSON. The orchestrator assembl
 
 ## Run object
 
-| Field                 | Type   | Notes                                                                                                                 |
-| --------------------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
-| `run_status`          | string | `complete`, `paused` (segment only), or `aborted`                                                                     |
-| `abort_reason`        | string | Present only when `run_status` is `aborted`                                                                           |
-| `need_user_input`     | string | Present only on a `paused` segment; the resume question                                                               |
-| `need_user_input_url` | string | Optional, and only on a `paused` segment; a link the user opens to do the human step, such as a Stripe Dashboard page |
-| `totals`              | object | `{ total, passed, adaptive, failed, errored }`; derived on merge                                                      |
-| `cases`               | array  | Case objects, in order; empty for an aborted run only if it aborted before any case completed                         |
+| Field                 | Type   | Notes                                                                                                                                       |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run_status`          | string | `complete`, `paused` (segment only), or `aborted`                                                                                           |
+| `abort_reason`        | string | Present only when `run_status` is `aborted`                                                                                                 |
+| `error_details`       | array  | Optional, and only on an `aborted` result; error details captured before any test case, in the same entry shape as a step's `error_details` |
+| `need_user_input`     | string | Present only on a `paused` segment; the resume question                                                                                     |
+| `need_user_input_url` | string | Optional, and only on a `paused` segment; a link the user opens to do the human step, such as a Stripe Dashboard page                       |
+| `totals`              | object | `{ total, passed, adaptive, failed, errored }`; derived on merge                                                                            |
+| `cases`               | array  | Case objects, in order; empty for an aborted run only if it aborted before any case completed                                               |
 
 Totals are derived from the per-case `status` values by `merge_results.py`. The runner does not emit totals. `total = passed + adaptive + failed + errored` and `len(cases) == total` hold by construction.
 
-An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. Any abort that lands after at least one test case completed takes this shape, and two paths reach it. A run may have split into segments at a `[HUMAN]` pause with a later segment aborting, most often because the resumed runner could not re-authenticate. Or a single-segment run may have hit an environment fault partway through, such as Mailcatcher becoming unreachable between cases, in which case the aborting segment carries its own completed cases. Either way the completed cases are preserved by `merge_results.py` and the report renders them under an abort banner. An `aborted` run with an empty or absent `cases` array means the run aborted before any test case completed, that is, setup or authentication failed, and no report is produced.
+An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. Any abort that lands after at least one test case completed takes this shape, and two paths reach it. A run may have split into segments at a `[HUMAN]` pause with a later segment aborting, most often because the resumed runner could not re-authenticate. Or a single-segment run may have hit an environment fault partway through, such as Mailcatcher becoming unreachable between cases, in which case the aborting segment carries its own completed cases. Either way the completed cases are preserved by `merge_results.py` and the report renders them under an abort banner. An `aborted` run with an empty or absent `cases` array means the run aborted before any test case completed, that is, setup or authentication failed, and no report is produced. When that run carries top-level `error_details`, the orchestrator prints them in its summary under the abort reason instead. When an aborted run with cases carries them, the report shows them in the abort banner.
 
 ## Case object
 

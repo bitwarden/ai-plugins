@@ -478,9 +478,10 @@ def render(data, header):
     abort_block = ""
     if aborted:
         abort_block = (
-            '<p class="abort-banner"><strong>Run aborted</strong>: '
+            '<div class="abort-banner"><p><strong>Run aborted</strong>: '
             f'{esc_linked(data.get("abort_reason", ""))}<br />'
             "The test cases below completed before the run was aborted.</p>"
+            f'{render_error_details(data.get("error_details"), True)}</div>'
         )
     hero_class, verdict_icon, verdict_text = render_verdict(totals, aborted)
     passed_or_adaptive = totals["passed"] + totals["adaptive"]
