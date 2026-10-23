@@ -14,7 +14,7 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 | `land.commit` | `bitwarden-abacus:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket     |
 | `land.pr`     | `bitwarden-delivery-tools:applying-pr-conventions`                                     | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
 
-**Ticketless work.** When a bead's source isn't a Jira ticket, the commit drops the bracket rather than inventing a
+**Work without a ticket.** When a bead's source isn't a Jira ticket, the commit drops the bracket rather than inventing a
 key or writing a placeholder, the same rule `applying-pr-conventions` uses for pull request titles, so a bead's commit
 and its PR title agree. The rule is settled in `skills/commit-message`, so Abacus never stops to ask.
 
