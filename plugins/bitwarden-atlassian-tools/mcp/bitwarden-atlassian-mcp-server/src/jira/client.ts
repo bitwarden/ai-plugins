@@ -375,28 +375,31 @@ export class JiraClient {
   /**
    * Link two work items.
    *
-   * Jira's payload is (inwardIssue, outwardIssue) and reads
-   * "outwardIssue <outward description> inwardIssue". For type "Blocks" the
-   * descriptions are outward "blocks" and inward "is blocked by", so the
-   * outward issue is the blocker.
+   * Jira's create payload reads "inwardIssue <outward description>
+   * outwardIssue". For type "Blocks" (outward "blocks", inward "is blocked
+   * by") that means inwardIssue blocks outwardIssue: the blocker goes on
+   * `inwardIssue` and the blocked item on `outwardIssue`.
    *
-   * Verified read-only against the live PM project: the same Blocks link between
-   * PM-39203 and PM-38796 is reported from PM-39203 as carrying `inwardIssue:
-   * PM-38796`, and from PM-38796 as carrying `outwardIssue: PM-39203`. Each end
-   * names the other and labels it with the other end's role, so the canonical
-   * pair is outward=PM-39203, inward=PM-38796, i.e. PM-39203 blocks PM-38796.
+   * Reading a link back is the other way round. On issue X's record, an entry
+   * carrying `inwardIssue: Y` reads "X is blocked by Y" and one carrying
+   * `outwardIssue: Y` reads "X blocks Y". For example, the Blocks link between
+   * PM-38796 and PM-39203 shows on PM-39203 as `inwardIssue: PM-38796`
+   * ("is blocked by") and on PM-38796 as `outwardIssue: PM-39203` ("blocks"),
+   * so PM-38796 blocks PM-39203.
    *
-   * Note this is the opposite of the acli CLI's `--in`/`--out` mapping.
+   * Verified live on 2026-10-21: posting `inwardIssue: SHOT-295`,
+   * `outwardIssue: SHOT-297` created a link that reads SHOT-295 blocks
+   * SHOT-297 from both ends.
    */
   async createIssueLink(params: {
     typeName: string;
-    outwardKey: string;
     inwardKey: string;
+    outwardKey: string;
   }): Promise<void> {
     await this.client.post(`${this.API_BASE}/issueLink`, {
       type: { name: params.typeName },
-      outwardIssue: { key: params.outwardKey },
       inwardIssue: { key: params.inwardKey },
+      outwardIssue: { key: params.outwardKey },
     });
   }
 

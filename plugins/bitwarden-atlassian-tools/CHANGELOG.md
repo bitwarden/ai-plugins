@@ -5,6 +5,15 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.7] - 2026-10-21
+
+### Fixed
+
+- `link_issues` created every `Blocks` link inverted: asked for "A blocks B", it stored "B blocks A". The blocker now goes on the create payload's `inwardIssue` and the blocked item on `outwardIssue`, which is how Jira reads a `Blocks` link. The dry-run payload changes to match.
+- The read-back check after a live link no longer reports an inverted link as verified. It reads the blocker's record and looks for the blocked item by role, independent of the create mapping, so the two can no longer share one mistake. A link that landed the wrong way round is reported as created inverted, with its link id.
+
+**Action needed:** every `Blocks` link created with `link_issues` before 2.7.7 is inverted. Check each one in Jira's Linked Issues panel, delete it, and recreate it with this version. `Relates` links are symmetric and are unaffected.
+
 ## [2.7.6] - 2026-10-12
 
 ### Changed
