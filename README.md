@@ -27,7 +27,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-stripe-tools](plugins/bitwarden-stripe-tools/)               | 1.0.0   | Read-only Stripe test-mode queries, invoice previews, and test-clock advancement through a guarded CLI wrapper                                                          |
 | [bitwarden-testing-tools](plugins/bitwarden-testing-tools/)             | 1.4.0   | Testing tools for analyzing and improving test quality across Bitwarden's repositories, and setting up the QA manual regression runs for a release.                     |
 | [bitwarden-testmo-tools](plugins/bitwarden-testmo-tools/)               | 1.0.0   | Testmo API access: create test runs from reviewable filter specs, one or many per pass, with dry-run, milestone linkage, and duplicate checks                           |
-| [claude-config-validator](plugins/claude-config-validator/)             | 2.3.0   | Validates Claude Code configuration files for security, structure, and quality                                                                                          |
+| [claude-config-validator](plugins/claude-config-validator/)             | 2.3.1   | Validates Claude Code configuration files for security, structure, and quality                                                                                          |
 | [claude-retrospective](plugins/claude-retrospective/)                   | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                              |
 
 ## Usage

@@ -12,15 +12,15 @@ The Claude Config Validator plugin provides expert-level validation for Claude C
 
 Validates these configuration file types, each routed to its own targeted skill except where noted:
 
-| Configuration Type                                                                    | What Gets Validated                                                                                                                                   |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity                                                   |
-| **Skills** (`SKILL.md`)                                                               | Not validated here. The commands delegate this to `plugin-dev:skill-reviewer`; support files under a skill are read by `reviewing-claude-config`      |
-| **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                                                                     |
-| **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                                                                     |
-| **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                                                             |
-| **Settings** (`.claude/settings.json`)                                                | Security (no committed credentials), permission scoping, valid JSON structure                                                                         |
-| **Plugin Configurations** (`plugins/*/`)                                              | Manifest validation, directory structure, marketplace standards. No checklist of its own: the commands delegate this to `plugin-dev:plugin-validator` |
+| Configuration Type                                                                    | What Gets Validated                                                                                                                                               |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Agents** (`.claude/agents/*.md`)                                                    | YAML frontmatter, tool access security, model selection, system prompt quality, description clarity                                                               |
+| **Skills** (`SKILL.md`)                                                               | Not validated here. The `validate-ai` skills delegate this to `plugin-dev:skill-reviewer`; support files under a skill are read by `reviewing-claude-config`      |
+| **CLAUDE.md** (project instructions)                                                  | Clarity, specificity, security patterns, proper emphasis, structured organization                                                                                 |
+| **Prompts/Commands** (`.claude/prompts/`, `.claude/commands/`, `plugins/*/commands/`) | Purpose clarity, session context handling, skill references, parameter validation                                                                                 |
+| **Hooks** (`hooks.json`, or a `hooks` block in settings)                              | Schema, event names, `${CLAUDE_PLUGIN_ROOT}` script paths, command and prompt-hook safety                                                                         |
+| **Settings** (`.claude/settings.json`)                                                | Security (no committed credentials), permission scoping, valid JSON structure                                                                                     |
+| **Plugin Configurations** (`plugins/*/`)                                              | Manifest validation, directory structure, marketplace standards. No checklist of its own: the `validate-ai` skills delegate this to `plugin-dev:plugin-validator` |
 
 ### Security-First Validation
 
@@ -85,10 +85,10 @@ headless workflow run means no report and a failed check.
 
 ### Commands
 
-| Command                                                      | Purpose                                                                                                                                              |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`/validate-ai-local`](commands/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
-| [`/validate-ai`](commands/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report its findings inline on the diff, with a sticky summary comment                     |
+| Command                                                    | Purpose                                                                                                                                              |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`/validate-ai-local`](skills/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
+| [`/validate-ai`](skills/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report its findings inline on the diff, with a sticky summary comment                     |
 
 Both commands run the same review the
 [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub
@@ -186,7 +186,7 @@ Security audit all Claude configuration files in this project
 | Settings and hooks   | `reviewing-runtime-configuration` |
 | CLAUDE.md files      | `reviewing-project-guidance`      |
 
-`SKILL.md` files are reviewed by `plugin-dev:skill-reviewer`, not here — it already covers frontmatter, trigger quality, word count, progressive disclosure, and broken references, and both `validate-ai` commands route every changed skill to it.
+`SKILL.md` files are reviewed by `plugin-dev:skill-reviewer`, not here — it already covers frontmatter, trigger quality, word count, progressive disclosure, and broken references, and both `validate-ai` skills route every changed skill to it.
 
 **Capabilities**:
 
@@ -221,7 +221,7 @@ Five passes, ordered so the security question comes first.
 
 ### Skill Validation
 
-Not performed by this plugin. `plugin-dev:skill-reviewer` owns `SKILL.md` review — frontmatter, description and trigger quality, word count and writing style, progressive disclosure, and referenced files that do not exist — and both `validate-ai` commands route every changed skill to it. Reviewing the same file against a second rule set produces duplicate findings a reader cannot tell from independent confirmation.
+Not performed by this plugin. `plugin-dev:skill-reviewer` owns `SKILL.md` review — frontmatter, description and trigger quality, word count and writing style, progressive disclosure, and referenced files that do not exist — and both `validate-ai` skills route every changed skill to it. Reviewing the same file against a second rule set produces duplicate findings a reader cannot tell from independent confirmation.
 
 Skill support files (`reference/`, `examples/`, `scripts/`) have no targeted reviewer, so `reviewing-claude-config` reads them directly for instruction content.
 
@@ -375,10 +375,9 @@ plugins/claude-config-validator/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
 ├── CHANGELOG.md             # Version history
-├── commands/
-│   ├── validate-ai/         # /validate-ai - pull request validation (command + README)
-│   └── validate-ai-local/   # /validate-ai-local - local checkout validation (command + README)
 ├── skills/
+│   ├── validate-ai/                    # /validate-ai - pull request validation (skill + README)
+│   ├── validate-ai-local/              # /validate-ai-local - local checkout validation (skill + README)
 │   ├── reviewing-claude-config/        # Entry point: scope, security scan, routing, filtering
 │   │   ├── SKILL.md
 │   │   ├── reference/                  # Priority framework, security patterns, requirements, changeset scope
