@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Inline comments and thread replies end with a `code-review` source line. claude-config-validator's `/validate-ai` posts under the same bot account, so without it a reader cannot tell which review raised a finding
+- Inline comments and thread replies on a GitHub pull request end with a `code-review` source line. claude-config-validator's `/validate-ai` posts under the same bot account, so without it a reader cannot tell which review raised a finding
 
 ## [2.4.0] - 2026-10-12
 
