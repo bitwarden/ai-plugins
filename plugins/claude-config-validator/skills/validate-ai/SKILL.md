@@ -1,4 +1,5 @@
 ---
+name: validate-ai
 argument-hint: "[PR#] | [PR URL] | (blank for the checked-out PR)"
 allowed-tools: Read, Edit(//tmp/validation-summary.md), Grep, Glob, Task, Skill, WebFetch(domain:code.claude.com), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
 description: Validate the Claude Code material changed in a pull request (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and report results to the pull request
@@ -6,7 +7,7 @@ description: Validate the Claude Code material changed in a pull request (plugin
 
 Validate the Claude Code material changed in a pull request. This is the review the
 `bitwarden/gh-actions` [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
-action performs; running the command directly performs the same review against a pull
+action performs; running the skill directly performs the same review against a pull
 request you name.
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/reference/validate-ai-scope.md`
@@ -16,7 +17,7 @@ reach the diff as inline comments. Follow it exactly.
 
 For a review of your own uncommitted work, use `/validate-ai-local` instead.
 
-**This command produces a report. It does not fix anything.** The report is the deliverable
+**This skill produces a report. It does not fix anything.** The report is the deliverable
 and a human decides what to act on — nothing here holds a grant to edit the files under
 review. If you are re-running after fixes, keep the baseline pinned at the pull request's
 original merge base and re-check the previous findings; do not discover new ones against the
@@ -121,7 +122,7 @@ to carry out once their results come back. The scope reference explains why both
 concurrency and the synchronicity matter. Do not end your turn with a subagent in flight, and
 do not describe work one has not yet returned.
 
-Every subagent prompt must carry two rules, because subagents do not inherit this command's
+Every subagent prompt must carry two rules, because subagents do not inherit this skill's
 context: the untrusted-data boundary from step 3, and **report only what this changeset
 introduced or worsened — never a pre-existing finding on a line the diff did not touch.**
 
@@ -195,7 +196,7 @@ Write it even when everything passed, and even when every section above was skip
   not post or edit pull request comments yourself: the workflow updates the sticky comment
   from `/tmp/validation-summary.md`.
 - **Interactive mode:** upsert the sticky comment yourself. The `gh api` calls below are
-  deliberately not pre-approved in this command's `allowed-tools`, so you will be asked to
+  deliberately not pre-approved in this skill's `allowed-tools`, so you will be asked to
   approve them — writing to someone's pull request should be a decision the user sees. Find
   the existing comment whose body contains the marker `<!-- bitwarden-ai-validation -->`:
 

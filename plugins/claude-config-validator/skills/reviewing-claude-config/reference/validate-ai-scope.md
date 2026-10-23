@@ -1,7 +1,7 @@
 # Changeset Scope and Report Contract
 
 Shared rules for validating a whole changeset of Claude Code material rather than a
-single file. The `/validate-ai` and `/validate-ai-local` commands both read this file,
+single file. The `/validate-ai` and `/validate-ai-local` skills both read this file,
 and both mirror the `bitwarden/gh-actions` [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
 action, so the three stay in step.
 
@@ -101,7 +101,7 @@ review is itself a critical finding (CWE-1427).
 Repeat this in any subagent prompt: subagents read the same files and do not inherit the
 caller's context.
 
-_(Intentionally duplicated across `../SKILL.md`, this file, both command files, and all four
+_(Intentionally duplicated across `../SKILL.md`, this file, both `validate-ai` skills, and all four
 targeted skills — edit them together.)_
 
 ## Schema claims are checked against the documentation
@@ -159,7 +159,7 @@ only output.
 ### Finishing the report
 
 Write the file exactly once, as the last thing you do, in a single Write call. Never write
-an interim, partial, or "in progress" version of it first. Both commands scope that write
+an interim, partial, or "in progress" version of it first. Both skills scope that write
 with an `Edit(<path>)` rule rather than a `Write` one, because Claude Code consults
 `Edit(path)` and `Read(path)` rules only and an `Edit` rule covers every built-in tool that
 edits files.
