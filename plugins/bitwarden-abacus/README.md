@@ -9,9 +9,14 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 
 ## What it does today
 
-| Abacus slot | Bitwarden skill                                    | Effect                                                                                         |
-| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `land.pr`   | `bitwarden-delivery-tools:applying-pr-conventions` | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
+| Abacus slot   | Bitwarden skill                                                                        | Effect                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `land.commit` | `bitwarden-abacus:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's commit format, `[PM-1234]` or `[NO-TICKET]`             |
+| `land.pr`     | `bitwarden-delivery-tools:applying-pr-conventions`                                     | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
+
+**Ticketless work.** Bitwarden's commit format always carries a ticket, so when a bead's source isn't a Jira ticket the
+commit uses `[NO-TICKET]` (settled in `skills/commit-message`, so Abacus never stops to ask). Pull request titles
+follow `applying-pr-conventions`, which drops the bracket when there is no ticket.
 
 Abacus still opens the pull request itself (through `abacus-finalize`), so stacking, cleanup on failure and the
 evidence checks stay in place. The skill only supplies the content. Each result is recorded on the bead together
@@ -27,7 +32,7 @@ The concierge and orchestrator launch with none of the Bitwarden plugins; the pl
 
 ## Requirements
 
-- Abacus 0.11 or later.
+- Abacus 0.13 or later (`land.commit` arrived in 0.13).
 - The plugins it names, installed from this marketplace. If they aren't installed on a machine, Abacus can't use
   them; `abacus doctor` reports what's missing.
 
