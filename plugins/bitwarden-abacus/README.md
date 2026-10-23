@@ -11,12 +11,12 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 
 | Abacus slot   | Bitwarden skill                                                                        | Effect                                                                                         |
 | ------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `land.commit` | `bitwarden-abacus:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's commit format, `[PM-1234]` or `[NO-TICKET]`             |
+| `land.commit` | `bitwarden-abacus:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket     |
 | `land.pr`     | `bitwarden-delivery-tools:applying-pr-conventions`                                     | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
 
-**Ticketless work.** Bitwarden's commit format always carries a ticket, so when a bead's source isn't a Jira ticket the
-commit uses `[NO-TICKET]` (settled in `skills/commit-message`, so Abacus never stops to ask). Pull request titles
-follow `applying-pr-conventions`, which drops the bracket when there is no ticket.
+**Ticketless work.** When a bead's source isn't a Jira ticket, the commit drops the bracket rather than inventing a
+key or writing a placeholder, the same rule `applying-pr-conventions` uses for pull request titles, so a bead's commit
+and its PR title agree. The rule is settled in `skills/commit-message`, so Abacus never stops to ask.
 
 Abacus still opens the pull request itself (through `abacus-finalize`), so stacking, cleanup on failure and the
 evidence checks stay in place. The skill only supplies the content. Each result is recorded on the bead together
@@ -50,13 +50,14 @@ There's nothing to invoke. Abacus finds the profile among your installed plugins
 abacus doctor
 ```
 
-It shows the `bitwarden` profile, the `land.pr` slot resolving to `applying-pr-conventions`, and any plugin the
-profile names that isn't installed. Then build as usual in a repository with draft-PR landing, for example by telling
+It shows the `bitwarden` profile, the `land.commit` and `land.pr` slots resolving to `commit-message` and
+`applying-pr-conventions`, and any plugin the profile names that isn't installed. Then build as usual in a repository with draft-PR landing, for example by telling
 the concierge:
 
 ```text
 build PM-1234
 ```
 
-Each bead's draft PR then carries Bitwarden's title, template body and `t:` type label. A repository can leave the
+Each bead's commit then follows Bitwarden's commit format, and its draft PR carries Bitwarden's title, template body and
+`t:` type label. A repository can leave the
 profile out with `"profile": "none"` in its `.abacus/config.json`.

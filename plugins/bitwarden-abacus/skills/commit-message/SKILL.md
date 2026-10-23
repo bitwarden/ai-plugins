@@ -14,11 +14,13 @@ or ticket the work tracks, or none) and each acceptance criterion with its evide
 2. **The ticket prefix, settled here so the stage never stops to ask:**
    - When the bead's source is a Jira ticket (a key such as `PM-1234`, or a `bitwarden.atlassian.net/browse/` link),
      use that key: `[PM-1234]`.
-   - Otherwise (a GitHub issue, any other link, or no source), use `[NO-TICKET]`. Never invent a ticket key.
+   - Otherwise (a GitHub issue, any other link, or no source), drop the bracket entirely: `<type>: <imperative
+summary>`. Never invent a ticket key or write a placeholder in its place.
 3. Compose the message only. The Abacus stage records it, and `abacus-finalize` commits it and appends Abacus's own
    trailers, so leave trailers out. Skip the skill's steps that act: the stage already settles the branch (it is
    Abacus's) and the pre-commit checks (the gate and the reviewer have run), and staging or committing belongs to
    `abacus-finalize`.
 
 Pull request titles are not covered here. Abacus's `land.pr` slot uses
-`bitwarden-delivery-tools:applying-pr-conventions`, which drops the ticket bracket when there is no ticket.
+`bitwarden-delivery-tools:applying-pr-conventions`, which drops the bracket the same way when there is no ticket, so a
+bead's commit subject and pull request title agree.
