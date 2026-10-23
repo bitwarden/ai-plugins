@@ -216,7 +216,7 @@ def render_error_entry(entry):
     count = entry.get("count")
     if isinstance(count, int) and not isinstance(count, bool) and count > 1:
         request_line += f" (×{count})"
-    lines = [f'<span class="errdet-req">{request_line}</span>']
+    lines = [f'<span class="error-details-req">{request_line}</span>']
     if entry.get("message"):
         lines.append(esc_linked(entry["message"]))
     validation = entry.get("validation_errors")
@@ -233,10 +233,10 @@ def render_error_entry(entry):
     if isinstance(stack, str) and stack.strip():
         frames = sum(1 for line in stack.splitlines() if line.strip().startswith("at "))
         stack_html = (
-            f'<details class="errdet-stack"><summary>Stack trace ({plural(frames, "frame")})</summary>'
+            f'<details class="error-details-stack"><summary>Stack trace ({plural(frames, "frame")})</summary>'
             f"<pre>{esc(stack)}</pre></details>"
         )
-    return f'<div class="errdet-box">{"<br />".join(lines)}{stack_html}</div>'
+    return f'<div class="error-details-box">{"<br />".join(lines)}{stack_html}</div>'
 
 
 def render_error_details(entries, failed):
@@ -254,7 +254,7 @@ def render_error_details(entries, failed):
         return ""
     tone = "fail" if failed else "warn"
     return (
-        f'<div class="errdet errdet-{tone}"><span class="errdet-label">Error details</span>'
+        f'<div class="error-details error-details-{tone}"><span class="error-details-label">Error details</span>'
         f'{"".join(boxes)}</div>'
     )
 
