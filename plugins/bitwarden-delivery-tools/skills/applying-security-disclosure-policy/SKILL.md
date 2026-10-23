@@ -10,13 +10,13 @@ Commit messages and pull request titles are public and permanent: Bitwarden's re
 
 This skill answers two questions for one change and returns the answers: is the change security-relevant, and if so, what do the rules say about the strings the caller is about to write. It drafts nothing, commits nothing, and submits nothing. The caller writes the strings and gets the author's approval.
 
-The caller says what it is composing (a commit message, a pull request title and body, or both) and passes the branch name and any ticket key it has. This skill does not read the repository, so what the caller passes is all it knows about the branch. Follow the caller's instruction over the defaults below.
+What the caller is composing (a commit message, a pull request title and body, or both), the branch, and any ticket key are already in the conversation by the time this skill runs. When the branch name isn't there, read it with `git branch --show-current`, since a `VULN-*` key in the branch is a high-confidence signal.
 
 ## Step 1 — Detect
 
 Two tiers.
 
-**High-confidence: treat as security-relevant.** Resolve the ticket from what the caller passed, including a key embedded in the branch name, or from the conversation. When `bitwarden-atlassian-tools` is installed, check it with `Skill(bitwarden-atlassian-tools:researching-jira-issues)`. Any of these counts:
+**High-confidence: treat as security-relevant.** Resolve the ticket from the conversation, including a key embedded in the branch name. When `bitwarden-atlassian-tools` is installed, check it with `Skill(bitwarden-atlassian-tools:researching-jira-issues)`. Any of these counts:
 
 - the ticket or a linked issue is in the `VULN` project (issue type `Security`), including a branch named for a `VULN-*` key
 - the engineering ticket (e.g. `PM-*`) carries the `Vulnerability-Resolution` label

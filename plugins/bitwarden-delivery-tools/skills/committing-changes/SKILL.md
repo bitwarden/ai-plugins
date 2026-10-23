@@ -12,7 +12,7 @@ Resolve the repository's default branch from the remote rather than assuming `ma
 
 ## Security-Sensitive Changes
 
-Before writing the message, invoke `Skill(applying-security-disclosure-policy)` for this change. Say you are composing a commit message, and pass the current branch name and any ticket key you have. Skip the call when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot. A settled `Yes` must come with its wording rules; if it doesn't, invoke the skill anyway.
+Before writing the message, invoke `Skill(applying-security-disclosure-policy)` for this change. Skip the call when a verdict was already settled for this change, as `force-multiplier` settles one at its pilot. A settled `Yes` must come with its wording rules; if it doesn't, invoke the skill anyway.
 
 Branch on the `Verdict:` line:
 

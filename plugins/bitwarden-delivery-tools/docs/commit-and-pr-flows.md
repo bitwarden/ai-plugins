@@ -58,7 +58,7 @@ graph TD
     substantial[performing-multi-agent-code-review]
     assess[Assess findings with the user:<br/>fix each, or record it as deferred]
     clean[Remove untracked review output]
-    conventions[applying-pr-conventions, given the branch name:<br/>security verdict from applying-security-disclosure-policy,<br/>rules for both commits and PR strings,<br/>title with its type from labeling-changes,<br/>body, ai-review label]
+    conventions[applying-pr-conventions:<br/>security verdict from applying-security-disclosure-policy,<br/>rules for both commits and PR strings,<br/>title with its type from labeling-changes,<br/>body, ai-review label]
     policyStop[Stop: policy unavailable or unusable,<br/>nothing composed or pushed]
     commitCheck{Security fix: does any commit<br/>not yet pushed break the wording rules?}
     whichCommit{Is it HEAD?}
