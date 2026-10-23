@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `land.commit` mapped to the new `commit-message` skill, which follows `bitwarden-delivery-tools:committing-changes`, so each commit Abacus makes uses Bitwarden's commit format. When a bead has no Jira ticket, the commit drops the bracket, as `applying-pr-conventions` does for pull request titles, so the two agree. Requires Abacus 0.13 or later.
+- `land.commit` mapped to the new `commit-message` skill, which follows `bitwarden-delivery-tools:committing-changes`, so each commit Abacus makes uses Bitwarden's commit format. When a bead has no Jira ticket, the commit drops the bracket, as `applying-pr-conventions` does for pull request titles, so the two agree. Every commit uses the full format; the followup-commit exemption in `committing-changes` doesn't apply to unattended landing.
+
+### Changed
+
+- Minimum supported Abacus version is now 0.13, up from 0.11. On Abacus 0.11 or 0.12 the profile no longer applies, including `land.pr`, so update Abacus along with this plugin.
 
 ## [0.1.0] - 2026-10-20
 
