@@ -47,6 +47,7 @@ The shape of the change as it is delivered. Confirmed once on the pilot, then re
 - `body` — fills whichever template `Skill(applying-pr-conventions)` resolves for the target repo, which is its own `.github/PULL_REQUEST_TEMPLATE.md` when it has one.
 - `labels` — the `ai-review` choice and any others, confirmed at pilot.
 - `draft` — `true` by default.
+- `disclosure` — the verdict from `Skill(applying-security-disclosure-policy)`, settled once at pilot. On `Yes`, it also holds the wording rules and a record that the author approved the pilot's commit and PR wording, so each target's `committing-changes` applies them without asking or fetching again. It sits in `pr_spec` but governs the commit message too: read it when composing each commit, not only when templating the PR. There is no `Stop` value, because a `Stop` ends the campaign before a spec is locked.
 
 ### `safety_policy`
 
@@ -80,6 +81,10 @@ pr_spec:
   body: "<filled from the resolved PR template>"
   labels: ["<ai-review choice>"]
   draft: true
+  disclosure:
+    verdict: "<No | Yes>"
+    wording_rules: "<on Yes: the rules the verdict returned>"
+    approved_at_pilot: <true on Yes, once the author approves the pilot's wording>
 safety_policy:
   max_targets_per_run: 10
   destructive: false
