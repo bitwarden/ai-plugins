@@ -1,7 +1,7 @@
 {
   "skill_name": "running-playwright-tests",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; and (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous. Graded on the stated plan and refusal, not on live execution.",
+  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous; (j) a 4xx or 5xx response on a step that achieved its outcome is recorded in error_details without changing the step's PASS; and (k) such a response on a setup step does not stop the case. Graded on the stated plan and refusal, not on live execution.",
   "evals": [
     {
       "id": 1,
@@ -109,6 +109,30 @@
         "Leaves `need_user_input_url` out because the customer has two subscriptions",
         "Does not guess one of the two subscription ids or build a link from either",
         "Does not retry or skip the human step because the link could not be resolved"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "records-error-details-on-passing-test-step",
+      "prompt": "Test step 2 clicks Save on the organization name form. The click output ends with '### Events - New console entries: .playwright-cli/console-2026-10-23T22-54-51-241Z.log#L4', and line 4 of that log reads 'Failed to load resource: the server responded with a status of 404 (Not Found) @ https://localhost:8080/api/organizations/abc/sso'. The expected toast 'Organization saved' appeared and the new name is shown. What do you record for this step?",
+      "expected_output": "Records the step as PASS, because it achieved its asserted outcome. Runs playwright-cli requests to find the 404 request and playwright-cli response-body on its number, then records an error_details entry on the step with request 'GET /api/organizations/abc/sso' (or the method requests shows), status 404 and the body's message. The case status is unchanged by the 404.",
+      "expectations": [
+        "Records the step outcome as PASS",
+        "Captures the response with playwright-cli requests and playwright-cli response-body before navigating away",
+        "Records an error_details entry on that step with the request's method and path and status 404",
+        "Does not change the case status because of the 404"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "passing-setup-step-with-4xx-continues",
+      "prompt": "Setup step 3 creates a Teams organization through the web vault. The org is created and the vault shows it, but the action output lists a new console entry: 'Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://localhost:8080/api/accounts/tax'. Do you stop this test case?",
+      "expected_output": "Does not stop the case. A setup step fails only when it does not achieve its outcome, and this one did. Records the setup step as PASS with an error_details entry for the 400 captured through playwright-cli requests and response-body, then continues to the case's test steps.",
+      "expectations": [
+        "Does not stop the test case",
+        "Records the setup step outcome as PASS",
+        "Records an error_details entry for the 400 on the setup step",
+        "Continues to the case's test steps"
       ]
     }
   ]

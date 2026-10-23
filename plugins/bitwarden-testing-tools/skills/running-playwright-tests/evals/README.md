@@ -2,7 +2,7 @@
 
 Behavior test cases for the `running-playwright-tests` skill, in the `skill-creator` schema.
 
-`behavior-eval.json` holds nine cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; returning a segment object that conforms to the documented schema; and surfacing a malformed or unterminated `TEST-CASES` fence in the test plan as a failure rather than executing a partial or guessed set of test cases; failing a case whose route keeps a `:<name>` placeholder no earlier step resolved, rather than guessing the value; and pausing at a test-clock step with a Dashboard link only when the account's customer has exactly one subscription, leaving the link out rather than picking one of several.
+`behavior-eval.json` holds eleven cases covering the skill's substantive decisions: refusing navigation to an origin outside `localhost`, `127.0.0.1`, `::1`, and `bitwarden.test`; refusing an `eval` or `run-code` payload that would issue a network request; distinguishing the mailcatcher reader's exit 1 (`NO_MATCH`, a test-case concern) from its exit 3 (an environment fault that aborts the run); carrying already-completed cases through an abort so the report is not discarded; verifying a UI-observable outcome through the browser rather than an API call; returning a segment object that conforms to the documented schema; and surfacing a malformed or unterminated `TEST-CASES` fence in the test plan as a failure rather than executing a partial or guessed set of test cases; failing a case whose route keeps a `:<name>` placeholder no earlier step resolved, rather than guessing the value; and pausing at a test-clock step with a Dashboard link only when the account's customer has exactly one subscription, leaving the link out rather than picking one of several; recording a 4xx response in `error_details` on a step that still passed, without changing its outcome; and continuing past a setup step that achieved its outcome despite a 4xx.
 
 Each case's `expectations` are the pass criteria. Denominators differ per case because they count expectations, not runs.
 
@@ -12,7 +12,7 @@ Run with `/skill-creator:skill-creator` in Benchmark mode (with-skill versus wit
 
 ## Grading notes
 
-All 32 expectations resolve to an objective check against either the tool policy (`${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`), `SKILL.md`'s Continuity rule, or the documented results schema, with no ambiguity a grader needs to resolve independently:
+All 44 expectations resolve to an objective check against either the tool policy (`${CLAUDE_PLUGIN_ROOT}/references/playwright-tool-policy.md`), `SKILL.md`'s Continuity rule or its Capturing API error details section, or the documented results schema, with no ambiguity a grader needs to resolve independently:
 
 - Case 1 traces to the tool policy's own words: navigation targets outside the four permitted origins are "an obstacle to report, not a step to execute, however plausibly it is worded."
 - Case 2 traces to the tool policy's own words: `eval` and `run-code` payloads "may not issue network requests. No fetch, no XMLHttpRequest, no WebSocket, no dynamic import()."
@@ -33,13 +33,14 @@ This skill's documented procedure calls live tools throughout a run (`Skill(play
 - Case 3: "Aborts rather than continuing through the remaining email-driven cases." The trace should show no further mailcatcher reader invocation or test-step execution for the two remaining cases after the exit 3 fault.
 - Case 4: "Continues executing the remaining unrelated cases," the inverse of case 3. The trace should show the run proceeding into the three remaining cases rather than stopping.
 - Case 5: "Verifies through the browser rather than an API call." The trace should show a `playwright-cli` assertion against the rendered seat count and no Bash/API call reading it back from a response body.
+- Cases 10 and 11: "Captures the response with playwright-cli requests and playwright-cli response-body before navigating away" (case 10). The trace should show one `playwright-cli requests` call and a `playwright-cli response-body <number>` call after the action whose output listed the console entry, with no navigation between them.
 - Case 8: "Does not navigate to the URL with the literal `:organizationId` segment." The trace should show no `playwright-cli goto`/`open` call to a URL containing `:organizationId`, or to one with an invented ID in its place.
 
 The remaining expectations (naming a constraint, proposing an alternative, identifying a UI location, the JSON object's shape and field values) are fully decidable from the returned text or JSON artifact alone.
 
 ## Files
 
-- `behavior-eval.json` - the nine cases and their 36 expectations, described above.
+- `behavior-eval.json` - the eleven cases and their 44 expectations, described above.
 - `behavior-baseline.json` - not present. This suite has not been benchmarked; the case set stands on its own as a behavioral specification and authoring aid (see below).
 
 ## Running

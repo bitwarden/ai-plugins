@@ -25,6 +25,8 @@ Use the `playwright-cli` skill for all interactions a user would perform in the 
 
 **`eval` and `run-code` payloads may not issue network requests.** No `fetch`, no `XMLHttpRequest`, no `WebSocket`, no dynamic `import()`. Those subcommands exist in this pipeline to read rendered DOM state for transient-toast assertions, nothing else. A step whose payload would make a request is an obstacle to report. Do not attempt to work around this constraint.
 
+**Reading failed responses is allowed.** `playwright-cli requests` and `playwright-cli response-body <number>` read responses the browser already received. They make no new request, so they don't conflict with the rule above. The runner uses them only to capture error details for a 4xx or 5xx response, never to verify an outcome. The UI rule above still holds.
+
 ## Category 2 - Email Reading
 
 Reading an email during a test step (verification links, magic links, OTP codes) is owned by the `bitwarden-mailcatcher-tools:reading-mailcatcher-api` skill. Invoke it for the exit-code contract, the reason the browser cannot reach Mailcatcher, the argument detail, and the grant for its reader script.
