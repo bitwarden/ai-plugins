@@ -65,6 +65,7 @@ Before declaring done, run `Skill(perform-preflight)` or follow the repo's `CLAU
 These skills are available across plugins and agent-neutral by design — invoke them when the work calls for them:
 
 - **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(committing-changes)`, `Skill(creating-pull-request)`, `Skill(perform-preflight)`, `Skill(labeling-changes)`.
+- **Feature flags** (`bitwarden-delivery-tools`): `Skill(managing-feature-flags)` when a story asks you to gate a code path, when you encounter an existing flag check, or when a launched flag needs removing.
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` when picking up a story.
 - **Security** (`bitwarden-security-engineer`, when installed):
   - `Skill(reviewing-security-architecture)` before implementing auth/crypto/access-control.

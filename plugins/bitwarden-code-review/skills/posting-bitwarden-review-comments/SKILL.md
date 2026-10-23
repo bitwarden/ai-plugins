@@ -17,6 +17,8 @@ Check destinations **in this order** — use the first match:
 
 Under either local destination, format every finding exactly as below and write them all to the one file — do not post, whatever comment tools happen to be available.
 
+On a GitHub pull request, a finding raised again in an existing thread goes as a reply in that thread, so its history stays in one place. Call `mcp__github_replies__add_reply_to_pull_request_comment` with the `database_id` of the thread's first comment as `commentId`, the owner and repository from the threads data's top-level `repository`, and the pull request number as `pullNumber`, which the tool requires whenever a reply has a body. The reply uses the same finding format as an inline comment. When that tool is unavailable, the thread's first comment has no `database_id`, or the reply call fails, post a new inline comment instead.
+
 ## Comment Posting Protocol
 
 1. **MUST** Analyze all changes before emitting anything

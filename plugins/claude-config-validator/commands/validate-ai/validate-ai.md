@@ -1,6 +1,6 @@
 ---
 argument-hint: "[PR#] | [PR URL] | (blank for the checked-out PR)"
-allowed-tools: Read, Edit(//tmp/validation-summary.md), Grep, Glob, Task, Skill, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
+allowed-tools: Read, Edit(//tmp/validation-summary.md), Grep, Glob, Task, Skill, WebFetch(domain:code.claude.com), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git rev-parse:*), Bash(printenv GITHUB_ACTIONS), Bash(ls:*)
 description: Validate the Claude Code material changed in a pull request (plugins, skills, agents, commands, hooks, CLAUDE.md, .claude/) and report results to the pull request
 ---
 
@@ -11,8 +11,8 @@ request you name.
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/reference/validate-ai-scope.md`
 first. It defines which paths count as Claude material, how to bucket them, which
-validations each bucket gates, the severity mapping, and the report contract. Follow it
-exactly.
+validations each bucket gates, the severity labels, the report contract, and how findings
+reach the diff as inline comments. Follow it exactly.
 
 For a review of your own uncommitted work, use `/validate-ai-local` instead.
 
@@ -35,9 +35,12 @@ Resolve, in this order:
   sources you tried, then stop. Resolve the mode below first if you need to tell the two
   apart.
 - **Sticky comment ID.** From a `STICKY COMMENT ID:` line in the surrounding prompt.
+- **Existing threads.** From a `PR THREADS FILE:` line in the surrounding prompt. Read that
+  file; it is what keeps a re-run from posting a finding the pull request already carries.
+  If it is missing or unreadable, continue without it.
 - **Mode.** **Workflow mode** when a sticky comment ID was supplied, or when
   `printenv GITHUB_ACTIONS` reports a value; otherwise **interactive mode**. The mode changes
-  only step 6.
+  steps 5 and 6.
 
   Workflow mode is the safe default: if the environment check cannot run and the pull request
   context arrived as `REPO:` / `PR NUMBER:` prompt lines, treat the run as workflow mode. A
@@ -108,8 +111,8 @@ line wrong.
 
 ## 4. Run the validations
 
-Each is gated as described in the scope reference. A section that cannot run is recorded as
-skipped with its reason — never silently omitted.
+Each is gated as described in the scope reference. A section that cannot run goes on the
+report's `**Not covered:**` line with its reason, never silently omitted.
 
 Work out the full set of subagent calls first and dispatch them in one message with several
 tool calls, passing `run_in_background: false` on each. 4a is one validation per changed
@@ -129,7 +132,8 @@ It owns manifest correctness, semantic versioning, directory structure, componen
 frontmatter, hook schema, MCP configuration, and hardcoded credentials.
 
 Validate every changed plugin directory even when only some component types changed. If
-`plugin-dev` is not installed, record the section as skipped with that reason.
+`plugin-dev` is not installed, name the section on the `**Not covered:**` line with that
+reason.
 
 ### 4b. Skill review (skill-reviewer agent from plugin-dev)
 
@@ -137,9 +141,9 @@ Invoke the `plugin-dev:skill-reviewer` agent, once per changed `SKILL.md`. It ow
 frontmatter, description and trigger quality, word count and writing style, progressive
 disclosure, and referenced files that do not exist.
 
-If `plugin-dev` is not installed, record this section as skipped with that reason, the same as
-4a. It is the pipeline's only skill review, so a silent omission here reads as a skill review
-that passed.
+If `plugin-dev` is not installed, name this section on the `**Not covered:**` line with that
+reason, the same as 4a. It is the pipeline's only skill review, so a silent omission here
+reads as a skill review that passed.
 
 4c deliberately does not review `SKILL.md` files — a second rule set over the same file
 produces duplicate findings a reader cannot tell from independent confirmation.
@@ -159,12 +163,23 @@ file type to a targeted review skill.
 ### Structure, marketplace, and version-bump scripts
 
 `validate-plugin-structure.sh`, `validate-marketplace.sh`, and `validate-version-bump.sh` are
-not run here — the workflow runs them as dedicated steps before this review, and their results
-reach the pull request through the job log and check status. Record that in the report's
-checks table so a reader does not read their absence as a pass. To run them yourself against a
-local checkout, use `/validate-ai-local`.
+not run here. The workflow runs them as dedicated steps before this review, and each reports
+its own result there. In interactive mode nothing runs them, so name all three on the
+report's `**Not covered:**` line. To run them yourself against a local checkout, use
+`/validate-ai-local`.
 
-## 5. Write the report
+## 5. Post inline comments and write the report
+
+Before writing, check every finding that says a field, key, or value is invalid, unknown,
+unsupported, or deprecated against the official documentation, as the scope reference's
+schema-claims section describes. The checks in step 4 work from a fixed schema, so this is
+what keeps a documented field from being reported as a defect on the pull request.
+
+Then post the CRITICAL and IMPORTANT findings inline, checked against the existing threads, as
+the scope reference's inline comments section describes, replying in a resolved thread whose
+problem persists rather than opening a new one. Only claude-code-action provides the inline
+comment and reply tools, so in interactive mode every finding takes the summary's fallback
+form.
 
 Write the full report to `/tmp/validation-summary.md`, following the report contract in the
 scope reference, which also carries the write-once rule and the completion marker. Both are
@@ -176,8 +191,9 @@ Write it even when everything passed, and even when every section above was skip
 
 ## 6. Deliver the report
 
-- **Workflow mode:** stop after writing the file. Do not post or edit pull request comments
-  yourself — the workflow updates the sticky comment from `/tmp/validation-summary.md`.
+- **Workflow mode:** stop after writing the file. Beyond the inline comments from step 5, do
+  not post or edit pull request comments yourself: the workflow updates the sticky comment
+  from `/tmp/validation-summary.md`.
 - **Interactive mode:** upsert the sticky comment yourself. The `gh api` calls below are
   deliberately not pre-approved in this command's `allowed-tools`, so you will be asked to
   approve them — writing to someone's pull request should be a decision the user sees. Find

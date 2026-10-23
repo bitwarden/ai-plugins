@@ -5,6 +5,35 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-10-23
+
+### Added
+
+- Catch-rate and behavior evals for `performing-multi-agent-code-review`
+- Mermaid flow diagrams for `performing-multi-agent-code-review` in `docs/`
+- Local mode reviews untracked source files, skipping config, dotfiles, and credential paths
+- `git` grants in `allowed-tools`: `ls-files`, `merge-base`, `show`, `remote get-url origin`, `fetch origin pull/*/head`
+
+### Fixed
+
+- PR mode has the architect read files at PR head and accepts other repos' PR URLs
+- Empty or failed diffs stop the review
+- Failed review stages are reported
+- Forwarding guidance read at the diff base, including `.claude/CLAUDE.md`
+- Untrusted-input boundary covers PR title, description, and opened files
+
+## [2.4.0] - 2026-10-12
+
+### Added
+
+- Documentation-parity review enrichment. When the diff touches any code with a documented ancestor scope (a `README.md`, `CLAUDE.md`, `docs/` directory, diagram source, or source-embedded doc comments in the change's ancestor chain), the `bitwarden-code-reviewer` agent now invokes `Skill(verifying-doc-parity)` during Cross-Plugin Enrichment to identify drifted in-repo docs at every documented ancestor scope of the change and to discover out-of-repo pages the change invalidates. Because the skill forks into its own subagent, the invocation passes it the diff, the PR description in PR mode, and a no-edit contract. Drift is reported as findings — the reviewer does not edit files in the PR — classified as substantive rather than as a documentation nitpick, and folded into classification and validation in Steps 3–4, applying the documentation standard's external-docs flow (work item before merge, stale marker on the page) when applicable. The dependency on the `bitwarden-doc-parity` plugin is optional; if it is not installed in the review environment, the review falls back to existing review knowledge.
+
+## [2.3.0] - 2026-10-08
+
+### Added
+
+- A CRITICAL or IMPORTANT finding raised again on a thread whose issue persists goes as a reply in that thread through `mcp__github_replies__add_reply_to_pull_request_comment`, so the thread's history stays in one place. Without that tool, without a `database_id` on the thread's first comment, or when the reply fails, it posts a new inline comment
+
 ## [2.2.0] - 2026-09-28
 
 ### Added

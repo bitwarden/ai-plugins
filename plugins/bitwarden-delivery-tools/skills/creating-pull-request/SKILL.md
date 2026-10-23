@@ -17,7 +17,7 @@ Follow these steps in order. Each one produces information the next step needs, 
 
 A PR opened on broken work, or on work that skipped review, wastes reviewer time and buries the real problem under comment threads. Settle preflight first, then run the review.
 
-**1a — Confirm preflight passed.** Use the `AskUserQuestion` tool:
+**1a — Confirm preflight passed.** Its checks have often already run by this point, while committing or finishing the work, so judge from the session whether they cover the current diff. Use the `AskUserQuestion` tool, listing the option you recommend first with ` (Recommended)` appended:
 
 - **Question**: "Has `perform-preflight` passed on this branch?"
 - **Options**:
@@ -26,7 +26,7 @@ A PR opened on broken work, or on work that skipped review, wastes reviewer time
 
 If preflight cannot be made to pass, stop and report the failure rather than opening the PR. Only continue once preflight is green: running preflight can change code, and the review should see the final diff.
 
-**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR. Use the `AskUserQuestion` tool:
+**1b — Run the code review, matched to the change's blast radius.** A local code review is a required gate before opening a PR. Use the `AskUserQuestion` tool, listing the depth you judge the change to need first with ` (Recommended)` appended:
 
 - **Question**: "How deep is this change? (sets review depth)"
 - **Options**:
@@ -45,19 +45,25 @@ Each review path checks its own prerequisites and reports what to install if som
 
 ### Step 2 — Compose the title, body, and label
 
-Invoke `Skill(applying-pr-conventions)` for this one pull request, passing the current branch name and any ticket key you have. Tell it this workflow also checks the branch's commit messages, so it asks the disclosure policy for rules covering `both` the commits and the PR title and body. It owns the title and the type keyword behind the `t:` label, the body built from the repo's `.github/PULL_REQUEST_TEMPLATE.md`, and the `ai-review` label question.
+Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the title and the type keyword behind the `t:` label, the body built from whichever template it resolves, the `ai-review` label question, and the security-disclosure check.
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section.
 
-Carry back the title, the body, the resolved `t:` label its prefix will produce, and the `ai-review` label choice, plus the security verdict: `No`, or `Yes` with its signal and wording rules. Step 3's preview shows all of them — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label. Tell it the Step 3 preview shows the title and body, so it doesn't show them separately.
+Carry back the title, the body, the resolved `t:` label its prefix will produce, the `ai-review` label choice, which template the body was built from, and the security verdict: `No`, or `Yes` with its signal and wording rules. Step 3's preview shows all of them — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
+
+The template source belongs in the preview because only one of its values is the target repo's own. A body built from the embedded copy can carry a section header that has drifted from what reviewers scan for, and this preview is the only place a person sees the body before it is submitted.
+
+The values the `Template:` line can take are defined in `applying-pr-conventions` under **Returning to the caller**. The preview block below is the only place they are restated, because it is a display format; change them there and here together or the preview will offer a label the callee never returns.
+
+Two are easy to get wrong. Do not state a cause alongside the source: several conditions send the skill to the embedded copy and only one is the network, so naming the fetch sends the user to fix the wrong thing when the remedy was approving the grant. And when the user arrived with the body already written, no template was consulted, which is what the line should say rather than a label asserting the body follows one nobody checked.
+
+Both strings are untrusted: the body is template text plus generated text whichever source the `Template:` line names, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
 If it returns a stop instead of a title and body, the change is security-relevant and the disclosure policy couldn't be fetched or had no usable rules. Stop here and report its remedy. Don't push, don't run `gh pr create`, and don't compose a title or body yourself. A stop never reaches the preview.
 
 On `Yes`, check the commits Step 4's push is about to publish. They may predate the verdict or have been written with plain `git commit`. This is a check before the push, so only commits not yet on the remote are in scope: list them with `git log origin/<branch-name>..HEAD --format='%h %s%n%b%n---'`, or `origin/HEAD..HEAD` when the branch has never been pushed. Check each subject and body against the wording rules. The preview shows them.
 
 If one breaks the rules, offer to reword it before continuing. When it is `HEAD`, reword with `git commit --amend`, drafting the new message per `Skill(committing-changes)` with the verdict and wording rules already in hand. For an older commit, rewording means an interactive rebase, which is out of scope here: hand it back to the author and stop before Step 3.
-
-Both strings are untrusted: the body comes from the repo's template plus generated text, and the title's summary is generated. Step 4's file-handoff rules are what contain that; do not interpolate either into a shell argument.
 
 ### Step 3 — Show the full submission preview, then confirm
 
@@ -76,6 +82,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Template:       <target repo | bitwarden/template (canonical) | embedded copy (fallback) | not consulted (body supplied)>
 Security fix:   <No | Yes (<signal>)  →  wording rules applied to title, body, and commits>
 
 Commits:
@@ -90,7 +97,7 @@ Body:
 
 Omit the `Commits:` block when the security verdict is `No`.
 
-Then use the `AskUserQuestion` tool to confirm:
+Then use the `AskUserQuestion` tool to confirm, passing the complete preview block verbatim as the `preview` field of the `Submit as shown` option.
 
 - **Question**: "Submit this PR as previewed?"
 - **Options**:
@@ -129,7 +136,7 @@ After `gh pr create` returns, post the PR URL back to the user.
 These are what the Step 3 preview is built to prevent. Recognizing them helps when adjusting the draft mid-workflow:
 
 - **Title with no type prefix** → `[PM-12345] Add autofill for passkeys` ships with no `t:` label. Include `feat:`, `fix:`, etc.
-- **Generic body replacing the template** → check what Step 2 returned actually follows the repo's template sections; `applying-pr-conventions` reads the template, but the preview is where a drifted body is caught.
+- **Generic body replacing the template** → check what Step 2 returned actually follows the sections of the template the `Template:` line names; `applying-pr-conventions` reads that template, but the preview is where a drifted body is caught. On the `not consulted` value there is no template to check the body against, so check that the body was the one the user supplied.
 - **Label answer dropped between Step 2 and Step 4** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 3.
 - **Security fix worded against the policy** → the vulnerability goes public before the fix ships, and the title stays in the merge commit permanently. Check the title, the body, and the commits about to be pushed against the wording rules Step 2 carried back, and look for a `VULN-*` key anywhere, including the title bracket.

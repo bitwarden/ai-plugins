@@ -44,7 +44,7 @@ The shape of the change as it is delivered. Confirmed once on the pilot, then re
 
 - `branch` — a deterministic branch name template (same input → same branch, so re-runs are no-ops).
 - `title` — follows `Skill(applying-pr-conventions)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label. `[TICKET]` is a placeholder — substitute a real tracking-issue key, never the literal word.
-- `body` — fills the target repo's `.github/PULL_REQUEST_TEMPLATE.md` per `Skill(applying-pr-conventions)`.
+- `body` — fills whichever template `Skill(applying-pr-conventions)` resolves for the target repo, which is its own `.github/PULL_REQUEST_TEMPLATE.md` when it has one.
 - `labels` — the `ai-review` choice and any others, confirmed at pilot.
 - `draft` — `true` by default.
 - `disclosure` — the verdict from `Skill(applying-security-disclosure-policy)`, settled once at pilot. On `Yes`, it also holds the wording rules and a record that the author approved the pilot's commit and PR wording, so each target's `committing-changes` applies them without asking or fetching again. It sits in `pr_spec` but governs the commit message too: read it when composing each commit, not only when templating the PR. There is no `Stop` value, because a `Stop` ends the campaign before a spec is locked.
@@ -78,7 +78,7 @@ validation: "<repo-defined build/lint/test> + Skill(perform-preflight)"
 pr_spec:
   branch: "<deterministic-branch-name-template>"
   title: "[<TICKET>] <type>: <summary>"
-  body: "<filled from the target repo's PR template>"
+  body: "<filled from the resolved PR template>"
   labels: ["<ai-review choice>"]
   draft: true
   disclosure:
