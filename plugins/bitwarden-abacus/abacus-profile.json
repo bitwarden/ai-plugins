@@ -1,7 +1,7 @@
 {
   "profile": "bitwarden",
-  "version": "0.1.0",
-  "abacus": ">=0.11",
+  "version": "0.2.0",
+  "abacus": ">=0.13",
   "plugins": {
     "workers": [
       "bitwarden-delivery-tools",
@@ -18,6 +18,7 @@
     "plan.analyze": "",
     "implement.guide": "",
     "review": [],
+    "land.commit": "bitwarden-abacus:commit-message",
     "land.pr": "bitwarden-delivery-tools:applying-pr-conventions",
     "retro.analyze": ""
   }
