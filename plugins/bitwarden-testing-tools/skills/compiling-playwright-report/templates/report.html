@@ -835,6 +835,56 @@
         border-color: rgba(255, 107, 129, 0.6);
         background: rgba(60, 10, 22, 0.55);
       }
+      .errdet {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .errdet-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+      }
+      .errdet-box {
+        font-family: var(--mono);
+        font-size: 0.82rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        padding: 0.5rem 0.7rem;
+        border-radius: 8px;
+        border: 1px solid;
+      }
+      .errdet-fail .errdet-label {
+        color: var(--fail);
+      }
+      .errdet-fail .errdet-box {
+        border-color: rgba(255, 107, 129, 0.6);
+        background: rgba(60, 10, 22, 0.55);
+      }
+      .errdet-warn .errdet-label {
+        color: var(--error);
+      }
+      .errdet-warn .errdet-box {
+        border-color: rgba(255, 190, 85, 0.55);
+        background: rgba(60, 40, 8, 0.5);
+      }
+      .errdet-stack {
+        margin-top: 0.4rem;
+      }
+      .errdet-stack summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+      .errdet-stack pre {
+        margin: 0.3rem 0 0;
+        white-space: pre-wrap;
+        font-size: 0.76rem;
+        color: var(--muted);
+      }
       .thumb {
         display: inline-flex;
         flex-direction: column;

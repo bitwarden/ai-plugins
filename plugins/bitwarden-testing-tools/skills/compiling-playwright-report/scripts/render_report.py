@@ -209,6 +209,56 @@ def render_pill(step, kind):
     return f'<span class="pill pill-{kind}">{SVG.format(icon)}{label}</span>'
 
 
+def render_error_entry(entry):
+    request_line = esc(entry["request"])
+    if entry.get("status") is not None:
+        request_line += esc(f' → {entry["status"]} {entry.get("status_text") or ""}'.rstrip())
+    count = entry.get("count")
+    if isinstance(count, int) and not isinstance(count, bool) and count > 1:
+        request_line += f" (×{count})"
+    lines = [f'<span class="errdet-req">{request_line}</span>']
+    if entry.get("message"):
+        lines.append(esc_linked(entry["message"]))
+    validation = entry.get("validation_errors")
+    if isinstance(validation, dict):
+        for field, messages in validation.items():
+            if isinstance(messages, list) and all(isinstance(m, str) for m in messages):
+                lines.extend(f"{esc(field)}: {esc_linked(m)}" for m in messages)
+    if entry.get("exception_message"):
+        lines.append(esc_linked(entry["exception_message"]))
+    if entry.get("inner_exception_message"):
+        lines.append("Inner: " + esc_linked(entry["inner_exception_message"]))
+    stack = entry.get("stack_trace")
+    stack_html = ""
+    if isinstance(stack, str) and stack.strip():
+        frames = sum(1 for line in stack.splitlines() if line.strip().startswith("at "))
+        stack_html = (
+            f'<details class="errdet-stack"><summary>Stack trace ({plural(frames, "frame")})</summary>'
+            f"<pre>{esc(stack)}</pre></details>"
+        )
+    return f'<div class="errdet-box">{"<br />".join(lines)}{stack_html}</div>'
+
+
+def render_error_details(entries, failed):
+    # Server error text the runner captured for a 4xx/5xx response. It is
+    # diagnostic only: red on a failed step, amber otherwise. Malformed entries
+    # are skipped rather than failing the render.
+    if not isinstance(entries, list):
+        return ""
+    boxes = [
+        render_error_entry(entry)
+        for entry in entries
+        if isinstance(entry, dict) and isinstance(entry.get("request"), str)
+    ]
+    if not boxes:
+        return ""
+    tone = "fail" if failed else "warn"
+    return (
+        f'<div class="errdet errdet-{tone}"><span class="errdet-label">Error details</span>'
+        f'{"".join(boxes)}</div>'
+    )
+
+
 def render_step(step, number):
     kind = step_kind(step)
     parts = [
@@ -225,6 +275,7 @@ def render_step(step, number):
             f'<div class="observed"><span class="observed-label">{label}</span>'
             f"<code>{esc_linked(observed)}</code></div>"
         )
+    parts.append(render_error_details(step.get("error_details"), kind == "fail"))
     filename = step.get("screenshot")
     if filename:
         alt = esc_attr(os.path.splitext(str(filename))[0])

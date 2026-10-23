@@ -33,13 +33,32 @@ An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. Any ab
 
 ## Step object
 
-| Field        | Type   | Notes                                                              |
-| ------------ | ------ | ------------------------------------------------------------------ |
-| `text`       | string | Step description                                                   |
-| `outcome`    | string | `PASS`, `FAIL`, or `COMPLETED (User: <answer>)` for a human step   |
-| `observed`   | string | Optional; what was actually observed on an assertion step          |
-| `screenshot` | string | Optional; bare filename, rendered relative as `screenshots/<name>` |
-| `human`      | bool   | Optional; `true` for a `[HUMAN]` step                              |
+| Field           | Type   | Notes                                                                                                                       |
+| --------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `text`          | string | Step description                                                                                                            |
+| `outcome`       | string | `PASS`, `FAIL`, or `COMPLETED (User: <answer>)` for a human step                                                            |
+| `observed`      | string | Optional; what was actually observed on an assertion step                                                                   |
+| `screenshot`    | string | Optional; bare filename, rendered relative as `screenshots/<name>`                                                          |
+| `human`         | bool   | Optional; `true` for a `[HUMAN]` step                                                                                       |
+| `error_details` | array  | Optional; one entry per 4xx/5xx API response the step caused, on any step type. Diagnostic only: it never changes `outcome` |
+
+## Error details entry
+
+Each `error_details` entry describes one failed API response, in the server's own words. The report renders it red on a failed step and amber otherwise, with the stack trace collapsed.
+
+| Field                     | Type   | Notes                                                                                                      |
+| ------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| `request`                 | string | Required; method and path, with no origin or query string, such as `POST /api/organizations`               |
+| `status`                  | int    | Optional; absent for an `external_trigger.py` call, whose output carries no status                         |
+| `status_text`             | string | Optional; such as `Internal Server Error`                                                                  |
+| `count`                   | int    | Optional; present only when the same request failed more than once in the step                             |
+| `message`                 | string | Optional; the response's `message`, capped at 2,000 characters                                             |
+| `validation_errors`       | object | Optional; field name to a list of messages, from the response's `validationErrors`                         |
+| `exception_message`       | string | Optional; the response's `exceptionMessage`, capped at 2,000 characters                                    |
+| `inner_exception_message` | string | Optional; the response's `innerExceptionMessage`, capped at 2,000 characters                               |
+| `stack_trace`             | string | Optional; the response's `exceptionStackTrace`, trimmed to 15 frames with a final `… N more` line when cut |
+
+The renderer skips an entry that is not an object or has no string `request`, and never fails a run over one.
 
 ## Invariants enforced in code
 

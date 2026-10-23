@@ -22,7 +22,15 @@
         {
           "text": "Clicked Tools dropdown",
           "outcome": "PASS",
-          "screenshot": "test-case-1-step-1-20260724-0930.png"
+          "screenshot": "test-case-1-step-1-20260724-0930.png",
+          "error_details": [
+            {
+              "request": "GET /api/sends",
+              "status": 404,
+              "status_text": "Not Found",
+              "count": 2
+            }
+          ]
         },
         {
           "text": "Assert import option visible",
@@ -41,7 +49,17 @@
         {
           "text": "Clicked Export",
           "outcome": "FAIL",
-          "observed": "500 response"
+          "observed": "500 response",
+          "error_details": [
+            {
+              "request": "POST /api/organizations/abc/export",
+              "status": 500,
+              "status_text": "Internal Server Error",
+              "message": "An unhandled server error has occurred.",
+              "exception_message": "@OrganizationKeyId is not a parameter for procedure Organization_Update.",
+              "stack_trace": "at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception)\nat Bit.Infrastructure.Dapper.Repositories.OrganizationRepository.ReplaceAsync(Organization obj)"
+            }
+          ]
         }
       ],
       "notes": "Server returned 500 on export request."

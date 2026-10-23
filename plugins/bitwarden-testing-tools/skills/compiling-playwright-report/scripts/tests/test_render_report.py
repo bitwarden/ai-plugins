@@ -110,6 +110,22 @@ class RenderCompleteRunTest(unittest.TestCase):
     def test_observed_value_rendered(self):
         self.assertIn("<code>500 response</code>", self.out)
 
+    def test_failed_step_error_details_are_red(self):
+        self.assertIn('class="errdet errdet-fail"', self.out)
+        self.assertIn("@OrganizationKeyId is not a parameter", self.out)
+
+    def test_passed_step_error_details_are_amber(self):
+        self.assertIn('class="errdet errdet-warn"', self.out)
+        self.assertIn("GET /api/sends", self.out)
+
+    def test_request_line_shows_status_and_count(self):
+        self.assertIn("POST /api/organizations/abc/export → 500 Internal Server Error", self.out)
+        self.assertIn("GET /api/sends → 404 Not Found (×2)", self.out)
+
+    def test_stack_trace_is_collapsed_with_frame_count(self):
+        self.assertIn("<summary>Stack trace (2 frames)</summary>", self.out)
+        self.assertNotIn('<details class="errdet-stack" open', self.out)
+
     def test_issues_summary_lists_error_with_notes(self):
         self.assertIn("Test Case 2:", self.out)
         self.assertIn("Server returned 500 on export request.", self.out)
@@ -148,6 +164,66 @@ class RenderEscapingTest(unittest.TestCase):
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", out)
         self.assertNotIn("<img", out)
         self.assertIn("&lt;img src=x onerror=alert(1)&gt;", out)
+
+
+def render_one_step(step):
+    data = {
+        "run_status": "complete",
+        "cases": [{"number": 1, "name": "Case", "status": "PASS", "test_steps": [step]}],
+    }
+    return render_report.render(data, HEADER)
+
+
+class RenderErrorDetailsTest(unittest.TestCase):
+    def test_error_details_without_observed(self):
+        out = render_one_step(
+            {"text": "Click", "outcome": "PASS", "error_details": [{"request": "GET /api/x", "status": 400}]}
+        )
+        self.assertIn('class="errdet errdet-warn"', out)
+        self.assertNotIn('class="observed"', out)
+
+    def test_no_error_details_no_section(self):
+        for step in ({"text": "Click", "outcome": "PASS"},
+                     {"text": "Click", "outcome": "PASS", "error_details": []}):
+            with self.subTest(step=step):
+                self.assertNotIn("errdet", render_one_step(step))
+
+    def test_external_trigger_entry_has_no_status(self):
+        out = render_one_step(
+            {"text": "Trigger", "outcome": "PASS",
+             "error_details": [{"request": "POST /stripe/webhook", "exception_message": "boom"}]}
+        )
+        self.assertIn("POST /stripe/webhook", out)
+        box = out[out.index('class="errdet-box"'):]
+        self.assertNotIn("→", box[: box.index("</div>")])
+
+    def test_validation_errors_are_listed(self):
+        out = render_one_step(
+            {"text": "Save", "outcome": "FAIL",
+             "error_details": [{"request": "POST /api/x", "status": 400,
+                                "validation_errors": {"Name": ["Required."]}}]}
+        )
+        self.assertIn("Name: Required.", out)
+
+    def test_malformed_error_details_are_skipped(self):
+        out = render_one_step({"text": "Click", "outcome": "PASS", "error_details": "oops"})
+        self.assertNotIn("errdet", out)
+        out = render_one_step(
+            {"text": "Click", "outcome": "PASS",
+             "error_details": [1, {"status": 500}, {"request": "GET /ok", "status": "500"}]}
+        )
+        self.assertIn("GET /ok → 500", out)
+        self.assertEqual(out.count('class="errdet-box"'), 1)
+
+    def test_error_details_render_inert(self):
+        out = render_one_step(
+            {"text": "Click", "outcome": "FAIL",
+             "error_details": [{"request": 'GET /x"><img src=x onerror=alert(1)>',
+                                "exception_message": "<script>alert(2)</script>"}]}
+        )
+        self.assertNotIn("<img src=x", out)
+        self.assertNotIn("<script>alert(2)", out)
+        self.assertIn("&lt;script&gt;alert(2)", out)
 
 
 class RenderValidationTest(unittest.TestCase):
