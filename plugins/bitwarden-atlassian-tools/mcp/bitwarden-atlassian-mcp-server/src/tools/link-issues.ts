@@ -23,12 +23,11 @@ import {
 } from "../utils/write-guard.js";
 
 /**
- * Resolve role-named parameters onto Jira's (outward, inward) pair.
+ * Resolve role-named parameters onto Jira's (inward, outward) pair.
  *
- * For type "Blocks" the link type's descriptions are outward "blocks" and
- * inward "is blocked by", and the payload reads
- * "outwardIssue <outward> inwardIssue". So the blocker is the outward issue.
- * Verified read-only against a real PM link; see JiraClient.createIssueLink.
+ * For type "Blocks" the create payload reads "inwardIssue blocks
+ * outwardIssue", so the blocker is the inward issue and the blocked item the
+ * outward issue. See JiraClient.createIssueLink for the live evidence.
  *
  * "Relates" is symmetric (both descriptions are "relates to"), so the ordering
  * of the pair carries no meaning.
@@ -37,21 +36,21 @@ import {
  */
 export function resolveLinkDirection(input: LinkIssuesInput): {
   typeName: string;
-  outwardKey: string;
   inwardKey: string;
+  outwardKey: string;
 } {
   if (input.linkType === "Blocks") {
     return {
       typeName: "Blocks",
-      outwardKey: input.blockerKey,
-      inwardKey: input.blockedKey,
+      inwardKey: input.blockerKey,
+      outwardKey: input.blockedKey,
     };
   }
 
   return {
     typeName: "Relates",
-    outwardKey: input.firstKey,
-    inwardKey: input.secondKey,
+    inwardKey: input.firstKey,
+    outwardKey: input.secondKey,
   };
 }
 
@@ -62,38 +61,63 @@ function describeLink(input: LinkIssuesInput): string {
 }
 
 /**
- * Read the outward issue back and confirm the link landed in the direction we
- * intended. Each end of a link names the other end and labels it with the
- * other end's role (see `JiraClient.createIssueLink`), so the outward issue's
- * own record should show an `inwardIssue` entry pointing at the inward key.
+ * Read the link back from one end and confirm it landed in the direction the
+ * caller asked for. The check is by role, independent of the create mapping,
+ * so a wrong mapping cannot pass its own check.
+ *
+ * On issue X's record, an entry carrying `outwardIssue: Y` reads "X <outward
+ * description> Y" and one carrying `inwardIssue: Y` reads "X <inward
+ * description> Y". So for Blocks the blocker's record should carry
+ * `outwardIssue: blocked` ("blocks"). If it carries `inwardIssue: blocked`
+ * instead ("is blocked by"), the link exists but is inverted, and that is
+ * reported as such. Relates is symmetric, so either side is accepted.
  *
  * Uses a fresh read-mode client rather than the write client the create call
  * used, so this never requires a read scope on the write token.
  */
-async function verifyLink(resolved: {
-  typeName: string;
-  outwardKey: string;
-  inwardKey: string;
-}): Promise<string> {
+async function verifyLink(input: LinkIssuesInput): Promise<string> {
+  const [readKey, otherKey] =
+    input.linkType === "Blocks"
+      ? [input.blockerKey, input.blockedKey]
+      : [input.firstKey, input.secondKey];
+
   try {
     const readClient = new JiraClient("read");
-    const issue = await readClient.getIssue(resolved.outwardKey, [
-      "issuelinks",
-    ]);
-    const links = issue.fields.issuelinks ?? [];
-    const found = links.some(
-      (link) =>
-        link.type.name === resolved.typeName &&
-        link.inwardIssue?.key === resolved.inwardKey,
+    const issue = await readClient.getIssue(readKey, ["issuelinks"]);
+    const links = (issue.fields.issuelinks ?? []).filter(
+      (link) => link.type.name === input.linkType,
     );
 
-    return found
-      ? `Verified: reading ${resolved.outwardKey} back shows the link to ${resolved.inwardKey}.`
-      : `Could not verify: reading ${resolved.outwardKey} back does not show a ` +
-          `${resolved.typeName} link to ${resolved.inwardKey}. Check Jira's Linked Issues panel.`;
+    if (input.linkType === "Blocks") {
+      if (links.some((link) => link.outwardIssue?.key === otherKey)) {
+        return `Verified: reading ${readKey} back shows it blocks ${otherKey}.`;
+      }
+
+      const inverted = links.find((link) => link.inwardIssue?.key === otherKey);
+      if (inverted) {
+        return (
+          `**Created inverted:** reading ${readKey} back shows link ${inverted.id} ` +
+          `as ${otherKey} blocks ${readKey}, the opposite of what was requested. ` +
+          `Delete link ${inverted.id} in Jira and recreate it.`
+        );
+      }
+    } else if (
+      links.some(
+        (link) =>
+          link.outwardIssue?.key === otherKey ||
+          link.inwardIssue?.key === otherKey,
+      )
+    ) {
+      return `Verified: reading ${readKey} back shows it relates to ${otherKey}.`;
+    }
+
+    return (
+      `Could not verify: reading ${readKey} back does not show a ` +
+      `${input.linkType} link to ${otherKey}. Check Jira's Linked Issues panel.`
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return `Could not verify the link by reading ${resolved.outwardKey} back: ${message}`;
+    return `Could not verify the link by reading ${readKey} back: ${message}`;
   }
 }
 
@@ -119,8 +143,8 @@ async function handler(input: any): Promise<string> {
       JSON.stringify(
         {
           type: { name: resolved.typeName },
-          outwardIssue: { key: resolved.outwardKey },
           inwardIssue: { key: resolved.inwardKey },
+          outwardIssue: { key: resolved.outwardKey },
         },
         null,
         2,
@@ -144,7 +168,7 @@ async function handler(input: any): Promise<string> {
     const client = new JiraClient("write");
     await client.createIssueLink(resolved);
 
-    const verification = await verifyLink(resolved);
+    const verification = await verifyLink(validated);
 
     return [`Linked: ${describeLink(validated)}.`, verification].join("\n\n");
   } catch (error) {
