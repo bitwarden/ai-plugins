@@ -186,7 +186,7 @@ class RenderErrorDetailsTest(unittest.TestCase):
         for step in ({"text": "Click", "outcome": "PASS"},
                      {"text": "Click", "outcome": "PASS", "error_details": []}):
             with self.subTest(step=step):
-                self.assertNotIn("errdet", render_one_step(step))
+                self.assertNotIn('class="errdet', render_one_step(step))
 
     def test_external_trigger_entry_has_no_status(self):
         out = render_one_step(
@@ -207,7 +207,7 @@ class RenderErrorDetailsTest(unittest.TestCase):
 
     def test_malformed_error_details_are_skipped(self):
         out = render_one_step({"text": "Click", "outcome": "PASS", "error_details": "oops"})
-        self.assertNotIn("errdet", out)
+        self.assertNotIn('class="errdet', out)
         out = render_one_step(
             {"text": "Click", "outcome": "PASS",
              "error_details": [1, {"status": 500}, {"request": "GET /ok", "status": "500"}]}
