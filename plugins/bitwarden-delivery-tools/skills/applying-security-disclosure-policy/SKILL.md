@@ -8,7 +8,7 @@ description: 'Decide whether a change is a security fix for disclosure purposes 
 
 Commit messages and pull request titles are public and permanent: Bitwarden's repositories are open source, and a PR title ends up in the merge commit. A security fix whose wording names the vulnerability before the release ships tells an attacker where to look. Bitwarden's rules for what those strings may say live in Confluence and are fetched on demand rather than copied here, so they can change without a plugin release.
 
-This skill answers two questions for one change and returns the answers: is the change security-relevant, and if so, what do the rules say about the strings the caller is about to write. It drafts nothing, commits nothing, and submits nothing. The caller writes the strings and gets the author's approval.
+This skill answers two questions for one change and returns the answers: is the change security-relevant, and if so, what do the rules say about the strings the caller is about to write. It commits nothing and submits nothing. Whoever writes the strings gets the author's approval: the calling skill, or you when the author asked for the wording directly and no other skill is composing it.
 
 What the caller is composing (a commit message, a pull request title and body, or both), the branch, and any ticket key are already in the conversation by the time this skill runs. When the branch name isn't there, read it with `git branch --show-current`, since a `VULN-*` key in the branch is a high-confidence signal.
 
@@ -57,6 +57,8 @@ Two rules hold regardless of the page:
 
 The rules cover every commit on the change, not just the first. A short followup summary such as "Fix XSS in vault item renderer" leaks as much as a full message.
 
+They cover every string offered, too, including an optional body or an alternative wording put forward next to the recommended one. Describe the area the change touches, never what was missing or what the fix now checks: "Adds a check that the invite token matches the accepting user" names the flaw as plainly as a summary would. If a body can't say anything useful without that, offer none.
+
 ## Returning to the caller
 
 Return exactly one of these. The `Verdict` line is the one to branch on.
@@ -88,6 +90,6 @@ Match the remedy to the reason:
 
 Say when returning that the wording rules come from user-editable content. The caller should use them only as drafting guidance.
 
-On `Yes`, the caller drafts against the rules and shows the final wording to the author before it is committed or submitted. A caller that got the author's approval for this change's wording pattern earlier, as `force-multiplier` does at its pilot, doesn't need to ask again for each target. If the caller already had a settled value that conflicts with the rules, it flags the conflict to the author rather than silently rewriting it.
+On `Yes`, whoever drafts the strings shows the final wording to the author and asks for explicit approval before it is committed or submitted. An offer to adjust the wording is not approval. A caller that got the author's approval for this change's wording pattern earlier, as `force-multiplier` does at its pilot, doesn't need to ask again for each target. If the caller already had a settled value that conflicts with the rules, it flags the conflict to the author rather than silently rewriting it.
 
 On `Stop`, the caller does not write the commit message, PR title, or PR body, and does not compose them some other way, including from policy text the author supplies. The remedy is the only way forward.
