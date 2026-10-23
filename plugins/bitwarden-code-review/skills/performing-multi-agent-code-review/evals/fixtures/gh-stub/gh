@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Stand-in for `gh` in behavior-eval fixtures that need a pull request without one existing on GitHub.
+# Serves `gh pr view` and `gh pr diff` for one canned pull request from pr.json, pr.diff, and pr.files
+# beside this script, and logs every invocation to calls.log. It never calls the real gh: anything
+# else exits 1, so a run cannot reach GitHub through it.
+set -euo pipefail
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+printf '%s\n' "$*" >>"$here/calls.log"
+
+fail() { echo "gh stub: $*" >&2; exit 1; }
+
+[[ $# -ge 2 && "$1" == pr ]] || fail "unsupported command: gh $*"
+cmd="$2"
+shift 2
+[[ "$cmd" == view || "$cmd" == diff ]] || fail "unsupported command: gh pr $cmd"
+
+number="$(jq -r .number "$here/pr.json")"
+url="$(jq -r .url "$here/pr.json")"
+repo="${url#https://github.com/}"
+repo="${repo%/pull/*}"
+
+selector=""
+fields=""
+expr=""
+name_only=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json) fields="${2:?--json needs fields}"; shift 2 ;;
+    --json=*) fields="${1#--json=}"; shift ;;
+    -q|--jq) expr="${2:?--jq needs an expression}"; shift 2 ;;
+    --jq=*) expr="${1#--jq=}"; shift ;;
+    -R|--repo) [[ "${2:-}" == "$repo" ]] || fail "no pull requests found in ${2:-}"; shift 2 ;;
+    --repo=*) [[ "${1#--repo=}" == "$repo" ]] || fail "no pull requests found in ${1#--repo=}"; shift ;;
+    --name-only) name_only=true; shift ;;
+    --patch|--comments) shift ;;
+    --color) shift 2 ;;
+    --color=*) shift ;;
+    -*) fail "unsupported flag: $1" ;;
+    *) [[ -z "$selector" ]] || fail "unexpected argument: $1"; selector="$1"; shift ;;
+  esac
+done
+
+case "$selector" in
+  "$number" | "#$number" | "$url") ;;
+  "") fail "no pull request found for the current branch" ;;
+  *) fail "no pull requests found for $selector" ;;
+esac
+
+if [[ "$cmd" == diff ]]; then
+  if $name_only; then cat "$here/pr.files"; else cat "$here/pr.diff"; fi
+  exit 0
+fi
+
+if [[ -n "$fields" ]]; then
+  json="$(jq -c --arg f "$fields" '($f | split(",")) as $k | with_entries(select(.key as $x | $k | index($x)))' "$here/pr.json")"
+  if [[ -n "$expr" ]]; then jq -r "$expr" <<<"$json"; else jq . <<<"$json"; fi
+  exit 0
+fi
+
+jq -r '"title:\t\(.title)\nstate:\t\(.state)\nauthor:\t\(.author.login)\nlabels:\t\nassignees:\t\nreviewers:\t\nprojects:\t\nmilestone:\t\nnumber:\t\(.number)\nurl:\t\(.url)\nadditions:\t\(.additions)\ndeletions:\t\(.deletions)\nauto-merge:\tdisabled\n--\n\(.body)"' "$here/pr.json"
