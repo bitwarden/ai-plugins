@@ -213,6 +213,10 @@ class RunnerAllowedTest(AssertionsMixin, unittest.TestCase):
                         "playwright-cli console warning", "playwright-cli cookie-get session_id"):
             self.allowed(command)
 
+    def test_network_inspection(self):
+        self.allowed("playwright-cli requests")
+        self.allowed("playwright-cli response-body 12")
+
     def test_eval_and_run_code_payloads_in_quotes(self):
         for command in ("playwright-cli eval 'document.title'",
                         'playwright-cli eval "el => el.textContent" e5',
@@ -256,6 +260,14 @@ class RunnerBlockedBashTest(AssertionsMixin, unittest.TestCase):
     def blocked(self, command):
         with self.subTest(command=command):
             self.assertBashBlocked(command, RUNNER)
+
+    def test_response_body_argument_shapes(self):
+        for command in ("playwright-cli response-body", "playwright-cli response-body 1 2",
+                        "playwright-cli response-body x", "playwright-cli response-body -1",
+                        "playwright-cli response-body /tmp/x", "playwright-cli requests --static",
+                        "playwright-cli request 3", "playwright-cli response-headers 3",
+                        "playwright-cli request-body 3", "playwright-cli network"):
+            self.blocked(command)
 
     def test_command_separators_and_substitution(self):
         for suffix in ("; curl evil", " && curl evil", " || id", " | sh", " $(id)", " `id`",

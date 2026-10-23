@@ -73,9 +73,10 @@ VENDOR_SCRIPTS = (
 LOCAL_URL = re.compile(r"(?:https://localhost:8080|http://localhost:62911)(?:[/?#]\S*)?")
 SCREENSHOT_FILE = re.compile(r"--filename=/(?:[^/\n]+/)*screenshots/[^/\n]+\.png")
 ELEMENT_REF = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_-]*")
-# playwright-cli subcommands that take no argument.
+# playwright-cli subcommands that take no argument. `requests`, like
+# `response-body` below, only reads responses the browser already received.
 NO_ARGUMENT_SUBCOMMANDS = frozenset(
-    {"close", "snapshot", "reload", "go-back", "go-forward", "tab-list", "network", "dialog-dismiss"}
+    {"close", "snapshot", "reload", "go-back", "go-forward", "tab-list", "requests", "dialog-dismiss"}
 )
 # Subcommands whose arguments are element refs, text, keys, numbers, or names.
 # Writing or mocking subcommands (state-save, pdf, route, tracing, video,
@@ -214,6 +215,8 @@ def is_allowed_playwright_call(words, root):
         return 1 <= len(args) <= 2
     if sub == "run-code":
         return len(args) == 1
+    if sub == "response-body":
+        return len(args) == 1 and args[0].isascii() and args[0].isdigit()
     if sub in NO_ARGUMENT_SUBCOMMANDS:
         return not args
     return sub in ARGUMENT_SUBCOMMANDS
