@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Minimum supported Abacus version is now 0.15, up from 0.13. On Abacus 0.13 or 0.14 the profile no longer applies, including `land.commit` and `land.pr`, so update Abacus along with this plugin.
+- The profile now asks for Abacus 0.15 or later, up from 0.13, because `plan.source` arrived in 0.15. On Abacus 0.13 or 0.14, `land.commit` and `land.pr` keep working and `plan.source` is ignored, so update Abacus to plan from Jira.
 
 ## [0.2.0] - 2026-10-22
 

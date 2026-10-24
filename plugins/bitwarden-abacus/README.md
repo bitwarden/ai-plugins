@@ -39,7 +39,7 @@ The concierge and orchestrator launch with none of the Bitwarden plugins; the pl
 
 ## Requirements
 
-- Abacus 0.15 or later (`plan.source` arrived in 0.15).
+- Abacus 0.15 or later to plan from Jira (`plan.source` arrived in 0.15); `land.commit` and `land.pr` work from 0.13.
 - The plugins it names, installed from this marketplace. If they aren't installed on a machine, Abacus can't use
   them; `abacus doctor` reports what's missing.
 
