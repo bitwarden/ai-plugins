@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Minimum supported Abacus version is now 0.13, up from 0.11. On Abacus 0.11 or 0.12 the profile no longer applies, including `land.pr`, so update Abacus along with this plugin.
+- The profile now asks for Abacus 0.13 or later, up from 0.11, because `land.commit` arrived in 0.13. On Abacus 0.11 or 0.12, `land.pr` keeps working and `land.commit` is ignored.
 
 ## [0.1.0] - 2026-10-20
 
