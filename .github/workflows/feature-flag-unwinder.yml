@@ -1,0 +1,355 @@
+# Feature flag unwinder.
+#
+# Runs every other Wednesday at 15:00 UTC, queries Jira for actionable
+# flag-cleanup tasks, and runs the `feature-flag-unwinder` agent once per
+# (task, target repo) pair:
+#
+#   Step 1 (`flagged-logic-removal`) → bitwarden/clients, server, ios, android
+#   Step 2 (`server-flag-removal`)   → bitwarden/server
+#
+# A manual run skips Jira: give it a flag and a step (and optionally a ticket
+# to link), and it fans out the same way.
+#
+# Each matrix job checks out exactly one target repo at the workspace root,
+# mints a GH App token scoped to that one repo, and runs the agent against
+# it. The agent opens at most one PR in that repo and, when there's a
+# ticket, comments the result on it. Server jobs additionally check out read-only
+# copies of bitwarden/clients, ios, and android so the backward-compat gate
+# can read their history and tags.
+
+name: Feature flag unwinder
+
+on:
+  schedule:
+    - cron: "0 15 * * 3" # Wednesdays 15:00 UTC
+  workflow_dispatch:
+    inputs:
+      flag:
+        description: "Flag key to unwind, e.g. pm-18612-otp-6-digits. Leave empty to run the ready-for-cleanup Jira query instead."
+        required: false
+        type: string
+      step:
+        description: "Lifecycle step for the flag: 1 removes flagged logic in all four repos, 2 removes the server FeatureFlagKeys constant. Required with a flag."
+        required: false
+        type: choice
+        default: none
+        options:
+          - none
+          - "1"
+          - "2"
+      jira_issue_key:
+        description: "Optional ticket to link in the PRs and comment on, e.g. PM-45033"
+        required: false
+        type: string
+      draft:
+        description: "Open the PRs as drafts"
+        required: false
+        type: boolean
+        default: false
+      repo:
+        description: "Limit the run to one target repo"
+        required: false
+        type: choice
+        default: all
+        options:
+          - all
+          - clients
+          - server
+          - ios
+          - android
+
+permissions: {}
+
+env:
+  _BOT_NAME: "bw-ghapp[bot]"
+  _BOT_EMAIL: "178206702+bw-ghapp[bot]@users.noreply.github.com"
+
+jobs:
+  biweekly-gate:
+    name: Biweekly gate (even ISO weeks only)
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'schedule'
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - id: gate
+        run: |
+          WEEK=$(date -u +%V)
+          if [ $((10#$WEEK % 2)) -eq 0 ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            echo "ISO week $WEEK is even, proceeding."
+          else
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            echo "ISO week $WEEK is odd, skipping this cycle."
+          fi
+
+  find-tasks:
+    name: Query Jira for ready-for-cleanup tasks
+    runs-on: ubuntu-24.04
+    needs: [biweekly-gate]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       needs.biweekly-gate.outputs.proceed == 'true')
+    permissions:
+      id-token: write
+    outputs:
+      matrix: ${{ steps.search.outputs.matrix }}
+    steps:
+      - name: Log in to Azure
+        uses: bitwarden/gh-actions/azure-login@main
+        with:
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Get Azure Key Vault secrets
+        id: get-kv-secrets
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
+        with:
+          keyvault: gh-org-bitwarden
+          secrets: "JIRA-EMAIL,JIRA-API-TOKEN"
+
+      - name: Log out from Azure
+        uses: bitwarden/gh-actions/azure-logout@main
+
+      - name: Build the job matrix
+        id: search
+        env:
+          JIRA_EMAIL: ${{ steps.get-kv-secrets.outputs.JIRA-EMAIL }}
+          JIRA_API_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
+          FLAG: ${{ inputs.flag }}
+          STEP: ${{ inputs.step || 'none' }}
+          TICKET: ${{ inputs.jira_issue_key }}
+          ONLY_REPO: ${{ inputs.repo || 'all' }}
+        run: |
+          set -euo pipefail
+          FLAG_RE='^[a-z0-9]+(-[a-z0-9]+)+$'
+
+          if [ -n "${FLAG:-}" ]; then
+            # Manual run: no Jira query, the inputs say what to do.
+            if ! [[ "$FLAG" =~ $FLAG_RE ]]; then
+              echo "::error::flag '$FLAG' is not a valid kebab-case flag key."
+              exit 1
+            fi
+            if [ "$STEP" != "1" ] && [ "$STEP" != "2" ]; then
+              echo "::error::Choose step 1 or 2 for flag '$FLAG'."
+              exit 1
+            fi
+            if [ -n "${TICKET:-}" ] && ! [[ "$TICKET" =~ ^[A-Z][A-Z0-9]+-[0-9]+$ ]]; then
+              echo "::error::jira_issue_key '$TICKET' is not a valid Jira issue key."
+              exit 1
+            fi
+            TASKS=$(jq -cn --arg flag "$FLAG" --argjson step "$STEP" --arg key "${TICKET:-}" \
+              '[{jira_issue_key: $key, flag: $flag, step: $step}]')
+          else
+            JQL='labels = "ready-for-cleanup" AND (labels = "flagged-logic-removal" OR labels = "server-flag-removal") AND statusCategory != Done'
+            RESPONSE=$(curl -sSf -G -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \
+              -H "Accept: application/json" \
+              --data-urlencode "jql=$JQL" \
+              --data-urlencode "fields=labels,customfield_12076" \
+              --data-urlencode "maxResults=50" \
+              "https://bitwarden.atlassian.net/rest/api/3/search/jql")
+
+            # Skip tickets the agent can't act on and say why in the run log.
+            echo "$RESPONSE" | jq -r --arg re "$FLAG_RE" '.issues[]
+              | (.fields.labels // []) as $l | (.fields.customfield_12076 // "") as $f
+              | if ($f | test($re) | not) then "::warning::\(.key) skipped: Feature flags field is empty or not a kebab-case flag key."
+                elif (($l | index("flagged-logic-removal")) and ($l | index("server-flag-removal"))) then "::warning::\(.key) skipped: it carries both step labels."
+                else empty end'
+
+            TASKS=$(echo "$RESPONSE" | jq -c --arg re "$FLAG_RE" '[ .issues[]
+              | (.fields.labels // []) as $l | (.fields.customfield_12076 // "") as $f
+              | select($f | test($re))
+              | select((($l | index("flagged-logic-removal")) and ($l | index("server-flag-removal"))) | not)
+              | {jira_issue_key: .key, flag: $f,
+                 step: (if ($l | index("flagged-logic-removal")) then 1 else 2 end)} ]')
+          fi
+
+          # One entry per (task, repo). Step 1 runs in all four repos, Step 2
+          # in server only. iOS needs a macOS runner.
+          MATRIX=$(echo "$TASKS" | jq -c --arg only "$ONLY_REPO" '
+            [ .[] | . as $t
+              | (if $t.step == 1 then ["clients", "server", "ios", "android"] else ["server"] end)[]
+              | $t + {repo: .} ]
+            | map(select($only == "all" or .repo == $only))
+            | map(. + {runner: (if .repo == "ios" then "macos-26-xlarge" else "ubuntu-24.04" end)})')
+
+          echo "Jobs: $MATRIX"
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  unwind:
+    name: Step ${{ matrix.step }} ${{ matrix.flag }} → bitwarden/${{ matrix.repo }}
+    runs-on: ${{ matrix.runner }}
+    needs: [find-tasks]
+    if: needs.find-tasks.outputs.matrix != '[]' && needs.find-tasks.outputs.matrix != ''
+    timeout-minutes: 90
+    permissions:
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.find-tasks.outputs.matrix) }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.flag }}-${{ matrix.repo }}-step-${{ matrix.step }}
+      cancel-in-progress: false
+    env:
+      # Scheduled runs use the FLAG_UNWINDER_DRAFT_PRS repo variable.
+      DRAFT: ${{ github.event_name == 'workflow_dispatch' && (inputs.draft && 'true' || 'false') || (vars.FLAG_UNWINDER_DRAFT_PRS == 'true' && 'true' || 'false') }}
+      REPO: ${{ matrix.repo }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Log in to Azure
+        uses: bitwarden/gh-actions/azure-login@main
+        with:
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Get Azure Key Vault secrets
+        id: get-kv-secrets
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
+        with:
+          keyvault: gh-org-bitwarden
+          secrets: "BW-GHAPP-ID,BW-GHAPP-KEY,ANTHROPIC-API-KEY,JIRA-EMAIL,JIRA-API-TOKEN"
+
+      - name: Log out from Azure
+        uses: bitwarden/gh-actions/azure-logout@main
+
+      # Scoped to the one target repo so a job can never push elsewhere.
+      - name: Generate GH App token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        id: app-token
+        with:
+          app-id: ${{ steps.get-kv-secrets.outputs.BW-GHAPP-ID }}
+          private-key: ${{ steps.get-kv-secrets.outputs.BW-GHAPP-KEY }}
+          owner: bitwarden
+          repositories: ${{ matrix.repo }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-actions: read
+
+      # Checked out at the workspace root so the target repo's own
+      # `./.github/actions/*` composite actions resolve below.
+      - name: Check out bitwarden/${{ matrix.repo }}
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: bitwarden/${{ matrix.repo }}
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Check out bitwarden/clients for the compat gate
+        if: matrix.repo == 'server'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: bitwarden/clients
+          path: .compat/clients
+          fetch-depth: 0 # tag history drives the compat gate
+          persist-credentials: false
+
+      - name: Check out bitwarden/ios for the compat gate
+        if: matrix.repo == 'server'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: bitwarden/ios
+          path: .compat/ios
+          fetch-depth: 0 # tag history drives the compat gate
+          persist-credentials: false
+
+      - name: Check out bitwarden/android for the compat gate
+        if: matrix.repo == 'server'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: bitwarden/android
+          path: .compat/android
+          fetch-depth: 0 # tag history drives the compat gate
+          persist-credentials: false
+
+      - name: Configure git identity
+        run: |
+          git config user.name "$_BOT_NAME"
+          git config user.email "$_BOT_EMAIL"
+
+      # Toolchain setup mirrors each target repo's own test.yml so the
+      # agent's build + test verification runs in a matching environment.
+      - name: Set up Node (clients)
+        if: matrix.repo == 'clients'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Set up .NET (server)
+        if: matrix.repo == 'server'
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+
+      - name: Set up Android build (android)
+        if: matrix.repo == 'android'
+        uses: ./.github/actions/setup-android-build
+
+      - name: Read Xcode version (ios)
+        if: matrix.repo == 'ios'
+        run: echo "_XCODE_VERSION=$(tr -d '\n' < .xcode-version)" >> "$GITHUB_ENV"
+
+      - name: Set Xcode version (ios)
+        if: matrix.repo == 'ios'
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: ${{ env._XCODE_VERSION }}
+
+      - name: Configure Ruby (ios)
+        if: matrix.repo == 'ios'
+        uses: ruby/setup-ruby@12fd324f1d0b43274fdc8130f6980590a667c455 # v1.312.0
+        with:
+          bundler-cache: true
+
+      - name: Resolve Atlassian cloud ID
+        id: atlassian
+        run: |
+          CLOUD_ID=$(curl -sSf https://bitwarden.atlassian.net/_edge/tenant_info | jq -r '.cloudId')
+          echo "cloud_id=$CLOUD_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Run feature-flag-unwinder agent
+        uses: anthropics/claude-code-action@97c53473391bff1901034d4b454b5bac7ab7a029 # v1.0.239
+        env:
+          CLIENTS_REPO: ${{ matrix.repo == 'server' && format('{0}/.compat/clients', github.workspace) || '' }}
+          IOS_REPO: ${{ matrix.repo == 'server' && format('{0}/.compat/ios', github.workspace) || '' }}
+          ANDROID_REPO: ${{ matrix.repo == 'server' && format('{0}/.compat/android', github.workspace) || '' }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ATLASSIAN_CLOUD_ID: ${{ steps.atlassian.outputs.cloud_id }}
+          ATLASSIAN_EMAIL: ${{ steps.get-kv-secrets.outputs.JIRA-EMAIL }}
+          ATLASSIAN_JIRA_READ_ONLY_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
+          ATLASSIAN_JIRA_WRITE_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
+          ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
+        with:
+          anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-API-KEY }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          plugin_marketplaces: |
+            https://github.com/bitwarden/ai-plugins.git
+          plugins: |
+            bitwarden-feature-flag-unwinder@bitwarden-marketplace
+            bitwarden-atlassian-tools@bitwarden-marketplace
+            bitwarden-delivery-tools@bitwarden-marketplace
+          # Identical to the dispatching-flag-cleanup skill's local launch:
+          # same agent, same request. The agent resolves the repo from the
+          # checkout and reads everything else from Jira.
+          prompt: Unwind ${{ matrix.flag }} step ${{ matrix.step }}${{ matrix.jira_issue_key != '' && format(' for {0}', matrix.jira_issue_key) || '' }}
+          claude_args: |
+            --verbose
+            --agent bitwarden-feature-flag-unwinder:feature-flag-unwinder
+            --allowedTools "Skill,Read,Edit,Write,Grep,Glob,Bash,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__add_issue_comment,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page"
+
+# Required Azure KV secrets (keyvault `gh-org-bitwarden`):
+#   BW-GHAPP-ID / BW-GHAPP-KEY — GH App installed on clients, server, ios, android
+#   ANTHROPIC-API-KEY           — Claude API key for claude-code-action
+#   JIRA-EMAIL / JIRA-API-TOKEN — Atlassian account with Jira read + comment
+#
+# Jira label conventions:
+#   - `ready-for-cleanup`     — "this task is actionable now"
+#   - `flagged-logic-removal` — Step 1 (runs in all four repos)
+#   - `server-flag-removal`   — Step 2 (runs in server only)
+# Step 3 (archive in LaunchDarkly) is manual and intentionally un-labelled.

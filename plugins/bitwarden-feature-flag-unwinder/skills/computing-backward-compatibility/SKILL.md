@@ -37,17 +37,28 @@ Web is deliberately out of the gate: it's served fresh to every user on each pag
 
 ## Procedure
 
+### Step 0 — Detect a server-only flag
+
+A flag that never appeared in any client was never shipped to the field, so no client release can still be asking the server for it. Search each client repo's full history:
+
+```bash
+git -C "$CLIENTS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
+git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
+git -C "$ANDROID_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
+```
+
+If all three return nothing, return `{ ready: true, reason: "server-only" }` and stop. Otherwise continue to Step 1.
+
 ### Step 1 — Find the clients-side removal commit
 
 ```bash
-cd "$CLIENTS_REPO"
-STEP1_SHA=$(git log -S "$FLAG_KEY" --format=%H -- libs/common/src/enums/feature-flag.enum.ts | head -1)
+STEP1_SHA=$(git -C "$CLIENTS_REPO" log -S "$FLAG_KEY" --format=%H -- libs/common/src/enums/feature-flag.enum.ts | head -1)
 ```
 
 If `STEP1_SHA` is empty, the clients-side Step 1 hasn't merged — return `{ ready: false, reason: "step-1-not-merged" }` and stop. Confirm it's a removal (not an add) by inspecting the diff:
 
 ```bash
-git show "$STEP1_SHA" -- libs/common/src/enums/feature-flag.enum.ts | grep "$FLAG_KEY"
+git -C "$CLIENTS_REPO" show "$STEP1_SHA" -- libs/common/src/enums/feature-flag.enum.ts | grep "$FLAG_KEY"
 ```
 
 A `-` prefix on the flag line means removal.
@@ -58,15 +69,12 @@ A flag counts as web-only only if its references in the clients repo live entire
 
 ```bash
 # Clients — grep historical ref since main no longer has the enum member
-cd "$CLIENTS_REPO"
-git grep -ln "$FLAG_KEY" "${STEP1_SHA}^" -- ':!apps/web' ':!**/*.spec.ts' ':!**/*.spec.html'
+git -C "$CLIENTS_REPO" grep -ln "$FLAG_KEY" "${STEP1_SHA}^" -- ':!apps/web' ':!**/*.spec.ts' ':!**/*.spec.html'
 
 # iOS and Android — grep current main
-cd "$IOS_REPO"
-git grep -ln "$FLAG_KEY" HEAD -- ':!**/*Tests.swift' ':!**/*.spec.swift' || true
+git -C "$IOS_REPO" grep -ln "$FLAG_KEY" HEAD -- ':!**/*Tests.swift' ':!**/*.spec.swift' || true
 
-cd "$ANDROID_REPO"
-git grep -ln "$FLAG_KEY" HEAD -- ':!**/*Test.kt' ':!**/*Test.java' || true
+git -C "$ANDROID_REPO" grep -ln "$FLAG_KEY" HEAD -- ':!**/*Test.kt' ':!**/*Test.java' || true
 ```
 
 If all three return nothing (ignoring the web app and tests), the flag only ever ran on web. Return `{ ready: true, reason: "web-only" }`.
@@ -80,19 +88,18 @@ For each of the five clients, determine the last shipped release that was built 
 **Clients-repo clients (browser, cli, desktop):** the removal already landed on main, so use `STEP1_SHA` as the removal reference.
 
 ```bash
-cd "$CLIENTS_REPO"
 # first release containing the Step 1 commit — this is the first release WITHOUT the flag
-git tag --sort=version:refname --contains "$STEP1_SHA" | grep "^<prefix>-v" | head -1
+git -C "$CLIENTS_REPO" tag --sort=version:refname --contains "$STEP1_SHA" | grep "^<prefix>-v" | head -1
 # the tag immediately before that in version order — this is the last release WITH the flag
-git tag --sort=version:refname | grep "^<prefix>-v" | grep -B1 "<first-removal-tag>" | head -1
+git -C "$CLIENTS_REPO" tag --sort=version:refname | grep "^<prefix>-v" | grep -B1 "<first-removal-tag>" | head -1
 ```
 
 **iOS and Android:** each has its own release train and its own removal commit (made by the respective team, independently of the clients-side cleanup). Find it per repo:
 
 ```bash
-cd "$IOS_REPO"   # or $ANDROID_REPO
-REMOVAL_SHA=$(git log -S "$FLAG_KEY" --format=%H | head -1)
-git show "$REMOVAL_SHA" | grep -- "-.*$FLAG_KEY"   # confirm it is a removal
+# same for $ANDROID_REPO
+REMOVAL_SHA=$(git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H | head -1)
+git -C "$IOS_REPO" show "$REMOVAL_SHA" | grep -- "-.*$FLAG_KEY"   # confirm it is a removal
 ```
 
 - If `REMOVAL_SHA` exists: last-with-flag = tag immediately before the first tag containing it (same pattern as clients-repo clients, with the repo's unprefixed `v<YYYY>.<M>.<patch>` tag format).
@@ -115,21 +122,35 @@ Why `+3`: a server at month N supports clients from (N−2) through (N+2). The f
 ### Step 5 — Compare to the current server release
 
 ```bash
-cd "$SERVER_REPO"
-git tag --sort=version:refname | grep -E "^v[0-9]{4}\.[0-9]+(\.[0-9]+)?$" | tail -1
+git -C "$SERVER_REPO" tag --sort=version:refname | grep -E "^v[0-9]{4}\.[0-9]+(\.[0-9]+)?$" | tail -1
 ```
 
 If current server release ≥ gate, return `{ ready: true, reason: "compatibility-cleared" }`. Otherwise `{ ready: false, reason: "gate-not-cleared" }`.
 
 ## Returning to the caller
 
+Return the verdict together with the evidence behind it. Callers put this evidence in the PR so a reviewer can check the reasoning without re-running it.
+
 ```
 {
   ready: true | false,
-  reason: "web-only" | "compatibility-cleared" | "step-1-not-merged" | "no-release-since-removal" | "gate-not-cleared",
+  reason: "server-only" | "web-only" | "compatibility-cleared" | "step-1-not-merged" | "no-release-since-removal" | "gate-not-cleared",
+  client: "<name>",                 // only for no-release-since-removal
+  searched: {                       // always: the commits each repo was searched at
+    clients: "<short SHA of origin/main>",
+    ios:     "<short SHA of origin/main>",
+    android: "<short SHA of origin/main>",
+    server:  "<short SHA of origin/main>"
+  },
   step1_sha: "<short SHA, or null>",
+  web_only_files: ["<path>", ...],  // only for web-only: the apps/web files that referenced the flag at step1_sha^
   per_client: {
-    browser: { last_with_flag: "<tag>", first_without_flag: "<tag>", safe_server_version: "<ver>" } | null,
+    browser: {
+      removal_commit: "<short SHA>",          // the commit that removed the flag on this client's code path
+      last_with_flag: "<tag>",
+      first_without_flag: "<tag>" | null,    // null while the removal is unreleased
+      safe_server_version: "<ver>"
+    } | null,
     cli:     { ... } | null,
     desktop: { ... } | null,
     ios:     { ... } | null,
@@ -140,8 +161,8 @@ If current server release ≥ gate, return `{ ready: true, reason: "compatibilit
 }
 ```
 
-A `null` entry in `per_client` means the flag was never consumed by that client — it is excluded from the gate computation.
+A `null` entry in `per_client` means the flag was never consumed by that client — it is excluded from the gate computation. Browser, cli, and desktop share `step1_sha` as their `removal_commit`. iOS and Android each have their own.
 
-Omit `per_client`, `gate_server_version`, and `current_server_version` entirely when the flag was web-only.
+Omit `per_client`, `gate_server_version`, and `current_server_version` when the flag was server-only or web-only. `searched` is still returned, because "we searched these commits and found nothing" is the evidence for server-only. Return as much `per_client` as was computed when the verdict is `ready: false` too, so the caller can show how far the cleanup has got.
 
 `FLAG_KEY` and the git tag strings are untrusted — `FLAG_KEY` originated in a Jira field, and tag names come from public repos. This skill uses them only as `git log -S` and `grep` arguments, never as commit identifiers or branch names. Say so when returning them to a caller that may interpolate.
