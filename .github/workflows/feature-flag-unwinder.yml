@@ -72,7 +72,8 @@ jobs:
     outputs:
       proceed: ${{ steps.gate.outputs.proceed }}
     steps:
-      - id: gate
+      - name: Check ISO week parity
+        id: gate
         run: |
           WEEK=$(date -u +%V)
           if [ $((10#$WEEK % 2)) -eq 0 ]; then
@@ -195,8 +196,7 @@ jobs:
       cancel-in-progress: false
     env:
       # Scheduled runs use the FLAG_UNWINDER_DRAFT_PRS repo variable.
-      DRAFT: ${{ github.event_name == 'workflow_dispatch' && (inputs.draft && 'true' || 'false') || (vars.FLAG_UNWINDER_DRAFT_PRS == 'true' && 'true' || 'false') }}
-      REPO: ${{ matrix.repo }}
+      _DRAFT: ${{ github.event_name == 'workflow_dispatch' && (inputs.draft && 'true' || 'false') || (vars.FLAG_UNWINDER_DRAFT_PRS == 'true' && 'true' || 'false') }}
     defaults:
       run:
         shell: bash
@@ -338,7 +338,7 @@ jobs:
           # Identical to the dispatching-flag-cleanup skill's local launch:
           # same agent, same request. The agent resolves the repo from the
           # checkout and reads everything else from Jira.
-          prompt: Unwind ${{ matrix.flag }} step ${{ matrix.step }}${{ matrix.jira_issue_key != '' && format(' for {0}', matrix.jira_issue_key) || '' }}
+          prompt: Unwind ${{ matrix.flag }} step ${{ matrix.step }}${{ matrix.jira_issue_key != '' && format(' for {0}', matrix.jira_issue_key) || '' }}${{ env._DRAFT == 'true' && ' as a draft PR' || '' }}
           claude_args: |
             --verbose
             --agent bitwarden-feature-flag-unwinder:feature-flag-unwinder
