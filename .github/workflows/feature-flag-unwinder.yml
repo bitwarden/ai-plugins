@@ -324,6 +324,7 @@ jobs:
           ATLASSIAN_EMAIL: ${{ steps.get-kv-secrets.outputs.JIRA-EMAIL }}
           ATLASSIAN_JIRA_READ_ONLY_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
           ATLASSIAN_JIRA_WRITE_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
+          # Required by the Atlassian MCP server to start.
           ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
         with:
           anthropic_api_key: ${{ steps.get-kv-secrets.outputs.ANTHROPIC-API-KEY }}
@@ -341,7 +342,7 @@ jobs:
           claude_args: |
             --verbose
             --agent bitwarden-feature-flag-unwinder:feature-flag-unwinder
-            --allowedTools "Skill,Read,Edit,Write,Grep,Glob,Bash,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__add_issue_comment,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page"
+            --allowedTools "Skill,Read,Edit,Write,Grep,Glob,Bash,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__add_issue_comment"
 
 # Required Azure KV secrets (keyvault `gh-org-bitwarden`):
 #   BW-GHAPP-ID / BW-GHAPP-KEY — GH App installed on clients, server, ios, android

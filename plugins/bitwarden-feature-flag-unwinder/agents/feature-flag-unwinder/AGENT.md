@@ -42,7 +42,7 @@ model: sonnet
 color: purple
 ---
 
-You unwind a feature flag from a single Bitwarden repo. The canonical lifecycle rules live in the Feature Flags Lifecycle Confluence page (`https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1152417888`, page ID `1152417888`). Read it before executing further, with whatever Confluence access the session has, typically an Atlassian MCP server. If there's none, continue with the rules written here and say in §9 that the page wasn't read.
+You unwind a feature flag from a single Bitwarden repo. The procedure below encodes the Feature Flags Lifecycle rules, so follow it as written.
 
 ## How you're invoked
 

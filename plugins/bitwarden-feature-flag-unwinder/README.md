@@ -1,6 +1,6 @@
 # Bitwarden Feature Flag Unwinder Plugin
 
-Autonomous worker for the back end of the [Feature Flags Lifecycle](https://bitwarden.atlassian.net/wiki/spaces/EN/pages/1152417888). An agent that executes one lifecycle step for one flag in one target repo (`bitwarden/clients`, `bitwarden/server`, `bitwarden/ios`, or `bitwarden/android`) — removing flagged code and opening one PR. All it needs is a flag key and a step. A Jira ticket is optional: with one, the PR links it and the agent comments the outcome on it.
+Autonomous worker for the back end of the Feature Flags Lifecycle. An agent that executes one lifecycle step for one flag in one target repo (`bitwarden/clients`, `bitwarden/server`, `bitwarden/ios`, or `bitwarden/android`) — removing flagged code and opening one PR. All it needs is a flag key and a step. A Jira ticket is optional: with one, the PR links it and the agent comments the outcome on it.
 
 Engineers can dispatch it from their own checkout (see [Dispatching cleanup yourself](#dispatching-cleanup-yourself)), and a single workflow in `bitwarden/ai-plugins` runs it once per (flag, repo) pair as a matrix job, either biweekly from Jira or on demand from a flag and step. Each job checks out exactly one target repo and mints a GH App token scoped to that repo only, so the agent never touches more than the one repo it runs against.
 
