@@ -1,0 +1,22 @@
+{
+  "name": "bitwarden-feature-flag-unwinder",
+  "version": "0.1.0",
+  "description": "Autonomous feature-flag unwinder scoped to one repo per invocation. Lives inside each target repo (clients, server, ios, android) as a workflow following the `sdk-update.yml` pattern, invoked via `repository_dispatch` from a biweekly conductor that reads Jira. Reads the step from the task's step label (`flagged-logic-removal` or `server-flag-removal`), removes flagged code, verifies build + tests, and opens one draft PR against the current repo. Ships both the per-repo workflow template and the conductor template.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-feature-flag-unwinder",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "feature-flags",
+    "launchdarkly",
+    "cleanup",
+    "pull-request",
+    "clients",
+    "server",
+    "jira",
+    "automation"
+  ],
+  "agents": "./agents/feature-flag-unwinder/AGENT.md"
+}
