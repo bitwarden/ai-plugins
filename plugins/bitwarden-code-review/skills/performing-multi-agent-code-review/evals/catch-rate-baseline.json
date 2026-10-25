@@ -1,0 +1,904 @@
+{
+  "metadata": {
+    "skill_name": "performing-multi-agent-code-review",
+    "eval_type": "catch-rate",
+    "executor_model": "opus",
+    "grader_model": "opus",
+    "timestamp": "2026-10-17T09:29:18Z",
+    "evals_run": [1, 2, 3, 4, 5],
+    "runs_per_configuration": 3
+  },
+  "run_summary": {
+    "with_skill": {
+      "runs": 15,
+      "catch_rate_per_run": [
+        {
+          "run_number": 1,
+          "catch_rate": 1
+        },
+        {
+          "run_number": 2,
+          "catch_rate": 1
+        },
+        {
+          "run_number": 3,
+          "catch_rate": 1
+        }
+      ],
+      "mean_catch_rate": 1,
+      "false_finding_rate": 0,
+      "validated_findings": 30,
+      "false_findings": 0,
+      "errored_runs": 0
+    },
+    "without_skill": {
+      "runs": 15,
+      "catch_rate_per_run": [
+        {
+          "run_number": 1,
+          "catch_rate": 1
+        },
+        {
+          "run_number": 2,
+          "catch_rate": 1
+        },
+        {
+          "run_number": 3,
+          "catch_rate": 1
+        }
+      ],
+      "mean_catch_rate": 1,
+      "false_finding_rate": 0.328,
+      "validated_findings": 61,
+      "false_findings": 20,
+      "errored_runs": 0
+    }
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "report": "1/with_skill/run-1/report/code-review-opus-PR-19221.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+          "verdict": "real",
+          "reason": "decryptAes256 now returns Utils.fromArrayToByteString, which maps each byte to its own character with no UTF-8 decoding, so multi-byte UTF-8 characters in decrypted LastPass fields come out garbled."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 2,
+      "report": "1/with_skill/run-2/report/code-review-opus-PR-19221.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+          "verdict": "real",
+          "reason": "decryptAes256 now decodes the raw plaintext bytes from the DANGEROUS_* helpers with Utils.fromArrayToByteString (one byte per character, Latin-1) instead of UTF-8, so multi-byte characters in LastPass import data come out garbled."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "report": "1/with_skill/run-3/report/code-review-opus-PR-19221.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+          "verdict": "real",
+          "reason": "decryptAes256 now calls Utils.fromArrayToByteString, which maps each byte to one character (Latin-1) instead of decoding UTF-8, so any multi-byte character in a decrypted LastPass field gets corrupted."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "report": "1/without_skill/run-1/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 2,
+      "grades": [
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+          "verdict": "real",
+          "reason": "decryptAes256 now returns Utils.fromArrayToByteString of the decrypted bytes. That maps each byte to one char (Latin-1) instead of decoding UTF-8, so any multi-byte character in imported fields is corrupted."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-98 (with 40-62)",
+          "verdict": "false",
+          "reason": "The missing await in the *WithDefault helpers was already there, and the claimed regression doesn't hold. Before, bad-padding ECB output still went through forge's output.toString() (UTF-8 decode, which throws on garbage bytes), and the Node crypto path threw outright, so the per-field fallback was already ineffective. This PR doesn't turn a working fallback into an aborted import."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:86-104",
+          "verdict": "false",
+          "reason": "Missing tests and a now-unused dependency are not a correctness defect in the code itself."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 2,
+      "report": "1/without_skill/run-2/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 4,
+      "false_findings": 1,
+      "grades": [
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+          "verdict": "real",
+          "reason": "The PR replaced Utils.fromArrayToUtf8 with Utils.fromArrayToByteString, which maps each byte to one character instead of decoding UTF-8, so multi-byte characters in decrypted fields come out garbled."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-98 (with 40-62)",
+          "verdict": "real",
+          "reason": "The old ECB path (WebCrypto aesDecryptFast) ignored decipher.finish(), but DANGEROUS_aesEcbDecryptLastpassImport now throws on failure, and the *WithDefault helpers return the promise without awaiting it, so the rejection escapes their catch."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:86-104",
+          "verdict": "real",
+          "reason": "The PR changes only crypto-utils.ts and an index export and adds no tests, and no spec covers CryptoUtils or the LastPass parser (the only LastPass spec is the CSV importer)."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:86-91",
+          "verdict": "false",
+          "reason": "The zero-IV default existed before this PR and WebCrypto never forced callers to pass an IV, and every current CBC caller passes one, so the PR introduces no defect here."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 3,
+      "report": "1/without_skill/run-3/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+          "verdict": "real",
+          "reason": "The PR swapped Utils.fromArrayToUtf8 for Utils.fromArrayToByteString, which maps each byte to its own character instead of decoding UTF-8, so multi-byte characters in decrypted LastPass fields come out garbled."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:86-104",
+          "verdict": "real",
+          "reason": "The PR adds no tests for CryptoUtils.decryptAes256 or the new CBC helper; the only spec covers ECB with ASCII text, so the UTF-8 regression goes undetected."
+        },
+        {
+          "location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:40-62",
+          "verdict": "real",
+          "reason": "The *WithDefault wrappers return the promise without awaiting it inside try, so a rejected decryption escapes the catch and the default is never returned; this predates the PR, but the defect does exist in the code."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "report": "2/with_skill/run-1/report/code-review-opus-PR-6879.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 5,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "RestoreOrganizationUserCommand.cs:202-204",
+          "verdict": "real",
+          "reason": "GetManyByOrganizationIdAsync runs before RestoreAsync while users are still Revoked (an exempt status), so the Contains check never matches and bulk restore never creates collections."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-118",
+          "verdict": "real",
+          "reason": "The single-user path checks requirement.State, which is Enabled if any of the user's orgs enforces the policy, rather than the org-scoped RequiresDefaultCollectionOnConfirm(organizationId)."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-118 (refactor)",
+          "verdict": "real",
+          "reason": "The logic is duplicated inline and the policy query is evaluated before the cheaper flag and name checks; the bulk query runs on every call no matter what the flag says."
+        },
+        {
+          "location": "RestoreOrganizationUserCommandTests.cs:1177-1544",
+          "verdict": "real",
+          "reason": "The PR adds #region blocks, which .claude/CLAUDE.md:13 explicitly forbids."
+        },
+        {
+          "location": "OrganizationUserRequestModels.cs:119-129",
+          "verdict": "real",
+          "reason": "The restore-only DefaultUserCollectionName property was added to the shared OrganizationUserBulkRequestModel, which many unrelated endpoints use."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 2,
+      "report": "2/with_skill/run-2/report/code-review-opus-PR-6879.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 4,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "src/Core/AdminConsole/OrganizationFeatures/OrganizationUsers/RestoreUser/v1/RestoreOrganizationUserCommand.cs:202-204",
+          "verdict": "real",
+          "reason": "The org-wide enforced-user query runs before the loop, while the target users are still Revoked (an exempt status), so the Contains check at line 244 can never be true and bulk restore never creates default collections."
+        },
+        {
+          "location": "src/Core/AdminConsole/OrganizationFeatures/OrganizationUsers/RestoreUser/v1/RestoreOrganizationUserCommand.cs:108-117",
+          "verdict": "real",
+          "reason": "GetAsync(userId) sets State to Enabled when any of the user's orgs enforces the policy, and the check is not scoped to organizationUser.OrganizationId (unlike RequiresDefaultCollectionOnConfirm), so a policy in another org can trigger collection creation in the restoring org."
+        },
+        {
+          "location": "src/Core/AdminConsole/OrganizationFeatures/OrganizationUsers/RestoreUser/v1/RestoreOrganizationUserCommand.cs:201-203,261-270",
+          "verdict": "real",
+          "reason": "The eligibility logic really is duplicated inline and the two copies disagree (user-wide State vs. org-scoped ID list), and the bulk path runs the policy query every time and calls CreateDefaultCollectionsAsync once per user instead of one batched call."
+        },
+        {
+          "location": "test/Core.Test/AdminConsole/OrganizationFeatures/OrganizationUsers/RestoreUser/RestoreOrganizationUserCommandTests.cs:1177-1544",
+          "verdict": "real",
+          "reason": "The new tests are wrapped in #region/#endregion at lines 1177/1367 and 1369/1544, and .claude/CLAUDE.md line 13 explicitly says to never use code regions."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "report": "2/with_skill/run-3/report/code-review-opus-PR-6879.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 4,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "RestoreOrganizationUserCommand.cs:202-204",
+          "verdict": "real",
+          "reason": "The org-scoped policy query runs before RestoreAsync while users are still Revoked, which is an exempt status, so their IDs are filtered out and the Contains check never matches."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-118",
+          "verdict": "real",
+          "reason": "GetAsync(userId).State is Enabled if any of the user's organizations enforces the policy (policyDetails.Any()), so a collection can be created in an organization that doesn't enforce it, unlike RequiresDefaultCollectionOnConfirm(orgId)."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:106-108",
+          "verdict": "real",
+          "reason": "The diff removes both `organizationUser.Status = status;` lines, so after restore the in-memory entity still says Revoked when it is logged, returned, and reused by callers."
+        },
+        {
+          "location": "RestoreOrganizationUserCommandTests.cs:1177-1544",
+          "verdict": "real",
+          "reason": "The PR adds #region/#endregion blocks, and .claude/CLAUDE.md explicitly says never to use code regions."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "report": "2/without_skill/run-1/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 6,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "RestoreOrganizationUserCommand.cs:202-204,244",
+          "verdict": "real",
+          "reason": "GetManyByOrganizationIdAsync filters with factory.Enforce, which exempts Revoked status, and the users are still Revoked when it is called, so the Contains check never matches."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-118",
+          "verdict": "real",
+          "reason": "State is Enabled whenever any enforced policy detail exists across all of the user's orgs (policyDetails.Any()), so the check is not scoped to organizationUser.OrganizationId, unlike RequiresDefaultCollectionOnConfirm(orgId)."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:106-119,240",
+          "verdict": "real",
+          "reason": "The diff removes `organizationUser.Status = status` in both paths, so callers like the SCIM PatchUserCommand (which checks orgUser.Status) and the event logging get an entity whose status is still Revoked."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-113,202-204",
+          "verdict": "real",
+          "reason": "The policy queries run before the cheap flag, name and status checks, and the bulk query runs on every call, so they add DB load even when the feature flag is off."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:244-252",
+          "verdict": "real",
+          "reason": "CreateDefaultCollectionsAsync accepts a list but is called once per user inside the loop, which means N round trips instead of one batched call."
+        },
+        {
+          "location": "RestoreOrganizationUserCommandTests.cs",
+          "verdict": "real",
+          "reason": "The tests stub GetManyByOrganizationIdAsync to return Revoked users' IDs and stub State without org scoping, which hides the defects in findings 1 and 2."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 2,
+      "report": "2/without_skill/run-2/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 6,
+      "false_findings": 3,
+      "grades": [
+        {
+          "location": "RestoreOrganizationUserCommand.cs:202-204 (used at :244)",
+          "verdict": "real",
+          "reason": "GetManyByOrganizationIdAsync filters through factory.Enforce, which drops users with Revoked status; the list is built before any RestoreAsync call, so the Contains check never matches a user being restored."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-118",
+          "verdict": "real",
+          "reason": "GetAsync(userId) builds the requirement from every org the user belongs to, and the factory sets State=Enabled if any enforced policy exists; the check never uses organizationUser.OrganizationId, so a policy in another org can trigger collection creation in this one."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:106-118, 240-259",
+          "verdict": "false",
+          "reason": "The in-memory Status is now stale, but no current consumer reads it: SCIM re-fetches the user, the bulk response only uses Id and the error string, and event logging doesn't use Status, so nothing observable breaks."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:115-117, 249-251",
+          "verdict": "false",
+          "reason": "This needs a hypothetical infrastructure failure, and any other repository or push call in the same non-transactional flow can fail the same way; it's general robustness speculation, not a concrete defect from this change."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-113, 202-204",
+          "verdict": "real",
+          "reason": "The single-user path runs the GetAsync policy query before the feature-flag and name checks, and the bulk path always runs GetManyByOrganizationIdAsync, adding needless DB queries to every restore even when the flag is off or no name is sent."
+        },
+        {
+          "location": "OrganizationUserRequestModels.cs:119-129",
+          "verdict": "false",
+          "reason": "This is an API-design preference; the other bulk endpoints just ignore the extra optional field, and the command checks the feature flag before using it, so no incorrect behavior results."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 3,
+      "report": "2/without_skill/run-3/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 6,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "RestoreOrganizationUserCommand.cs:202-204,244",
+          "verdict": "real",
+          "reason": "The policy query runs while the users are still Revoked, which is an exempt status, so they are filtered out; the Contains check is never true and bulk restore never creates a default collection."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-118",
+          "verdict": "real",
+          "reason": "GetAsync(userId).State is Enabled when any of the user's organizations enforces Data Ownership, so a restore into an organization without the policy can still create a default collection there."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:106-119, 240-257",
+          "verdict": "real",
+          "reason": "The diff removes `organizationUser.Status = status` in both paths, so the in-memory entity stays Revoked; SCIM PatchUserCommand reuses that same orgUser across operations and branches on its Status."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:106-118, 240-257",
+          "verdict": "real",
+          "reason": "The new CreateDefaultCollectionsAsync call runs after the restore has been committed but before the event and push, and the bulk path only catches BadRequestException, so a failure there leaves the user restored with no event or push."
+        },
+        {
+          "location": "RestoreOrganizationUserCommand.cs:108-113, 202-204",
+          "verdict": "real",
+          "reason": "The policy queries run before the cheap feature-flag and name checks, and in the bulk path they run unconditionally, so every restore pays for those lookups."
+        },
+        {
+          "location": "RestoreOrganizationUserCommandTests.cs",
+          "verdict": "real",
+          "reason": "The bulk tests stub GetManyByOrganizationIdAsync to return revoked users' IDs, which the real query filters out, and no test covers the cross-organization policy case or the post-restore status."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "report": "3/with_skill/run-1/report/code-review-opus-PR-411.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:47-48",
+          "verdict": "real",
+          "reason": "B64::as_bytes() returns the decoded 16 raw bytes rather than the UTF-8 bytes of the base64 string that was used before, so the KDF salt no longer matches the salt importers read from the file."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 2,
+      "report": "3/with_skill/run-2/report/code-review-opus-PR-411.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:47-48",
+          "verdict": "real",
+          "reason": "B64::as_bytes() returns the decoded 16 raw bytes, not the base64 text bytes the old String passed, so the KDF salt changed and other clients can't derive the same key."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "report": "3/with_skill/run-3/report/code-review-opus-PR-411.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:46-48",
+          "verdict": "real",
+          "reason": "B64::as_bytes() returns the decoded 16 raw bytes rather than the base64 text bytes used before, while the file still stores the base64 string, so importers derive a different key."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "report": "3/without_skill/run-1/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 2,
+      "false_findings": 1,
+      "grades": [
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:46-48",
+          "verdict": "real",
+          "reason": "`salt` is now a `B64`, so `salt.as_bytes()` gives the 16 decoded bytes instead of the UTF-8 bytes of the base64 string, but the export's `salt` field still holds the base64 string, so other clients' importers derive a different key."
+        },
+        {
+          "location": "crates/bitwarden-fido/src/lib.rs:118-119, types.rs:80/119, bitwarden-send/src/send.rs:312-315, cxf/login.rs:214-218",
+          "verdict": "false",
+          "reason": "The decoder really is more lenient now (it strips padding and skips trailing-bit checks), but `B64Url` uses a deliberately permissive decoder (`BASE64URL_PERMISSIVE`), and accepting padded or non-canonical input breaks nothing; the review itself says it probably doesn't matter, so this is an intended behaviour change, not a defect."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 2,
+      "report": "3/without_skill/run-2/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 2,
+      "grades": [
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:46-48",
+          "verdict": "real",
+          "reason": "B64::as_bytes() returns the decoded 16 raw bytes, not the UTF-8 bytes of the base64 string the old code used, so the export key is now derived from a different salt than other clients use."
+        },
+        {
+          "location": "crates/bitwarden-fido/src/lib.rs:118-119,243-244; crates/bitwarden-fido/src/types.rs:80; crates/bitwarden-send/src/send.rs:312-315",
+          "verdict": "false",
+          "reason": "Accepting padding and ignoring trailing bits is the documented, intended behaviour of B64Url, and the review shows no concrete case where it breaks anything; the string-vs-bytes comparison problem is speculation."
+        },
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:91-246",
+          "verdict": "false",
+          "reason": "This is a request for more tests, not a correctness defect in the PR's code; the actual bug is already covered by Finding 1."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 3,
+      "report": "3/without_skill/run-3/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 2,
+      "false_findings": 1,
+      "grades": [
+        {
+          "location": "crates/bitwarden-exporters/src/encrypted_json.rs:46-48",
+          "verdict": "real",
+          "reason": "B64::as_bytes() returns the 16 decoded raw bytes rather than the 24-byte base64 string, so PinKey::derive now uses a different salt from the old code and from the salt string other clients read from the export."
+        },
+        {
+          "location": "crates/bitwarden-send/src/send.rs, bitwarden-vault/src/cipher/login.rs, bitwarden-fido/src/lib.rs, bitwarden-fido/src/types.rs",
+          "verdict": "false",
+          "reason": "The decoding is indeed more lenient now, but the B64/B64Url types are documented to ignore padding, so this is intended. Accepting padded or non-canonical forms of the same bytes does not cause any concrete wrong result or security failure on these paths."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "report": "4/with_skill/run-1/report/code-review-opus-PR-20336.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:440-443",
+          "verdict": "real",
+          "reason": "When both sources are empty, syncNewPolicies returns early and never calls newPolicyService.replace, so policies removed since the last sync stay in the new policy state. The legacy syncPolicies always calls replace, so it does clear them."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 2,
+      "report": "4/with_skill/run-2/report/code-review-opus-PR-20336.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:440-443",
+          "verdict": "real",
+          "reason": "syncNewPolicies returns early without calling newPolicyService.replace when both policiesNew and policies are empty, unlike syncPolicies which always replaces, so stale policies are never cleared."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "report": "4/with_skill/run-3/report/code-review-opus-PR-20336.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 1,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:441-443",
+          "verdict": "real",
+          "reason": "syncNewPolicies returns before calling newPolicyService.replace when both policiesNew and policies are empty, so stale policies stay in POLICIES_NEW, unlike syncPolicies, which always replaces."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "report": "4/without_skill/run-1/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 5,
+      "false_findings": 4,
+      "grades": [
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:433-449",
+          "verdict": "real",
+          "reason": "syncNewPolicies returns before calling newPolicyService.replace when both sources are empty, so POLICIES_NEW keeps stale policies while the legacy store is cleared."
+        },
+        {
+          "location": "libs/common/src/platform/server-notifications/internal/default-server-notifications.service.ts:297-302",
+          "verdict": "false",
+          "reason": "The PR's new upsert correctly targets the notification's userId; the active-account behaviour of syncPolicy is pre-existing legacy code that this PR doesn't introduce."
+        },
+        {
+          "location": "libs/common/src/admin-console/services/policy/default-new-policy.service.ts:309-315",
+          "verdict": "false",
+          "reason": "The cited lines don't exist (the file is 26 lines), and an upsert-only notification path matches the legacy service by design; the only real removal problem is the one already covered by Finding 1."
+        },
+        {
+          "location": "libs/auth/src/angular/login/login.component.ts:510-516",
+          "verdict": "false",
+          "reason": "Replacing with the login-time policies mirrors the existing legacy policyService.replace call on the line before it and is intentional pre-sync seeding, not a defect."
+        },
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:438-440",
+          "verdict": "false",
+          "reason": "This rests on a hypothetical server change; falling back to policies when policiesNew is empty is documented intended behaviour, and the review shows no concrete wrong result."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 2,
+      "report": "4/without_skill/run-2/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 5,
+      "false_findings": 4,
+      "grades": [
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:433-449",
+          "verdict": "real",
+          "reason": "syncNewPolicies returns before calling replace when both arrays are empty, so stale policiesNew state is never cleared, unlike legacy syncPolicies, which always replaces."
+        },
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:438-440",
+          "verdict": "false",
+          "reason": "Falling back when policiesNew is empty is a documented design choice, and since policiesNew is a superset of policies, the divergence it describes is speculative rather than a concrete defect."
+        },
+        {
+          "location": "libs/common/src/platform/server-notifications/internal/default-server-notifications.service.ts:297-302",
+          "verdict": "false",
+          "reason": "The new upsert correctly uses the notification's userId; the active-account behavior of syncPolicy is pre-existing legacy code, not a defect this PR introduced."
+        },
+        {
+          "location": "libs/common/src/admin-console/services/policy/default-new-policy.service.ts:15-21",
+          "verdict": "false",
+          "reason": "Policy notifications send updated policy data (including enabled=false), which upsert overwrites correctly; the legacy service has no delete path either, so no new defect is introduced."
+        },
+        {
+          "location": "libs/auth/src/angular/login/login.component.ts:511-516",
+          "verdict": "false",
+          "reason": "This deliberately mirrors the existing legacy replace-on-login behavior, and the follow-up sync is expected to replace it; the only residual problem is the separate early-return bug in Finding 1."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 3,
+      "report": "4/without_skill/run-3/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 1,
+      "grades": [
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:440-443",
+          "verdict": "real",
+          "reason": "syncNewPolicies returns before calling newPolicyService.replace when both arrays are empty or absent, so stale policiesNew state is never cleared, unlike syncPolicies, which always calls replace."
+        },
+        {
+          "location": "libs/common/src/platform/sync/default-sync.service.ts:438-440",
+          "verdict": "false",
+          "reason": "Falling back on an empty array is intended and documented in the code comment, and since policiesNew (accepted and confirmed) covers at least what policies (confirmed) does, an empty policiesNew means policies is empty too, so the fallback adds no wrong data; the real harm comes only from the early return in Finding 1."
+        },
+        {
+          "location": "libs/common/src/platform/server-notifications/internal/default-server-notifications.service.ts:297-301",
+          "verdict": "real",
+          "reason": "policyService.syncPolicy writes for the active account, while the new newPolicyService.upsert writes for the notification's userId, so in multi-user notification handling the two stores can be updated for different users."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "report": "5/with_skill/run-1/report/code-review-opus-PR-2273.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 2,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+          "verdict": "real",
+          "reason": "The explicit startup logout check was removed. checkSessionTimeouts only fires for the active user when hasPassedSessionTimeout is true, which never happens for .onAppRestart, or when the account has no unlock method. So a 'log out on restart' user who has a master password is only locked."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-587",
+          "verdict": "real",
+          "reason": "canBeLocked(userId:) gets its biometric flag from getBiometricUnlockStatus(), which reads stateService.getBiometricAuthenticationEnabled() without a userId. Now that the PR uses account.canBeLocked to decide logouts, inactive accounts are judged using the active user's biometric setting."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 2,
+      "report": "5/with_skill/run-2/report/code-review-opus-PR-2273.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+          "verdict": "real",
+          "reason": "The explicit logout-action startup check was replaced with checkSessionTimeouts. hasPassedSessionTimeout returns false for .onAppRestart, and the no-unlock-method branch requires !canBeLocked, so an account with a master password and the logout action is only routed to vaultUnlock on restart instead of being logged out."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-596",
+          "verdict": "real",
+          "reason": "canBeLocked(userId:) gets its biometric part from getBiometricUnlockStatus(), which calls stateService.getBiometricAuthenticationEnabled(), and that reads the active user's flag. This PR now uses that value to decide logout for inactive accounts, so they can be logged out wrongly or missed."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepositoryTests.swift:581-657",
+          "verdict": "real",
+          "reason": "The four negative tests never set isAuthenticated. The mock defaults it to false, so isLoggedOut is true, and the !isLoggedOut clause by itself prevents the logout, which means the targeted clauses are never exercised."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "report": "5/with_skill/run-3/report/code-review-opus-PR-2273.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+          "verdict": "real",
+          "reason": "The explicit startup check for sessionTimeoutAction == .logout was replaced with a callback that only fires when hasPassedSessionTimeout is true (never for .onAppRestart) or when the account has no unlock method, so master-password, PIN or biometric users who chose 'log out on app restart' are now only locked."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-596",
+          "verdict": "real",
+          "reason": "canBeLocked(userId:) and sessionTimeoutAction(userId:) both get biometric status from getBiometricAuthenticationEnabled(), which reads the active account, so an inactive biometric-only account can wrongly match the new no-unlock-method condition and be logged out."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-589",
+          "verdict": "real",
+          "reason": "checkSessionTimeouts also runs on every willEnterForeground and in the profile switcher, so an authenticated, locked TDE account that is still mid-login and has no unlock method meets the new condition and gets sent through .didTimeout, which forces logout."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "report": "5/without_skill/run-1/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 6,
+      "false_findings": 1,
+      "grades": [
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+          "verdict": "real",
+          "reason": "The explicit logout-action check was removed, and hasPassedSessionTimeout returns false for .onAppRestart and for intervals that haven't elapsed, so an MP user set to log out on restart only gets the unlock screen."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:582-585 (canBeLocked 553-564)",
+          "verdict": "real",
+          "reason": "canBeLocked calls getBiometricUnlockStatus(), which reads the biometric-enabled flag of the active user, so the new per-account logout decision is wrong for inactive accounts."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-596",
+          "verdict": "real",
+          "reason": "A biometry lockout makes getBiometricUnlockStatus throw (caught by try?) or return .notAvailable, so canBeLocked is false and a biometric-only account is force-logged out because of a temporary OS state."
+        },
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-249",
+          "verdict": "real",
+          "reason": "preparedStartRoute now runs checkSessionTimeouts in extensions, where every account defaults to locked in memory, so an inactive account with no unlock method that is unlocked in the main app gets logged out in shared storage."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:577-605",
+          "verdict": "real",
+          "reason": "A throw from sessionTimeoutAction or logout for one account (for example a no-MP account during biometry lockout) aborts the whole loop, so the active user's startup timeout can be skipped, which the old per-active-user try? check never allowed."
+        },
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-249",
+          "verdict": "false",
+          "reason": "Applying normal time-based timeouts to inactive accounts at startup is consistent with existing checkSessionTimeouts behavior, and the reviewer calls it 'probably fine'; this is a scope and latency observation, not a concrete defect."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 2,
+      "report": "5/without_skill/run-2/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 4,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+          "verdict": "real",
+          "reason": "The explicit startup check for logout with a non-never timeout was removed; hasPassedSessionTimeout returns false for .onAppRestart (VaultTimeoutService.swift:163-167), so a master-password user who chose 'log out on app restart' is no longer routed to didTimeout and is only shown the unlock screen."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-585",
+          "verdict": "real",
+          "reason": "canBeLocked(userId:) uses biometricsRepository.getBiometricUnlockStatus(), which reads the active user's biometric flag, and the PR now uses that value to destructively log out inactive accounts."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:582-590",
+          "verdict": "real",
+          "reason": "checkSessionTimeouts also runs on every willEnterForeground (AppProcessor) and from the profile switcher, and the new no-unlock-method condition has no restart gating, so a locked authenticated account with no MP/PIN/biometrics (or one whose biometry is locked out, which try? turns into false) is sent through didTimeout and logged out."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:577-605",
+          "verdict": "real",
+          "reason": "The whole per-account loop sits in one do/catch, so a throw for one account skips the rest; now that the function runs at startup, a later active user's timeout may never be handled."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 3,
+      "report": "5/without_skill/run-3/report/review.md",
+      "hit_d": true,
+      "hit_g": true,
+      "hit": true,
+      "validated_findings": 3,
+      "false_findings": 0,
+      "grades": [
+        {
+          "location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+          "verdict": "real",
+          "reason": "The explicit `.logout`-action/non-`.never` startup check was replaced by `checkSessionTimeouts`, whose `hasPassedSessionTimeout` returns false for `.onAppRestart` (and for unexpired timers), so users with a master password and the \"Log out\" action are no longer logged out on restart; the updated test only forces the mock flag."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-597 (canBeLocked at 553-563)",
+          "verdict": "real",
+          "reason": "`canBeLocked(userId:)` calls `biometricsRepository.getBiometricUnlockStatus()`, which reads `getBiometricAuthenticationEnabled()` for the active user only, so the new logout rule evaluates inactive accounts using the wrong user's biometrics setting."
+        },
+        {
+          "location": "BitwardenShared/Core/Auth/Repositories/AuthRepository.swift:583-589 / AppProcessor.swift:99-103",
+          "verdict": "real",
+          "reason": "The no-unlock-method condition is not limited to startup; `checkSessionTimeouts` also runs on every `willEnterForeground`, so a locked active account with no MP/PIN/biometrics (e.g. a TDE user waiting for device approval) gets `.didTimeout` and is logged out when the app returns to the foreground."
+        }
+      ]
+    }
+  ]
+}

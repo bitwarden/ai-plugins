@@ -1,0 +1,57 @@
+{
+  "skill_name": "performing-multi-agent-code-review",
+  "eval_type": "catch-rate",
+  "purpose": "Merged pull requests in public Bitwarden repositories that introduced a bug a later pull request fixed. The buggy lines are added lines in the original diff. expected_location uses new-side line numbers in the file at head_sha. bug_summary is given to the grader to confirm a hit describes the same defect. See ./README.md for the run flow and scoring.",
+  "evals": [
+    {
+      "id": 1,
+      "repo": "bitwarden/clients",
+      "pr_url": "https://github.com/bitwarden/clients/pull/19221",
+      "pr_title": "[PM-31406] Migrate lastpass importer to special-purpose dangerous-crypto-compat",
+      "head_sha": "343704371d58cf90bc8cfbe91a243d7b82543996",
+      "expected_location": "libs/importer/src/importers/lastpass/access/services/crypto-utils.ts:95-103",
+      "bug_summary": "decryptAes256 replaced Utils.fromArrayToUtf8 with Utils.fromArrayToByteString (Latin-1 byte mapping), so any multi-byte UTF-8 character in LastPass-imported Vault Data is corrupted.",
+      "fix_pr_url": "https://github.com/bitwarden/clients/pull/23481"
+    },
+    {
+      "id": 2,
+      "repo": "bitwarden/server",
+      "pr_url": "https://github.com/bitwarden/server/pull/6879",
+      "pr_title": "[PM-28627] Create Default Collection Restore",
+      "head_sha": "ecc840275f539e9b891424f03d1d1ae9f5e208f7",
+      "expected_location": "src/Core/AdminConsole/OrganizationFeatures/OrganizationUsers/RestoreUser/v1/RestoreOrganizationUserCommand.cs:202-204",
+      "bug_summary": "Bulk restore fetches data-ownership-enforced org user IDs before restoring; the users are still Revoked (an exempt status), so the Contains check at line 244 is never true and no default collection is created on bulk restore.",
+      "fix_pr_url": "https://github.com/bitwarden/server/pull/6960"
+    },
+    {
+      "id": 3,
+      "repo": "bitwarden/sdk-internal",
+      "pr_url": "https://github.com/bitwarden/sdk-internal/pull/411",
+      "pr_title": "Migrate more b64",
+      "head_sha": "9b6b4005f5d7ff68f4f44e483677003cf141c956",
+      "expected_location": "crates/bitwarden-exporters/src/encrypted_json.rs:46-48",
+      "bug_summary": "The salt changed from STANDARD.encode(salt) (a String) to B64::from(...), whose as_bytes() returns the decoded raw bytes, so the export key is derived from a different salt than other clients use and password-protected exports cannot be decrypted by them.",
+      "fix_pr_url": "https://github.com/bitwarden/sdk-internal/pull/636"
+    },
+    {
+      "id": 4,
+      "repo": "bitwarden/clients",
+      "pr_url": "https://github.com/bitwarden/clients/pull/20336",
+      "pr_title": "[PM-34155] Enhance policy service with accepted policies retrieval and update sync response structure for new sync response",
+      "head_sha": "3fb131ceb3403c1d46bfa8c23a14ba9e41ddc87c",
+      "expected_location": "libs/common/src/platform/sync/default-sync.service.ts:440-443",
+      "bug_summary": "syncNewPolicies returns early when both policiesNew and policies are empty, so newPolicyService state is never cleared and stale policies keep being enforced after all policies are removed.",
+      "fix_pr_url": "https://github.com/bitwarden/clients/pull/22929"
+    },
+    {
+      "id": 5,
+      "repo": "bitwarden/ios",
+      "pr_url": "https://github.com/bitwarden/ios/pull/2273",
+      "pr_title": "[PM-28150] fix: Log out accounts without unlock methods on app restart",
+      "head_sha": "3275de1a1d49bf778966a70e36010a381162a0bc",
+      "expected_location": "BitwardenShared/UI/Auth/Extensions/AuthRouter+Redirects.swift:245-254",
+      "bug_summary": "The explicit startup check (timeout action == .logout and timeout != .never) was replaced with checkSessionTimeouts, which relies on hasPassedSessionTimeout; that never fires for .onAppRestart, so 'log out on app restart' accounts are only locked.",
+      "fix_pr_url": "https://github.com/bitwarden/ios/pull/2301"
+    }
+  ]
+}

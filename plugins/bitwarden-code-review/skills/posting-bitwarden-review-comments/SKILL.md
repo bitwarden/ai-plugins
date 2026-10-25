@@ -15,7 +15,7 @@ Check destinations **in this order** — use the first match:
 | Local target, no GitHub destination | The review target is local changes and no caller declared a GitHub destination                                                                                                                                        | Write to `review-inline-comments.md` in working directory    |
 | GitHub pull request                 | Neither of the above                                                                                                                                                                                                  | Post via `mcp__github_inline_comment__create_inline_comment` |
 
-Under either local destination, format every finding exactly as below and write them all to the one file — do not post, whatever comment tools happen to be available.
+Under either local destination, format every finding exactly as below, without the source line, and write them all to the one file — do not post, whatever comment tools happen to be available.
 
 On a GitHub pull request, a finding raised again in an existing thread goes as a reply in that thread, so its history stays in one place. Call `mcp__github_replies__add_reply_to_pull_request_comment` with the `database_id` of the thread's first comment as `commentId`, the owner and repository from the threads data's top-level `repository`, and the pull request number as `pullNumber`, which the tool requires whenever a reply has a body. The reply uses the same finding format as an inline comment. When that tool is unavailable, the thread's first comment has no `database_id`, or the reply call fails, post a new inline comment instead.
 
@@ -57,8 +57,9 @@ On a GitHub pull request, a finding raised again in an existing thread goes as a
 4. Be brief yet clear
 5. Use collapsed sections for comments over 5 lines
 6. Include both opening `<details>` AND closing `</details>` tags
+7. On a GitHub pull request, end with the source line `<sub>code-review</sub>`, short comments and thread replies included
 
-**Visibility Rule:** Only severity + one-line description visible; everything else inside `<details>` tags.
+**Visibility Rule:** Only severity + one-line description and, on a GitHub pull request, the source line visible; everything else inside `<details>` tags.
 
 ### Template for long comments
 
@@ -74,6 +75,8 @@ On a GitHub pull request, a finding raised again in an existing thread goes as a
 
 Reference: [docs link if applicable]
 </details>
+
+<sub>code-review</sub>
 ```
 
 ## Summary Output
