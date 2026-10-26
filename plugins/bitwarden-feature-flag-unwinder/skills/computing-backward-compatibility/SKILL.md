@@ -5,7 +5,7 @@ description: "Compute whether a Bitwarden feature flag has aged out of the clien
 
 # Computing Backward Compatibility
 
-Decide whether it is safe to remove a feature flag from the Bitwarden server. The rule from the Feature Flags Lifecycle: the server must have shipped a release that no longer needs to support any client release in the field that still carried the flag. Bitwarden runs a ±2 month compatibility window between server and clients, so the first safe server release is `(last client release with the flag).month + 3`, carrying the year.
+Decide whether it is safe to remove a feature flag from the Bitwarden server. Bitwarden's feature-flag lifecycle requires that the server must have shipped a release that no longer needs to support any client release in the field that still carried the flag. Bitwarden runs a ±2 month compatibility window between server and clients, so the first safe server release is `(last client release with the flag).month + 3`, carrying the year.
 
 Return a verdict the caller can act on without re-reasoning the rule.
 
@@ -17,7 +17,7 @@ Return a verdict the caller can act on without re-reasoning the rule.
 - `SERVER_REPO` — absolute path to a `bitwarden/server` checkout. The latest release tag is read from here.
 - `FLAG_KEY` — the LaunchDarkly flag key (kebab-case, e.g. `pm-18612-otp-6-digits`).
 
-All five repos must have full tag history. A shallow clone followed by `git fetch --tags --unshallow` is enough.
+All five repos must have full history and tags, fetched fresh: run `git -C <path> fetch --quiet --tags origin main` on each first (add `--unshallow` for a shallow clone). Every search below runs against `origin/main`, never the checkout's `HEAD`, so a checkout parked on another branch or left stale doesn't change the answer, and the `searched` evidence names the commits that were actually searched.
 
 ## Clients covered
 
@@ -51,61 +51,69 @@ If all three return nothing, return `{ ready: true, reason: "server-only" }` and
 
 ### Step 1 — Find the clients-side removal commit
 
+`git log -S` lists every commit that changed how often the key appears, newest first. So the newest one is the removal only if its diff _removes_ the key. While the flag is still live, the newest one is the commit that added it. Branch on the diff sign, never on whether a commit was found:
+
 ```bash
-STEP1_SHA=$(git -C "$CLIENTS_REPO" log -S "$FLAG_KEY" --format=%H -- libs/common/src/enums/feature-flag.enum.ts | head -1)
+CANDIDATE=$(git -C "$CLIENTS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main -- libs/common/src/enums/feature-flag.enum.ts)
+STEP1_SHA=""
+if [ -n "$CANDIDATE" ] && git -C "$CLIENTS_REPO" show "$CANDIDATE" -- libs/common/src/enums/feature-flag.enum.ts | grep -q -- "^-.*$FLAG_KEY"; then
+  STEP1_SHA="$CANDIDATE"   # confirmed: the newest change removed the key
+fi
 ```
 
-If `STEP1_SHA` is empty, the clients-side Step 1 hasn't merged — return `{ ready: false, reason: "step-1-not-merged" }` and stop. Confirm it's a removal (not an add) by inspecting the diff:
+If `STEP1_SHA` is empty, the clients-side Step 1 hasn't merged: either the key is still in the enum, or it was never there. Return `{ ready: false, reason: "step-1-not-merged" }` and stop. (A flag that was never in any client was already handled as server-only in Step 0.)
+
+### Step 2 — Detect web-only consumption and attribute consumers
+
+A flag counts as web-only only if its references in the clients repo live entirely under `apps/web/` and nothing in the ios or android repos references it either.
 
 ```bash
-git -C "$CLIENTS_REPO" show "$STEP1_SHA" -- libs/common/src/enums/feature-flag.enum.ts | grep "$FLAG_KEY"
-```
-
-A `-` prefix on the flag line means removal.
-
-### Step 2 — Detect web-only consumption
-
-A flag counts as web-only only if its references in the clients repo live entirely under `apps/web/` and nothing in the ios or android repos references it either. Any hit in `libs/`, `bitwarden_license/`, a sibling `apps/*` dir, the ios repo, or the android repo gets built into one of the five non-web clients.
-
-```bash
-# Clients — grep historical ref since main no longer has the enum member
+# Clients: grep the commit before the removal, since main no longer has the enum member
 git -C "$CLIENTS_REPO" grep -ln "$FLAG_KEY" "${STEP1_SHA}^" -- ':!apps/web' ':!**/*.spec.ts' ':!**/*.spec.html'
 
-# iOS and Android — grep current main
-git -C "$IOS_REPO" grep -ln "$FLAG_KEY" HEAD -- ':!**/*Tests.swift' ':!**/*.spec.swift' || true
-
-git -C "$ANDROID_REPO" grep -ln "$FLAG_KEY" HEAD -- ':!**/*Test.kt' ':!**/*Test.java' || true
+# iOS and Android: grep the history (the flag may already be removed from main)
+git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
+git -C "$ANDROID_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
 ```
 
-If all three return nothing (ignoring the web app and tests), the flag only ever ran on web. Return `{ ready: true, reason: "web-only" }`.
+If the clients grep returns nothing and neither iOS nor Android history contains the key, the flag only ever ran on web. Return `{ ready: true, reason: "web-only" }` with `web_only_files` from `git -C "$CLIENTS_REPO" grep -l "$FLAG_KEY" "${STEP1_SHA}^" -- apps/web`.
 
-Otherwise continue to Step 3 and run the gate against every non-web client whose grep returned a hit (the per-client determination handles both "cleanup done" and "cleanup pending" cases).
+Otherwise, attribute consumers. These decide which `per_client` entries are objects and which are `null`:
 
-### Step 3 — For each non-web client, find the last release that still carried the flag
+- **browser, cli, desktop.** A clients-repo hit under `apps/browser/`, `apps/cli/`, or `apps/desktop/` marks only that client. A hit anywhere else outside `apps/web/`, including `libs/` and `bitwarden_license/`, is shared code compiled into all three, so it marks browser, cli, and desktop all as consumers.
+- **ios, android.** A consumer if its history contains the key.
 
-For each of the five clients, determine the last shipped release that was built from a commit still containing the flag. If the client was never a consumer (grep returned nothing in Step 2), skip it.
+When in doubt, mark a client as a consumer. A false `null` drops it from the gate and understates the safe version, which is the dangerous direction.
 
-**Clients-repo clients (browser, cli, desktop):** the removal already landed on main, so use `STEP1_SHA` as the removal reference.
+### Step 3 — For each consumer, find the last release that still carried the flag
+
+Find the first release _without_ the flag, then the release immediately before it on the same train, which is the last release _with_ the flag.
+
+**Clients-repo clients (browser, cli, desktop)** share `STEP1_SHA` as the removal commit:
 
 ```bash
-# first release containing the Step 1 commit — this is the first release WITHOUT the flag
-git -C "$CLIENTS_REPO" tag --sort=version:refname --contains "$STEP1_SHA" | grep "^<prefix>-v" | head -1
-# the tag immediately before that in version order — this is the last release WITH the flag
-git -C "$CLIENTS_REPO" tag --sort=version:refname | grep "^<prefix>-v" | grep -B1 "<first-removal-tag>" | head -1
+# first release containing the removal: the first release WITHOUT the flag
+FIRST_WITHOUT=$(git -C "$CLIENTS_REPO" tag --sort=version:refname --contains "$STEP1_SHA" | grep "^<prefix>-v" | head -1)
+# the tag immediately before it on this train: the last release WITH the flag
+# (-x -F matches the whole tag literally, so dots aren't wildcards and 2026.3.0 can't match 2026.3.10)
+LAST_WITH=$(git -C "$CLIENTS_REPO" tag --sort=version:refname | grep "^<prefix>-v" | grep -B1 -x -F "$FIRST_WITHOUT" | head -1)
 ```
 
-**iOS and Android:** each has its own release train and its own removal commit (made by the respective team, independently of the clients-side cleanup). Find it per repo:
+If `LAST_WITH` equals `FIRST_WITHOUT`, no earlier release exists on that train, so that client never shipped the flag. Set its `per_client` entry to `null`. If `FIRST_WITHOUT` is empty, the removal hasn't been released on that train. Return `{ ready: false, reason: "no-release-since-removal", client: "<name>" }`.
+
+**iOS and Android** each have their own release train and their own removal commit, made by that team independently of the clients cleanup. Confirm the removal by the diff sign, exactly as in Step 1:
 
 ```bash
 # same for $ANDROID_REPO
-REMOVAL_SHA=$(git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H | head -1)
-git -C "$IOS_REPO" show "$REMOVAL_SHA" | grep -- "-.*$FLAG_KEY"   # confirm it is a removal
+CANDIDATE=$(git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main)
+REMOVAL_SHA=""
+if [ -n "$CANDIDATE" ] && git -C "$IOS_REPO" show "$CANDIDATE" | grep -q -- "^-.*$FLAG_KEY"; then
+  REMOVAL_SHA="$CANDIDATE"   # confirmed: the newest change removed the key
+fi
 ```
 
-- If `REMOVAL_SHA` exists: last-with-flag = tag immediately before the first tag containing it (same pattern as clients-repo clients, with the repo's unprefixed `v<YYYY>.<M>.<patch>` tag format).
-- If `REMOVAL_SHA` doesn't exist: the flag is still present in this client's source. Last-with-flag = the latest release tag on this repo. That client's cleanup is still pending, and the gate here depends on when that cleanup lands.
-
-If `git tag --contains "$REMOVAL_SHA"` returns nothing (the removal is on main but not yet released), that client hasn't shipped a release since removal — the gate cannot clear yet. Return `{ ready: false, reason: "no-release-since-removal", client: "<name>" }`.
+- **`REMOVAL_SHA` set:** find `FIRST_WITHOUT` and `LAST_WITH` exactly as for clients-repo clients, with the repo's unprefixed `v<YYYY>.<M>.<patch>` tags and the same no-predecessor and not-yet-released rules.
+- **`REMOVAL_SHA` empty:** the flag is still in this client's source, so its cleanup is pending. `LAST_WITH` is the repo's latest release tag, and `FIRST_WITHOUT` is `null`. The gate then depends on when that cleanup ships, and will normally not clear.
 
 ### Step 4 — Compute the safe-to-remove server version per client
 
@@ -146,7 +154,7 @@ Return the verdict together with the evidence behind it. Callers put this eviden
   web_only_files: ["<path>", ...],  // only for web-only: the apps/web files that referenced the flag at step1_sha^
   per_client: {
     browser: {
-      removal_commit: "<short SHA>",          // the commit that removed the flag on this client's code path
+      removal_commit: "<short SHA>" | null,   // the commit that removed the flag on this client's code path; null while its cleanup is pending
       last_with_flag: "<tag>",
       first_without_flag: "<tag>" | null,    // null while the removal is unreleased
       safe_server_version: "<ver>"

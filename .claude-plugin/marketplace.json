@@ -145,7 +145,7 @@
       "name": "bitwarden-feature-flag-unwinder",
       "source": "./plugins/bitwarden-feature-flag-unwinder",
       "version": "0.1.0",
-      "description": "Autonomous feature-flag unwinder scoped to one repo per invocation. Give it a flag key and a lifecycle step (and optionally a Jira ticket to link and comment on); it removes the flagged code, verifies build + tests, and opens one PR against the current repo. Engineers dispatch it locally (\"clean up feature flag pm-1234-flag\" fans out one background session per repo), and a workflow in ai-plugins runs it per target repo (clients, server, ios, android), biweekly from Jira or on demand."
+      "description": "Autonomous feature-flag cleanup agent. Given a flag key and a lifecycle step, removes the flagged code in one repo, verifies build and tests, and opens one PR."
     }
   ]
 }
