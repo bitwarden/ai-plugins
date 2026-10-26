@@ -89,7 +89,9 @@ graph TD
     commitCheck -->|no| preview
     commitCheck -->|yes| whichCommit
     whichCommit -->|yes| amend
+    whichCommit -->|yes, author declines| handBack
     whichCommit -->|no, older commit| handBack
+    commitCheck -->|commit range can't be resolved| handBack
     amend --> preview
     preview --> confirm
     confirm -->|Submit as shown| push
