@@ -1,0 +1,22 @@
+{
+  "name": "bitwarden-feature-flag-unwinder",
+  "version": "0.1.0",
+  "description": "Autonomous feature-flag cleanup agent. Given a flag key and a lifecycle step, removes the flagged code in one repo, verifies build and tests, and opens one PR.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-feature-flag-unwinder",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "feature-flags",
+    "launchdarkly",
+    "cleanup",
+    "pull-request",
+    "clients",
+    "server",
+    "jira",
+    "automation"
+  ],
+  "agents": "./agents/feature-flag-unwinder/AGENT.md"
+}

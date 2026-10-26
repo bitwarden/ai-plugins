@@ -140,6 +140,12 @@
       "source": "./plugins/bitwarden-abacus",
       "version": "0.2.0",
       "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with commit message and pull request conventions."
+    },
+    {
+      "name": "bitwarden-feature-flag-unwinder",
+      "source": "./plugins/bitwarden-feature-flag-unwinder",
+      "version": "0.1.0",
+      "description": "Autonomous feature-flag cleanup agent. Given a flag key and a lifecycle step, removes the flagged code in one repo, verifies build and tests, and opens one PR."
     }
   ]
 }
