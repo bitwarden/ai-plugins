@@ -5,7 +5,7 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.6.0] - 2026-10-23
+## [4.1.0] - 2026-10-26
 
 ### Added
 
@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
 - `force-multiplier` settles the verdict once at PILOT, records it in `pr_spec.disclosure`, and stops the whole campaign, pilot included, on `Stop`.
 - `docs/commit-and-pr-flows.md` shows the disclosure check, the branch commit check, and the `Stop` paths in all three flows.
+
+## [4.0.0] - 2026-10-17
+
+### Removed
+
+- **`filing-breakdown-tasks` skill.** Removed in favor of a dedicated breakdown workflow in [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns), which emits a `tasks.md` sibling that feeds `bitwarden-atlassian-tools:filing-jira-tickets` directly. The intermediate wrapper is no longer necessary. Users previously invoking this skill should install the breakdown workflow in `tech-breakdowns` or call `filing-jira-tickets` with a hand-authored `tasks.md`.
 
 ## [3.5.2] - 2026-10-08
 
