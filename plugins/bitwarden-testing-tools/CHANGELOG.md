@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `assessing-requirement-readiness` skill: judges whether a Jira story is ready to build and test, and returns READY or NOT READY with the gaps to fix. Given an epic, it judges each child story.
-- `designing-test-plans` skill: builds a test plan from READY stories, mapping each test to its acceptance criterion with its test type, test kind, and method (automated or manual).
+- `designing-test-plans` skill: builds a test plan from a READY story, or from an epic's READY child stories, mapping each test to its acceptance criterion with its layer, test kind, and method (automated or manual).
 - Trigger evals and baselines for both skills.
 
 ## [1.2.0] - 2026-09-14
