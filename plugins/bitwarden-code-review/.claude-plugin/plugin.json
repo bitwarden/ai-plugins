@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-code-review",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Comprehensive code review system with organization-wide standards.",
   "author": {
     "name": "Bitwarden",
@@ -18,9 +18,5 @@
     "server",
     "security"
   ],
-  "agents": "./agents/bitwarden-code-reviewer/AGENT.md",
-  "commands": [
-    "./commands/code-review/code-review.md",
-    "./commands/code-review-local/code-review-local.md"
-  ]
+  "agents": "./agents/bitwarden-code-reviewer/AGENT.md"
 }

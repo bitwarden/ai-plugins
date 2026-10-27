@@ -2,7 +2,7 @@
 
 Automated code review for pull requests following Bitwarden engineering standards.
 
-## Commands
+## Skills
 
 ### `/code-review [PR#]`
 
