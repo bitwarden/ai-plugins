@@ -1,4 +1,5 @@
 ---
+name: code-review-local
 argument-hint: "[PR#] | [PR URL] | [--base <ref>] | (blank to choose interactively)"
 allowed-tools: AskUserQuestion, Task
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
