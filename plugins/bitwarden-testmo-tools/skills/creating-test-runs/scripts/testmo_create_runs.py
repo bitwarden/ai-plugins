@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
-"""Create a Testmo run from a reviewable JSON filter spec.
+"""Create Testmo runs from reviewable JSON filter specs.
 
 Reproduces the manual "filter cases -> create run" workflow via the API so it is repeatable.
-Read-only unless --create is passed. The API key is read from the environment and never printed,
+Pass --spec once per run; a batch fetches the folder tree and case list once, refuses --create
+unless every run is ready, and links every run to one milestone when --milestone-id or
+--milestone-name is given. Read-only unless --create is passed.
+
+Example:
+  python3 testmo_create_runs.py --spec a.json --spec b.json --milestone-name "2026.8.0 Manual Regression"
+  python3 testmo_create_runs.py --spec a.json --spec b.json --milestone-name "2026.8.0 Manual Regression" --create
+
+The API key is read from the environment and never printed,
 and never placed on a command line: argv is world-readable via `ps`. Requests go through urllib
 in-process; on a network with TLS interception, where OpenSSL cannot verify the chain, they fall
 back to curl with the header passed on stdin.
@@ -25,6 +33,7 @@ Filter model (all keys under "filters" are optional; a case must match every key
   has_automation          bool; case has_automation flag must equal this.
 """
 import argparse, json, os, shutil, ssl, subprocess, sys, tempfile
+from pathlib import Path
 import http.client, urllib.error, urllib.parse, urllib.request
 
 BASE = "https://bitwarden.testmo.net/api/v1"
@@ -39,8 +48,8 @@ _USE_CURL = False
 class TestmoAPIError(Exception):
     """A Testmo API request did not return a usable JSON response.
 
-    Raised rather than exiting so callers can decide: the single-run script aborts, while the
-    release orchestrator records the failed run and carries on to report a full tally.
+    Raised rather than exiting so callers can decide: a read failure aborts the batch, while a
+    failed write is recorded and the create loop carries on to report a full tally.
     Messages are built from the request line and the response body only, never the API key.
     """
 
@@ -111,7 +120,7 @@ def _urllib_call(method, path, body):
     except (OSError, http.client.HTTPException) as e:
         # urllib wraps only connect/send errors in URLError. A read timeout or a reset raised by
         # getresponse() or resp.read() arrives bare (TimeoutError, RemoteDisconnected,
-        # IncompleteRead), and must still become TestmoAPIError so the release create loop records
+        # IncompleteRead), and must still become TestmoAPIError so the create loop records
         # the failure and carries on to its tally instead of dying with a traceback.
         raise TestmoAPIError(
             f"{method} {path} failed: {type(e).__name__}: {e}.{_unknown_outcome_hint(method)}"
@@ -378,9 +387,9 @@ def matches(case, spec, folder_ids):
         return False
     return True
 
-# Keys both entrypoints index directly. Checked when a spec is loaded, before any API call: a
-# KeyError raised later — in setup_release_runs.py, mid-way through the create loop — fires after
-# earlier runs have already been POSTed, producing a half-populated milestone.
+# Keys main() indexes directly. Checked when a spec is loaded, before any API call: a KeyError
+# raised later — mid-way through the create loop — fires after earlier runs have already been
+# POSTed, producing a half-populated milestone.
 REQUIRED_SPEC_KEYS = ("project_id", "run_name")
 
 class SpecError(Exception):
@@ -402,14 +411,6 @@ def load_spec(path):
         raise SpecError(f"{path} is missing {', '.join(repr(k) for k in absent)} "
                         f"(every spec needs {', '.join(REQUIRED_SPEC_KEYS)})")
     return spec
-
-def unresolved_period(run_name):
-    """True when run_name still carries the literal <period> placeholder.
-
-    Creating that run would post a name like "Mobile <period>" to the live instance, so --create
-    refuses it; a dry-run only warns.
-    """
-    return "<period>" in run_name
 
 def existing_runs_for_milestone(project, milestone_id):
     """Find runs already linked to this milestone, for the duplicate-run guards.
@@ -441,148 +442,280 @@ def same_run(existing, spec):
         return True
     return existing.get("config_id") == spec["config_id"]
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--spec", required=True, help="path to JSON filter spec")
-    ap.add_argument("--create", action="store_true", help="actually POST the run (omit for dry-run)")
-    ap.add_argument("--milestone-id", type=int, default=None,
-                    help="link the run to this existing milestone id (overrides the spec). "
-                         "Milestones must be created in the Testmo UI first — the API cannot create them.")
-    ap.add_argument("--period", default=None,
-                    help="substitute this string for the literal <period> in run_name, e.g. 2026.8.0")
-    ap.add_argument("--allow-existing", action="store_true",
-                    help="create the run even though a run with the same name (and config) is already "
-                         "linked to the milestone. Without this, --create refuses.")
-    args = ap.parse_args()
+
+def load_specs(paths):
+    """Load every spec up front, so a bad file fails before any API call is made.
+
+    Problems are collected rather than raised one at a time, so several bad specs are reported in a
+    single pass. Each spec is labelled by its file name, since multi-configuration runs share a
+    run_name by design and the name alone would not say which spec a row belongs to.
+    """
+    specs, invalid = [], []
+    for path in paths:
+        try:
+            specs.append((Path(path).stem, load_spec(path)))
+        except SpecError as e:
+            invalid.append(str(e))
+    if invalid:
+        detail = "\n".join(f"  {line}" for line in invalid)
+        sys.exit(f"{len(invalid)} spec(s) are invalid:\n{detail}")
+    return specs
+
+def resolve_project(specs):
+    """Return the single project id every spec targets.
+
+    The spec is the only source of truth for this — there is deliberately no --project override,
+    since a flag that outranked each spec's project_id could create a spec into a project it was
+    never written for. One invocation fetches one project's cases, so the specs must agree.
+    """
+    by_project = {}
+    for name, spec in specs:
+        by_project.setdefault(spec["project_id"], []).append(name)
+    if len(by_project) > 1:
+        lines = "\n".join(f"  {pid}: {', '.join(names)}" for pid, names in by_project.items())
+        sys.exit(f"Specs disagree on project_id:\n{lines}\n"
+                 f"Every spec in one invocation must target the same project.")
     try:
-        spec = load_spec(args.spec)
-    except SpecError as e:
+        # Request paths interpolate this, so it has to be an integer id and nothing else.
+        return project_path_id(next(iter(by_project)))
+    except TestmoAPIError as e:
         sys.exit(str(e))
-    if args.milestone_id is not None:
-        spec["milestone_id"] = args.milestone_id
-    if args.period is not None:
-        spec["run_name"] = spec["run_name"].replace("<period>", args.period)
 
-    project = project_path_id(spec["project_id"])
-    filters = spec.get("filters", {})
-    milestone_id = spec.get("milestone_id")
-    # bool is a subclass of int, so `true` would otherwise pass as milestone 1.
-    is_integer = isinstance(milestone_id, int) and not isinstance(milestone_id, bool)
-    if milestone_id is not None and not is_integer:
-        sys.exit(f'"milestone_id" must be an integer milestone id, got {milestone_id!r}')
+def resolve_milestone(project, name):
+    """Return the id of the one milestone with this exact name. The API cannot create milestones."""
+    hits = [m for m in fetch_all(project, "milestones") if m.get("name") == name]
+    if not hits:
+        sys.exit(f"No milestone named {name!r} in project {project}. "
+                 f"Create it in the Testmo UI first (the API cannot create milestones).")
+    if len(hits) > 1:
+        ids = ", ".join(str(m["id"]) for m in hits)
+        sys.exit(f"{len(hits)} milestones named {name!r} (ids: {ids}). Rename or use a unique name.")
+    return hits[0]["id"]
 
-    # Idempotency: the same check setup_release_runs.py makes, through the same key-safe transport,
-    # so the single-run path never needs a hand-written API call. It needs a milestone to scope the
-    # lookup — run names like "Mobile" recur every cycle, so a project-wide name match means nothing.
-    duplicates, checked = [], None
-    if milestone_id is not None:
-        linked, checked = existing_runs_for_milestone(project, milestone_id)
-        duplicates = [r for r in linked if same_run(r, spec)]
-        if not checked:
-            print(f"Existing runs: CANNOT CHECK — the runs API returned no milestone_id field, so a "
-                  f"duplicate in milestone {milestone_id} cannot be ruled out\n")
-        elif duplicates:
-            ids = ", ".join(str(r.get("id")) for r in duplicates)
-            print(f"Existing runs: {len(duplicates)} run(s) named {spec['run_name']!r} already linked "
-                  f"to milestone {milestone_id} (ids: {ids})\n")
-        else:
-            print(f"Existing runs: no run named {spec['run_name']!r} linked to milestone "
-                  f"{milestone_id}\n")
-    else:
-        print("Existing runs: NOT CHECKED — no milestone_id (pass --milestone-id to check for a "
-              "duplicate)\n")
+def needs_manual_step_2(spec):
+    """True when this run cannot be finished by the API alone.
 
-    folder_ids, notes = resolve_folders(filters, project)
+    A `config_id` marks a run that is one of several same-named variants distinguished only by
+    Testmo Configuration. /cases cannot filter by configuration and exposes no per-case config
+    assignment, so the script only ever reproduces step 1 — removing the other configurations'
+    cases is a manual UI pass. Each spec's `_comment` spells out its own step 2, and `_comment` is
+    never displayed, so the reminder has to come from here.
+    """
+    return spec.get("config_id") is not None
+
+def print_step_2_reminder(labels, created):
+    """Name every run that still needs its manual Testmo UI pass."""
+    if not labels:
+        return
+    verb = "need" if created else "will need"
+    print(f"\nMANUAL STEP 2 REQUIRED — {len(labels)} run(s) {verb} a Testmo UI pass:")
+    for label in labels:
+        print(f"  {label}")
+    print("  These are multi-configuration runs: the API reproduced step 1 only. In the Testmo UI, "
+          "remove\n  the cases belonging to the other configurations. Each spec's \"_comment\" gives "
+          "its own step 2.\n  Until that pass is done these runs hold the wrong case set.")
+
+def build_payload(spec, ids):
+    payload = {"name": spec["run_name"], "state_id": spec.get("run_state_id", 7),
+               "include_all": False, "cases": ids}
+    for k in ("milestone_id", "config_id", "tags", "note"):
+        if k in spec and spec[k] is not None:
+            payload[k] = spec[k]
+    return payload
+
+def print_details(notes, cases, selected, payload):
+    """Single-spec dry-run detail: folder resolution, a sample of the matched cases, the payload."""
     if notes:
         print("--- folder resolution ---")
         for n in notes:
             print(f"  {n}")
-        unmatched = [n for n in notes if n.startswith(("UNMATCHED", "UNKNOWN"))]
-        if unmatched:
-            sys.exit(f"\n{len(unmatched)} folder reference(s) did not resolve — fix the spec before continuing.")
-        print(f"  => {len(folder_ids)} folders in scope\n")
-
-    cases = fetch_cases(project, filters)
-    selected = [c for c in cases if matches(c, filters, folder_ids)]
-    ids = [c["id"] for c in selected]
-
-    print(f"Project {project}: {len(cases)} total cases -> {len(ids)} match filter")
+        print()
+    print(f"{len(cases)} cases fetched -> {len(selected)} match filter")
     for c in selected[:10]:
         tt = ",".join(t["name"] for t in (c.get("custom_test_type") or [])) or "-"
-        print(f'  id={c["id"]} folder={c.get("folder_id")} type={tt} auto={c.get("custom_automation_type")} state={c.get("state_id")}')
-    if len(ids) > 10:
-        print(f"  ... +{len(ids)-10} more")
-
-    payload = {
-        "name": spec["run_name"],
-        "state_id": spec.get("run_state_id", 7),
-        "include_all": False,
-        "cases": ids,
-    }
-    for k in ("milestone_id", "config_id", "tags", "note"):
-        if k in spec and spec[k] is not None:
-            payload[k] = spec[k]
-
-    # A spec may ship `"config_id": null` as an explicit placeholder when the run is one of
-    # several same-named variants distinguished only by Testmo Configuration (e.g. the three
-    # Desktop runs). Dry-runs still work so case counts can be validated, but creating the run
-    # would produce indistinguishable runs, so that is refused.
-    needs_config = "config_id" in spec and spec["config_id"] is None
-
+        print(f'  id={c["id"]} folder={c.get("folder_id")} type={tt} '
+              f'auto={c.get("custom_automation_type")} state={c.get("state_id")}')
+    if len(selected) > 10:
+        print(f"  ... +{len(selected) - 10} more")
     print("\n--- run payload (cases truncated) ---")
-    print(json.dumps({**payload, "cases": f"[{len(ids)} ids]"}, indent=2))
+    print(json.dumps({**payload, "cases": f"[{len(payload['cases'])} ids]"}, indent=2))
+    print()
 
-    if needs_config:
-        print(
-            f"\nWARNING: this spec has \"config_id\": null — a placeholder that must be filled in "
-            f"before the run can be created.\n"
-            f"         Look up the id via GET /projects/{project}/configs and set it in the spec."
-        )
+# Why each non-ready status blocks --create, keyed by the status text before any " — " detail.
+_BLOCKED_HINTS = {
+    "NEEDS CONFIG_ID": "these runs are distinguished from their same-named siblings only by "
+                       "Configuration — look the ids up via GET /projects/{project}/configs and set "
+                       "them in the specs",
+    "EMPTY": "0 cases is almost always a renamed tag or folder — check the spec's filters against "
+             "the live repository",
+    "DUPLICATE": "the run already exists in the milestone, or another spec in this batch creates the "
+                 "same run — drop that spec, or pass --allow-existing if the duplicate is intended",
+}
 
-    if unresolved_period(spec["run_name"]):
-        print("\nWARNING: run_name still contains the literal <period> placeholder. Pass --period "
-              "(e.g. --period 2026.8.0) before creating.")
+def main():
+    ap = argparse.ArgumentParser(
+        description="Create Testmo runs from JSON filter specs. Dry-run unless --create is passed.")
+    ap.add_argument("--spec", action="append", required=True, metavar="PATH",
+                    help="path to a JSON filter spec. Repeat to create several runs in one pass; the "
+                         "folder tree and case list are fetched once for all of them.")
+    milestone = ap.add_mutually_exclusive_group()
+    milestone.add_argument("--milestone-id", type=int, default=None,
+                           help="link every run to this existing milestone id (overrides the specs)")
+    milestone.add_argument("--milestone-name", default=None,
+                           help="link every run to the existing milestone with this exact name. "
+                                "Milestones must be created in the Testmo UI first.")
+    ap.add_argument("--create", action="store_true", help="actually POST the runs (omit for dry-run)")
+    ap.add_argument("--allow-existing", action="store_true",
+                    help="create runs even when a run with the same name (and config) is already "
+                         "linked to the milestone. Without this, --create refuses.")
+    args = ap.parse_args()
+
+    specs = load_specs(args.spec)
+    project = resolve_project(specs)
+    override = args.milestone_id
+    if args.milestone_name is not None:
+        override = resolve_milestone(project, args.milestone_name)
+    for name, spec in specs:
+        if override is not None:
+            spec["milestone_id"] = override
+        mid = spec.get("milestone_id")
+        # bool is a subclass of int, so `true` would otherwise pass as milestone 1.
+        if mid is not None and (not isinstance(mid, int) or isinstance(mid, bool)):
+            sys.exit(f'{name}: "milestone_id" must be an integer milestone id, got {mid!r}')
+
+    print(f"Specs     : {len(specs)}")
+    print(f"Project   : {project}  (from the specs)")
+    if args.milestone_name is not None:
+        print(f"Milestone : {args.milestone_name!r} -> id {override}")
+    elif override is not None:
+        print(f"Milestone : id {override}")
+    print(f"Mode      : {'CREATE' if args.create else 'DRY RUN'}")
+
+    # Idempotency is checked per spec, against the runs already linked to its milestone. It needs a
+    # milestone to scope the lookup — run names like "Mobile" recur every cycle, so a project-wide
+    # name match means nothing.
+    linked = {}
+    for mid in dict.fromkeys(s.get("milestone_id") for _, s in specs):
+        if mid is None:
+            print("Existing  : NOT CHECKED for specs with no milestone — pass --milestone-id or "
+                  "--milestone-name to check for duplicates")
+            continue
+        runs, checked = existing_runs_for_milestone(project, mid)
+        linked[mid] = (runs, checked)
+        if not checked:
+            print(f"Existing  : CANNOT CHECK milestone {mid} — the runs API returned no "
+                  f"milestone_id field, so duplicates cannot be ruled out")
+        else:
+            print(f"Existing  : {len(runs)} run(s) already linked to milestone {mid}")
+    print()
+
+    # Fetch shared data once so N specs don't trigger N full downloads. Tag-driven specs each issue
+    # their own server-side filtered fetch instead of using the full case list.
+    all_filters = [s.get("filters") or {} for _, s in specs]
+    folders = (fetch_all(project, "folders")
+               if any(f.get("folder_paths") or f.get("folder_ids") for f in all_filters) else None)
+    all_cases = fetch_all(project, "cases") if any(not f.get("tags") for f in all_filters) else None
+
+    rows, results, batch = [], [], {}
+    for i, (name, spec) in enumerate(specs):
+        filters = spec.get("filters") or {}
+        label = f"{spec['run_name']}  [{name}]"
+        folder_ids, notes = resolve_folders(filters, project, folders=folders)
+        bad = [n for n in notes if n.startswith(("UNMATCHED", "UNKNOWN"))]
+        if bad:
+            rows.append((label, "FOLDER ERROR", "; ".join(bad)))
+            continue
+        cases = fetch_cases(project, filters) if filters.get("tags") else all_cases
+        selected = [c for c in cases if matches(c, filters, folder_ids)]
+        ids = [c["id"] for c in selected]
+
+        mid = spec.get("milestone_id")
+        existing = [r for r in linked.get(mid, ([], None))[0] if same_run(r, spec)]
+        # Index by position, not file name: the same spec passed twice is still a duplicate.
+        twin = batch.setdefault((mid, spec["run_name"], spec.get("config_id")), i)
+        # "config_id": null is an explicit placeholder — the run needs a Testmo Configuration that
+        # has not been looked up yet, and creating it would produce indistinguishable runs.
+        if "config_id" in spec and spec["config_id"] is None:
+            status = "NEEDS CONFIG_ID"
+        elif not ids:
+            status = "EMPTY — 0 cases"
+        elif existing and not args.allow_existing:
+            status = f"DUPLICATE — run {', '.join(str(r.get('id')) for r in existing)} exists"
+        elif mid is not None and twin != i and not args.allow_existing:
+            status = f"DUPLICATE — same run as [{specs[twin][0]}]"
+        else:
+            status = "ready"
+        rows.append((label, str(len(ids)), status))
+        results.append((name, spec, ids))
+        if len(specs) == 1:
+            print_details(notes, cases, selected, build_payload(spec, ids))
+
+    print(f"{'RUN NAME  [SPEC]':<60}{'CASES':>7}  STATUS")
+    print("-" * 86)
+    for label, count, status in rows:
+        print(f"{label[:59]:<60}{count:>7}  {status}")
+    ready = sum(1 for r in rows if r[2] == "ready")
+    print("-" * 86)
+    print(f"{'TOTAL':<60}{sum(len(ids) for _, _, ids in results):>7}  "
+          f"{ready}/{len(specs)} runs ready")
+
+    errors = [r for r in rows if r[1] == "FOLDER ERROR"]
+    if errors:
+        sys.exit(f"\n{len(errors)} spec(s) reference folders that did not resolve — fix them before "
+                 f"continuing.")
+    blocked = [r for r in rows if r[2] != "ready"]
+    step_2 = [f"{spec['run_name']}  [{name}]" for name, spec, _ in results if needs_manual_step_2(spec)]
 
     if not args.create:
-        print("\nDRY RUN — no run created. Re-run with --create to POST.")
-        if duplicates:
-            print("NOTE: --create would refuse — a matching run already exists (see above) — unless "
-                  "--allow-existing is passed.")
+        print("\nDRY RUN — no runs created. Re-run with --create to POST the above.")
+        print_step_2_reminder(step_2, created=False)
+        if blocked:
+            print(f"NOTE: {len(blocked)} run(s) are not ready (see STATUS above); --create would "
+                  f"refuse until they are fixed or dropped.")
         return
-    if duplicates and not args.allow_existing:
-        sys.exit(
-            f"Refusing to create: {len(duplicates)} run(s) named {spec['run_name']!r} are already "
-            f"linked to milestone {milestone_id} (ids: "
-            f"{', '.join(str(r.get('id')) for r in duplicates)}). Re-run with --allow-existing if "
-            f"the duplicate is intended."
-        )
-    if checked is False:
-        print("WARNING: could not verify whether this run already exists in the milestone — the runs "
-              "API returned no milestone_id field. Check the Testmo UI.")
-    if unresolved_period(spec["run_name"]):
-        sys.exit(f"Refusing to create: run_name {spec['run_name']!r} still contains <period>. "
-                 f"Pass --period.")
-    if needs_config:
-        sys.exit(
-            "Refusing to create: \"config_id\" is null in this spec. This run is distinguished from "
-            f"its same-named siblings only by Configuration, so creating it without one would produce "
-            f"indistinguishable runs. Look it up via GET /projects/{project}/configs."
-        )
-    if not ids:
-        sys.exit("Refusing to create a run with 0 cases.")
-    res = call("POST", f"/projects/{project}/runs", payload)
-    rid = (res.get("result") or {}).get("id")
-    if rid is None:
-        sys.exit(f"POST succeeded but the response carried no run id — nothing to link to. Response:\n{res}")
-    print(f"\nCREATED run id={rid}  https://bitwarden.testmo.net/run/{rid}")
-    if spec.get("config_id") is not None:
-        # Multi-configuration runs are two-step: /cases cannot filter by configuration, so this
-        # only ever reproduced step 1. The spec's "_comment" holds its own step 2 and is never
-        # displayed, so say so here rather than leaving the run silently holding the wrong cases.
-        print("\nMANUAL STEP 2 REQUIRED — this run has a config_id, so it is one of several "
-              "same-named\nvariants. In the Testmo UI, remove the cases belonging to the other "
-              "configurations; the\nspec's \"_comment\" gives the exact pass. Until then this run "
-              "holds the wrong case set.")
+
+    if blocked:
+        # Refuse the whole batch rather than create the ready runs and skip the rest: a skipped run
+        # leaves the milestone incomplete, and the dry-run is the place to have noticed.
+        detail = "\n".join(f"  {label} — {status}" for label, _, status in blocked)
+        kinds = dict.fromkeys(status.split(" — ")[0] for _, _, status in blocked)
+        reasons = "\n".join(f"  {k}: {_BLOCKED_HINTS[k].format(project=project)}" for k in kinds)
+        sys.exit(f"\nRefusing to create: {len(blocked)} run(s) are not ready:\n{detail}\n{reasons}")
+    if any(checked is False for _, checked in linked.values()):
+        print("WARNING: could not verify whether these runs already exist — the runs API returned no "
+              "milestone_id field. Check the Testmo UI before continuing.")
+
+    # Create every run we can rather than aborting on the first failure: stopping midway through a
+    # batch leaves a half-populated milestone and no record of which runs made it.
+    print()
+    created, failed, step_2 = [], [], []
+    for name, spec, ids in results:
+        label = f"{spec['run_name']}  [{name}]"
+        try:
+            res = call("POST", f"/projects/{project}/runs", build_payload(spec, ids))
+        except TestmoAPIError as e:
+            reason = str(e).splitlines()[0]
+            print(f"  FAILED: {label}\n           {reason}")
+            failed.append((label, reason))
+            continue
+        rid = (res.get("result") or {}).get("id")
+        if rid is None:
+            print(f"  FAILED: {label}\n           POST succeeded but the response carried no run id")
+            failed.append((label, "response carried no run id"))
+            continue
+        created.append(rid)
+        if needs_manual_step_2(spec):
+            step_2.append(f"{label}  -> https://bitwarden.testmo.net/run/{rid}")
+        print(f"  CREATED run {rid}  ({len(ids)} cases)  {label}  https://bitwarden.testmo.net/run/{rid}")
+
+    print(f"\n{len(created)} created, {len(failed)} failed — of {len(results)} run(s) attempted.")
+    print_step_2_reminder(step_2, created=True)
+    if failed:
+        print("\nNOT created:")
+        for label, reason in failed:
+            print(f"  {label} — {reason}")
+        sys.exit(f"\n{len(failed)} run(s) were not created. Fix the cause and re-run with only those "
+                 f"specs — the {len(created)} run(s) above already exist.")
 
 if __name__ == "__main__":
     try:

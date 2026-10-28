@@ -108,7 +108,7 @@
     {
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     },
     {
@@ -144,8 +144,8 @@
     {
       "name": "bitwarden-testmo-tools",
       "source": "./plugins/bitwarden-testmo-tools",
-      "version": "0.8.2",
-      "description": "Testmo API access for Bitwarden QA — read and analyze the test-case repository and run history, and create regression test runs from reviewable filter specs with dry-run and milestone linkage."
+      "version": "1.0.0",
+      "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks."
     }
   ]
 }
