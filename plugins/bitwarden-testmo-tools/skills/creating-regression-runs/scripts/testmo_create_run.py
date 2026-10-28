@@ -25,7 +25,7 @@ Filter model (all keys under "filters" are optional; a case must match every key
   has_automation          bool; case has_automation flag must equal this.
 """
 import argparse, json, os, shutil, ssl, subprocess, sys, tempfile
-import urllib.error, urllib.parse, urllib.request
+import http.client, urllib.error, urllib.parse, urllib.request
 
 BASE = "https://bitwarden.testmo.net/api/v1"
 KEY = os.environ.get("TESTMO_API_KEY")
@@ -63,6 +63,17 @@ def _decode(method, path, raw):
 def _auth_hint(code):
     return "  (is TESTMO_API_KEY current?)" if code in (401, 403) else ""
 
+def _unknown_outcome_hint(method):
+    """A write that timed out or lost its connection after sending may still have been applied."""
+    if method == "GET":
+        return ""
+    return ("  The request was sent, so the server may still have applied it — check the milestone "
+            "in Testmo before re-running.")
+
+# curl exit codes for a failure after the request was sent: 18 partial transfer, 28 timeout,
+# 52 empty reply, 56 receive error. A connect failure (6, 7) means nothing reached the server.
+_CURL_AFTER_SEND_FAILURES = (18, 28, 52, 56)
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """Refuse every redirect, so a 3xx surfaces as an HTTPError instead of being followed.
 
@@ -97,6 +108,14 @@ def _urllib_call(method, path, body):
         if isinstance(e.reason, ssl.SSLCertVerificationError):
             raise _TLSVerificationError(str(e.reason))
         raise TestmoAPIError(f"{method} {path} failed: {e.reason}")
+    except (OSError, http.client.HTTPException) as e:
+        # urllib wraps only connect/send errors in URLError. A read timeout or a reset raised by
+        # getresponse() or resp.read() arrives bare (TimeoutError, RemoteDisconnected,
+        # IncompleteRead), and must still become TestmoAPIError so the release create loop records
+        # the failure and carries on to its tally instead of dying with a traceback.
+        raise TestmoAPIError(
+            f"{method} {path} failed: {type(e).__name__}: {e}.{_unknown_outcome_hint(method)}"
+        )
     return _decode(method, path, raw)
 
 def _curl_call(method, path, body):
@@ -144,8 +163,10 @@ def _curl_call(method, path, body):
             os.unlink(body_file)
     if proc.returncode != 0:
         # Redact: a config parse error can echo the offending line back on stderr.
+        hint = _unknown_outcome_hint(method) if proc.returncode in _CURL_AFTER_SEND_FAILURES else ""
         raise TestmoAPIError(
-            f"{method} {path} failed: curl exited {proc.returncode}\n{_redact(proc.stderr.strip())}"
+            f"{method} {path} failed: curl exited {proc.returncode}.{hint}\n"
+            f"{_redact(proc.stderr.strip())}"
         )
     raw, found, status = proc.stdout.rpartition(marker)
     if not found:

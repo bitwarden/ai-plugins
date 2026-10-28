@@ -5,6 +5,25 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2026-10-28
+
+Addresses two findings from the PR #222 Claude code review.
+
+### Fixed
+
+- `testmo_create_run.py` wraps read timeouts and dropped connections in `TestmoAPIError`. urllib only
+  wraps connect and send errors in `URLError`; a `TimeoutError`, `RemoteDisconnected`, or
+  `IncompleteRead` raised while waiting for or reading the response escaped both `except` clauses, so
+  one slow POST aborted the `setup_release_runs.py` create loop with a traceback before its
+  created/failed tally printed. A write that fails after the request was sent now says the server may
+  still have applied it, on both the urllib and curl transports.
+
+### Changed
+
+- `SKILL.md`: workflow step 3 and the Idempotent guardrail document the `CANNOT CHECK` state, in which
+  the runs API returned no `milestone_id`, the duplicate guard cannot see linked runs, and `--create`
+  only warns. The guardrail previously described the check as unconditional.
+
 ## [0.8.1] - 2026-10-28
 
 Addresses the Aikido findings on PR #222.

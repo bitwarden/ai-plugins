@@ -73,7 +73,9 @@ diagnosing one that selects the wrong cases. The base URL is
    id is given, the script looks for a run with the same name (and `config_id`) already linked to that
    milestone, and `--create` refuses on a match unless `--allow-existing` is passed. Without a
    milestone id it reports `NOT CHECKED` — pass `--milestone-id` rather than querying the API by hand,
-   so the key never leaves the script's key-safe transport.
+   so the key never leaves the script's key-safe transport. A third state, `CANNOT CHECK`, means the
+   runs API returned no `milestone_id` field: the duplicate guard is blind and `--create` only warns,
+   so have the user verify the milestone in the Testmo UI before proceeding.
 4. **Create the run** only after **the user** has reviewed the dry-run. Print the dry-run summary
    — matched case count, sample cases, run payload — and obtain their explicit confirmation first.
    **Never issue the dry-run and the `--create` in the same turn:** reviewing your own dry-run and
@@ -195,7 +197,9 @@ period in the name:
 - **Idempotent** — do not create a duplicate run for a period/milestone. Both scripts enforce this:
   `setup_release_runs.py` refuses when the milestone already has runs linked, and `testmo_create_run.py`
   refuses when a same-named run (and config) is already linked to the given milestone. Either can be
-  overridden with `--allow-existing`.
+  overridden with `--allow-existing`. The guard depends on the runs API returning `milestone_id`; when
+  it does not, both scripts report `CANNOT CHECK` and `--create` only warns — treat that as unchecked,
+  not clean, and confirm in the Testmo UI before creating.
 - **Committed specs** — prefer a reviewed spec file over ad-hoc arguments.
 - **Never expose the key** — reference `TESTMO_API_KEY` only.
 
