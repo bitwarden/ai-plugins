@@ -22,6 +22,8 @@ It offers two complementary lenses. The autonomous `bitwarden-code-reviewer` age
 
 | Skill                                                                                        | Triggers                                                                          | Purpose                                                                                                                                                                                                             |
 | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`code-review`](./skills/code-review/SKILL.md)                                               | `/bitwarden-code-review:code-review`                                              | Review a GitHub pull request and post findings directly to GitHub                                                                                                                                                   |
+| [`code-review-local`](./skills/code-review-local/SKILL.md)                                   | `/bitwarden-code-review:code-review-local`                                        | Review a GitHub pull request or local changes and write the review to local files instead of posting                                                                                                                |
 | [`classifying-review-findings`](./skills/classifying-review-findings/SKILL.md)               | "classify finding", "severity"                                                    | 5-tier severity system (CRITICAL / IMPORTANT / DEBT / SUGGESTED / QUESTION) with emoji and label mapping                                                                                                            |
 | [`avoiding-false-positives`](./skills/avoiding-false-positives/SKILL.md)                     | "validate finding", "verify before posting", "stacked PR"                         | Rejection criteria and verification checks that drop low-confidence findings before they reach a comment, plus the once-per-review gate that decides whether completeness findings apply to a confirmed stack layer |
 | [`performing-multi-agent-code-review`](./skills/performing-multi-agent-code-review/SKILL.md) | "perform multi-agent code review", "review the last week of commits in this repo" | Perform a rigorous, multi-agent code review                                                                                                                                                                         |
@@ -51,9 +53,8 @@ bitwarden-code-review/
 ├── agents/
 │   └── bitwarden-code-reviewer/
 │       └── AGENT.md                          # Main review agent
-├── commands/
-│   ├── code-review/                          # Code review command
-│   └── code-review-local/                    # Local review command
+├── docs/
+│   └── multi-agent-code-review-flows.md           # Mermaid diagrams of the multi-agent review
 ├── skills/                                   # See Skills table above
 ├── tests/
 │   └── TESTING.md                            # Test plan and validation
@@ -94,6 +95,8 @@ The `performing-multi-agent-code-review` skill is built for complex changes wher
 It's a deliberately different lens from the `bitwarden-code-reviewer` agent. That agent reviews the way a human reviewer would; this skill has **Claude evaluate code as Claude** — optimized for signal, not parity. It spotlights blockers, real bugs, and known-bad patterns, and stays out of the nit-picking lane. Each potential finding is scored 0–100, and only those clearing an 80-confidence bar are raised; every one it keeps is cited with file, line, and the agent that caught it. What clears the bar still gets challenged — the validation and severity-audit agents can overturn a finding — but an overturned finding is never dropped: it moves into a collapsed **Reviewed and Dismissed** section, tagged with its original severity, original confidence, and the reason it was set aside. That section is deliberate — a human sees everything the first pass surfaced and can judge when a dismissal was wrong and the original call was right; without it, that signal is lost.
 
 Agents start cold — a sub-agent inherits none of the main session's context — so the skill briefs every one of them explicitly. Each receives Bitwarden's zero-knowledge invariant and the P01–P06 threat-model directive verbatim, bar the conditional skill-review agent, which returns prose for the orchestrator to classify and never reasons about vault data itself. Feature context — the PR's intent, the ticket, the product framing — is handed out deliberately: the architecture and security agents get the full "why" so they can reason adversarially from intent, while the quality and bug agents see only the diff, so their first read stays unbiased.
+
+For the whole process at a glance, see the [review flow diagrams](./docs/multi-agent-code-review-flows.md).
 
 The `performing-multi-agent-code-review` skill slots cleanly into a [Claude Code agent-teams](https://code.claude.com/docs/en/agent-teams) loop — run it at the end of a coding session, address what it finds, refactor — or as a depth-of-review gate on a draft PR before you publish.
 

@@ -175,7 +175,7 @@ bypass that. Take the first case below that applies:
 - **`/validate-ai` or `/validate-ai-local`**: use the scope rules and severity source in
   `reference/validate-ai-scope.md`, and hand back findings in the four-level CRITICAL /
   IMPORTANT / SUGGESTED / OPTIONAL classification. The command owns the single write of the
-  report document and the mapping down to its critical/major/minor severities.
+  report document, the labels it gives each severity, and any inline comments.
 - **Anything else**: return the findings as text in the format below, for the invoking
   context to route. This is the default, and what a direct invocation always does.
 
@@ -264,8 +264,8 @@ Load only when a specific question calls for it:
   model selection, tool names, progressive disclosure, settings conventions)
 - **Whole-changeset review** → `reference/validate-ai-scope.md` (which paths count as Claude
   material, which validations each bucket gates, and the report contract used by the
-  `/validate-ai` and `/validate-ai-local` commands). Its report-writing and subagent
-  instructions address those commands, which hold grants this skill does not.
+  `/validate-ai` and `/validate-ai-local` commands). Its report-writing, inline-comment, and
+  subagent instructions address those commands, which hold grants this skill does not.
 
 ## Cross-Plugin Enrichment
 

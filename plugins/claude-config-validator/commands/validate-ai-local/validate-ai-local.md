@@ -66,8 +66,8 @@ Locate the scripts, in order:
 2. A sibling checkout: `<repo-root>/../gh-actions/validate-ai/scripts`
 3. Neither found — tell the user you need a `gh-actions` checkout, and offer to shallow
    clone it: `git clone --depth 1 https://github.com/bitwarden/gh-actions <tmpdir>`.
-   Ask before cloning. If the user declines, skip the script checks and record them as
-   skipped in the report.
+   Ask before cloning. If the user declines, skip the script checks and name them on the
+   report's `**Not covered:**` line.
 
 Cloning and running these scripts is deliberately not pre-approved in this command's
 `allowed-tools`, so both will be asked for. They execute shell code that lives outside
@@ -99,8 +99,7 @@ per changed plugin, one review per changed skill. Work out the full set across b
 sections and dispatch it in a single message with several tool calls, so they run
 concurrently. Keep them synchronous (`run_in_background: false`, where that parameter
 exists), and never describe a subagent's findings before it has returned them. Section 6 is
-yours to carry out once their results come back. The numbering is for the report's order,
-not for execution.
+yours to carry out once their results come back. The numbering is not an execution order.
 
 Every subagent prompt must state that findings are limited to **what this changeset
 introduced or worsened — never a pre-existing finding on a line the diff did not touch.**
@@ -124,8 +123,8 @@ hardcoded credentials.
 
 Validate every changed plugin directory even when only some component types changed.
 
-If the `plugin-dev` plugin is not installed, record this section as skipped with that
-reason — do not silently approximate it.
+If the `plugin-dev` plugin is not installed, name this section on the report's
+`**Not covered:**` line with that reason. Do not silently approximate it.
 
 ## 5. Skill review (skill-reviewer agent from plugin-dev)
 
@@ -173,7 +172,9 @@ instead. Never fall back to the working directory: landing the report in whichev
 repository you validated is the outcome this path exists to avoid.
 
 Follow the report contract in the scope reference, and end the report with
-`<!-- validation-complete -->` on a line of its own. One Write call, once, after every
+`<!-- validation-complete -->` on a line of its own. There is no pull request diff to comment
+on, so every finding takes the fallback form, with its details and fix nested under its
+one-liner. One Write call, once, after every
 subagent has returned. Writing it is mandatory — write it even when everything passed and
 even when every section was skipped.
 
@@ -181,6 +182,6 @@ The marker matters less locally than in CI, where it is what tells the `validate
 a report is finished. Keeping it here means a local report and a pull request report are the
 same document, and that a report cut short is recognizable as one.
 
-Then print a short console summary: the overall result, the count of critical/major/minor
-findings, and the path to the report. If any check failed, say plainly that validation
+Then print a short console summary: the overall result, the count of CRITICAL, IMPORTANT,
+and SUGGESTED findings, and the path to the report. If any check failed, say plainly that validation
 failed and which check failed.

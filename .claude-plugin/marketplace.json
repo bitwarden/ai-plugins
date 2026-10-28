@@ -18,13 +18,13 @@
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "2.1.0",
+      "version": "2.2.1",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Routes CLAUDE.md, agents, commands, hooks, and settings to targeted review skills, reporting only what a changeset introduced."
     },
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "2.2.0",
+      "version": "2.7.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -48,7 +48,7 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.7.4",
+      "version": "2.7.7",
       "description": "Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, attachments, and opt-in Jira write tools"
     },
     {
@@ -78,7 +78,7 @@
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "3.5.0",
+      "version": "3.5.2",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, feature flags, commits, pull requests, preflight checks, change labeling, and Jira ticket filing."
     },
     {
@@ -110,6 +110,36 @@
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.2.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+    },
+    {
+      "name": "bitwarden-doc-parity",
+      "source": "./plugins/bitwarden-doc-parity",
+      "version": "1.0.1",
+      "description": "Enforces the documentation standard's base obligations — docs and diagrams update in the same change as the code they describe. Session instructions, a Stop-hook tripwire, a semantic verification skill, and a CI review face."
+    },
+    {
+      "name": "bitwarden-mailcatcher-tools",
+      "source": "./plugins/bitwarden-mailcatcher-tools",
+      "version": "1.0.0",
+      "description": "Mailcatcher tools for Bitwarden — reading verification links, magic links, and other action links from the local dev inbox."
+    },
+    {
+      "name": "bitwarden-stripe-tools",
+      "source": "./plugins/bitwarden-stripe-tools",
+      "version": "1.0.0",
+      "description": "Stripe tools for Bitwarden — read-only test-mode queries, invoice previews, and test-clock advancement through a guarded Stripe CLI wrapper."
+    },
+    {
+      "name": "bitwarden-retrospective-tools",
+      "source": "./plugins/bitwarden-retrospective-tools",
+      "version": "1.0.0",
+      "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs and your GitHub activity."
+    },
+    {
+      "name": "bitwarden-abacus",
+      "source": "./plugins/bitwarden-abacus",
+      "version": "0.2.0",
+      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with commit message and pull request conventions."
     },
     {
       "name": "bitwarden-testmo-tools",

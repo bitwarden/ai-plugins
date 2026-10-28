@@ -5,6 +5,24 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-10-17
+
+### Removed
+
+- **`filing-breakdown-tasks` skill.** Removed in favor of a dedicated breakdown workflow in [`bitwarden/tech-breakdowns`](https://github.com/bitwarden/tech-breakdowns), which emits a `tasks.md` sibling that feeds `bitwarden-atlassian-tools:filing-jira-tickets` directly. The intermediate wrapper is no longer necessary. Users previously invoking this skill should install the breakdown workflow in `tech-breakdowns` or call `filing-jira-tickets` with a hand-authored `tasks.md`.
+
+## [3.5.2] - 2026-10-08
+
+### Changed
+
+- `creating-pull-request`: the preflight and review-depth questions lead with a recommended option. Preflight usually ran earlier in the session, and asking cold made the user recall something the model could already see.
+
+## [3.5.1] - 2026-10-08
+
+### Fixed
+
+- `creating-pull-request`: the submission preview is passed as the `preview` field of the `Submit as shown` option, so it renders inside the confirmation dialog. Printed on its own, the preview could be hidden behind the dialog and the user was asked to approve a PR they could not see.
+
 ## [3.5.0] - 2026-10-06
 
 ### Added

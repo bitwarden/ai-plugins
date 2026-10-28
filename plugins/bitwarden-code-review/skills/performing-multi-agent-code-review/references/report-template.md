@@ -38,6 +38,8 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 ## Summary
 
+<!-- Only after a stage failure: begin the assessment with "Review incomplete: {failed stages}." -->
+
 | Severity     | Count |
 | ------------ | ----- |
 | 🛑 Blocker   | {n}   |
@@ -46,7 +48,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 {1-5 sentences for overall assessment.}
 
-<!-- Only when a changed SKILL.md went unreviewed; name just the files not covered. A review that translated to zero findings is a pass, not a gap. Omit entirely otherwise. -->
+<!-- Only when the review skipped something: an unreviewed SKILL.md, a failed agent, a skipped untracked file, unavailable full-file context, or guidance not read at the base ref. Name each reason and what it covers. A review that translated to zero findings is a pass, not a gap. Omit entirely otherwise. -->
 
 **Not covered:** {What the review did not look at, and why, naming each file. E.g. "Skill review did not run — `plugin-dev` is not installed, so `plugins/example/skills/doing-a-thing/SKILL.md` and `plugins/example/skills/doing-another/SKILL.md` were not checked for description quality, length, or progressive disclosure."}
 
@@ -58,6 +60,7 @@ Every finding carries a `source_agent` value (per `finding-shape.md`). Render it
 
 `{file/path.ext}:{line}`
 **Caught by:** {Friendly agent label}
+<!-- Only after a stage failure: **Validation:** not validated, or **Audit:** not audited. -->
 
   <details><summary>Details</summary>
   {Explanation, why it matters, suggested fix. Include code snippets where helpful.}

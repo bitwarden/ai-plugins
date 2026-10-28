@@ -135,6 +135,18 @@ function formatIssueDetails(
     output += `**[${fields.parent.key}]** ${fields.parent.fields?.summary || "No summary"}\n\n`;
   }
 
+  // Issue links
+  if (fields.issuelinks && fields.issuelinks.length > 0) {
+    output += `## Issue Links\n\n`;
+    for (const link of fields.issuelinks) {
+      const linked = link.outwardIssue || link.inwardIssue;
+      if (!linked) continue;
+      const phrase = link.outwardIssue ? link.type?.outward : link.type?.inward;
+      output += `- ${phrase || "Unknown"} **[${linked.key}]** ${linked.fields?.summary || "No summary"} - ${linked.fields?.status?.name || "Unknown"}\n`;
+    }
+    output += `\n`;
+  }
+
   // Attachments
   if (fields.attachment && fields.attachment.length > 0) {
     output += `## Attachments\n\n`;
