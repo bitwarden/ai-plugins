@@ -5,6 +5,15 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-10-27
+
+### Changed
+
+- `code-review-local` takes `--output-dir <path>` and by default writes to `${CLAUDE_PLUGIN_DATA}/code-reviews/` instead of the working directory
+- Review file names include the PR number, or the branch and date
+- `bitwarden-code-reviewer` can run `git branch --show-current` to name local-review files
+- `code-review-local` README names the correct model
+
 ## [2.7.0] - 2026-10-27
 
 ### Changed

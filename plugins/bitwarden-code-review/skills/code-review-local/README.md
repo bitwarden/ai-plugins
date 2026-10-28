@@ -7,7 +7,7 @@ The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to pe
 ## Usage
 
 ```bash
-/code-review-local [PR#] | [PR URL] | [--base <ref>]
+/code-review-local [PR#] | [PR URL] | [--base <ref>] | [--output-dir <path>]
 ```
 
 ### Arguments
@@ -15,6 +15,7 @@ The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to pe
 - **`[PR#]`** (optional): Pull request number (e.g., `123`)
 - **`[PR URL]`** (optional): Full GitHub PR URL (e.g., `https://github.com/bitwarden/clients/pull/123`)
 - **`[--base <ref>]`** (optional): Ref that local mode diffs the branch against, in place of `origin/HEAD`. Prefer the remote-tracking form (`origin/rc`) over a bare branch name: a bare `rc` resolves only against a local branch of that name, which may not exist and which can sit behind the remote. Applies to local changes only; it is dropped with a PR target, where GitHub's recorded base is used. Only the space-separated pair is accepted, and the ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$` — any other form is refused before the review starts
+- **`[--output-dir <path>]`** (optional): Directory to write the review files to. Defaults to `${CLAUDE_PLUGIN_DATA}/code-reviews/`
 - **No arguments**: The command will ask interactively whether to review a PR or local changes
 
 ### Examples
@@ -50,9 +51,9 @@ The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to pe
 
 ## Output Files
 
-The command generates two markdown files in your current working directory:
+The command writes two markdown files to `${CLAUDE_PLUGIN_DATA}/code-reviews/`, or to `--output-dir` when given, named `code-review-local-PR-<n>-*.md` for a PR or `code-review-local-<branch>-<YYYY-MM-DD>-*.md` for local changes. Writes under `~/.claude/` ask for approval, so headless runs (`claude -p`) need `--output-dir` set to an allowed directory.
 
-### 1. `review-summary.md`
+### 1. Summary file
 
 Contains the overall summary comment (via `Skill(posting-review-summary)`).
 
@@ -84,7 +85,7 @@ See inline comments for details.
 [One neutral sentence describing what was reviewed]
 ```
 
-### 2. `review-inline-comments.md`
+### 2. Inline-comments file
 
 Contains all inline review comments with file and line references that would be posted with `gh pr review --comment`.
 
@@ -147,13 +148,13 @@ The agent uses Bitwarden's standard emoji classification system:
 Review the generated files before manually posting to GitHub:
 
 ```bash
-/code-review-local 123
+/code-review-local 123 --output-dir .
 # Review the generated files
-cat review-summary.md
-cat review-inline-comments.md
+cat code-review-local-PR-123-summary.md
+cat code-review-local-PR-123-inline-comments.md
 # Manually post if satisfied
-gh pr comment 123 --body-file review-summary.md
-gh pr review 123 --comment --body "$(cat review-inline-comments.md)"
+gh pr comment 123 --body-file code-review-local-PR-123-summary.md
+gh pr review 123 --comment --body "$(cat code-review-local-PR-123-inline-comments.md)"
 ```
 
 ### Offline Review Workflow
@@ -172,9 +173,9 @@ Integrate with custom tooling or approval processes:
 
 ```bash
 # Generate review
-/code-review-local 789
+/code-review-local 789 --output-dir .
 # Process with custom scripts
-python process_review.py review-summary.md review-inline-comments.md
+python process_review.py code-review-local-PR-789-summary.md code-review-local-PR-789-inline-comments.md
 ```
 
 ### Pre-Commit Validation
@@ -202,7 +203,7 @@ Use the output to understand code review best practices:
 
 ## Technical Details
 
-- **Model**: Uses `claude-sonnet-4-5` model for balanced performance and quality
+- **Model**: Uses the `opus` model
 - **Agent**: Invokes `bitwarden-code-reviewer` specialized agent
 - **GitHub Access**: Read-only via `gh` CLI (requires authentication)
 - **No Posting**: Deliberately does not post to GitHub-output is file-only

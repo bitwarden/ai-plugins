@@ -24,7 +24,7 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "2.7.0",
+      "version": "2.8.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -78,7 +78,7 @@
     {
       "name": "bitwarden-delivery-tools",
       "source": "./plugins/bitwarden-delivery-tools",
-      "version": "3.5.2",
+      "version": "4.0.1",
       "description": "Delivery lifecycle skills for Bitwarden initiatives — initiative funnel navigation, work transitions, architectural judgment, feature flags, commits, pull requests, preflight checks, change labeling, and Jira ticket filing."
     },
     {
