@@ -32,8 +32,10 @@ and ask the user to install `bitwarden-testmo-tools`.
    children; manual regression runs link to the `… Manual Regression` child.
 3. **Build the spec list.** Read the profile from `release-profiles.json` and drop any skipped specs.
    A name the user asks to skip that is not in the profile is a typo — stop and ask rather than
-   continuing. Turn each remaining name into the absolute path
-   `${CLAUDE_PLUGIN_ROOT}/skills/setting-up-regression-runs/specs/<name>.json`.
+   continuing. Turn each remaining name into
+   `${CLAUDE_PLUGIN_ROOT}/skills/setting-up-regression-runs/specs/<name>.json`, written out as a
+   literal absolute path. Never pass `${CLAUDE_PLUGIN_ROOT}` itself to `creating-test-runs` — in that
+   skill it means the `bitwarden-testmo-tools` root, not this plugin's.
 4. **Hand off.** Invoke `Skill(bitwarden-testmo-tools:creating-test-runs)` and follow it, passing every
    spec path as its own `--spec` and the milestone as `--milestone-name`. That skill owns the dry-run,
    the user's review, and `--create` — never run the dry-run and `--create` in the same turn.

@@ -1,6 +1,6 @@
 ---
 name: creating-test-runs
-description: Create test runs in Bitwarden's Testmo instance from reviewable JSON filter specs. Use when asked to create one or more Testmo runs, link runs to a Testmo milestone, select cases for a run, or write or debug a run filter spec built from folder/tag/test-type/team/automation filters. Accepts several specs in one pass. Dry-run first; writes mutate the live instance.
+description: Create test runs in Bitwarden's Testmo instance from reviewable JSON filter specs. Use when asked to create one or more Testmo runs, link runs to a Testmo milestone, select cases for a run, or write or debug a run filter spec built from folder/tag/test-type/team/automation filters. Accepts several specs in one pass. Dry-run first; writes mutate the live instance. For a release's QA manual regression suite, use bitwarden-testing-tools' setting-up-regression-runs instead — it owns the release profiles and specs and delegates here.
 ---
 
 # Creating Test Runs in Testmo
@@ -43,7 +43,7 @@ plugin cache, and `/plugin update` overwrites it.
    SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-test-runs"
    python3 "$SKILL/scripts/testmo_create_runs.py" \
      --spec /path/to/a.json --spec /path/to/b.json \
-     --milestone-name "2026.8.0 Manual Regression"
+     --milestone-name "<exact milestone name>"
    ```
    A single spec also prints its folder resolution, sample cases, and run payload.
 4. **Show the user the dry-run output and stop.** Point out every row whose STATUS is not `ready`, the

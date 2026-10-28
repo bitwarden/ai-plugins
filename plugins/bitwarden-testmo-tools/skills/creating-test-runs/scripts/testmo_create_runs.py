@@ -641,7 +641,7 @@ def main():
             status = "EMPTY — 0 cases"
         elif existing and not args.allow_existing:
             status = f"DUPLICATE — run {', '.join(str(r.get('id')) for r in existing)} exists"
-        elif mid is not None and twin != i and not args.allow_existing:
+        elif twin != i and not args.allow_existing:
             status = f"DUPLICATE — same run as [{specs[twin][0]}]"
         else:
             status = "ready"
