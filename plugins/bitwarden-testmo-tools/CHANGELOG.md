@@ -5,6 +5,29 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-10-28
+
+Addresses the Aikido findings on PR #222.
+
+### Security
+
+- The urllib transport no longer follows redirects. urllib's default redirect handler copies the
+  `Authorization` header onto the redirected request, even across hosts, so a 3xx from a proxy or a
+  misconfigured endpoint would have sent the Testmo API key to whatever host it named. A redirect now
+  fails as `HTTP 3xx`; the curl fallback already did not follow redirects.
+
+### Fixed
+
+- `setup_release_runs.py` exits with a named error when a release profile's `extends` chain is cyclic
+  or points at a profile that does not exist, instead of recursing until the stack overflows or
+  raising a bare `KeyError`.
+
+### Changed
+
+- Readability: `fetch_all()` keeps the normalized project id in its own variable rather than
+  rebinding its `project` argument, and the `milestone_id` type check is split into a named
+  `is_integer` test.
+
 ## [0.8.0] - 2026-10-07
 
 Addresses the second round of PR #222 review findings.

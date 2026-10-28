@@ -63,6 +63,19 @@ def _decode(method, path, raw):
 def _auth_hint(code):
     return "  (is TESTMO_API_KEY current?)" if code in (401, 403) else ""
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuse every redirect, so a 3xx surfaces as an HTTPError instead of being followed.
+
+    urllib's default handler copies the request headers — Authorization included — onto the
+    redirected request, even when it points at another host. The Testmo API has no reason to
+    redirect, so a 3xx here means a proxy or misconfiguration, and following it would hand the key
+    to whatever host it names. curl, the fallback transport, does not follow redirects without -L.
+    """
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
 def _urllib_call(method, path, body):
     """Preferred transport: the Authorization header never leaves this process."""
     data = json.dumps(body).encode() if body is not None else None
@@ -72,7 +85,7 @@ def _urllib_call(method, path, body):
     if data is not None:
         req.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        with _OPENER.open(req, timeout=TIMEOUT) as resp:
             raw = resp.read().decode(errors="replace")
     except urllib.error.HTTPError as e:
         # e.read() is the API's error body; it echoes the request but not the auth header.
@@ -204,18 +217,18 @@ def project_path_id(value):
     raise TestmoAPIError(f'"project_id" must be an integer project id, got {value!r}')
 
 def fetch_all(project, resource, query=""):
-    project = project_path_id(project)
+    project_id = project_path_id(project)
     out, page = [], 1
     sep = "&" if query else ""
     while True:
-        d = call("GET", f"/projects/{project}/{resource}?{query}{sep}page={page:d}")
+        d = call("GET", f"/projects/{project_id}/{resource}?{query}{sep}page={page:d}")
         out += d.get("result", [])
         if not d.get("next_page"):
             return out
         page += 1
         if page > MAX_PAGES:
             raise TestmoAPIError(
-                f"GET /projects/{project}/{resource} kept reporting next_page past {MAX_PAGES} "
+                f"GET /projects/{project_id}/{resource} kept reporting next_page past {MAX_PAGES} "
                 f"pages ({len(out)} records so far). Aborting rather than paging forever — check "
                 f"the query above for an unencoded character that truncated it."
             )
@@ -432,7 +445,9 @@ def main():
     project = project_path_id(spec["project_id"])
     filters = spec.get("filters", {})
     milestone_id = spec.get("milestone_id")
-    if milestone_id is not None and (isinstance(milestone_id, bool) or not isinstance(milestone_id, int)):
+    # bool is a subclass of int, so `true` would otherwise pass as milestone 1.
+    is_integer = isinstance(milestone_id, int) and not isinstance(milestone_id, bool)
+    if milestone_id is not None and not is_integer:
         sys.exit(f'"milestone_id" must be an integer milestone id, got {milestone_id!r}')
 
     # Idempotency: the same check setup_release_runs.py makes, through the same key-safe transport,

@@ -29,11 +29,18 @@ def load_profile(name):
     if name not in profiles:
         sys.exit(f"Unknown release profile {name!r}. Available: {', '.join(profiles)}")
     seen, order = set(), []
-    def collect(pname):
+    def collect(pname, chain=()):
+        # A cyclic or dangling `extends` is a packaging error; name it instead of recursing until
+        # the stack overflows or raising a bare KeyError.
+        if pname in chain:
+            sys.exit(f"Release profile {chain[0]!r} has a cyclic 'extends': "
+                     f"{' -> '.join(chain + (pname,))}")
+        if pname not in profiles:
+            sys.exit(f"Release profile {chain[-1]!r} extends unknown profile {pname!r}")
         p = profiles[pname]
         parent = p.get("extends")
         if parent:
-            collect(parent)
+            collect(parent, chain + (pname,))
         for s in p.get("specs", []):
             if s not in seen:
                 seen.add(s)
