@@ -1,4 +1,5 @@
 {
+  "_comment": "Web Admin Portal / Secrets Manager / Providers regression — one run covering the Provider Portal, Secrets Manager, Reseller Managed Orgs, and Admin Portal trees plus the shared navigation folders those products own (Provider Portal nav, Product Switcher, Product Nav in Side Bar, Disable SM Advertisements), Regression/Smoke, Active, manual only. Case count not yet captured against the Testmo UI — record it here after the next validated dry-run.",
   "project_id": 1,
   "run_name": "Admin Portal / SM / Providers",
   "run_state_id": 7,

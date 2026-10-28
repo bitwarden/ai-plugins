@@ -151,9 +151,11 @@ def _check_key():
     """Exit unless TESTMO_API_KEY is set and safe to interpolate into a curl config line."""
     if not KEY:
         sys.exit("TESTMO_API_KEY not set")
-    if any(c in KEY for c in '"\r\n'):
-        sys.exit("TESTMO_API_KEY contains a quote or a newline, which cannot be carried safely in "
-                 "an HTTP header. Re-copy the key from Testmo (no surrounding quotes).")
+    # A backslash cannot inject a directive (that needs a raw newline), but curl processes escapes
+    # inside a quoted config value, so it would silently alter the header that is sent.
+    if any(c in KEY for c in '"\\\r\n'):
+        sys.exit("TESTMO_API_KEY contains a quote, a backslash, or a newline, which cannot be carried "
+                 "safely in an HTTP header. Re-copy the key from Testmo (no surrounding quotes).")
 
 def call(method, path, body=None):
     """Issue a Testmo API request and return the decoded JSON body.
@@ -190,12 +192,16 @@ def project_path_id(value):
 
     Every path is built as f"/projects/{project}/…" from the spec's `project_id`, so a non-integer
     value would let a spec steer the URL itself (`1/../..`, a whole `https://…`) rather than just
-    name a project. Reject anything that is not an integer id.
+    name a project. Reject anything that is not an integer id — including `True` and `1.9`, which
+    int() would otherwise quietly turn into project 1.
     """
-    try:
-        return int(value)
-    except (TypeError, ValueError):
+    if isinstance(value, bool):
         raise TestmoAPIError(f'"project_id" must be an integer project id, got {value!r}')
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.strip().isdigit():
+        return int(value)
+    raise TestmoAPIError(f'"project_id" must be an integer project id, got {value!r}')
 
 def fetch_all(project, resource, query=""):
     project = project_path_id(project)
@@ -338,6 +344,69 @@ def matches(case, spec, folder_ids):
         return False
     return True
 
+# Keys both entrypoints index directly. Checked when a spec is loaded, before any API call: a
+# KeyError raised later — in setup_release_runs.py, mid-way through the create loop — fires after
+# earlier runs have already been POSTed, producing a half-populated milestone.
+REQUIRED_SPEC_KEYS = ("project_id", "run_name")
+
+class SpecError(Exception):
+    """A spec file is missing, is not valid JSON, or lacks a required key."""
+
+def load_spec(path):
+    """Load and validate one spec file. Raises SpecError naming the file and the problem."""
+    try:
+        with open(path) as fh:
+            spec = json.load(fh)
+    except FileNotFoundError:
+        raise SpecError(f"Spec file not found: {path}")
+    except json.JSONDecodeError as e:
+        raise SpecError(f"{path} is not valid JSON: {e}")
+    if not isinstance(spec, dict):
+        raise SpecError(f"{path} must contain a JSON object, got {type(spec).__name__}")
+    absent = [k for k in REQUIRED_SPEC_KEYS if spec.get(k) is None]
+    if absent:
+        raise SpecError(f"{path} is missing {', '.join(repr(k) for k in absent)} "
+                        f"(every spec needs {', '.join(REQUIRED_SPEC_KEYS)})")
+    return spec
+
+def unresolved_period(run_name):
+    """True when run_name still carries the literal <period> placeholder.
+
+    Creating that run would post a name like "Mobile <period>" to the live instance, so --create
+    refuses it; a dry-run only warns.
+    """
+    return "<period>" in run_name
+
+def existing_runs_for_milestone(project, milestone_id):
+    """Find runs already linked to this milestone, for the duplicate-run guards.
+
+    Returns (runs, checked). `checked` is False when the runs payload carries no milestone_id
+    field at all: the guard then cannot tell "no duplicates" from "cannot see the link", and the
+    caller must say so rather than report a clean result — a guardrail that quietly no-ops is
+    worse than none.
+    """
+    # ?milestone_id= is honoured server-side (verified 2026-09-02: project 1 pages from 20 down to 4
+    # for a busy milestone). The client-side filter below is kept regardless, because the API ignores
+    # query parameters it does not recognize — were the name ever to change, that would silently return
+    # every run in the project, and this guard must not widen into a false positive.
+    runs = fetch_all(project, "runs", f"milestone_id={milestone_id:d}")
+    if runs and not any("milestone_id" in r for r in runs):
+        return [], False
+    return [r for r in runs if r.get("milestone_id") == milestone_id], True
+
+def same_run(existing, spec):
+    """True when an existing run is (or cannot be told apart from) the run this spec creates.
+
+    Multi-configuration runs share a run name by design, so the name alone is not enough: a run
+    with a different config_id is a sibling, not a duplicate. When the run object exposes no
+    config_id, the two cannot be told apart, so it counts — the guard errs toward refusing.
+    """
+    if existing.get("name") != spec["run_name"]:
+        return False
+    if spec.get("config_id") is None or "config_id" not in existing:
+        return True
+    return existing.get("config_id") == spec["config_id"]
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", required=True, help="path to JSON filter spec")
@@ -347,8 +416,14 @@ def main():
                          "Milestones must be created in the Testmo UI first — the API cannot create them.")
     ap.add_argument("--period", default=None,
                     help="substitute this string for the literal <period> in run_name, e.g. 2026.8.0")
+    ap.add_argument("--allow-existing", action="store_true",
+                    help="create the run even though a run with the same name (and config) is already "
+                         "linked to the milestone. Without this, --create refuses.")
     args = ap.parse_args()
-    spec = json.load(open(args.spec))
+    try:
+        spec = load_spec(args.spec)
+    except SpecError as e:
+        sys.exit(str(e))
     if args.milestone_id is not None:
         spec["milestone_id"] = args.milestone_id
     if args.period is not None:
@@ -356,6 +431,30 @@ def main():
 
     project = project_path_id(spec["project_id"])
     filters = spec.get("filters", {})
+    milestone_id = spec.get("milestone_id")
+    if milestone_id is not None and (isinstance(milestone_id, bool) or not isinstance(milestone_id, int)):
+        sys.exit(f'"milestone_id" must be an integer milestone id, got {milestone_id!r}')
+
+    # Idempotency: the same check setup_release_runs.py makes, through the same key-safe transport,
+    # so the single-run path never needs a hand-written API call. It needs a milestone to scope the
+    # lookup — run names like "Mobile" recur every cycle, so a project-wide name match means nothing.
+    duplicates, checked = [], None
+    if milestone_id is not None:
+        linked, checked = existing_runs_for_milestone(project, milestone_id)
+        duplicates = [r for r in linked if same_run(r, spec)]
+        if not checked:
+            print(f"Existing runs: CANNOT CHECK — the runs API returned no milestone_id field, so a "
+                  f"duplicate in milestone {milestone_id} cannot be ruled out\n")
+        elif duplicates:
+            ids = ", ".join(str(r.get("id")) for r in duplicates)
+            print(f"Existing runs: {len(duplicates)} run(s) named {spec['run_name']!r} already linked "
+                  f"to milestone {milestone_id} (ids: {ids})\n")
+        else:
+            print(f"Existing runs: no run named {spec['run_name']!r} linked to milestone "
+                  f"{milestone_id}\n")
+    else:
+        print("Existing runs: NOT CHECKED — no milestone_id (pass --milestone-id to check for a "
+              "duplicate)\n")
 
     folder_ids, notes = resolve_folders(filters, project)
     if notes:
@@ -404,9 +503,29 @@ def main():
             f"         Look up the id via GET /projects/{project}/configs and set it in the spec."
         )
 
+    if unresolved_period(spec["run_name"]):
+        print("\nWARNING: run_name still contains the literal <period> placeholder. Pass --period "
+              "(e.g. --period 2026.8.0) before creating.")
+
     if not args.create:
         print("\nDRY RUN — no run created. Re-run with --create to POST.")
+        if duplicates:
+            print("NOTE: --create would refuse — a matching run already exists (see above) — unless "
+                  "--allow-existing is passed.")
         return
+    if duplicates and not args.allow_existing:
+        sys.exit(
+            f"Refusing to create: {len(duplicates)} run(s) named {spec['run_name']!r} are already "
+            f"linked to milestone {milestone_id} (ids: "
+            f"{', '.join(str(r.get('id')) for r in duplicates)}). Re-run with --allow-existing if "
+            f"the duplicate is intended."
+        )
+    if checked is False:
+        print("WARNING: could not verify whether this run already exists in the milestone — the runs "
+              "API returned no milestone_id field. Check the Testmo UI.")
+    if unresolved_period(spec["run_name"]):
+        sys.exit(f"Refusing to create: run_name {spec['run_name']!r} still contains <period>. "
+                 f"Pass --period.")
     if needs_config:
         sys.exit(
             "Refusing to create: \"config_id\" is null in this spec. This run is distinguished from "

@@ -5,6 +5,65 @@ All notable changes to the Bitwarden Testmo Tools plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-07
+
+Addresses the second round of PR #222 review findings.
+
+### Added
+
+- `testmo_create_run.py` checks for a duplicate run itself. When a milestone id is known (from the
+  spec or `--milestone-id`), it lists the runs already linked to that milestone and reports any with
+  the same name and `config_id`; `--create` refuses on a match unless the new `--allow-existing` flag
+  is passed. Workflow step 3 previously told Claude to query `GET /projects/1/runs` by hand with no
+  command supplied — the one place key handling was left to improvisation, where the obvious
+  `curl -H "Authorization: …"` puts the key on argv. The lookup now goes through the same key-safe
+  transport as everything else. `existing_runs_for_milestone()` moved into `testmo_create_run.py` so
+  both entrypoints share it.
+
+### Changed
+
+- `setup_release_runs.py --create` refuses the whole release when any dry-run row is not `ready`.
+  A spec matching 0 cases was previously labelled `ready` in the dry-run, then skipped by the create
+  loop, and the release still ended `Done. All N run(s) linked` with exit status 0 — so a renamed tag
+  could drop runs from a milestone with nothing in the output or the exit code saying so. The dry-run
+  now labels it `EMPTY — 0 cases` and `--create` refuses alongside `NEEDS CONFIG_ID`; `--exclude` the
+  spec if the release genuinely does not need it.
+- A `run_name` still containing the literal `<period>` placeholder is labelled `NEEDS --period` and
+  blocks `--create` in both scripts, rather than posting a run named `… <period> …`.
+- Dry-run rows and refusal messages identify runs by spec name as well as run name, since
+  multi-configuration runs share a run name. The `N/M runs ready` total no longer counts rows that are
+  not ready.
+- `SKILL.md`: added a "Where a spec lives" section — users' own specs live outside the plugin cache and
+  go through `testmo_create_run.py --spec`; a spec that should join a release profile has to be
+  contributed upstream, since `setup_release_runs.py` only reads `specs/` and `/plugin update`
+  overwrites the cache. References to `references/` and `release-profiles.json` are written as
+  `$SKILL/…` paths, matching the rule the document already set for `scripts/` and `specs/`.
+- `SKILL.md`: the description now carries release and milestone trigger phrasing; runnable
+  commands use a real spec name instead of `<run>`; hard-coded run counts that duplicated
+  `release-profiles.json` are gone; the fetch behavior of `setup_release_runs.py` is described
+  accurately (tag-driven specs fetch separately); and a garbled sentence about folder renames is fixed.
+- `references/api-reference.md`: the top-level folder list notes Directory Connector (BWDC) and that
+  `GET /projects/1/folders` is authoritative.
+- Added a `_comment` to the three specs that lacked one (Directory Connector, Admin Console, Admin
+  Portal / SM / Providers).
+- `setup_release_runs.py` is now executable, matching `testmo_create_run.py`.
+- Moved the 0.6.1 "Verified against the live instance" notes out of a non-standard changelog heading,
+  and pointed a 0.7.0 link at the reference file that now holds that section.
+
+### Fixed
+
+- `testmo_create_run.py` validates its spec through the same `load_spec()` / `REQUIRED_SPEC_KEYS`
+  check as `setup_release_runs.py`. A missing file, malformed JSON, or a spec without `project_id` or
+  `run_name` previously raised a bare traceback; 0.7.1 had fixed this only in the orchestrator.
+
+### Security
+
+- `project_path_id()` rejects `True` and non-integer floats such as `1.9`, which `int()` had quietly
+  turned into project 1.
+- `_check_key()` also rejects a backslash in `TESTMO_API_KEY`. Not an injection path (that needs a raw
+  newline, already rejected), but curl processes escapes inside a quoted config value, so it would
+  silently alter the header sent.
+
 ## [0.7.1] - 2026-09-15
 
 Addresses two Minor findings from the PR #222 review.
@@ -96,7 +155,7 @@ Addresses the Major findings from the PR #222 review.
   in the same turn. Repeated in Guardrails and in the whole-release recipe.
 - `SKILL.md`: the "Setting up a whole release (recommended)" recipe gains a step 4 for the manual
   configuration pass, with the per-platform counts and a link to
-  [Multi-configuration runs](#multi-configuration-runs-mobile-desktop-extension); mirrored in
+  [Multi-configuration runs](skills/creating-regression-runs/references/multi-configuration-runs.md); mirrored in
   Guardrails. The recipe previously ended at `--create`.
 - `SKILL.md`: the TLS-proxy and `filters.tags` sections describe the transport and probe above.
 
@@ -145,7 +204,7 @@ Addresses the Major findings from the PR #222 review.
   returned every run in the project), so if the parameter name ever changed, the guard would otherwise
   silently widen to "every run is a duplicate".
 
-### Verified against the live instance (project 1, read-only)
+Verified against the live instance (project 1, read-only):
 
 - Run objects do carry `milestone_id`, so the guard's central assumption holds; the "cannot check" branch
   added in 0.6.0 stays as a safety net.

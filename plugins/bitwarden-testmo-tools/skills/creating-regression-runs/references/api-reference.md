@@ -31,5 +31,7 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
 - **Team** (`custom_team`, multiselect): 25=Admin Console, 26=Auth, 27=Autofill, 28=Billing,
   38=Desktop Native, 29=DIRT, 30=Key Management, 31=Mobile, 37=Passwordless, 32=Platform,
   33=Secrets Manager, 34=Tools, 35=UI Foundation, 36=Vault.
-- **Top-level folders**: Web=3136, Extension=2779, Mobile=3010, Desktop=2923, CLI=2858, API=3390,
-  Passwordless=3103. (Excluded as junk: "Retired Test Cases"=81330, "Need to be deleted"=371518.)
+- **Top-level folders** (partial list — `GET /projects/1/folders` is authoritative): Web=3136,
+  Extension=2779, Mobile=3010, Desktop=2923, CLI=2858, API=3390, Passwordless=3103, and
+  "Directory Connector (BWDC)" (id not captured; `specs/directory-connector-regression.json` resolves it
+  by path). (Excluded as junk: "Retired Test Cases"=81330, "Need to be deleted"=371518.)

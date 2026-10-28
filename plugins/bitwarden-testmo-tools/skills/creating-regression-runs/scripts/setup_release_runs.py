@@ -41,38 +41,29 @@ def load_profile(name):
     collect(name)
     return order
 
-# Keys the create loop indexes directly. Checked here rather than there: a KeyError raised mid-loop
-# fires after earlier runs have already been POSTed, producing exactly the half-populated milestone
-# the surrounding code works to avoid. `run_name` is the one that actually bit — it was only ever
-# defaulted when a period was derived from the milestone name, so a spec omitting it survived
-# load_specs and the whole dry-run, then failed at the first create.
-REQUIRED_SPEC_KEYS = ("project_id", "run_name")
-
 def load_specs(spec_names):
-    """Load every spec up front, so a packaging error fails before any API call is made."""
-    specs, missing, incomplete = [], [], []
+    """Load every spec up front, so a packaging error fails before any API call is made.
+
+    Validation is core.load_spec(), shared with testmo_create_run.py so both entrypoints reject the
+    same malformed specs. Problems are collected rather than raised one at a time, so a profile with
+    several bad specs is reported in a single pass.
+    """
+    specs, missing, invalid = [], [], []
     for name in spec_names:
         path = SPECS_DIR / f"{name}.json"
         if not path.exists():
             missing.append(name)
             continue
         try:
-            spec = json.loads(path.read_text())
-        except json.JSONDecodeError as e:
-            sys.exit(f"{path.name} is not valid JSON: {e}")
-        absent = [k for k in REQUIRED_SPEC_KEYS if spec.get(k) is None]
-        if absent:
-            incomplete.append(f"{path.name} is missing {', '.join(repr(k) for k in absent)}")
-            continue
-        specs.append((name, spec))
+            specs.append((name, core.load_spec(path)))
+        except core.SpecError as e:
+            invalid.append(str(e))
     if missing:
         sys.exit(f"Profile references {len(missing)} spec(s) with no file in {SPECS_DIR}: "
                  f"{', '.join(missing)}")
-    if incomplete:
-        detail = "\n".join(f"  {line}" for line in incomplete)
-        sys.exit(f"{len(incomplete)} spec(s) are missing a required key:\n{detail}\n"
-                 f"Every spec needs {', '.join(REQUIRED_SPEC_KEYS)} before a run can be created "
-                 f"from it.")
+    if invalid:
+        detail = "\n".join(f"  {line}" for line in invalid)
+        sys.exit(f"{len(invalid)} spec(s) are invalid:\n{detail}")
     return specs
 
 
@@ -108,24 +99,6 @@ def resolve_milestone(project, name):
         ids = ", ".join(str(m["id"]) for m in hits)
         sys.exit(f"{len(hits)} milestones named {name!r} (ids: {ids}). Rename or use a unique name.")
     return hits[0]["id"]
-
-def existing_runs_for_milestone(project, milestone_id):
-    """Find runs already linked to this milestone, for the duplicate-release guard.
-
-    Returns (runs, checked). `checked` is False when the runs payload carries no milestone_id
-    field at all: the guard then cannot tell "no duplicates" from "cannot see the link", and the
-    caller must say so rather than report a clean result — a guardrail that quietly no-ops is
-    worse than none.
-    """
-    # ?milestone_id= is honoured server-side (verified 2026-09-02: project 1 pages from 20 down to 4
-    # for a busy milestone). The client-side filter below is kept regardless, because the API ignores
-    # query parameters it does not recognize — were the name ever to change, that would silently return
-    # every run in the project, and this guard must not widen into a false positive.
-    runs = core.fetch_all(project, "runs", f"milestone_id={milestone_id}")
-    if runs and not any("milestone_id" in r for r in runs):
-        return [], False
-    return [r for r in runs if r.get("milestone_id") == milestone_id], True
-
 
 def needs_manual_step_2(spec):
     """True when this run cannot be finished by the API alone.
@@ -200,7 +173,7 @@ def main():
 
     # Idempotency: a release is set up once per milestone. Check before doing any of the work, and
     # report the result in dry-runs too, so a duplicate is visible at review time.
-    existing, checked = existing_runs_for_milestone(project, milestone_id)
+    existing, checked = core.existing_runs_for_milestone(project, milestone_id)
     if not checked:
         print("Existing runs   : CANNOT CHECK — the runs API returned no milestone_id field, so a "
               "duplicate release cannot be ruled out")
@@ -224,31 +197,45 @@ def main():
 
         cases = core.fetch_cases(project, filters) if filters.get("tags") else all_cases
         folder_ids, notes = core.resolve_folders(filters, project, folders=folders)
+        # Rows carry the spec name as well as the run name: multi-config runs share a run name by
+        # design, so three "Desktop" rows (or three "Desktop" refusals) would say nothing about
+        # which spec is at fault.
+        label = f"{spec['run_name']}  [{name}]"
         bad = [n for n in notes if n.startswith(("UNMATCHED", "UNKNOWN"))]
         if bad:
-            rows.append((spec["run_name"], "FOLDER ERROR", "; ".join(bad)))
+            rows.append((label, "FOLDER ERROR", "; ".join(bad)))
             continue
         selected = [c for c in cases if core.matches(c, filters, folder_ids)]
         ids = [c["id"] for c in selected]
         # "config_id": null is an explicit placeholder — the run needs a Testmo Configuration that
         # has not been looked up yet. Surface it in the dry-run summary; block --create below.
         if "config_id" in spec and spec["config_id"] is None:
-            rows.append((spec["run_name"], str(len(ids)), "NEEDS CONFIG_ID"))
+            status = "NEEDS CONFIG_ID"
+        elif not ids:
+            # 0 cases is almost always a renamed tag or folder, not an empty suite. Say so here,
+            # where a human is reviewing, and refuse --create below rather than letting the
+            # create loop quietly skip it and report the milestone as complete.
+            status = "EMPTY — 0 cases"
+        elif core.unresolved_period(spec["run_name"]):
+            status = "NEEDS --period"
         else:
-            rows.append((spec["run_name"], str(len(ids)), "ready"))
+            status = "ready"
+        rows.append((label, str(len(ids)), status))
         results.append((name, spec, ids))
 
-    print(f"{'RUN NAME':<60}{'CASES':>7}  STATUS")
+    print(f"{'RUN NAME  [SPEC]':<60}{'CASES':>7}  STATUS")
     print("-" * 86)
     for nm, cnt, status in rows:
         print(f"{nm[:59]:<60}{cnt:>7}  {status}")
     total = sum(len(ids) for _, _, ids in results)
+    ready = sum(1 for r in rows if r[2] == "ready")
     print("-" * 86)
-    print(f"{'TOTAL':<60}{total:>7}  {len(results)}/{len(spec_names)} runs ready")
+    print(f"{'TOTAL':<60}{total:>7}  {ready}/{len(spec_names)} runs ready")
 
     errors = [r for r in rows if r[1] == "FOLDER ERROR"]
     if errors:
         sys.exit(f"\n{len(errors)} spec(s) have problems — fix before creating.")
+    blocked = [r for r in rows if r[2] != "ready"]
 
     if not args.create:
         print("\nDRY RUN — no runs created. Re-run with --create to POST all of the above.")
@@ -260,6 +247,9 @@ def main():
         if existing:
             print(f"NOTE: {len(existing)} run(s) are already linked to milestone {milestone_id}; "
                   f"--create would refuse unless --allow-existing is passed.")
+        if blocked:
+            print(f"NOTE: {len(blocked)} run(s) are not ready (see STATUS above); --create would "
+                  f"refuse until they are fixed or --exclude'd.")
         return
 
     if existing and not args.allow_existing:
@@ -276,30 +266,33 @@ def main():
         print("WARNING: could not verify whether this milestone already has runs — the runs API "
               "returned no milestone_id field. Check the Testmo UI before continuing.")
 
-    needs_config = [r[0] for r in rows if r[2] == "NEEDS CONFIG_ID"]
-    if needs_config:
-        sys.exit(
-            f"\nRefusing to create: {len(needs_config)} spec(s) have \"config_id\": null — "
-            f"{', '.join(sorted(set(needs_config)))}.\nThese runs are distinguished from their "
-            f"same-named siblings only by Configuration, so creating them without one would produce "
-            f"indistinguishable runs.\nLook the ids up via GET /projects/"
-            f"{project}/configs and set them in the specs."
-        )
+    if blocked:
+        # Refuse the whole release rather than create the ready runs and skip the rest: a skipped
+        # run leaves the milestone incomplete, and the dry-run is the place to have noticed.
+        hints = {
+            "NEEDS CONFIG_ID": "these runs are distinguished from their same-named siblings only by "
+                               f"Configuration — look the ids up via GET /projects/{project}/configs "
+                               "and set them in the specs",
+            "EMPTY — 0 cases": "0 cases is almost always a renamed tag or folder — check the spec's "
+                               "filters against the live repository",
+            "NEEDS --period": "run_name still contains <period> — pass --period",
+        }
+        detail = "\n".join(f"  {label} — {status}" for label, _, status in blocked)
+        reasons = "\n".join(f"  {status}: {hints[status]}"
+                             for status in dict.fromkeys(status for _, _, status in blocked))
+        sys.exit(f"\nRefusing to create: {len(blocked)} run(s) are not ready:\n{detail}\n{reasons}\n"
+                 f"Fix them, or --exclude them if this release does not need them.")
 
     # Create every run we can rather than aborting on the first failure: stopping midway through a
     # 14-run release leaves a half-populated milestone and no record of which runs made it. Each
     # failure is recorded and reported in the closing tally instead.
     print()
-    created, skipped, failed, step_2 = [], [], [], []
+    created, failed, step_2 = [], [], []
     for spec_name, spec, ids in results:
         name = spec["run_name"]
         # Multi-config runs share a run_name by design, so identify rows by spec file as well —
         # otherwise a tally of three "Extension" failures says nothing about which ones.
         label = f"{name}  [{spec_name}]"
-        if not ids:
-            print(f"  SKIP (0 cases): {label}")
-            skipped.append(label)
-            continue
         payload = {"name": name, "state_id": spec.get("run_state_id", 7),
                    "include_all": False, "cases": ids, "milestone_id": milestone_id}
         for k in ("config_id", "tags", "note"):
@@ -322,8 +315,7 @@ def main():
             step_2.append(f"{label}  -> https://bitwarden.testmo.net/run/{rid}")
         print(f"  CREATED run {rid}  ({len(ids)} cases)  {label}")
 
-    print(f"\n{len(created)} created, {len(skipped)} skipped (0 cases), {len(failed)} failed "
-          f"— of {len(results)} run(s) attempted.")
+    print(f"\n{len(created)} created, {len(failed)} failed — of {len(results)} run(s) attempted.")
     print_step_2_reminder(step_2, created=True)
     if failed:
         print("\nNOT created:")

@@ -1,4 +1,5 @@
 {
+  "_comment": "Directory Connector (BWDC) regression — the whole top-level 'Directory Connector (BWDC)' folder and its subfolders, Regression/Smoke, Active, manual only. Runs on partial releases only (see release-profiles.json). Case count not yet captured against the Testmo UI — record it here after the next validated dry-run.",
   "project_id": 1,
   "run_name": "Directory Connector (BWDC)",
   "run_state_id": 7,

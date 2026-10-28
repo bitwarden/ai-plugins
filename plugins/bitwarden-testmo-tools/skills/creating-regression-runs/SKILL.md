@@ -1,6 +1,6 @@
 ---
 name: creating-regression-runs
-description: Create Bitwarden regression test runs in Testmo from a reviewable JSON filter spec. Use when asked to set up a bimonthly/periodic regression run, select cases for a run, or create a Testmo run from folder/test-type/team/automation filters. Dry-run first; writes mutate the live instance.
+description: Create Bitwarden regression test runs in Testmo from a reviewable JSON filter spec. Use when asked to set up the regression runs for a release (e.g. "set up the 2026.8.0 regression runs"), link runs to a Testmo milestone, create a single periodic regression run, select cases for a run, or write or debug a run filter spec built from folder/tag/test-type/team/automation filters. Dry-run first; writes mutate the live instance.
 ---
 
 # Creating Regression Runs in Testmo
@@ -19,52 +19,69 @@ filter spec, and — only when explicitly told to — creates the run via the Te
 - `curl` is **not** normally needed, but is used as a fallback on networks running TLS interception.
   It ships with macOS, Windows 10+, and most Linux distributions. The scripts switch to it by
   themselves on a `CERTIFICATE_VERIFY_FAILED`; if you need to know why, see
-  [references/tls-inspecting-proxies.md](references/tls-inspecting-proxies.md).
+  [`$SKILL/references/tls-inspecting-proxies.md`](references/tls-inspecting-proxies.md).
 
 ## Locating the scripts and specs
 
-The scripts and the committed specs ship **inside the installed plugin**, not in the user's working
-directory. Always address them through `${CLAUDE_PLUGIN_ROOT}`; a bare `scripts/…` or `specs/…` path
-resolves against whatever repository the user happens to be in and will not exist. Every command below
-opens by setting a shorthand, because shell state does not carry over between commands:
+Everything this skill bundles — `scripts/`, `specs/`, `references/`, and `release-profiles.json` —
+ships **inside the installed plugin**, not in the user's working directory. Always address it through
+`${CLAUDE_PLUGIN_ROOT}`; a bare `scripts/…`, `specs/…`, or `references/…` path resolves against
+whatever repository the user happens to be in and will not exist. This document writes those paths as
+`$SKILL/…`, and every command below opens by setting that shorthand, because shell state does not carry
+over between commands:
 
 ```bash
 SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
 ```
 
-A user's own spec file is the exception — pass its real path, wherever it lives.
+### Where a spec lives
+
+- **Shipped specs** live in `$SKILL/specs/` and are the only ones a release profile can reference —
+  `setup_release_runs.py` reads specs from that directory and nowhere else.
+- **A user's own spec** can live anywhere — pass its real path to `testmo_create_run.py --spec`. Do
+  not write it into `$SKILL/specs/`: that is the installed plugin cache, and `/plugin update`
+  overwrites it.
+- **A spec that should join a release profile** must be contributed upstream: a PR to
+  `bitwarden/ai-plugins` adding the file under `skills/creating-regression-runs/specs/` and its name to
+  `release-profiles.json`.
 
 ## Reference material
 
 Endpoints, project ids, and the numeric ids behind every field value live in
-[references/api-reference.md](references/api-reference.md). Read it before writing a new spec or
+[`$SKILL/references/api-reference.md`](references/api-reference.md). Read it before writing a new spec or
 diagnosing one that selects the wrong cases. The base URL is
 `https://bitwarden.testmo.net/api/v1` and every shipped spec targets project `1` (live Bitwarden).
 
 ## Workflow
 
 1. **Define or load the filter spec** (see schema below). Start from
-   `${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs/specs/regression-run.template.json`. Commit one
-   spec file per recurring run so it is reviewable and reproducible.
+   `$SKILL/specs/regression-run.template.json`, copied to a path outside the plugin (see
+   [Where a spec lives](#where-a-spec-lives)). Keep one spec file per recurring run under version
+   control so it is reviewable and reproducible.
 2. **Dry-run the spec** and confirm the matched case count, the sample cases, and the run payload look
    right:
    ```bash
    SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
-   python3 "$SKILL/scripts/testmo_create_run.py" --spec "$SKILL/specs/<run>.json"
+   python3 "$SKILL/scripts/testmo_create_run.py" \
+     --spec "$SKILL/specs/web-password-manager-regression.json" --milestone-id 263
    ```
+   Substitute the spec path (a shipped spec, as here, or the user's own file) and the milestone id.
    A dry-run reads live data but writes nothing, so this is the review step for a new spec as well as for
    each period's run. Compare the count against the previous cycle — a large swing usually means a
    renamed folder or a changed tag rather than real repository churn.
-3. **Idempotency check:** confirm a run for this period/milestone does not already exist
-   (`GET /projects/1/runs`) before creating another. This step is manual for a single run —
-   `setup_release_runs.py` performs it for you and refuses on a collision.
+3. **Idempotency check:** read the `Existing runs:` line at the top of the dry-run. When a milestone
+   id is given, the script looks for a run with the same name (and `config_id`) already linked to that
+   milestone, and `--create` refuses on a match unless `--allow-existing` is passed. Without a
+   milestone id it reports `NOT CHECKED` — pass `--milestone-id` rather than querying the API by hand,
+   so the key never leaves the script's key-safe transport.
 4. **Create the run** only after **the user** has reviewed the dry-run. Print the dry-run summary
    — matched case count, sample cases, run payload — and obtain their explicit confirmation first.
    **Never issue the dry-run and the `--create` in the same turn:** reviewing your own dry-run and
    proceeding is not the review step, and this write mutates the live instance.
    ```bash
    SKILL="${CLAUDE_PLUGIN_ROOT}/skills/creating-regression-runs"
-   python3 "$SKILL/scripts/testmo_create_run.py" --spec "$SKILL/specs/<run>.json" --create
+   python3 "$SKILL/scripts/testmo_create_run.py" \
+     --spec "$SKILL/specs/web-password-manager-regression.json" --milestone-id 263 --create
    ```
 
 ## Filter-spec schema
@@ -99,7 +116,7 @@ the warning below.
 - `milestone_id` — milestone to link the run to. Usually supplied at run time by `--milestone-id` or by
   `setup_release_runs.py` instead of being committed.
 - `config_id` — Testmo Configuration, for platforms that ship several same-named runs (omit it otherwise).
-  See [references/multi-configuration-runs.md](references/multi-configuration-runs.md).
+  See [`$SKILL/references/multi-configuration-runs.md`](references/multi-configuration-runs.md).
 - `tags` — **labels applied to the created run.** These do _not_ select cases.
 - `note` — free-text note on the run.
 - `filters` — the case-selection block, below.
@@ -122,8 +139,8 @@ are ANDed; multi-value lists within a key are ORed).
   A non-empty probe result is a hard error.
 - `folder_paths` — folders by readable path, e.g. `"Web > Password Manager"`. Each expands to that folder
   **and all descendants** (set `include_subfolders: false` for exact-folder-only). Paths are OR'd. The
-  script resolves paths against the live folder tree and **fails fast** if any path is unmatched, so specs
-  survive folder renames being caught rather than silently dropping cases. `folder_ids` does the same by id.
+  script resolves paths against the live folder tree and **fails fast** if any path is unmatched, so a
+  folder rename is caught loudly instead of silently dropping cases. `folder_ids` does the same by id.
 - `test_type_ids` / `team_ids` — the case's multiselect set must **intersect** the list.
 - `case_state_ids` — the case `state_id` must be in the list (`4` = Active).
 - `automation_type_ids` — include only these automation types (`null` in the list = "no type set").
@@ -160,7 +177,7 @@ period in the name:
 - The **release/period** is conveyed by the parent milestone the run is linked to, so `<period>` no longer
   belongs in `run_name` (the `--period` substitution remains for any spec that still uses the placeholder).
 - The **platform variant** is conveyed by the run's Testmo **Configuration** (`config_id`), not the name
-  — see [references/multi-configuration-runs.md](references/multi-configuration-runs.md).
+  — see [`$SKILL/references/multi-configuration-runs.md`](references/multi-configuration-runs.md).
   Both mobile specs are therefore named just `"Mobile"` and distinguished by config
   (`config_id` 1 = Android, 3 = iOS). Look up config ids via `GET /projects/{id}/configs`.
 
@@ -173,11 +190,12 @@ period in the name:
   issue the dry-run and the `--create` in the same turn.
 - **Multi-configuration runs are not finished when the script exits** — every run created with a
   `config_id` (all Mobile, Desktop, and Extension runs) needs the manual step 2 described in
-  [references/multi-configuration-runs.md](references/multi-configuration-runs.md). Tell the user which
+  [`$SKILL/references/multi-configuration-runs.md`](references/multi-configuration-runs.md). Tell the user which
   runs still need it; the scripts list them.
-- **Idempotent** — do not create a duplicate run for a period/milestone. `setup_release_runs.py` enforces
-  this: it refuses to create when the milestone already has runs linked, unless `--allow-existing` is
-  passed. For a single run, check by hand (workflow step 3).
+- **Idempotent** — do not create a duplicate run for a period/milestone. Both scripts enforce this:
+  `setup_release_runs.py` refuses when the milestone already has runs linked, and `testmo_create_run.py`
+  refuses when a same-named run (and config) is already linked to the given milestone. Either can be
+  overridden with `--allow-existing`.
 - **Committed specs** — prefer a reviewed spec file over ad-hoc arguments.
 - **Never expose the key** — reference `TESTMO_API_KEY` only.
 
@@ -197,7 +215,7 @@ groups releases as a parent `YYYY.M.0 Release` milestone with `… Manual Regres
 ## Setting up a whole release (recommended)
 
 Use `setup_release_runs.py` to create every run for a release in one pass, linked to a milestone.
-Release membership lives in `release-profiles.json` — each profile lists its specs, and a profile may
+Release membership lives in `$SKILL/release-profiles.json` — each profile lists its specs, and a profile may
 `extends` another.
 
 `full` is **not** a superset of `partial`. Both extend a shared `common` base; the difference is:
@@ -220,25 +238,31 @@ python3 "$SKILL/scripts/setup_release_runs.py" --release full --milestone-name "
 **Step 3 needs the user's explicit approval.** Show them the dry-run summary and wait; do not run
 the dry-run and `--create` in the same turn.
 
-**Step 4 is mandatory, not optional.** A `--release full` run creates 14 runs, and 9 of them — 2
-Mobile, 3 Desktop, 4 Extension — are
-[multi-configuration runs](references/multi-configuration-runs.md)
+**Step 4 is mandatory, not optional.** Every Mobile, Desktop, and Extension run is one of the
+multi-configuration runs (see [`$SKILL/references/multi-configuration-runs.md`](references/multi-configuration-runs.md))
 that the API can only get halfway. Each one still needs a Testmo UI pass to remove the non-target
-configuration's cases, and until that pass is done the run holds the wrong case set. `--release
-partial` creates 7 runs, 2 of which (both Mobile) need it. Both scripts name the affected runs in
-their output; each spec's `_comment` gives the exact pass for that run.
+configuration's cases, and until that pass is done the run holds the wrong case set. `full` includes
+all three platforms; `partial` includes only Mobile. The dry-run prints the run totals and both
+scripts name every affected run in their output; each spec's `_comment` gives the exact pass for
+that run.
 
 It resolves the milestone by name (fails if missing/ambiguous — the API can't create milestones), derives
-`--period` from the milestone name (override with `--period`), fetches cases/folders once for the whole
-set, and links every run to the milestone.
+`--period` from the milestone name (override with `--period`), fetches the folder tree and the
+unfiltered case list once for the whole set (tag-driven specs each issue their own server-side filtered
+fetch), and links every run to the milestone.
 
 **The target project comes from the specs.** There is no `--project` flag: the orchestrator reads
 `project_id` from every spec in the profile and refuses to run if they disagree, matching
 `testmo_create_run.py`, which has always treated the spec as authoritative. A flag that outranked each
 spec's own `project_id` could create a spec into a project it was never written for.
 
-It creates as many runs as it can rather than stopping at the first failure, then prints a
-`created / skipped / failed` tally. A partial failure names each run that did not make it — by run name
+`--create` refuses the whole release if any dry-run row is not `ready` — `NEEDS CONFIG_ID`,
+`NEEDS --period`, or `EMPTY — 0 cases` (almost always a renamed tag or folder). Fix the spec, or
+`--exclude` it if this release does not need it; the release is never created with runs quietly
+missing.
+
+Once every row is ready, it creates as many runs as it can rather than stopping at the first failure,
+then prints a `created / failed` tally. A partial failure names each run that did not make it — by run name
 **and** spec name, since multi-config runs share a run name — and exits non-zero, because the milestone is
 then only partly populated.
 
@@ -261,8 +285,9 @@ python3 "$SKILL/scripts/setup_release_runs.py" --release partial \
 
 The excluded specs are listed in the summary header. A name that is not in the profile is a hard error
 rather than a no-op, so a typo cannot silently create the run you meant to skip. Reach for `--exclude` for
-one-off omissions; if a set of runs is skipped every cycle, add a profile to `release-profiles.json`
-instead.
+one-off omissions; if a set of runs is skipped every cycle, add a profile to
+`$SKILL/release-profiles.json` instead (an upstream change — see
+[Where a spec lives](#where-a-spec-lives)).
 
 For a single run, `testmo_create_run.py --spec <file> [--milestone-id N] [--period X]` still works.
 
