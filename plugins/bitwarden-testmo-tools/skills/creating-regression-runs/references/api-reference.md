@@ -1,8 +1,5 @@
 # Testmo API and project 1 field reference
 
-Read this when you need an endpoint, a project id, or the numeric id behind a field value —
-writing a new spec, or checking one that selects the wrong cases.
-
 ## API reference
 
 - **Base:** `https://bitwarden.testmo.net/api/v1`, auth header `Authorization: Bearer $TESTMO_API_KEY`.
