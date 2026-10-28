@@ -7,7 +7,7 @@ The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to pe
 ## Usage
 
 ```bash
-/code-review-local [PR#] | [PR URL] | [--base <ref>] | [--output-dir <path>]
+/code-review-local [PR# | PR URL | --base <ref>] [--output-dir <path>]
 ```
 
 ### Arguments
@@ -148,13 +148,13 @@ The agent uses Bitwarden's standard emoji classification system:
 Review the generated files before manually posting to GitHub:
 
 ```bash
-/code-review-local 123 --output-dir .
+/code-review-local 123 --output-dir /tmp/reviews
 # Review the generated files
-cat code-review-local-PR-123-summary.md
-cat code-review-local-PR-123-inline-comments.md
+cat /tmp/reviews/code-review-local-PR-123-summary.md
+cat /tmp/reviews/code-review-local-PR-123-inline-comments.md
 # Manually post if satisfied
-gh pr comment 123 --body-file code-review-local-PR-123-summary.md
-gh pr review 123 --comment --body "$(cat code-review-local-PR-123-inline-comments.md)"
+gh pr comment 123 --body-file /tmp/reviews/code-review-local-PR-123-summary.md
+gh pr review 123 --comment --body "$(cat /tmp/reviews/code-review-local-PR-123-inline-comments.md)"
 ```
 
 ### Offline Review Workflow
@@ -173,9 +173,9 @@ Integrate with custom tooling or approval processes:
 
 ```bash
 # Generate review
-/code-review-local 789 --output-dir .
+/code-review-local 789 --output-dir /tmp/reviews
 # Process with custom scripts
-python process_review.py code-review-local-PR-789-summary.md code-review-local-PR-789-inline-comments.md
+python process_review.py /tmp/reviews/code-review-local-PR-789-summary.md /tmp/reviews/code-review-local-PR-789-inline-comments.md
 ```
 
 ### Pre-Commit Validation

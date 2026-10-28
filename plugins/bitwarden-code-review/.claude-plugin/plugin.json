@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-code-review",
-  "version": "2.8.0",
+  "version": "3.0.0",
   "description": "Comprehensive code review system with organization-wide standards.",
   "author": {
     "name": "Bitwarden",
