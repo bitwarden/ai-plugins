@@ -1,0 +1,156 @@
+{
+  "model": "claude-opus-4-8",
+  "should_trigger_pass_rate": 1.0,
+  "should_not_trigger_pass_rate": 1.0,
+  "should_trigger_pass": "10/10",
+  "should_not_trigger_pass": "11/11",
+  "results": [
+    {
+      "query": "PM-41861 passed refinement. what do I need to test?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "I'm picking up QA for the item-types import/export work (PM-32009). work out what has to be tested from the ACs before devs finish so nothing in the story gets missed",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "for every acceptance criterion in the passkey enrollment epic, list the scenarios that would prove it works, including boundaries and invalid input",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "the PO wants a test plan for CL-1221 before sign-off, showing the tests we'll need for each requirement. can you put that together?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "the vault-unlock rework story says the PIN has to be 4 to 8 digits. what test cases does the story need overall, edge values included?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "emergency-access revamp epic is ready. give me the test design for each child story and show where gaps in the requirements leave nothing to test against",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "what scenarios should QA cover for PM-42838 now that the design question got answered?",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "need a plan of what to test for the billing upgrade flow story, traced back to its acceptance criteria, so I can show coverage in refinement",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "derive test scenarios from the ACs on PM-41861 and tell me which ones belong pre-merge vs after the feature works",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "before dev starts on the org-vault export epic, figure out the full set of tests each story needs from what's written in the tickets",
+      "should_trigger": true,
+      "triggers": 7,
+      "runs": 7,
+      "trigger_rate": 1.0
+    },
+    {
+      "query": "is PM-123 ready to build, or does it need more detail before we test it?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "review the acceptance criteria on PM-456 for gaps and ambiguity",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "which layer should the new PM-789 tests go at, unit or component?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "are unit tests enough for the PM-234 change, or do we need integration tests?",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write manual Gherkin test cases for PM-345 that I can import into Testmo",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write the Testmo test cases for the acceptance criteria on PM-567",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "break down PM-678 into a work plan with testing phases",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "create a work plan with verification tasks for the PM-890 epic",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "identify the requirements and clarify the ambiguities in PM-112",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write a spec from this ticket, PM-223",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    },
+    {
+      "query": "write the Playwright tests for the acceptance criteria on PM-345",
+      "should_trigger": false,
+      "triggers": 0,
+      "runs": 7,
+      "trigger_rate": 0.0
+    }
+  ]
+}

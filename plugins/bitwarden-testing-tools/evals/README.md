@@ -44,7 +44,7 @@ timeout — `--timeout` bounds anything that stalls.
   a non-trigger and warns on stderr, so a slow run is not silently read as a real failure.
 - `--model` (default `claude-opus-4-8`) — pass the same model the baseline was recorded on so
   verdicts are comparable. Each `baseline.json` records its model in a top-level `model` field;
-  match it. Both current baselines were recorded on `claude-opus-4-8`, the model most users run.
+  match it. All four current baselines were recorded on `claude-opus-4-8`, the model most users run.
 
 ## Running
 
@@ -68,8 +68,9 @@ python3 ../../../evals/run_real_eval.py \
 
 A 20-query set at `--runs-per-query 7` is 140 `claude -p` invocations; with 3 workers it takes
 several minutes. `--num-workers` is the memory knob (see _Arguments_). The two coverage skills
-share trigger space, so after any description change to one, re-run the other's eval too to
-confirm neither cannibalizes the other's triggers.
+share trigger space, and so do `assessing-requirement-readiness` and `designing-test-plans`. After
+a description change to either skill in a pair, re-run both evals in that pair to confirm neither
+cannibalizes the other's triggers.
 
 ## Regression check
 
@@ -94,7 +95,10 @@ description change.
 
 ## Known below-threshold queries
 
-None. On `claude-opus-4-8` both baselines pass every query: `recommending-test-layers` at 10/10
+- `assessing-requirement-readiness`: `is CL-1221 actually testable or is it hand-wavy`, 2/7 should-trigger on `claude-opus-4-8`. Too short and vague to route.
+- `assessing-requirement-readiness`: `the autofill story we're refining next has a figma link and two lines of description. will that hold up or should I send it back to the PO now?`, 2/7 should-trigger on `claude-opus-4-8`. Names no Jira ticket, and the skill starts from a Jira story.
+
+On `claude-opus-4-8` the `recommending-test-layers` and `assessing-test-coverage` baselines pass every query: `recommending-test-layers` at 10/10
 should-trigger and 10/10 should-not-trigger, `assessing-test-coverage` likewise 10/10 and 10/10.
 The mechanism still allows a baseline to _record_ a should-trigger query below threshold and diff
 clean; when the model was `claude-sonnet-5`, `assessing-test-coverage`'s branch-audit phrasing
