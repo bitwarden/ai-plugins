@@ -4,7 +4,7 @@
 
 - **Base:** `https://bitwarden.testmo.net/api/v1`, auth header `Authorization: Bearer $TESTMO_API_KEY`.
 - **Projects:** `1` = **Bitwarden** (live: ~13.7k cases), `2` = **Pretend** (sandbox), `11` = Automation -
-  Test, `14` = Archive. Every shipped spec targets project `1`. Project `2` is safe for exercising the
+  Test, `14` = Archive. Project `2` is safe for exercising the
   script's write path, but it does **not** mirror project 1's folders, tags, or configurations, so a spec
   cannot be validated there — a dry-run against it proves nothing about the case set the spec will select.
 - **Pagination quirk:** `per_page` only accepts specific values (100 works; 5/10 return HTTP 422). Omit
@@ -30,5 +30,4 @@ milestone_id?, config_id?, tags?, note?}`. Run `state_id`s (from `/projects/{id}
   33=Secrets Manager, 34=Tools, 35=UI Foundation, 36=Vault.
 - **Top-level folders** (partial list — `GET /projects/1/folders` is authoritative): Web=3136,
   Extension=2779, Mobile=3010, Desktop=2923, CLI=2858, API=3390, Passwordless=3103, and
-  "Directory Connector (BWDC)" (id not captured; `specs/directory-connector-regression.json` resolves it
-  by path). (Excluded as junk: "Retired Test Cases"=81330, "Need to be deleted"=371518.)
+  "Directory Connector (BWDC)" (id not captured; resolve it by path). (Excluded as junk: "Retired Test Cases"=81330, "Need to be deleted"=371518.)
