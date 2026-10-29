@@ -119,8 +119,7 @@ A subagent's returned text is posted nowhere. An abort that only returns text is
 silent, and leaves the workflow's placeholder comment looking like a review that found nothing.
 `Skill(posting-review-summary)` owns the routing, and its first row is local mode keyed on the
 caller's declaration — so the abort lands in the same summary file a normal local review
-writes. Naming a destination here instead would risk writing a file the active mode does not
-read, which is as silent as writing nothing.
+writes.
 
 ## Why this path guesses no second candidate
 

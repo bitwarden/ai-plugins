@@ -1,8 +1,6 @@
 # `/code-review-local` - Local Code Review Skill
 
-## Overview
-
-The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to perform comprehensive code reviews of **GitHub pull requests or local git changes**, writing the review findings to **local files** instead of posting them to GitHub. This enables offline review workflows, preview capabilities before posting, pre-commit validation, and integration with custom review processes.
+Reviews a GitHub pull request or your local git changes with the `bitwarden-code-reviewer` agent and writes the review to local files instead of posting it. Use it to preview a review before it goes on a pull request, to review a branch that has no pull request yet, or to feed a review into your own tooling.
 
 ## Usage
 
@@ -10,86 +8,64 @@ The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to pe
 /code-review-local [PR# | PR URL | --base <ref>] [--output-dir <path>]
 ```
 
-### Arguments
+- **`PR#` or `PR URL`**: the pull request to review, by number or full URL
+- **`--base <ref>`**: for local changes only, the ref the branch is diffed against instead of `origin/HEAD`. Use the remote-tracking form (`origin/rc`): a bare `rc` needs a local branch of that name, which can sit behind the remote. Dropped with a pull request target, where GitHub's recorded base is used. The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`
+- **`--output-dir <path>`**: directory for the review files. Defaults to `${CLAUDE_PLUGIN_DATA}/code-reviews/`
+- **No arguments**: the command asks whether to review a pull request or the local changes
 
-- **`[PR#]`** (optional): Pull request number (e.g., `123`)
-- **`[PR URL]`** (optional): Full GitHub PR URL (e.g., `https://github.com/bitwarden/clients/pull/123`)
-- **`[--base <ref>]`** (optional): Ref that local mode diffs the branch against, in place of `origin/HEAD`. Prefer the remote-tracking form (`origin/rc`) over a bare branch name: a bare `rc` resolves only against a local branch of that name, which may not exist and which can sit behind the remote. Applies to local changes only; it is dropped with a PR target, where GitHub's recorded base is used. Only the space-separated pair is accepted, and the ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$` — any other form is refused before the review starts
-- **`[--output-dir <path>]`** (optional): Directory to write the review files to. Defaults to `${CLAUDE_PLUGIN_DATA}/code-reviews/`
-- **No arguments**: The command will ask interactively whether to review a PR or local changes
+Only the space-separated forms are accepted. `--base=rc`, `--output-dir=foo`, or a flag with no value is refused before the review starts.
 
-### Examples
-
-#### Review GitHub Pull Requests
+## Examples
 
 ```bash
-# Review by PR number
+# A pull request, by number or URL
 /code-review-local 123
-
-# Review by full URL
 /code-review-local https://github.com/bitwarden/mobile/pull/4567
-```
 
-#### Review Local Changes
-
-```bash
-# Interactive mode - choose to review local changes when prompted
+# Local changes: choose "local changes" when asked
 /code-review-local
-# When asked for PR number, indicate you want to review local changes instead
 
-# On a branch cut from a release branch, name the base you cut from.
-# Without it the three-dot diff takes the merge base with trunk and
-# sweeps in every commit the release branch already carries.
-# Use the remote-tracking ref: a bare `rc` needs a local branch of
-# that name, and a local branch can sit behind the remote.
+# A branch cut from a release branch
 /code-review-local --base origin/rc
 
-# The agent reviews one scope, not both:
-# - The branch against its base, when it has commits ahead of that base
-# - Otherwise your pending changes (tracked edits plus untracked files)
+# Somewhere other than the default directory
+/code-review-local 123 --output-dir /tmp/reviews
 ```
 
-## Output Files
+For local changes the agent reviews one scope, not both: the branch against its base when it has commits ahead of that base, otherwise your pending changes (tracked edits plus untracked source files). To review uncommitted edits on a branch that is already ahead of its base, commit them first and re-run. The summary names the scope and the base it used. A `--base` ref that does not resolve produces a No Verdict rather than a review of some other scope.
 
-The command writes two markdown files to `${CLAUDE_PLUGIN_DATA}/code-reviews/`, or to `--output-dir` when given, named `code-review-local-PR-<n>-*.md` for a PR or `code-review-local-<branch>-<YYYY-MM-DD>-*.md` for local changes. Writes under `~/.claude/` ask for approval, so headless runs (`claude -p`) need `--output-dir` set to an allowed directory.
+## Output files
 
-### 1. Summary file
+The agent, not this command, decides where the files go and what they are called; the command only passes `--output-dir` through. The [agent flow diagrams](../../docs/code-review-agent-flows.md) show the rule.
 
-Contains the overall summary comment (via `Skill(posting-review-summary)`).
+| Target        | Files                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Pull request  | `code-review-local-PR-<n>-summary.md`, `code-review-local-PR-<n>-inline-comments.md`                               |
+| Local changes | `code-review-local-<branch>-<YYYY-MM-DD>-summary.md`, `code-review-local-<branch>-<YYYY-MM-DD>-inline-comments.md` |
 
-**Format for PRs with issues:**
+Both land in `${CLAUDE_PLUGIN_DATA}/code-reviews/`, or in `--output-dir` when given, and the command prints the full path of each. Writes under `~/.claude/` ask for approval, so headless runs (`claude -p`) need `--output-dir` set to an allowed directory.
+
+**Summary file.** The summary comment, in the format `posting-review-summary` posts to GitHub:
 
 ```markdown
-**Overall Assessment:** REQUEST CHANGES
+## 🤖 Bitwarden Claude Code Review
 
-[1-2 neutral sentences describing what was reviewed]
+**Overall Assessment:** APPROVE / REQUEST CHANGES
+
+[Up to 4 neutral sentences describing what was reviewed]
 
 <details>
 <summary>Code Review Details</summary>
 
-- ❌ **CRITICAL**: [One-line description]
+- ❌ : [One-line description]
   - `filename.ts:42`
-- ⚠️ **IMPORTANT**: [One-line description]
-  - `filename.ts:87`
 
 </details>
-
-See inline comments for details.
 ```
 
-**Format for clean PRs:**
+When nothing could be reviewed it carries the `NO VERDICT` form instead, with the reason in place of the assessment sentences.
 
-```markdown
-**Overall Assessment:** APPROVE
-
-[One neutral sentence describing what was reviewed]
-```
-
-### 2. Inline-comments file
-
-Contains all inline review comments with file and line references that would be posted with `gh pr review --comment`.
-
-**Format:**
+**Inline-comments file.** Every inline comment the agent would have posted, with file and line references. Empty when there are none.
 
 ```markdown
 ## [file-path]:[line-number]
@@ -106,134 +82,21 @@ Contains all inline review comments with file and line references that would be 
 ---
 ```
 
-**Note**: If no inline comments are needed (clean PR), this file will be empty.
-
-## Review Severity Categories
-
-The agent uses Bitwarden's standard emoji classification system:
-
-- **❌ Critical**: Security vulnerabilities, data loss risks, breaking changes
-- **⚠️ Important**: Bugs, incorrect logic, maintainability concerns
-- **♻️ Debt**: Code quality improvements, technical debt
-- **🎨 Suggested**: Measurable improvements with concrete metrics
-- **❓ Question**: Clarifications, suggestions for discussion
-
-## What the Command Does
-
-### For Pull Request Reviews:
-
-1. **Fetches PR data** from GitHub using `gh pr view` and related commands
-2. **Reads existing comments** to avoid duplicates
-3. **Assesses PR metadata and context**
-
-### For Local Changes Reviews:
-
-1. **Analyzes git changes** using `git status`, `git diff`, and `git log`
-2. **Evaluates whichever scope local mode resolves** — the branch against its base, or pending changes when the default base cannot be resolved
-3. **Diffs against `--base` when given, `origin/HEAD` otherwise**, and names the ref it used in the summary
-4. **Falls back to pending changes** when the branch has nothing ahead of its base, or when the default `origin/HEAD` cannot be resolved, and says so in the summary
-5. **Reports No Verdict instead of falling back** when a supplied `--base` does not resolve — the named scope was never computed, and reviewing the working tree instead would answer a question nobody asked
-
-### Common Review Steps:
-
-1. **Applies standard review protocol** following Bitwarden engineering standards
-2. **Evaluates code** against security, correctness, and maintainability standards
-3. **Generates structured review findings** with proper formatting
-4. **Writes output to local files** (never posts to GitHub)
-
-## Use Cases
-
-### Preview Before Posting
-
-Review the generated files before manually posting to GitHub:
+### Posting a reviewed draft
 
 ```bash
 /code-review-local 123 --output-dir /tmp/reviews
-# Review the generated files
 cat /tmp/reviews/code-review-local-PR-123-summary.md
-cat /tmp/reviews/code-review-local-PR-123-inline-comments.md
-# Manually post if satisfied
 gh pr comment 123 --body-file /tmp/reviews/code-review-local-PR-123-summary.md
-gh pr review 123 --comment --body "$(cat /tmp/reviews/code-review-local-PR-123-inline-comments.md)"
 ```
-
-### Offline Review Workflow
-
-Perform code reviews without immediate GitHub access:
-
-```bash
-# Review while offline or in restricted environment
-/code-review-local 456
-# Later, post the reviews when ready
-```
-
-### Custom Review Integration
-
-Integrate with custom tooling or approval processes:
-
-```bash
-# Generate review
-/code-review-local 789 --output-dir /tmp/reviews
-# Process with custom scripts
-python process_review.py /tmp/reviews/code-review-local-PR-789-summary.md /tmp/reviews/code-review-local-PR-789-inline-comments.md
-```
-
-### Pre-Commit Validation
-
-Review your pending changes before committing. This reviews the edits themselves only while the branch has no commits ahead of its base — once it does, the branch-against-base diff wins and your uncommitted edits are not what gets reviewed. Commit first and re-run to cover them.
-
-```bash
-# On a branch level with its base, this reviews the pending edits
-/code-review-local
-# Choose "local changes" when prompted
-# Review findings in the generated files
-# Fix any issues identified
-# Commit when clean
-```
-
-### Training and Learning
-
-Use the output to understand code review best practices:
-
-```bash
-# Generate review to learn from the agent's analysis
-/code-review-local 101
-# Study the findings and reasoning
-```
-
-## Technical Details
-
-- **Model**: Uses the `opus` model
-- **Agent**: Invokes `bitwarden-code-reviewer` specialized agent
-- **GitHub Access**: Read-only via `gh` CLI (requires authentication)
-- **No Posting**: Deliberately does not post to GitHub-output is file-only
 
 ## Requirements
 
-- GitHub CLI (`gh`) installed and authenticated
-- Access to the target repository
-- `bitwarden-code-review` plugin installed
+- GitHub CLI (`gh`) installed and authenticated, for pull request targets
+- The `bitwarden-code-review` plugin installed
 
-## Related Documentation
+## Related documentation
 
 - [Bitwarden Code Review Plugin README](../../README.md)
 - [Bitwarden Code Reviewer Agent](../../agents/bitwarden-code-reviewer/AGENT.md)
-
-## Troubleshooting
-
-### "PR not found" error
-
-- Verify the PR number or URL is correct
-- Ensure you have access to the repository
-- Check that `gh` CLI is authenticated: `gh auth status`
-
-### Empty review files
-
-- Verify the PR has actual changes to review
-- Check that the PR is not already merged/closed
-
-### "Permission denied" errors
-
-- Verify repository access permissions
-- Re-authenticate with `gh auth login`
-- Check that the repository allows code review access
+- [Code review agent flows](../../docs/code-review-agent-flows.md)
