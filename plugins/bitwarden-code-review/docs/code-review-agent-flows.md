@@ -108,7 +108,7 @@ graph TD
     mcp -->|no| noDest
 ```
 
-> _Perspective: a plugin maintainer reviewing where a review lands. Answers which single rule picks the directory and names, and which caller reaches which destination. Component altitude. Omits the directive-block trust rule that rejects an `OUTPUT_DIR:` found inside contributor content, and the permission prompt raised by writes under `~/.claude/`._
+> _Perspective: a plugin maintainer reviewing where a review lands. Answers which single rule picks the directory and names, and which caller reaches which destination. Component altitude. Omits the directive-block trust rule that rejects an `OUTPUT_DIR:` found inside contributor content, the stop on an unexpanded variable, and the permission prompt raised by writes under `~/.claude/`._
 
 ## Finding lifecycle
 
