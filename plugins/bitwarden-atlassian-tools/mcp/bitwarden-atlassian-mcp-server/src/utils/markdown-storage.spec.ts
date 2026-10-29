@@ -376,3 +376,33 @@ describe("markdownToStorage keeps inline markup well-formed", () => {
     }
   });
 });
+
+describe("markdownToStorage nesting limit", () => {
+  it("renders block quotes nested past the limit as plain text, without overflowing", () => {
+    const result = markdownToStorage(">".repeat(10000) + " deep");
+
+    assertWellFormed(result.storage);
+    expect(result.storage).toContain("deep");
+    expect(result.warnings).toEqual([
+      "Content nested more than 50 levels deep was rendered as plain text.",
+    ]);
+  });
+
+  it("does the same for deeply nested lists", () => {
+    const list = Array.from(
+      { length: 3000 },
+      (_, i) => " ".repeat(i * 2) + "- item",
+    ).join("\n");
+    const result = markdownToStorage(list);
+
+    assertWellFormed(result.storage);
+    expect(result.warnings).toHaveLength(1);
+  });
+
+  it("leaves ordinary nesting untouched", () => {
+    const result = markdownToStorage("> > quoted\n\n- a\n  - b\n    - c");
+
+    expect(result.warnings).toEqual([]);
+    expect(result.storage).toContain("<ul><li>c</li></ul>");
+  });
+});

@@ -42,6 +42,13 @@ interface ListMarker {
 const SLOT = "\u0000";
 const HARD_BREAK = "\u0001";
 
+/**
+ * Block quotes and lists nest by recursion. Past this depth their content is
+ * rendered as plain text instead, so pathological nesting cannot exhaust the
+ * call stack. Real documents nest a handful of levels.
+ */
+const MAX_NESTING = 50;
+
 const HR = /^ {0,3}([-*_])(?: *\1){2,} *$/;
 const FENCE_OPEN = /^( {0,3})(`{3,}|~{3,})\s*([\w+#.-]*)/;
 const HEADING = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;
@@ -123,7 +130,19 @@ function interruptsParagraph(lines: string[], i: number): boolean {
   );
 }
 
-function parseBlocks(lines: string[], warnings: string[]): Block[] {
+function parseBlocks(lines: string[], warnings: string[], depth = 0): Block[] {
+  if (depth > MAX_NESTING) {
+    warnings.push(
+      `Content nested more than ${MAX_NESTING} levels deep was rendered as plain text.`,
+    );
+    const text = lines
+      .filter((line) => !isBlank(line))
+      .map((line) => line.trim());
+    return [
+      { kind: "paragraph", html: renderInline(text.join(" "), warnings) },
+    ];
+  }
+
   const blocks: Block[] = [];
   let i = 0;
 
@@ -180,13 +199,16 @@ function parseBlocks(lines: string[], warnings: string[]): Block[] {
         quoted.push(lines[i].replace(/^ {0,3}> ?/, ""));
         i++;
       }
-      const inner = renderBlocks(parseBlocks(quoted, warnings), false);
+      const inner = renderBlocks(
+        parseBlocks(quoted, warnings, depth + 1),
+        false,
+      );
       blocks.push({ kind: "html", html: `<blockquote>${inner}</blockquote>` });
       continue;
     }
 
     if (matchListMarker(line)) {
-      const { html, next } = parseList(lines, i, warnings);
+      const { html, next } = parseList(lines, i, warnings, depth);
       blocks.push({ kind: "html", html });
       i = next;
       continue;
@@ -247,6 +269,7 @@ function parseList(
   lines: string[],
   start: number,
   warnings: string[],
+  depth: number,
 ): { html: string; next: number } {
   const first = matchListMarker(lines[start])!;
   const items: string[][] = [];
@@ -305,7 +328,8 @@ function parseList(
   const tag = first.ordered ? "ol" : "ul";
   const body = items
     .map(
-      (item) => `<li>${renderBlocks(parseBlocks(item, warnings), !loose)}</li>`,
+      (item) =>
+        `<li>${renderBlocks(parseBlocks(item, warnings, depth + 1), !loose)}</li>`,
     )
     .join("");
 
