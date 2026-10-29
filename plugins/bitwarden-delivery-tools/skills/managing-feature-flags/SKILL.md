@@ -67,7 +67,14 @@ Clients are simple consumers. They read flag state from the server's `/config` e
 
 Creating the LaunchDarkly flag is a manual tech-lead or manager step today. Production rollout percentages are a release decision — surface them to the tech lead rather than deciding them during implementation.
 
-Cleanup means removing the flag check and hardcoding the winning variation, then archiving the flag in LaunchDarkly. Both halves are required; a removed code path with a live flag still reads as an active flag.
+Cleanup runs in two steps, because older clients keep reading a flag from the server after newer ones stop checking it. When the server stops returning a flag, clients fall back to their built-in default, usually off, which turns the feature off for anyone still on an older client.
+
+1. **Remove the flag check** from every client and from the server, hardcoding the winning variation. Leave the flag defined in `FeatureFlagKeys` and live in LaunchDarkly, so older clients still receive its value.
+2. **Remove the flag** from `FeatureFlagKeys` and archive it in LaunchDarkly no earlier than three months after the last client release that still checked it, across every client including iOS and Android.
+
+Do not archive the flag during step 1, including through `launchdarkly-flag-cleanup`, which edits code and archives in one pass. A flag that gates writing a new data format other clients read waits longer before step 1: remove the client check no earlier than four months after the first client release that can read the format. The [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility) explains both waits.
+
+Both steps are required. A flag still defined after its step 2 wait has passed is tech debt.
 
 ## Optional: the LaunchDarkly Plugin
 

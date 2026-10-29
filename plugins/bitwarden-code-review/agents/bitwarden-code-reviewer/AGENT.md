@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 2.7.0
+version: 2.7.1
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
@@ -100,7 +100,7 @@ Examine all changed code in priority order:
 
 - **Security** - Authentication, authorization, data exposure, injection risks
 - **Correctness** - Logic errors, null/undefined handling, race conditions
-- **Breaking Changes** - API compatibility, database migrations, configuration changes
+- **Breaking Changes** - API compatibility, database migrations, configuration changes. Judge API compatibility against the [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility): a removed, renamed, or retyped response property, a new required request field, `#[serde(deny_unknown_fields)]` on a type that comes from the server, a direct `ICurrentContext.ClientVersion` check where a feature flag belongs, or a new data format written without a feature flag
 - **Performance** - O(n²) algorithms, memory leaks, unnecessary network calls
 - **Maintainability** - Only after above are satisfied
 

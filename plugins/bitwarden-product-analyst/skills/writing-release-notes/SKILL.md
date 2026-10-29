@@ -35,7 +35,7 @@ The #release Slack thread is posted weekly and specifies which feature flags are
 
 - **Include**: Only user-facing changes whose feature flag is being enabled in this release (or that have no flag) should appear in the notes.
 - **Flags enabled with no matching issue in this release**: don't assume there's nothing to report — see the Step 3 investigation.
-- **Server releases — flag removals**: When a feature flag is being fully removed from the server codebase, this signals that self-hosted users are gaining access to the feature. These must appear in the release notes.
+- **Server releases — flag removals**: When a feature flag's gating logic is removed from the server codebase, self-hosted users gain access to the feature. These must appear in the release notes. Flag cleanup runs in two steps: the gating logic is removed first, and the flag definition stays in `FeatureFlagKeys` for at least three months so older clients keep receiving its value. Removing that leftover definition ships nothing new, so leave it out. Cleanup tickets are typically titled `[Remove - Step 1]` and `[Remove - Step 2]`. Only Step 1 belongs in the notes. See the [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility#feature-flags).
 
 Ask the user to paste the thread content.
 
@@ -85,7 +85,7 @@ Go through every issue in the release and classify it. Only items that pass the 
 
 ### Always include (never collapse) — server releases only
 
-Feature flags that are **fully removed** from the server codebase in this release. Flag removal is the moment self-hosted users gain access to a feature. Write each removal as a user-facing line describing what the feature does — not the internal flag identifier. See Step 4 for format.
+Feature flags whose **gating logic** is removed from the server codebase in this release. That removal is the moment self-hosted users gain access to a feature. Skip removals of a flag definition whose gating logic was already removed in an earlier release. Write each removal as a user-facing line describing what the feature does — not the internal flag identifier. See Step 4 for format.
 
 ### Investigate — flags enabled without a matching release issue
 

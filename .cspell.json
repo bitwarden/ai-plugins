@@ -157,6 +157,7 @@
     "scriptable",
     "SDLC",
     "semver",
+    "serde",
     "shellcheck",
     "shortlog",
     "shortstat",

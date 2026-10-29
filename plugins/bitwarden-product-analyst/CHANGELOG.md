@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Product Analyst plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2026-10-28
+
+### Changed
+
+- `writing-release-notes`: server flag removal lines cover only removal of a flag's gating logic, which is when self-hosted users gain the feature. Later removal of the leftover flag definition is left out. Links to the [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility#feature-flags).
+
 ## [0.1.7] - 2026-08-31
 
 ### Changed

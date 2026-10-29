@@ -59,8 +59,8 @@ If the ADR suggests a solution that does not match the patterns in the code bein
 - **Dual data-access parity:** Every database change requires parallel implementations across database backends. Never ship one without the other.
 - **Open-source stewardship:** Code is public. Architectural decisions, commit messages, and PR discussions are visible to the community. Write them with that audience in mind.
 - **Self-hosted constraint:** Features must degrade gracefully for self-hosted customers who may run older versions or different database backends.
-- **Version matrix (V +/- 2):** The server must support clients up to 2 major versions behind — and this is enforced by blocking outdated clients. Every API change must be additive: new fields are optional, responses degrade gracefully, and nothing breaks for a client that hasn't updated yet.
-- **No formal API versioning:** Breaking changes are actively discouraged. Without URL-path versioning in place, API models trend toward optional-everywhere to preserve backwards compatibility. Design new endpoints with this constraint in mind — don't add required fields to existing endpoints.
+- **Version compatibility (V +/- 2):** Every server release works with clients up to two months older or newer, and every client works with servers in the same range. In practice the server keeps serving clients up to two months older, and clients keep working with self-hosted servers up to two months older. Old behavior can be removed three months after the last release that depends on it. Outdated clients are not blocked, except to protect user data. Read the [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility) before designing any change that crosses the client-server boundary.
+- **No formal API versioning:** Without URL-path versioning, request and response shapes only change additively until the old shape ages out. New request fields are optional, and removing, renaming, or retyping a field waits three months after the last client that uses it. Don't add required fields to existing endpoints.
 
 ## Working with the Architecture Group (Holistic Coherence)
 
