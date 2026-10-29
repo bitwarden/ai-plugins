@@ -19,6 +19,8 @@ import {
   ConfluenceChildPagesResult,
   ConfluenceCqlSearchParams,
   ConfluenceCqlSearchResult,
+  ConfluencePageCreateRequest,
+  ConfluenceSpace,
 } from "./types.js";
 
 export class ConfluenceClient {
@@ -27,8 +29,8 @@ export class ConfluenceClient {
   private readonly API_BASE = "/wiki/api/v2";
   private readonly API_V1_BASE = "/wiki/rest/api";
 
-  constructor() {
-    this.config = loadConfluenceConfig();
+  constructor(mode: "read" | "write" = "read") {
+    this.config = loadConfluenceConfig(mode);
     this.client = axios.create({
       baseURL: this.config.gatewayBaseUrl,
       headers: getConfluenceHeaders(this.config),
@@ -94,6 +96,10 @@ export class ConfluenceClient {
     if (params.includeBody !== false) {
       const format = params.bodyFormat || "storage";
       queryParams["body-format"] = format;
+    }
+
+    if (params.getDraft) {
+      queryParams["get-draft"] = true;
     }
 
     const response = await this.client.get<ConfluencePage>(
@@ -296,6 +302,31 @@ export class ConfluenceClient {
     const response = await this.client.get<ConfluenceSpacesResult>(
       `${this.API_BASE}/spaces`,
       { params: queryParams },
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Get a single space by id
+   */
+  async getSpace(spaceId: string): Promise<ConfluenceSpace> {
+    const response = await this.client.get<ConfluenceSpace>(
+      `${this.API_BASE}/spaces/${spaceId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Create a page. Requires a client constructed in "write" mode.
+   */
+  async createPage(
+    payload: ConfluencePageCreateRequest,
+  ): Promise<ConfluencePage> {
+    const response = await this.client.post<ConfluencePage>(
+      `${this.API_BASE}/pages`,
+      payload,
     );
 
     return response.data;

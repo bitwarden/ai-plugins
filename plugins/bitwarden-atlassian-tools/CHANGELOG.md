@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-10-29
+
+### Added
+
+- `create_confluence_page` creates an unpublished Confluence draft from markdown, in a space and optionally under a parent page. Like the Jira write tools, it defaults to a dry run, writes only on `dryRun: false`, and reads the draft back to check it. It needs a new, optional `ATLASSIAN_CONFLUENCE_WRITE_TOKEN` with the `write:page:confluence` scope; the Jira write token is never used for Confluence.
+
 ## [2.7.7] - 2026-10-21
 
 ### Fixed

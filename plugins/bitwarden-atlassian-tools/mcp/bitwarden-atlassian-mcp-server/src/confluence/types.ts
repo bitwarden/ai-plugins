@@ -73,7 +73,17 @@ export interface ConfluencePage {
     editui: string;
     tinyui: string;
     self: string;
+    base?: string;
   };
+}
+
+/** Body of `POST /wiki/api/v2/pages`, creating an unpublished draft. */
+export interface ConfluencePageCreateRequest {
+  spaceId: string;
+  status: "draft";
+  title: string;
+  parentId?: string;
+  body: { representation: "storage"; value: string };
 }
 
 export interface ConfluenceSearchResult {
@@ -89,6 +99,8 @@ export interface ConfluenceGetPageParams {
   pageId: string;
   includeBody?: boolean;
   bodyFormat?: "storage" | "view" | "export_view";
+  /** Return the page's unpublished draft. */
+  getDraft?: boolean;
 }
 
 export interface ConfluenceSearchParams {
