@@ -20,7 +20,9 @@ The template's Content-Security-Policy is a second line of defense: it lets only
 
 ## Placeholders
 
-Self-explanatory: `{{DATE}}`, `{{SUBTITLE}}`, `{{STAT_REPOS}}`, `{{STAT_SESSIONS}}`, `{{STAT_PRS_OPENED}}`, `{{STAT_PRS_APPROVED}}`, `{{STAT_GH_EVENTS}}`, `{{STANDUP_SHIPPED}}`, `{{STANDUP_NEXT}}`, `{{THEME_PARAGRAPHS}}`, `{{GENERATED_AT}}`. `{{DATE}}` appears several times; replace every occurrence.
+Self-explanatory: `{{DATE}}`, `{{SUBTITLE}}`, `{{STAT_REPOS}}`, `{{STAT_SESSIONS}}`, `{{STAT_PRS_OPENED}}`, `{{STAT_PRS_APPROVED}}`, `{{STAT_GH_EVENTS}}`, `{{STANDUP_PAST}}`, `{{STANDUP_NEXT}}`, `{{STANDUP_BLOCKERS}}`, `{{THEME_PARAGRAPHS}}`, `{{GENERATED_AT}}`. `{{DATE}}` appears several times; replace every occurrence.
+
+`{{STANDUP_RAG}}` is `green`, `amber`, or `red` and colors the card's status dot. `{{STANDUP_BLUF}}` is one HTML-escaped sentence. `{{STANDUP_LABEL_PAST}}` and `{{STANDUP_LABEL_NEXT}}` are `Yesterday` and `Today`. `{{STANDUP_PERIOD}}` is `Workday · {DATE}`.
 
 `{{STAT_JIRA_ISSUES}}` is the length of `jira.issues`; `{{STAT_CONFLUENCE_PAGES}}` is the length of `confluence.pages`. Each is `—` when its source is `null` (not collected), distinct from `0` (collected, nothing found). For a multi-day range, sum each day's count, deduping by issue key for Jira and by page `url` for Confluence.
 

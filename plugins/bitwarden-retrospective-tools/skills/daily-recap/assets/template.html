@@ -287,6 +287,15 @@
         margin-bottom: 32px;
         position: relative;
       }
+      .standup[data-rag="green"] {
+        border-left-color: var(--green);
+      }
+      .standup[data-rag="amber"] {
+        border-left-color: var(--amber);
+      }
+      .standup[data-rag="red"] {
+        border-left-color: var(--red);
+      }
       .standup-header {
         display: flex;
         align-items: center;
@@ -340,9 +349,34 @@
         color: var(--red);
         border-color: var(--red);
       }
+      .standup-bluf {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--text);
+      }
+      .standup-rag-dot {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--text-muted);
+      }
+      .standup[data-rag="green"] .standup-rag-dot {
+        background: var(--green);
+      }
+      .standup[data-rag="amber"] .standup-rag-dot {
+        background: var(--amber);
+      }
+      .standup[data-rag="red"] .standup-rag-dot {
+        background: var(--red);
+      }
       .standup-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 20px;
       }
       @media (max-width: 720px) {
@@ -384,6 +418,14 @@
         left: 0;
         top: 0;
         color: var(--amber);
+        font-weight: 700;
+      }
+      .standup-col.blockers li::before {
+        content: "!";
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: var(--red);
         font-weight: 700;
       }
       .standup-col li strong {
@@ -991,25 +1033,40 @@
 
       {{TODAY_BANNER}}
 
-      <div class="standup" id="standup" data-date="{{DATE}}">
+      <div
+        class="standup"
+        id="standup"
+        data-date="{{DATE}}"
+        data-rag="{{STANDUP_RAG}}"
+      >
         <div class="standup-header">
           <div class="standup-title">Standup Recap · 30s read</div>
           <div style="display: flex; align-items: center; gap: 10px">
-            <span class="standup-meta">Workday · {{DATE}}</span>
+            <span class="standup-meta">{{STANDUP_PERIOD}}</span>
             <button class="standup-copy" id="copy-standup">Copy</button>
           </div>
         </div>
+        <p class="standup-bluf">
+          <span class="standup-rag-dot" aria-hidden="true"></span
+          >{{STANDUP_BLUF}}
+        </p>
         <div class="standup-grid">
           <div class="standup-col yesterday">
-            <h3>What I shipped</h3>
+            <h3>{{STANDUP_LABEL_PAST}}</h3>
             <ul>
-              {{STANDUP_SHIPPED}}
+              {{STANDUP_PAST}}
             </ul>
           </div>
           <div class="standup-col next">
-            <h3>Today / Blockers</h3>
+            <h3>{{STANDUP_LABEL_NEXT}}</h3>
             <ul>
               {{STANDUP_NEXT}}
+            </ul>
+          </div>
+          <div class="standup-col blockers">
+            <h3>Blockers</h3>
+            <ul>
+              {{STANDUP_BLOCKERS}}
             </ul>
           </div>
         </div>
