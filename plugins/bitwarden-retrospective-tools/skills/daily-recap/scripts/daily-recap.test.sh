@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # daily-recap.test.sh
 # Tests for date-utils.sh, gather-gh-events.sh, gather-atlassian.sh, gather-gh-search.sh,
-# and find-sessions.sh.
+# find-sessions.sh, and the template's CSP script hash.
 #
 # Usage: ./daily-recap.test.sh
 #
@@ -20,6 +20,7 @@ GATHER="${SCRIPT_DIR}/gather-gh-events.sh"
 GATHER_ATLASSIAN="${SCRIPT_DIR}/gather-atlassian.sh"
 GATHER_SEARCH="${SCRIPT_DIR}/gather-gh-search.sh"
 FIND="${SCRIPT_DIR}/find-sessions.sh"
+TEMPLATE="${SCRIPT_DIR}/../assets/template.html"
 
 command -v jq >/dev/null 2>&1 || {
   echo "Error: jq is required to run these tests"
@@ -1279,6 +1280,28 @@ find_sessions "${END}" "${START}"
 assert_eq "reversed window: exits 1" 1 "${STATUS}"
 OUT="$(env HOME="${FAKE_HOME}" CLAUDE_CONFIG_DIR="${WORK_DIR}/missing" bash "${FIND}" "${START}" "${END}" 2>&1)"
 assert_contains "missing log directory: says where it looked" "no Claude Code session logs found at ${WORK_DIR}/missing/projects" "${OUT}"
+echo ""
+
+# ---------------------------------------------------------------------------
+# template.html CSP script hash. The Content-Security-Policy pins the inline
+# <script> by its SHA-256 hash; if the script is edited without recomputing the
+# hash, the page still renders but filtering and Copy silently stop working.
+# ---------------------------------------------------------------------------
+echo "[16] template.html CSP script hash"
+if ! command -v perl >/dev/null 2>&1 || ! command -v openssl >/dev/null 2>&1; then
+  echo "  (skipped: perl and openssl are required for this case)"
+else
+  SCRIPT_HASH="$(perl -0777 -ne 'print $1 if /<script>(.*?)<\/script>/s' "${TEMPLATE}" | openssl dgst -sha256 -binary | openssl base64)"
+  CSP_HASH="$(grep -o "sha256-[^']*" "${TEMPLATE}" | head -1 | sed 's/^sha256-//')"
+  if [[ "${SCRIPT_HASH}" == "${CSP_HASH}" ]]; then
+    pass "CSP sha256 hash matches the <script> block"
+  else
+    fail "CSP sha256 hash matches the <script> block"
+    echo "     expected (from <script>): ${SCRIPT_HASH}"
+    echo "     got (from CSP meta):      ${CSP_HASH}"
+    echo "     see README.md 'Maintaining the Template' to regenerate the hash"
+  fi
+fi
 echo ""
 
 echo "=== ${PASSED} passed, ${FAILED} failed ==="

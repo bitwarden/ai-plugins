@@ -11,7 +11,7 @@
 -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'sha256-UaE3qkKXMshJcRk0cgb29R6GGeMefCWzFJL1E9E7c/Y='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'"
+      content="default-src 'none'; script-src 'sha256-Zl4m3DTqpEYUEe4Zy9EQ3w2LiQg3VAHrHW6/bLOBi2E='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'"
     />
     <title>Daily Recap · {{DATE}}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1140,7 +1140,6 @@
         const projectsView = document.getElementById("projects-view");
         const timelineView = document.getElementById("timeline-view");
         const viewToggleBtns = document.querySelectorAll(".view-toggle button");
-        const recapDate = document.getElementById("standup").dataset.date;
 
         const counts = { all: streams.length };
         streams.forEach((s) => {
@@ -1260,18 +1259,55 @@
             copyBtn.classList.remove(cls);
           }, 2000);
         }
+        const RAG_SHORTCODES = {
+          green: ":large_green_circle:",
+          amber: ":large_orange_circle:",
+          red: ":red_circle:",
+        };
+        const collapse = (s) => s.replace(/\s+/g, " ").trim();
+        // Walks a node's children, turning <a> into [text](href) (href's parens
+        // percent-encoded so they cannot break the markdown), <code> into `text`, and
+        // any other element into its own children's text, recursively.
+        function inlineMarkdown(node) {
+          let out = "";
+          node.childNodes.forEach((child) => {
+            if (child.nodeType === Node.TEXT_NODE) {
+              out += child.textContent;
+            } else if (child.tagName === "A") {
+              const href = child
+                .getAttribute("href")
+                .replace(/\(/g, "%28")
+                .replace(/\)/g, "%29");
+              out += `[${collapse(child.textContent)}](${href})`;
+            } else if (child.tagName === "CODE") {
+              out += "`" + collapse(child.textContent) + "`";
+            } else {
+              out += inlineMarkdown(child);
+            }
+          });
+          return out;
+        }
+        function bulletsFor(col) {
+          const items = Array.from(col.querySelectorAll("li"))
+            .map((li) => collapse(inlineMarkdown(li)))
+            .filter((text) => text.length > 0);
+          return items.length
+            ? items.map((text) => "- " + text).join("\n")
+            : "- None";
+        }
         copyBtn.addEventListener("click", () => {
-          const shipped = Array.from(
-            document.querySelectorAll(".standup-col.yesterday li"),
-          )
-            .map((li) => "✓ " + li.textContent.trim())
+          const standup = document.getElementById("standup");
+          const shortcode = RAG_SHORTCODES[standup.dataset.rag];
+          const bluf = collapse(
+            document.querySelector(".standup-bluf").textContent,
+          );
+          const sections = Array.from(document.querySelectorAll(".standup-col"))
+            .map((col) => {
+              const label = collapse(col.querySelector("h3").textContent);
+              return "`" + label + ":`\n" + bulletsFor(col);
+            })
             .join("\n");
-          const next = Array.from(
-            document.querySelectorAll(".standup-col.next li"),
-          )
-            .map((li) => "→ " + li.textContent.trim())
-            .join("\n");
-          const text = `Standup · ${recapDate}\n\nWhat I shipped:\n${shipped}\n\nToday / Blockers:\n${next}`;
+          const text = `${shortcode ? shortcode + " " : ""}${bluf}\n\n${sections}`;
           const viaApi =
             navigator.clipboard && window.isSecureContext
               ? navigator.clipboard.writeText(text)
