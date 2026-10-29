@@ -335,13 +335,16 @@ describe("images the converter skips", () => {
     expect(JSON.stringify(doc)).not.toContain('"media"');
   });
 
-  it("falls back when only one of two same-URL images survives", () => {
-    const body =
-      "![x](https://example.com/p.png)\n\n- ![x](https://example.com/p.png)";
-
-    expect(allText(buildCommentAdf(body).content)).toBe(
-      "![x](https://example.com/p.png)- ![x](https://example.com/p.png)",
+  it("sends only the block whose same-URL image was skipped verbatim", () => {
+    const doc = buildCommentAdf(
+      "![x](https://example.com/p.png)\n\n- ![x](https://example.com/p.png)",
     );
+
+    expect(doc.content.map((node) => node.type)).toEqual([
+      "mediaSingle",
+      "paragraph",
+    ]);
+    expect(allText(doc.content)).toBe("- ![x](https://example.com/p.png)");
   });
 
   it.each([
@@ -391,6 +394,30 @@ describe("block-level HTML", () => {
 
     expect(doc.content).toHaveLength(3);
     expect(allText(doc.content)).toBe("Before<div>the requirement</div>After");
+  });
+});
+
+describe("fallback scope", () => {
+  // The verbatim fallback applies per top-level block, so one generic or
+  // footnote costs only its own block its formatting.
+  it("keeps a list rendering after a paragraph carrying HTML", () => {
+    const doc = buildCommentAdf(
+      "Use **List<String>** here\n\n- item one\n- item two",
+    );
+
+    expect(doc.content[0]).toEqual(paragraph("Use **List<String>** here"));
+    expect(doc.content[1].type).toBe("bulletList");
+  });
+
+  it("keeps a paragraph rendering before a footnote definition", () => {
+    const doc = buildCommentAdf("Text with **bold**[^1].\n\n[^1]: note");
+
+    expect(JSON.stringify(doc.content[0])).toContain('"strong"');
+    expect(doc.content[1]).toEqual(paragraph("[^1]: note"));
+  });
+
+  it("falls back for the whole body when no block yields content", () => {
+    expect(buildCommentAdf("<br>").content).toEqual([paragraph("<br>")]);
   });
 });
 
@@ -526,13 +553,13 @@ describe("line breaks on the verbatim path", () => {
     ]);
   });
 
-  it("still splits blank-line-separated blocks into paragraphs", () => {
+  it("sends only the block carrying HTML verbatim", () => {
     const doc = buildCommentAdf("a<br>\nb\n\nc\nd");
 
     expect(doc.content).toHaveLength(2);
     expect(doc.content.map((node) => allText([node]))).toEqual([
       "a<br>b",
-      "cd",
+      "c d",
     ]);
   });
 

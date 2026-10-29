@@ -102,7 +102,10 @@ const addIssueCommentTool: ToolDefinition = {
         description:
           "Comment body as markdown. Blank lines separate paragraphs; " +
           "**bold**, links, `code`, fenced code blocks, bullet and numbered " +
-          "lists, and tables are all preserved.",
+          "lists, and tables are all preserved. " +
+          "Write a literal `<` inside backticks or as `\\<`; a block that " +
+          "carries raw HTML or a link reference definition is sent as " +
+          "plain text.",
       },
       dryRun: {
         type: "boolean",

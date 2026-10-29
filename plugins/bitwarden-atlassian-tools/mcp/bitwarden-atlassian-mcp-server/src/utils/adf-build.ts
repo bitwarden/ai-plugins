@@ -9,13 +9,13 @@
  * comment bodies, both authored as markdown. Both go through marklassian
  * instead of hand-built text nodes, so emphasis, links, inline and fenced
  * code, lists, headings, blockquotes, and tables survive the trip into Jira.
- * Targets outside a scheme allowlist are dropped on the way through, and an
- * entry carrying raw HTML or a link reference definition is sent as plain text
+ * Targets outside a scheme allowlist are dropped on the way through, and a
+ * block carrying raw HTML or a link reference definition is sent as plain text
  * so none of its text is lost to markup the converter would discard.
  */
 
 import { markdownToAdf } from "marklassian";
-import { marked } from "marked";
+import { marked, type Token } from "marked";
 
 /**
  * A single ADF node. Deliberately open: markdown converts into any of ADF's
@@ -187,20 +187,15 @@ function sanitizeNode(node: AdfNode): AdfNode | null {
 const DISCARDED_TOKEN_TYPES = new Set(["html", "def"]);
 
 /**
- * Whether markdown carries a token the converter would discard.
+ * Walk anything the lexer returns looking for a discarded token.
  *
  * The question is asked of marked, the lexer marklassian itself parses with,
  * so the answer matches what the converter will actually do. Recognizing the
  * constructs by hand cannot: a stray fence run, a four-space indented block, an
  * unmatched backtick and an autolink all hinge on lexical context, and every
  * approximation of it mistook one for another.
- */
-function containsDiscardedToken(markdown: string): boolean {
-  return hasDiscardedToken(marked.lexer(markdown));
-}
-
-/**
- * Walk anything the lexer returns looking for a discarded token. Tokens nest
+ *
+ * Tokens nest
  * differently by kind, with children under `tokens`, `items`, `header` and
  * `rows`, so this recurses over every value rather than naming those keys and
  * silently missing a nesting the next marked release introduces.
@@ -270,26 +265,24 @@ function collectAttr(
  *
  * This runs before sanitization, which drops unsafe targets on purpose.
  */
-function dropsImage(markdown: string, converted: AdfNode[]): boolean {
+function dropsImage(block: Token, converted: AdfNode[]): boolean {
   const remaining = collectAttr(
     converted,
     "media",
     (node) => (node.attrs as Record<string, unknown> | undefined)?.url,
   );
 
-  return collectAttr(marked.lexer(markdown), "image", (node) => node.href).some(
-    (href) => {
-      const index = remaining.indexOf(href);
+  return collectAttr(block, "image", (node) => node.href).some((href) => {
+    const index = remaining.indexOf(href);
 
-      if (index === -1) {
-        return true;
-      }
+    if (index === -1) {
+      return true;
+    }
 
-      remaining.splice(index, 1);
+    remaining.splice(index, 1);
 
-      return false;
-    },
-  );
+    return false;
+  });
 }
 
 /**
@@ -340,38 +333,55 @@ function plainParagraphs(text: string): AdfNode[] {
 }
 
 /**
- * Convert one markdown string into sanitized ADF block nodes.
+ * Convert one top-level block into sanitized ADF block nodes.
  *
- * Markdown carrying no renderable blocks converts to an empty document:
- * `<details>`, `<br>`, an HTML comment, and a bare link reference all do,
- * because raw HTML is discarded rather than rendered. Jira also rejects a
- * comment whose body has no content. Before this module parsed markdown, such
- * text reached Jira verbatim, so it falls back to a single plain-text
- * paragraph and no author's words are ever silently dropped.
+ * Markdown carrying no renderable blocks converts to nothing: `<details>`,
+ * `<br>`, an HTML comment, and a bare link reference all do, because raw HTML
+ * is discarded rather than rendered. Before this module parsed markdown, such
+ * text reached Jira verbatim, so it falls back to plain text and no author's
+ * words are ever silently dropped.
  */
-function convertMarkdown(text: string): AdfNode[] {
+function convertBlock(block: Token): AdfNode[] {
   // Raw HTML and link reference definitions would be discarded, taking the
-  // author's characters with them, so the entry is sent as plain text instead.
-  // It forfeits markdown rendering for that entry, which is the deliberate
+  // author's characters with them, so the block is sent as plain text instead.
+  // It forfeits markdown rendering for that block, which is the deliberate
   // trade: text is never lost, and the outcome is predictable from the input
   // rather than depending on which constructs happen to survive conversion.
-  if (containsDiscardedToken(text)) {
-    return plainParagraphs(text);
+  if (hasDiscardedToken(block)) {
+    return plainParagraphs(block.raw);
   }
 
-  const converted = markdownToAdf(text).content;
+  const converted = markdownToAdf(block.raw).content;
 
-  // An image the converter skipped would vanish URL and all, so the entry gets
+  // An image the converter skipped would vanish URL and all, so the block gets
   // the same all-or-nothing treatment as raw HTML.
-  if (dropsImage(text, converted)) {
-    return plainParagraphs(text);
+  if (dropsImage(block, converted)) {
+    return plainParagraphs(block.raw);
   }
 
-  const blocks = converted
+  const nodes = converted
     .map(sanitizeNode)
     .filter((node): node is AdfNode => node !== null);
 
-  return blocks.length > 0 ? blocks : plainParagraphs(text);
+  return nodes.length > 0 ? nodes : plainParagraphs(block.raw);
+}
+
+/**
+ * Convert one markdown string into sanitized ADF block nodes.
+ *
+ * The fallback to plain text applies per top-level block rather than to the
+ * whole string, so a single `List<String>` in one paragraph costs that
+ * paragraph its formatting and leaves the lists, code, and headings around it
+ * rendering. Jira also rejects a comment whose body has no content, so a string
+ * that yields nothing still falls back to plain text as a whole.
+ */
+function convertMarkdown(text: string): AdfNode[] {
+  const nodes = marked
+    .lexer(text)
+    .filter((block) => block.type !== "space")
+    .flatMap(convertBlock);
+
+  return nodes.length > 0 ? nodes : plainParagraphs(text);
 }
 
 /**
