@@ -317,6 +317,46 @@ describe("image target sanitization", () => {
   });
 });
 
+describe("images the converter skips", () => {
+  // marklassian lifts an image to a media node only in some contexts and skips
+  // it in others, so a partial loss must still trigger the verbatim fallback.
+  it.each([
+    ["a list item", "- ![alt](https://example.com/p.png)\n- second"],
+    [
+      "mid-sentence in a list item",
+      "- see ![x](https://example.com/p.png) here",
+    ],
+    ["a heading", "# ![x](https://example.com/p.png) title"],
+  ])("sends an image in %s verbatim", (_label, body) => {
+    const doc = buildCommentAdf(body);
+
+    // `allText` skips the hardBreak each newline becomes on this path.
+    expect(allText(doc.content)).toBe(body.replaceAll("\n", ""));
+    expect(JSON.stringify(doc)).not.toContain('"media"');
+  });
+
+  it("falls back when only one of two same-URL images survives", () => {
+    const body =
+      "![x](https://example.com/p.png)\n\n- ![x](https://example.com/p.png)";
+
+    expect(allText(buildCommentAdf(body).content)).toBe(
+      "![x](https://example.com/p.png)- ![x](https://example.com/p.png)",
+    );
+  });
+
+  it.each([
+    ["a blockquote", "> ![x](https://example.com/p.png)"],
+    [
+      "a table cell",
+      "| a | b |\n| - | - |\n| ![x](https://example.com/p.png) | y |",
+    ],
+  ])("still converts an image in %s", (_label, body) => {
+    expect(JSON.stringify(buildCommentAdf(body))).toContain(
+      '"url":"https://example.com/p.png"',
+    );
+  });
+});
+
 describe("encoded link targets", () => {
   // `new URL` rejects these, so a fallback that assumed "cannot be parsed means
   // relative" would keep them. Anything decoding entities into an href would
@@ -351,6 +391,30 @@ describe("block-level HTML", () => {
 
     expect(doc.content).toHaveLength(3);
     expect(allText(doc.content)).toBe("Before<div>the requirement</div>After");
+  });
+});
+
+describe("raw ADF passthrough", () => {
+  // marklassian copies an `<adf>` block into its output unmodified, which would
+  // carry a target past the scheme allowlist. The block lexes as raw HTML, so
+  // the entry has to arrive as inert text instead.
+  const unsafeLink =
+    '<adf>{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"link","attrs":{"href":"javascript:alert(1)"}}]}]}</adf>';
+
+  it("sends an <adf> block as plain text", () => {
+    const doc = buildCommentAdf(unsafeLink);
+
+    expect(doc.content).toEqual([paragraph(unsafeLink)]);
+  });
+
+  it("sends an <adf> block between paragraphs as plain text", () => {
+    const doc = buildCommentAdf(`Before\n\n${unsafeLink}\n\nAfter`);
+
+    expect(doc.content).toEqual([
+      paragraph("Before"),
+      paragraph(unsafeLink),
+      paragraph("After"),
+    ]);
   });
 });
 

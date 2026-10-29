@@ -11,7 +11,7 @@
  * code, lists, headings, blockquotes, and tables survive the trip into Jira.
  * Targets outside a scheme allowlist are dropped on the way through, and an
  * entry carrying raw HTML or a link reference definition is sent as plain text
- * so none of its characters are lost to markup the converter would discard.
+ * so none of its text is lost to markup the converter would discard.
  */
 
 import { markdownToAdf } from "marklassian";
@@ -224,6 +224,75 @@ function hasDiscardedToken(value: unknown): boolean {
 }
 
 /**
+ * Collect the string `read` returns for every node of `type`, at any depth. Serves
+ * both marked's tokens and marklassian's ADF, which nest differently, so this
+ * recurses over every value for the same reason `hasDiscardedToken` does.
+ */
+function collectAttr(
+  value: unknown,
+  type: string,
+  read: (node: Record<string, unknown>) => unknown,
+  found: string[] = [],
+): string[] {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectAttr(item, type, read, found));
+    return found;
+  }
+
+  if (value === null || typeof value !== "object") {
+    return found;
+  }
+
+  const node = value as Record<string, unknown>;
+
+  if (node.type === type) {
+    const attr = read(node);
+
+    if (typeof attr === "string") {
+      found.push(attr);
+    }
+  }
+
+  Object.values(node).forEach((child) => collectAttr(child, type, read, found));
+
+  return found;
+}
+
+/**
+ * Whether the converter dropped an image the markdown contained.
+ *
+ * marklassian lifts an image to a `media` node only in some contexts (a
+ * top-level paragraph, a blockquote, a table cell) and skips it elsewhere, such
+ * as in a list item or heading, taking its URL and alt text with it. The loss
+ * is partial, so the sibling blocks survive and nothing else notices. Comparing
+ * the lexer's images against the converter's media nodes catches it wherever
+ * it happens, without restating which contexts marklassian supports.
+ *
+ * This runs before sanitization, which drops unsafe targets on purpose.
+ */
+function dropsImage(markdown: string, converted: AdfNode[]): boolean {
+  const remaining = collectAttr(
+    converted,
+    "media",
+    (node) => (node.attrs as Record<string, unknown> | undefined)?.url,
+  );
+
+  return collectAttr(marked.lexer(markdown), "image", (node) => node.href).some(
+    (href) => {
+      const index = remaining.indexOf(href);
+
+      if (index === -1) {
+        return true;
+      }
+
+      remaining.splice(index, 1);
+
+      return false;
+    },
+  );
+}
+
+/**
  * A paragraph of unstyled text, carrying single newlines as hard breaks.
  *
  * ADF renders a newline inside a text node as nothing, so line structure would
@@ -290,8 +359,16 @@ function convertMarkdown(text: string): AdfNode[] {
     return plainParagraphs(text);
   }
 
-  const blocks = markdownToAdf(text)
-    .content.map(sanitizeNode)
+  const converted = markdownToAdf(text).content;
+
+  // An image the converter skipped would vanish URL and all, so the entry gets
+  // the same all-or-nothing treatment as raw HTML.
+  if (dropsImage(text, converted)) {
+    return plainParagraphs(text);
+  }
+
+  const blocks = converted
+    .map(sanitizeNode)
     .filter((node): node is AdfNode => node !== null);
 
   return blocks.length > 0 ? blocks : plainParagraphs(text);
