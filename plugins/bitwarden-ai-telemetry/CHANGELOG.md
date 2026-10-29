@@ -5,6 +5,12 @@ All notable changes to the bitwarden-ai-telemetry plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-10-29
+
+### Fixed
+
+- The session-start record no longer drops, with a false "collector could not be reached" warning, when ZScaler Private Access has been idle. The first connection after idle can take more than one second to complete, so the request timeout is now five seconds and each hook's timeout is ten.
+
 ## [1.5.0] - 2026-10-01
 
 ### Added
