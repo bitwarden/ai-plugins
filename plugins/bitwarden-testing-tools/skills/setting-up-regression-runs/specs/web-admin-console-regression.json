@@ -1,0 +1,19 @@
+{
+  "_comment": "Web Admin Console regression — the 'Web > Admin Console (Organization Management)' tree plus the AC-specific shared folders (TDE - AC, and the Admin Console header bar and left nav), Regression/Smoke, Active, manual only. Case count not yet captured against the Testmo UI — record it here after the next validated dry-run.",
+  "project_id": 1,
+  "run_name": "Admin Console",
+  "run_state_id": 7,
+  "tags": ["regression"],
+  "filters": {
+    "folder_paths": [
+      "Web > Admin Console (Organization Management)",
+      "Web > Shared > TDE > TDE - AC",
+      "Web > Shared > Navigation > Admin Console Header Bar",
+      "Web > Shared > Navigation > Admin Console Left Nav"
+    ],
+    "include_subfolders": true,
+    "test_type_ids": [19, 20],
+    "case_state_ids": [4],
+    "exclude_automation_type_ids": [10, 23, 24]
+  }
+}

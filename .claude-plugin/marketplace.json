@@ -108,7 +108,7 @@
     {
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
-      "version": "1.2.0",
+      "version": "1.4.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     },
     {
@@ -140,6 +140,12 @@
       "source": "./plugins/bitwarden-abacus",
       "version": "0.2.0",
       "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with commit message and pull request conventions."
+    },
+    {
+      "name": "bitwarden-testmo-tools",
+      "source": "./plugins/bitwarden-testmo-tools",
+      "version": "1.0.0",
+      "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks."
     }
   ]
 }

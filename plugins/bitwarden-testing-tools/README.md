@@ -8,17 +8,24 @@ A set of skills that support Bitwarden's testing and quality work with evidence 
 
 ## Skills
 
-| Skill                       | What It Does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `assessing-test-coverage`   | Determines what a change is **already tested by**. From a PR, Jira key, Tech Breakdown, or Testmo CSV, resolves the change surface, finds the existing tests PRs-first, buckets each by layer (unit / integration / E2E), cites it as a stable GitHub permalink, and records untested behaviors as gaps — writing a self-contained markdown report under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`.                                                                                                                                                         |
-| `writing-manual-test-cases` | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`.                                                                                                                                       |
-| `recommending-test-layers`  | Recommends **which tests to add and at which layer**. From a Jira key, Testmo CSV, an `assessing-test-coverage` report, a PR, or a feature description, places each behavior at its lowest sufficient deterministic layer (static / unit / component / contract), then adds non-deterministic layers (integration, E2E, smoke, synthetic monitoring, exploratory) where each one's trigger is met, grading criticality against Bitwarden's Severity guide. Writes a markdown recommendation report under `${CLAUDE_PLUGIN_DATA}/recommending-test-layers/`. |
+| Skill                             | What It Does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assessing-test-coverage`         | Determines what a change is **already tested by**. From a PR, Jira key, Tech Breakdown, or Testmo CSV, resolves the change surface, finds the existing tests PRs-first, buckets each by layer (unit / integration / E2E), cites it as a stable GitHub permalink, and records untested behaviors as gaps — writing a self-contained markdown report under `${CLAUDE_PLUGIN_DATA}/coverage-reports/`.                                                                                                                                                         |
+| `writing-manual-test-cases`       | Authors the **new manual test cases** a change needs. From a Jira ticket, PR, or feature description, gap-checks the requirements, plans the scenario coverage for approval, then drafts Gherkin cases — each classified Smoke / Regression / Functional with a matching Automation Type. Delivers a plain-text file for review and a Testmo-importable CSV under `${CLAUDE_PLUGIN_DATA}/writing-manual-test-cases/`.                                                                                                                                       |
+| `recommending-test-layers`        | Recommends **which tests to add and at which layer**. From a Jira key, Testmo CSV, an `assessing-test-coverage` report, a PR, or a feature description, places each behavior at its lowest sufficient deterministic layer (static / unit / component / contract), then adds non-deterministic layers (integration, E2E, smoke, synthetic monitoring, exploratory) where each one's trigger is met, grading criticality against Bitwarden's Severity guide. Writes a markdown recommendation report under `${CLAUDE_PLUGIN_DATA}/recommending-test-layers/`. |
+| `assessing-requirement-readiness` | Judges whether a Jira story is **READY to build and test**; given an epic, enumerates its child stories and judges each. Checks each acceptance criterion for clarity, testability, and completeness, reads linked issues, sibling stories, and any Figma design, and returns READY or NOT READY with the specific gaps to fix. Reviews only and does not write the specification.                                                                                                                                                                          |
+| `designing-test-plans`            | Designs the **tests a READY story or epic needs**, derived from its acceptance criteria. Gates on `assessing-requirement-readiness` first, then maps each acceptance criterion to the tests that cover it, with traceability from criterion to test. Designs only and writes no test code.                                                                                                                                                                                                                                                                  |
+| `setting-up-regression-runs`      | Sets up the **QA manual regression runs for a release** in Testmo. Picks the `partial` or `full` release profile, applies any per-release exclusions, and hands the profile's shipped specs to `bitwarden-testmo-tools`' `creating-test-runs` skill, which dry-runs them for review, creates them linked to the release milestone, and lists the multi-configuration runs that still need a manual Testmo UI pass.                                                                                                                                          |
 
 ## Cross-Plugin Integration
 
 | Plugin                      | How It's Used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bitwarden-atlassian-tools` | **Recommended** — the primary way to drive analysis from Jira tickets and linked Confluence requirements, via its `researching-jira-issues` skill and Atlassian MCP tools. `recommending-test-layers` also uses its `get_confluence_page` tool to grade criticality against the Bitwarden Defect Severity Classification Guide, for any input type. Optional by design: if absent, drive the analysis from the PR / CSV / tech-breakdown / description instead and grade criticality by judgment. A Jira ticket input, however, requires the plugin — without it, stop and ask the user to install and configure it. |
+
+`assessing-requirement-readiness` and `designing-test-plans` also require `bitwarden-atlassian-tools`. The readiness skill reads the story with `get_issue` and gets linked issues and Confluence context through `researching-jira-issues`, and its input is always a Jira story or epic key. Without the plugin, stop and ask the user to install and configure it.
+
+`setting-up-regression-runs` requires `bitwarden-testmo-tools`, which owns the Testmo API access and run-creation script. Without it, stop and ask the user to install it.
 
 ## Installation
 
@@ -30,6 +37,12 @@ For Jira-backed analysis, install the Atlassian tools alongside it:
 
 ```bash
 /plugin install bitwarden-atlassian-tools@bitwarden-marketplace
+```
+
+To set up regression runs, install the Testmo tools as well:
+
+```bash
+/plugin install bitwarden-testmo-tools@bitwarden-marketplace
 ```
 
 ## Usage
@@ -62,6 +75,10 @@ Should I add integration tests for the SsoController change, or are unit tests e
 
 ```
 Recommend which tests to add and at which layer for PM-32009.
+```
+
+```
+Set up the full regression runs for the "2026.8.0 Manual Regression" milestone.
 ```
 
 ## References
