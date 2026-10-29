@@ -55,7 +55,7 @@ const HEADING = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;
 const BLOCKQUOTE = /^ {0,3}>/;
 /** `(url "title")`. The URL may hold one level of balanced parentheses. */
 const LINK_TARGET =
-  '\\(\\s*<?((?:[^\\s()<>]|\\([^\\s()<>]*\\))+)>?(?:\\s+"[^"]*")?\\s*\\)';
+  '\\(\\s*<?((?:[^\\s()<>\\u0000\\u0001]|\\([^\\s()<>\\u0000\\u0001]*\\))+)>?(?:\\s+"[^"]*")?\\s*\\)';
 const TABLE_SEPARATOR = /^ *\|? *:?-+:? *(?:\| *:?-+:? *)*\|? *$/;
 
 export function markdownToStorage(markdown: string): StorageConversion {
@@ -430,7 +430,10 @@ function renderInline(text: string, warnings: string[]): string {
     html = html.replace(slotPattern, (_, n) => slots[Number(n)]);
   } while (html !== previous);
 
-  return html;
+  // Hard breaks become <br /> only once every slot is restored, so a break
+  // inside parked text (bold, link text) is converted too. Code spans, alt
+  // text, and URLs never carry one: they turn it into a space or stop at it.
+  return html.replaceAll(HARD_BREAK, "<br />");
 }
 
 /**
@@ -462,7 +465,9 @@ function formatInline(
   let s = text;
 
   s = s.replace(/(`+)(?!`)([\s\S]*?[^`])\1(?!`)/g, (_, _ticks, code: string) =>
-    hold(`<code>${escapeXml(code.replace(/^ ([\s\S]*) $/, "$1"))}</code>`),
+    hold(
+      `<code>${escapeXml(code.replaceAll(HARD_BREAK, " ").replace(/^ ([\s\S]*) $/, "$1"))}</code>`,
+    ),
   );
 
   s = s.replace(
@@ -475,7 +480,7 @@ function formatInline(
     (_, alt: string, url: string) => {
       if (isKeptUrl(url)) {
         return hold(
-          `<ac:image ac:alt="${escapeXml(alt)}"><ri:url ri:value="${escapeXml(url)}" /></ac:image>`,
+          `<ac:image ac:alt="${escapeXml(alt.replaceAll(HARD_BREAK, " "))}"><ri:url ri:value="${escapeXml(url)}" /></ac:image>`,
         );
       }
       warnings.push(
@@ -494,18 +499,18 @@ function formatInline(
   // URLs stop at a slot mark, so a code span or link parked right after one
   // is never pulled inside its href.
   s = s.replace(
-    /<((?:https?:\/\/|mailto:)[^\s<>\u0000]+)>/gi,
+    /<((?:https?:\/\/|mailto:)[^\s<>\u0000\u0001]+)>/gi,
     (_, url: string) => linkOrText(url, url, false),
   );
 
   s = s.replace(
-    /(^|[\s(])(https?:\/\/[^\s<\u0000]*[^\s<\u0000.,:;"')\]])/g,
+    /(^|[\s(\u0001])(https?:\/\/[^\s<\u0000\u0001]*[^\s<\u0000\u0001.,:;"')\]])/g,
     (_, lead: string, url: string) => lead + linkOrText(url, url, false),
   );
 
   s = emphasize(escapeXml(s), hold);
 
-  return s.replace(new RegExp(HARD_BREAK, "g"), "<br />");
+  return s;
 }
 
 /**

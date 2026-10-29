@@ -3,8 +3,9 @@
 /**
  * Atlassian MCP Server
  * MCP server for Jira and Confluence integration with Claude Code.
- * Confluence is read-only; Jira read is always on, and Jira write is opt-in
- * per install via ATLASSIAN_JIRA_WRITE_TOKEN.
+ * Reads are always on. Jira write is opt-in per install via
+ * ATLASSIAN_JIRA_WRITE_TOKEN, and Confluence draft creation via
+ * ATLASSIAN_CONFLUENCE_WRITE_TOKEN.
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";

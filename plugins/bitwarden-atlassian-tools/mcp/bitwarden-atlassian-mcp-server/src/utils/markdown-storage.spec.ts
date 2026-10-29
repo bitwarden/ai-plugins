@@ -32,6 +32,12 @@ function assertWellFormed(xml: string): void {
     }
   }
   if (stack.length > 0) throw new Error(`Unclosed: ${stack.join(", ")}`);
+  const control = xml.match(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/);
+  if (control) {
+    throw new Error(
+      `Forbidden control character U+${control[0].charCodeAt(0).toString(16).padStart(4, "0")}`,
+    );
+  }
 
   function token_(m: RegExpExecArray) {
     return [m[0], m[1], m[2], m[3], m[4]] as const;
@@ -355,6 +361,8 @@ describe("markdownToStorage keeps inline markup well-formed", () => {
       "<",
       ">",
       "[x](https://e.com)",
+      "  \n",
+      "\\\n",
       "https://e.com/",
       "<https://e.com>",
       "\\*",
@@ -404,5 +412,31 @@ describe("markdownToStorage nesting limit", () => {
 
     expect(result.warnings).toEqual([]);
     expect(result.storage).toContain("<ul><li>c</li></ul>");
+  });
+});
+
+describe("markdownToStorage hard breaks inside inline markup", () => {
+  it("ends a bare URL at a hard break instead of absorbing the next word", () => {
+    expect(convert("See https://example.com/a  \nnext line")).toBe(
+      '<p>See <a href="https://example.com/a">https://example.com/a</a><br />next line</p>',
+    );
+  });
+
+  it("turns a hard break inside a code span into a space", () => {
+    expect(convert("Run `foo  \nbar` now")).toBe(
+      "<p>Run <code>foo bar</code> now</p>",
+    );
+  });
+
+  it("turns a hard break inside image alt text into a space", () => {
+    expect(convert("![alt  \ntext](https://e.com/i.png)")).toContain(
+      'ac:alt="alt text"',
+    );
+  });
+
+  it("keeps a hard break inside bold text as a line break", () => {
+    expect(convert("**bold  \nbold** end")).toBe(
+      "<p><strong>bold<br />bold</strong> end</p>",
+    );
   });
 });
