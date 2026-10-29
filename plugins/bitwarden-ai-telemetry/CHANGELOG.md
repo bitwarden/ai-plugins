@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- The session-start record no longer drops, with a false "collector could not be reached" warning, when ZScaler Private Access has been idle. The first connection after idle can take more than one second to complete, so the request timeout is now five seconds and each hook's timeout is ten.
+- Records no longer drop with a false "collector could not be reached" warning when a request through ZScaler Private Access takes more than one second. The request timeout is now two seconds.
 
 ## [1.5.0] - 2026-10-01
 

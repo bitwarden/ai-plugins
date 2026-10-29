@@ -36,12 +36,12 @@ FAULT_UNEXPECTED_STATUS = "unexpected_status"  # answered, but not by the collec
 # the POST raised would read a captive portal as delivery.
 _EXPECTED_STATUS = 202
 
-# ZPA sets up the route to the collector on the first connection after
-# idle, and that TLS handshake can take seconds. A shorter timeout drops
-# the session-start record and warns about a connection that works.
-# hooks.json gives each hook twice this, so the hook is not killed before
-# the request gives up and the fault can still be reported.
-_REQUEST_TIMEOUT_SECONDS = 5
+# Requests through ZScaler Private Access have been measured at up to 1.5s
+# from APAC, so a 1s timeout drops records and warns about a connection that
+# works. emit_git.py can send two requests in one run, and two timeouts plus
+# its git calls must stay under the 5s hook timeout in hooks.json, or the hook
+# is killed before it can report the fault.
+_REQUEST_TIMEOUT_SECONDS = 2
 
 # One warning per fault class per hour. The hook fires on every edit and a
 # re-auth gap lasts minutes, so a warning without a throttle would repeat

@@ -1,6 +1,6 @@
 # Outbound payload reference
 
-Every hook invocation that has something to report sends one HTTPS `POST` to `BW_TELEMETRY_OTLP` with `Content-Type: application/json` and a five-second timeout. The body is a single OTLP-JSON log record. The collector address must be `https` on `bitwarden.pw` or one of its subdomains; any other value is treated as unset and nothing is sent.
+Every hook invocation that has something to report sends one HTTPS `POST` to `BW_TELEMETRY_OTLP` with `Content-Type: application/json` and a two-second timeout. The body is a single OTLP-JSON log record. The collector address must be `https` on `bitwarden.pw` or one of its subdomains; any other value is treated as unset and nothing is sent.
 
 ## Envelope
 
