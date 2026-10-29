@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2026-10-28
+
+### Changed
+
+- `managing-feature-flags`: cleanup now runs in two steps. The flag check is removed first, and the flag stays defined and live in LaunchDarkly until three months after the last client release that checked it, so older clients keep receiving its value. Data-format flags wait four months before the client check is removed. Links to the [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility).
+- `architecting-solutions`: the version compatibility constraints now match the [version compatibility guidance](https://contributing.bitwarden.com/contributing/version-compatibility). Outdated clients are not blocked except to protect user data, and removals are allowed three months after the last release that depends on them.
+
 ## [4.0.0] - 2026-10-17
 
 ### Removed
