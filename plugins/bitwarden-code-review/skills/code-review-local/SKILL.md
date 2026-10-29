@@ -1,6 +1,6 @@
 ---
 name: code-review-local
-argument-hint: "[PR#] | [PR URL] | [--base <ref>] | (blank to choose interactively)"
+argument-hint: "[PR# | PR URL | --base <ref>] [--output-dir <path>] | (blank to choose interactively)"
 allowed-tools: AskUserQuestion, Task
 description: Review a GitHub pull request or local changes and write the review to local files instead of posting
 ---
@@ -12,6 +12,8 @@ description: Review a GitHub pull request or local changes and write the review 
 **Never continue with the default base once `--base` has appeared in any form.** An unrecognized form leaves no ref to validate, so it would otherwise reach the interactive path, emit no `BASE:` line, and let the agent review the trunk merge base under an ordinary verdict with nothing saying the requested base was dropped. That is the silent wrong scope this parameter exists to prevent, and the entry path is the only place it could still happen. Aborting here also keeps a leftover token out of target resolution, where a `--base=rc2` could have its `2` read as a pull request number.
 
 **The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$` before it goes into the `BASE:` line.** It is written verbatim into `git diff <ref>...HEAD`, and `Bash(git diff:*)` is a prefix rule, so a value starting with `-` matches that rule as an option rather than a ref and reaches git as a flag. The leading character class is what rejects that; the rest keeps whitespace, shell metacharacters, and `@{` out of the command string. If the value does not match, **do not invoke the Task tool at all**: report what you were given and ask again.
+
+**Take `--output-dir <path>` out of `$ARGUMENTS` too**, before resolving the target. The only accepted form is `--output-dir`, a space, then the path, which ends at the next whitespace; any other form is an error, handled as for `--base`. Unlike `--base`, it applies to both targets. Expand a leading `~` to the home directory, then make the path absolute, resolving a relative one against the working directory. Without the flag, emit no `OUTPUT_DIR:` line; the agent defaults to `${CLAUDE_PLUGIN_DATA}/code-reviews/`.
 
 **Resolve the target next, in this turn.** Two ways in:
 
@@ -31,9 +33,11 @@ On the line after it, add `BASE: <ref>` — only when the target is local change
 
 On the next line, always add `OUTPUT: local files` — both targets. This command writes to local files and never posts, so that declaration, not the target, is what `Skill(posting-review-summary)` routes on.
 
-That line is the only carrier — `$ARGUMENTS` is empty on the interactive path, so an agent left to re-derive the target from it would find nothing. This command's own turn holds only `AskUserQuestion` and `Task`: it settles the target and delegates. Thread pre-fetching belongs to the workflow-driven `/bitwarden-code-review:code-review`, not here. Do not run the `gh`, `git`, `Skill`, or `Write` operations described below yourself — they are the agent's, and it carries its own grants for them.
+On the line after that, add `OUTPUT_DIR: <absolute dir>` — only when `--output-dir` was given. Omit the line entirely otherwise: there is no placeholder form, and the agent applies its default when the line is absent.
 
-Invoke the bitwarden-code-reviewer agent now with the instructions below.
+The `TARGET:` line is the only carrier — `$ARGUMENTS` is empty on the interactive path, so an agent left to re-derive the target from it would find nothing. This command's own turn holds only `AskUserQuestion` and `Task`: it settles the target and delegates. Thread pre-fetching belongs to the workflow-driven `/bitwarden-code-review:code-review`, not here. Do not run the `gh`, `git`, `Skill`, or `Write` operations described below yourself — they are the agent's, and it carries its own grants for them.
+
+Invoke the bitwarden-code-reviewer agent now with the instructions below. When it returns, tell the user the full path of each file it wrote.
 
 **CRITICAL INSTRUCTIONS FOR THE AGENT:**
 
@@ -91,12 +95,10 @@ Invoke the bitwarden-code-reviewer agent now with the instructions below.
 
 3. **Local Review Mode**: Writing to local files instead of GitHub. Invoke `Skill(posting-review-summary)` with local output context.
 
-4. **Output Destination**: Write to local files:
-   - `review-summary.md` - Summary (via `Skill(posting-review-summary)` in local mode)
-   - `review-inline-comments.md` - Inline comments (same format as GitHub)
+4. **Output Destination**: Both files go to the local-file destination your `AGENT.md` Step 1 resolves — the `OUTPUT_DIR:` directory when that line is present, its default otherwise — under the names it assigns.
 
 5. **Format Exactly As PR Comments**: Both files MUST contain exactly what would be posted to GitHub
-   - If no inline comments would be left, leave `review-inline-comments.md` blank.
+   - If no inline comments would be left, leave the inline-comments file blank.
 
 6. **No GitHub Posting**: Do NOT use `gh pr review --comment` or `gh pr comment` to post anything. Only READ from GitHub, WRITE to local files.
 
@@ -108,11 +110,13 @@ Invoke the bitwarden-code-reviewer agent now with the instructions below.
 
 **Note**: The output formats below mirror the standard GitHub review formats documented in your AGENT.md file, adapted for local file output instead of direct GitHub posting.
 
-**File 1: `review-summary.md`**
+**File 1: the summary file**
 
 Uses the same format as `Skill(posting-review-summary)`, including its `## No Verdict` form when nothing could be reviewed:
 
 ```markdown
+## 🤖 Bitwarden Claude Code Review
+
 **Overall Assessment:** APPROVE / REQUEST CHANGES
 
 [1-2 neutral sentence describing what was reviewed]
@@ -126,7 +130,7 @@ Uses the same format as `Skill(posting-review-summary)`, including its `## No Ve
 </details>
 ```
 
-**File 2: `review-inline-comments.md`**
+**File 2: the inline-comments file**
 
 Contains all inline review comments with file and line references (same format as would be posted with `gh pr review --comment` in standard GitHub reviews, but written to local file). Format:
 

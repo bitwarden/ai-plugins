@@ -27,8 +27,8 @@ It offers two complementary lenses. The autonomous `bitwarden-code-reviewer` age
 | [`classifying-review-findings`](./skills/classifying-review-findings/SKILL.md)               | "classify finding", "severity"                                                    | 5-tier severity system (CRITICAL / IMPORTANT / DEBT / SUGGESTED / QUESTION) with emoji and label mapping                                                                                                            |
 | [`avoiding-false-positives`](./skills/avoiding-false-positives/SKILL.md)                     | "validate finding", "verify before posting", "stacked PR"                         | Rejection criteria and verification checks that drop low-confidence findings before they reach a comment, plus the once-per-review gate that decides whether completeness findings apply to a confirmed stack layer |
 | [`performing-multi-agent-code-review`](./skills/performing-multi-agent-code-review/SKILL.md) | "perform multi-agent code review", "review the last week of commits in this repo" | Perform a rigorous, multi-agent code review                                                                                                                                                                         |
-| [`posting-bitwarden-review-comments`](./skills/posting-bitwarden-review-comments/SKILL.md)   | "post inline comment", "post PR comment"                                          | Inline PR comment formatting per Bitwarden standards (severity emojis, explanation, actionable suggestion)                                                                                                          |
-| [`posting-review-summary`](./skills/posting-review-summary/SKILL.md)                         | "post summary", "summary comment"                                                 | Final summary comment handling — routes to sticky comment, GitHub Actions MCP tool, or local file based on context                                                                                                  |
+| [`posting-bitwarden-review-comments`](./skills/posting-bitwarden-review-comments/SKILL.md)   | "post inline comment", "post PR comment"                                          | Inline finding format per Bitwarden standards (severity emojis, explanation, actionable suggestion); posts to GitHub or writes to the file path the agent passes                                                    |
+| [`posting-review-summary`](./skills/posting-review-summary/SKILL.md)                         | "post summary", "summary comment"                                                 | Final summary format, including the No Verdict and Not covered forms; posts to GitHub or writes to the file path the agent passes                                                                                   |
 | [`reviewing-dependency-changes`](./skills/reviewing-dependency-changes/SKILL.md)             | "package.json", "Renovate PR", "dependency manifest"                              | Flags dependency manifest changes for AppSec approval, version-bump significance, and lock-file hygiene                                                                                                             |
 | [`addressing-code-review-comments`](./skills/addressing-code-review-comments/SKILL.md)       | "address review comments", "respond to PR feedback"                               | Guides developers working through review comments locally — verify before implementing, surface ambiguity, no performative agreement                                                                                |
 
@@ -36,7 +36,7 @@ It offers two complementary lenses. The autonomous `bitwarden-code-reviewer` age
 
 ### Code Review Agent
 
-The plugin provides a single agent (`bitwarden-code-reviewer`) that follows a linear 7-step review process — from context gathering through validation to posting. See [`AGENT.md`](./agents/bitwarden-code-reviewer/AGENT.md) for the full flow.
+The plugin provides a single agent (`bitwarden-code-reviewer`) that follows a linear six-step review process — from context gathering through validation to posting. It is the one place that decides where a review lands: in GitHub Actions the review goes to the pull request; for `code-review-local` and local mode it writes to `${CLAUDE_PLUGIN_DATA}/code-reviews/`, or to `--output-dir` when given, and never into the repository. See [`AGENT.md`](./agents/bitwarden-code-reviewer/AGENT.md) for the full flow and the [agent flow diagrams](./docs/code-review-agent-flows.md) for who calls it and where its output goes.
 
 ### Finding Classification
 
@@ -54,7 +54,8 @@ bitwarden-code-review/
 │   └── bitwarden-code-reviewer/
 │       └── AGENT.md                          # Main review agent
 ├── docs/
-│   └── multi-agent-code-review-flows.md           # Mermaid diagrams of the multi-agent review
+│   ├── code-review-agent-flows.md            # Mermaid diagrams of the review agent
+│   └── multi-agent-code-review-flows.md      # Mermaid diagrams of the multi-agent review
 ├── skills/                                   # See Skills table above
 ├── tests/
 │   └── TESTING.md                            # Test plan and validation
