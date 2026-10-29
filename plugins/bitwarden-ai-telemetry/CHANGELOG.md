@@ -5,6 +5,12 @@ All notable changes to the bitwarden-ai-telemetry plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-10-29
+
+### Fixed
+
+- Records no longer drop with a false "collector could not be reached" warning when a request through ZScaler Private Access takes more than one second. The request timeout is now five seconds. Hook timeouts are now ten seconds. The git hook timeout is fifteen seconds, because the git hook sends two records when one command commits and creates a pull request.
+
 ## [1.5.0] - 2026-10-01
 
 ### Added
