@@ -56,6 +56,10 @@ import createIssue from "./tools/create-issue.js";
 import linkIssues from "./tools/link-issues.js";
 import addIssueComment from "./tools/add-issue-comment.js";
 
+// Confluence write tool, registered unconditionally like the Jira write tools;
+// a live create is gated inside the handler on ATLASSIAN_CONFLUENCE_WRITE_TOKEN.
+import createConfluencePage from "./tools/create-confluence-page.js";
+
 const tools: ToolDefinition[] = [
   getIssue,
   getIssueComments,
@@ -76,6 +80,7 @@ const tools: ToolDefinition[] = [
   createIssue,
   linkIssues,
   addIssueComment,
+  createConfluencePage,
 ];
 
 async function main() {

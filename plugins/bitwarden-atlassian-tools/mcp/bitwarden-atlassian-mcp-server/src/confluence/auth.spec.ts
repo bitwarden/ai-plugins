@@ -3,6 +3,7 @@ import {
   loadConfluenceConfig,
   getAuthHeader,
   getConfluenceHeaders,
+  hasConfluenceWriteToken,
 } from "./auth.js";
 
 describe("loadConfluenceConfig", () => {
@@ -109,6 +110,39 @@ describe("loadConfluenceConfig", () => {
 
     expect(() => loadConfluenceConfig()).toThrow(
       /Missing required Confluence environment variables/,
+    );
+  });
+});
+
+describe("Confluence write token", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    process.env.ATLASSIAN_CLOUD_ID = "test-cloud-id";
+    process.env.ATLASSIAN_EMAIL = "user@example.com";
+    process.env.ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN = "read-token";
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("uses ATLASSIAN_CONFLUENCE_WRITE_TOKEN only in write mode", () => {
+    process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN = "write-token";
+
+    expect(loadConfluenceConfig("write").apiToken).toBe("write-token");
+    expect(loadConfluenceConfig().apiToken).toBe("read-token");
+    expect(hasConfluenceWriteToken()).toBe(true);
+  });
+
+  it("never falls back to the Jira write token", () => {
+    delete process.env.ATLASSIAN_CONFLUENCE_WRITE_TOKEN;
+    process.env.ATLASSIAN_JIRA_WRITE_TOKEN = "jira-write-token";
+
+    expect(hasConfluenceWriteToken()).toBe(false);
+    expect(() => loadConfluenceConfig("write")).toThrow(
+      /ATLASSIAN_CONFLUENCE_WRITE_TOKEN/,
     );
   });
 });

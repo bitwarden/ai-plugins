@@ -339,6 +339,29 @@ export const AddIssueCommentSchema = z.object({
 export type AddIssueCommentInput = z.infer<typeof AddIssueCommentSchema>;
 
 /**
+ * Create an unpublished Confluence draft from markdown. Ids are held to digits
+ * because they end up in REST paths.
+ */
+export const CreateConfluencePageSchema = z.object({
+  spaceId: z.string().regex(/^\d+$/, "Must be a numeric Confluence space id"),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title cannot be empty")
+    .max(255, "Confluence titles are limited to 255 characters"),
+  parentId: z
+    .string()
+    .regex(/^\d+$/, "Must be a numeric Confluence page id")
+    .optional(),
+  body: z.string().trim().min(1, "Body cannot be empty"),
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type CreateConfluencePageInput = z.infer<
+  typeof CreateConfluencePageSchema
+>;
+
+/**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against
  * @param input - Input data to validate

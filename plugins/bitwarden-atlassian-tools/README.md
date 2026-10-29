@@ -4,7 +4,7 @@
 
 Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
 
-Read access is the default and always available. Jira write access (creating work items, links, and comments) is **opt-in per install**: `create_issue`, `link_issues`, and `add_issue_comment` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
+Read access is the default and always available. Jira write access (creating work items, links, and comments) is **opt-in per install**: `create_issue`, `link_issues`, and `add_issue_comment` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence is read-only except for `create_confluence_page`, which creates unpublished drafts and needs its own opt-in token, `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`.
 
 ## Installation
 
@@ -20,6 +20,9 @@ export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
 # Optional — enables the Jira write tools (create_issue, link_issues, add_issue_comment).
 # Omit to keep this install read-only.
 export ATLASSIAN_JIRA_WRITE_TOKEN="your-jira-write-scoped-token"
+
+# Optional — enables create_confluence_page. Omit to keep Confluence read-only.
+export ATLASSIAN_CONFLUENCE_WRITE_TOKEN="your-confluence-write-scoped-token"
 ```
 
 API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
@@ -138,6 +141,24 @@ A leaked write token permits more than any one tool uses: `write:comment.propert
 | `search_confluence`            | Search Confluence by space/title     |
 | `search_confluence_cql`        | Search Confluence using CQL          |
 | `list_spaces`                  | List accessible Confluence spaces    |
+
+### Confluence (write, requires `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`)
+
+| Tool                     | Purpose                                                                                             |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `create_confluence_page` | Create an unpublished draft from markdown in a space the user names, optionally under a parent page |
+
+Like the Jira write tools, it defaults to a dry run that returns the exact request, writes only on `dryRun: false`, and reads the draft back afterwards to check it. The space is never guessed: the dry run names the space for the user to confirm, and an id that matches no space is reported back rather than used. The markdown is converted to Confluence storage format. Only absolute `http(s)` and `mailto` links are kept; relative links become plain text and are listed in the result. Publishing the draft is left to a person in Confluence.
+
+Create the write token as a separate scoped token at [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens), choosing the Confluence app. It is used for the create request alone, so it needs one scope:
+
+| Scope                   | Required for             |
+| ----------------------- | ------------------------ |
+| `write:page:confluence` | `create_confluence_page` |
+
+With a classic token, `write:confluence-content` covers it instead. The space lookup and the read-back run on the read-only Confluence token, whose scopes above already cover them (`read:space:confluence`, `read:page:confluence`).
+
+Token scope is separate from Confluence permission. Creating a draft also requires permission to add pages in the target space.
 
 ## Usage
 

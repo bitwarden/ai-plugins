@@ -19,18 +19,33 @@ function resolveEnv(name: string): string | undefined {
 }
 
 /**
+ * Whether this install has the optional Confluence write token, which is used
+ * only to create pages. The Jira write token is never used for Confluence.
+ */
+export function hasConfluenceWriteToken(): boolean {
+  return resolveEnv("ATLASSIAN_CONFLUENCE_WRITE_TOKEN") !== undefined;
+}
+
+/**
  * Load Confluence configuration from environment variables
+ * @param mode - "write" uses ATLASSIAN_CONFLUENCE_WRITE_TOKEN. Defaults to read-only.
  * @throws {Error} If required environment variables are missing
  */
-export function loadConfluenceConfig(): ConfluenceConfig {
+export function loadConfluenceConfig(
+  mode: "read" | "write" = "read",
+): ConfluenceConfig {
   const cloudId = resolveEnv("ATLASSIAN_CLOUD_ID");
   const email = resolveEnv("ATLASSIAN_EMAIL");
-  const apiToken = resolveEnv("ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN");
+  const tokenVar =
+    mode === "write"
+      ? "ATLASSIAN_CONFLUENCE_WRITE_TOKEN"
+      : "ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN";
+  const apiToken = resolveEnv(tokenVar);
 
   if (!cloudId || !email || !apiToken) {
     throw new Error(
       "Missing required Confluence environment variables. " +
-        "Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN",
+        `Please set ATLASSIAN_CLOUD_ID, ATLASSIAN_EMAIL, and ${tokenVar}`,
     );
   }
 
