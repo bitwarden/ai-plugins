@@ -1,6 +1,6 @@
 {
   "profile": "bitwarden",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "abacus": ">=0.15",
   "plugins": {
     "workers": [
@@ -18,7 +18,7 @@
     "plan.analyze": "",
     "implement.guide": "",
     "review": [],
-    "land.commit": "bitwarden-abacus:commit-message",
+    "land.commit": "bitwarden-abacus-tools:commit-message",
     "land.pr": "bitwarden-delivery-tools:applying-pr-conventions",
     "retro.analyze": ""
   }

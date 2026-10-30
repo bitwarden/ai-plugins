@@ -136,9 +136,9 @@
       "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs, your GitHub activity, and your Jira and Confluence activity."
     },
     {
-      "name": "bitwarden-abacus",
-      "source": "./plugins/bitwarden-abacus",
-      "version": "0.3.0",
+      "name": "bitwarden-abacus-tools",
+      "source": "./plugins/bitwarden-abacus-tools",
+      "version": "1.0.0",
       "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step: Jira issues when it plans, commit message and pull request conventions when it lands."
     },
     {

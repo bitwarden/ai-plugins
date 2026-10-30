@@ -9,11 +9,11 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 
 ## What it does today
 
-| Abacus slot   | Bitwarden skill                                                                        | Effect                                                                                         |
-| ------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `plan.source` | `bitwarden-atlassian-tools:researching-jira-issues`                                    | "Plan PM-1234" works: the planner reads the issue, its links and Confluence pages into beads   |
-| `land.commit` | `bitwarden-abacus:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket     |
-| `land.pr`     | `bitwarden-delivery-tools:applying-pr-conventions`                                     | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
+| Abacus slot   | Bitwarden skill                                                                              | Effect                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `plan.source` | `bitwarden-atlassian-tools:researching-jira-issues`                                          | "Plan PM-1234" works: the planner reads the issue, its links and Confluence pages into beads   |
+| `land.commit` | `bitwarden-abacus-tools:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket     |
+| `land.pr`     | `bitwarden-delivery-tools:applying-pr-conventions`                                           | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
 
 **Planning from Jira.** The planner reads the issue through the Atlassian tools, drafts beads with the issue key as
 their source, and turns the issue's acceptance criteria into checkable ones. It only reads: Abacus refuses Jira
@@ -46,7 +46,7 @@ The concierge and orchestrator launch with none of the Bitwarden plugins; the pl
 ## Installation
 
 ```bash
-/plugin install bitwarden-abacus@bitwarden-marketplace
+/plugin install bitwarden-abacus-tools@bitwarden-marketplace
 ```
 
 ## Usage
