@@ -1,4 +1,4 @@
-# bitwarden-abacus
+# bitwarden-abacus-tools
 
 ## Overview
 
