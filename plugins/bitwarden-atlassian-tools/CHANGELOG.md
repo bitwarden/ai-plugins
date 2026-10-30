@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2026-10-30
+
+### Added
+
+- `transition_issue` moves an issue to a status named by the caller, such as `In Progress` or `Done`, and finds the workflow transition that reaches it, so no transition ids or workflow knowledge are needed up front. An issue already in the target status is left alone, which keeps the tool safe to call repeatedly from automation. When no transition reaches the target, it lists the statuses that are reachable instead. Like the other write tools it defaults to a dry run, needs `ATLASSIAN_JIRA_WRITE_TOKEN` only for the live transition, and reads the status back afterwards to confirm where the issue landed.
+
 ## [2.8.2] - 2026-10-30
 
 ### Fixed

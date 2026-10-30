@@ -55,6 +55,7 @@ import getCreateFields from "./tools/get-create-fields.js";
 import createIssue from "./tools/create-issue.js";
 import linkIssues from "./tools/link-issues.js";
 import addIssueComment from "./tools/add-issue-comment.js";
+import transitionIssue from "./tools/transition-issue.js";
 
 const tools: ToolDefinition[] = [
   getIssue,
@@ -76,6 +77,7 @@ const tools: ToolDefinition[] = [
   createIssue,
   linkIssues,
   addIssueComment,
+  transitionIssue,
 ];
 
 async function main() {
