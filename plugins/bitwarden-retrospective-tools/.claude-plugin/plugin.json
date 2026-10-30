@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-retrospective-tools",
-  "version": "1.1.0",
-  "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs, your GitHub activity, and your Jira and Confluence activity.",
+  "version": "1.2.0",
+  "description": "Tools for looking back on your own engineering work: a daily or weekly work recap, in Platform RAG standup format, built from your Claude Code session logs, your GitHub activity, and your Jira and Confluence activity.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
