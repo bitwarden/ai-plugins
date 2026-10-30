@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.1] - 2026-10-29
+
+### Fixed
+
+- The MCP server starts on devices whose package firewall enforces a minimum package age. The launch sequence installs from the lockfile on every start, and the lockfile resolved `hono` and `ip-address` to releases too new to clear that window, so the install failed and the server never came up. Both are pinned to the newest releases that clear it, `hono` 4.13.13 and `ip-address` 10.7.4, which still carry every published advisory fix for each package. Neither is loaded at runtime: both arrive only through the MCP SDK's HTTP server transport, and this server runs over stdio.
+
 ## [2.8.0] - 2026-10-09
 
 ### Added
