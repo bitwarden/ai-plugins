@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.2] - 2026-10-30
+
+### Fixed
+
+- The MCP server's dependencies hold to the same 7-day minimum release age that Bitwarden's install-time package firewall enforces. pnpm applies the window both when it resolves the lockfile, so a regenerated lockfile only takes releases at least 7 days old, and when it installs from one, so a lockfile carrying a newer release fails the install in CI instead of failing later on a protected device.
+
 ## [2.8.1] - 2026-10-29
 
 ### Fixed
