@@ -138,8 +138,8 @@
     {
       "name": "bitwarden-abacus",
       "source": "./plugins/bitwarden-abacus",
-      "version": "0.2.0",
-      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with commit message and pull request conventions."
+      "version": "0.3.0",
+      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step: Jira issues when it plans, commit message and pull request conventions when it lands."
     },
     {
       "name": "bitwarden-testmo-tools",

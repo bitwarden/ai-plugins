@@ -1,7 +1,7 @@
 {
   "profile": "bitwarden",
-  "version": "0.2.0",
-  "abacus": ">=0.13",
+  "version": "0.3.0",
+  "abacus": ">=0.15",
   "plugins": {
     "workers": [
       "bitwarden-delivery-tools",
@@ -14,7 +14,7 @@
     "orchestrator": []
   },
   "slots": {
-    "plan.source": "",
+    "plan.source": "bitwarden-atlassian-tools:researching-jira-issues",
     "plan.analyze": "",
     "implement.guide": "",
     "review": [],
