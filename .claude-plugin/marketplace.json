@@ -146,6 +146,12 @@
       "source": "./plugins/bitwarden-testmo-tools",
       "version": "1.0.0",
       "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks."
+    },
+    {
+      "name": "bitwarden-beads-tools",
+      "source": "./plugins/bitwarden-beads-tools",
+      "version": "0.1.0",
+      "description": "Tools that complement the beads (bd) issue tracker in Claude Code, including a live pane and status line of the project's open, in-progress, and blocked beads."
     }
   ]
 }
