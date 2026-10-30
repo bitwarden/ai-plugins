@@ -64,7 +64,7 @@ Provides specific, file:line referenced feedback with:
 
 ## Installation
 
-Requires Claude Code 2.1.210 or later. Both commands scope their report write with an
+Requires Claude Code 2.1.210 or later. Both skills scope their report write with an
 `Edit(<path>)` rule, and consulting that rule for the `Write` tool is behavior that release
 introduced. On an older CLI the report write falls back to a permission prompt, which in a
 headless workflow run means no report and a failed check.
@@ -83,14 +83,14 @@ headless workflow run means no report and a failed check.
 
 ## Usage
 
-### Commands
+### Skills
 
-| Command                                                    | Purpose                                                                                                                                              |
+| Skill                                                      | Purpose                                                                                                                                              |
 | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`/validate-ai-local`](skills/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
 | [`/validate-ai`](skills/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report its findings inline on the diff, with a sticky summary comment                     |
 
-Both commands run the same review the
+Both skills run the same review the
 [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub
 Action runs org-wide: this plugin's `reviewing-claude-config` skill for configuration and
 security, plus the `plugin-dev` plugin's `plugin-validator` and `skill-reviewer` agents
@@ -98,7 +98,7 @@ for plugin structure and skill quality. `/validate-ai-local` additionally runs t
 action's structure, marketplace, and version-bump shell checks against your checkout.
 They share their scope rules and report contract in
 [`reference/validate-ai-scope.md`](skills/reviewing-claude-config/reference/validate-ai-scope.md),
-so the two commands and the action cannot drift apart.
+so the two skills and the action cannot drift apart.
 
 ### Basic Invocation
 
