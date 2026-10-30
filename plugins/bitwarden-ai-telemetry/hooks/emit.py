@@ -36,6 +36,13 @@ FAULT_UNEXPECTED_STATUS = "unexpected_status"  # answered, but not by the collec
 # the POST raised would read a captive portal as delivery.
 _EXPECTED_STATUS = 202
 
+# Requests through ZScaler Private Access have been measured at up to 1.5s
+# from APAC, so a 1s timeout drops records and warns about a connection that
+# works. Each hook timeout in hooks.json covers all requests of its hook, so
+# the hook is not killed before the last request gives up and the fault can
+# still be reported.
+_REQUEST_TIMEOUT_SECONDS = 5
+
 # One warning per fault class per hour. The hook fires on every edit and a
 # re-auth gap lasts minutes, so a warning without a throttle would repeat
 # constantly and be learned as noise.
@@ -197,7 +204,7 @@ def emit(body_name, attrs):
         req = urllib.request.Request(
             COLLECTOR, data=json.dumps(payload).encode(),
             headers={"Content-Type": "application/json"})
-        resp = urllib.request.urlopen(req, timeout=1)
+        resp = urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT_SECONDS)
     except urllib.error.HTTPError as e:
         # The collector answered, and said no. urlopen raises for any status
         # at or above 400, so this is the only place a 4xx or 5xx surfaces,

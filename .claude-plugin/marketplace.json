@@ -18,13 +18,13 @@
     {
       "name": "claude-config-validator",
       "source": "./plugins/claude-config-validator",
-      "version": "2.2.1",
+      "version": "2.3.0",
       "description": "Validates Claude Code configuration files for security, structure, and quality. Routes CLAUDE.md, agents, commands, hooks, and settings to targeted review skills, reporting only what a changeset introduced."
     },
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "2.6.0",
+      "version": "2.7.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
@@ -48,7 +48,7 @@
     {
       "name": "bitwarden-atlassian-tools",
       "source": "./plugins/bitwarden-atlassian-tools",
-      "version": "2.7.7",
+      "version": "2.8.2",
       "description": "Atlassian access via MCP server with deep Jira issue research skill, JQL search, Confluence pages, CQL search, attachments, and opt-in Jira write tools"
     },
     {
@@ -102,13 +102,13 @@
     {
       "name": "bitwarden-ai-telemetry",
       "source": "./plugins/bitwarden-ai-telemetry",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "description": "Claude Code hooks emitting metadata-only AI-usage telemetry (session, identity, git-linkage, MCP) tagged with the signed-in account email via OTLP."
     },
     {
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
-      "version": "1.2.0",
+      "version": "1.4.0",
       "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
     },
     {
@@ -132,14 +132,20 @@
     {
       "name": "bitwarden-retrospective-tools",
       "source": "./plugins/bitwarden-retrospective-tools",
-      "version": "1.0.0",
-      "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs and your GitHub activity."
+      "version": "1.1.0",
+      "description": "Tools for looking back on your own engineering work: a daily work recap built from your Claude Code session logs, your GitHub activity, and your Jira and Confluence activity."
     },
     {
-      "name": "bitwarden-abacus",
-      "source": "./plugins/bitwarden-abacus",
-      "version": "0.2.0",
-      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step, starting with commit message and pull request conventions."
+      "name": "bitwarden-abacus-tools",
+      "source": "./plugins/bitwarden-abacus-tools",
+      "version": "1.0.0",
+      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step: Jira issues when it plans, commit message and pull request conventions when it lands."
+    },
+    {
+      "name": "bitwarden-testmo-tools",
+      "source": "./plugins/bitwarden-testmo-tools",
+      "version": "1.0.0",
+      "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks."
     },
     {
       "name": "bitwarden-beads-tools",

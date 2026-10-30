@@ -183,7 +183,12 @@ const createIssueTool: ToolDefinition = {
       descriptionParagraphs: {
         type: "array",
         items: { type: "string" },
-        description: "Description body as paragraphs of plain text.",
+        description:
+          "Description body as paragraphs of markdown. Each entry may use " +
+          "**bold**, links, `code`, fenced code blocks, lists, and tables. " +
+          "Write a literal `<` inside backticks or as `\\<`; a block that " +
+          "carries raw HTML or a link reference definition is sent as " +
+          "plain text.",
       },
       parentKey: {
         type: "string",

@@ -5,6 +5,13 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-10-27
+
+### Changed
+
+- `code-review` and `code-review-local` moved from `commands/` to `skills/`
+- Invocation names are unchanged: `/bitwarden-code-review:code-review` and `/bitwarden-code-review:code-review-local`
+
 ## [2.6.0] - 2026-10-23
 
 ### Changed

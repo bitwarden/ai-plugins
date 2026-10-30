@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-testmo-tools",
+  "version": "1.0.0",
+  "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-testmo-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "testmo",
+    "qa",
+    "regression",
+    "test-runs",
+    "test-management",
+    "milestones"
+  ]
+}

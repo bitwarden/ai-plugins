@@ -237,12 +237,12 @@ under its one-liner instead:
 
 ## Inline comments
 
-Post each CRITICAL and IMPORTANT finding as an inline comment with
-`mcp__github_inline_comment__create_inline_comment` when that tool is available. SUGGESTED
-findings stay in the summary only: a comment on the diff asks the author to act, and a
-suggestion does not carry that weight.
+Post every finding, SUGGESTED included, as an inline comment with
+`mcp__github_inline_comment__create_inline_comment` when that tool is available. A finding
+that lives only in the collapsed summary is easy to miss, and an author who never sees a
+suggestion cannot weigh it before merge.
 
-Each comment shows one line and collapses the rest:
+Each comment shows one line and collapses the rest, and ends with a source line:
 
 ```markdown
 ⚠️ **IMPORTANT**: [one-line claim]
@@ -257,6 +257,8 @@ Each comment shows one line and collapses the rest:
 Reference: [documentation link, where one applies]
 
 </details>
+
+<sub>validate-ai</sub>
 ```
 
 Take each comment's line from the pull request side of `gh pr diff`. GitHub anchors a
@@ -287,7 +289,7 @@ persists, unless the thread already holds such a repeat. Reply in that thread wi
 `mcp__github_replies__add_reply_to_pull_request_comment`, addressed to the `database_id` of
 the thread's first comment, and pass the pull request number, which the tool requires
 whenever a reply has a body. The history then stays in one place. The reply takes the inline
-comment's form, one-line severity title and collapsed details. When that tool is unavailable
+comment's form, one-line severity title, collapsed details, and source line. When that tool is unavailable
 (interactive mode, or a workflow that does not provide it), or the thread's first comment has
 no `database_id`, post a new inline comment instead. Either way the finding counts as posted
 inline for the summary. A SUGGESTED finding a human has already answered does not reappear,

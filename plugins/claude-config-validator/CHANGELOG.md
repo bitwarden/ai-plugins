@@ -5,6 +5,13 @@ All notable changes to the Claude Config Validator Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-10-13
+
+### Changed
+
+- `/validate-ai` posts SUGGESTED findings as inline comments on the diff alongside CRITICAL and IMPORTANT ones. A suggestion that lives only in the collapsed summary is easy to overlook, so the author never weighs it before merge
+- `/validate-ai` inline comments and thread replies end with a `validate-ai` source line. bitwarden-code-review posts under the same bot account, so without it a reader cannot tell which review raised a finding
+
 ## [2.2.1] - 2026-10-09
 
 ### Fixed
