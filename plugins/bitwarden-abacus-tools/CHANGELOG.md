@@ -1,9 +1,15 @@
 # Changelog
 
-All notable changes to the `bitwarden-abacus` plugin will be documented in this file.
+All notable changes to the `bitwarden-abacus-tools` plugin will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2026-10-30
+
+### Changed
+
+- **BREAKING:** Renamed from `bitwarden-abacus` to `bitwarden-abacus-tools`, following the capability-plugin naming in ADR 0038. Install it as `bitwarden-abacus-tools@bitwarden-marketplace`; the `land.commit` slot now resolves to `bitwarden-abacus-tools:commit-message`.
 
 ## [0.3.0] - 2026-10-23
 
