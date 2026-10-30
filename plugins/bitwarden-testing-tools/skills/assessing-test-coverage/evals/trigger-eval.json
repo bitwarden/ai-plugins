@@ -40,6 +40,22 @@
     "should_trigger": true
   },
   {
+    "query": "we're in tech breakdown for PM-41861 -- what existing tests do we have to change now that staged members get a send invitation option?",
+    "should_trigger": true
+  },
+  {
+    "query": "got the test plan for PM-39988 from designing-test-plans at ./designing-test-plans/PM-39988-plan.md. before anyone writes new cases, which of these do we already have that we should update instead?",
+    "should_trigger": true
+  },
+  {
+    "query": "PM-41861 and PM-42581 have the same title -- did we end up with two sets of Testmo cases for the same thing?",
+    "should_trigger": true
+  },
+  {
+    "query": "the emergency-access revamp changes the invite flow. besides our own cases, does it break anything other teams own in Testmo?",
+    "should_trigger": true
+  },
+  {
     "query": "write the unit tests for the new CipherService.RestoreAsync method",
     "should_trigger": false
   },
@@ -77,6 +93,22 @@
   },
   {
     "query": "explain how the testing pyramid works and which layers bitwarden uses across its repos",
+    "should_trigger": false
+  },
+  {
+    "query": "tech breakdown for the emergency-access revamp -- write up test cases for the new grantor approval step",
+    "should_trigger": false
+  },
+  {
+    "query": "the RestoreAsync unit tests broke after my refactor -- update them so they pass",
+    "should_trigger": false
+  },
+  {
+    "query": "we're refining PM-39988 -- what do we need to test?",
+    "should_trigger": false
+  },
+  {
+    "query": "is PM-39988 ready to pick up or does it need more refinement first?",
     "should_trigger": false
   }
 ]
