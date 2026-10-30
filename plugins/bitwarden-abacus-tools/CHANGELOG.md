@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING:** Renamed from `bitwarden-abacus` to `bitwarden-abacus-tools`, following the capability-plugin naming in ADR 0038. Install it as `bitwarden-abacus-tools@bitwarden-marketplace` and uninstall `bitwarden-abacus`; the `land.commit` slot now resolves to `bitwarden-abacus-tools:commit-message`.
+- **BREAKING:** Renamed from `bitwarden-abacus` to `bitwarden-abacus-tools`, following the capability-plugin naming in ADR 0038. Install it as `bitwarden-abacus-tools@bitwarden-marketplace`; the `land.commit` slot now resolves to `bitwarden-abacus-tools:commit-message`.
 
 ## [0.3.0] - 2026-10-23
 
