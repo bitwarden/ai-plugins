@@ -4,6 +4,21 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-30
+
+### Added
+
+- `bitwarden-test-automation` MCP server, bundled at `mcp/bitwarden-test-automation-mcp-server/`. Its one tool, `find_automated_cases`, takes Testmo case IDs and reports which are automated in `bitwarden/test`, with the file, line, platform, and whether the test is ignored or has a KnownBug. It reads the repo through the user's `gh` login, needs no Testmo key, and refuses to start when `NODE_TLS_REJECT_UNAUTHORIZED` is `0`.
+- `assessing-test-coverage`: for a story, reviews the existing Testmo cases in the story's client folders and New Release, and recommends retire or update for each case the story changes, with the AC or plan item behind each recommendation. Retiring means setting the case to Retired and leaving it in place with a note. Checks each case's Automation Type against the `[Description]` IDs in code, using the Testmo validator's rules. Lists possible duplicates, cases owned by other teams, and plan overlap when a plan is given. Adds a Testmo section after the existing Coverage and Gaps sections. Reads Testmo through Testmo's official MCP server in read-only mode.
+- `assessing-test-coverage` excludes Retired cases by reading the case states first and sending every other state in each case search.
+- `assessing-test-coverage` blocks `curl`, `wget`, WebFetch, and `.env` file reads while it runs, and reads Testmo only through the `testmo` MCP server.
+- `assessing-test-coverage` uses the newest saved `designing-test-plans` plan for the story when no plan path is given, and names the file in its report.
+- `designing-test-plans` runs `assessing-test-coverage` with the saved plan when the request also asks about existing tests or Testmo cases.
+
+### Changed
+
+- `assessing-test-coverage` runs as a forked skill and no longer stops to ask the user mid-run. When the team or client is unclear, or a repo can't be read, it records that in its report and in the text it returns.
+
 ## [1.4.0] - 2026-10-28
 
 ### Added

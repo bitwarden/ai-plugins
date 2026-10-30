@@ -1,0 +1,38 @@
+{
+  "name": "@bitwarden/test-automation-mcp",
+  "version": "1.0.0",
+  "description": "Read-only MCP server that finds which Testmo case IDs are automated in bitwarden/test",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "bitwarden-test-automation-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "watch": "tsc --watch",
+    "dev": "tsc && node build/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "mcp",
+    "testmo",
+    "model-context-protocol"
+  ],
+  "author": "Bitwarden",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "@types/node": "24.13.3",
+    "typescript": "7.0.2",
+    "zod": "4.6.6"
+  },
+  "devDependencies": {
+    "corepack": "0.36.0",
+    "vitest": "5.0.2"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@12.9.1+sha512.06b055fff5cd20dc12781de173ced3310ce0951bf2ec620211a16045d5444d5c93a663210764ef29a653a610459ba0368f0e74f84d80c54723cf95aae7bc0d6d"
+}
