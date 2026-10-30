@@ -95,16 +95,56 @@ Then check every launch before reporting:
 
 - **The agent didn't resolve.** If the output says `no agent named 'bitwarden-feature-flag-unwinder:feature-flag-unwinder'`, the session started as a generic session that will improvise from the request. Stop it at once with `claude stop <id>`, then confirm its checkout is unchanged. The usual cause is that the plugin isn't installed: `claude --bg` doesn't load plugins passed with `--plugin-dir`. Tell the engineer to install `bitwarden-feature-flag-unwinder` and re-run.
 - **The launch was refused.** `Workspace not trusted` means the trust check in §2 missed. Ask the engineer to run `claude` in that checkout once, accept the prompt, and say when to retry that repo.
-- **The session is blocked.** Check `claude agents --json` for each id. A session whose `state` is `blocked` is waiting on a prompt. Most often that's the first-run question about a repo's project MCP servers (the clients repo declares several in `.mcp.json`) or a tool-permission prompt. Tell the engineer to `claude attach <id>` and answer it. Rejecting the project MCP servers is fine, because the agent doesn't use them.
+- **The session is blocked.** Check `claude agents --json` for each id. A session whose `status` is `blocked` is waiting on a prompt. Most often that's the first-run question about a repo's project MCP servers (the clients repo declares several in `.mcp.json`) or a tool-permission prompt. Tell the engineer to `claude attach <id>` and answer it. Rejecting the project MCP servers is fine, because the agent doesn't use them.
 
-### 5. Report
+### 5. Report the launch
 
 Give the user, per flag:
 
-- the session id, name, and state for each launched repo, flagging any that are blocked and why
+- the session id, name, and status for each launched repo, flagging any that are blocked and why
 - how to follow them: `claude agents` to list, `claude attach <id>` to watch or approve a permission prompt, `claude logs <id>` for output
 - the repos that were skipped and why
-- a reminder that each agent reports its PR URL in its own session, and on the ticket if there is one, when it finishes
+- that you'll report the PRs when the sessions finish
+
+### 6. Wait for the sessions to finish
+
+Skip this step when no session launched. Otherwise wait in a background shell command, so this session stays usable while the agents build and test. Put the launched session ids in `IDS`:
+
+```bash
+IDS='["<id>","<id>"]'
+until claude agents --json | jq -e --argjson ids "$IDS" \
+  '[.[] | select(.sessionId as $s | $ids | index($s)) | select(.status == "busy")] | length == 0' >/dev/null; do
+  sleep 60
+done
+```
+
+A session counts as finished when it's no longer `busy`. It has either written its summary, stopped on a prompt, or exited. If the engineer ends this session before the wait completes, the agents keep running, and a later request to check on the cleanup runs §7 on its own.
+
+### 7. Report the PRs
+
+Link and label the PRs first:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/skills/dispatching-flag-cleanup/scripts/link-and-label-prs.sh" "<FLAG>" "<N>"
+```
+
+When the flag has more than one open PR, the script adds a "Related Step N PRs" block to each PR body, above the Objective heading, listing the other PRs. It also gives every PR the `t:flagged-code-removal` label, and removes `t:tech-debt` if a repo's labeler added it. The agent's PR title has no conventional type keyword, so this label is the PR's only `t:` label. A re-run replaces the block, so it is safe to repeat. Relay any warning it prints. The usual one is that `t:flagged-code-removal` doesn't exist in a repo yet, so that PR has no `t:` label and fails its repo's label check until someone creates the label and re-runs the script.
+
+Then look up each launched repo's PR by its branch, which the agent names `flag-cleanup/<FLAG>-step-<N>`:
+
+```bash
+gh pr list --repo "bitwarden/<repo>" --head "flag-cleanup/<FLAG>-step-<N>" --state open --json url --jq '.[0].url // "none"'
+```
+
+Show one table per flag, with every repo from the plan:
+
+| Repo    | Session      | Status  | PR                                            |
+| ------- | ------------ | ------- | --------------------------------------------- |
+| clients | `<id>`       | idle    | https://github.com/bitwarden/clients/pull/123 |
+| server  | `<id>`       | blocked | none                                          |
+| android | not launched | n/a     | nothing to remove                             |
+
+For each row with no PR, say how to find out why: `claude attach <id>` for a blocked session, `claude logs <id>` for one that finished. A session that stopped before opening a PR explains why in its summary, and on the ticket if there is one.
 
 ## Failure handling
 

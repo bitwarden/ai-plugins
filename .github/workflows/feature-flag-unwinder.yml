@@ -344,6 +344,80 @@ jobs:
             --agent bitwarden-feature-flag-unwinder:feature-flag-unwinder
             --allowedTools "Skill,Read,Edit,Write,Grep,Glob,Bash,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue,mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__add_issue_comment"
 
+      # One row per matrix job. GitHub shows every job's summary on the run's
+      # summary page, so the run reads as one table of PRs. "none" means the
+      # agent opened no PR, and the job log has its reason.
+      - name: Report PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          _REPO: ${{ matrix.repo }}
+          _FLAG: ${{ matrix.flag }}
+          _STEP: ${{ matrix.step }}
+        run: |
+          URL=$(gh pr list --repo "bitwarden/$_REPO" --head "flag-cleanup/${_FLAG}-step-${_STEP}" \
+            --state open --json url --jq '.[0].url // "none"' || echo "lookup failed")
+          {
+            echo "| Flag | Repo | Step | PR |"
+            echo "| ---- | ---- | ---- | -- |"
+            echo "| \`$_FLAG\` | $_REPO | $_STEP | $URL |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Runs once all unwind jobs finish, so every PR for a flag exists. Same
+  # script the dispatching-flag-cleanup skill runs after a local dispatch.
+  link-prs:
+    name: Link and label PRs
+    runs-on: ubuntu-24.04
+    needs: [find-tasks, unwind]
+    if: always() && needs.find-tasks.outputs.matrix != '[]' && needs.find-tasks.outputs.matrix != ''
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Log in to Azure
+        uses: bitwarden/gh-actions/azure-login@main
+        with:
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Get Azure Key Vault secrets
+        id: get-kv-secrets
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
+        with:
+          keyvault: gh-org-bitwarden
+          secrets: "BW-GHAPP-ID,BW-GHAPP-KEY"
+
+      - name: Log out from Azure
+        uses: bitwarden/gh-actions/azure-logout@main
+
+      # PR bodies and labels only, no contents access to the target repos.
+      - name: Generate GH App token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        id: app-token
+        with:
+          app-id: ${{ steps.get-kv-secrets.outputs.BW-GHAPP-ID }}
+          private-key: ${{ steps.get-kv-secrets.outputs.BW-GHAPP-KEY }}
+          owner: bitwarden
+          repositories: clients,server,ios,android
+          permission-pull-requests: write
+
+      - name: Check out the link script
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          sparse-checkout: plugins/bitwarden-feature-flag-unwinder/skills/dispatching-flag-cleanup/scripts
+          persist-credentials: false
+
+      - name: Link and label each flag's PRs
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          _MATRIX: ${{ needs.find-tasks.outputs.matrix }}
+        run: |
+          echo "$_MATRIX" | jq -r 'unique_by([.flag, .step])[] | "\(.flag) \(.step)"' \
+            | while read -r FLAG STEP; do
+                bash plugins/bitwarden-feature-flag-unwinder/skills/dispatching-flag-cleanup/scripts/link-and-label-prs.sh "$FLAG" "$STEP"
+              done
+
 # Required Azure KV secrets (keyvault `gh-org-bitwarden`):
 #   BW-GHAPP-ID / BW-GHAPP-KEY — GH App installed on clients, server, ios, android
 #   ANTHROPIC-API-KEY           — Claude API key for claude-code-action

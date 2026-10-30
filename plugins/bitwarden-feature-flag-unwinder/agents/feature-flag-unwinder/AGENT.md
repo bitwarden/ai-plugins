@@ -234,7 +234,9 @@ If verification required follow-up edits (dangling references, Step 1 stragglers
 EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
 ```
 
-Invoke `Skill(applying-pr-conventions)` once to compose the title, body, and label. Tell it the label is already settled as `ai-review`, so it doesn't stop to ask, because nobody may be watching this session. Pass `JIRA_ISSUE_KEY` for the Tracking section if there is one, and the content below for the Objective section:
+The title is `[${JIRA_ISSUE_KEY}] Remove ${FLAG_KEY} feature flag (step ${STEP})`, without the `[${JIRA_ISSUE_KEY}] ` prefix when there is no ticket.
+
+Invoke `Skill(applying-pr-conventions)` once to compose the body and label. Tell it the title and the label (`ai-review`) are already settled, so it doesn't stop to ask, because nobody may be watching this session. Pass `JIRA_ISSUE_KEY` for the Tracking section if there is one, and the content below for the Objective section:
 
 **Step 1** Objective content:
 
