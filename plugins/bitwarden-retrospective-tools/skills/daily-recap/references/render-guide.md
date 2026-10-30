@@ -64,7 +64,7 @@ The standup card sits at the top of the page, and its Copy button turns it into 
 | `{{STANDUP_LABEL_PAST}}` | `Yesterday` | `Last week` |
 | `{{STANDUP_LABEL_NEXT}}` | `Today`     | `This week` |
 
-The Blockers heading is fixed in the template. `{{STANDUP_PERIOD}}` is `Workday · {DATE}`.
+The Blockers heading is fixed in the template. `{{STANDUP_PERIOD}}` is `Workday · {DATE}` for a daily recap and `Week · {DATE}` for a weekly one.
 
 ### RAG status
 
