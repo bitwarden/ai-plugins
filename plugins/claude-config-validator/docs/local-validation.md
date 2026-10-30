@@ -45,7 +45,7 @@ shows up on your machine rather than as a red check.
 | Configuration and security | `reviewing-claude-config` skill             | Any agent, skill, command, hook, `CLAUDE.md`, or `.claude/` file changed       |
 
 Scope rules, gating, and the report format are defined once in
-[`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
+[`reference/validate-ai-scope.md`](../skills/reviewing-claude-config/reference/validate-ai-scope.md),
 shared with `/validate-ai` and kept in step with the action.
 
 ## Change detection
@@ -64,7 +64,7 @@ the union of:
   `/plugin install plugin-dev@claude-plugins-official`, from the `claude-plugins-official`
   marketplace at `anthropics/claude-plugins-official`. Without it those sections are reported as
   skipped, not silently dropped.
-- **A `bitwarden/gh-actions` checkout** for the three shell checks. The command looks at
+- **A `bitwarden/gh-actions` checkout** for the three shell checks. The skill looks at
   `$BW_GH_ACTIONS_PATH/validate-ai/scripts`, then a sibling `../gh-actions` checkout, and
   otherwise offers to shallow-clone the repository to a temporary directory. Decline and
   the report names those checks on its `**Not covered:**` line.
@@ -77,7 +77,7 @@ in `bitwarden/gh-actions` is their sole source of truth, and they are invoked wi
 
 ## Permissions
 
-The command pre-approves read-only inspection only — `git diff`, `git fetch origin`,
+The skill pre-approves read-only inspection only — `git diff`, `git fetch origin`,
 `git rev-parse`, `git symbolic-ref`, `git ls-files`, `date`, `ls` — plus an `Edit` rule
 scoped to `~/.claude/plugins/data/claude-config-validator*/ai-validation/*`, the only
 directory it writes to. `WebFetch` is scoped to `code.claude.com`, the one host it needs to
@@ -88,7 +88,7 @@ step executes shell code from outside this repository, and a blanket `Bash(bash:
 would pre-approve arbitrary commands on the one path that fetches code from the network.
 If you run this often, allowlist the exact script invocations yourself.
 
-Three details in the `Edit` rule are deliberate. It is an `Edit` rule even though the command uses
+Three details in the `Edit` rule are deliberate. It is an `Edit` rule even though the skill uses
 `Write`, because Claude Code checks file permissions against `Edit(path)` and `Read(path)`
 rules only: a path rule written for `Write` is accepted, never consulted, and warned about
 at startup, while an `Edit` rule applies to every built-in tool that edits files. That
@@ -114,7 +114,7 @@ goes through is a separate path.
 `validate-version-bump.sh` reads the current plugin version from your working tree, so an
 uncommitted version bump counts. It detects the changelog entry with
 `git diff <base-ref>...HEAD`, so an **uncommitted** `CHANGELOG.md` edit is not visible to
-it and gets reported as missing until you commit. The command states this in the report
+it and gets reported as missing until you commit. The skill states this in the report
 whenever that check runs.
 
 ## Output
@@ -130,7 +130,7 @@ whenever that check runs.
 `~/.claude/plugins/data/`. Reports land there rather than in the checkout you validated,
 which can be any repository — so no repository needs a `.gitignore` entry for them, and
 reports from different checkouts do not overwrite each other. The trade-off is that they
-accumulate somewhere you have to go looking for; the command prints the path it wrote each
+accumulate somewhere you have to go looking for; the skill prints the path it wrote each
 time. `claude plugin uninstall <plugin>` deletes that directory unless you pass
 `--keep-data`; `claude plugin uninstall --help` documents both the flag and the
 `~/.claude/plugins/data/{id}/` layout the `Edit` rule is written against.
@@ -150,8 +150,8 @@ skipped, and it ends with `<!-- validation-complete -->` so a local report match
 
 ## Related documentation
 
-- [Claude Config Validator plugin README](../../README.md)
-- [`reviewing-claude-config` skill](../../skills/reviewing-claude-config/SKILL.md)
+- [Claude Config Validator plugin README](../README.md)
+- [`reviewing-claude-config` skill](../skills/reviewing-claude-config/SKILL.md)
 - [validate-ai action](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
 
 ## Troubleshooting
