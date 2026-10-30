@@ -10,10 +10,10 @@ Skills can be invoked individually. See the table below for what ships today.
 
 ## Skills
 
-| Skill         | What It Does                                                                                                                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `daily-recap` | Builds an interactive HTML recap of one workday from your Claude Code sessions and GitHub events, with a standup card, themed work streams, and a filterable GitHub timeline. See [its README](skills/daily-recap/README.md). |
-| `weekly-recap` | A thin skill that reuses daily-recap's scripts, template, and references to build the same recap over a Monday-to-Friday workweek instead of a single day. |
+| Skill          | What It Does                                                                                                                                                                                                                  |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `daily-recap`  | Builds an interactive HTML recap of one workday from your Claude Code sessions and GitHub events, with a standup card, themed work streams, and a filterable GitHub timeline. See [its README](skills/daily-recap/README.md). |
+| `weekly-recap` | A thin skill that reuses daily-recap's scripts, template, and references to build the same recap over a Monday-to-Friday workweek instead of a single day.                                                                    |
 
 ## Installation
 
