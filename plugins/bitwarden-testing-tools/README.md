@@ -51,13 +51,14 @@ To set up regression runs, install the Testmo tools as well:
 
 Add the server in read-only mode, named exactly `testmo`. The skill's allowed tools expect that name.
 
+First open your shell profile (for example `~/.zshrc`) in a text editor and add the line `export TESTMO_TOKEN=<your key>`. Use the editor, not `echo` or another command. A command would save the key in your shell history. Then open a new terminal.
+
 ```bash
-read -s TESTMO_TOKEN   # paste your key, then press Enter
-claude mcp add testmo "https://testmo.sembi.com/mcp?mode=read-only&INSTANCE-URL=bitwarden.testmo.net" --transport http --scope user --header "Authorization: Bearer $TESTMO_TOKEN"
-claude mcp list        # testmo should show Connected
+claude mcp add testmo "https://testmo.sembi.com/mcp?mode=read-only&INSTANCE-URL=bitwarden.testmo.net" --transport http --scope user --header 'Authorization: Bearer ${TESTMO_TOKEN}'
+claude mcp list        # testmo should show Connected, with no warning about TESTMO_TOKEN
 ```
 
-Claude Code saves the key in `~/.claude.json`. Without the server, the skill reports that Testmo was not checked and finishes the code side.
+The single quotes matter. Claude Code saves `${TESTMO_TOKEN}`, not the key, in `~/.claude.json` and reads the key from your environment each time it starts. Without the server, the skill reports that Testmo was not checked and finishes the code side.
 
 ## Test Automation MCP Server
 

@@ -2,7 +2,7 @@
 name: assessing-test-coverage
 description: Use when determining what test coverage ALREADY exists for a specific change (a PR, Jira key, Tech Breakdown doc, Testmo CSV, changed paths, or named component), or which existing Testmo cases and tests it makes obsolete, wrong, or duplicated, including other teams' cases. Use it before writing new tests or Testmo cases. Triggers on "what's already tested", "does this PR have tests", "what coverage exists for", "is this component covered", "which behaviors have no test today", "which Testmo cases does this story make obsolete", or "which tests should be retired or updated for PM-123". A backward-looking review: it recommends update or retire, lists possible duplicates, notes other teams' affected cases, and never writes to Testmo or code. Do NOT use it to decide which new tests to add ("should I add integration tests here", "are unit tests enough"), to design a test strategy or plan, to run or fix existing tests, or to explain testing concepts like the test pyramid or which layers a repo uses.
 argument-hint: "[PR URL | Jira key | Tech Breakdown doc | Testmo CSV] [designing-test-plans plan path]"
-allowed-tools: "Read, Write, Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh api repos/bitwarden/*), Bash(gh search code:*), Bash(git rev-parse:*), Bash(git remote get-url:*), Bash(git -C * rev-parse:*), Bash(git -C * remote get-url:*), Bash(git clone:*), Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__testmo__get_states, mcp__testmo__get_statuses, mcp__testmo__get_repository_folders, mcp__testmo__get_repository_folder, mcp__testmo__get_repository_cases, mcp__testmo__get_repository_case, mcp__testmo__get_case_result_history, mcp__plugin_bitwarden-testing-tools_bitwarden-test-automation__find_automated_cases, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue"
+allowed-tools: "Read, Write, Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh api repos/bitwarden/*), Bash(gh search code:*), Bash(git rev-parse:*), Bash(git remote get-url:*), Bash(git -C * rev-parse:*), Bash(git -C * remote get-url:*), Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__testmo__get_states, mcp__testmo__get_statuses, mcp__testmo__get_repository_folders, mcp__testmo__get_repository_folder, mcp__testmo__get_repository_cases, mcp__testmo__get_repository_case, mcp__testmo__get_case_result_history, mcp__plugin_bitwarden-testing-tools_bitwarden-test-automation__find_automated_cases, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue"
 disallowed-tools: "Bash(curl *), Bash(wget *), WebFetch, Read(//**/.env), Read(//**/.env.*)"
 context: fork
 agent: general-purpose
@@ -20,7 +20,7 @@ This skill reviews and recommends. It never edits Testmo, never edits code, and 
 
 ## Steps
 
-Before the first read from Jira or Testmo, load the tools by exact name with ToolSearch: `select:mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue` for Jira, and `select:mcp__testmo__get_states,mcp__testmo__get_statuses,mcp__testmo__get_repository_folders,mcp__testmo__get_repository_folder,mcp__testmo__get_repository_cases,mcp__testmo__get_repository_case,mcp__testmo__get_case_result_history` for Testmo. Do not use keyword searches for these tools, since they can match unrelated tools. A keyword search that finds nothing does not mean the tools are missing. If an exact-name load finds nothing, try the same load once more before doing anything else, because the plugin's servers can take a moment to start. Report a source as unavailable only when that second load or a call to the tool itself fails, and quote the error.
+Before the first read from Jira or Testmo, load the tools by exact name with ToolSearch: `select:mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue` for Jira, and `select:mcp__testmo__get_states,mcp__testmo__get_statuses,mcp__testmo__get_repository_folders,mcp__testmo__get_repository_folder,mcp__testmo__get_repository_cases,mcp__testmo__get_repository_case,mcp__testmo__get_case_result_history,mcp__plugin_bitwarden-testing-tools_bitwarden-test-automation__find_automated_cases` for Testmo and the code check. Do not use keyword searches for these tools, since they can match unrelated tools. A keyword search that finds nothing does not mean the tools are missing. If an exact-name load finds nothing, try the same load once more before doing anything else, because the plugin's servers can take a moment to start. Report a source as unavailable only when that second load or a call to the tool itself fails, and quote the error.
 
 1. Resolve the input into a change surface (changed paths/symbols, named components) and the repos it touches:
    - PR URL → `gh pr view`, `gh pr diff`.
@@ -37,7 +37,7 @@ Before the first read from Jira or Testmo, load the tools by exact name with Too
 2. List the change's testable behaviors.
 3. For each behavior, find the tests covering it: tests in the linked PR diffs first, then a lookup scoped to the change surface. Include E2E.
 4. Record each behavior: layer (unit / integration / E2E), representative test permalink(s), count, source. Behaviors with no test found are gaps.
-5. Run the Testmo procedure below for every story. If Testmo cannot be read, record why in the Testmo section and continue with the code side.
+5. Run the Testmo procedure below for every story. If Testmo cannot be read, record why in the Testmo section and continue with the code side. If the input resolves to no story and no plan, skip the Testmo procedure and record "no AC source, Testmo cases not reviewed" under NOT CHECKED.
 6. Write the report to `${CLAUDE_PLUGIN_DATA}/coverage-reports/<slug>-<timestamp>-coverage.md` (`<slug>` from the ticket/PR/feature; `<timestamp>` from `date +%Y-%m-%d-%H%M%S`) using the template below.
 
 ## Testmo procedure
@@ -146,12 +146,12 @@ Then compare each case's Automation Type from the search results with what the c
 - Every match ignored, but the type is `Automated`, is a mismatch.
 - The type is `Automated`, but the tool finds no match, is a mismatch.
 
-Report mismatches only, for the team to decide. Do not call them bugs. Check only the IDs you fetched in full-review scope. If the tool returns "Code not checked", list the cases as not checked for code, with the reason the tool gave. Never state that a case has no test in code unless the tool returned that result.
+Report mismatches only, for the team to decide. Do not call them bugs. Check every full-review case ID from step C's merged results, fetched or not. If the tool returns "Code not checked", list the cases as not checked for code, with the reason the tool gave. Never state that a case has no test in code unless the tool returned that result.
 
 H. **Plan overlap (only when the user gave a plan).** For each plan item that an existing case or test already covers, answer two separate questions:
 
 - **a. Is the existing case's content still right?** Keep or update, tied to an AC.
-- **b. Does the plan want it automated?** Take this from the plan's Layer and Method for that test. Skill C does not decide it.
+- **b. Does the plan want it automated?** Take this from the plan's Layer and Method for that test. This skill does not decide it.
 
 Outcomes:
 
@@ -232,7 +232,7 @@ The Testmo section must be as simple as possible.
 - No em dashes anywhere in the output. Use a colon, a comma, or a new sentence instead.
 - The Evidence & sources row lists the folders searched and says "searched by case name only."
 - Readers may not have a Testmo seat, so each entry stands on its own: link, folder, why, and the note to paste or the proposed text.
-- HEADS-UP FOR OTHER TEAMS lists only heads-up cases that need an update or retire under step E. A heads-up case that needs a change is listed there, not under SUGGESTED CHANGES.
+- HEADS-UP FOR OTHER TEAMS lists heads-up cases that need an update or retire under step E, plus one line per other team on a shared full-review case that needs a change. A heads-up case that needs a change is listed there, not under SUGGESTED CHANGES.
 
 Sections, in order, each present only when it has entries:
 
