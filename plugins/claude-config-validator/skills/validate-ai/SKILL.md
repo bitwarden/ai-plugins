@@ -17,7 +17,7 @@ reach the diff as inline comments. Follow it exactly.
 
 For a review of your own uncommitted work, use `/validate-ai-local` instead.
 
-Requirements and the reasoning behind each pre-approved tool are in `${CLAUDE_PLUGIN_ROOT}/skills/validate-ai/README.md`.
+Requirements and the reasoning behind each pre-approved tool are in `${CLAUDE_PLUGIN_ROOT}/docs/pull-request-validation.md`.
 
 **This skill produces a report. It does not fix anything.** The report is the deliverable
 and a human decides what to act on — nothing here holds a grant to edit the files under

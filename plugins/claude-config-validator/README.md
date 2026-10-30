@@ -85,10 +85,10 @@ headless workflow run means no report and a failed check.
 
 ### Skills
 
-| Skill                                                      | Purpose                                                                                                                                              |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`/validate-ai-local`](skills/validate-ai-local/README.md) | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
-| [`/validate-ai`](skills/validate-ai/README.md)             | Validate the Claude material changed in a pull request and report its findings inline on the diff, with a sticky summary comment                     |
+| Skill                                             | Purpose                                                                                                                                              |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`/validate-ai-local`](docs/local-validation.md)  | Validate the Claude material you changed locally (branch commits plus uncommitted work) and write a report to `${CLAUDE_PLUGIN_DATA}/ai-validation/` |
+| [`/validate-ai`](docs/pull-request-validation.md) | Validate the Claude material changed in a pull request and report its findings inline on the diff, with a sticky summary comment                     |
 
 Both skills run the same review the
 [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai) GitHub
@@ -375,9 +375,12 @@ plugins/claude-config-validator/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
 ├── CHANGELOG.md             # Version history
+├── docs/
+│   ├── pull-request-validation.md      # /validate-ai usage, permissions, and output
+│   └── local-validation.md             # /validate-ai-local usage, permissions, output, and troubleshooting
 ├── skills/
-│   ├── validate-ai/                    # /validate-ai - pull request validation (skill + README)
-│   ├── validate-ai-local/              # /validate-ai-local - local checkout validation (skill + README)
+│   ├── validate-ai/                    # /validate-ai - pull request validation
+│   ├── validate-ai-local/              # /validate-ai-local - local checkout validation
 │   ├── reviewing-claude-config/        # Entry point: scope, security scan, routing, filtering
 │   │   ├── SKILL.md
 │   │   ├── reference/                  # Priority framework, security patterns, requirements, changeset scope

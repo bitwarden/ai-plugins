@@ -9,7 +9,7 @@ pull request. It is the review the
 Action performs org-wide, expressed as a skill so the action and a human get the same
 review from the same source.
 
-For your own uncommitted work, use [`/validate-ai-local`](../validate-ai-local/README.md).
+For your own uncommitted work, use [`/validate-ai-local`](local-validation.md).
 
 ## Usage
 
@@ -67,7 +67,7 @@ own result there. In interactive mode nothing runs them, so the report names all
 its `**Not covered:**` line. To run them against a checkout, use `/validate-ai-local`.
 
 Scope rules, gating, and the report format are defined once in
-[`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
+[`reference/validate-ai-scope.md`](../skills/reviewing-claude-config/reference/validate-ai-scope.md),
 shared with `/validate-ai-local` and kept in step with the action.
 
 ## Where pull-request configuration is read from
@@ -157,9 +157,9 @@ happily as a comment update.
 
 ## Related documentation
 
-- [Claude Config Validator plugin README](../../README.md)
-- [`reviewing-claude-config` skill](../../skills/reviewing-claude-config/SKILL.md)
-- [`/validate-ai-local`](../validate-ai-local/README.md)
+- [Claude Config Validator plugin README](../README.md)
+- [`reviewing-claude-config` skill](../skills/reviewing-claude-config/SKILL.md)
+- [`/validate-ai-local`](local-validation.md)
 - [validate-ai action](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
 
 ## Troubleshooting

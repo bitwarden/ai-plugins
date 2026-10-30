@@ -14,7 +14,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/reference/validate-ai
 first. It defines which paths count as Claude material, how to bucket them, which
 validations each bucket gates, and the report contract. Follow it exactly.
 
-Requirements, the reasoning behind each pre-approved tool, and troubleshooting are in `${CLAUDE_PLUGIN_ROOT}/skills/validate-ai-local/README.md`.
+Requirements, the reasoning behind each pre-approved tool, and troubleshooting are in `${CLAUDE_PLUGIN_ROOT}/docs/local-validation.md`.
 
 **Never post anything to GitHub from this skill.** Output is local files only.
 

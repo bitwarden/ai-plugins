@@ -45,7 +45,7 @@ shows up on your machine rather than as a red check.
 | Configuration and security | `reviewing-claude-config` skill             | Any agent, skill, command, hook, `CLAUDE.md`, or `.claude/` file changed       |
 
 Scope rules, gating, and the report format are defined once in
-[`reference/validate-ai-scope.md`](../../skills/reviewing-claude-config/reference/validate-ai-scope.md),
+[`reference/validate-ai-scope.md`](../skills/reviewing-claude-config/reference/validate-ai-scope.md),
 shared with `/validate-ai` and kept in step with the action.
 
 ## Change detection
@@ -150,8 +150,8 @@ skipped, and it ends with `<!-- validation-complete -->` so a local report match
 
 ## Related documentation
 
-- [Claude Config Validator plugin README](../../README.md)
-- [`reviewing-claude-config` skill](../../skills/reviewing-claude-config/SKILL.md)
+- [Claude Config Validator plugin README](../README.md)
+- [`reviewing-claude-config` skill](../skills/reviewing-claude-config/SKILL.md)
 - [validate-ai action](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
 
 ## Troubleshooting
