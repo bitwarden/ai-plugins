@@ -1,8 +1,8 @@
-# `/code-review-local` - Local Code Review Command
+# `/code-review-local` - Local Code Review Skill
 
 ## Overview
 
-The `/code-review-local` slash command invokes the `bitwarden-code-reviewer` agent to perform comprehensive code reviews of **GitHub pull requests or local git changes**, writing the review findings to **local files** instead of posting them to GitHub. This enables offline review workflows, preview capabilities before posting, pre-commit validation, and integration with custom review processes.
+The `/code-review-local` skill invokes the `bitwarden-code-reviewer` agent to perform comprehensive code reviews of **GitHub pull requests or local git changes**, writing the review findings to **local files** instead of posting them to GitHub. This enables offline review workflows, preview capabilities before posting, pre-commit validation, and integration with custom review processes.
 
 ## Usage
 

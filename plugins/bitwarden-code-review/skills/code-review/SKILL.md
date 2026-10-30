@@ -1,4 +1,5 @@
 ---
+name: code-review
 argument-hint: "[PR#] | (blank when the workflow supplies one)"
 allowed-tools: Read(//tmp/pr-threads.json), Task
 description: Review a GitHub pull request and post findings directly to GitHub

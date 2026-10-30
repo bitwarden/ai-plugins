@@ -22,6 +22,8 @@ It offers two complementary lenses. The autonomous `bitwarden-code-reviewer` age
 
 | Skill                                                                                        | Triggers                                                                          | Purpose                                                                                                                                                                                                             |
 | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`code-review`](./skills/code-review/SKILL.md)                                               | `/bitwarden-code-review:code-review`                                              | Review a GitHub pull request and post findings directly to GitHub                                                                                                                                                   |
+| [`code-review-local`](./skills/code-review-local/SKILL.md)                                   | `/bitwarden-code-review:code-review-local`                                        | Review a GitHub pull request or local changes and write the review to local files instead of posting                                                                                                                |
 | [`classifying-review-findings`](./skills/classifying-review-findings/SKILL.md)               | "classify finding", "severity"                                                    | 5-tier severity system (CRITICAL / IMPORTANT / DEBT / SUGGESTED / QUESTION) with emoji and label mapping                                                                                                            |
 | [`avoiding-false-positives`](./skills/avoiding-false-positives/SKILL.md)                     | "validate finding", "verify before posting", "stacked PR"                         | Rejection criteria and verification checks that drop low-confidence findings before they reach a comment, plus the once-per-review gate that decides whether completeness findings apply to a confirmed stack layer |
 | [`performing-multi-agent-code-review`](./skills/performing-multi-agent-code-review/SKILL.md) | "perform multi-agent code review", "review the last week of commits in this repo" | Perform a rigorous, multi-agent code review                                                                                                                                                                         |
@@ -51,9 +53,6 @@ bitwarden-code-review/
 ├── agents/
 │   └── bitwarden-code-reviewer/
 │       └── AGENT.md                          # Main review agent
-├── commands/
-│   ├── code-review/                          # Code review command
-│   └── code-review-local/                    # Local review command
 ├── docs/
 │   └── multi-agent-code-review-flows.md           # Mermaid diagrams of the multi-agent review
 ├── skills/                                   # See Skills table above
