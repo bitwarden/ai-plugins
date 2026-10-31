@@ -37,7 +37,7 @@ description: >-
 - **Fix:** Replace with the current pinned equivalent:
   - `ubuntu-latest` → `ubuntu-24.04`
   - `windows-latest` → `windows-2022`
-  - `macos-latest` → `macos-14`
+  - `macos-latest` → `macos-26`
 
 **`step_pinned`**
 
