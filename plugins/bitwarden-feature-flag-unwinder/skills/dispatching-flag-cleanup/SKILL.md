@@ -1,6 +1,6 @@
 ---
 name: dispatching-flag-cleanup
-description: Fan a feature-flag cleanup out to every Bitwarden repo it applies to by launching one background feature-flag-unwinder agent per repo from the engineer's local checkouts. Needs only a flag key and a step; a Jira ticket is optional. Use when the user asks to "clean up feature flag pm-1234-flag-name", "run step 2 cleanup for pm-1234-flag-name", "unwind pm-1234-flag-name everywhere", "create cleanup PRs for pm-1234-flag-name", "clean up the flag for PM-1234", "run the flag unwinder across all repos", or otherwise wants flag-removal PRs opened across clients, server, ios, and android. Not for unwinding a flag in a single repo the user is already in (dispatch the feature-flag-unwinder agent directly) or for the scheduled GitHub Actions run.
+description: Fan a feature-flag cleanup out to every Bitwarden repo it applies to by launching one background feature-flag-unwinder agent per repo from the engineer's local checkouts. Needs only a flag key and a step; a Jira ticket is optional. Use when the user asks to "clean up feature flag pm-1234-flag-name", "run step 2 cleanup for pm-1234-flag-name", "unwind pm-1234-flag-name everywhere", "create cleanup PRs for pm-1234-flag-name", "clean up the flag for PM-1234", "run the flag unwinder across all repos", or otherwise wants flag-removal PRs opened across clients, server, ios, and android. Also use when the user asks to "check on the flag cleanup for pm-1234-flag-name" or "what PRs did the flag cleanup open", to report on cleanup sessions dispatched earlier. Not for unwinding a flag in a single repo the user is already in (dispatch the feature-flag-unwinder agent directly) or for the scheduled GitHub Actions run.
 ---
 
 # Dispatching Flag Cleanup
@@ -35,11 +35,11 @@ Resolve each repo's checkout in this order, stopping at the first that applies:
 2. **Under a root.** `<root>/<repo>`, where the root is `BITWARDEN_REPOS_ROOT` if set, otherwise the parent of the current directory's checkout if its `origin` is a `bitwarden/*` repo, otherwise the current directory.
 3. **Ask.** If neither finds it, ask the engineer for the path, or whether to skip that repo.
 
-A checkout counts as found only if `git -C <path> remote get-url origin` points at `bitwarden/<repo>` over HTTPS or SSH. A server run, Step 1 or Step 2, also needs `clients`, `ios`, and `android` for the compatibility gate, so resolve those the same way even when they won't get a session of their own.
+A checkout counts as found only if `git -C <path> remote get-url origin` points at `bitwarden/<repo>` over HTTPS or SSH. A server run, Step 1 or Step 2, also needs `clients`, `ios`, and `android` for the compatibility gate, so resolve those the same way even when they won't get a session of their own. If any of the three is still unresolved, a Step 2 server run is not ready, because the agent stops at once without them. For a Step 1 server run, launch anyway and note in the plan that the agent will skip the combine check and keep the constant.
 
 For each found checkout, also check:
 
-- **Anything to remove.** Run `git -C <path> fetch --quiet origin main`, then `git -C <path> grep -l -F "<FLAG>" origin/main --`. Every flag definition contains the key as a string, so no match means this repo has nothing for the step, and launching a session there would only confirm that. Mark it "nothing to remove" and don't launch it. Treat server specially. For Step 2, no match means the constant is already gone. For Step 1, see the combine check below: if only the `FeatureFlagKeys` constant in `src/Core/Constants.cs` matches and the steps won't combine, there's nothing to remove, because Step 1 keeps that constant. Uncommitted work in the checkout doesn't matter, because the agent works in its own worktree and never touches the checkout.
+- **Anything to remove.** Run `git -C <path> fetch --quiet origin main`, then `git -C <path> grep -l -F "<FLAG>" origin/main --`. Every flag definition contains the key as a string, so no match means this repo has nothing for the step, and launching a session there would only confirm that. Mark it "nothing to remove" and don't launch it. Treat server specially. For Step 2, no match means the constant is already gone. For Step 1, if only the `FeatureFlagKeys` constant in `src/Core/Constants.cs` matches, still launch it. The agent runs its compatibility gate and removes the constant if the window has cleared. Show it in the §3 plan as "Step 1 + possible Step 2 (agent decides)". Uncommitted work in the checkout doesn't matter, because the agent works in its own worktree and never touches the checkout.
 - **Combined Steps 1 and 2 (Step 1 only).** If clients, ios, and android all have no match on `origin/main`, check whether the flag ever existed in any of them: `git -C <path> log -S "<FLAG>" --format=%H -1 origin/main` for each. If all three come back empty, it's a server-only flag. No client release ever carried it, so the server agent will remove the logic and the `FeatureFlagKeys` constant in one PR, completing Step 2 as well. Show server as "Steps 1 + 2 combined (server-only flag)" in the plan. The agent makes the final call with the compat gate, and also combines when an old client cleanup's compatibility window has already passed. So for any server Step 1 run, mention that it may combine.
 - **Toolchain.** The agent builds and tests each repo before opening its PR, so check this machine can. Look for the tools each repo's `CLAUDE.md` lists for its build and tests. At minimum:
 
@@ -65,7 +65,7 @@ Launching opens real PRs, and posts ticket comments if there's a ticket, so show
 | ios     | not found       | no                | n/a        |
 | android | ~/repos/android | nothing to remove | n/a        |
 
-Above the table, show the flag key, the step, the ticket (key and summary) if there is one, and whether PRs open as drafts. If any repo isn't ready, say what would fix it: give its path, clone it under the root, set `BITWARDEN_REPOS_ROOT` or the repo's `*_REPO` variable. A repo with nothing to remove needs no fix. Say so, and if there's a ticket, mention that no session will comment on it for that repo.
+Above the table, show the flag key, the step, the ticket (key and summary) if there is one, and whether PRs open as drafts. If any repo isn't ready, say what would fix it: give its path, clone it under the root, set `BITWARDEN_REPOS_ROOT` or the repo's `*_REPO` variable. For a Step 2 server run blocked by a missing client checkout, name that checkout and its `*_REPO` variable. A repo with nothing to remove needs no fix. Say so, and if there's a ticket, mention that no session will comment on it for that repo.
 
 If any repo's toolchain is missing, list what's missing and ask whether to proceed for those repos with CI validation. In that mode the agent skips the local build and tests, opens the PR anyway, and relies on the PR's CI checks to catch problems. The PR body says it wasn't validated locally. The alternatives are to install the toolchain and re-check, or to skip those repos. Ask once for all such repos, and say plainly that a CI-validated PR may fail its checks and need a follow-up push. Repos with a working toolchain still validate locally.
 
@@ -87,7 +87,7 @@ The `< /dev/null` matters. `claude --bg` reads stdin into the prompt, so a launc
 
 Include `for <KEY>` only with a ticket, `as a draft PR` only when the engineer asked for drafts, and `and validate with CI` only for repos the engineer agreed to validate with CI.
 
-For any server launch, Step 1 or Step 2, append the client checkout paths resolved in §2 to the request: `using clients at <path>, ios at <path>, android at <path>`. Don't pass them, or anything else, as environment variables or `PATH` changes on the command. A background session doesn't inherit the launching shell's environment, so only the request text reaches the agent. The agent picks the repo's pinned toolchain version (for example from `.nvmrc`) itself.
+For any server launch, Step 1 or Step 2, append the client checkout paths resolved in §2 to the request: `using clients at <path>, ios at <path>, android at <path>`. For a Step 1 launch with a client checkout unresolved, include only the clauses that resolved. Don't pass them, or anything else, as environment variables or `PATH` changes on the command. A background session doesn't inherit the launching shell's environment, so only the request text reaches the agent. The agent picks the repo's pinned toolchain version (for example from `.nvmrc`) itself.
 
 Run each launch as its own command so one failure doesn't stop the rest. Capture the session id each launch prints, and keep the launch's full output, because the first line carries warnings. Don't pass any permission-bypass flag. Background sessions use the user's normal permission settings, and a session that needs approval waits until the user attaches to it.
 
@@ -120,6 +120,10 @@ done
 
 A session counts as finished when it's no longer `busy`. It has either written its summary, stopped on a prompt, or exited. If the engineer ends this session before the wait completes, the agents keep running, and a later request to check on the cleanup runs §7 on its own.
 
+### Checking on an earlier dispatch
+
+When the user asks to check on a cleanup dispatched in another session, get the flag key and step, asking for either if the request doesn't say. Skip §1 through §6. The repos are the ones the step routes to in the table at the top. Find each repo's session in `claude agents --json` by its name, `unwind <FLAG> <repo> step <N>`, which §4 sets. Then run §7, showing "no session found" for a repo with no matching session. If a session is still `busy`, report it as running and don't wait.
+
 ### 7. Report the PRs
 
 Link and label the PRs first:
@@ -145,6 +149,8 @@ Show one table per flag, with every repo from the plan:
 | android | not launched | n/a     | nothing to remove                             |
 
 For each row with no PR, say how to find out why: `claude attach <id>` for a blocked session, `claude logs <id>` for one that finished. A session that stopped before opening a PR explains why in its summary, and on the ticket if there is one.
+
+With a ticket, finish by taking it out of the scheduled workflow's query, so the next run doesn't redo the work. Remove the `ready-for-cleanup` label from the ticket only when every repo the step routes to (the table at the top) has an open PR or has nothing to remove on `origin/main` (re-run the §2 check, where a server Step 1 run counts as done when only the `FeatureFlagKeys` constant matches). Use the session's Jira access. Remove just that one label, keeping the others: read the ticket's labels and write them back without it if the tool can't remove a single label. If the ticket doesn't carry the label, there's nothing to do. Otherwise keep the label and name the repos still outstanding, so the next scheduled run retries them. Say which you did.
 
 ## Failure handling
 

@@ -180,7 +180,7 @@ Server only. After the flagged logic is removed, run the §S2a gate check with t
 
 - the flag never appeared in clients, ios, or android (`server-only`),
 - it was only ever used in the web app (`web-only`), or
-- the clients cleanup shipped long enough ago that the compatibility window has passed (`compatibility-cleared`).
+- the client cleanups shipped long enough ago that the compatibility window has passed (`compatibility-cleared`), including a flag that was only ever in ios or android.
 
 If the verdict is `ready: false`, keep the constant and continue as a normal Step 1. That's the usual case while client cleanups are still in flight, and it isn't a failure. Note the verdict reason for the PR body and §9.
 
@@ -195,7 +195,7 @@ Resolve the sibling checkouts (§0), then delegate to `Skill(computing-backward-
 Dispatch on `verdict.ready`:
 
 - `true` → proceed to §S2b.
-- `false` with `reason == "step-1-not-merged"` → stop and report that Step 1 hasn't merged yet.
+- `false` with `reason == "step-1-not-merged"` → stop and report that the clients-side Step 1 hasn't merged yet.
 - `false` with `reason == "no-release-since-removal"` → stop and report which non-web client hasn't shipped a release (`verdict.client`). Re-run once that client has shipped.
 - `false` with `reason == "gate-not-cleared"` → stop and report the per-client table from the verdict.
 

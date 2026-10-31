@@ -354,6 +354,7 @@ jobs:
           _REPO: ${{ matrix.repo }}
           _FLAG: ${{ matrix.flag }}
           _STEP: ${{ matrix.step }}
+          _KEY: ${{ matrix.jira_issue_key }}
         run: |
           URL=$(gh pr list --repo "bitwarden/$_REPO" --head "flag-cleanup/${_FLAG}-step-${_STEP}" \
             --state open --json url --jq '.[0].url // "none"' || echo "lookup failed")
@@ -363,10 +364,38 @@ jobs:
             echo "| \`$_FLAG\` | $_REPO | $_STEP | $URL |"
           } >> "$GITHUB_STEP_SUMMARY"
 
+          # The link-prs job reads this to decide whether the ticket is done.
+          # "pr" and "nothing" (no references left on main) both count as done.
+          # A server Step 1 run whose only match is the FeatureFlagKeys
+          # constant also counts as "nothing", because Step 1 keeps it.
+          if [[ "$URL" == https://* ]]; then
+            OUTCOME=pr
+          else
+            git fetch --quiet origin main
+            MATCHES=$(git grep -l -F "$_FLAG" origin/main -- | sed 's|^origin/main:||')
+            if [ -z "$MATCHES" ] || { [ "$_REPO" = server ] && [ "$_STEP" = 1 ] && [ "$MATCHES" = src/Core/Constants.cs ]; }; then
+              OUTCOME=nothing
+            else
+              OUTCOME=failed
+            fi
+          fi
+          mkdir -p .outcome
+          jq -cn --arg flag "$_FLAG" --argjson step "$_STEP" --arg repo "$_REPO" --arg key "$_KEY" --arg outcome "$OUTCOME" \
+            '{flag: $flag, step: $step, repo: $repo, jira_issue_key: $key, outcome: $outcome}' > .outcome/outcome.json
+
+      - name: Upload outcome
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: outcome-${{ matrix.flag }}-step-${{ matrix.step }}-${{ matrix.repo }}
+          path: .outcome/outcome.json
+          if-no-files-found: ignore
+
   # Runs once all unwind jobs finish, so every PR for a flag exists. Same
-  # script the dispatching-flag-cleanup skill runs after a local dispatch.
+  # steps the dispatching-flag-cleanup skill runs after a local dispatch:
+  # link and label the PRs, then take finished tickets out of the query.
   link-prs:
-    name: Link and label PRs
+    name: Link PRs and update tickets
     runs-on: ubuntu-24.04
     needs: [find-tasks, unwind]
     if: always() && needs.find-tasks.outputs.matrix != '[]' && needs.find-tasks.outputs.matrix != ''
@@ -386,7 +415,7 @@ jobs:
         uses: bitwarden/gh-actions/get-keyvault-secrets@main
         with:
           keyvault: gh-org-bitwarden
-          secrets: "BW-GHAPP-ID,BW-GHAPP-KEY"
+          secrets: "BW-GHAPP-ID,BW-GHAPP-KEY,JIRA-EMAIL,JIRA-API-TOKEN"
 
       - name: Log out from Azure
         uses: bitwarden/gh-actions/azure-logout@main
@@ -418,13 +447,55 @@ jobs:
                 bash plugins/bitwarden-feature-flag-unwinder/skills/dispatching-flag-cleanup/scripts/link-and-label-prs.sh "$FLAG" "$STEP"
               done
 
+      - name: Download outcomes
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: outcome-*
+          path: .outcomes
+
+      # A ticket leaves the ready-for-cleanup query only when every repo its
+      # step covers opened a PR or had nothing to remove. A failed or missing
+      # job (including a run limited to one repo) keeps the label, so the next
+      # scheduled run retries the ticket.
+      - name: Remove ready-for-cleanup from finished tickets
+        env:
+          JIRA_EMAIL: ${{ steps.get-kv-secrets.outputs.JIRA-EMAIL }}
+          JIRA_API_TOKEN: ${{ steps.get-kv-secrets.outputs.JIRA-API-TOKEN }}
+        run: |
+          if [ -z "$(find .outcomes -name outcome.json 2>/dev/null)" ]; then
+            echo "No outcomes found."
+            exit 0
+          fi
+          find .outcomes -name outcome.json -exec cat {} + | jq -s '.' > outcomes.json
+
+          jq -r '
+            map(select(.jira_issue_key != "")) | group_by(.jira_issue_key)[]
+            | (if .[0].step == 1 then ["android", "clients", "ios", "server"] else ["server"] end) as $expected
+            | (map(select(.outcome == "pr" or .outcome == "nothing") | .repo) | unique) as $done
+            | "\(.[0].jira_issue_key) \(if $done == $expected then "done" else ($expected - $done | join(",")) end)"
+          ' outcomes.json | while read -r KEY STATE; do
+            if ! [[ "$KEY" =~ ^[A-Z][A-Z0-9]+-[0-9]+$ ]]; then
+              echo "::warning::Skipping invalid ticket key '$KEY'."
+            elif [ "$STATE" != done ]; then
+              echo "$KEY keeps ready-for-cleanup: not finished in $STATE."
+            elif curl -sSf -X PUT -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \
+                -H "Content-Type: application/json" \
+                --data '{"update":{"labels":[{"remove":"ready-for-cleanup"}]}}' \
+                "https://bitwarden.atlassian.net/rest/api/3/issue/$KEY" >/dev/null; then
+              echo "$KEY: removed ready-for-cleanup."
+            else
+              echo "::warning::$KEY: could not remove ready-for-cleanup."
+            fi
+          done
+
 # Required Azure KV secrets (keyvault `gh-org-bitwarden`):
 #   BW-GHAPP-ID / BW-GHAPP-KEY — GH App installed on clients, server, ios, android
 #   ANTHROPIC-API-KEY           — Claude API key for claude-code-action
-#   JIRA-EMAIL / JIRA-API-TOKEN — Atlassian account with Jira read + comment
+#   JIRA-EMAIL / JIRA-API-TOKEN — Atlassian account with Jira read, comment, and edit (link-prs removes ready-for-cleanup)
 #
 # Jira label conventions:
-#   - `ready-for-cleanup`     — "this task is actionable now"
+#   - `ready-for-cleanup`     — "this task is actionable now"; link-prs removes it once
+#                               every repo for the ticket has a PR or nothing to remove
 #   - `flagged-logic-removal` — Step 1 (runs in all four repos)
 #   - `server-flag-removal`   — Step 2 (runs in server only)
 # Step 3 (archive in LaunchDarkly) is manual and intentionally un-labelled.

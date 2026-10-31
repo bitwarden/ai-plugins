@@ -47,7 +47,7 @@ git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
 git -C "$ANDROID_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
 ```
 
-If all three return nothing, return `{ ready: true, reason: "server-only" }` and stop. Otherwise continue to Step 1.
+If all three return nothing, return `{ ready: true, reason: "server-only" }` and stop. Otherwise keep the clients result as `CLIENTS_HISTORY` and continue to Step 1.
 
 ### Step 1 — Find the clients-side removal commit
 
@@ -61,24 +61,36 @@ if [ -n "$CANDIDATE" ] && git -C "$CLIENTS_REPO" show "$CANDIDATE" -- libs/commo
 fi
 ```
 
-If `STEP1_SHA` is empty, the clients-side Step 1 hasn't merged: either the key is still in the enum, or it was never there. Return `{ ready: false, reason: "step-1-not-merged" }` and stop. (A flag that was never in any client was already handled as server-only in Step 0.)
+If `STEP1_SHA` is empty, check `CLIENTS_HISTORY` from Step 0:
+
+- **`CLIENTS_HISTORY` set.** The clients repo has history for the key, so the clients-side Step 1 hasn't merged. Return `{ ready: false, reason: "step-1-not-merged" }` and stop.
+- **`CLIENTS_HISTORY` empty.** The flag was only ever in ios or android. Set browser, cli, and desktop to `null`, skip Step 2, and continue to Step 3 for ios and android.
 
 ### Step 2 — Detect web-only consumption and attribute consumers
 
 A flag counts as web-only only if its references in the clients repo live entirely under `apps/web/` and nothing in the ios or android repos references it either.
 
+Clients code reads a flag through its enum member (`FeatureFlag.OtpSixDigits`), not through the key string, and the enum file holds the key by construction. So resolve the member name from the enum at the commit before the removal, then grep for the member and the key everywhere except the enum file:
+
 ```bash
+ENUM=libs/common/src/enums/feature-flag.enum.ts
+# The member name on the line that defines the key, e.g. OtpSixDigits
+MEMBER=$(git -C "$CLIENTS_REPO" show "${STEP1_SHA}^:$ENUM" | grep -F "\"$FLAG_KEY\"" | sed -E 's/^[[:space:]]*([A-Za-z0-9_]+)[[:space:]]*=.*/\1/' | head -1)
+
 # Clients: grep the commit before the removal, since main no longer has the enum member
-git -C "$CLIENTS_REPO" grep -ln "$FLAG_KEY" "${STEP1_SHA}^" -- ':!apps/web' ':!**/*.spec.ts' ':!**/*.spec.html'
+git -C "$CLIENTS_REPO" grep -l -F -w -e "FeatureFlag.$MEMBER" -e "$FLAG_KEY" "${STEP1_SHA}^" \
+  -- ':!apps/web' ':!**/*.spec.ts' ':!**/*.spec.html' ":!$ENUM"
 
 # iOS and Android: grep the history (the flag may already be removed from main)
 git -C "$IOS_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
 git -C "$ANDROID_REPO" log -S "$FLAG_KEY" --format=%H -1 origin/main
 ```
 
-If the clients grep returns nothing and neither iOS nor Android history contains the key, the flag only ever ran on web. Return `{ ready: true, reason: "web-only" }` with `web_only_files` from `git -C "$CLIENTS_REPO" grep -l "$FLAG_KEY" "${STEP1_SHA}^" -- apps/web`.
+If `MEMBER` is empty or doesn't match `^[A-Za-z0-9_]+$`, the member can't be resolved. Skip the web-only check and mark browser, cli, and desktop all as consumers.
 
-Otherwise, attribute consumers. These decide which `per_client` entries are objects and which are `null`:
+If the clients grep returns nothing and neither iOS nor Android history contains the key, the flag only ever ran on web. Return `{ ready: true, reason: "web-only" }` with `web_only_files` from the same grep with the pathspec `-- apps/web ':!**/*.spec.ts' ':!**/*.spec.html'`.
+
+Otherwise, attribute consumers. `git grep` prints each hit as `<commit>^:<path>`, so drop that prefix before matching paths. These decide which `per_client` entries are objects and which are `null`:
 
 - **browser, cli, desktop.** A clients-repo hit under `apps/browser/`, `apps/cli/`, or `apps/desktop/` marks only that client. A hit anywhere else outside `apps/web/`, including `libs/` and `bitwarden_license/`, is shared code compiled into all three, so it marks browser, cli, and desktop all as consumers.
 - **ios, android.** A consumer if its history contains the key.
@@ -99,7 +111,7 @@ FIRST_WITHOUT=$(git -C "$CLIENTS_REPO" tag --sort=version:refname --contains "$S
 LAST_WITH=$(git -C "$CLIENTS_REPO" tag --sort=version:refname | grep "^<prefix>-v" | grep -B1 -x -F "$FIRST_WITHOUT" | head -1)
 ```
 
-If `LAST_WITH` equals `FIRST_WITHOUT`, no earlier release exists on that train, so that client never shipped the flag. Set its `per_client` entry to `null`. If `FIRST_WITHOUT` is empty, the removal hasn't been released on that train. Return `{ ready: false, reason: "no-release-since-removal", client: "<name>" }`.
+If `FIRST_WITHOUT` is empty, the removal hasn't been released on that train. Return `{ ready: false, reason: "no-release-since-removal", client: "<name>" }`. Otherwise, if `LAST_WITH` equals `FIRST_WITHOUT`, no earlier release exists on that train, so that client never shipped the flag. Set its `per_client` entry to `null`. Check the empty case first, because an empty `FIRST_WITHOUT` also makes `LAST_WITH` empty and the two would compare equal.
 
 **iOS and Android** each have their own release train and their own removal commit, made by that team independently of the clients cleanup. Confirm the removal by the diff sign, exactly as in Step 1:
 
