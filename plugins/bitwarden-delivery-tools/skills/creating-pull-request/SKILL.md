@@ -85,7 +85,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
-Review label:   <multi-agent-reviewed | multi-agent-reviewed (label will be created in <owner/repo>) | None>
+Review label:   <multi-agent-reviewed | multi-agent-reviewed (label will be created) | None>
 Template:       <target repo | bitwarden/template (canonical) | embedded copy (fallback) | not consulted (body supplied)>
 
 Body:
