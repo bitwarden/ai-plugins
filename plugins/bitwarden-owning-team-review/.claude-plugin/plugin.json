@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-owning-team-review",
+  "version": "0.1.0",
+  "description": "Classifies whether a pull request needs review from the team that owns the code it changes, or whether any engineer can approve it. Uses global change kinds, each module's INTENT.md, and fails shut. Read-only. A workflow or an engineer acts on the result.",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-owning-team-review",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "code-review",
+    "codeowners",
+    "code-ownership",
+    "pull-request",
+    "classification"
+  ],
+  "agents": "./agents/owning-team-classifier/AGENT.md"
+}

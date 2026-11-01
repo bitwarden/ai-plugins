@@ -1,0 +1,286 @@
+{
+  "agent_name": "owning-team-classifier",
+  "eval_type": "classification",
+  "purpose": "Squash-merged bitwarden/clients pull requests from outside authors that changed Platform-owned code between 2026-05-01 and 2026-10-31. fixtures/setup-real.sh replays each one on its real base with draft rules sections overlaid from fixtures/rules/clients/. Expected results follow change-kinds.md and the overlay rules, labeled by hand from the diff. platform_review records what Platform's reviewers actually did, for comparison. See ./README.md.",
+  "evals": [
+    {
+      "id": 101,
+      "repo": "bitwarden/clients",
+      "pr": 23046,
+      "merge_sha": "58fd61e9dfe7ad8f4bea9cf75a1d7ed4d2510a43",
+      "covers": "special-case: Send-only, flag-gated retry added to the shared full sync",
+      "platform_review": "Approved: platform changes LGTM, pending an SDK bump",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/sync/default-sync.service.ts",
+            "kinds": ["special-case"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 102,
+      "repo": "bitwarden/clients",
+      "pr": 20235,
+      "merge_sha": "d25e043248d5db31da3d147d23f49f0b718e9272",
+      "covers": "api-additive: new optional options on an exported routing helper",
+      "platform_review": "Asked what the use case was and proposed an alternative",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/angular/src/platform/utils/feature-flagged-route.ts",
+            "kinds": ["api-additive"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 103,
+      "repo": "bitwarden/clients",
+      "pr": 23088,
+      "merge_sha": "0ac5e1014dee63be2f076b2f24934fd46b0ee8b0",
+      "covers": "api-additive: new server settings property, response mapping, and service getter",
+      "platform_review": "Requested a rename and caught an inverted default",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/models/response/server-config.response.ts",
+            "kinds": ["api-additive"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 104,
+      "repo": "bitwarden/clients",
+      "pr": 20637,
+      "merge_sha": "ae5e3c8f57224444d3eae83c356ce1c6dd48daea",
+      "covers": "special-case: new feature-flag branch for one logout reason, copying an existing branch",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/server-notifications/internal/default-server-notifications.service.ts",
+            "kinds": ["special-case"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 105,
+      "repo": "bitwarden/clients",
+      "pr": 23445,
+      "merge_sha": "c0ed2cda41ffef6d4a85e35e5f1d23cf18f9d915",
+      "covers": "api-breaking: getFeatureFlag$ stops re-emitting unchanged values, with no signature change",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/services/config/default-config.service.ts",
+            "kinds": ["api-breaking"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 106,
+      "repo": "bitwarden/clients",
+      "pr": 20793,
+      "merge_sha": "eae66fd75e27fe895f135ecca92ec6a2e65a52e9",
+      "covers": "api-additive: new public getter on Rc, inside a race-condition fix",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/misc/reference-counting/rc.ts",
+            "kinds": ["api-additive"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 107,
+      "repo": "bitwarden/clients",
+      "pr": 24204,
+      "merge_sha": "2444eee6958f381459ce81e32293b6dfa870fd3d",
+      "covers": "structural: platform SDK state imports an Admin Console mapper, two lines",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/services/sdk/client-managed-state.ts",
+            "kinds": ["structural", "special-case"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 108,
+      "repo": "bitwarden/clients",
+      "pr": 21189,
+      "merge_sha": "0e9b1b2cfdf6fff748b021485435250e36928699",
+      "covers": "api-breaking: removed constructor dependencies and changed policy-notification behavior",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/server-notifications/internal/default-server-notifications.service.ts",
+            "kinds": ["api-breaking"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 109,
+      "repo": "bitwarden/clients",
+      "pr": 23955,
+      "merge_sha": "309b1f7530f40722b5574f10c207dc899787d851",
+      "covers": "shape change: a read cache added to CLI storage",
+      "platform_review": "Approved with design discussion",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "apps/cli/src/platform/services/lowdb-storage.service.ts"
+          }
+        ]
+      }
+    },
+    {
+      "id": 110,
+      "repo": "bitwarden/clients",
+      "pr": 22929,
+      "merge_sha": "4d6f017a8918fdb7d2edf8da13de1b5489c6bab7",
+      "covers": "fail shut: a sync-state change the base commit's test asserted against, so nothing shows it is a fix",
+      "platform_review": "Approved, deferring to Admin Console",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/sync/default-sync.service.ts",
+            "kinds": ["api-breaking"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 111,
+      "repo": "bitwarden/clients",
+      "pr": 22477,
+      "merge_sha": "cdd3f5e2004aa7c11e982fa4ecf0bcc647009f05",
+      "covers": "fail shut: an exported URL guard now accepts more input, with no base evidence it was a bug",
+      "platform_review": "Approved without changes",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/common/src/platform/misc/safe-urls.ts",
+            "kinds": ["api-breaking"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 112,
+      "repo": "bitwarden/clients",
+      "pr": 20182,
+      "merge_sha": "ce9358e8762a9d222b2db0216bc1bf021e0b6c50",
+      "covers": "api-breaking: a feature moves a persisted key to a new storage location, using a new StateDefinition",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "apps/web/src/app/billing/individual/upgrade/services/unified-upgrade-prompt.service.ts",
+            "kinds": ["api-breaking"]
+          }
+        ],
+        "not_required": [
+          {
+            "file": "libs/state/src/core/state-definitions.ts",
+            "kinds": ["pattern-following", "api-additive"],
+            "signals": ["do-not-need", "kind-default"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 113,
+      "repo": "bitwarden/clients",
+      "pr": 23090,
+      "merge_sha": "71e57e8d7eb30ce91f2e9ce622d7b0ff2fa0f270",
+      "covers": "api-breaking: mark and measure move to debug level, which drops them from non-dev builds",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/logging/src/console-log.service.ts",
+            "kinds": ["api-breaking"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 114,
+      "repo": "bitwarden/clients",
+      "pr": 22754,
+      "merge_sha": "03a9110bed3cfc1bca19f71ac16586aed5fd7339",
+      "covers": "comment-only change, listed in the do-not-need entries",
+      "platform_review": "Approved without comment",
+      "expected": {
+        "result": "any-engineer",
+        "not_required": [
+          {
+            "file": "libs/common/src/platform/ipc/ipc.service.ts",
+            "signals": ["do-not-need", "kind-default"]
+          }
+        ]
+      }
+    },
+    {
+      "id": 115,
+      "repo": "bitwarden/clients",
+      "pr": 24340,
+      "base_sha": "b793bdc6cf15f87814f0b3de26b795afcc7774ec",
+      "head_sha": "f7568ae2424f56d4326dc2b1ee1156d3b82ec939",
+      "covers": "open PR: a new Platform library, and one-line swaps from one Platform helper to another in other teams' code",
+      "platform_review": "Open, not yet reviewed",
+      "expected": {
+        "result": "owning-team-review",
+        "required": [
+          {
+            "file": "libs/release-channel/src/index.ts",
+            "kinds": ["api-additive", "structural"]
+          },
+          {
+            "file": ".github/CODEOWNERS"
+          }
+        ],
+        "not_required": [
+          {
+            "file": "libs/components/src/navigation/nav-logo.component.ts"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "separate_entries",
+          "files": [
+            "libs/release-channel/src/index.ts",
+            "libs/components/src/navigation/nav-logo.component.ts"
+          ]
+        }
+      ]
+    }
+  ]
+}

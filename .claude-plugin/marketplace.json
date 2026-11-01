@@ -146,6 +146,12 @@
       "source": "./plugins/bitwarden-testmo-tools",
       "version": "1.0.0",
       "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks."
+    },
+    {
+      "name": "bitwarden-owning-team-review",
+      "source": "./plugins/bitwarden-owning-team-review",
+      "version": "0.1.0",
+      "description": "Classifies whether a pull request needs review from the team that owns the code it changes, using global change kinds and each module's INTENT.md. Read-only."
     }
   ]
 }
