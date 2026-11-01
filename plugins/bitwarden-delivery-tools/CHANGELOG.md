@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `creating-pull-request`: when a completed `performing-multi-agent-code-review` report covers the branch's full diff, the PR is opened with the `multi-agent-reviewed` label without the user asking for it. Reviewers kept asking authors whether a PR had been through the multi-agent review, and authors juggling several PRs could not always say; the label answers that on the PR itself. The skill checks the target repo for the label before the submission preview and creates it if missing, never overwriting an existing label's color or description. When creation fails, the PR opens without the label and the skill reports why. The label marks the code as it stood at review time and does not follow later pushes.
 
+### Fixed
+
+- The marketplace catalog entries in `marketplace.json` and the root `README.md` now show the current version and no longer list Jira ticket filing, which was removed in 4.0.0.
+
 ## [4.0.0] - 2026-10-17
 
 ### Removed
