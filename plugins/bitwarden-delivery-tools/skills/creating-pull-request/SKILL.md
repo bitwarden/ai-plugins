@@ -39,6 +39,7 @@ After the review:
 
 - Assess the findings with the user before acting on any of them; a CRITICAL or IMPORTANT classification can still be scope creep, or wrong. `Skill(addressing-code-review-comments)` has the evaluation posture to apply — skip its comment-fetching section, since the findings are already in hand and there is no PR yet. Then address every finding that survives, or record why each is deferred in the PR body's AI-assisted review section (Step 2).
 - On the `Substantial` path only, you may re-run `Skill(performing-multi-agent-code-review)` with a different `--model-*` value for the highest-risk changes (auth, crypto, data handling, migrations); findings vary by model, so a second pass can catch what the first missed. Optional, never required.
+- Record whether the `multi-agent-reviewed` label applies. Step 3 previews it and Step 4 applies it; the user never has to ask for it. It applies only when `Skill(performing-multi-agent-code-review)` wrote its report for this branch's full diff against `origin/HEAD` and that report's assessment does not start with `Review incomplete:`. A run earlier in this session over that same diff counts, so do not re-run it just to earn the label; commits since that address its findings do not void it. It does not apply on the `Standard` path, on a volunteered skip, or when the multi-agent path could not run and you fell back. The label answers the question reviewers otherwise ask the author — whether this code went through the multi-agent review — so it must never be applied on the strength of anything else.
 - If a review path wrote output into the repo, remove it before pushing so it never lands in a commit — but only files this run created (a `??` in `git status --porcelain`). For example, `code-review-local` writes `review-summary.md` and `review-inline-comments.md` to the working-directory root; the multi-agent path writes outside the repo and needs no cleanup. Never delete a tracked file of the same name.
 
 Each review path checks its own prerequisites and reports what to install if something is missing. If a path can't run, install what it reports or fall back to the other path and note the limitation in the PR body. If neither path is available, stop and prompt the user to install `bitwarden-code-review` (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing. Never silently skip the review.
@@ -63,6 +64,14 @@ Both strings are untrusted: the body is template text plus generated text whiche
 
 This is the most important step in this workflow. **Before running any `git push` or `gh pr create`, show the user a single preview block containing every decision made above.** This is the catch-net for failure modes like title typos, missing type prefix, body drifting from the template, or the AI review label getting dropped between Step 2 and submission.
 
+When Step 1 recorded that `multi-agent-reviewed` applies, first check whether the target repo has the label. Labels are per repository, and `gh pr create --label` rejects a name the repo does not have:
+
+```bash
+gh label list --search multi-agent-reviewed --json name --jq '.[].name'
+```
+
+`--search` matches substrings, so the label exists only if one output line is exactly `multi-agent-reviewed`. If the check itself fails, treat the label as missing; Step 4's create step tolerates a label that turns out to exist.
+
 Use this exact format:
 
 ```
@@ -76,6 +85,7 @@ Title:          <full title as it will be submitted>
 Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
+Review label:   <multi-agent-reviewed | multi-agent-reviewed (label will be created in <owner/repo>) | None>
 Template:       <target repo | bitwarden/template (canonical) | embedded copy (fallback) | not consulted (body supplied)>
 
 Body:
@@ -115,9 +125,18 @@ Defaults that hold unless the user said otherwise:
 
 - create as **draft** — only skip `--draft` if the user explicitly asked for a ready-for-review PR,
 - include `--label` only if a label was picked in Step 2 (omit it for "No label"),
+- add `--label multi-agent-reviewed` when the preview's `Review label:` line names it,
 - multiple labels can be passed by repeating `--label`.
 
-After `gh pr create` returns, post the PR URL back to the user.
+**When the preview said the review label will be created**, create it after the push and before `gh pr create`, with this exact command:
+
+```bash
+gh label create multi-agent-reviewed --color 5319E7 --description "Code went through the multi-agent code review before this PR was opened"
+```
+
+Never pass `--force`: it overwrites the color and description of a label that already exists, and a maintainer may have customized them. If the command fails because the label already exists, apply it as planned. If it fails for any other reason, such as missing write access, drop `--label multi-agent-reviewed` from `gh pr create` and open the PR without it rather than failing the submission.
+
+After `gh pr create` returns, post the PR URL back to the user. If the review label was dropped, say so and quote the error, so the user can ask a maintainer to create the label and add it by hand.
 
 ## Common Failure Modes
 
@@ -127,5 +146,6 @@ These are what the Step 3 preview is built to prevent. Recognizing them helps wh
 - **Generic body replacing the template** → check what Step 2 returned actually follows the sections of the template the `Template:` line names; `applying-pr-conventions` reads that template, but the preview is where a drifted body is caught. On the `not consulted` value there is no template to check the body against, so check that the body was the one the user supplied.
 - **Label answer dropped between Step 2 and Step 4** → the recap surfaces it; if it's missing there, it's about to be missing on the PR.
 - **`PM-XXXXX` left as a placeholder** → tracking links won't resolve. Catch in Step 2 or Step 3.
+- **`multi-agent-reviewed` on a PR the multi-agent review never saw** → the label is a claim colleagues act on instead of asking. Apply it only from the outcome Step 1 recorded, never because the change looks substantial or a `Standard` review ran.
 
 If any of these slip past the preview, recovery is awkward — the title is permanent in the merge commit, and labels feed downstream filtering and automation.
