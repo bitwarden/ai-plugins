@@ -39,7 +39,7 @@ After the review:
 
 - Assess the findings with the user before acting on any of them; a CRITICAL or IMPORTANT classification can still be scope creep, or wrong. `Skill(addressing-code-review-comments)` has the evaluation posture to apply — skip its comment-fetching section, since the findings are already in hand and there is no PR yet. Then address every finding that survives, or record why each is deferred in the PR body's AI-assisted review section (Step 2).
 - On the `Substantial` path only, you may re-run `Skill(performing-multi-agent-code-review)` with a different `--model-*` value for the highest-risk changes (auth, crypto, data handling, migrations); findings vary by model, so a second pass can catch what the first missed. Optional, never required.
-- Record whether the `multi-agent-reviewed` label applies. Step 3 previews it and Step 4 applies it; the user never has to ask for it. It applies only when `Skill(performing-multi-agent-code-review)` wrote its report for this branch's full diff against `origin/HEAD` and that report's assessment does not start with `Review incomplete:`. A run earlier in this session over that same diff counts, so do not re-run it just to earn the label; commits since that address its findings do not void it. It does not apply on the `Standard` path, on a volunteered skip, or when the multi-agent path could not run and you fell back. The label answers the question reviewers otherwise ask the author — whether this code went through the multi-agent review — so it must never be applied on the strength of anything else.
+- Record whether the `multi-agent-reviewed` label applies. Step 3 previews it and Step 4 applies it; the user never has to ask for it. It applies only when `Skill(performing-multi-agent-code-review)` wrote its report for this branch's full diff against `origin/HEAD` and that report's assessment does not start with `Review incomplete:`. A qualifying run earlier in this session counts regardless of which depth Step 1b selected, so do not re-run it just to earn the label. Commits since that only address its findings do not void it, but any commit adding behavior the report did not see does, unless the review is re-run. With no such report there is nothing to label — the usual case on the `Standard` path, on a volunteered skip, and after a fallback. The label answers the question reviewers otherwise ask the author — whether this code went through the multi-agent review — so it must never be applied on the strength of anything else.
 - If a review path wrote output into the repo, remove it before pushing so it never lands in a commit — but only files this run created (a `??` in `git status --porcelain`). For example, `code-review-local` writes `review-summary.md` and `review-inline-comments.md` to the working-directory root; the multi-agent path writes outside the repo and needs no cleanup. Never delete a tracked file of the same name.
 
 Each review path checks its own prerequisites and reports what to install if something is missing. If a path can't run, install what it reports or fall back to the other path and note the limitation in the PR body. If neither path is available, stop and prompt the user to install `bitwarden-code-review` (`/plugin install bitwarden-code-review@bitwarden-marketplace`) before continuing. Never silently skip the review.
@@ -124,7 +124,7 @@ gh pr create --draft \
 Defaults that hold unless the user said otherwise:
 
 - create as **draft** — only skip `--draft` if the user explicitly asked for a ready-for-review PR,
-- include `--label` only if a label was picked in Step 2 (omit it for "No label"),
+- include the Step 2 label only if one was picked there (omit it for "No label"),
 - add `--label multi-agent-reviewed` when the preview's `Review label:` line names it,
 - multiple labels can be passed by repeating `--label`.
 
@@ -135,6 +135,8 @@ gh label create multi-agent-reviewed --color 5319E7 --description "Code went thr
 ```
 
 Never pass `--force`: it overwrites the color and description of a label that already exists, and a maintainer may have customized them. If the command fails because the label already exists, apply it as planned. If it fails for any other reason, such as missing write access, drop `--label multi-agent-reviewed` from `gh pr create` and open the PR without it rather than failing the submission.
+
+If `gh pr create` itself fails on the label, retry it once without `--label multi-agent-reviewed` rather than leaving the branch pushed with no PR. If that retry reports that a pull request already exists for the branch, the first attempt created it: use that PR instead of opening another. Report the drop as below.
 
 After `gh pr create` returns, post the PR URL back to the user. If the review label was dropped, say so and quote the error, so the user can ask a maintainer to create the label and add it by hand.
 

@@ -38,7 +38,7 @@ graph TD
 
 Preflight settles before the review because fixing a preflight failure can change the diff the review needs to see. The submission preview is the single point where every decision is visible together, and nothing is pushed until the user confirms it. Editing the label from the preview re-asks only the label, since re-entering `applying-pr-conventions` would recompose the title and body and discard an edit already made.
 
-When the review took the `performing-multi-agent-code-review` path, the pull request is opened with the `multi-agent-reviewed` label, creating it in the repo first if it is missing, so reviewers can see the multi-agent review ran without asking the author.
+When a completed `performing-multi-agent-code-review` report covers the branch, the pull request is opened with the `multi-agent-reviewed` label, creating it in the repo first if it is missing, so reviewers can see the multi-agent review ran without asking the author.
 
 ```mermaid
 graph TD
@@ -57,7 +57,7 @@ graph TD
     edit[Apply the edit]
     relabel[Re-ask the label only]
     cancel[Stop, nothing pushed]
-    push[git push, then gh pr create --draft<br/>with title and body passed via files,<br/>plus multi-agent-reviewed after a Substantial review]
+    push[git push, then gh pr create --draft<br/>with title and body passed via files,<br/>plus multi-agent-reviewed after a completed multi-agent review]
     url[Report the PR URL]
 
     start --> preflightDone
