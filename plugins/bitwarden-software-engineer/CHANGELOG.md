@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-software-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-01
+
+### Added
+
+- "Orient before implementing" reads the `INTENT.md` above files in another team's module, and raises a non-routine or intent-contradicting change as a cross-team question before writing code.
+- Cross-plugin integration names `bitwarden-owning-team-review`'s local classifier for branches that change another team's module.
+
 ## [1.1.0] - 2026-10-01
 
 ### Added
