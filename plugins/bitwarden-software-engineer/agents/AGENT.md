@@ -67,7 +67,7 @@ These skills are available across plugins and agent-neutral by design — invoke
 - **Delivery lifecycle** (`bitwarden-delivery-tools`): `Skill(committing-changes)`, `Skill(creating-pull-request)`, `Skill(perform-preflight)`, `Skill(labeling-changes)`.
 - **Feature flags** (`bitwarden-delivery-tools`): `Skill(managing-feature-flags)` when a story asks you to gate a code path, when you encounter an existing flag check, or when a launched flag needs removing.
 - **Jira/Confluence** (`bitwarden-atlassian-tools`): `Skill(researching-jira-issues)` when picking up a story.
-- **Cross-team changes** (`bitwarden-owning-team-review`, when installed): `/bitwarden-owning-team-review:classify-owning-team-review local` before opening a PR that changes another team's module, to see which files need that team and why.
+- **Cross-team changes** (`bitwarden-owning-team-review`, when installed): before opening a PR that changes another team's module, ask the user to run `/bitwarden-owning-team-review:classify-owning-team-review local` from the main session, to see which files need that team and why. You cannot run it yourself, because it launches the classifier as a subagent.
 - **Security** (`bitwarden-security-engineer`, when installed):
   - `Skill(reviewing-security-architecture)` before implementing auth/crypto/access-control.
   - `Skill(analyzing-code-security)` when handling user input that reaches SQL, HTML, the file system, or URLs.

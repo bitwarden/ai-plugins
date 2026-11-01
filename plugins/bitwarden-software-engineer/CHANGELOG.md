@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - "Orient before implementing" reads the `INTENT.md` above files in another team's module, and raises a non-routine or intent-contradicting change as a cross-team question before writing code.
-- Cross-plugin integration names `bitwarden-owning-team-review`'s local classifier for branches that change another team's module.
+- Cross-plugin integration asks the user to run `bitwarden-owning-team-review`'s local classifier from the main session for branches that change another team's module. The agent cannot launch the classifier itself.
 
 ## [1.1.0] - 2026-10-01
 
