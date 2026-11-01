@@ -75,5 +75,5 @@ echo $(( $(date +%s) - start )) >"$run_dir/seconds"
 # The agent prints its result as its final message. Parse it the way a real caller does.
 if [[ -f "$run_dir/run.jsonl" ]]; then
   jq -rs '[.[] | select(.type == "result") | .result] | last // empty' "$run_dir/run.jsonl" >"$run_dir/result.raw"
-  "$EVALS_DIR/extract-result.sh" <"$run_dir/result.raw" >"$run_dir/result.json" 2>/dev/null || rm -f "$run_dir/result.json"
+  "$PLUGIN_DIR/scripts/extract-result.sh" <"$run_dir/result.raw" >"$run_dir/result.json" 2>/dev/null || rm -f "$run_dir/result.json"
 fi

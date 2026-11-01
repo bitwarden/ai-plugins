@@ -220,9 +220,17 @@ Every caller, whether the CI workflow, the skill, or the evals, follows the same
 
 1. **Prepare the context.** From the root of a checkout of the repository, run `scripts/prepare-context.sh pr <number> [<owner>/<repo>]`, or `scripts/prepare-context.sh local [<base-ref>]`. The script prints the path of a new context directory. The directory holds the diff, the changed files, CODEOWNERS at the base and head commits, and an export of the base commit with no `.git` directory. It never fetches the PR's title or body.
 2. **Run the agent** with the prompt `CONTEXT: <context directory>` as its only line. Grant it `Read`, `Grep`, and `Glob` only, and scope `Read` to the context directory and the plugin's own files.
-3. **Parse its final message** as one JSON object, starting at the first line that begins with `{`. `evals/extract-result.sh` does this. Treat a missing or unparseable result as `no-verdict`, which needs the owning team.
+3. **Parse its final message** as one JSON object, starting at the first line that begins with `{`. `scripts/extract-result.sh` does this. Treat a missing or unparseable result as `no-verdict`, which needs the owning team.
 
-In CI, check the repository out with `persist-credentials: false`, so no token sits in the checkout while the agent runs.
+In CI, check the repository out with `persist-credentials: false`, so no token sits in the checkout while the agent runs. Run the agent from an empty directory, so no `CLAUDE.md` or `.claude/` settings from the PR's checkout load into the session.
+
+### Evaluation workflow
+
+The `classify-owning-team` action in `bitwarden/gh-actions` runs the classifier when someone adds the `owner-classification` label to a PR, and posts the result as a sticky comment. It does not set a status or request reviewers, so CODEOWNERS still decides who must approve. Team handles appear in code spans, so the comment notifies no team.
+
+The action also checks whether its GitHub App can request each owner as a reviewer, without requesting anyone. It mints a token with organization Members read access, resolves each team, and reads the team's permission on the repository. The comment's "Reviewer request check" table shows the result, and an App without Members read access shows as a token failure.
+
+`scripts/render-comment.sh` renders the comment from the result and the team check. It escapes the agent's text, renders a missing, unparseable, or stale result as no verdict, and links each `evidence` location at the head commit.
 
 ## Security
 
@@ -258,12 +266,14 @@ bitwarden-owning-team-review/
 │   │   ├── intent/                   # Draft INTENT.md files for the real-PR replay
 │   │   └── gh-stub/gh                # Serves the canned PR in place of gh
 │   ├── run-eval.sh
-│   ├── extract-result.sh             # Parses the agent's printed result, as every caller should
 │   ├── score.sh
 │   ├── score.jq
 │   └── aggregate.sh
 ├── scripts/
-│   └── prepare-context.sh
+│   ├── prepare-context.sh            # Builds the read-only context every caller passes to the agent
+│   ├── extract-result.sh             # Parses the agent's printed result, as every caller should
+│   ├── render-comment.sh             # Renders the result as the PR comment
+│   └── render-comment.jq
 ├── skills/
 │   └── classify-owning-team-review/
 │       └── SKILL.md

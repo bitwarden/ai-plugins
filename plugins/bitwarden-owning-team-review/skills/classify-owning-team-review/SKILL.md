@@ -1,7 +1,7 @@
 ---
 name: classify-owning-team-review
 argument-hint: "<PR#> [<PR#> ...] | <PR URL> | local [--base <ref>] (blank to be asked)"
-allowed-tools: AskUserQuestion, Task, Bash(bash */bitwarden-owning-team-review/scripts/prepare-context.sh *)
+allowed-tools: AskUserQuestion, Task, Bash(bash ${CLAUDE_PLUGIN_ROOT}/scripts/prepare-context.sh *)
 description: Classify whether one or more pull requests need review from the team that owns the code they change, and report the results as a table. Use to check the current branch before opening a PR (`local`), to check an open PR before requesting review, or to backtest a module's INTENT.md against merged PRs - phrasings like "does this PR need the owning team", "classify PR 18231", "backtest our INTENT.md against these PRs", "which of these PRs would have needed us". Read-only. Never posts to GitHub and writes nothing in the repository.
 ---
 
@@ -22,11 +22,11 @@ Every number must match `^[0-9]+$`, and every `<owner>/<repo>` must match `^[A-Z
 
 ## Step 2: Prepare a context for each target
 
-Run the plugin's script once per target, from the checkout root. Its path is `${CLAUDE_PLUGIN_ROOT}/scripts/prepare-context.sh`:
+Run the plugin's script once per target, from the checkout root:
 
 ```bash
-bash <plugin-root>/scripts/prepare-context.sh pr <number> [<owner>/<repo>]
-bash <plugin-root>/scripts/prepare-context.sh local [<ref>]
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/prepare-context.sh pr <number> [<owner>/<repo>]
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/prepare-context.sh local [<ref>]
 ```
 
 The script prints the path of a new context directory. It holds the diff, the changed files, CODEOWNERS, and an export of the base commit. It never fetches the pull request's title or body. If the script fails, report its message as that target's `no-verdict` row and continue with the others.

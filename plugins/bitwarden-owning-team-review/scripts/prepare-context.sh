@@ -57,8 +57,13 @@ esac
 
 git cat-file -e "$base_sha^{commit}" 2>/dev/null || git fetch -q origin "$base_sha" \
   || fail "base commit $base_sha is not in this checkout and could not be fetched"
-if [[ "$mode" == pr ]] && ! git cat-file -e "$head_sha^{commit}" 2>/dev/null; then
-  git fetch -q origin "pull/$number/head" 2>/dev/null || git fetch -q origin "$head_sha" 2>/dev/null || true
+if [[ "$mode" == pr ]]; then
+  if ! git cat-file -e "$head_sha^{commit}" 2>/dev/null; then
+    git fetch -q origin "pull/$number/head" 2>/dev/null || git fetch -q origin "$head_sha" 2>/dev/null || true
+  fi
+  # GitHub's PR diff is against the merge base, not the base branch tip, so base/ must be the same commit.
+  base_sha="$(git merge-base "$base_sha" "$head_sha" 2>/dev/null)" \
+    || fail "could not find the merge base of $base_sha and $head_sha"
 fi
 
 ctx="$(mktemp -d "${TMPDIR:-/tmp}/owning-team-review.XXXXXX")"
