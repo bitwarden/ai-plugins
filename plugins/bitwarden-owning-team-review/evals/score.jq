@@ -24,7 +24,7 @@ def text_of: [.entries[]? | .reason, .explanation, .next_step, (.review_focus //
 | if $r == null then
     {passed: false, result_correct: false,
      false_negative: ($x.result == "owning-team-review"), false_positive: false,
-     kind_correct: false, failures: ["no result file"]}
+     kind_correct: false, failures: ["no parseable result"]}
   else
     [
       (if $r.result != $x.result then "result was \($r.result), expected \($x.result)" else empty end),

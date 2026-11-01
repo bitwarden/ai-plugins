@@ -68,7 +68,7 @@ Four judgments remain after the indicators. Make all four for every change.
 
 The base commit must show that the old behavior was wrong before you call a behavior change a `fix`. Evidence is the old code contradicting its own documentation, name, or type, or a sibling in the module doing the same job the corrected way. A test on the base commit that asserted the old behavior is evidence the behavior was deliberate. You never read the PR description, so the author's word that something is a fix is not evidence. Without evidence, the change is `api-breaking`.
 
-**Pattern-following or pattern-breaking?** Find the existing pattern before you decide. Read the base version of the touched files with `git show <BASE_SHA>:<path>`. List their siblings with `git show <BASE_SHA>:<directory>/` and read the ones that do the same job.
+**Pattern-following or pattern-breaking?** Find the existing pattern before you decide. Read the base version of the touched files from the context's `base/` export. List their siblings with `Glob` and read the ones that do the same job.
 
 - It is `pattern-following` when the module already does the same job somewhere else, and the new code does it the same way: same base class, same helper, same registration, same file layout. The pattern must also be one the module's intent keeps. Copying a pattern that `## Direction` retires is `debt-extending`, even when the old pattern is still common in the code.
 - It is `pattern-breaking` when the module already does the same job somewhere else, and the new code does it a different way. Examples are its own caching where the module has a cache, or direct storage access where the module has a state provider.

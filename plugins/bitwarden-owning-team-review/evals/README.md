@@ -58,23 +58,23 @@ Expected results fail shut, as the classifier does. A behavior change counts as 
 
 Each expected result is a hand label that follows `change-kinds.md` and the draft intent, not a record of what Platform's reviewers did. Each case also records `platform_review`. Seven owner-required cases were approved by Platform without comment. These cases show where the rules ask for more review than Platform gave in practice, which is calibration data for the intent and not a classifier error.
 
-| ID  | PR                                                        | Covers                                                                        | Expected                     | Platform's review                    |
-| --- | --------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------ |
-| 101 | [#23046](https://github.com/bitwarden/clients/pull/23046) | `special-case`: Send-only, flag-gated retry in the shared full sync           | owning team                  | Approved, pending an SDK bump        |
-| 102 | [#20235](https://github.com/bitwarden/clients/pull/20235) | `api-additive`: new options on an exported routing helper                     | owning team                  | Asked for the use case               |
-| 103 | [#23088](https://github.com/bitwarden/clients/pull/23088) | `api-additive`: new server setting, response mapping, and getter              | owning team                  | Caught an inverted default           |
-| 104 | [#20637](https://github.com/bitwarden/clients/pull/20637) | `special-case`: flag branch for one logout reason, copying an existing branch | owning team                  | Approved without comment             |
-| 105 | [#23445](https://github.com/bitwarden/clients/pull/23445) | `api-breaking`: `getFeatureFlag$` stops re-emitting unchanged values          | owning team                  | Approved without comment             |
-| 106 | [#20793](https://github.com/bitwarden/clients/pull/20793) | `api-additive`: new public getter inside a race fix                           | owning team                  | Approved without comment             |
-| 107 | [#24204](https://github.com/bitwarden/clients/pull/24204) | `structural`: platform imports an Admin Console mapper                        | owning team                  | Approved without comment             |
-| 108 | [#21189](https://github.com/bitwarden/clients/pull/21189) | `api-breaking`: removed constructor dependencies and changed behavior         | owning team                  | Approved without comment             |
-| 109 | [#23955](https://github.com/bitwarden/clients/pull/23955) | shape change: a read cache in CLI storage                                     | owning team                  | Approved with design discussion      |
-| 110 | [#22929](https://github.com/bitwarden/clients/pull/22929) | fail shut: sync-state change a base test asserted against                     | owning team                  | Approved, deferring to Admin Console |
-| 111 | [#22477](https://github.com/bitwarden/clients/pull/22477) | fail shut: exported URL guard accepts more input                              | owning team                  | Approved                             |
-| 112 | [#20182](https://github.com/bitwarden/clients/pull/20182) | `api-breaking`: a persisted key moves to a new storage location               | owning team                  | Approved without comment             |
-| 113 | [#23090](https://github.com/bitwarden/clients/pull/23090) | `api-breaking`: mark and measure drop out of non-dev builds                   | owning team                  | Approved without comment             |
-| 114 | [#22754](https://github.com/bitwarden/clients/pull/22754) | comment-only change                                                           | any engineer                 | Approved without comment             |
-| 115 | [#24340](https://github.com/bitwarden/clients/pull/24340) | a new Platform library, plus swaps to it in other teams' code                 | Platform and Tech Leads only | Open                                 |
+| ID  | PR                                                        | Covers                                                                        | Expected     | Platform's review                    |
+| --- | --------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| 101 | [#23046](https://github.com/bitwarden/clients/pull/23046) | `special-case`: Send-only, flag-gated retry in the shared full sync           | owning team  | Approved, pending an SDK bump        |
+| 102 | [#20235](https://github.com/bitwarden/clients/pull/20235) | `api-additive`: new options on an exported routing helper                     | owning team  | Asked for the use case               |
+| 103 | [#23088](https://github.com/bitwarden/clients/pull/23088) | `api-additive`: new server setting, response mapping, and getter              | owning team  | Caught an inverted default           |
+| 104 | [#20637](https://github.com/bitwarden/clients/pull/20637) | `special-case`: flag branch for one logout reason, copying an existing branch | owning team  | Approved without comment             |
+| 105 | [#23445](https://github.com/bitwarden/clients/pull/23445) | `api-breaking`: `getFeatureFlag$` stops re-emitting unchanged values          | owning team  | Approved without comment             |
+| 106 | [#20793](https://github.com/bitwarden/clients/pull/20793) | `api-additive`: new public getter inside a race fix                           | owning team  | Approved without comment             |
+| 107 | [#24204](https://github.com/bitwarden/clients/pull/24204) | `structural`: platform imports an Admin Console mapper                        | owning team  | Approved without comment             |
+| 108 | [#21189](https://github.com/bitwarden/clients/pull/21189) | `api-breaking`: removed constructor dependencies and changed behavior         | owning team  | Approved without comment             |
+| 109 | [#23955](https://github.com/bitwarden/clients/pull/23955) | shape change: a read cache in CLI storage                                     | owning team  | Approved with design discussion      |
+| 110 | [#22929](https://github.com/bitwarden/clients/pull/22929) | fail shut: sync-state change a base test asserted against                     | owning team  | Approved, deferring to Admin Console |
+| 111 | [#22477](https://github.com/bitwarden/clients/pull/22477) | fail shut: exported URL guard accepts more input                              | owning team  | Approved                             |
+| 112 | [#20182](https://github.com/bitwarden/clients/pull/20182) | `api-breaking`: a persisted key moves to a new storage location               | owning team  | Approved without comment             |
+| 113 | [#23090](https://github.com/bitwarden/clients/pull/23090) | `api-breaking`: mark and measure drop out of non-dev builds                   | owning team  | Approved without comment             |
+| 114 | [#22754](https://github.com/bitwarden/clients/pull/22754) | comment-only change                                                           | any engineer | Approved without comment             |
+| 115 | [#24340](https://github.com/bitwarden/clients/pull/24340) | a new Platform library, plus swaps to it in other teams' code                 | owning team  | Open                                 |
 
 Run the set with `EVAL_SET=real-pr-eval.json` and `CLONES_DIR` set to a directory holding a `clients` clone. Each fixture is a shared clone of about 120 MB.
 
@@ -111,7 +111,7 @@ runs | xargs -L 1 ./score.sh
 
 ## Permissions
 
-A fixture is untrusted input, as a real pull request is. Runs use `--permission-mode dontAsk` with an allow-list that matches the agent's own grants: `Read`, `gh pr view`, `gh pr diff`, `git grep`, `git show`, and writes to `owning-team-review-*.json` in the fixture repository only. A deny list blocks `git` options that write files or run commands under an allowed prefix. Runs load only `local` settings, and refuse a fixture that carries `.claude/settings.local.json`.
+A fixture is untrusted input, as a real pull request is. Each run calls `scripts/prepare-context.sh` the way a real caller does, with the `gh` stub first on `PATH`, then runs the agent with `--permission-mode dontAsk` and only `Read`, `Grep`, and `Glob`. `Read` is scoped to the context directory and the plugin's own files. The agent has no shell and no write tool, so the run captures its printed result from the transcript. Runs load only `local` settings, and refuse a fixture that carries `.claude/settings.local.json`.
 
 ## Regression gate
 
@@ -121,18 +121,17 @@ A change to the agent, `change-kinds.md`, or `intent-format.md` must not add a f
 
 | Set       | Cases | Runs | Pass rate | False negatives | False positives | Cost   |
 | --------- | ----- | ---- | --------- | --------------- | --------------- | ------ |
-| Synthetic | 23    | 69   | 69 / 69   | 0               | 0               | $10.02 |
-| Real PRs  | 15    | 45   | 45 / 45   | 0               | 0               | $13.02 |
+| Synthetic | 23    | 69   | 69 / 69   | 0               | 0               | $7.93  |
+| Real PRs  | 15    | 45   | 45 / 45   | 0               | 0               | $10.89 |
 
-Every case passed all three runs. Cases 2 and 112 accept `api-additive` as well as `pattern-following`, because a new definition that a barrel file re-exports meets the new-export indicator. The "do not need" entry decides both cases in every run.
+Every case passed all three runs, with the agent limited to `Read`, `Grep`, and `Glob` on a prepared context. Cases 2, 18, and 112 accept `api-additive` as well as `pattern-following`, because a new definition that a barrel file re-exports meets the new-export indicator. The "do not need" entry decides both cases in every run.
 
 On real cases 101, 104, and 107, the classifier decided on `intent-conflict` and quoted the draft Platform boundary: platform code does not carry behavior that exists for one feature.
 
 Each run took 20 to 60 seconds and cost $0.06 to $0.35.
 
-Read the baseline with three caveats:
+Read the baseline with two caveats:
 
-- **One run per case.** The regression gate needs three runs per case before it can compare pass rates.
 - **The labels fail shut.** Real cases 110 and 111 fix bugs, but nothing on their base commits shows the old behavior was wrong, so the expected result is the owning team. Synthetic case 22 carries an interface comment that documents the corrected behavior, which is what lets it count as a fix.
 - **The intent overlay is a draft.** The real-PR results measure the classifier against a draft Platform `INTENT.md`, not intent Platform has agreed to.
 

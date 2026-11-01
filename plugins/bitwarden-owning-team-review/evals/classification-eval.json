@@ -266,7 +266,7 @@
         "not_required": [
           {
             "file": "libs/platform/state/key-definitions.ts",
-            "kinds": ["pattern-following"]
+            "kinds": ["pattern-following", "api-additive"]
           }
         ]
       }

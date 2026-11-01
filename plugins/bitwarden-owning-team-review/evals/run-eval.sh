@@ -38,42 +38,42 @@ fi
 repo="$run_dir/repo"
 number="$(jq -r .number "$run_dir/gh/pr.json")"
 
-# A fixture is untrusted input, like a real pull request. dontAsk denies every call not allowed here.
-# The deny list closes git options that write files or run commands under an allowed prefix.
-allowed=(
-  Read
-  "Edit(/$repo/owning-team-review-*.json)"
-  "Bash(gh pr view:*)" "Bash(gh pr diff:*)"
-  "Bash(git grep:*)" "Bash(git show:*)"
-)
-denied=(
-  "Bash(git * --output*)" "Bash(git *--output=*)"
-  "Bash(git *--upl*)" "Bash(git *--open-files-in-pager*)" "Bash(git * -O*)"
-)
+# Build the classifier's read-only context the way every real caller does. The gh stub serves the
+# fixture's canned pull request, so nothing reaches GitHub.
+cd "$repo"
+ctx="$(env PATH="$EVALS_DIR/fixtures/gh-stub:$PATH" GH_STUB_DATA="$run_dir/gh" \
+  bash "$PLUGIN_DIR/scripts/prepare-context.sh" pr "$number" 2>"$run_dir/context.log")" \
+  || { echo "prepare-context failed for $id/run-$run" >&2; ctx=""; }
+echo "$ctx" >"$run_dir/context"
 
-harness_note="Tool permissions in this session are an allow-list, enforced per command. Allowed Bash commands: gh pr view, gh pr diff, git grep, and git show. Run each command on its own, not chained with && or ;."
+# A fixture is untrusted input, like a real pull request. dontAsk denies every call not allowed here.
+# The agent has no shell; reads are limited to the context and the plugin's own files.
+allowed=(
+  "Read(/$ctx/**)" "Read(/$PLUGIN_DIR/**)"
+  Grep Glob
+)
 
 [[ ! -e "$repo/.claude/settings.local.json" && ! -L "$repo/.claude/settings.local.json" ]] \
   || { echo "fixture carries .claude/settings.local.json; refusing to load it" >&2; exit 1; }
 
-cd "$repo"
 start=$(date +%s)
-env -u CLAUDECODE \
-  PATH="$EVALS_DIR/fixtures/gh-stub:$PATH" \
-  GH_STUB_DATA="$run_dir/gh" \
-  claude -p "TARGET: PR #$number" \
-  --agent bitwarden-owning-team-review:owning-team-classifier \
-  --plugin-dir "$PLUGIN_DIR" \
-  --model "$model" \
-  --setting-sources local \
-  --permission-mode dontAsk \
-  --allowedTools "${allowed[@]}" \
-  --disallowedTools "${denied[@]}" \
-  --append-system-prompt "$harness_note" \
-  --no-session-persistence \
-  --output-format stream-json --verbose \
-  >"$run_dir/run.jsonl" 2>"$run_dir/stderr.log" || echo "claude exited $? for $id/run-$run" >&2
+if [[ -n "$ctx" ]]; then
+  env -u CLAUDECODE \
+    claude -p "CONTEXT: $ctx" \
+    --agent bitwarden-owning-team-review:owning-team-classifier \
+    --plugin-dir "$PLUGIN_DIR" \
+    --model "$model" \
+    --setting-sources local \
+    --permission-mode dontAsk \
+    --allowedTools "${allowed[@]}" \
+    --no-session-persistence \
+    --output-format stream-json --verbose \
+    >"$run_dir/run.jsonl" 2>"$run_dir/stderr.log" || echo "claude exited $? for $id/run-$run" >&2
+fi
 echo $(( $(date +%s) - start )) >"$run_dir/seconds"
 
-result="$repo/owning-team-review-$number.json"
-if [[ -f "$result" ]]; then cp "$result" "$run_dir/result.json"; fi
+# The agent prints its result as its final message. Parse it the way a real caller does.
+if [[ -f "$run_dir/run.jsonl" ]]; then
+  jq -rs '[.[] | select(.type == "result") | .result] | last // empty' "$run_dir/run.jsonl" >"$run_dir/result.raw"
+  "$EVALS_DIR/extract-result.sh" <"$run_dir/result.raw" >"$run_dir/result.json" 2>/dev/null || rm -f "$run_dir/result.json"
+fi

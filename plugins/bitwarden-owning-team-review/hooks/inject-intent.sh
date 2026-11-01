@@ -36,7 +36,8 @@ root="$(cd -P -- "$root" 2>/dev/null && pwd -P)" || exit 0
 
 intent=""
 while :; do
-  if [[ -f "$dir/INTENT.md" ]]; then
+  # A symlinked INTENT.md could point at any file on the machine, so only a regular file counts.
+  if [[ -f "$dir/INTENT.md" && ! -L "$dir/INTENT.md" ]]; then
     intent="$dir/INTENT.md"
     break
   fi

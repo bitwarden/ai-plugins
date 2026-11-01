@@ -1,7 +1,7 @@
 {
   "agent_name": "owning-team-classifier",
   "eval_type": "classification",
-  "purpose": "Squash-merged bitwarden/clients pull requests from outside authors that changed Platform-owned code between 2026-05-01 and 2026-10-31. fixtures/setup-real.sh replays each one on its real base with draft rules sections overlaid from fixtures/rules/clients/. Expected results follow change-kinds.md and the overlay rules, labeled by hand from the diff. platform_review records what Platform's reviewers actually did, for comparison. See ./README.md.",
+  "purpose": "Squash-merged bitwarden/clients pull requests from outside authors that changed Platform-owned code between 2026-05-01 and 2026-10-31, plus one open pull request. fixtures/setup-real.sh replays each one on its real base with a draft Platform INTENT.md copied from fixtures/intent/clients/. Expected results follow change-kinds.md and the draft intent, labeled by hand from the diff. platform_review records what Platform's reviewers actually did, for comparison. See ./README.md.",
   "evals": [
     {
       "id": 101,
@@ -253,7 +253,7 @@
       "pr": 24340,
       "base_sha": "b793bdc6cf15f87814f0b3de26b795afcc7774ec",
       "head_sha": "f7568ae2424f56d4326dc2b1ee1156d3b82ec939",
-      "covers": "open PR: a new Platform library, and one-line swaps from one Platform helper to another in other teams' code",
+      "covers": "open PR: a new Platform library, plus swaps to it in other teams' code. The ruleset, not the classifier, protects the CODEOWNERS entry",
       "platform_review": "Open, not yet reviewed",
       "expected": {
         "result": "owning-team-review",
@@ -261,9 +261,6 @@
           {
             "file": "libs/release-channel/src/index.ts",
             "kinds": ["api-additive", "structural"]
-          },
-          {
-            "file": ".github/CODEOWNERS"
           }
         ],
         "not_required": [

@@ -20,7 +20,7 @@ The plugin classifies and nothing else. The agent never posts, approves, request
 
 **The agent reads untrusted input, so it does not hold the token that controls a merge gate.** The workflow posts everything, in evaluation mode and when enforcing.
 
-- **It contains prompt injection.** The PR author writes the diff the agent reads. With no write grants, a successful injection can produce at most a wrong classification for that one PR. It cannot post a passing status, approve the PR, dismiss a review, or act on another PR. Read-only does not prevent a manipulated classification. The mechanical indicators and the fail-shut rule address that risk.
+- **It contains prompt injection.** The PR author writes the diff the agent reads. The agent has no shell and no write tool, only `Read`, `Grep`, and `Glob`, so a successful injection can produce at most a wrong classification for that one PR. It cannot post a passing status, approve the PR, dismiss a review, or act on another PR. Read-only does not prevent a manipulated classification. The mechanical indicators and the fail-shut rule address that risk.
 - **Most posts need no judgment.** The workflow updates the status on every review event by checking team membership, with no LLM run. The status must come from one pinned GitHub App so that nobody can fake it, and that App's token stays out of any session that reads contributor content. The workflow also posts the failure status when the agent crashes or times out, which the agent cannot do for itself.
 - **The same agent is safe to run locally.** A backtest runs the agent against merged PRs and other teams' PRs. With no write grants, a local run cannot post to them.
 
@@ -165,11 +165,12 @@ Context that a PreToolUse hook adds reaches the agent only after the tool runs, 
 
 ## Components
 
-| Component                                                                      | Type  | Purpose                                                                                                                                                                               |
-| ------------------------------------------------------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`owning-team-classifier`](./agents/owning-team-classifier/AGENT.md)           | Agent | Classifies one PR. Writes `owning-team-review-<PR>.json`.                                                                                                                             |
-| [`inject-intent.sh`](./hooks/inject-intent.sh)                                 | Hook  | Injects the governing `INTENT.md` before the first edit in a module, once per session.                                                                                                |
-| [`classify-owning-team-review`](./skills/classify-owning-team-review/SKILL.md) | Skill | Runs the agent on the current branch (`local`) or on one or more PRs, and reports a table. Use it before opening a PR, to check an open PR, or to backtest intent against merged PRs. |
+| Component                                                                      | Type   | Purpose                                                                                                                                                                               |
+| ------------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`owning-team-classifier`](./agents/owning-team-classifier/AGENT.md)           | Agent  | Classifies one PR from its context directory, and prints a JSON result.                                                                                                               |
+| [`inject-intent.sh`](./hooks/inject-intent.sh)                                 | Hook   | Puts the governing `INTENT.md` in front of the agent before its first change in a module, once per session.                                                                           |
+| [`prepare-context.sh`](./scripts/prepare-context.sh)                           | Script | Builds the read-only context every caller passes to the agent.                                                                                                                        |
+| [`classify-owning-team-review`](./skills/classify-owning-team-review/SKILL.md) | Skill  | Runs the agent on the current branch (`local`) or on one or more PRs, and reports a table. Use it before opening a PR, to check an open PR, or to backtest intent against merged PRs. |
 
 ## How the classifier decides
 
@@ -213,22 +214,29 @@ Check the current branch before opening a PR, check one PR, or backtest a module
 /bitwarden-owning-team-review:classify-owning-team-review 17702 17840 17911
 ```
 
-In CI, the workflow invokes the agent directly with the prompt `TARGET: PR #<number>`, then reads `owning-team-review-<number>.json`.
+### Invocation contract
+
+Every caller, whether the CI workflow, the skill, or the evals, follows the same three steps:
+
+1. **Prepare the context.** From the root of a checkout of the repository, run `scripts/prepare-context.sh pr <number> [<owner>/<repo>]`, or `scripts/prepare-context.sh local [<base-ref>]`. The script prints the path of a new context directory. The directory holds the diff, the changed files, CODEOWNERS at the base and head commits, and an export of the base commit with no `.git` directory. It never fetches the PR's title or body.
+2. **Run the agent** with the prompt `CONTEXT: <context directory>` as its only line. Grant it `Read`, `Grep`, and `Glob` only, and scope `Read` to the context directory and the plugin's own files.
+3. **Parse its final message** as one JSON object, starting at the first line that begins with `{`. `evals/extract-result.sh` does this. Treat a missing or unparseable result as `no-verdict`, which needs the owning team.
+
+In CI, check the repository out with `persist-credentials: false`, so no token sits in the checkout while the agent runs.
 
 ## Security
 
-- **Intent comes from the PR's base commit.** A PR cannot change the intent it is judged by, and the ruleset requires the owning team for any `INTENT.md` change.
-- **The PR title, body, and diff are untrusted.** The agent does not read the title or body. Text in the diff that addresses the agent has no effect on the result.
-- **Inputs are validated before they reach a command.** The PR number, commit SHAs, and file paths are checked against strict patterns.
-- **The agent is read-only on GitHub.** Its grants are `gh pr view`, `gh pr diff`, and the read-only `git` commands `diff`, `grep`, `merge-base`, `rev-parse`, and `show`, `Read` for its own reference files, and `Write` for its result file. `.claude/settings.json` denies GitHub and git write commands.
-- **The workflow fails closed.** It treats a `no-verdict` result, a missing file, or an unparseable file as needing the owning team.
+- **The agent has no shell and no write access.** Its tools are `Read`, `Grep`, and `Glob`. `prepare-context.sh` does every `gh` and `git` call before the agent starts, and validates the PR number, the repository, the base ref, and the commit SHAs. The agent cannot run a command, write a file, or post to GitHub, even if a prompt injection succeeds.
+- **Intent comes from the PR's base commit.** The context holds an export of the base commit, so a PR cannot change the intent it is judged by. The ruleset requires the owning team for any `INTENT.md` change.
+- **The PR title, body, and diff are untrusted.** The context never includes the title or body. Text in the diff that addresses the agent has no effect on the result.
+- **The skill cannot classify the wrong repository.** A PR URL names its repository, and `prepare-context.sh` stops when the checkout's origin is a different one.
+- **The hook reads only regular files.** It ignores a symlinked `INTENT.md`, which could otherwise point at any file on the machine.
+- **The workflow fails closed.** It treats a `no-verdict` result, or a missing or unparseable result, as needing the owning team.
 
 ## Directory structure
 
 ```
 bitwarden-owning-team-review/
-├── .claude/
-│   └── settings.json
 ├── .claude-plugin/
 │   └── plugin.json
 ├── agents/
@@ -250,9 +258,12 @@ bitwarden-owning-team-review/
 │   │   ├── intent/                   # Draft INTENT.md files for the real-PR replay
 │   │   └── gh-stub/gh                # Serves the canned PR in place of gh
 │   ├── run-eval.sh
+│   ├── extract-result.sh             # Parses the agent's printed result, as every caller should
 │   ├── score.sh
 │   ├── score.jq
 │   └── aggregate.sh
+├── scripts/
+│   └── prepare-context.sh
 ├── skills/
 │   └── classify-owning-team-review/
 │       └── SKILL.md
