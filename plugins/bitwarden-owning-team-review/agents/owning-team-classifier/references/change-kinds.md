@@ -23,7 +23,7 @@ The kinds are listed from least to most serious. When a group of files contains 
 
 **The contract includes stored data and released clients.** Persisted state, database schemas, and serialized models are depended on by data already written and by client versions already shipped. A change to them is a contract change even when no code signature changes.
 
-**Test-only changes take the kind of the code they test,** and are `fix` when they change only tests. Skipping or deleting a test is not a test-only change. It weakens a guard, so it is `debt-extending`.
+**A test change takes the kind of the production code it changes alongside.** A change that touches only test files is `fix`. Skipping or deleting a test is not a test-only change. It weakens a guard, so it is `debt-extending`.
 
 **Security-sensitive code is not a kind.** Teams protect cryptography, authentication, and key handling with domain critical paths, which need the owning team for every change.
 

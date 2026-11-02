@@ -52,6 +52,6 @@ Each agent prints its result as a single JSON object as its final message. Parse
 - **Files needing the owner** lists the files on required entries, grouped by each entry's `owners`.
 - **Kinds** lists the distinct change kinds across all entries.
 - **Signals** lists the distinct signals on required entries.
-- **Reason** is the `reason` of the first required entry, or the `no-verdict` reason.
+- **Reason** is the `reason` of the first required entry. For `no-verdict`, it is the first item in `notes`, or the script's message when the context could not be built.
 
 For a backtest, add a final column, **Owner feedback in review**, and leave it empty for the tech lead to fill in. A row where the classifier said `any-engineer` and the owning team commented or asked for changes is a **miss**. Each miss is a candidate for a change to the module's `INTENT.md`.

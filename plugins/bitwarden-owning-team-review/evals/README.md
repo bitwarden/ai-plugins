@@ -119,10 +119,10 @@ A change to the agent, `change-kinds.md`, or `intent-format.md` must not add a f
 
 ## Baseline (2026-11-01, agent 0.1.0, Opus, three runs per case)
 
-| Set       | Cases | Runs | Pass rate | False negatives | False positives | Cost   |
-| --------- | ----- | ---- | --------- | --------------- | --------------- | ------ |
-| Synthetic | 23    | 69   | 69 / 69   | 0               | 0               | $7.93  |
-| Real PRs  | 15    | 45   | 45 / 45   | 0               | 0               | $10.89 |
+| Set       | Cases | Runs | Pass rate | False negatives | False positives | Cost  |
+| --------- | ----- | ---- | --------- | --------------- | --------------- | ----- |
+| Synthetic | 23    | 69   | 69 / 69   | 0               | 0               | $8.12 |
+| Real PRs  | 15    | 45   | 45 / 45   | 0               | 0               | $9.17 |
 
 Every case passed all three runs, with the agent limited to `Read`, `Grep`, and `Glob` on a prepared context. Cases 2, 18, and 112 accept `api-additive` as well as `pattern-following`, because a new definition that a barrel file re-exports meets the new-export indicator. The "do not need" entry decides both cases in every run.
 

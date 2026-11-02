@@ -169,10 +169,11 @@ The workflow renders this result into the PR comment that explains why review is
 ```
 
 - `result` is `owning-team-review` when any entry is required, `any-engineer` when none is, and `no-verdict` when you stopped early. The workflow treats `no-verdict`, a missing file, and an unparseable file the same way it treats `owning-team-review`.
+- On a `no-verdict` result, `entries` is `[]`. `pr`, `base_sha`, and `head_sha` are the values from `pr.json`, or `null` when it could not be read. `notes` holds the reason the run stopped as its first item.
 - `intent` is the path of the governing `INTENT.md`, and `null` when no intent governs the files.
 - `change_kind` is the group's most serious kind from Step 5a, and `null` for `unreadable-path` and `malformed-intent`. `other_kinds` lists every other kind found in the group, most serious first, and is empty when there are none.
 - `owners` is the owner set from Step 4 for every file in the entry, and `[]` for files with no owner. Never put files with different owners in one entry. Write `explanation`, `next_step`, and `review_focus` for that owner's reviewer only.
-- Use one entry per owner set, intent, kind, and signal. Include entries that are not required too. They tell the author which files would need only any engineer on their own, so the author can split them into a separate PR.
+- Use one entry per owner set, intent, and signal. `change_kind` is the most serious kind in the entry, and `other_kinds` holds the rest. Include entries that are not required too. They tell the author which files would need only any engineer on their own, so the author can split them into a separate PR.
 - `rule` is the verbatim text of the trigger, intent statement, or "do not need" entry that decided the entry, and `null` for other signals.
 - `evidence` lists every diff location that fired the signal, as `file` and `line` on the head commit. The workflow turns each one into a link. Use an empty list for entries that are not required and for signals that apply to a whole file.
 - `reason` is one sentence. The workflow uses it in the status description and in tables.
