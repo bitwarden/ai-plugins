@@ -85,7 +85,7 @@ scripts/find-sessions.sh 2026-10-13T11:00:00Z 2026-10-14T11:00:00Z [--include-ho
 
 GitHub's events feed only holds your most recent 300 events from the last 30 days. Recaps for older or very busy days note when early events may be missing. `gather-gh-search.sh` has no such cap: it searches instead of reading the feed, so it also covers authored, reviewed, and commented PRs over multi-day windows the events feed can't reach.
 
-`scripts/daily-recap.test.sh` tests all five scripts against fixture session logs and stubbed `gh` and `curl`, so it reads no real data and makes no network calls. It is plain bash and needs only `jq`:
+`scripts/daily-recap.test.sh` tests all five scripts against fixture session logs and stubbed `gh` and `curl`, so it reads no real data and makes no network calls. It is plain bash and needs only `jq`. One test case recomputes the template's CSP script hash using `perl` and `openssl` if they're available, and skips that check cleanly if either is missing:
 
 ```bash
 scripts/daily-recap.test.sh
