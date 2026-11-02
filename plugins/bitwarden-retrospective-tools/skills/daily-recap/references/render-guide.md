@@ -72,7 +72,6 @@ The Blockers heading is fixed in the template. `{{STANDUP_PERIOD}}` is `Workday 
 
 - Jira issues with `returned: true`.
 - Jira transitions in the window whose `to` is `Blocked`.
-- PRs with changes requested in the window.
 - Streams whose status is `open` or `deferred`.
 
 Apply this heuristic:

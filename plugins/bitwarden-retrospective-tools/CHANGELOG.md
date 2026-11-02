@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- **Standup card restructured to Platform RAG format**: the standup card now renders a red/amber/green status dot plus a BLUF line above the Last week/This week/Blockers (or Yesterday/Today/Blockers) sections, driven by in-window evidence only (returned items, Blocked transitions, PRs with changes requested, open/deferred streams) per the documented heuristic in `render-guide.md`.
+- **Standup card restructured to Platform RAG format**: the standup card now renders a red/amber/green status dot plus a BLUF line above the Last week/This week/Blockers (or Yesterday/Today/Blockers) sections, driven by in-window evidence only (returned items, Blocked transitions, open/deferred streams) per the documented heuristic in `render-guide.md`.
 - **Standup Copy output emits Platform RAG text with markdown links**: the Copy button now emits Slack-shortcode RAG status plus markdown links (`[text](href)`) instead of plain text, so links survive copy/paste.
 - **Standup bullet rules documented and enforced**: outcome-first phrasing, link-on-the-noun placement, and no per-bullet status tokens, documented in `render-guide.md` and `SKILL.md`.
 
