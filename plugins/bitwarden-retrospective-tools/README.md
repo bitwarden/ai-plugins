@@ -28,6 +28,7 @@ Skills activate based on natural-language triggers:
 ```
 What did I work on yesterday?
 Put together a recap I can use for standup
+Give me a weekly recap
 ```
 
 ## Requirements
