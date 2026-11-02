@@ -59,7 +59,10 @@ Tags: `New Repo`, `Sweep`, `Merged`, `Approval`.
 
 The standup card sits at the top of the page, and its Copy button turns it into Slack-ready text. Fill these placeholders:
 
-| Placeholder              | Daily       | Weekly      |
+| Placeholder              | Daily       | Weekly      | Other range |
+| ------------------------ | ----------- | ----------- | ----------- |
+| `{{STANDUP_LABEL_PAST}}` | `Yesterday` | `Last week` | `Recently`  |
+| `{{STANDUP_LABEL_NEXT}}` | `Today`     | `This week` | `Next`      |
 | ------------------------ | ----------- | ----------- |
 | `{{STANDUP_LABEL_PAST}}` | `Yesterday` | `Last week` |
 | `{{STANDUP_LABEL_NEXT}}` | `Today`     | `This week` |
