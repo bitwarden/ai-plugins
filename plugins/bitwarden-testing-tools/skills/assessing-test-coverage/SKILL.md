@@ -225,7 +225,7 @@ J. **Plain notes.** Say these in the case's entry, without judgment:
 The Testmo section must be as simple as possible.
 
 - Show only the sections that have entries. No empty headings, no counts of untouched matches, no "keep" list.
-- If nothing needs action, the whole Testmo section is one line: "No Testmo cases need changes for this story."
+- If no case needs an update or retire, there are no integrity mismatches, and nothing goes under NOT CHECKED, the whole Testmo section is one line: "No Testmo cases need changes for this story."
 - Use only the sections listed below. Do not add a Notes section or any other heading.
 - Write a NOT CHECKED section only when something could not be checked. It names what was not checked and why, including a Testmo read failure with its reason. Do not write a line saying that nothing was blocked or that checks passed.
 - An entry holds only the fields in its layout. No parenthetical remarks, and no comments after an entry. Do not write things like "(Overlaps new case 12857686.)" or "under the pre-invite behavior". Overlaps between cases belong under POSSIBLE DUPLICATES.
@@ -244,6 +244,7 @@ Retire  <case ID>  <case name>
         Link: <https://bitwarden.testmo.net/repositories/1?case_id=ID>
         Folder: <folder path>
         Other teams: <other teams on the case, only for shared cases>
+        Team: <"No team set", only when the Team field is empty>
         State: <only when not Active, e.g. "Draft, not Active">
         Last run: <date and result, or "no results recorded">
         Note to paste: <the retire note, exactly as step E gives it>
@@ -255,6 +256,9 @@ Update  <case ID>  <case name>
         Link: <link>
         Folder: <folder path>
         Other teams: <other teams on the case, only for shared cases>
+        State: <only when not Active, e.g. "Draft, not Active">
+        Team: <"No team set", only when the Team field is empty>
+        Checkboxes: <Needs Review / Remove After Release, only when checked>
         Automation Type: <type, only when relevant>
         Now:      <current step or expected result>
         Proposed: <proposed step or expected result>
