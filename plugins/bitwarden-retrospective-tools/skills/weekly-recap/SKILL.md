@@ -44,5 +44,5 @@ Merge the per-day results before step 5. A session or PR that spans several days
 - `{{STANDUP_PERIOD}}`: `Week · {range}`.
 - `{{STANDUP_LABEL_PAST}}` is `Last week` and `{{STANDUP_LABEL_NEXT}}` is `This week`, per the render guide's Weekly column.
 - Stats sum across the week. Count each PR, repository, and session once, and follow the render guide's dedupe rules for Jira and Confluence.
-- Timeline: order events across the week and put a day divider before each day's events, using the After Midnight divider's markup with the text `{Weekday} · {YYYY-MM-DD}`. Leave out the After Midnight divider; post-midnight events stay under their workday.
+- Timeline: order events across the week and put a day divider before each day's events, using the After Midnight divider's markup with the text `{Weekday} · {YYYY-MM-DD}`. Each event's `tl-time` span reads `{Ddd} {HH:MM}` rather than `{HH:MM}`, so the day stays legible when the project or search filter hides the events under a divider. Leave out the After Midnight divider; post-midnight events stay under their workday.
 - The BLUF and Last week bullets summarize the week's main outcomes, not each day in turn.
