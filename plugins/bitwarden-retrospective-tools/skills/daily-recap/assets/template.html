@@ -11,7 +11,7 @@
 -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'sha256-Zl4m3DTqpEYUEe4Zy9EQ3w2LiQg3VAHrHW6/bLOBi2E='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'"
+      content="default-src 'none'; script-src 'sha256-q/1TSi70sFfBMCWhzoBYbGcIaBjKfXnr2KqUIYbQC5o='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'"
     />
     <title>Daily Recap · {{DATE}}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1273,7 +1273,7 @@
           node.childNodes.forEach((child) => {
             if (child.nodeType === Node.TEXT_NODE) {
               out += child.textContent;
-            } else if (child.tagName === "A") {
+            } else if (child.tagName === "A" && child.hasAttribute("href")) {
               const href = child
                 .getAttribute("href")
                 .replace(/\(/g, "%28")
