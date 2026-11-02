@@ -226,9 +226,9 @@ In CI, check the repository out with `persist-credentials: false`, so no token s
 
 ### Evaluation workflow
 
-The `classify-owning-team` action in `bitwarden/gh-actions` runs the classifier when someone adds the `owner-classification` label to a PR, and posts the result as a sticky comment. It does not set a status or request reviewers, so CODEOWNERS still decides who must approve. Team handles appear in code spans, so the comment notifies no team.
+The `owning-team-classification.yml` workflow in `bitwarden/clients` runs the classifier when someone adds the `owner-classification` label to a PR, and posts the result as a sticky comment. It does not set a status or request reviewers, so CODEOWNERS still decides who must approve. Team handles appear in code spans, so the comment notifies no team.
 
-The action also checks whether its GitHub App can request each owner as a reviewer, without requesting anyone. It mints a token with organization Members read access, resolves each team, and reads the team's permission on the repository. The comment's "Reviewer request check" table shows the result, and an App without Members read access shows as a token failure.
+The workflow also checks whether its GitHub App can request each owner as a reviewer, without requesting anyone. It mints a token with organization Members read access, resolves each team, and reads the team's permission on the repository. The comment's "Reviewer request check" table shows the result, and an App without Members read access shows as a token failure.
 
 `scripts/render-comment.sh` renders the comment from the result and the team check. It escapes the agent's text, renders a missing, unparseable, or stale result as no verdict, and links each `evidence` location at the head commit.
 
