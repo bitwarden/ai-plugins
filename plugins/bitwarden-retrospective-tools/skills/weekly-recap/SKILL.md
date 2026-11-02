@@ -30,7 +30,7 @@ To step between dates, source `${CLAUDE_PLUGIN_ROOT}/skills/daily-recap/scripts/
 
 ## Collecting
 
-In daily-recap's step 1, run (a), (b), and (d) once per workday in the week, passing that day's date and naming each file by it (`events-YYYY-MM-DD.json`, `sessions-YYYY-MM-DD.json`, `atlassian-YYYY-MM-DD.json`). Run (c) once for the whole week: `gather-gh-search.sh MONDAY LAST-DAY`, where LAST-DAY is Friday, or today for "this week". Skip (e) and leave `{{TODAY_BANNER}}` empty: "this week" already covers today, and for a past week the banner would sit across a weekend gap.
+In daily-recap's step 1, run (a), (b), and (d) once per workday in the week, passing that day's date and naming each file by it (`events-YYYY-MM-DD.json`, `sessions-YYYY-MM-DD.json`, `atlassian-YYYY-MM-DD.json`). Run (c) once for the whole week: `gather-gh-search.sh MONDAY LAST-DAY`, where LAST-DAY is Friday, or for "this week" the earlier of today and that week's Friday. Skip (e) and leave `{{TODAY_BANNER}}` empty: "this week" already covers today, and for a past week the banner would sit across a weekend gap.
 
 GitHub's events feed holds only the last 300 events from the last 30 days, so a busy week can be truncated, and a week more than 30 days old has no events at all. When any day's `feed_complete` is `false`, say so in the recap and rely on `search.json` for PRs.
 
