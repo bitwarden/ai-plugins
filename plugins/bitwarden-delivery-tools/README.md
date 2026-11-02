@@ -27,10 +27,10 @@ Any agent (tech-lead, software-engineer, shepherds, others) can compose these sk
 
 ### Technical design
 
-| Skill                    | Triggers                                                                                          | Purpose                                                                                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `architecting-solutions` | "plan the solution", "assess blast radius", "evaluate trade-offs", "should Architecture weigh in" | Architectural judgment framework: security mindset, blast radius, Bitwarden-specific constraints, and the signals that warrant pulling in the Architecture group. |
-| `managing-feature-flags` | "feature flag", "put it behind a flag", "LaunchDarkly", "gradual rollout", "flag cleanup"         | Flag conventions and lifecycle: when to flag, server and client evaluation, release vs operational, rollout and cleanup.                                          |
+| Skill                    | Triggers                                                                                          | Purpose                                                                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `architecting-solutions` | "plan the solution", "assess blast radius", "evaluate trade-offs", "should Architecture weigh in" | Architectural judgment framework: security mindset, ADR and module-intent checks, blast radius, Bitwarden-specific constraints, and the signals that warrant pulling in the Architecture group. |
+| `managing-feature-flags` | "feature flag", "put it behind a flag", "LaunchDarkly", "gradual rollout", "flag cleanup"         | Flag conventions and lifecycle: when to flag, server and client evaluation, release vs operational, rollout and cleanup.                                                                        |
 
 ### Mechanics
 
@@ -57,6 +57,7 @@ Several skills in this plugin reference tools or skills provided by sibling plug
 
 - **`bitwarden-atlassian-tools`** — provides the Jira/Confluence MCP tools used by `navigating-the-initiative-funnel`.
 - **`bitwarden-security-engineer`** — provides `Skill(bitwarden-security-context)`, referenced from `architecting-solutions`.
+- **`bitwarden-owning-team-review`** — provides the `change-kinds.md` definitions `architecting-solutions` cites, and the local classifier `perform-preflight` runs on branches that change another team's module.
 - **`bitwarden-code-review`** — provides `/bitwarden-code-review:code-review-local` and `Skill(performing-multi-agent-code-review)`, the code-review gate `creating-pull-request` runs before opening a PR. If it is absent, `creating-pull-request` prompts you to install it rather than skip the review.
 - **`launchdarkly` (optional, third-party)** — provides the `launchdarkly-flag-*` and `launchdarkly-metric-*` skills that `managing-feature-flags` hands off to for driving LaunchDarkly over MCP. Requires the plugin and its hosted [MCP server](https://mcp.launchdarkly.com/mcp/launchdarkly/install). `managing-feature-flags` degrades gracefully without it.
 

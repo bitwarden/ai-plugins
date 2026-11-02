@@ -49,6 +49,8 @@ Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the t
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section.
 
+When preflight ran the owning-team classifier, also pass each file it found that needs the owning team, with the classifier's reason and whether the author already contacted that team. Those go into the body's AI-assisted review section too, so the owning team's reviewer sees why they were asked before the PR comment loads.
+
 Carry back the title, the body, the resolved `t:` label its prefix will produce, the `ai-review` label choice, and which template the body was built from. Step 3's preview shows all five — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
 
 The template source belongs in the preview because only one of its values is the target repo's own. A body built from the embedded copy can carry a section header that has drifted from what reviewers scan for, and this preview is the only place a person sees the body before it is submitted.

@@ -5,6 +5,14 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-11-01
+
+### Added
+
+- `architecting-solutions` checks the `INTENT.md` of every module a design changes, next to the ADR check. A non-routine change in another team's module, or a change that contradicts its intent, is raised with the owning team before code is written. Designs carry an intent reference section.
+- `perform-preflight` has an Owning-Team Review section that runs the `bitwarden-owning-team-review` classifier on the branch, when that plugin is installed. An agent running preflight asks the user to run it from the main session.
+- `creating-pull-request` passes the classifier's owning-team findings into the PR body's AI-assisted review section.
+
 ## [4.0.0] - 2026-10-17
 
 ### Removed

@@ -12,11 +12,12 @@ Software engineer agent for a Bitwarden product team. Generic AI coding assistan
 
 ## Cross-Plugin Integration
 
-| Plugin                        | How It's Used                                                                                                                                                                        |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bitwarden-delivery-tools`    | `committing-changes`, `creating-pull-request`, `perform-preflight`, `labeling-changes` for the day-to-day PR loop; `managing-feature-flags` when gating, reading, or removing a flag |
-| `bitwarden-atlassian-tools`   | `researching-jira-issues` when picking up a story                                                                                                                                    |
-| `bitwarden-security-engineer` | `reviewing-security-architecture`, `analyzing-code-security`, `reviewing-dependencies`, `detecting-secrets` when relevant to the change                                              |
+| Plugin                         | How It's Used                                                                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bitwarden-delivery-tools`     | `committing-changes`, `creating-pull-request`, `perform-preflight`, `labeling-changes` for the day-to-day PR loop; `managing-feature-flags` when gating, reading, or removing a flag |
+| `bitwarden-atlassian-tools`    | `researching-jira-issues` when picking up a story                                                                                                                                    |
+| `bitwarden-security-engineer`  | `reviewing-security-architecture`, `analyzing-code-security`, `reviewing-dependencies`, `detecting-secrets` when relevant to the change                                              |
+| `bitwarden-owning-team-review` | Asks the user to run `classify-owning-team-review local` before opening a PR that changes another team's module (when installed)                                                     |
 
 Per-repo skills (`implementing-dapper-queries`, `implementing-ef-core`, `writing-database-queries`, and similar) live in the relevant Bitwarden repos and are picked up by Claude Code's progressive disclosure.
 
