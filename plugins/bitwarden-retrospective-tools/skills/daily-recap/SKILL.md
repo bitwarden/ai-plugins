@@ -2,7 +2,7 @@
 name: daily-recap
 context: fork
 agent: general-purpose
-description: Generates an interactive HTML recap of the user's own engineering work over the time window given as arguments, ready for standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, pushed, reviewed, or moved tickets and docs on over a time window ("yesterday", "this morning", "last night", "since standup", a specific date), or asks for a "recap", "daily summary", "standup notes", "morning recap", or "1:1 prep", including phrasings like "throw together what I did yesterday" or "something I can show my manager". Not for looking up a single specific PR, commit, ticket, or document, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
+description: Generates an interactive HTML recap of the user's own engineering work over the time window given as arguments, ready for standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, pushed, reviewed, or moved tickets and docs on over a time window ("yesterday", "this morning", "last night", "since standup", a specific date, or a date range such as "the last three days"), or asks for a "recap", "daily summary", "standup notes", "morning recap", or "1:1 prep", including phrasings like "throw together what I did yesterday" or "something I can show my manager". Not for looking up a single specific PR, commit, ticket, or document, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
 ---
 
 # Daily Recap
