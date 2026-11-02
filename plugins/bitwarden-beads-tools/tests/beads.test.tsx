@@ -106,6 +106,30 @@ test("output that is not JSON reads as an error in the status line", async ($, o
   expect(statuses).toContain("beads: error reading bd list");
 });
 
+test("JSON without an issues list reads as an error, not an empty backlog", async ($, on) => {
+  const statuses: (string | undefined)[] = [];
+  on("session.cwd", () => ({ value: "/work/demo" }));
+  on("process.run", () => ({
+    value: {
+      exitCode: 0,
+      stdout: JSON.stringify({ items: [] }),
+      stderr: "",
+      isStdoutTruncated: false,
+      isStderrTruncated: false,
+    },
+  }));
+  on("ui.status", ($, e) => {
+    statuses.push(e.text);
+
+    return { value: undefined };
+  });
+  on("ui.open", () => ({ value: { isPlaced: true } }));
+
+  const ran = await $.command.run(RUN);
+  expect(JSON.stringify(ran)).toContain("beads: error reading bd list");
+  expect(statuses).toContain("beads: error reading bd list");
+});
+
 test("a project with no open beads clears the status line", async ($, on) => {
   const statuses: (string | undefined)[] = [];
   let issues: unknown[] = [];
@@ -357,4 +381,79 @@ test("outside a beads project the command says so", async ($, on) => {
 
   const ran = await $.command.run(RUN);
   expect(JSON.stringify(ran)).toContain("No beads project here");
+});
+
+test("a Bash call that runs bd reads the beads again", async ($, on) => {
+  const commands: string[] = [];
+  let runs = 0;
+  on("session.cwd", () => ({ value: "/work/demo" }));
+  on("process.run", () => {
+    runs += 1;
+
+    return {
+      value: {
+        exitCode: 0,
+        stdout: JSON.stringify({ issues: BEADS }),
+        stderr: "",
+        isStdoutTruncated: false,
+        isStderrTruncated: false,
+      },
+    };
+  });
+  let refreshed: () => void = () => {};
+  const done = new Promise<void>((resolve) => {
+    refreshed = resolve;
+  });
+  on("ui.status", () => {
+    refreshed();
+
+    return { value: undefined };
+  });
+  on("tool.call", ($, e) => {
+    commands.push(e.command);
+
+    return { result: { stdout: "", stderr: "", exitCode: 0 } };
+  });
+
+  // A bd call quoted inside sh -c is not matched; the poll picks it up.
+  await $.tool.call({ tool: "Bash", command: 'sh -c "bd close demo-1"' });
+  await $.tool.call({ tool: "Bash", command: "git add . && bd close demo-1" });
+  await done;
+
+  expect(commands).toHaveLength(2);
+  expect(runs).toBe(1);
+});
+
+test("changing directory reads the beads again", async ($, on) => {
+  on("session.cwd", () => ({ value: "/work/demo" }));
+  on("process.run", () => ({
+    value: {
+      exitCode: 0,
+      stdout: JSON.stringify({ issues: BEADS }),
+      stderr: "",
+      isStdoutTruncated: false,
+      isStderrTruncated: false,
+    },
+  }));
+  let refreshed: () => void = () => {};
+  const done = new Promise<void>((resolve) => {
+    refreshed = resolve;
+  });
+  on("ui.status", () => {
+    refreshed();
+
+    return { value: undefined };
+  });
+  on("classic.CwdChanged", () => ({}));
+
+  await $.classic.CwdChanged({ old_cwd: "/work", new_cwd: "/work/demo" });
+  await done;
+
+  const ui = await $.ui.mount({
+    plugin: "bitwarden-beads-tools",
+    surface: "terminal",
+    ...PANE,
+  });
+  expect(await ui.find({ text: /Fix the login flow/ })).toBeDefined();
+  await ui.unmount();
 });

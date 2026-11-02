@@ -81,9 +81,11 @@ async function load($: EngineInterface): Promise<BeadsSnapshot | null> {
     const parsed: unknown = JSON.parse(ran.stdout || "{}");
     const rows = (parsed as { issues?: unknown } | null)?.issues;
 
-    return {
-      beads: Array.isArray(rows) ? rows.map(toBead).filter(isBead) : [],
-    };
+    if (!Array.isArray(rows)) {
+      return { beads: [], error: "bd list returned an unexpected shape" };
+    }
+
+    return { beads: rows.map(toBead).filter(isBead) };
   } catch {
     return { beads: [], error: "bd list returned output that is not JSON" };
   }
