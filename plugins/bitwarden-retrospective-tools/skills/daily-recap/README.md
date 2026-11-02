@@ -20,7 +20,7 @@ It does not cover a single PR or ticket lookup, someone else's activity, meeting
 A self-contained page with:
 
 - A stats strip (repositories touched, sessions, PRs opened and approved, GitHub events)
-- A standup card with a Copy button; Copy emits markdown links and backtick-wrapped code rather than stripping them
+- A standup card with a red/amber/green RAG status dot, a one-line BLUF summary, and a three-column section grid including a Blockers column; the Copy button emits the same structure as Slack text, prefixed with the matching status shortcode (`:large_green_circle:`/`:large_orange_circle:`/`:red_circle:`) and preserving markdown links and backtick-wrapped code rather than stripping them
 - Work grouped into themed streams per project, filterable by project, status, and keyword
 - A GitHub timeline view, filterable by project and keyword
 - A short theme-of-the-day summary with open threads
