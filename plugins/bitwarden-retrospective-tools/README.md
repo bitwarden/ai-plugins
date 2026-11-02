@@ -1,6 +1,6 @@
 # Bitwarden Retrospective Tools Plugin
 
-Tools for looking back on your own engineering work.
+Tools for looking back on your own engineering work: a daily or weekly work recap, in Platform RAG standup format, built from your Claude Code session logs, your GitHub activity, and your Jira and Confluence activity.
 
 ## Overview
 
