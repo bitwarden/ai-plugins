@@ -2,7 +2,7 @@
 name: weekly-recap
 context: fork
 agent: general-purpose
-description: Generates an interactive HTML recap of the user's own engineering work over one Monday-to-Friday workweek, ready for a weekly standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, reviewed, or moved tickets and docs on over a week ("this week", "last week", "the week of" a date), or asks for a "weekly recap", "weekly standup", "weekly summary", "week in review", or "weekly update", including phrasings like "throw together what I did last week". Not for a single day or part of a day, for looking up a single specific PR, commit, ticket, or document, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
+description: Generates an interactive HTML recap of the user's own engineering work over one Monday-to-Friday workweek, ready for a weekly standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, reviewed, or moved tickets and docs on over a week ("this week", "last week", "the week of" a date), or asks for a "weekly recap", "weekly standup", "weekly summary", "week in review", or "weekly update", including phrasings like "throw together what I did last week". Not for a single day or part of a day, for a multi-day range that is not a Monday-to-Friday week or for several weeks at once (use the daily-recap skill), for looking up a single specific PR, commit, ticket, or document, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
 ---
 
 # Weekly Recap
@@ -16,7 +16,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/daily-recap/SKILL.md` and follow its workflow
 That file is read as plain text, so two things in it need translating:
 
 - Its relative paths (`scripts/`, `assets/`, `references/`) are under `${CLAUDE_PLUGIN_ROOT}/skills/daily-recap/`. Call the scripts by that absolute path.
-- Its `${CLAUDE_PLUGIN_DATA}` is not set in the Bash environment. Use this output directory instead: `out_dir="${DAILY_RECAP_OUTPUT_DIR:-${CLAUDE_PLUGIN_DATA}/daily-recaps}"`.
+- Its `${CLAUDE_PLUGIN_DATA}` stays literal, because that file is read as plain text rather than loaded as a skill. Use the path substituted into this file: `out_dir="${DAILY_RECAP_OUTPUT_DIR:-${CLAUDE_PLUGIN_DATA}/daily-recaps}"`. If the result still contains `${` or begins with `/daily-recaps`, the plugin data variable was empty; stop and report that this skill must run from the installed plugin.
 
 ## The week
 
@@ -30,7 +30,7 @@ To step between dates, source `${CLAUDE_PLUGIN_ROOT}/skills/daily-recap/scripts/
 
 ## Collecting
 
-In daily-recap's step 1, run (a), (b), and (d) once per workday in the week, passing that day's date and naming each file by it (`events-YYYY-MM-DD.json`, `sessions-YYYY-MM-DD.json`, `atlassian-YYYY-MM-DD.json`). Run (c) once for the whole week: `gather-gh-search.sh MONDAY LAST-DAY`, where LAST-DAY is Friday, or for "this week" the earlier of today and that week's Friday. Skip (e) and leave `{{TODAY_BANNER}}` empty: "this week" already covers today, and for a past week the banner would sit across a weekend gap.
+In daily-recap's step 1, run (a), (b), and (d) once per workday in the week, passing that day's date and naming each file by it (`events-YYYY-MM-DD.json`, `sessions-YYYY-MM-DD.json`, `atlassian-YYYY-MM-DD.json`). In (b), read the window bounds from that day's `events-YYYY-MM-DD.json` rather than the `events.json` the step names. Run (c) once for the whole week: `gather-gh-search.sh MONDAY LAST-DAY`, where LAST-DAY is Friday, or for "this week" the earlier of today and that week's Friday. Skip (e) and leave `{{TODAY_BANNER}}` empty: "this week" already covers today, and for a past week the banner would sit across a weekend gap.
 
 GitHub's events feed holds only the last 300 events from the last 30 days, so a busy week can be truncated, and a week more than 30 days old has no events at all. When any day's `feed_complete` is `false`, say so in the recap and rely on `search.json` for PRs.
 

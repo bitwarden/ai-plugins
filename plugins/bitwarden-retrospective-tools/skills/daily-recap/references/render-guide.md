@@ -59,10 +59,10 @@ Tags: `New Repo`, `Sweep`, `Merged`, `Approval`.
 
 The standup card sits at the top of the page, and its Copy button turns it into Slack-ready text. Fill these placeholders:
 
-| Placeholder              | Daily       | Weekly      | Other range |
-| ------------------------ | ----------- | ----------- | ----------- |
-| `{{STANDUP_LABEL_PAST}}` | `Yesterday` | `Last week` | `Recently`  |
-| `{{STANDUP_LABEL_NEXT}}` | `Today`     | `This week` | `Next`      |
+| Placeholder              | Daily (past day) | Daily (today) | Weekly      | Other range |
+| ------------------------ | ---------------- | ------------- | ----------- | ----------- |
+| `{{STANDUP_LABEL_PAST}}` | `Yesterday`      | `Earlier`     | `Last week` | `Recently`  |
+| `{{STANDUP_LABEL_NEXT}}` | `Today`          | `Next`        | `This week` | `Next`      |
 
 The Blockers heading is fixed in the template. `{{STANDUP_PERIOD}}` is `Workday · {DATE}` for a daily recap and `Week · {DATE}` for a weekly one.
 
@@ -79,6 +79,8 @@ Apply this heuristic:
 - `green`: the period's main work landed or moved forward, and no signal points to a setback. Open streams alone do not rule out green; unfinished work is normal.
 - `amber`: the minimum whenever there is any blocker. Also amber when signals are mixed, for example one stream completed while another was deferred or an issue was sent back. When in doubt between green and amber, choose amber.
 - `red`: a heavy or critical blocker load, such as several blocked items or a blocker that stops the period's main work.
+
+When `jira` is `null`, only the stream signal is available: derive the color from streams and session evidence alone, never treat the absent Jira signals as evidence of green, and say in the BLUF that Jira activity is not included.
 
 The signals cover only the window, so work that is stuck with no activity inside it does not affect the color.
 
