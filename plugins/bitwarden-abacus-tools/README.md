@@ -32,6 +32,28 @@ with the plugin versions that produced it.
 The other slots (`plan.analyze`, `implement.guide`, `review`, `retro.analyze`) are listed but empty
 until Abacus uses them.
 
+## Substantial code review
+
+`substantial-review` is the deep review Abacus runs on high-risk changes, and on changes with no recorded risk assessment, before it lands a pull request. It is a workflow rather than a skill because a workflow stage can't start subagents, so the multi-agent pipeline from `bitwarden-code-review:performing-multi-agent-code-review` is laid out as workflow stages instead: an architecture reviewer, quality, bug and security reviewers in parallel (plus Claude configuration and skill reviewers when the change touches those files), validation of every finding, and a severity audit. The skill's prompt rules are carried over word for word, so both reviews judge a change the same way.
+
+Abacus calls it with `workflow("bitwarden-abacus-tools:substantial-review", args)`:
+
+| Argument | Required | Meaning                                                                                                                                         |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repo`   | yes      | Absolute path to the worktree holding the change                                                                                                |
+| `base`   | yes      | Full SHA of the commit the change branched from. The change is the working tree against it, so a moving branch tip would pull in unrelated work |
+| `bead`   | no       | Bead id, shown in progress labels                                                                                                               |
+
+It returns one object for Abacus's assess stage to read:
+
+- `status` is `complete`, `incomplete` when a reviewer or stage failed (Abacus treats that as no review), or `empty` when there was nothing to review.
+- `reviewed` holds `repo`, `base`, the `head` SHA and whether uncommitted work was included (`dirty`), so the review record can be tied to the exact change.
+- `findings` lists each surviving finding with `severity` (`CRITICAL`, `IMPORTANT` or `DEBT`, the `classifying-review-findings` names for the pipeline's Blocker, Important and Refactor tiers), `file`, `line`, `title`, `detail`, a `security` flag, the `reviewer` that raised it, its `confidence`, and whether validation and the audit ran on it.
+- `dismissed` lists what validation or the audit dropped, and why.
+- `summary` and `not_covered` say what the review concluded and what it couldn't look at.
+
+The security reviewer runs as `bitwarden-security-engineer:bitwarden-security-engineer`, so that plugin must be enabled for the worker; without it every review comes back `incomplete`. `claude-config-validator` and `plugin-dev` add the configuration and skill reviewers when present, and a skipped skill review is named in `not_covered`.
+
 ## Coordinating roles
 
 The concierge and orchestrator launch with none of the Bitwarden plugins; the planner keeps
