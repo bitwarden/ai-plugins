@@ -94,7 +94,7 @@ All three tools default to a dry run that returns the exact payload without send
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `create_issue`      | Create one work item in any project. Carries no project-specific field knowledge: pass anything beyond the common core through `fields`, keyed by field id from `get_create_fields` |
 | `link_issues`       | Link two work items. For a dependency, takes `blockerKey` and `blockedKey` and maps them onto Jira's inward/outward sides internally so the direction cannot be inverted            |
-| `add_issue_comment` | Add a plain-text comment to an existing issue. Blank lines split the text into separate paragraphs                                                                                  |
+| `add_issue_comment` | Add a comment to an existing issue. The body is markdown: emphasis, links, inline and fenced code, lists, and tables all render                                                     |
 
 The classic `write:jira-work` scope alone covers all three write tools — it grants creating and editing issues and posting comments as the user. For a **scoped (granular)** write token, add these instead, on top of the read scopes above:
 
@@ -148,7 +148,7 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Read a Confluence page: `mcp__bitwarden-atlassian__get_confluence_page` with `pageId: "123456789"`
 - Search Confluence: `mcp__bitwarden-atlassian__search_confluence_cql` with `cql: "space = EN AND text ~ \"search term\""`
 - Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
-- Preview a comment before posting it: `mcp__bitwarden-atlassian__add_issue_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
+- Preview a comment before posting it: `mcp__bitwarden-atlassian__add_issue_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me, one nit: the **guard** is inverted."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
 
 ## Skills
 

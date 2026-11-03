@@ -41,10 +41,10 @@ For your own uncommitted work, use [`/validate-ai-local`](../validate-ai-local/R
 The command detects its context and changes only where findings and the report go.
 
 **Workflow mode:** a `STICKY COMMENT ID:` was supplied in the prompt, or
-`GITHUB_ACTIONS` is set. The command posts CRITICAL and IMPORTANT findings as inline
-comments on the diff, skipping any an existing thread already raised. When such a thread
-was resolved but the problem is still on the diff, it replies in that thread once. It writes
-the summary to `/tmp/validation-summary.md`; the workflow replaces its sticky comment with that
+`GITHUB_ACTIONS` is set. The command posts every finding as an inline comment on the
+diff, skipping any an existing thread already raised. When a CRITICAL or IMPORTANT finding's
+thread was resolved but the problem is still on the diff, it replies in that thread once. It
+writes the summary to `/tmp/validation-summary.md`; the workflow replaces its sticky comment with that
 file's contents. This is how the action drives it.
 
 **Interactive mode:** anything else. There is no inline comment tool outside the action,

@@ -1,7 +1,7 @@
 {
   "profile": "bitwarden",
-  "version": "0.2.0",
-  "abacus": ">=0.13",
+  "version": "1.0.0",
+  "abacus": ">=0.15",
   "plugins": {
     "workers": [
       "bitwarden-delivery-tools",
@@ -14,11 +14,11 @@
     "orchestrator": []
   },
   "slots": {
-    "plan.source": "",
+    "plan.source": "bitwarden-atlassian-tools:researching-jira-issues",
     "plan.analyze": "",
     "implement.guide": "",
     "review": [],
-    "land.commit": "bitwarden-abacus:commit-message",
+    "land.commit": "bitwarden-abacus-tools:commit-message",
     "land.pr": "bitwarden-delivery-tools:applying-pr-conventions",
     "retro.analyze": ""
   }
