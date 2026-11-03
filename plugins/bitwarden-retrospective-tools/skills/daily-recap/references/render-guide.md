@@ -117,7 +117,7 @@ Put each Jira key or PR inside the sentence as `<a class="pr-ref" href="...">` o
 Copy turns each link into `[text](url)` and each `<code>` into backticks:
 
 ```text
-:large_green_circle: {BLUF}
+:large_green_circle: Workday · 2026-10-23 — {BLUF}
 
 `Yesterday:`
 - Restored vault export for self-hosted users by fixing the path check behind the [PM-12345]({jira url}) export bug in [bitwarden/clients#1234](https://github.com/bitwarden/clients/pull/1234)

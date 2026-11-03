@@ -11,7 +11,7 @@
 -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'sha256-q/1TSi70sFfBMCWhzoBYbGcIaBjKfXnr2KqUIYbQC5o='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'"
+      content="default-src 'none'; script-src 'sha256-bRcyh2qlLAq4yCSKRCR2o8P3xYNzqxBodVL8iLzGYGM='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'"
     />
     <title>Daily Recap · {{DATE}}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -281,7 +281,7 @@
           rgba(23, 93, 220, 0.04)
         );
         border: 1px solid var(--border);
-        border-left: 4px solid var(--bw-green);
+        border-left: 4px solid var(--border);
         border-radius: 20px;
         padding: 22px 28px;
         margin-bottom: 32px;
@@ -1302,6 +1302,9 @@
         copyBtn.addEventListener("click", () => {
           const standup = document.getElementById("standup");
           const shortcode = RAG_SHORTCODES[standup.dataset.rag];
+          const period = collapse(
+            document.querySelector(".standup-meta").textContent,
+          );
           const bluf = collapse(
             document.querySelector(".standup-bluf").textContent,
           );
@@ -1311,7 +1314,7 @@
               return "`" + label + ":`\n" + bulletsFor(col);
             })
             .join("\n");
-          const text = `${shortcode ? shortcode + " " : ""}${bluf}\n\n${sections}`;
+          const text = `${shortcode ? shortcode + " " : ""}${period} — ${bluf}\n\n${sections}`;
           const viaApi =
             navigator.clipboard && window.isSecureContext
               ? navigator.clipboard.writeText(text)
