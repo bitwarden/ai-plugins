@@ -26,7 +26,7 @@ A week is the five workdays Monday through Friday. Each workday uses daily-recap
 - "this week": Monday of the current week through today. Today's window ends in the future, which is fine.
 - A specific date: the Monday-to-Friday week containing it.
 
-To step between dates, source `${CLAUDE_PLUGIN_ROOT}/skills/daily-recap/scripts/date-utils.sh` and use `add_days`, which handles GNU and BSD `date`.
+To step between dates, source `${CLAUDE_PLUGIN_ROOT}/skills/daily-recap/scripts/date-utils.sh` and use `add_days`, which handles GNU and BSD `date`. For a date's weekday, use `epoch_fmt "$(local_to_epoch "YYYY-MM-DD 12:00:00")" '%u'` (1=Monday) rather than `date -d`, which is GNU-only and silently returns today's weekday on BSD `date`.
 
 ## Collecting
 
@@ -34,7 +34,7 @@ In daily-recap's step 1, run (a), (b), and (d) once per workday in the week, pas
 
 GitHub's events feed holds only the last 300 events from the last 30 days, so a busy week can be truncated, and a week more than 30 days old has no events at all. When any day's `feed_complete` is `false`, say so in the recap and rely on `search.json` for PRs.
 
-Merge the per-day results before step 5. A session or PR that spans several days is one item, and a stream can run across the whole week.
+Merge the per-day session digests before step 4, and the remaining per-day results before step 5. A session or PR that spans several days is one item, and a stream can run across the whole week.
 
 ## Rendering
 
