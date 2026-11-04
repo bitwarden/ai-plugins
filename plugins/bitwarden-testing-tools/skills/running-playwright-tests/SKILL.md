@@ -132,7 +132,7 @@ After all SETUP steps complete, execute the Test Steps.
 
 ### Capturing API error details
 
-Every 4xx or 5xx API response a step causes gets an entry in that step's `error_details`, whether the step passed or failed and whether or not the step expected the error. This applies to Step 2's setup actions too; those entries go in the aborted object's top-level `error_details` if setup cannot complete. Error details are diagnostic only. They never change a step's `outcome` or a case's `status`, and a response body is never evidence for an assertion: verify outcomes through the browser as usual.
+Every 4xx or 5xx API response a step causes gets an entry in that step's `error_details`, whether the step passed or failed and whether or not the step expected the error. This applies to Step 2's setup actions too; those entries go in the aborted object's top-level `error_details` if setup cannot complete. Error details are diagnostic only. They never change a step's `outcome` or a case's `status`, and a response is never the only evidence for an assertion: verify outcomes through the browser as usual.
 
 Detect errors from output you already have, so a step with no error costs nothing extra:
 
@@ -201,7 +201,7 @@ Each step object:
 
 ### Adaptive assertion evaluation
 
-After any assertion step fails, before recording the result, apply the evaluation in `${CLAUDE_SKILL_DIR}/references/adaptive-assertion-evaluation.md` — using only what you already observed during normal execution (no additional browser calls). It can resolve a failed assertion to `PASS (adaptive)`, but never when the feature behavior itself is wrong, the expected content is genuinely absent, the test couldn't run due to environment state, or the failed assertion was a URL/navigation check.
+After any assertion step fails, before recording the result, apply the evaluation in `${CLAUDE_SKILL_DIR}/references/adaptive-assertion-evaluation.md`, gathering evidence with read-only calls when what you already observed is not enough. It can resolve a failed assertion to `PASS (adaptive)`, but never when the feature behavior itself is wrong, the expected content is genuinely absent, the test couldn't run due to environment state, or the failed assertion was a URL/navigation check.
 
 When a case resolves to `PASS (adaptive)`, set the case's `status` to `"PASS (adaptive)"` and fill its `adaptive` object with `specified` (what the plan asserted) and `found` (what actually rendered).
 
@@ -235,13 +235,13 @@ Always save screenshots in the artifact output directory and pass `--full-page`:
 
 When the measured height equals the viewport, skip the resizes and take the screenshot as usual.
 
-Do NOT screenshot after: `run-code`, `eval`, `console`, `requests`, `response-body`, `cookie-get`, or any pure-inspection action; or a step where nothing visible changed.
+Do NOT screenshot after: a `run-code` call that only reads, `eval`, `console`, `requests`, `response-body`, `cookie-get`, or any pure-inspection action; or a step where nothing visible changed.
 
 When in doubt, take the screenshot.
 
 ### Asserting transient toasts
 
-Toasts can auto-dismiss in well under a second. Capture the text reliably from the live DOM per `${CLAUDE_SKILL_DIR}/references/asserting-transient-toasts.md`, which covers both the normal case and the Admin Portal's server-rendered post-back case.
+Perform the action and read the toast in one call, per `${CLAUDE_SKILL_DIR}/references/asserting-transient-toasts.md`, which covers both the normal case and the Admin Portal's server-rendered post-back case.
 
 ### Continuity rule
 
