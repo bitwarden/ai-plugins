@@ -46,7 +46,7 @@ Abacus calls it with `workflow("bitwarden-abacus-tools:substantial-review", args
 
 It returns one object for Abacus's assess stage to read:
 
-- `status` is `complete`, `incomplete` when a reviewer or stage failed (Abacus treats that as no review), or `empty` when there was nothing to review.
+- `status` is `complete`, `incomplete` when a reviewer or stage failed or every changed path was filtered out before review (Abacus treats that as no review), or `empty` when the change has no tracked or untracked paths at all.
 - `reviewed` holds `repo`, `base`, the `head` SHA and whether uncommitted work was included (`dirty`), so the review record can be tied to the exact change.
 - `findings` lists each surviving finding with `severity` (`CRITICAL`, `IMPORTANT` or `DEBT`, the `classifying-review-findings` names for the pipeline's Blocker, Important and Refactor tiers), `file`, `line`, `title`, `detail`, a `security` flag, the `reviewer` that raised it, its `confidence`, and whether validation and the audit ran on it.
 - `dismissed` lists what validation or the audit dropped, and why.

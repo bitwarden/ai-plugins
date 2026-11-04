@@ -238,13 +238,17 @@ const DENY_NAME =
   /(\.local\.|\.tfstate$|credentials|^service-account|^id_rsa|^id_ecdsa|^id_dsa|^id_ed25519|\.(pem|key|p12|pfx|jks|keystore|kdbx)$)/;
 const unsafe = (p) => /['\n\r]/.test(p);
 const skipped = [];
+const unlisted = [];
 let kept = [];
 for (const p of g.untracked) {
   if (unsafe(p)) {
     skipped.push(p);
     continue;
   }
-  if (!ALLOW.test(p)) continue;
+  if (!ALLOW.test(p)) {
+    unlisted.push(p);
+    continue;
+  }
   const parts = p.split("/");
   const name = parts[parts.length - 1];
   if (parts.some((c) => DENY_COMPONENT.test(c)) || DENY_NAME.test(name)) {
@@ -263,6 +267,10 @@ if (skipped.length)
   notCovered.push(
     `untracked files skipped by the credential filter: ${skipped.join(", ")}`,
   );
+if (unlisted.length)
+  notCovered.push(
+    `untracked files outside the reviewable file types: ${unlisted.join(", ")}`,
+  );
 
 const tracked = g.changed.filter((c) => !unsafe(c.path));
 for (const c of g.changed)
@@ -272,11 +280,24 @@ for (const c of g.changed)
     );
 
 const reviewed = { repo: REPO, base: BASE, head: g.head, dirty: g.dirty };
-if (!tracked.length && !kept.length) {
+if (!g.changed.length && !g.untracked.length) {
   return {
     status: "empty",
     reviewed,
     summary: "The change is empty against its base, so nothing was reviewed.",
+    not_covered: "",
+    findings: [],
+    dismissed: [],
+  };
+}
+// Something changed, but every path was filtered out before review. That is
+// not an empty change, so it must not read as one to an unattended gate.
+if (!tracked.length && !kept.length) {
+  return {
+    status: "incomplete",
+    reviewed,
+    summary:
+      "Review incomplete: every changed path was filtered out, so nothing was reviewed.",
     not_covered: notCovered.join("; "),
     findings: [],
     dismissed: [],
