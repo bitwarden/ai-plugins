@@ -35,8 +35,20 @@ export function classifyGhFailure(stderr: string): string {
   if (/gh auth login|not logged in|authentication required/i.test(stderr)) {
     return "there is no gh login on this machine. Run `gh auth login`, then retry";
   }
-  if (/rate limit|secondary rate|HTTP 403/i.test(stderr)) {
+  if (/rate limit|secondary rate/i.test(stderr)) {
     return "the GitHub API rate limit was reached";
+  }
+  // GitHub also returns 403 for access problems, so a 403 is only a rate limit
+  // when the message says so. "Authorize in your web browser" is the line gh
+  // adds when GitHub asks for SSO authorization.
+  if (/SAML enforcement|Authorize in your web browser/i.test(stderr)) {
+    return `this gh login's token is not authorized for SAML SSO in the bitwarden organization. Authorize the token for SAML SSO and check its access to ${CODE_REPO}, then retry`;
+  }
+  if (/Resource not accessible by/i.test(stderr)) {
+    return `this gh login's token cannot read ${CODE_REPO}. Check the token's access to ${CODE_REPO}, then retry`;
+  }
+  if (/HTTP 403/i.test(stderr)) {
+    return `GitHub refused access (HTTP 403). Check this gh login's access to ${CODE_REPO}, then retry`;
   }
   if (/HTTP 404|Not Found/i.test(stderr)) {
     return `${CODE_REPO} was not found, or this gh login cannot read it`;

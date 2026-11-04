@@ -66,6 +66,51 @@ describe("classifyGhFailure", () => {
     expect(classifyGhFailure(stderr)).toMatch(reason);
   });
 
+  // Messages as gh api prints them: "gh: <message> (HTTP <status>)".
+  it.each([
+    [
+      "primary rate limit",
+      "gh: API rate limit exceeded for x.x.x.x. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.) (HTTP 403)",
+    ],
+    [
+      "secondary rate limit",
+      "gh: You have exceeded a secondary rate limit. Please wait a few minutes before you try again. (HTTP 403)",
+    ],
+  ])("reports a %s as a rate limit", (_, stderr) => {
+    expect(classifyGhFailure(stderr)).toBe(
+      "the GitHub API rate limit was reached",
+    );
+  });
+
+  it.each([
+    [
+      "a token not authorized for SAML SSO",
+      "gh: Resource protected by organization SAML enforcement. You must grant your OAuth token access to this organization. (HTTP 403)",
+      /not authorized for SAML SSO in the bitwarden organization\. Authorize the token for SAML SSO and check its access to bitwarden\/test/,
+    ],
+    [
+      "gh's SSO authorization prompt",
+      "gh: HTTP 403\nAuthorize in your web browser: https://github.com/orgs/bitwarden/sso",
+      /not authorized for SAML SSO/,
+    ],
+    [
+      "a fine-grained token without the repo",
+      "gh: Resource not accessible by personal access token (HTTP 403)",
+      /cannot read bitwarden\/test\. Check the token's access to bitwarden\/test/,
+    ],
+    [
+      "another 403",
+      "gh: Maximum number of login attempts exceeded. Please try again later. (HTTP 403)",
+      /^GitHub refused access \(HTTP 403\)\. Check this gh login's access to bitwarden\/test/,
+    ],
+    ["a bare 403", "gh: HTTP 403", /^GitHub refused access \(HTTP 403\)/],
+  ])("does not call %s a rate limit", (_, stderr, reason) => {
+    const result = classifyGhFailure(stderr);
+
+    expect(result).toMatch(reason);
+    expect(result).not.toMatch(/rate limit/);
+  });
+
   it("falls back to a generic reason without echoing stderr", () => {
     expect(classifyGhFailure("something odd with ghp_secret123")).toBe(
       "gh api failed",
