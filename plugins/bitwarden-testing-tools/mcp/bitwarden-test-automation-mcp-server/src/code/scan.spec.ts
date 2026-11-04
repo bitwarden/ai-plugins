@@ -154,6 +154,102 @@ describe("scanFile", () => {
     ]);
   });
 
+  it("reads a SetProperty Covers string that is one case ID", () => {
+    const text = '        .SetProperty("Covers", "20507")';
+
+    const hits = scanFile("Bitwarden.Web.Tests/A.cs", text);
+
+    expect(hits).toEqual([
+      {
+        id: 20507,
+        path: "Bitwarden.Web.Tests/A.cs",
+        line: 1,
+        attribute: "SetPropertyCovers",
+        platform: "Web",
+        ignored: false,
+        knownBug: false,
+      },
+    ]);
+  });
+
+  it("reads each ID in a SetProperty Covers list", () => {
+    const text = [
+      "        new TestCaseData(PlanType.Teams)",
+      '            .SetProperty("Covers", "20507, 20509, 20506, 506021, 20557")',
+    ].join("\n");
+
+    const hits = scanFile("Bitwarden.Web.Tests/A.cs", text);
+
+    expect(hits.map((hit) => [hit.id, hit.attribute, hit.line])).toEqual([
+      [20507, "SetPropertyCovers", 2],
+      [20509, "SetPropertyCovers", 2],
+      [20506, "SetPropertyCovers", 2],
+      [506021, "SetPropertyCovers", 2],
+      [20557, "SetPropertyCovers", 2],
+    ]);
+  });
+
+  it("allows any spacing after the SetProperty comma and in the list", () => {
+    const text = [
+      '.SetProperty("Covers","20502")',
+      '.SetProperty("Covers",   "20504,20501")',
+      '.SetProperty("Covers",\t" 20503 ,  20505 ")',
+    ].join("\n");
+
+    const hits = scanFile("Bitwarden.Web.Tests/A.cs", text);
+
+    expect(hits.map((hit) => [hit.id, hit.line])).toEqual([
+      [20502, 1],
+      [20504, 2],
+      [20501, 2],
+      [20503, 3],
+      [20505, 3],
+    ]);
+  });
+
+  it("does not read SetProperty forms the validator does not match", () => {
+    const text = [
+      '.SetProperty( "Covers", "20501")',
+      '.SetProperty("Covers" , "20502")',
+      '.SetProperty("Covers", 20503)',
+      '.SetProperty("Covers", "")',
+      '.SetProperty("Category", "20504")',
+    ].join("\n");
+
+    expect(scanFile("Bitwarden.Web.Tests/A.cs", text)).toEqual([]);
+  });
+
+  it("does not read a SetProperty Covers entry such as Login 2 as case 2", () => {
+    const text = '.SetProperty("Covers", "20507, Login 2")';
+
+    const hits = scanFile("Bitwarden.Web.Tests/A.cs", text);
+
+    expect(hits.map((hit) => hit.id)).toEqual([20507]);
+  });
+
+  it("reads Ignore and KnownBug near a SetProperty Covers call", () => {
+    const ignoredText = [
+      '[Ignore("flaky")]',
+      "public static IEnumerable<TestCaseData> Plans",
+      "{",
+      '    get { yield return new TestCaseData().SetProperty("Covers", "20502"); }',
+      "}",
+    ].join("\n");
+    const knownBugText = [
+      '[KnownBug("PM-12345")]',
+      "public static IEnumerable<TestCaseData> Plans",
+      "{",
+      '    get { yield return new TestCaseData().SetProperty("Covers", "20504"); }',
+      "}",
+    ].join("\n");
+
+    const [ignoredHit] = scanFile("Bitwarden.Web.Tests/A.cs", ignoredText);
+    const [knownBugHit] = scanFile("Bitwarden.Web.Tests/A.cs", knownBugText);
+
+    expect([ignoredHit.ignored, ignoredHit.knownBug]).toEqual([true, false]);
+    expect([knownBugHit.ignored, knownBugHit.knownBug]).toEqual([false, true]);
+  });
+
   it("marks a method ignored when [Ignore] sits on it", () => {
     const text = [
       '[Description("100")]',

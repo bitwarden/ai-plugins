@@ -6,12 +6,15 @@
  *     quoted argument may hold a list, as in [Covers("N, M")], and each ID in
  *     it is matched on its own. Bare [Covers(N, M)] is read the same way.
  *   - .SetDescription("N"): the string must be exactly the case ID.
+ *   - .SetProperty("Covers", "N, M"): each comma-separated entry, trimmed,
+ *     must be exactly the case ID.
  * "Login 2" is not case 2, and "9891533 and 9891534" is not a match.
  * Only .cs files under a top-level *.Tests folder are scanned, except the
  * ProdSmoke folder, which reuses functional IDs on purpose.
  */
 
-export type CodeAttribute = "Description" | "Covers" | "SetDescription";
+export type CodeAttribute =
+  "Description" | "Covers" | "SetDescription" | "SetPropertyCovers";
 
 export interface CodeHit {
   id: number;
@@ -36,6 +39,10 @@ const COVERS = /Covers\(([^)]+)\)/g;
 // quote, so it is not read as an ID.
 const COVERS_ARGUMENT = /\s*"[^"]*"|[^,]+/g;
 const SET_DESCRIPTION = /\.SetDescription\("(\d+)"\)/g;
+// Same spacing and quoting as the bitwarden/test validator. The validator takes
+// every digit run in the string, but here each comma-separated entry must be
+// exactly an ID, as with the other forms.
+const SET_PROPERTY_COVERS = /\.SetProperty\("Covers",\s*"([^"]+)"\)/g;
 const TEST_METHOD =
   /(?:public|private|protected|internal)\s+(?:void|Task|async\s+Task)\s+\w+\s*\(/;
 const CLASS_DECLARATION = /\bclass\s+\w+/;
@@ -166,12 +173,19 @@ export function scanFile(path: string, text: string): CodeHit[] {
     for (const match of line.matchAll(SET_DESCRIPTION)) {
       found.push({ ids: exactId(match[1]), attribute: "SetDescription" });
     }
+    for (const match of line.matchAll(SET_PROPERTY_COVERS)) {
+      found.push({
+        ids: match[1].split(",").flatMap((entry) => exactId(entry.trim())),
+        attribute: "SetPropertyCovers",
+      });
+    }
 
     for (const { ids, attribute } of found) {
-      // A SetDescription call sits inside a TestCaseSource, so it has no method
-      // line to stop at. Its ignore state is read from the lines around it.
+      // SetDescription and SetProperty calls sit inside a TestCaseSource, so
+      // they have no method line to stop at. Their ignore state is read from
+      // the lines around them.
       const attributes =
-        attribute === "SetDescription"
+        attribute === "SetDescription" || attribute === "SetPropertyCovers"
           ? nearbyAttributes(lines, index)
           : methodAttributes(lines, index);
       const ignored = attributes.ignored || classIgnored(lines, index);

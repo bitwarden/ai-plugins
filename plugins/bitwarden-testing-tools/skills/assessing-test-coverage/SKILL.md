@@ -136,7 +136,7 @@ G. **Check Automation Type against code.** Run this for every full-review case, 
 
 How matches are read:
 
-- A match is exact. The server counts a case ID only when the whole `[Description("...")]` string is the case ID, the whole `.SetDescription("...")` string is the case ID, or a `[Covers(...)]` argument is exactly the case ID. Each comma-separated `[Covers(...)]` argument is trimmed and matched on its own. `[Description("Login 2")]` is not case 2, and `[Description("9891533 and 9891534")]` is not a match for either ID.
+- A match is exact. The server counts a case ID only when the whole `[Description("...")]` string is the case ID, the whole `.SetDescription("...")` string is the case ID, a `[Covers(...)]` argument is exactly the case ID, or an entry in a `.SetProperty("Covers", "...")` string is exactly the case ID. Each comma-separated `[Covers(...)]` argument and `.SetProperty("Covers", "...")` entry is trimmed and matched on its own. `[Description("Login 2")]` is not case 2, and `[Description("9891533 and 9891534")]` is not a match for either ID.
 - Test files under the `ProdSmoke` folder are not read. They reuse functional IDs on purpose.
 - A test is ignored when `[Ignore]` sits on its method or its class. KnownBug is read from the method.
 

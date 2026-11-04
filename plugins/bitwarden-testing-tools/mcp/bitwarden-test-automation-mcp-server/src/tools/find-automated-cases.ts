@@ -38,7 +38,7 @@ async function handler(input: unknown, ctx: ToolContext): Promise<string> {
   const header = [
     `Source: ${CODE_REPO}, ${CODE_BRANCH} at ${index.sha} (read ${read}).`,
     `Scanned ${index.filesScanned} .cs files under *.Tests folders. ProdSmoke is excluded on purpose.`,
-    'Matches are exact: [Description("N")], each [Covers(N)] argument, and .SetDescription("N"), where N is the whole value. ' +
+    'Matches are exact: [Description("N")], each [Covers(N)] argument, .SetDescription("N"), and each comma-separated entry in .SetProperty("Covers", "N"), where N is the whole value. ' +
       "Ignored and KnownBug are read from the attributes near each match.",
   ];
 
