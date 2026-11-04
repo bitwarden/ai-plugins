@@ -109,7 +109,7 @@
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
       "version": "1.5.0",
-      "description": "Testing tools for Bitwarden — analyzing and improving test quality across its repositories."
+      "description": "Testing tools for Bitwarden: test coverage and Testmo case review, test layer recommendations, manual test cases, requirement readiness, test plans, and QA manual regression runs, plus the bundled bitwarden-test-automation MCP server."
     },
     {
       "name": "bitwarden-doc-parity",

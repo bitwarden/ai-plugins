@@ -101,6 +101,8 @@ Every retire and update names the AC or plan item it rests on. If no AC or plan 
 
 **Linked issues.** When a case is headed for an Update or Retire and what it was written to check is unclear, read the Jira issue linked to the case, if it has one, with get_issue. Use it only to settle what the case checks, not to find new work. When it settles the call, name it in the Why line, for example: "AC-2 adds a PDF option to the export menu. The case comes from PM-1234, which limited the menu to CSV and JSON until PDF export shipped."
 
+If `get_issue` is unavailable, because the second exact-name load at the top of Steps found nothing or the call failed, skip the lookup. Decide from the case text alone, with Confidence: Low and the trigger that made the case unclear. Add a NOT CHECKED line naming the linked issue that was not read, with the reason or error text. For a Jira key input, step 1 already stopped when `bitwarden-atlassian-tools` is not installed, so this mostly applies to PR, Tech Breakdown, and CSV input.
+
 **Confidence.** Every Update and Retire entry, and every heads-up entry that needs a change, gets a confidence line. Do not rate how sure you feel. Apply this checklist to the case's title, steps, and expected result.
 
 Mark Low when any of these apply:
