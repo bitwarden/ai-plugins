@@ -193,7 +193,7 @@ Each step object:
 - Omit `notes` when there is nothing to note.
 - Include `observed` only on assertion steps, holding a short description in your own words of what you saw, never text copied from the page, an email, or a response.
 - Include `error_details` on any step that caused a 4xx or 5xx API response, per "Capturing API error details"; omit it otherwise. Every key but `request` is optional.
-- Include `screenshot` only for a step that produced a visual change; use the exact filename you passed to `--filename`.
+- Include `screenshot` only for a step that produced a visual change; use the exact filename you passed to `--filename`, or to a toast call's `path`.
 - Set `"human": true` and `"outcome": "COMPLETED (User: <answer>)"` for a `[HUMAN]` step.
 - Include `adaptive_reason` only when `status` is `"PASS (adaptive)"`, written per the adaptive evaluation.
 - Include `account` only when the case created a login account, holding the exact `{ email, password }` used, so a resumed segment can re-authenticate.
@@ -213,7 +213,7 @@ Run `playwright-cli screenshot` to take a full-page screenshot **after every vis
 - After a modal, dialog, or overlay opens or closes
 - After a checkbox, toggle, accordion, or other element reveals or hides content
 - After a form is submitted and a result or error appears
-- After a toast or notification appears — take it best-effort, since a toast can dismiss before the screenshot lands. Assert a toast's text from the DOM per "Asserting transient toasts" below, never from a screenshot. Watch for up to 3 seconds after any state-changing action; if no toast appears, continue
+- After a toast or notification appears — for an asserted toast, the call that reads it takes this screenshot, per "Asserting transient toasts" below; otherwise take it best-effort, since a toast can dismiss before the screenshot lands. Assert a toast's text from the DOM, never from a screenshot. Watch for up to 3 seconds after any state-changing action; if no toast appears, continue
 
 Always save screenshots in the artifact output directory and pass `--full-page`: `screenshot --filename=<artifacts-output-dir>/screenshots/<name>.png --full-page`
 
@@ -235,13 +235,13 @@ Always save screenshots in the artifact output directory and pass `--full-page`:
 
 When the measured height equals the viewport, skip the resizes and take the screenshot as usual.
 
-Do NOT screenshot after: a `run-code` call that only reads, `eval`, `console`, `requests`, `response-body`, `cookie-get`, or any pure-inspection action; or a step where nothing visible changed.
+Do NOT screenshot after: a `run-code` call that only reads or already took the step's screenshot, `eval`, `console`, `requests`, `response-body`, `cookie-get`, or any pure-inspection action; or a step where nothing visible changed.
 
 When in doubt, take the screenshot.
 
 ### Asserting transient toasts
 
-Perform the action and read the toast in one call, per `${CLAUDE_SKILL_DIR}/references/asserting-transient-toasts.md`, which covers both the normal case and the Admin Portal's server-rendered post-back case.
+Perform the action, read the toast, and take the screenshot in one call, per `${CLAUDE_SKILL_DIR}/references/asserting-transient-toasts.md`, which covers both the normal case and the Admin Portal's server-rendered post-back case.
 
 ### Continuity rule
 
@@ -302,7 +302,7 @@ If you already read the subscription because the skill told you its `test_clock`
 
 ## Step 4 - Produce the required output
 
-Do not return until every test case object is complete. Before assembling the output, collect the filenames you passed to `--filename` for each screenshot, and use them verbatim in each step's `screenshot` field.
+Do not return until every test case object is complete. Before assembling the output, collect the filenames you passed to `--filename` or to a toast call's `path` for each screenshot, and use them verbatim in each step's `screenshot` field.
 
 Return a single JSON object and nothing else, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/complete-run.json`:
 
