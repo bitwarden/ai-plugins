@@ -32,6 +32,10 @@ An `aborted` run MAY carry `cases` and `totals` alongside `abort_reason`. Any ab
 | `adaptive_reason` | string | The runner's own account of why the case passed adaptively; present only when status is `PASS (adaptive)`                                                                                    |
 | `account`         | object | Optional; `{ email, password }` for an account the case created. The password is a disposable local-dev credential, written to `test-results-*.json` in cleartext, so never commit that file |
 
+Every case records at least one step in `setup_steps` or `test_steps`. A case with neither was not run: `merge_results.py` keeps it, counts it by its `status`, and appends its number to its stdout summary as `| not_run=<n>[,<n>...]`.
+
+Each case number appears once in the merged `cases`. When a later segment carries a case number already present, it replaces the earlier entry in place only when that entry was not run; any other repeat fails the merge with exit 3.
+
 ## Step object
 
 | Field           | Type   | Notes                                                                                                                       |

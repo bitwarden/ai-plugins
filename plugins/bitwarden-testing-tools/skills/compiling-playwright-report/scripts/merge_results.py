@@ -16,7 +16,13 @@
 # along with error_details when that segment supplied a list.
 # Totals are derived, never trusted from the runner.
 #
-# Exit codes: 0 written; 2 usage error; 3 invalid or malformed segment JSON.
+# A case that recorded no setup or test steps was not run; its number is
+# appended to the stdout summary as "| not_run=<n>[,<n>...]". A later segment
+# may carry the same case number again to replace a not-run entry in place;
+# repeating a case number whose earlier entry ran is an error.
+#
+# Exit codes: 0 written; 2 usage error; 3 invalid or malformed segment JSON,
+# or a repeated case number whose earlier entry ran.
 
 import argparse
 import json
@@ -49,6 +55,16 @@ def load_segment(path):
     return data
 
 
+def was_run(case):
+    """A case ran when it recorded at least one setup or test step."""
+    return bool(case.get("setup_steps")) or bool(case.get("test_steps"))
+
+
+def not_run(cases):
+    """Return the numbers of the cases that recorded no steps at all."""
+    return [case.get("number") for case in cases if not was_run(case)]
+
+
 def merge(segments):
     """Concatenate cases across every segment and take the last segment's status.
 
@@ -57,12 +73,27 @@ def merge(segments):
     aborted when it cannot re-authenticate, having no memory of earlier segments.
     Dropping cases here silently threw away completed work and left the run with
     no report at all.
+
+    A case number seen again in a later segment replaces the earlier entry in
+    place, but only when that entry was not run, so re-running a skipped case
+    never overwrites a real result. Any other repeat is rejected.
     """
     last = segments[-1]
     run_status = last["run_status"]
     cases = []
+    position = {}
     for segment in segments:
-        cases.extend(segment.get("cases", []))
+        for case in segment.get("cases", []):
+            number = case.get("number")
+            if number in position:
+                index = position[number]
+                if was_run(cases[index]):
+                    fail(f"case {number} appears more than once and its earlier entry ran")
+                cases[index] = case
+                continue
+            if number is not None:
+                position[number] = len(cases)
+            cases.append(case)
     result = {"run_status": run_status, "totals": tally(cases), "cases": cases}
     if run_status == "aborted":
         result["abort_reason"] = last.get("abort_reason", "")
@@ -87,11 +118,15 @@ def main(argv):
         json.dump(result, handle, indent=2, ensure_ascii=False)
         handle.write("\n")
     totals = result["totals"]
-    print(
+    summary = (
         f"run_status={result['run_status']} | {totals['total']} total | "
         f"{totals['passed']} passed | {totals['adaptive']} passed (adaptive) | "
         f"{totals['failed']} failed | {totals['errored']} errored"
     )
+    skipped = not_run(result["cases"])
+    if skipped:
+        summary += " | not_run=" + ",".join(str(number) for number in skipped)
+    print(summary)
     return 0
 
 
