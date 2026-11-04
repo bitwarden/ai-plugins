@@ -159,6 +159,18 @@
         "Does not put the flag requirement in `## Notes` or in any `[HUMAN]` step or verification point",
         "Writes the Stripe `trialing` check as a step or verification point that names the bitwarden-stripe-tools:using-stripe-cli skill, with no `[HUMAN]` prefix"
       ]
+    },
+    {
+      "id": 14,
+      "name": "records-availability-check-outside-the-diff",
+      "prompt": "Build the application context for a change to the server's member-access commands: when an admin gives an organization member Privileged Controls access and every Privileged Controls seat is in use, a seat is added. The change does not touch the Admin portal. Tests turn Privileged Controls on for a new paid organization by checking \"Use PAM\" on the organization's Admin portal edit page.",
+      "expected_output": "Traces the Admin portal save for the organization edit page beyond the changed code, finds that it rejects an organization whose plan does not support Privileged Access Management, and records that in a `## Notes` bullet starting `Availability:` that names `flow:create-paid-org` with `planTier` `Enterprise` and cites the check. The copied `flow:create-paid-org` keeps the catalog's `Use when:` line unchanged.",
+      "expectations": [
+        "Includes a `## Notes` bullet starting `Availability:` saying the organization's plan must support Privileged Access Management",
+        "That bullet names `flow:create-paid-org` with `planTier` `Enterprise`",
+        "That bullet ends with a `Source:` citation of `server/src/Admin/AdminConsole/Controllers/OrganizationsController.cs`",
+        "The copied `flow:create-paid-org` carries the catalog's `Use when:` line unchanged, with no added guidance about which plan to choose"
+      ]
     }
   ]
 }

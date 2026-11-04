@@ -34,6 +34,8 @@ Get each affected repo's changed files:
 
 For each changed component, controller, command, or template, trace the handlers and templates it references to identify the **trace surface** — non-diff code you need to read to identify states and flows. The change set and trace surface together form the blast radius. The blast radius is working context only — do not emit it.
 
+**Find what makes the feature available.** Many features are open only to some users or organizations: a member role or admin permission, a premium subscription, a particular plan, an organization not managed by a provider. Beyond the changed code, trace the checks that decide whether the user or organization can use or turn on the feature at all, including checks the change does not touch, such as the validation behind a form a setup flow submits. For each check, add a `## Notes` bullet that starts `Availability:`, says what the setup must create to pass the check, names the flow and parameter value that satisfy it when one does, and ends with a `Source:` citation of the check. Never edit a copied flow to carry this.
+
 ### Gather `## States`
 
 States come in two tiers:
