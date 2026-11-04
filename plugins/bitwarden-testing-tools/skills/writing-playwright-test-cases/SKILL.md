@@ -89,6 +89,8 @@ For each test case, define:
   2. The expected count, text, or state (e.g., "exactly 2 elements", "text contains '-$5.00'")
   3. What a failure looks like (e.g., "0 elements — server not returning Discounts array")
 
+- **Toast assertions**: Place a toast assertion as the step right after the action that shows the toast, and begin it `Assert: toast from step <N>:`, where `<N>` is that action's step number. The runner performs the action and reads the toast in one call.
+
 - **All target-state verification points must appear**: Every item under "UI projection > Verification points" on a `**State type:** target` state must map to at least one explicit assertion step. If one has no corresponding assertion, the test case is incomplete. A setup state only positions the app and is never the assertion target, so its verification points need no assertion step.
 
 **Interactive elements must be exercised.** When the plan describes collapsible sections, accordions, tabs, expandable cards, or modal triggers, each must have a dedicated step that:
