@@ -266,7 +266,19 @@ Then check the `cases` array in that same file:
 
 ### complete
 
-Capture the totals from the merge stdout line for the final summary, and proceed to Task 9. The canonical `test-results-<timestamp>.json` is already written.
+Check the merge stdout line for a trailing `| not_run=<numbers>` list, naming the test cases the runner returned without running a step.
+
+- **There is no `not_run=` list, or this run has already retried once**: capture the totals, and the `not_run=` list if present, from the merge stdout line for the final summary, and proceed to Task 9. The canonical `test-results-<timestamp>.json` is already written.
+- **There is a `not_run=` list and this run has not retried yet**: retry those test cases once. Increment `K`, then dispatch `playwright-test-runner` with:
+
+  ```
+  Test plan path: <artifacts-output-dir>/test-plan-<timestamp>.md
+  Checkpoint path: <artifacts-output-dir>/test-results-<timestamp>.json
+  Artifacts output dir: <artifacts-output-dir>
+  Run only: Test Case <the not_run numbers, separated by commas>
+  ```
+
+  Return to step 1 with the new response. The merge script replaces each not-run entry with the retry's result, and a pause or abort during the retry is handled like any other segment.
 
 ---
 
@@ -316,7 +328,10 @@ Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
 Report (HTML): <artifacts-output-dir>/report-<timestamp>.html
 
 Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed | <N> errored
+Not run: Test Case <numbers>
 ```
+
+Include the `Not run:` line only when the last merge stdout line ended with a `not_run=` list, and list its numbers separated by commas.
 
 After presenting this summary, open the report in the user's browser:
 
@@ -372,4 +387,7 @@ Test plan: <artifacts-output-dir>/test-plan-<timestamp>.md
 Results (JSON): <artifacts-output-dir>/test-results-<timestamp>.json
 
 Results: <N> total | <N> passed | <N> passed (adaptive) | <N> failed | <N> errored
+Not run: Test Case <numbers>
 ```
+
+Include the `Not run:` line under the same condition as in **Report written**.
