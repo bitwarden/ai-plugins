@@ -60,11 +60,11 @@ For the resuming test case (the first test case in your input), before executing
 
 1. Open the browser fresh: `playwright-cli open --config=<config-path>` (always first)
 2. Re-establish the browser session. Take the credentials from the resuming test case's own SETUP steps in the test plan. If the case instead depends on an account an earlier case created, so its email is not in this case's SETUP, read that account's `{ email, password }` from the earlier case's `account` block in the checkpoint file passed as the `Checkpoint path` input. When only the email is known, the password is the fixed dev master password `test-master-password-12`.
-3. Start from the step immediately after the `[HUMAN]` step identified by "Paused at", applying the user's answer to any steps that reference it
+3. Start from the step immediately after the `[HUMAN]` step identified by "Paused at", or after the last of them when "Paused at" lists several consecutive `[HUMAN]` steps, applying the user's answer to any steps that reference it
 
 All subsequent test cases run fully and normally from their first step.
 
-If the `[HUMAN]` step was the last step of the resuming test case (no test steps follow it within that case), record the test case result using the user's answer as the outcome of that step, then proceed to subsequent test cases or return the complete JSON object if none remain.
+If the `[HUMAN]` step, or the last of the consecutive `[HUMAN]` steps, was the last step of the resuming test case (no test steps follow it within that case), record the test case result using the user's answer as the outcome of each of those steps, then proceed to subsequent test cases or return the complete JSON object if none remain.
 
 This protocol repeats for each `[HUMAN]` step encountered in a run. A second pause in a resumed run uses the same paused JSON object format.
 
@@ -73,6 +73,10 @@ A `Resume:` block in your inputs looks like:
 ```
 Resume: Paused at <location string>. User's answer: <answer>.
 ```
+
+### Run only dispatch (conditional)
+
+Only when your input names the test cases to run with `Run only:`: your test cases are just those, and each runs fully and normally from its first step. When one of them depends on an account an earlier case created, so its email is not in this case's SETUP, sign in with that account's `{ email, password }` from the earlier case's `account` block in the checkpoint file passed as the `Checkpoint path` input.
 
 ## Step 1 — Initialize the browser session
 
@@ -96,7 +100,12 @@ ${CLAUDE_SKILL_DIR}/scripts/read_admin_email.py --secrets-path <bitwarden git ro
 
 Use its stdout verbatim as the address. Use this script for the admin address even after invoking the mailcatcher skill, which offers its own `get_admin_email.py`. Do NOT `Read` `server/dev/secrets.json`. That file also holds the Stripe test mode API key, the SQL password, and the installation id and key, and a whole-file read puts all of it in your context. The script prints only the one address. On exit 4 (file missing or no `admins` entry), mark the affected test case FAIL with the script's stderr as the reason.
 
-**Resolve route placeholders at run time.** When a Starting URL or navigation step contains a `:<name>` path segment, such as `:organizationId`, replace it with the value an earlier step in this dispatch created, read from the browser's URL once that step landed on the created resource (e.g. the ID after `/organizations/` once a new organization's vault loads). Record the resolved value with the other setup facts. If no earlier step in this dispatch produced the value, mark the test case FAIL naming the unresolved placeholder; a resumed dispatch starts without the values resolved before the pause. Never guess a value.
+**Resolve route placeholders at run time.** When a Starting URL or navigation step contains a `:<name>` path segment, such as `:organizationId`, replace it with the value of the resource an earlier step created. Take it from either source:
+
+- An earlier step in this dispatch: read the value from the browser's URL once that step landed on the created resource (e.g. the ID after `/organizations/` once a new organization's vault loads).
+- On a resumed dispatch, the "Paused at" context: the paused runner records there the values it resolved before the pause (see Human step halt).
+
+Record the resolved value with the other setup facts. If neither source has the value, mark the test case FAIL naming the unresolved placeholder. Never guess a value.
 
 - Use `setup-{description}-{timestamp}.png` screenshot names during setup (e.g., `setup-login-complete-20260409-2057.png`)
 - Apply the same "screenshot every visual state change" rule as during test cases (see Step 3)
@@ -110,7 +119,11 @@ When setup's actions caused a 4xx or 5xx response, add the top-level `error_deta
 
 ## Step 3 — Execute test cases
 
-Work through every test case in order. For each test case:
+Work through every test case in order.
+
+Start every test case at its first step. Never decide, from steps you have not reached yet, that a case cannot run or should not start: not because a later step is a `[HUMAN]` step, because a later step supplies a value, because the case is long, or because other cases remain. A test case ends in one of four ways only: all its steps finish, it fails at a step as this skill describes, you halt at a `[HUMAN]` step, or the run aborts.
+
+For each test case:
 
 ### 3a — Run Setup Steps first (if any)
 
@@ -189,6 +202,8 @@ Each step object:
 }
 ```
 
+- Set `status` to `"FAIL"` when a step does not achieve its outcome, including a failed setup step and an unmet assertion. Set it to `"ERROR"` only when a step you started could not be carried out because a tool failed on it, such as a `playwright-cli` command that errors for a reason the page does not show, and not because of how the product behaved.
+- Record at least one step in `setup_steps` or `test_steps`, ending with the step where the case finished, failed, or stopped. A case that fails before any step runs, such as on an unresolved placeholder in its Starting URL, records the step it could not perform, with outcome `FAIL`.
 - Omit `setup_steps` (or use `[]`) when the case has no setup steps.
 - Omit `notes` when there is nothing to note.
 - Include `observed` only on assertion steps, holding a short description in your own words of what you saw, never text copied from the page, an email, or a response.
@@ -287,6 +302,8 @@ Rules:
 
 - `cases` holds only the test cases completed before the pause (use `[]` if none).
 - `need_user_input` is required and is the resume question.
+- When the steps directly after the `[HUMAN]` step are also `[HUMAN]` steps, halt once for all of them. `need_user_input` lists each one, numbered, with its location, and the resumed run continues after the last of them.
+- `need_user_input` also records what the steps after the pause need that a fresh browser cannot show: each placeholder value resolved so far in the paused case, such as the organization id, the accounts and passwords its steps created, and which account is signed in.
 - `need_user_input_url` is optional. Set it only for a step that attaches a Stripe test clock, to the subscription's Dashboard page found as described below, and leave it out for every other step.
 - Do not set `run_status` to `"complete"` on a pause.
 
@@ -302,7 +319,7 @@ If you already read the subscription because the skill told you its `test_clock`
 
 ## Step 4 - Produce the required output
 
-Do not return until every test case object is complete. Before assembling the output, collect the filenames you passed to `--filename` or to a toast call's `path` for each screenshot, and use them verbatim in each step's `screenshot` field.
+Do not return until every test case object is complete. A `complete` object holds one case object for every test case in your input, each started at its first step and recording at least one step. Before assembling the output, collect the filenames you passed to `--filename` or to a toast call's `path` for each screenshot, and use them verbatim in each step's `screenshot` field.
 
 Return a single JSON object and nothing else, matching `${CLAUDE_PLUGIN_ROOT}/skills/compiling-playwright-report/references/examples/complete-run.json`:
 

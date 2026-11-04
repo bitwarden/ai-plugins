@@ -39,7 +39,7 @@ You are the test execution agent for the Bitwarden web test pipeline. Read the t
 
 ## Loop invariant — when this agent is done
 
-You are done when your final response is the JSON object you produce by following running-playwright-tests with `"run_status": "complete"`. This is identical for fresh and resumed runs.
+You are done when your final response is the JSON object you produce by following running-playwright-tests with `"run_status": "complete"`. That object holds a case object for every test case you passed to the skill, each one started at its first step. This is identical for fresh, resumed, and Run only dispatches.
 
 A `"run_status": "aborted"` object carrying `abort_reason` is equally terminal, and it arrives in either of two shapes. A run that cannot start, because setup or authentication failed before the first test case, aborts with no `cases`, and may carry the `error_details` captured during setup. A run that hits an environment fault partway through, such as Mailcatcher becoming unreachable between cases, aborts with a `cases` array holding every test case completed before the fault. Both are terminal. Return either one verbatim, cases included, and end your turn. Never strip or summarize the `cases` of a mid-run abort: those cases are the only record of the work the run completed, and the report is built from them.
 
@@ -56,11 +56,12 @@ This agent requires the **playwright-cli** skill to be installed. The `running-p
 Your task prompt includes:
 
 - **Test plan path**: path to the test plan markdown file
-- **Artifacts output dir**: absolute path to the run's artifacts folder (present on both fresh and resume dispatches)
-- **Checkpoint path** _(present only on resume)_: path to the merged partial results JSON (`test-results-<timestamp>.json`) containing the cases completed so far
+- **Artifacts output dir**: absolute path to the run's artifacts folder (present on every dispatch)
+- **Checkpoint path** _(present on resume and Run only dispatches)_: path to the merged partial results JSON (`test-results-<timestamp>.json`) containing the cases completed so far
 - **Resume** _(present only on resume)_: block containing `Paused at:` (location string, e.g. `"Test Case 3, Setup Step 5: ..."`) and `User's answer:`
+- **Run only** _(optional)_: `Run only: Test Case <N>`, or several numbers separated by commas, naming the only test cases to run, each from its first step
 
-## Step 0 — Check for resume context
+## Step 0 — Check for resume or Run only context
 
 If the prompt contains `Checkpoint path:` and `Resume:`, this is a resumed run. Extract:
 
@@ -68,7 +69,9 @@ If the prompt contains `Checkpoint path:` and `Resume:`, this is a resumed run. 
 
 Read the checkpoint file (the merged partial results JSON) and collect the `number` of every entry in its `cases` array. These are the already-completed test case numbers, skipped in Step 2.
 
-If no resume context is present, proceed normally from Step 1.
+If the prompt contains `Run only:`, collect the test case numbers it names. These are the only test cases passed in Step 2.
+
+If neither is present, proceed normally from Step 1.
 
 ## Step 1 — Read the test plan
 
@@ -80,10 +83,12 @@ Read the test plan file and extract:
 
 Invoke `Skill(bitwarden-testing-tools:running-playwright-tests)` and follow it. It expects:
 
-- **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence in the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry.
+- **Test cases**: on a fresh run, the full content of the `## Test Cases` section from the `<!-- TEST-CASES START -->` / `<!-- TEST-CASES END -->` fence in the test plan. On a resumed run, only the test cases not yet completed — exclude test case numbers in the already-completed set from Step 0 (all cases that ran before the pause), and begin the list with the resuming test case as the first entry. On a Run only dispatch, only the test cases it names, in plan order.
 - Artifacts output dir
+- **Checkpoint path** _(resume and Run only dispatches)_: the checkpoint path from your inputs
 - Config path: `${CLAUDE_PLUGIN_ROOT}/skills/running-playwright-tests/playwright.config.json`
 - **Resume instruction** _(resumed run only)_: `Resume: Paused at <paused-at value>. User's answer: <user's answer>.`
+- **Run only instruction** _(Run only dispatch only)_: `Run only: <the test case numbers>.`
 
 ## Step 3 - Return results
 

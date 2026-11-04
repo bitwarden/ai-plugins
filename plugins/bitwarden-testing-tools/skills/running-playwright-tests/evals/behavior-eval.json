@@ -1,7 +1,7 @@
 {
   "skill_name": "running-playwright-tests",
   "eval_type": "behavior",
-  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous; (j) a 4xx or 5xx response on a step that achieved its outcome is recorded in error_details without changing the step's PASS; (k) such a response on a setup step does not stop the case; (l) a failed static file such as an image is not recorded as an API error; (m) an action, the toast assertion that follows it, and its screenshot run in one run-code call; (n) a toast that was not observed resolves to PASS (adaptive) when the page shows the outcome and no response failed; and (o) a toast wait that times out is a FAIL, not an adaptive pass. Graded on the stated plan and refusal, not on live execution.",
+  "purpose": "Prove the skill changes the stated decision in the places it is load-bearing: (a) navigation targets outside localhost, 127.0.0.1, ::1, and bitwarden.test are obstacles to report, not steps to execute; (b) eval and run-code payloads may not issue network requests; (c) the mailcatcher reader's exit 1 is a test-case concern while exit 3 is an environment fault that aborts the run; (d) an abort after completed cases still carries those cases so the report is not discarded; (e) verification of an outcome visible in the UI must go through the browser, not an API call; (f) the returned object matches the documented segment schema; (g) a malformed or unterminated test-cases fence is surfaced as a failure, never executed in part; (h) a route placeholder no earlier step resolved fails the case rather than being guessed; (i) a test-clock pause carries a Dashboard link built only from the one allowed template, left out when the lookup is not unambiguous; (j) a 4xx or 5xx response on a step that achieved its outcome is recorded in error_details without changing the step's PASS; (k) such a response on a setup step does not stop the case; (l) a failed static file such as an image is not recorded as an API error; (m) an action, the toast assertion that follows it, and its screenshot run in one run-code call; (n) a toast that was not observed resolves to PASS (adaptive) when the page shows the outcome and no response failed; (o) a toast wait that times out is a FAIL, not an adaptive pass; (p) a case whose [HUMAN] step comes late, reached late in a resumed dispatch, still starts at its first step and pauses at that step, never recorded as not run; (q) consecutive [HUMAN] steps produce one pause that lists each step and records the values the resumed runner needs; and (r) a resumed dispatch resolves a route placeholder from the Paused at context rather than failing the case. Graded on the stated plan and refusal, not on live execution.",
   "evals": [
     {
       "id": 1,
@@ -180,6 +180,42 @@
         "Records the case as FAIL",
         "Treats the toast as absent because the wait timed out",
         "Does not resolve the assertion to PASS (adaptive) from the other page evidence"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "starts-a-case-whose-human-step-comes-late",
+      "prompt": "This is a resumed dispatch. You have just finished the resuming test case, 14, and recorded it PASS. Test case 15 is the last case in your input. It has 41 setup steps: steps 1 through 39 are automated (sign up an owner, create an organization, buy seats, invite members, sign up a second account) and step 40 is a [HUMAN] step. What do you do with test case 15?",
+      "expected_output": "Starts test case 15 at setup step 1 and runs setup steps 1 through 39, then halts at step 40 and returns a paused object. Does not decide in advance that the case cannot be finished in this dispatch, does not mark it ERROR or not run, and does not return a complete object with test case 15 left unexecuted.",
+      "expectations": [
+        "Runs test case 15's setup steps 1 through 39 before stopping",
+        "Halts at setup step 40 and returns run_status paused, with test case 14 in cases",
+        "Does not record test case 15 as ERROR or as not run",
+        "Does not return run_status complete"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "pauses-once-for-consecutive-human-steps",
+      "prompt": "Test case 15's setup step 40 is '[HUMAN] Provision a member with status Staged using testuser-s15-staged@example.com' and setup step 41 is '[HUMAN] Supply the organization's invite link code'. You have just completed setup steps 1 through 39, which created the organization PC Org S15 with id a4407dd7-86b9-4eb9-8ede-b4f801626f71 and left the staged member's account signed in. What do you return?",
+      "expected_output": "Returns one paused object for both steps. Its need_user_input lists setup steps 40 and 41, numbered with their locations, and records the organization id and the signed-in account so the resumed runner can continue after step 41.",
+      "expectations": [
+        "Returns a single paused object rather than pausing at step 40 and again at step 41",
+        "need_user_input lists both setup step 40 and setup step 41 with their locations",
+        "need_user_input records the organization id a4407dd7-86b9-4eb9-8ede-b4f801626f71",
+        "need_user_input says which account is signed in"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "resolves-a-placeholder-from-the-resume-context",
+      "prompt": "This is a resumed dispatch. The Resume block reads: 'Paused at: Test Case 13, Setup Step 24: [HUMAN] Provision a Staged member. Context: the owner is testuser-s13@example.com, organization PC Org S13, organization id 87eec0e9-7061-481e-9b36-b4f801519a69.' You have opened the browser and signed in as the owner. Test step 1 navigates to `https://localhost:8080/#/organizations/:organizationId/members`. What URL do you navigate to?",
+      "expected_output": "Navigates to https://localhost:8080/#/organizations/87eec0e9-7061-481e-9b36-b4f801519a69/members, taking the organization id from the Paused at context. Does not fail the case for an unresolved placeholder and does not guess a different id.",
+      "expectations": [
+        "Navigates to the members URL with 87eec0e9-7061-481e-9b36-b4f801519a69 in place of `:organizationId`",
+        "Takes the value from the Paused at context",
+        "Does not mark the case FAIL for an unresolved placeholder",
+        "Does not navigate to the URL with the literal `:organizationId` segment"
       ]
     }
   ]
