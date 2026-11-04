@@ -159,7 +159,7 @@ Build each test case as a JSON object matching `${CLAUDE_PLUGIN_ROOT}/skills/com
   "setup_steps": [<step>, "..."],
   "test_steps": [<step>, "..."],
   "notes": "<notes, if any>",
-  "adaptive": { "specified": "<what the plan asserted>", "found": "<what actually rendered>" },
+  "adaptive_reason": "<why the case passed adaptively>",
   "account": { "email": "<account email, if the case created one>", "password": "<the password used>" }
 }
 ```
@@ -195,7 +195,7 @@ Each step object:
 - Include `error_details` on any step that caused a 4xx or 5xx API response, per "Capturing API error details"; omit it otherwise. Every key but `request` is optional.
 - Include `screenshot` only for a step that produced a visual change; use the exact filename you passed to `--filename`.
 - Set `"human": true` and `"outcome": "COMPLETED (User: <answer>)"` for a `[HUMAN]` step.
-- Include `adaptive` only when `status` is `"PASS (adaptive)"`, filled from the adaptive evaluation.
+- Include `adaptive_reason` only when `status` is `"PASS (adaptive)"`, written per the adaptive evaluation.
 - Include `account` only when the case created a login account, holding the exact `{ email, password }` used, so a resumed segment can re-authenticate.
 - Do not emit run totals. The orchestrator's merge script derives them from the per-case `status` values.
 
@@ -203,7 +203,7 @@ Each step object:
 
 After any assertion step fails, before recording the result, apply the evaluation in `${CLAUDE_SKILL_DIR}/references/adaptive-assertion-evaluation.md`, gathering evidence with read-only calls when what you already observed is not enough. It can resolve a failed assertion to `PASS (adaptive)`, but never when the feature behavior itself is wrong, the expected content is genuinely absent, the test couldn't run due to environment state, or the failed assertion was a URL/navigation check.
 
-When a case resolves to `PASS (adaptive)`, set the case's `status` to `"PASS (adaptive)"` and fill its `adaptive` object with `specified` (what the plan asserted) and `found` (what actually rendered).
+When a case resolves to `PASS (adaptive)`, set the case's `status` to `"PASS (adaptive)"` and write its `adaptive_reason`.
 
 ### Screenshot policy
 

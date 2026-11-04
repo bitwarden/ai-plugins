@@ -9,10 +9,7 @@ After any assertion step fails, apply this evaluation before recording the resul
 3. Apply the rule to each failed assertion individually:
    - If **all** failed assertions resolve adaptively → record the test case as `PASS (adaptive)`
    - If **any** failed assertion represents a genuine failure → record `FAIL`; document the adaptive assessments for the resolved assertions in Notes
-4. When recording `PASS (adaptive)`, write in Notes:
-   - What the plan's assertion specified
-   - What was actually found, including any evidence gathered in step 1
-   - Why the semantic condition is considered met
+4. When recording `PASS (adaptive)`, write the case's `adaptive_reason` in your own words, covering each assertion that resolved adaptively: what you accepted in place of what it asserted, the evidence you relied on, and why the semantic condition is met.
 5. Do NOT apply adaptive evaluation when:
    - The feature behavior itself is wrong (e.g., the server accepted input it should have rejected)
    - The expected content or behavior is genuinely absent from the page

@@ -301,12 +301,10 @@ def render_case(case, tc_template):
     if case.get("url"):
         url_block = f'<p class="url"><span>URL</span><code>{esc_linked(case["url"])}</code></p>'
     callout_block = ""
-    adaptive = case.get("adaptive")
-    if case["status"] == "PASS (adaptive)" and isinstance(adaptive, dict):
+    if case["status"] == "PASS (adaptive)" and case.get("adaptive_reason"):
         callout_block = (
-            '<div class="callout callout-adaptive"><strong>Adaptive pass</strong><dl>'
-            f"<dt>Plan specified</dt><dd>{esc(adaptive.get('specified'))}</dd>"
-            f"<dt>Runner found</dt><dd>{esc(adaptive.get('found'))}</dd></dl></div>"
+            '<div class="callout callout-adaptive"><strong>Adaptive pass</strong>'
+            f"<p>{esc_linked(case['adaptive_reason'])}</p></div>"
         )
     setup_block = ""
     if setup_steps:
@@ -386,11 +384,11 @@ def render_recommendations(cases):
             )
     for case in cases:
         if case["status"] == "PASS (adaptive)":
-            adaptive = case.get("adaptive") or {}
+            number = esc_attr(case.get("number"))
             items.append(
-                f"<li>Update test plan: TC{esc(case.get('number'))} asserted "
-                f"{esc(adaptive.get('specified'))}, actual rendering is "
-                f"{esc(adaptive.get('found'))}. Update the assertion in the test plan to match.</li>"
+                f'<li>Review the adaptive pass in <a href="#case-{number}">Test Case {number}</a> '
+                f'({esc(case.get("name"))}). Update the assertion if what the runner accepted is correct, '
+                "otherwise re-run to confirm.</li>"
             )
     if any(case["status"] in ("FAIL", "ERROR") for case in cases):
         items.append("<li>Re-test after applying the fixes above.</li>")

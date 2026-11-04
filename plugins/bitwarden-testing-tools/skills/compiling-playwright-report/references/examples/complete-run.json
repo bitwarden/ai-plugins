@@ -76,10 +76,7 @@
           "observed": "badge text: 'Canceled'"
         }
       ],
-      "adaptive": {
-        "specified": "badge reads 'Inactive'",
-        "found": "badge reads 'Canceled'"
-      }
+      "adaptive_reason": "The plan asserted the badge reads 'Inactive'; the badge reads 'Canceled'. Both labels mark the same ended subscription, so the condition is met."
     }
   ]
 }

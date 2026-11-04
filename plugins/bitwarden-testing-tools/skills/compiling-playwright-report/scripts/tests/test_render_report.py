@@ -64,9 +64,12 @@ class RenderCompleteRunTest(unittest.TestCase):
         self.assertNotIn('<details class="case case-pass" id="case-1" data-status="pass" open', self.out)
         self.assertNotRegex(self.out, r'<details class="case[^>]* open')
 
-    def test_adaptive_case_shows_specified_and_found(self):
-        self.assertIn("<dt>Plan specified</dt><dd>badge reads 'Inactive'</dd>", self.out)
-        self.assertIn("<dt>Runner found</dt><dd>badge reads 'Canceled'</dd>", self.out)
+    def test_adaptive_case_shows_reason(self):
+        self.assertIn(
+            '<div class="callout callout-adaptive"><strong>Adaptive pass</strong>'
+            "<p>The plan asserted the badge reads 'Inactive'; the badge reads 'Canceled'.",
+            self.out,
+        )
 
     def test_setup_and_test_sections_present(self):
         self.assertIn("Setup steps", self.out)
@@ -137,8 +140,8 @@ class RenderCompleteRunTest(unittest.TestCase):
     def test_recommendations_fix_adaptive_retest(self):
         self.assertIn('Fix: <a href="#case-2">Test Case 2</a>', self.out)
         self.assertIn(
-            "Update test plan: TC3 asserted badge reads 'Inactive', "
-            "actual rendering is badge reads 'Canceled'.",
+            '<li>Review the adaptive pass in <a href="#case-3">Test Case 3</a> (Subscription badge label). '
+            "Update the assertion if what the runner accepted is correct, otherwise re-run to confirm.</li>",
             self.out,
         )
         self.assertIn("Re-test", self.out)
@@ -162,6 +165,23 @@ class RenderEscapingTest(unittest.TestCase):
         # The report carries its own inline script, so check the payload, not the tag.
         self.assertNotIn("<script>alert(1)", out)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", out)
+        self.assertNotIn("<img", out)
+        self.assertIn("&lt;img src=x onerror=alert(1)&gt;", out)
+
+    def test_adaptive_reason_renders_inert(self):
+        data = {
+            "run_status": "complete",
+            "cases": [
+                {
+                    "number": 1,
+                    "name": "Case",
+                    "status": "PASS (adaptive)",
+                    "test_steps": [{"text": "Assert", "outcome": "FAIL"}],
+                    "adaptive_reason": "<img src=x onerror=alert(1)>",
+                }
+            ],
+        }
+        out = render_report.render(data, HEADER)
         self.assertNotIn("<img", out)
         self.assertIn("&lt;img src=x onerror=alert(1)&gt;", out)
 
