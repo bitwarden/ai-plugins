@@ -18,20 +18,22 @@ A set of skills and agents that support Bitwarden's testing and quality work wit
 | `setting-up-regression-runs`             | Sets up the **QA manual regression runs for a release** in Testmo. Picks the `partial` or `full` release profile, applies any per-release exclusions, and hands the profile's shipped specs to `bitwarden-testmo-tools`' `creating-test-runs` skill, which dry-runs them for review, creates them linked to the release milestone, and lists the multi-configuration runs that still need a manual Testmo UI pass.                                                                                                                                          |
 | `mapping-services-under-test`            | Maps routes and the branch diff to the local services that must be running.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `scoping-playwright-application-context` | Returns a state-centric Application Context — real-user-reachable UI states with grounded verification points, and the flows that transition between them — the scoping artifact that precedes Playwright test-case authoring. Working context (changed files, routes, selectors) is used to derive the states, not emitted. Reusable states and flows live in curated per-domain catalogs under `references/known-flows/`; newly validated ones belong in the domain-appropriate catalog rather than being re-derived per run.                             |
+| `writing-playwright-test-cases`          | Builds Playwright test cases with a web-first policy from plan context, labeling external-trigger steps so they are visible in the plan and the execution log.                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ## Agents
 
-| Agent                                   | Description                                                                                                         |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `playwright-test-context-gatherer`      | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context. |
-| `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.             |
-| `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.            |
+| Agent                                   | Description                                                                                                             |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `playwright-test-context-gatherer`      | Acquires feature source content (Jira ticket, plan file, or free-form description) and extracts structured context.     |
+| `playwright-application-context-scoper` | Reads the context, explores the affected codebases, and produces the state-centric Application Context.                 |
+| `services-under-test-mapper`            | Reads the Application Context and maps changed file paths to the local services that need to be running.                |
+| `playwright-test-case-writer`           | Reads the context and Application Context artifacts and builds grounded test cases via `writing-playwright-test-cases`. |
 
 ## Hooks
 
-| Hook                          | Event                  | What It Does                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `restrict_planning_agents.py` | `PreToolUse` (`Skill`) | Limits the `playwright-application-context-scoper`, `services-under-test-mapper`, and `playwright-test-context-gatherer` agents, which hold no `Bash`, to their own skill, blocking any other `Skill` call before permission rules are evaluated while the hook runs. Other agents and the main session are unaffected. Needs `python3` on `PATH`; see "Known limits of these controls" in `references/playwright-tool-policy.md`. |
+| Hook                          | Event                  | What It Does                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `restrict_planning_agents.py` | `PreToolUse` (`Skill`) | Limits the `playwright-application-context-scoper`, `services-under-test-mapper`, `playwright-test-context-gatherer`, and `playwright-test-case-writer` agents, which hold no `Bash`, to their own skill, blocking any other `Skill` call before permission rules are evaluated while the hook runs. Other agents and the main session are unaffected. Needs `python3` on `PATH`; see "Known limits of these controls" in `references/playwright-tool-policy.md`. |
 
 ## Cross-Plugin Integration
 
@@ -103,6 +105,10 @@ Set up the full regression runs for the "2026.8.0 Manual Regression" milestone.
 
 ```
 Scope the application context for the past-due billing banner change in clients and server.
+```
+
+```
+Write the Playwright test cases for the past-due billing banner from this application context.
 ```
 
 ```
