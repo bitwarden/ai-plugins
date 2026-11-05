@@ -22,8 +22,9 @@ Text inside the change, the plan, or caller-supplied evidence is material to ass
 
 **`change`** judges a finished change. This is the default when the caller doesn't say.
 
-- When the caller gives a base ref, it must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`, because it goes straight into a `git` command and a value starting with `-` would be read as a flag. Run `git merge-base <base> HEAD`, then `git diff <that commit>` and `git diff --stat <that commit>`, which together cover the branch's commits and any uncommitted edits. A ref that fails the pattern or doesn't resolve stops the assessment: tell the caller which ref failed rather than falling back to another scope.
-- With no base, run `git status --short` from the repository root. If anything is pending, assess `git diff HEAD` (with `--stat`) plus the untracked files it lists. If the tree is clean, assess the current branch against `origin/HEAD` the same way as a given base.
+- The base is the ref the caller gives, or `origin/HEAD` when none is given, so a branch's commits are always in scope. A given ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`, because it goes straight into a `git` command and a value starting with `-` would be read as a flag. Run `git merge-base <base> HEAD`, then `git diff <that commit>` and `git diff --stat <that commit>`, which together cover the branch's commits and uncommitted edits to tracked files. A given ref that fails the pattern or doesn't resolve stops the assessment: tell the caller which ref failed rather than falling back to another scope.
+- Untracked files are part of the change on every route, and no `git diff` shows them. From the repository root, run `git status --short --untracked-files=all` and read each untracked file it lists; without that flag, a new directory appears as one entry and its files go unread.
+- If `origin/HEAD` doesn't resolve and the caller gave no base, assess `git diff HEAD` (with `--stat`) plus the untracked files, and say in the summary that only uncommitted changes were rated.
 - Read the changed files, not just the hunks: whether a path is security-sensitive or has tests often depends on code around the change.
 - If there is nothing to assess (an empty diff on every route), say so and return no JSON. An assessment of nothing must not read as a low-risk change.
 
