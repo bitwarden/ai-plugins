@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-11-05
+
+### Added
+
+- `assessing-change-risk` skill: rates a finished or planned change against a fixed checklist of risk factors, gates and mitigations, sets a level from low to critical, and says how much human review it needs and where to look. Its JSON output and raise-only review rules are the same every time, so any caller can gate on the result and reviewers can see why a change was flagged
+
 ## [2.7.0] - 2026-10-27
 
 ### Changed
