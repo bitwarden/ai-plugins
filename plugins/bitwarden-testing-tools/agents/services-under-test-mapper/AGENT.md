@@ -1,6 +1,6 @@
 ---
 name: services-under-test-mapper
-version: 1.5.0
+version: 1.6.0
 description: |
   Planning-phase agent for Bitwarden web test planning. Given three artifact paths (an Application Context for its `## States` routes, the context artifact, and the diff artifact), it determines which local development services must be running to execute the tests and returns the service list — names, URLs, ports, and the primary test URL — as a markdown response. Use it to resolve the run-time service set for a scoped change before starting a local test environment.
 
