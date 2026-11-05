@@ -161,6 +161,7 @@
     "sast",
     "sbom",
     "SCIM",
+    "scoper",
     "scriptable",
     "SDLC",
     "semver",
@@ -228,7 +229,8 @@
     "xoxb",
     "zeroization",
     "Zeroize",
-    "zeroized"
+    "zeroized",
+    "titlecase"
   ],
   "flagWords": [],
   "ignorePaths": [
