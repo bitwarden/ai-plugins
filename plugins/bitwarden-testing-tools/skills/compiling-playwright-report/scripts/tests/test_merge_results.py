@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Unit tests for merge_results: segment assembly, derived totals, validation.
+
+Run with:  python3 -m unittest discover -s scripts/tests   (from the skill dir)
+"""
+import contextlib
+import io
+import json
+import os
+import sys
+import tempfile
+import unittest
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SCRIPTS = os.path.dirname(HERE)
+SKILL = os.path.dirname(SCRIPTS)
+sys.path.insert(0, SCRIPTS)
+
+import merge_results
+
+EXAMPLES = os.path.join(SKILL, "references", "examples")
+STEP = {"text": "did a thing", "outcome": "PASS"}
+
+
+def load_example(name):
+    with open(os.path.join(EXAMPLES, name), encoding="utf-8") as f:
+        return json.load(f)
+
+
+class MergeTest(unittest.TestCase):
+    def test_merge_two_segments_completes(self):
+        result = merge_results.merge(
+            [load_example("paused-segment.json"), load_example("resume-segment.json")]
+        )
+        self.assertEqual(result["run_status"], "complete")
+        self.assertEqual([c["number"] for c in result["cases"]], [1, 2])
+        self.assertEqual(
+            result["totals"],
+            {"total": 2, "passed": 1, "adaptive": 0, "failed": 1, "errored": 0},
+        )
+        self.assertNotIn("need_user_input", result)
+
+    def test_single_paused_segment_carries_question(self):
+        result = merge_results.merge([load_example("paused-segment.json")])
+        self.assertEqual(result["run_status"], "paused")
+        self.assertEqual(result["totals"]["total"], 1)
+        self.assertIn("Attach a Stripe test clock", result["need_user_input"])
+
+    def test_paused_segment_carries_the_link(self):
+        result = merge_results.merge([load_example("paused-segment.json")])
+        self.assertEqual(
+            result["need_user_input_url"],
+            "https://dashboard.stripe.com/test/subscriptions/sub_1234",
+        )
+
+    def test_paused_segment_without_a_link_omits_it(self):
+        segment = load_example("paused-segment.json")
+        del segment["need_user_input_url"]
+        result = merge_results.merge([segment])
+        self.assertNotIn("need_user_input_url", result)
+
+    def test_paused_segment_drops_a_non_string_link(self):
+        segment = load_example("paused-segment.json")
+        segment["need_user_input_url"] = ["https://dashboard.stripe.com/test/subscriptions/sub_1234"]
+        result = merge_results.merge([segment])
+        self.assertNotIn("need_user_input_url", result)
+
+    def test_resumed_run_does_not_carry_the_earlier_link(self):
+        result = merge_results.merge(
+            [load_example("paused-segment.json"), load_example("resume-segment.json")]
+        )
+        self.assertNotIn("need_user_input_url", result)
+
+    def test_aborted_segment(self):
+        result = merge_results.merge([load_example("aborted-run.json")])
+        self.assertEqual(result["run_status"], "aborted")
+        self.assertEqual(result["cases"], [])
+        self.assertIn("login failed", result["abort_reason"])
+
+    def test_aborted_segment_carries_error_details(self):
+        result = merge_results.merge([load_example("aborted-run.json")])
+        self.assertEqual(result["error_details"][0]["request"], "POST /identity/connect/token")
+
+    def test_aborted_segment_drops_non_list_error_details(self):
+        segment = load_example("aborted-run.json")
+        segment["error_details"] = "x"
+        self.assertNotIn("error_details", merge_results.merge([segment]))
+
+    def test_complete_run_drops_error_details(self):
+        paused = load_example("paused-segment.json")
+        paused["error_details"] = [{"request": "GET /a"}]
+        result = merge_results.merge([paused, load_example("resume-segment.json")])
+        self.assertNotIn("error_details", result)
+
+    def test_single_aborted_segment_retains_its_own_cases(self):
+        """A mid-run environment fault aborts one segment that carries cases.
+
+        Distinct from test_aborted_last_segment_retains_earlier_cases: there is
+        no earlier segment to carry forward here, so the cases survive only if
+        merge accumulates the aborting segment's own cases too.
+        """
+        result = merge_results.merge([load_example("aborted-with-cases.json")])
+        self.assertEqual(result["run_status"], "aborted")
+        self.assertEqual([c["number"] for c in result["cases"]], [1, 2])
+        self.assertEqual(
+            result["totals"],
+            {"total": 2, "passed": 1, "adaptive": 0, "failed": 1, "errored": 0},
+        )
+        self.assertIn("Mailcatcher unreachable", result["abort_reason"])
+
+    def test_aborted_last_segment_retains_earlier_cases(self):
+        completed = {
+            "run_status": "complete",
+            "cases": [
+                {"number": 1, "name": "Login", "status": "PASS"},
+                {"number": 2, "name": "Create org", "status": "FAIL"},
+            ],
+        }
+        aborted = {
+            "run_status": "aborted",
+            "abort_reason": "setup failure before test cases (re-authentication failed)",
+        }
+        result = merge_results.merge([completed, aborted])
+        self.assertEqual(result["run_status"], "aborted")
+        self.assertEqual([c["number"] for c in result["cases"]], [1, 2])
+        self.assertEqual(
+            result["totals"],
+            {"total": 2, "passed": 1, "adaptive": 0, "failed": 1, "errored": 0},
+        )
+        self.assertIn("re-authentication failed", result["abort_reason"])
+
+    def test_later_segment_replaces_a_not_run_case_in_place(self):
+        first = {
+            "run_status": "complete",
+            "cases": [
+                {"number": 1, "name": "One", "status": "PASS", "test_steps": [STEP]},
+                {"number": 2, "name": "Two", "status": "ERROR", "setup_steps": [], "test_steps": []},
+                {"number": 3, "name": "Three", "status": "PASS", "test_steps": [STEP]},
+            ],
+        }
+        rerun = {
+            "run_status": "complete",
+            "cases": [{"number": 2, "name": "Two", "status": "FAIL", "test_steps": [STEP]}],
+        }
+        result = merge_results.merge([first, rerun])
+        self.assertEqual([c["number"] for c in result["cases"]], [1, 2, 3])
+        self.assertEqual(result["cases"][1]["status"], "FAIL")
+        self.assertEqual(
+            result["totals"],
+            {"total": 3, "passed": 2, "adaptive": 0, "failed": 1, "errored": 0},
+        )
+
+    def test_repeat_of_a_case_that_ran_exits_3(self):
+        first = {
+            "run_status": "complete",
+            "cases": [{"number": 1, "name": "One", "status": "PASS", "test_steps": [STEP]}],
+        }
+        rerun = {
+            "run_status": "complete",
+            "cases": [{"number": 1, "name": "One", "status": "FAIL", "test_steps": [STEP]}],
+        }
+        with self.assertRaises(SystemExit) as cm:
+            merge_results.merge([first, rerun])
+        self.assertEqual(cm.exception.code, 3)
+
+    def test_not_run_lists_cases_with_no_steps(self):
+        cases = [
+            {"number": 1, "name": "One", "status": "PASS", "test_steps": [STEP]},
+            {"number": 2, "name": "Two", "status": "ERROR", "setup_steps": [], "test_steps": []},
+            {"number": 3, "name": "Three", "status": "FAIL", "setup_steps": [STEP]},
+            {"number": 4, "name": "Four", "status": "ERROR"},
+        ]
+        self.assertEqual(merge_results.not_run(cases), [2, 4])
+
+    def test_main_reports_not_run_cases(self):
+        d = tempfile.mkdtemp()
+        seg = os.path.join(d, "s1.json")
+        out = os.path.join(d, "out.json")
+        with open(seg, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "run_status": "complete",
+                    "cases": [
+                        {"number": 1, "name": "One", "status": "PASS", "test_steps": [STEP]},
+                        {"number": 2, "name": "Two", "status": "ERROR", "test_steps": []},
+                    ],
+                },
+                f,
+            )
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            merge_results.main([seg, "--output", out])
+        self.assertTrue(stdout.getvalue().rstrip().endswith("| not_run=2"))
+
+    def test_main_omits_not_run_when_every_case_ran(self):
+        d = tempfile.mkdtemp()
+        seg = os.path.join(d, "s1.json")
+        out = os.path.join(d, "out.json")
+        with open(seg, "w", encoding="utf-8") as f:
+            json.dump(load_example("resume-segment.json"), f)
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            merge_results.main([seg, "--output", out])
+        self.assertNotIn("not_run", stdout.getvalue())
+
+    def test_bad_status_exits_3(self):
+        with self.assertRaises(SystemExit) as cm:
+            merge_results.merge(
+                [{"run_status": "complete", "cases": [{"number": 1, "name": "x", "status": "NOPE"}]}]
+            )
+        self.assertEqual(cm.exception.code, 3)
+
+    def test_segment_cases_must_be_a_list_of_objects(self):
+        d = tempfile.mkdtemp()
+        for index, cases in enumerate(({"1": "x"}, "abc", [1, 2], [{"number": 1}, "x"])):
+            seg = os.path.join(d, f"s{index}.json")
+            with open(seg, "w", encoding="utf-8") as f:
+                json.dump({"run_status": "complete", "cases": cases}, f)
+            with self.subTest(cases=cases), self.assertRaises(SystemExit) as cm:
+                merge_results.load_segment(seg)
+            self.assertEqual(cm.exception.code, 3)
+
+    def test_main_writes_and_reports_status(self):
+        d = tempfile.mkdtemp()
+        seg = os.path.join(d, "s1.json")
+        out = os.path.join(d, "out.json")
+        with open(seg, "w", encoding="utf-8") as f:
+            json.dump(load_example("aborted-run.json"), f)
+        rc = merge_results.main([seg, "--output", out])
+        self.assertEqual(rc, 0)
+        with open(out, encoding="utf-8") as f:
+            written = json.load(f)
+        self.assertEqual(written["run_status"], "aborted")
+
+
+if __name__ == "__main__":
+    unittest.main()
