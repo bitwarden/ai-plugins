@@ -114,7 +114,11 @@ class RenderCompleteRunTest(unittest.TestCase):
         self.assertIn('<span class="pill pill-pass">', self.out)
 
     def test_observed_value_rendered(self):
-        self.assertIn("<code>500 response</code>", self.out)
+        self.assertIn(
+            '<span class="observed-label">Observed (mismatch)</span>'
+            "<code>badge text: 'Canceled'</code>",
+            self.out,
+        )
 
     def test_failed_step_error_details_are_red(self):
         self.assertIn('class="error-details error-details-fail"', self.out)

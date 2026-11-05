@@ -49,7 +49,6 @@
         {
           "text": "Clicked Export",
           "outcome": "FAIL",
-          "observed": "500 response",
           "error_details": [
             {
               "request": "POST /api/organizations/abc/export",
