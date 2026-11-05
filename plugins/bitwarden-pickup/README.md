@@ -10,7 +10,7 @@ When you type `/pickup`, the plugin:
 
 1. Reads the last two exchanges of the conversation: each prompt and the final reply to it. Tool calls, tool output, and skill bodies stay behind. It cuts each part at 1,000 characters.
 2. Runs `/clear`.
-3. Adds the two exchanges to the new conversation as a row that the model reads and you do not see.
+3. Adds the two exchanges to the new conversation as a row that the model reads and you do not see. The row puts them between `<transcript-excerpt>` tags and tells the model that they are a record of the old conversation, not a new request.
 4. Submits this prompt as you: "We're continuing where another session (`<session id>`, transcript `<path>`) ended. Where did we leave off?"
 
 The model answers from the two exchanges. It opens the old transcript only for what they do not cover.
@@ -24,7 +24,7 @@ The model answers from the two exchanges. It opens the old transcript only for w
 
 ## Prerequisites
 
-- A Claude Code version that loads hooks modules (`"modules"` in `hooks/hooks.json`).
+- Claude Code v2.1.287 or later. That is the first version that loads hooks modules (`"modules"` in `hooks/hooks.json`). Run `claude --version` to check. The plugin is tested with v2.1.311.
 
 The plugin has no other dependencies. It makes no network calls and runs no shell commands.
 
@@ -49,7 +49,7 @@ The plugin has no other dependencies. It makes no network calls and runs no shel
 - The plugin is one hooks module, `hooks/register.ts`. It registers `/pickup` when a session starts.
 - Only Claude Code's `SessionStart` and `Stop` hook inputs name the transcript path. The plugin keeps the path in its own store, one entry for each session, and removes the entry at `SessionEnd`.
 - When no hook has named the path for the session, the prompt names the session ID only. This can happen before the first reply, or when another plugin stops the `SessionStart` hook before it reaches this one.
-- `/clear` waits until a command finishes, so the plugin runs it from a timer after `/pickup` returns. If `/clear` fails, a toast says why and nothing is submitted.
+- `/clear` waits until a command finishes, so the plugin runs it from a timer after `/pickup` returns. If `/clear` fails, a toast says why and nothing is submitted. If a step after `/clear` fails, or another plugin refuses the row with the two exchanges, a toast says so.
 
 ## Development
 

@@ -8,4 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `/pickup`, which runs `/clear` and then starts the next conversation with the last two exchanges of the cleared one. The exchanges reach the model as a hidden row: each prompt and its final reply, cut at 1,000 characters, without tool calls, tool output, or skill bodies. The submitted prompt names the old session and, when a hook has named it, its transcript path. `/pickup <question>` replaces the default question, "Where did we leave off?".
+- `/pickup`, which runs `/clear` and then starts the next conversation with the last two exchanges of the cleared one. The exchanges reach the model as a hidden row, between `<transcript-excerpt>` tags and marked as a record, not a new request: each prompt and its final reply, cut at 1,000 characters, without tool calls, tool output, or skill bodies. A toast reports any step that fails after `/clear`. The submitted prompt names the old session and, when a hook has named it, its transcript path. `/pickup <question>` replaces the default question, "Where did we leave off?".
