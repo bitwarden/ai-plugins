@@ -43,19 +43,22 @@ class RenderCompleteRunTest(unittest.TestCase):
     def test_tally_counts(self):
         self.assertEqual(
             render_report.tally(self.data["cases"]),
-            {"total": 3, "passed": 1, "adaptive": 1, "failed": 0, "errored": 1},
+            {"total": 4, "passed": 1, "adaptive": 1, "failed": 1, "errored": 1},
         )
 
     def test_summary_tile_counts(self):
-        self.assertIn('<span class="tile-n">3</span><span class="tile-l">Total</span>', self.out)
+        self.assertIn('<span class="tile-n">4</span><span class="tile-l">Total</span>', self.out)
         self.assertIn('<span class="tile-n">1</span><span class="tile-l">Errors</span>', self.out)
 
     def test_zero_count_tile_is_dimmed(self):
-        self.assertIn('class="tile tile-fail tile-zero"', self.out)
-        self.assertNotIn('class="tile tile-error tile-zero"', self.out)
+        cases = [case for case in self.data["cases"] if case["status"] != "FAIL"]
+        out = render_report.render(dict(self.data, cases=cases), HEADER)
+        self.assertIn('class="tile tile-fail tile-zero"', out)
+        self.assertNotIn('class="tile tile-error tile-zero"', out)
 
     def test_status_labels_and_data_attributes(self):
         self.assertIn('data-status="pass"', self.out)
+        self.assertIn('data-status="fail"', self.out)
         self.assertIn('data-status="error"', self.out)
         self.assertIn('data-status="adaptive"', self.out)
         self.assertRegex(self.out, r'status-text t-adaptive">Passed \(adaptive\)<')
@@ -129,9 +132,13 @@ class RenderCompleteRunTest(unittest.TestCase):
         self.assertIn("<summary>Stack trace (2 frames)</summary>", self.out)
         self.assertNotIn('<details class="error-details-stack" open', self.out)
 
-    def test_issues_summary_lists_error_with_notes(self):
+    def test_issues_summary_lists_failure_with_notes(self):
         self.assertIn("Test Case 2:", self.out)
         self.assertIn("Server returned 500 on export request.", self.out)
+
+    def test_issues_summary_lists_error_with_notes(self):
+        self.assertIn("Test Case 4:", self.out)
+        self.assertIn("The playwright-cli fill command failed on this step", self.out)
 
     def test_issue_links_to_its_case(self):
         self.assertIn('<a href="#case-2">Test Case 2:', self.out)

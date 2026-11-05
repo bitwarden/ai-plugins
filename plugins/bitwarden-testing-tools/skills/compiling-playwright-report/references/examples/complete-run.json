@@ -43,7 +43,7 @@
     {
       "number": 2,
       "name": "Export vault",
-      "status": "ERROR",
+      "status": "FAIL",
       "url": "https://localhost:8080/#/tools/export",
       "test_steps": [
         {
@@ -77,6 +77,19 @@
         }
       ],
       "adaptive_reason": "The plan asserted the badge reads 'Inactive'; the badge reads 'Canceled'. Both labels mark the same ended subscription, so the condition is met."
+    },
+    {
+      "number": 4,
+      "name": "Change master password",
+      "status": "ERROR",
+      "url": "https://localhost:8080/#/settings/security/password",
+      "test_steps": [
+        {
+          "text": "Fill the Current master password field",
+          "outcome": "FAIL"
+        }
+      ],
+      "notes": "The playwright-cli fill command failed on this step with an error the page did not explain, so the step could not be carried out."
     }
   ]
 }
