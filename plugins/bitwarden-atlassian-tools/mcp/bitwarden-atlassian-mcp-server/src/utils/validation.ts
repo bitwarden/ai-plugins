@@ -339,6 +339,18 @@ export const AddIssueCommentSchema = z.object({
 export type AddIssueCommentInput = z.infer<typeof AddIssueCommentSchema>;
 
 /**
+ * Move an issue to a status by the status's name, not by transition id or
+ * transition name, so the caller never has to discover the workflow first.
+ */
+export const TransitionIssueSchema = z.object({
+  issueIdOrKey: JiraIssueKey,
+  status: z.string().trim().min(1, "Target status cannot be empty"),
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type TransitionIssueInput = z.infer<typeof TransitionIssueSchema>;
+
+/**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against
  * @param input - Input data to validate

@@ -1,4 +1,5 @@
 ---
+name: validate-ai-local
 argument-hint: "[base-ref] (defaults to the repository default branch)"
 allowed-tools: Read, Edit(~/.claude/plugins/data/claude-config-validator*/ai-validation/*), Grep, Glob, Task, Skill, WebFetch(domain:code.claude.com), Bash(git diff:*), Bash(git fetch origin:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git ls-files:*), Bash(date:*), Bash(ls:*)
 description: Validate the Claude Code material you changed locally and write a timestamped report to the plugin's data directory
@@ -13,9 +14,11 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/reviewing-claude-config/reference/validate-ai
 first. It defines which paths count as Claude material, how to bucket them, which
 validations each bucket gates, and the report contract. Follow it exactly.
 
-**Never post anything to GitHub from this command.** Output is local files only.
+Requirements and troubleshooting are in `${CLAUDE_PLUGIN_ROOT}/docs/local-validation.md`.
 
-**This command produces a report. It does not fix anything.** The report is the deliverable
+**Never post anything to GitHub from this skill.** Output is local files only.
+
+**This skill produces a report. It does not fix anything.** The report is the deliverable
 and you decide what to act on — nothing here holds a grant to edit the files under review. If
 you are re-running after fixes, keep the base ref pinned where the first run had it and
 re-check the previous findings; do not discover new ones against the fixes, or each round
@@ -69,7 +72,7 @@ Locate the scripts, in order:
    Ask before cloning. If the user declines, skip the script checks and name them on the
    report's `**Not covered:**` line.
 
-Cloning and running these scripts is deliberately not pre-approved in this command's
+Cloning and running these scripts is deliberately not pre-approved in this skill's
 `allowed-tools`, so both will be asked for. They execute shell code that lives outside
 this repository; that is worth a prompt, and a user who runs this often can allowlist the
 exact commands themselves.
@@ -103,7 +106,7 @@ yours to carry out once their results come back. The numbering is not an executi
 
 Every subagent prompt must state that findings are limited to **what this changeset
 introduced or worsened — never a pre-existing finding on a line the diff did not touch.**
-Subagents do not inherit this command's context, and an unfenced one re-audits whole files
+Subagents do not inherit this skill's context, and an unfenced one re-audits whole files
 because they appear in the diff.
 
 Usually the changes here are your own, so the untrusted-data boundary that `/validate-ai`
