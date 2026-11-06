@@ -2,7 +2,7 @@
 name: daily-recap
 context: fork
 agent: general-purpose
-description: Generates an interactive HTML recap of the user's own engineering work over the time window given as arguments, ready for standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, pushed, reviewed, or moved tickets and docs on over a time window ("yesterday", "this morning", "last night", "since standup", "this week", a specific date), or asks for a "recap", "daily summary", "standup notes", "morning recap", or "1:1 prep", including phrasings like "throw together what I did yesterday" or "something I can show my manager". Not for looking up a single specific PR, commit, ticket, or document, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
+description: Generates an interactive HTML recap of the user's own engineering work over the time window given as arguments, ready for standup, 1:1 prep, or sharing with colleagues. Use when the user asks what they worked on, shipped, merged, pushed, reviewed, or moved tickets and docs on over a time window ("yesterday", "this morning", "last night", "since standup", a specific date, or a date range such as "the last three days"), or asks for a "recap", "daily summary", "standup notes", "morning recap", or "1:1 prep", including phrasings like "throw together what I did yesterday" or "something I can show my manager". Not for looking up a single specific PR, commit, ticket, or document, for someone else's activity, for meeting recaps, for repository-level overviews, or for critiquing how a single Claude Code session went.
 ---
 
 # Daily Recap
@@ -24,7 +24,8 @@ Choosing the date to pass:
 - "yesterday", "standup", or no time given: omit the date. The script defaults to the most recently completed workday.
 - A specific date: pass it as `YYYY-MM-DD`.
 - "this morning", "today", "since standup": pass today's date. The window then ends in the future, which is fine.
-- "this week" or another range: run `gather-gh-events.sh`, `find-sessions.sh`, and `gather-atlassian.sh` once per workday, with each day's files named by its date inside the work directory from step 1, merge the results, and title the page with the range. Run `gather-gh-search.sh` once for the whole range instead, passing both the start and end date.
+- A week ("this week", "last week", a weekly standup): use the weekly-recap skill at `${CLAUDE_PLUGIN_ROOT}/skills/weekly-recap/SKILL.md` instead.
+- Another multi-day range: run `gather-gh-events.sh`, `find-sessions.sh`, and `gather-atlassian.sh` once per workday, with each day's files named by its date inside the work directory from step 1, merge the results, and title the page with the range. Run `gather-gh-search.sh` once for the whole range instead, passing both the start and end date.
 
 ## Workflow
 
@@ -58,7 +59,7 @@ scripts/gather-gh-events.sh "$(date +%Y-%m-%d)" > "$work_dir/today.json"
 
 `find-sessions.sh` emits one digest per session: project directory, `cwd`, branches, first and last activity, prompt count, the first few user prompts, tool call count, and edited files, counting only entries inside the window. It skips sessions launched from the home directory or temp directories, because those collect ad-hoc and tool-launched sessions. Pass `--include-home` when the user says they work from their home directory or the digest list looks too thin.
 
-`gather-gh-search.sh [START-DATE [END-DATE]]` finds PRs the user authored, reviewed, or commented on through GitHub's search API rather than the events feed. One date is a single workday, the same window as `gather-gh-events.sh`. Two dates run from the cutoff on START-DATE to the cutoff on the day after END-DATE, so for "this week" or another range, run it once with both dates instead of once per day. It emits `login`, `window`, `search_complete`, `pr_count`, and `prs` (each with repo, number, title, state, is_draft, url, author, roles, activity, last_activity). It counts only the user's own in-window activity. Search has no 300-event cap, so it catches PRs the events feed missed. When `search_complete` is `false`, say in the recap that some PRs may be missing.
+`gather-gh-search.sh [START-DATE [END-DATE]]` finds PRs the user authored, reviewed, or commented on through GitHub's search API rather than the events feed. One date is a single workday, the same window as `gather-gh-events.sh`. Two dates run from the cutoff on START-DATE to the cutoff on the day after END-DATE, so for a multi-day range, run it once with both dates instead of once per day. It emits `login`, `window`, `search_complete`, `pr_count`, and `prs` (each with repo, number, title, state, is_draft, url, author, roles, activity, last_activity). It counts only the user's own in-window activity. Search has no 300-event cap, so it catches PRs the events feed missed. When `search_complete` is `false`, say in the recap that some PRs may be missing.
 
 `gather-atlassian.sh [YYYY-MM-DD]` collects Jira and Confluence activity for one workday only, so a range runs it once per day, like `gather-gh-events.sh`. See `references/data-sources.md` for the full field schema and credential env vars.
 
@@ -117,13 +118,13 @@ Copy the template into the output directory from step 1, then fill every `{{...}
 cp assets/template.html "$out_dir/recap-YYYY-MM-DD.html"
 ```
 
-`references/render-guide.md` has the HTML shapes for project sections, stream cards, timeline events, and the Today banner. Read it before filling those placeholders. Three rules matter most:
+`references/render-guide.md` covers how to fill the standup card (RAG status, BLUF, sections, and bullet rules) and has the HTML shapes for project sections, stream cards, timeline events, and the Today banner. Read it before filling those placeholders. Three rules matter most:
 
 - Never copy credentials, tokens, API keys, `.env` values, or connection strings out of session prompts or tool output into the page; summarize around them. The page is built to be shared, and escaping leaves a secret perfectly readable.
 - HTML-escape every piece of text that comes from GitHub, session logs, Jira, or Confluence (titles, comment bodies, commit messages, branch names, prompts, issue summaries and statuses, page titles and space keys). Other people write much of that text, and unescaped markup would render as live HTML.
 - Leave the `<script>` block and the Content-Security-Policy meta tag untouched. The policy pins the script by hash, so any edit disables the page's filters and Copy button.
 
-Always pair PR numbers with titles; a bare `#1234` tells the reader nothing. Link them as `<a class="pr-ref" href="...">#1234</a>`. Events after midnight but before the cutoff belong to the recap's workday and go under the "After Midnight" divider in the timeline. Fill the Today banner from `today.json` alone, so it stays empty on runs that skip step (e). Fill `{{OPEN_THREADS}}` from the user's unfinished work: PRs from `search.json`/`events.json` that are still open or still drafts, branches created or pushed in the window that have not been merged or deleted, streams whose status is `open` or `deferred`, and Jira issues from `jira.issues` whose `status_category` is not `Done`. Call out any such issue marked `returned: true` as notable (for example "sent back"), since it was moved backward in status within the window. When `jira` is `null`, leave the Jira part off but still fill the placeholder from the GitHub/session content alone.
+In stream cards and the timeline, always pair PR numbers with titles; a bare `#1234` tells the reader nothing. Link them as `<a class="pr-ref" href="...">#1234</a>`. The standup card follows its own rules in the render guide: outcome-first bullets with each Jira key or PR linked on the noun it refers to. Events after midnight but before the cutoff belong to the recap's workday and go under the "After Midnight" divider in the timeline. Fill the Today banner from `today.json` alone, so it stays empty on runs that skip step (e). Fill `{{OPEN_THREADS}}` from the user's unfinished work: PRs from `search.json`/`events.json` that are still open or still drafts, branches created or pushed in the window that have not been merged or deleted, streams whose status is `open` or `deferred`, and Jira issues from `jira.issues` whose `status_category` is not `Done`. Call out any such issue marked `returned: true` as notable (for example "sent back"), since it was moved backward in status within the window. When `jira` is `null`, leave the Jira part off but still fill the placeholder from the GitHub/session content alone.
 
 ### 7. Open it
 

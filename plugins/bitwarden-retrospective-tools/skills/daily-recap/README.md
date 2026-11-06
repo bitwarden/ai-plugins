@@ -20,7 +20,7 @@ It does not cover a single PR or ticket lookup, someone else's activity, meeting
 A self-contained page with:
 
 - A stats strip (repositories touched, sessions, PRs opened and approved, GitHub events)
-- A standup card with a Copy button
+- A standup card with a red/amber/green RAG status dot, a one-line BLUF summary, and a three-column section grid including a Blockers column; the Copy button emits the same structure as Slack text, prefixed with the matching status shortcode (`:large_green_circle:`/`:large_orange_circle:`/`:red_circle:`) and preserving markdown links and backtick-wrapped code rather than stripping them
 - Work grouped into themed streams per project, filterable by project, status, and keyword
 - A GitHub timeline view, filterable by project and keyword
 - A short theme-of-the-day summary with open threads
@@ -85,7 +85,7 @@ scripts/find-sessions.sh 2026-10-13T11:00:00Z 2026-10-14T11:00:00Z [--include-ho
 
 GitHub's events feed only holds your most recent 300 events from the last 30 days. Recaps for older or very busy days note when early events may be missing. `gather-gh-search.sh` has no such cap: it searches instead of reading the feed, so it also covers authored, reviewed, and commented PRs over multi-day windows the events feed can't reach.
 
-`scripts/daily-recap.test.sh` tests all five scripts against fixture session logs and stubbed `gh` and `curl`, so it reads no real data and makes no network calls. It is plain bash and needs only `jq`:
+`scripts/daily-recap.test.sh` tests all five scripts against fixture session logs and stubbed `gh` and `curl`, so it reads no real data and makes no network calls. It is plain bash and needs only `jq`. One test case recomputes the template's CSP script hash using `perl` and `openssl` if they're available, and skips that check cleanly if either is missing:
 
 ```bash
 scripts/daily-recap.test.sh
