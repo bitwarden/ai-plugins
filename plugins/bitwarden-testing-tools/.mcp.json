@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "bitwarden-test-automation": {
+      "type": "stdio",
+      "command": "bash",
+      "args": [
+        "-c",
+        "cd \"${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-test-automation-mcp-server\" && CPV=$(node -p 'require(\"./package.json\").devDependencies.corepack.trim()') && npm exec --yes corepack@\"$CPV\" -- pnpm install --frozen-lockfile --prod --silent >/dev/null && npm exec --yes corepack@\"$CPV\" -- pnpm run build >/dev/null && exec node build/index.js"
+      ]
+    }
+  }
+}
