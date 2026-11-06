@@ -1,6 +1,6 @@
 ---
 name: assessing-change-risk
-description: 'Assesses the risk of a code change, either finished (local changes or a branch diff) or planned (a description, acceptance criteria and the code it will touch). Answers a fixed checklist of risk factors, gates and mitigations with evidence, sets a level from low to critical, and states how much human review the change needs, why, and where to look. Returns a JSON assessment followed by a short readable summary. Use for "assess the risk of this change", "how risky is this PR", "how much human review does this need", "risk assessment", "what should a reviewer look at here", or when a caller hands over a change or plan to be risk-rated. Not a code review that hunts for bugs or a security review that hunts for vulnerabilities.'
+description: 'Rates the risk of a finished or planned code change from low to critical and says how much human review it needs and where to look. Use for "assess the risk of this change", "how risky is this PR", "how much human review does this need", "what should a reviewer look at here", or when a caller hands over a change or plan to be risk-rated. Not a code review that hunts for bugs or a security review that hunts for vulnerabilities.'
 allowed-tools: "Read, Grep, Glob, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git merge-base:*)"
 ---
 
@@ -54,7 +54,7 @@ Answer each `yes`, `no` or `unknown`. Use these ids exactly.
 Gates pass or fail; they aren't scored. Report each with evidence.
 
 - `no-secrets`: the change adds no secrets, keys, tokens or personal data. The evidence names the path, line and kind of secret, never its value, so the assessment can be stored and shared without spreading it.
-- `dependencies-clean`: any new dependency has no known vulnerability or license problem you can find. If no dependency changed, it passes with "no dependency changes".
+- `dependencies-clean`: any new dependency has no known vulnerability or license problem you can find. If no dependency changed, it passes with "no dependency changes". When a dependency changed and nothing was checked against an advisory source, the evidence says "not checked against an advisory source", so a pass never reads as a clean bill.
 
 ## Mitigations
 
@@ -68,7 +68,7 @@ At `plan`, a mitigation the acceptance criteria already ask for counts as presen
 
 ## The level
 
-Count `unknown` as `yes`. The level is the highest tier whose condition holds; mitigations then apply as below.
+Count `unknown` as `yes`.
 
 - **critical**: `core-paths` is yes and so is `contract-changes` or `persistent-data`, with no `rollback`; or the change weakens a security control (removes a check, widens access, disables validation).
 - **high**: any of `core-paths`, `contract-changes`, `persistent-data` or `build-supply-chain` is yes.
@@ -83,7 +83,7 @@ For **medium**, name the paths (a file or a folder) a human should look at and w
 
 ## Human review
 
-The level maps to a starting requirement: low -> `not-required`, medium -> `partial`, high -> `required`, critical -> `critical`. These requirements are ordered in that same sequence, and the rules below only ever raise one, in this order, because each guards a case where the level alone could understate what a person needs to see. Rules 1 and 2 match a literal `yes`; rule 3 covers `unknown`.
+The level maps to a starting requirement: low -> `not-required`, medium -> `partial`, high -> `required`, critical -> `critical`. These requirements are ordered in that same sequence, and the rules below only ever raise one, in this order, because each guards a case where the level alone could understate what a person needs to see.
 
 1. `core-paths` is yes -> at least `required`. Nothing lowers core paths.
 2. `persistent-data` is yes -> at least `partial`. If no areas are named yet, add `(whole change)` because it changes persistent data.
@@ -92,7 +92,7 @@ The level maps to a starting requirement: low -> `not-required`, medium -> `part
 5. Any gate failed -> at least `required`.
 6. Still `partial` with no areas named -> `required`, because a partial review with nowhere to look is no review at all.
 
-`review.why` starts with `risk <level>`, then gets one reason for each rule that actually raised the requirement ("touches core paths", "gate failed: no-secrets"). A rule that matched without raising adds its areas but no reason.
+`review.why` starts with `risk <level>`, then gets one reason for each rule that actually raised the requirement ("gate failed: no-secrets", "partial review with no areas named"). A rule that matched without raising adds its areas but no reason.
 
 `review.areas` holds the areas for `partial`: the `review_areas` plus any the rules added. For every other requirement it is empty, and the riskiest-first list stays in `review_areas`.
 
@@ -195,7 +195,7 @@ Return the JSON first, in a fenced `json` block, with nothing before it. List ev
 
 - `point` is `change` or `plan`, whichever was assessed.
 - `scope` is what was assessed, so a caller can tell a full assessment from a narrowed one: the base ref the diff was taken against, `uncommitted-only` when `origin/HEAD` did not resolve and no base was given, or `plan` at `plan`.
-- `level` is `low`, `medium`, `high` or `critical`.
+- `level` is `low`, `medium`, `high` or `critical`. It scores the factors only; a failed gate shows in `gates` and raises `review.requirement`, so gate on the requirement rather than the level alone.
 - `summary` is one or two sentences a reviewer, or at `plan` whoever approves the plan, reads first.
 - `recommended_criteria` is for `plan`; leave it empty on a finished change.
 - `review.requirement` is `not-required`, `partial`, `required` or `critical`.
