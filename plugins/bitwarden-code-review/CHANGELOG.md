@@ -5,6 +5,20 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-10-29
+
+### Changed
+
+- `bitwarden-code-reviewer` picks the local-file directory and names: `OUTPUT_DIR:` when given, else `${CLAUDE_PLUGIN_DATA}/code-reviews/`, never the working directory
+- Files are named `code-review-local-PR-<n>-*` or `code-review-local-<branch>-<date>-*`
+- `code-review-local` takes `--output-dir <path>` and passes it through; the posting skills write to the path the agent passes
+- `bitwarden-code-reviewer` can run `git branch --show-current`
+- `code-review-local` README trimmed to usage, output files, and examples
+
+### Added
+
+- `docs/code-review-agent-flows.md`: callers, target and scope, output routing, finding lifecycle
+
 ## [2.7.0] - 2026-10-27
 
 ### Changed
