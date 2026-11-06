@@ -1,0 +1,133 @@
+name: Test Automation MCP Server Testing
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "plugins/bitwarden-testing-tools/mcp/bitwarden-test-automation-mcp-server/**"
+      - "plugins/bitwarden-testing-tools/.mcp.json"
+      - ".github/workflows/test-automation-mcp-server-test.yml"
+      - ".nvmrc"
+  push:
+    branches:
+      - main
+    paths:
+      - "plugins/bitwarden-testing-tools/mcp/bitwarden-test-automation-mcp-server/**"
+      - "plugins/bitwarden-testing-tools/.mcp.json"
+      - ".github/workflows/test-automation-mcp-server-test.yml"
+      - ".nvmrc"
+  workflow_dispatch:
+
+permissions: {}
+
+defaults:
+  run:
+    working-directory: plugins/bitwarden-testing-tools/mcp/bitwarden-test-automation-mcp-server
+
+jobs:
+  testing:
+    name: Run tests
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Get Node version
+        id: retrieve-node-version
+        working-directory: ${{ github.workspace }}
+        run: |
+          NODE_NVMRC=$(cat .nvmrc)
+          NODE_VERSION=${NODE_NVMRC/v/''}
+          echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ steps.retrieve-node-version.outputs.node_version }}
+
+      - name: Set up pnpm via Corepack
+        run: |
+          COREPACK_VERSION=$(jq -er '.devDependencies.corepack' package.json)
+          mkdir -p "$RUNNER_TEMP/corepack-bin"
+          npm exec --yes --package=corepack@"$COREPACK_VERSION" -- corepack enable --install-directory "$RUNNER_TEMP/corepack-bin"
+          echo "$RUNNER_TEMP/corepack-bin" >> "$GITHUB_PATH"
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('plugins/bitwarden-testing-tools/mcp/bitwarden-test-automation-mcp-server/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm run test
+
+  launch:
+    name: Launch via .mcp.json
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # Node 24 bundles Corepack and Node 26 does not. The launch path has to
+        # work on both without anything being installed or enabled first.
+        node-version: ["24", "26"]
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build a PATH holding only node and npm
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/node-only-bin"
+          ln -sf "$(command -v node)" "$RUNNER_TEMP/node-only-bin/node"
+          ln -sf "$(command -v npm)" "$RUNNER_TEMP/node-only-bin/npm"
+
+      - name: Start the server through .mcp.json and require an MCP handshake
+        working-directory: plugins/bitwarden-testing-tools
+        run: |
+          set -eu
+
+          # Read the command from the shipped artifact so this test cannot drift from it.
+          CMD=$(jq -er '.mcpServers["bitwarden-test-automation"].args[1]' .mcp.json)
+          printf '%s\n' "Launch command under test:" "$CMD"
+
+          # Fail loudly if the runner image puts Corepack back on PATH, rather
+          # than assuming a given Node line lacks it.
+          {
+            printf '%s\n' 'if command -v corepack >/dev/null; then echo "corepack leaked into PATH" >&2; exit 1; fi'
+            printf '%s\n' "$CMD"
+          } > "$RUNNER_TEMP/launch.sh"
+
+          REQ='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ci","version":"1.0"}}}'
+          OUT=$(printf '%s\n' "$REQ" | env -i \
+            HOME="$HOME" \
+            PATH="$RUNNER_TEMP/node-only-bin:/usr/bin:/bin" \
+            RUNNER_TEMP="$RUNNER_TEMP" \
+            CLAUDE_PLUGIN_ROOT="$PWD" \
+            bash "$RUNNER_TEMP/launch.sh" | head -1)
+
+          printf '%s\n' "$OUT"
+          printf '%s' "$OUT" | jq -e '.result.serverInfo.name == "bitwarden-test-automation-mcp"' >/dev/null \
+            || { echo "unexpected initialize result" >&2; exit 1; }
