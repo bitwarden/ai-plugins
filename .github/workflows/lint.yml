@@ -61,6 +61,9 @@ jobs:
         run: pnpm run lint:prettier
         continue-on-error: true
 
+      - name: Test session log paths
+        run: pnpm run test:session-paths
+
       - name: Run cspell
         id: cspell
         if: always()

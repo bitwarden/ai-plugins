@@ -28,7 +28,7 @@ A curated collection of plugins for AI-assisted development at Bitwarden. Enable
 | [bitwarden-testing-tools](plugins/bitwarden-testing-tools/)             | 1.5.0   | Testing tools for Bitwarden: test coverage and Testmo case review, test layer recommendations, manual test cases, requirement readiness, test plans, and QA manual regression runs, plus the bundled bitwarden-test-automation MCP server. |
 | [bitwarden-testmo-tools](plugins/bitwarden-testmo-tools/)               | 1.0.0   | Testmo API access: create test runs from reviewable filter specs, one or many per pass, with dry-run, milestone linkage, and duplicate checks                                                                                              |
 | [claude-config-validator](plugins/claude-config-validator/)             | 2.3.1   | Validates Claude Code configuration files for security, structure, and quality                                                                                                                                                             |
-| [claude-retrospective](plugins/claude-retrospective/)                   | 1.1.1   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                                                                                                 |
+| [claude-retrospective](plugins/claude-retrospective/)                   | 1.1.2   | Analyze Claude Code sessions to identify successful patterns and improvement opportunities                                                                                                                                                 |
 
 ## Usage
 

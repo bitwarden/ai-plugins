@@ -10,7 +10,17 @@ set -e
 # Calculate project identifier from working directory
 calculate_project_dir() {
     local work_dir="$1"
-    echo "${work_dir}" | sed 's/\//\-/g'
+    local drive
+    if [[ "${OSTYPE}" == msys* && "${work_dir}" =~ ^/([a-zA-Z])/ ]]; then
+        drive="${BASH_REMATCH[1]}"
+        work_dir="${drive^^}:${work_dir:2}"
+    fi
+    if [[ "${work_dir}" == [a-zA-Z]:* ]]; then
+        drive="${work_dir:0:1}"
+        work_dir="${drive^^}-${work_dir:2}"
+        work_dir="${work_dir//\\//}"
+    fi
+    printf '%s\n' "${work_dir}" | sed 's|/|-|g'
 }
 
 # Get session logs directory
