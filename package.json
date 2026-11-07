@@ -24,6 +24,7 @@
     "*": "prettier --cache --write --ignore-unknown"
   },
   "scripts": {
+    "test:session-paths": "bash plugins/claude-retrospective/skills/extracting-session-data/scripts/tests/locate-logs.test.sh",
     "prepare": "husky",
     "lint": "pnpm run lint:prettier && pnpm run lint:spelling",
     "lint:prettier": "prettier --check .",
