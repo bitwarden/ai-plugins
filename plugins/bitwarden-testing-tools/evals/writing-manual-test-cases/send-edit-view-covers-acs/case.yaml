@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: send-edit-view-covers-acs
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  Test cases that cover all five acceptance criteria, one behavior per case, with valid Testmo types, no product details the story does not give, and no stopping to ask questions.

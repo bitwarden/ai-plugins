@@ -1,0 +1,86 @@
+[
+  {
+    "query": "write Gherkin test cases for the acceptance criteria on PM-223 so I can import them into Testmo",
+    "should_trigger": true
+  },
+  {
+    "query": "write manual Gherkin test cases for PM-345 that I can import into Testmo",
+    "should_trigger": true
+  },
+  {
+    "query": "write the Testmo test cases for the acceptance criteria on PM-567",
+    "should_trigger": true
+  },
+  {
+    "query": "write test cases for CL-1221",
+    "should_trigger": true
+  },
+  {
+    "query": "can you turn bitwarden/server PR 6001 into manual test cases our QA team can run? Gherkin, plus a CSV I can drop into Testmo",
+    "should_trigger": true
+  },
+  {
+    "query": "here are the ACs for the free-user health upgrade banner. write the manual test cases with Background, Given, When, Then",
+    "should_trigger": true
+  },
+  {
+    "query": "I already have the scenario list for the passkey enrollment story: enroll from settings, enroll during login, cancel mid-enrollment. write each one up as a Testmo test case",
+    "should_trigger": true
+  },
+  {
+    "query": "QA needs manual regression cases for the vault-unlock PIN rework before release. draft them in Gherkin",
+    "should_trigger": true
+  },
+  {
+    "query": "need a Testmo import file of manual cases covering the org-vault export feature, happy path and negative cases",
+    "should_trigger": true
+  },
+  {
+    "query": "draft smoke, regression, and functional manual test cases for the emergency-access revamp so I can bulk import them into Testmo",
+    "should_trigger": true
+  },
+  {
+    "query": "is PM-41861 ready for QA to write test cases against, or are the acceptance criteria too vague?",
+    "should_trigger": false
+  },
+  {
+    "query": "build a test plan for PM-42838 with traceability from each acceptance criterion to its tests",
+    "should_trigger": false
+  },
+  {
+    "query": "PM-41861 passed refinement. what do I need to test?",
+    "should_trigger": false
+  },
+  {
+    "query": "I've got a Testmo CSV of manual cases for the vault-unlock rework. which of these should be automated and at which layer?",
+    "should_trigger": false
+  },
+  {
+    "query": "which behaviors in the org-vault export epic already have automated test coverage? I've got a Testmo CSV of the manual cases to cross-reference against",
+    "should_trigger": false
+  },
+  {
+    "query": "which passkey enrollment behaviors already have manual test cases in Testmo or automated tests in the repos?",
+    "should_trigger": false
+  },
+  {
+    "query": "should I add integration tests for the SsoController change, or are unit tests enough?",
+    "should_trigger": false
+  },
+  {
+    "query": "write the Playwright tests for the acceptance criteria on PM-345",
+    "should_trigger": false
+  },
+  {
+    "query": "write the unit tests for the new CipherService.RestoreAsync method",
+    "should_trigger": false
+  },
+  {
+    "query": "write a Gherkin feature file and the SpecFlow step definitions that automate the login flow",
+    "should_trigger": false
+  },
+  {
+    "query": "review the manual test cases I already wrote for PM-223 and tell me which steps are vague",
+    "should_trigger": false
+  }
+]

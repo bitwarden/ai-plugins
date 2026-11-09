@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: custom-field-bug
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  Test cases confirming a custom field cannot be saved without a name, covering the four field types the story names, one behavior per case, with no invented product details and no stopping to ask questions.

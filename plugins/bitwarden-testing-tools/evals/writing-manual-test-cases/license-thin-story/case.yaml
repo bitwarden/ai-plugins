@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: license-thin-story
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The story has no acceptance criteria. The output does not invent license fields, labels, or messages, says the story has no acceptance criteria and what is missing, and does not stop to ask questions.
