@@ -36,4 +36,4 @@ The skill uses `gh search code`, `gh repo list`, and `gh api` to scan the organi
 4. Presents a structured table with repos, paths, and summaries
 5. Includes direct GitHub URLs for quick navigation
 
-For well-known features (e.g., passkeys), the skill includes curated mappings that provide instant answers without needing to hit the GitHub API.
+For well-known features (e.g., passkeys), the skill includes curated mappings that guide the search to the right repos first, then confirms each path with a live query before presenting it.

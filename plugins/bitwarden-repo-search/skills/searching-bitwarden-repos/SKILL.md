@@ -2,15 +2,14 @@
 name: searching-bitwarden-repos
 description: "Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live. Use for 'where is passkey code', 'which repo has X', 'find where feature Y is implemented', or any cross-repo code discovery question."
 argument-hint: "[search-query]"
-arguments: [query]
-allowed-tools: "Bash(gh search code:*), Bash(gh search repos:*), Bash(gh repo list:*), Bash(gh repo view:*), Bash(gh api repos/bitwarden/:*)"
+allowed-tools: "Bash(gh search code *), Bash(gh search repos *), Bash(gh repo list *), Bash(gh repo view *), Bash(gh api *)"
 ---
 
 # Searching Bitwarden Repos
 
 Search across all repositories in the **bitwarden** GitHub organization to find where code, features, or topics are located. Return structured results grouped by repository with file paths and direct GitHub URLs.
 
-The search term is always inserted single-quoted and verbatim into commands. If the term contains backticks, `$`, `;`, or `|`, reject it and ask the user to rephrase rather than escaping it.
+The search term is always inserted single-quoted and verbatim into commands. If the term contains a single quote (`'`), reject it and ask the user to rephrase rather than escaping it. Inside single quotes, all other shell metacharacters are inert.
 
 ## Steps
 
