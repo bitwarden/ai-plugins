@@ -268,6 +268,48 @@ test("the poll starts once a refresh finds a beads project", async ($, on) => {
   expect(runs).toBe(4);
 });
 
+test("the poll stops once the directory is no longer a beads project", async ($, on) => {
+  let runs = 0;
+  let cwd = "/work/demo";
+  const clock = mock.clock(on);
+  on("command.register", () => ({ value: { command: "beads-pane" } }));
+  on("session.start", (_, e) => ({ cwd: e.cwd }));
+  on("session.cwd", () => ({ value: cwd }));
+  on("process.run", () => {
+    runs += 1;
+    const isProject = cwd === "/work/demo";
+
+    return {
+      value: {
+        exitCode: isProject ? 0 : 1,
+        stdout: isProject ? JSON.stringify({ issues: BEADS }) : "",
+        stderr: "",
+        isStdoutTruncated: false,
+        isStderrTruncated: false,
+      },
+    };
+  });
+  on("ui.status", () => ({ value: undefined }));
+  on("ui.open", () => ({ value: { isPlaced: true } }));
+  on("classic.CwdChanged", () => ({}));
+
+  await $.session.start({
+    cwd: "/work/demo",
+    surface: "terminal",
+    isInteractive: true,
+  });
+  await clock.advance(30_000);
+  expect(runs).toBe(2);
+
+  cwd = "/work";
+  await $.classic.CwdChanged({ old_cwd: "/work/demo", new_cwd: "/work" });
+  await clock.advance(0);
+  expect(runs).toBe(3);
+
+  await clock.advance(90_000);
+  expect(runs).toBe(3);
+});
+
 test("a refresh that a newer one overtook does not overwrite it", async ($, on) => {
   const statuses: (string | undefined)[] = [];
   let entered: () => void = () => {};

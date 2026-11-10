@@ -22,9 +22,12 @@ const snapshot = atom(
   null,
 );
 
-// Set when an interactive session starts and cleared once the poll begins, so
-// the poll waits for the first refresh that finds a beads project.
-let canPoll = false;
+// Set when an interactive session starts. Headless runs never poll.
+let isInteractive = false;
+
+// The poll runs only while the last refresh found a beads project, so a
+// session that moves out of one stops running bd on a timer.
+let poll: { cancel(): void } | undefined;
 
 // Counts refreshes, so one that a newer refresh overtook leaves the snapshot
 // and status line to it.
@@ -48,9 +51,11 @@ async function refresh($: EngineInterface): Promise<BeadsSnapshot | null> {
     next === null || (next.error === undefined && next.beads.length === 0);
   $.ui.status(isQuiet ? undefined : summary(next));
 
-  if (next !== null && canPoll) {
-    canPoll = false;
-    $.clock.every(POLL_MS, () => void refresh($));
+  if (next === null) {
+    poll?.cancel();
+    poll = undefined;
+  } else if (isInteractive && poll === undefined) {
+    poll = $.clock.every(POLL_MS, () => void refresh($));
   }
 
   return next;
@@ -149,7 +154,7 @@ export const register: Register = (on) => {
     });
 
     if (e.isInteractive) {
-      canPoll = true;
+      isInteractive = true;
       void refresh($).then((found) => {
         if (found !== null) {
           void $.ui.open({ id: PANE, title: "Beads" });
