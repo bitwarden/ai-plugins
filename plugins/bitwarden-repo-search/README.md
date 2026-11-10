@@ -8,8 +8,8 @@ Bitwarden's codebase spans many repositories (`clients`, `server`, `sdk-internal
 
 ## Skills
 
-| Skill | Description |
-| --- | --- |
+| Skill                       | Description                                                      |
+| --------------------------- | ---------------------------------------------------------------- |
 | `searching-bitwarden-repos` | Search across all bitwarden org repos by code, feature, or topic |
 
 ## Usage
