@@ -27,8 +27,7 @@ jobs:
       contents: read
     env:
       # Mods and `claude plugin test` need v2.1.290 or later.
-      CLAUDE_CODE_VERSION: 2.1.317
-      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+      _CLAUDE_CODE_VERSION: 2.1.317
 
     steps:
       - name: Check out repo
@@ -49,9 +48,11 @@ jobs:
           node-version: ${{ steps.retrieve-node-version.outputs.node_version }}
 
       - name: Install Claude Code
-        run: npm install --global @anthropic-ai/claude-code@"$CLAUDE_CODE_VERSION"
+        run: npm install --global @anthropic-ai/claude-code@"$_CLAUDE_CODE_VERSION"
 
       - name: Run the tests of every mod that has them
+        env:
+          CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
         run: |
           set -euo pipefail
           status=0
