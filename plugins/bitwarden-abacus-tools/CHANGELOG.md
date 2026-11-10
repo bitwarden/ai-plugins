@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-abacus-tools` plugin will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-03
+
+### Added
+
+- `substantial-review` workflow, the deep code review Abacus runs before landing high-risk or unassessed changes. A workflow stage can't start subagents, so the multi-agent review skill can't run inside Abacus as written; this lays its pipeline out as workflow stages and returns findings in a shape Abacus's assess stage reads directly.
+
 ## [1.0.0] - 2026-10-30
 
 ### Changed

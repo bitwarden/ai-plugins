@@ -20,6 +20,7 @@ import {
   JiraRemoteLink,
   JiraCreateMetaIssueType,
   JiraCreateMetaField,
+  JiraTransition,
 } from "./types.js";
 
 export class JiraClient {
@@ -401,6 +402,33 @@ export class JiraClient {
       inwardIssue: { key: params.inwardKey },
       outwardIssue: { key: params.outwardKey },
     });
+  }
+
+  /**
+   * List the transitions available from an issue's current status, as this
+   * user. Transitions the user lacks permission for, or whose conditions fail,
+   * are omitted by Jira.
+   */
+  async getTransitions(issueIdOrKey: string): Promise<JiraTransition[]> {
+    const response = await this.client.get<{ transitions: JiraTransition[] }>(
+      `${this.API_BASE}/issue/${issueIdOrKey}/transitions`,
+    );
+
+    return response.data.transitions;
+  }
+
+  /**
+   * Move an issue through a workflow transition. Jira answers 204 with no
+   * body on success.
+   */
+  async transitionIssue(
+    issueIdOrKey: string,
+    transitionId: string,
+  ): Promise<void> {
+    await this.client.post(
+      `${this.API_BASE}/issue/${issueIdOrKey}/transitions`,
+      { transition: { id: transitionId } },
+    );
   }
 
   // ── Create-screen Metadata (read-only, works with either token) ─────
