@@ -1,0 +1,76 @@
+# cspell:ignore endgroup
+name: Plugin Mod Testing
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "plugins/**"
+      - ".github/workflows/plugin-mod-test.yml"
+      - ".nvmrc"
+  push:
+    branches:
+      - main
+    paths:
+      - "plugins/**"
+      - ".github/workflows/plugin-mod-test.yml"
+      - ".nvmrc"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  testing:
+    name: Run mod tests
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      # Mods and `claude plugin test` need v2.1.290 or later.
+      CLAUDE_CODE_VERSION: 2.1.317
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Get Node version
+        id: retrieve-node-version
+        run: |
+          NODE_NVMRC=$(cat .nvmrc)
+          NODE_VERSION=${NODE_NVMRC/v/''}
+          echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ steps.retrieve-node-version.outputs.node_version }}
+
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code@"$CLAUDE_CODE_VERSION"
+
+      - name: Run the tests of every mod that has them
+        run: |
+          set -euo pipefail
+          status=0
+          ran=0
+
+          # A mod is a plugin whose hooks.json lists a hooks module under
+          # `modules`. Other plugins' test files belong to their own runners.
+          for hooks in plugins/*/hooks/hooks.json; do
+            jq -e '(.modules // []) | length > 0' "$hooks" >/dev/null || continue
+            plugin=$(dirname "$(dirname "$hooks")")
+
+            tests=$(find "$plugin" -path '*/node_modules' -prune -o \( -name '*.test.ts' -o -name '*.test.tsx' \) -print)
+            [ -n "$tests" ] || continue
+
+            ran=$((ran + 1))
+            echo "::group::$plugin"
+            claude plugin test "$plugin" || status=1
+            echo "::endgroup::"
+          done
+
+          echo "Tested $ran mod(s)."
+          exit "$status"
