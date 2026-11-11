@@ -21,7 +21,7 @@ Ask Claude Code to search the Bitwarden organization:
 - "Find where WebAuthn login is implemented"
 - "What repos use bitwarden-fido?"
 
-The skill uses `gh search code`, `gh repo list`, and `gh api` to scan the organization and presents results grouped by repository with file paths and direct GitHub URLs.
+The skill uses `gh search code`, `gh search repos`, and `gh api` to scan the organization and presents results grouped by repository with file paths and direct GitHub URLs.
 
 ## Prerequisites
 
