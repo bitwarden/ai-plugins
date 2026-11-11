@@ -15,7 +15,7 @@ Bitwarden has two separate passkey concepts:
 
 2. **Passkeys for Bitwarden account login** (WebAuthn):
    - **server** → `src/Api/Auth/Controllers/WebAuthnController.cs`
-   - **clients** → `apps/browser/src/auth/`
+   - **clients** → core: `libs/common/src/auth/services/webauthn-login/`, Angular: `libs/angular/src/auth/login-via-webauthn/`, settings UI: `apps/web/src/app/auth/settings/webauthn-login-settings/`, browser adapters: `apps/browser/src/auth/`
    - **sdk-internal** → `crates/bitwarden-fido/src/device_auth_key.rs`
 
 ## Passwordless.dev (separate product)
