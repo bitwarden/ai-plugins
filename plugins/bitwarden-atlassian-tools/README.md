@@ -4,7 +4,7 @@
 
 Atlassian access via a custom MCP server providing Jira issue retrieval, JQL search, Confluence page reading, CQL search, and attachment downloads.
 
-Read access is the default and always available. Jira write access (creating work items, links, and comments, and transitioning issues) is **opt-in per install**: `create_issue`, `link_issues`, `add_issue_comment`, and `transition_issue` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence remains read-only with no write path.
+Read access is the default and always available. Jira write access (creating work items, links, and comments, and transitioning issues) is **opt-in per install**: `create_issue`, `link_issues`, `add_issue_comment`, and `transition_issue` are always listed and their dry-run preview always works, but without `ATLASSIAN_JIRA_WRITE_TOKEN` a live write refuses to execute. Confluence write access (creating and updating pages) follows the same pattern: `create_confluence_page` and `update_confluence_page` are always listed, but without `ATLASSIAN_CONFLUENCE_WRITE_TOKEN` a live write refuses to execute.
 
 ## Installation
 
@@ -20,6 +20,11 @@ export ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN="your-confluence-scoped-token"
 # Optional — enables the Jira write tools (create_issue, link_issues, add_issue_comment, transition_issue).
 # Omit to keep this install read-only.
 export ATLASSIAN_JIRA_WRITE_TOKEN="your-jira-write-scoped-token"
+
+# Optional — enables the Confluence write tools (create_confluence_page, update_confluence_page).
+# Omit to keep Confluence read-only. Can be the same token as ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN
+# if it has write permissions.
+export ATLASSIAN_CONFLUENCE_WRITE_TOKEN="your-confluence-write-scoped-token"
 ```
 
 API requests are routed through the Atlassian API gateway (`api.atlassian.com`), which supports both classic and scoped API tokens.
@@ -140,6 +145,26 @@ A leaked write token permits more than any one tool uses: `write:comment.propert
 | `search_confluence_cql`        | Search Confluence using CQL          |
 | `list_spaces`                  | List accessible Confluence spaces    |
 
+### Confluence (write, requires `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`)
+
+Both tools default to a dry run that returns the exact payload without sending it. A live write requires an explicit `dryRun: false`. Dry runs need no write token. Body content can be markdown (auto-converted to Confluence storage format) or raw XHTML.
+
+| Tool                     | Purpose                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `create_confluence_page` | Create a new page in any Confluence space. Accepts a space ID, title, body, and optional parent page ID      |
+| `update_confluence_page` | Update an existing page by ID. Version numbers are auto-incremented — callers never manage versions manually |
+
+For a **scoped (granular)** write token, add these scopes on top of the read scopes above:
+
+| Scope                      | Required for                                       |
+| -------------------------- | -------------------------------------------------- |
+| `write:page:confluence`    | `create_confluence_page`, `update_confluence_page` |
+| `write:content:confluence` | `create_confluence_page`, `update_confluence_page` |
+
+The classic `read:confluence-content.all` + `write:confluence-content` scopes also cover both write tools. If using a classic API token (not scoped), it inherits the user's full Confluence permissions and no additional scope configuration is needed.
+
+A leaked write token permits more than the two tools use: `write:page:confluence` grants creating and editing any page in any space the user can reach, not just the pages these tools target. Treat this token as higher-blast-radius than the read-only token and rotate it accordingly.
+
 ## Usage
 
 The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples:
@@ -151,6 +176,8 @@ The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples
 - Preview a ticket before creating it: `mcp__bitwarden-atlassian__create_issue` with `project: "PM"`, `issueType: "Story"`, `summary: "Add CSV export to the item list"` — omit `dryRun` (defaults to `true`) to get the payload back without creating anything
 - Preview a comment before posting it: `mcp__bitwarden-atlassian__add_issue_comment` with `issueIdOrKey: "PROJ-123"`, `body: "Looks good to me, one nit: the **guard** is inverted."` — omit `dryRun` (defaults to `true`) to get the payload back without posting anything
 - Preview a status change: `mcp__bitwarden-atlassian__transition_issue` with `issueIdOrKey: "PROJ-123"`, `status: "In Progress"` — omit `dryRun` (defaults to `true`) to see which transition would apply without moving the issue
+- Preview a Confluence page before creating it: `mcp__bitwarden-atlassian__create_confluence_page` with `spaceId: "229380"`, `title: "Sprint Retrospective"`, `body: "# Retro\n\n## What went well\n..."` — omit `dryRun` to preview the storage format payload
+- Preview a page update: `mcp__bitwarden-atlassian__update_confluence_page` with `pageId: "123456789"`, `title: "Updated Page"`, `body: "# New content"` — omit `dryRun` to preview without updating
 
 ## Skills
 

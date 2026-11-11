@@ -196,3 +196,30 @@ export interface ConfluenceCqlSearchResult {
   size: number;
   totalSize: number;
 }
+
+// ── Confluence Write Types (v2 API) ────────────────────────────────
+
+export interface ConfluenceCreatePageParams {
+  spaceId: string;
+  title: string;
+  parentId?: string;
+  body: {
+    representation: "storage";
+    value: string;
+  };
+  status?: "current" | "draft";
+}
+
+export interface ConfluenceUpdatePageParams {
+  id: string;
+  title: string;
+  body: {
+    representation: "storage";
+    value: string;
+  };
+  version: {
+    number: number;
+    message?: string;
+  };
+  status?: "current" | "draft";
+}

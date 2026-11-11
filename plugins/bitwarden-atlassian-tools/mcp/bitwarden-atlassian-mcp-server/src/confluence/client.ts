@@ -4,7 +4,11 @@
  */
 
 import axios, { AxiosInstance, AxiosError } from "axios";
-import { loadConfluenceConfig, getConfluenceHeaders } from "./auth.js";
+import {
+  loadConfluenceConfig,
+  getConfluenceHeaders,
+  ConfluenceAccessMode,
+} from "./auth.js";
 import {
   ConfluenceConfig,
   ConfluencePage,
@@ -19,6 +23,8 @@ import {
   ConfluenceChildPagesResult,
   ConfluenceCqlSearchParams,
   ConfluenceCqlSearchResult,
+  ConfluenceCreatePageParams,
+  ConfluenceUpdatePageParams,
 } from "./types.js";
 
 export class ConfluenceClient {
@@ -27,8 +33,8 @@ export class ConfluenceClient {
   private readonly API_BASE = "/wiki/api/v2";
   private readonly API_V1_BASE = "/wiki/rest/api";
 
-  constructor() {
-    this.config = loadConfluenceConfig();
+  constructor(mode: ConfluenceAccessMode = "read") {
+    this.config = loadConfluenceConfig(mode);
     this.client = axios.create({
       baseURL: this.config.gatewayBaseUrl,
       headers: getConfluenceHeaders(this.config),
@@ -319,6 +325,55 @@ export class ConfluenceClient {
     const response = await this.client.get<ConfluenceCqlSearchResult>(
       `${this.API_V1_BASE}/content/search`,
       { params: queryParams },
+    );
+
+    return response.data;
+  }
+
+  // ── Write Methods (require ATLASSIAN_CONFLUENCE_WRITE_TOKEN) ────
+
+  /**
+   * Create a new Confluence page
+   */
+  async createPage(
+    params: ConfluenceCreatePageParams,
+  ): Promise<ConfluencePage> {
+    const payload: Record<string, any> = {
+      spaceId: params.spaceId,
+      status: params.status || "current",
+      title: params.title,
+      body: params.body,
+    };
+
+    if (params.parentId) {
+      payload.parentId = params.parentId;
+    }
+
+    const response = await this.client.post<ConfluencePage>(
+      `${this.API_BASE}/pages`,
+      payload,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Update an existing Confluence page
+   */
+  async updatePage(
+    params: ConfluenceUpdatePageParams,
+  ): Promise<ConfluencePage> {
+    const payload = {
+      id: params.id,
+      status: params.status || "current",
+      title: params.title,
+      body: params.body,
+      version: params.version,
+    };
+
+    const response = await this.client.put<ConfluencePage>(
+      `${this.API_BASE}/pages/${params.id}`,
+      payload,
     );
 
     return response.data;
