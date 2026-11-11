@@ -1,5 +1,7 @@
 ---
 name: searching-bitwarden-repos
+context: fork
+agent: general-purpose
 description: "Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live. Use for 'where is passkey code', 'which repo has X', 'find where feature Y is implemented', or any cross-repo code discovery question."
 argument-hint: "[search-query]"
 allowed-tools: "Bash(gh search code *), Bash(gh search repos *), Bash(gh repo list *), Bash(gh repo view *), Bash(gh api *)"
