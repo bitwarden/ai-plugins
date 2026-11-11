@@ -68,7 +68,7 @@ For the most relevant repos found, get more detail:
 gh repo view bitwarden/<repo-name> --json name,description,url,stargazerCount,primaryLanguage,repositoryTopics,defaultBranchRef
 ```
 
-Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`). Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
+Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`). Validate that the branch name matches `^[A-Za-z0-9._/-]+$` before interpolating it into a command; reject it otherwise. Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
 
 ```bash
 gh api 'repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef>?recursive=1' --jq '.tree[].path | select(startswith("<dir>/"))'
