@@ -163,6 +163,8 @@ For a **scoped (granular)** write token, add these scopes on top of the read sco
 
 The classic `read:confluence-content.all` + `write:confluence-content` scopes also cover both write tools. If using a classic API token (not scoped), it inherits the user's full Confluence permissions and no additional scope configuration is needed.
 
+A leaked write token permits more than the two tools use: `write:page:confluence` grants creating and editing any page in any space the user can reach, not just the pages these tools target. Treat this token as higher-blast-radius than the read-only token and rotate it accordingly.
+
 ## Usage
 
 The MCP tools are available as `mcp__bitwarden-atlassian__<tool_name>`. Examples:
