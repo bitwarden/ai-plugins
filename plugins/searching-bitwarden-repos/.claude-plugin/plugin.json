@@ -1,12 +1,12 @@
 {
-  "name": "bitwarden-repo-search",
+  "name": "searching-bitwarden-repos",
   "version": "0.1.0",
   "description": "Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
   },
-  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-repo-search",
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/searching-bitwarden-repos",
   "repository": "https://github.com/bitwarden/ai-plugins",
   "keywords": [
     "search",

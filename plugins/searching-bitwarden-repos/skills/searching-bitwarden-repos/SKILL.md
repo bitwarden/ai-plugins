@@ -15,26 +15,31 @@ The search term is always inserted single-quoted and verbatim into commands. If 
 
 ### 1. Search for code across the organization
 
-Use GitHub code search to find where the query term appears across all bitwarden repos:
+Use GitHub code search to find where the query term appears across all bitwarden repos. Start with compact output (one line per hit) to save context:
 
 ```bash
-gh search code --owner bitwarden --limit 50 --json repository,path,textMatches -- '<search term>'
+gh search code --owner bitwarden --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
+```
+
+Only fetch `textMatches` for files you plan to present in the final output:
+
+```bash
+gh search code --owner bitwarden --limit 10 --json repository,path,textMatches -- '<search term>'
 ```
 
 If results are too broad, refine with language or path filters:
 
 ```bash
-gh search code --owner bitwarden --limit 30 --json repository,path,textMatches -- '<search term> language:rust'
-gh search code --owner bitwarden --limit 30 --json repository,path,textMatches -- '<search term> path:src'
+gh search code --owner bitwarden --limit 30 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term> language:rust'
+gh search code --owner bitwarden --limit 30 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term> path:src'
 ```
 
 ### 2. Identify relevant repositories
 
-If code search returns too many results or the user wants a higher-level view, list repos that might be relevant:
+If code search returns too many results or the user wants a higher-level view, search repos by topic:
 
 ```bash
-gh search repos --owner bitwarden --json name,description,url -- '<search term>'
-gh repo list bitwarden --limit 100 --json name,description,url,primaryLanguage,updatedAt
+gh search repos --owner bitwarden --limit 50 --archived=false --json name,description,url,language -- '<search term>'
 ```
 
 ### 3. Drill into specific repos
@@ -42,13 +47,19 @@ gh repo list bitwarden --limit 100 --json name,description,url,primaryLanguage,u
 For the most relevant repos found, get more detail:
 
 ```bash
-gh repo view bitwarden/<repo-name> --json name,description,url,stargazerCount,primaryLanguage,topics,defaultBranchRef
+gh repo view bitwarden/<repo-name> --json name,description,url,stargazerCount,primaryLanguage,repositoryTopics,defaultBranchRef
 ```
 
-Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`), and add `?recursive=1` to get the full tree:
+Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`). Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
 
 ```bash
-gh api 'repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef>?recursive=1' --jq '.tree[].path'
+gh api 'repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef>?recursive=1' --jq '.tree[].path | select(startswith("<dir>/"))'
+```
+
+If no specific directory is known, limit to top-level entries only (omit `?recursive=1`):
+
+```bash
+gh api 'repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef>' --jq '.tree[].path'
 ```
 
 ### 4. Present results

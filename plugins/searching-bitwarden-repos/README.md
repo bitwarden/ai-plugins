@@ -1,4 +1,4 @@
-# bitwarden-repo-search
+# searching-bitwarden-repos
 
 Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live — directly from Claude Code.
 
