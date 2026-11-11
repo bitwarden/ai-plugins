@@ -5,6 +5,15 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0] - 2026-11-11
+
+### Added
+
+- `create_confluence_page` creates a new page in any Confluence space. Accepts markdown or Confluence storage format (XHTML) as body content — markdown is auto-converted to storage format with proper Confluence table classes, code block macros, and info panel blockquotes. Defaults to a dry run; live creation requires `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`.
+- `update_confluence_page` updates an existing page by ID. Version numbers are auto-incremented by reading the current page version first, so callers never manage versions manually. Same markdown auto-conversion as create. Defaults to a dry run; live updates require `ATLASSIAN_CONFLUENCE_WRITE_TOKEN`.
+- `ATLASSIAN_CONFLUENCE_WRITE_TOKEN` env var support in `.mcp.json`, following the same opt-in dual-token pattern as Jira writes.
+- Generalized `write-guard.ts` to support both Jira and Confluence write tools via a `product` parameter, keeping all token-gate messaging in one place.
+
 ## [2.9.0] - 2026-10-30
 
 ### Added
