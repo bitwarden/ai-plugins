@@ -350,6 +350,70 @@ export const TransitionIssueSchema = z.object({
 
 export type TransitionIssueInput = z.infer<typeof TransitionIssueSchema>;
 
+// ── Confluence Write Schemas (opt-in, require ATLASSIAN_CONFLUENCE_WRITE_TOKEN) ──
+
+export const CreateConfluencePageSchema = z.object({
+  spaceId: z
+    .string()
+    .min(1, 'Space ID is required (numeric string, e.g. "229380")'),
+  title: z
+    .string()
+    .min(1, "Page title cannot be empty")
+    .max(255, "Confluence page titles are limited to 255 characters"),
+  parentId: z
+    .string()
+    .optional()
+    .describe("Parent page ID. Omit to create at the space root."),
+  body: z
+    .string()
+    .min(1, "Page body cannot be empty")
+    .describe(
+      "Page content as markdown or Confluence storage format (XHTML). " +
+        "Markdown is auto-converted. Storage format (starting with an HTML tag) " +
+        "is passed through as-is.",
+    ),
+  status: z
+    .enum(["current", "draft"])
+    .optional()
+    .default("current")
+    .describe('Page status: "current" (published) or "draft".'),
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type CreateConfluencePageInput = z.infer<
+  typeof CreateConfluencePageSchema
+>;
+
+export const UpdateConfluencePageSchema = z.object({
+  pageId: z.string().min(1, "Page ID is required"),
+  title: z
+    .string()
+    .min(1, "Page title cannot be empty")
+    .max(255, "Confluence page titles are limited to 255 characters"),
+  body: z
+    .string()
+    .min(1, "Page body cannot be empty")
+    .describe(
+      "Page content as markdown or Confluence storage format (XHTML). " +
+        "Markdown is auto-converted. Storage format (starting with an HTML tag) " +
+        "is passed through as-is.",
+    ),
+  versionMessage: z
+    .string()
+    .optional()
+    .describe("Optional version comment describing the change."),
+  status: z
+    .enum(["current", "draft"])
+    .optional()
+    .default("current")
+    .describe('Page status: "current" (published) or "draft".'),
+  dryRun: z.boolean().optional().default(true),
+});
+
+export type UpdateConfluencePageInput = z.infer<
+  typeof UpdateConfluencePageSchema
+>;
+
 /**
  * Validate input against a Zod schema
  * @param schema - Zod schema to validate against
