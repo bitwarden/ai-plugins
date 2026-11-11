@@ -1,5 +1,7 @@
 ---
 name: searching-bitwarden-repos
+context: fork
+agent: general-purpose
 description: "Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live. Use for 'where is passkey code', 'which repo has X', 'find where feature Y is implemented', or any cross-repo code discovery question."
 argument-hint: "[search-query]"
 allowed-tools: "Bash(gh search code *), Bash(gh search repos *), Bash(gh repo view *), Bash(gh api repos/bitwarden/*)"
@@ -9,14 +11,14 @@ allowed-tools: "Bash(gh search code *), Bash(gh search repos *), Bash(gh repo vi
 
 Search across all repositories in the **bitwarden** GitHub organization to find where code, features, or topics are located. Return structured results grouped by repository with file paths and direct GitHub URLs.
 
-The search term is always inserted single-quoted and verbatim into commands. If the term contains a single quote (`'`), reject it and ask the user to rephrase rather than escaping it. Inside single quotes, all other shell metacharacters are inert.
+The search term is provided via `$ARGUMENTS` and always inserted single-quoted and verbatim into commands. If `$ARGUMENTS` contains a single quote (`'`), reject it and ask the user to rephrase rather than escaping it. Inside single quotes, all other shell metacharacters are inert.
 
 ## Scoping
 
 By default, search the entire `bitwarden` org. If the user names specific repos (e.g., "in clients and server"), use `--repo` flags instead of `--owner`:
 
 ```bash
-gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
+gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '$ARGUMENTS'
 ```
 
 ## Steps
@@ -26,7 +28,7 @@ gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --jso
 Use GitHub code search to find where the query term appears. Start with compact output (one line per hit) to save context:
 
 ```bash
-gh search code --owner bitwarden --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
+gh search code --owner bitwarden --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '$ARGUMENTS'
 ```
 
 To get code snippets for specific files identified above, narrow with `--repo` and path qualifiers:
@@ -47,7 +49,7 @@ gh search code --owner bitwarden --limit 30 --json repository,path --jq '.[] | "
 If code search returns too many results or the user wants a higher-level view, search repos by topic:
 
 ```bash
-gh search repos --owner bitwarden --limit 50 --archived=false --json name,description,url,language -- '<search term>'
+gh search repos --owner bitwarden --limit 50 --archived=false --json name,description,url,language -- '$ARGUMENTS'
 ```
 
 ### 3. Drill into specific repos
