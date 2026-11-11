@@ -25,10 +25,6 @@ If the user names specific repos (e.g., "in clients and server"), use `--repo` f
 gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
 ```
 
-### Deduplication
-
-When the same file path appears in multiple repos (e.g., `bitwarden/msapoc` mirrors `clients` under `upstream/clients/...`), show the file once and list all repos that contain it. Prefer the primary repo (the non-fork, non-mirror) as the main entry.
-
 ## Steps
 
 ### 1. Search for code across the organization
@@ -65,7 +61,7 @@ gh search repos --owner bitwarden --limit 50 --archived=false --json name,descri
 For the most relevant repos found, get more detail:
 
 ```bash
-gh repo view bitwarden/<repo-name> --json name,description,url,stargazerCount,primaryLanguage,repositoryTopics,defaultBranchRef
+gh repo view bitwarden/<repo-name> --json name,description,url,primaryLanguage,repositoryTopics,defaultBranchRef,isFork
 ```
 
 Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`). Validate that the branch name matches `^[A-Za-z0-9._/-]+$` before interpolating it into a command; reject it otherwise. Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
@@ -91,7 +87,9 @@ Organize findings clearly:
 
 Format as a table when there are multiple repos. Include the repo description and primary language.
 
-**Ranking:** Show the main product repos first (`clients`, `server`, `sdk-internal`, `android`, `ios`), then supporting/tooling repos, then forks and mirrors last. Within each group, rank by number of hits.
+**Ranking:** Rank repos by search hit count — repos with more matches for the query appear first. This naturally surfaces main product repos since they contain the most code. No hardcoded repo lists, no extra API calls.
+
+**Deduplication:** When the same file path appears in multiple repos (e.g., `bitwarden/msapoc` mirrors `clients` under `upstream/clients/...`), show the file once and list all repos that contain it. Prefer the non-fork repo as the primary entry.
 
 ## Known feature mappings
 
