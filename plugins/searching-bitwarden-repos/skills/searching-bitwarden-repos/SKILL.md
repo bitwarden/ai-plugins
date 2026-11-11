@@ -13,11 +13,27 @@ Search across all repositories in the **bitwarden** GitHub organization to find 
 
 The search term is always inserted single-quoted and verbatim into commands. If the term contains a single quote (`'`), reject it and ask the user to rephrase rather than escaping it. Inside single quotes, all other shell metacharacters are inert.
 
+## Scoping
+
+By default, search the entire `bitwarden` org. The user can narrow scope in two ways:
+
+### Explicit scope in the request
+
+If the user names specific repos (e.g., "in clients and server"), use `--repo` flags instead of `--owner`:
+
+```bash
+gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
+```
+
+### Deduplication
+
+When the same file path appears in multiple repos (e.g., `bitwarden/msapoc` mirrors `clients` under `upstream/clients/...`), show the file once and list all repos that contain it. Prefer the primary repo (the non-fork, non-mirror) as the main entry.
+
 ## Steps
 
 ### 1. Search for code across the organization
 
-Use GitHub code search to find where the query term appears across all bitwarden repos. Start with compact output (one line per hit) to save context:
+Use GitHub code search to find where the query term appears. Start with compact output (one line per hit) to save context:
 
 ```bash
 gh search code --owner bitwarden --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
@@ -74,6 +90,8 @@ Organize findings clearly:
 - **Direct GitHub URLs** to the relevant files so the user can navigate there
 
 Format as a table when there are multiple repos. Include the repo description and primary language.
+
+**Ranking:** Show the main product repos first (`clients`, `server`, `sdk-internal`, `android`, `ios`), then supporting/tooling repos, then forks and mirrors last. Within each group, rank by number of hits.
 
 ## Known feature mappings
 
