@@ -11,7 +11,7 @@ allowed-tools: "Bash(gh search code *), Bash(gh search repos *), Bash(gh repo vi
 
 Search across all repositories in the **bitwarden** GitHub organization to find where code, features, or topics are located. Return structured results grouped by repository with file paths and direct GitHub URLs.
 
-The search term is provided via `$ARGUMENTS` and always inserted single-quoted and verbatim into commands. If `$ARGUMENTS` contains a single quote (`'`), reject it and ask the user to rephrase rather than escaping it. Inside single quotes, all other shell metacharacters are inert.
+`$ARGUMENTS` carries the full user input. Extract the search term and any scoping instructions (e.g., "in clients and server") from it. The search term is always inserted single-quoted into commands. If the search term contains a single quote (`'`), reject it and ask the user to rephrase rather than escaping it. Inside single quotes, all other shell metacharacters are inert.
 
 ## Scoping
 
@@ -63,7 +63,7 @@ gh repo view bitwarden/<repo-name> --json name,description,url,primaryLanguage,r
 Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`). Validate that both the branch name and directory path match `^[A-Za-z0-9._/-]+$` before interpolating into a command; reject otherwise. Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
 
 ```bash
-gh api repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef> --jq '.tree[].path | select(startswith("<dir>/"))'
+gh api 'repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef>?recursive=1' --jq '.tree[].path | select(startswith("<dir>/"))'
 ```
 
 If no specific directory is known, limit to top-level entries only:
