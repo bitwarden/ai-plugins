@@ -31,7 +31,7 @@ Use GitHub code search to find where the query term appears. Start with compact 
 gh search code --owner bitwarden --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '$ARGUMENTS'
 ```
 
-To get code snippets for specific files identified above, narrow with `--repo` and path qualifiers:
+To get code snippets for specific files identified above, narrow with `--repo` and path qualifiers. Validate that `<dir>` matches `^[A-Za-z0-9._/-]+$` before interpolation:
 
 ```bash
 gh search code --repo bitwarden/<repo-name> --limit 10 --json repository,path,textMatches -- '<search term> path:<dir>'
@@ -85,7 +85,7 @@ Format as a table when there are multiple repos. Include the repo description an
 
 **Ranking:** Rank repos by search hit count — repos with more matches for the query appear first. This naturally surfaces main product repos since they contain the most code. No hardcoded repo lists, no extra API calls.
 
-**Deduplication:** When the same file path appears in multiple repos (e.g., `bitwarden/msapoc` mirrors `clients` under `upstream/clients/...`), show the file once and list all repos that contain it.
+**Deduplication:** When matching on file paths across repos, strip vendoring prefixes like `upstream/<repo>/` before comparing. For example, `bitwarden/msapoc` stores `upstream/clients/libs/common/...` — treat that as the same file as `bitwarden/clients libs/common/...`. Show the file once with the primary repo listed first, and note which other repos contain it.
 
 ## Known feature mappings
 
