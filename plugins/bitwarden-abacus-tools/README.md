@@ -25,7 +25,7 @@ asks for the text.
 key or writing a placeholder, the same rule `applying-pr-conventions` uses for pull request titles, so a bead's commit
 and its PR title agree. The rule is settled in `skills/commit-message`, so Abacus never stops to ask.
 
-**The AI review label.** `applying-pr-conventions` asks a person whether to add an AI review label, and nobody attends an Abacus stage to answer. `skills/composing-abacus-pull-requests` settles it as `ai-review`, so every draft PR Abacus opens in a Bitwarden repository is queued for AI review, and the bead's recorded answers say the profile chose it. The body shape Abacus asks for (gherkin acceptance criteria with their test names, review guidance, the AI-assisted review section) wins over the PR template wherever the two differ.
+**The AI review label.** `applying-pr-conventions` asks a person whether to add an AI review label, and nobody attends an Abacus stage to answer. `skills/composing-abacus-pull-requests` settles it as `ai-review`, which belongs only on a pull request created as a draft, and Abacus opens every pull request as one, so every draft PR Abacus opens in a Bitwarden repository is queued for AI review, and the bead's recorded answers say the profile chose it. The body shape Abacus asks for (gherkin acceptance criteria with their test names, review guidance, the AI-assisted review section) wins over the PR template wherever the two differ.
 
 Abacus still opens the pull request itself (through `abacus-finalize`), so stacking, cleanup on failure and the
 evidence checks stay in place. The skill only supplies the content. Each result is recorded on the bead together
