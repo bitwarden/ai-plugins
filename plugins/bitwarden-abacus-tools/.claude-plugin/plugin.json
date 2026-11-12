@@ -1,6 +1,6 @@
 {
   "name": "bitwarden-abacus-tools",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Abacus profile for Bitwarden: tells Abacus which Bitwarden skills to use at each step of its process: reading Jira issues when Abacus plans, and commit message and pull request conventions when it lands work.",
   "author": {
     "name": "Bitwarden",

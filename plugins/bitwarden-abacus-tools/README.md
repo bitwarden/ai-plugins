@@ -9,11 +9,11 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 
 ## What it does today
 
-| Abacus slot   | Bitwarden skill                                                                              | Effect                                                                                         |
-| ------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `plan.source` | `bitwarden-atlassian-tools:researching-jira-issues`                                          | "Plan PM-1234" works: the planner reads the issue, its links and Confluence pages into beads   |
-| `land.commit` | `bitwarden-abacus-tools:commit-message` (over `bitwarden-delivery-tools:committing-changes`) | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket     |
-| `land.pr`     | `bitwarden-delivery-tools:applying-pr-conventions`                                           | Each bead's draft PR gets Bitwarden's conventional title, PR template body and `t:` type label |
+| Abacus slot   | Bitwarden skill                                                                                                   | Effect                                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `plan.source` | `bitwarden-atlassian-tools:researching-jira-issues`                                                               | "Plan PM-1234" works: the planner reads the issue, its links and Confluence pages into beads                      |
+| `land.commit` | `bitwarden-abacus-tools:commit-message` (over `bitwarden-delivery-tools:committing-changes`)                      | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket                        |
+| `land.pr`     | `bitwarden-abacus-tools:composing-abacus-pull-requests` (over `bitwarden-delivery-tools:applying-pr-conventions`) | Each bead's draft PR gets Bitwarden's conventional title, PR template body, `t:` type label and `ai-review` label |
 
 **Planning from Jira.** The planner reads the issue through the Atlassian tools, drafts beads with the issue key as
 their source, and turns the issue's acceptance criteria into checkable ones. It only reads: Abacus refuses Jira
@@ -24,6 +24,8 @@ asks for the text.
 **Work without a ticket.** When a bead's source isn't a Jira ticket, the commit drops the bracket rather than inventing a
 key or writing a placeholder, the same rule `applying-pr-conventions` uses for pull request titles, so a bead's commit
 and its PR title agree. The rule is settled in `skills/commit-message`, so Abacus never stops to ask.
+
+**The AI review label.** `applying-pr-conventions` asks a person whether to add an AI review label, and nobody attends an Abacus stage to answer. `skills/composing-abacus-pull-requests` settles it as `ai-review`, so every draft PR Abacus opens in a Bitwarden repository is queued for AI review, and the bead's recorded answers say the profile chose it. The body shape Abacus asks for (gherkin acceptance criteria with their test names, review guidance, the AI-assisted review section) wins over the PR template wherever the two differ.
 
 Abacus still opens the pull request itself (through `abacus-finalize`), so stacking, cleanup on failure and the
 evidence checks stay in place. The skill only supplies the content. Each result is recorded on the bead together
@@ -88,6 +90,6 @@ plan PM-1234
 build PM-1234
 ```
 
-Each bead's commit then follows Bitwarden's commit format, and its draft PR carries Bitwarden's title, template body and
-`t:` type label. A repository can leave the
+Each bead's commit then follows Bitwarden's commit format, and its draft PR carries Bitwarden's title, template body,
+`t:` type label and `ai-review` label. A repository can leave the
 profile out with `"profile": "none"` in its `.abacus/config.json`.
