@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The workspace template's `cryptography-choices.md` module states the no-hand-built-crypto rule: tokens, signatures and encrypted formats come from the codebase's vetted library, and a direct use needs the owning team's agreement before any code
 
+  A workspace `CLAUDE.md` that already has this module doesn't receive the new bullet: `enhance-workspace` and `init-workspace`'s Merge mode add only modules whose heading is missing. Rebuild it with `/bitwarden-init:init-workspace` → **Replace**, or add the bullet by hand.
+
 ## [1.2.2] - 2026-08-03
 
 ### Fixed

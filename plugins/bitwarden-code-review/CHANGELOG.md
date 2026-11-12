@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `bitwarden-code-reviewer`: hand-built crypto (a token, signature, key format or encrypted format composed from primitives instead of the codebase's library) is a finding unless the owning team's agreement is recorded with the code, and the reviewer asks whether such code should exist before whether it is correct
+- `bitwarden-code-reviewer`: a "Hand-Built Crypto" step in Step 2, applied whether or not sibling plugins are installed. A token, signature, key format or encrypted format composed from primitives instead of the codebase's library is a ⚠️ IMPORTANT design finding unless a comment on the code records the owning team's agreement. The reviewer asks whether such code should exist before whether it is correct, and validates the finding by confirming the code builds the format itself, not by the trace-incorrect-behavior tests
 
 ## [3.1.0] - 2026-11-06
 

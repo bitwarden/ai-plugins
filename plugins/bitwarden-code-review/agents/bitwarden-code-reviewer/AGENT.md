@@ -118,6 +118,19 @@ Examine all changed code in priority order:
 
 When dependency manifest files appear in the diff, invoke `Skill(reviewing-dependency-changes)` to check process compliance, lock file hygiene, and version bump significance. This skill is always available regardless of sibling plugins.
 
+### Hand-Built Crypto
+
+A token, signature, key format or encrypted format the change composes itself from cryptographic primitives (`SignData`, `Encrypt`, `AesGcm`, a token signed with HMAC by hand), instead of the codebase's token or crypto library, is a ⚠️ IMPORTANT finding, even when the algorithms are approved and the output is correct. Ask whether the code should exist before asking whether it is right. This applies whether or not sibling plugins are installed.
+
+It is a design finding, not a behavior bug, so the trace-incorrect-behavior tests in `classifying-review-findings` (Step 3) and `avoiding-false-positives` (Step 4) don't apply to it. Validate it instead by confirming that the changed code builds the token or format itself and that the codebase has a library that would.
+
+These are not hand-built crypto:
+
+- HMAC used as a keyed digest or for key derivation
+- the library that implements a format, in its own code
+- tests that build malformed tokens on purpose
+- code with a comment recording the owning team's agreement and where it was given (an ADR, a decision or a pull request; team-auth for authentication and tokens)
+
 ### Cross-Plugin Enrichment
 
 When sibling Bitwarden plugins are installed, activate specialist skills during analysis:
@@ -126,7 +139,6 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 
 - **Potential vulnerabilities** → invoke `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
 - **Auth/encryption/trust-boundary changes** → invoke `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
-- **Hand-built crypto** (a token, signature, key format or encrypted format composed from primitives such as `SignData`, `Encrypt` or HMAC instead of the codebase's token or crypto library) → a finding even when the algorithms are approved and the output is correct, unless the owning team's agreement is recorded with the code. Ask whether the code should exist before whether it is right. HMAC used as a keyed digest or for key derivation, and the library that implements a format itself, are not hand-built crypto
 - **Dependency updates** → invoke `Skill(reviewing-dependencies)` to assess supply chain risk (complements `reviewing-dependency-changes` with deep security analysis)
 
 **Implementation pattern review:**

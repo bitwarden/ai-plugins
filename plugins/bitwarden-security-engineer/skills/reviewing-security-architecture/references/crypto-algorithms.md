@@ -29,6 +29,11 @@ var jwt = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
     Audience = audience,
     Expires = now.AddMinutes(1),
     TokenType = "client-authentication+jwt",
+    Claims = new Dictionary<string, object>
+    {
+        ["sub"] = clientId,
+        ["jti"] = Guid.NewGuid().ToString(),
+    },
     SigningCredentials = new SigningCredentials(new ECDsaSecurityKey(ecdsa), SecurityAlgorithms.EcdsaSha256),
 });
 ```
@@ -42,7 +47,8 @@ The hand-built version can be correct and still be a finding: every format detai
 var aes = Aes.Create();
 aes.Mode = CipherMode.ECB;
 
-// CORRECT — GCM mode (authenticated encryption)
+// CORRECT (mode choice only) — GCM mode (authenticated encryption)
+// For a stored or transmitted format, use the codebase's library (EncString, Data Protection) rather than AesGcm directly
 var aesGcm = new AesGcm(key);
 ```
 
