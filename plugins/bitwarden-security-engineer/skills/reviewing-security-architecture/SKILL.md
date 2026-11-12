@@ -79,7 +79,7 @@ public async Task<Cipher> GetCipher(Guid cipherId) {
 
 ### Cryptographic Implementation
 
-- Make and check tokens, signatures, key formats and encrypted formats (JWT, JWS, JWE, JWK, COSE, EncString) with the vetted library the codebase already uses: `Microsoft.IdentityModel` on the server, the Bitwarden SDK in clients. Never compose one from cryptographic primitives (`ECDsa.SignData`, `RSA.Encrypt`, `AesGcm`, HMAC), even with approved algorithms and correct output (OWASP ASVS 4.0.3 V6.2.2).
+- Make and check tokens, signatures, key formats and encrypted formats (JWT, JWS, JWE, JWK, COSE, EncString) with the vetted library the codebase already uses: `Microsoft.IdentityModel` on the server, the Bitwarden SDK in clients. Never compose one from cryptographic primitives (`ECDsa.SignData`, `RSA.Encrypt`, `AesGcm`, HMAC), even with approved algorithms and correct output (OWASP ASVS 4.0.3 V6.2.2). HMAC used as a keyed digest or for key derivation is not a token or a format, and the library that implements a format (such as `Bitwarden.Core` for EncStrings) is where its primitives belong.
 - Ask whether hand-built crypto should exist before asking whether it is correct. A design that writes its own token or format is a finding unless the owning team (team-auth for authentication and tokens) has agreed to it, and the agreement is recorded where the code is, for example in a justified `RS0030` suppression under `Microsoft.CodeAnalysis.BannedApiAnalyzers`.
 - Avoiding a dependency is not a reason to hand-build crypto. Prefer the library the codebase already depends on.
 

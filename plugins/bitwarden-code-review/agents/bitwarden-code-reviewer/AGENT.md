@@ -126,7 +126,7 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 
 - **Potential vulnerabilities** → invoke `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
 - **Auth/encryption/trust-boundary changes** → invoke `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
-- **Hand-built crypto** (a token, signature, key format or encrypted format composed from primitives such as `SignData`, `Encrypt` or HMAC instead of the codebase's token or crypto library) → a finding even when the algorithms are approved and the output is correct, unless the owning team's agreement is recorded with the code. Ask whether the code should exist before whether it is right
+- **Hand-built crypto** (a token, signature, key format or encrypted format composed from primitives such as `SignData`, `Encrypt` or HMAC instead of the codebase's token or crypto library) → a finding even when the algorithms are approved and the output is correct, unless the owning team's agreement is recorded with the code. Ask whether the code should exist before whether it is right. HMAC used as a keyed digest or for key derivation, and the library that implements a format itself, are not hand-built crypto
 - **Dependency updates** → invoke `Skill(reviewing-dependencies)` to assess supply chain risk (complements `reviewing-dependency-changes` with deep security analysis)
 
 **Implementation pattern review:**
