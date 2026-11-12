@@ -23,7 +23,7 @@ var signature = ecdsa.SignData(Encoding.ASCII.GetBytes(signingInput), HashAlgori
 var jwt = $"{signingInput}.{Base64Url(signature)}";
 
 // CORRECT — the token library builds and signs it
-var jwt = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+var token = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
 {
     Issuer = clientId,
     Audience = audience,
