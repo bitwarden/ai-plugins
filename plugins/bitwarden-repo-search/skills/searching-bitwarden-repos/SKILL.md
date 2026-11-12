@@ -31,7 +31,7 @@ Use GitHub code search to find where the query term appears. Start with compact 
 gh search code --owner bitwarden --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '$ARGUMENTS'
 ```
 
-To get code snippets for specific files identified above, narrow with `--repo` and path qualifiers. Validate that `<dir>` matches `^[A-Za-z0-9._/-]+$` before interpolation:
+To get code snippets for specific files identified above, narrow with `--repo` and path qualifiers. Validate that `<repo-name>` and `<dir>` both match `^[A-Za-z0-9._/-]+$` before interpolation:
 
 ```bash
 gh search code --repo bitwarden/<repo-name> --limit 10 --json repository,path,textMatches -- '<search term> path:<dir>'
@@ -54,13 +54,13 @@ gh search repos --owner bitwarden --limit 50 --archived=false --json name,descri
 
 ### 3. Drill into specific repos
 
-For the most relevant repos found, get more detail:
+For the most relevant repos found, get more detail. Validate that `<repo-name>` matches `^[A-Za-z0-9._/-]+$` before interpolation:
 
 ```bash
 gh repo view bitwarden/<repo-name> --json name,description,url,primaryLanguage,repositoryTopics,defaultBranchRef
 ```
 
-Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from step 3 (not hardcoded `main`). Validate that both the branch name and directory path match `^[A-Za-z0-9._/-]+$` before interpolating into a command; reject otherwise. Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
+Browse the repo tree to understand structure when needed. Use the `defaultBranchRef` name from the `gh repo view` command above (not hardcoded `main`). Validate that `<defaultBranchRef>` and `<dir>` both match `^[A-Za-z0-9._/-]+$` before interpolating into a command; reject otherwise. Filter output to directories found in step 1 to avoid flooding context on large repos (e.g., `clients` has 12k+ paths):
 
 ```bash
 gh api 'repos/bitwarden/<repo-name>/git/trees/<defaultBranchRef>?recursive=1' --jq '.tree[].path | select(startswith("<dir>/"))'
@@ -79,11 +79,11 @@ Organize findings clearly:
 - **Which repos** contain code related to the query
 - **Which files/paths** are most relevant, grouped by repo
 - **Brief summary** of what each repo's role is in relation to the query
-- **Direct GitHub URLs** to the relevant files so the user can navigate there
+- **Direct GitHub URLs** to the relevant files — construct as `https://github.com/<nameWithOwner>/blob/<defaultBranchRef>/<path>` using data from steps 1 and 3
 
-Format as a table when there are multiple repos. Include the repo description and primary language.
+Format as a table when there are multiple repos. Include the repo description and primary language from `gh repo view` output in step 3.
 
-**Ranking:** Rank repos by search hit count — repos with more matches for the query appear first. This naturally surfaces main product repos since they contain the most code. No hardcoded repo lists, no extra API calls.
+**Ranking:** Rank repos by the number of distinct files matched in the result set. Note that results are capped at `--limit 50` and GitHub returns at most five matches per file, so counts are approximate — but they still differentiate repos with many hits from those with few. No hardcoded repo lists, no extra API calls.
 
 **Deduplication:** When matching on file paths across repos, strip vendoring prefixes like `upstream/<repo>/` before comparing. For example, `bitwarden/msapoc` stores `upstream/clients/libs/common/...` — treat that as the same file as `bitwarden/clients libs/common/...`. Show the file once with the primary repo listed first, and note which other repos contain it.
 
