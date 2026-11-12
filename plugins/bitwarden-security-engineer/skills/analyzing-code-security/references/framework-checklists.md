@@ -4,18 +4,18 @@ Reference tables for OWASP Top 10, API Top 10, Mobile Top 10, and CWE Top 25. Co
 
 ## OWASP Web Top 10
 
-| #   | Category                  | What to Look For                                                                   |
-| --- | ------------------------- | ---------------------------------------------------------------------------------- |
-| A01 | Broken Access Control     | Missing authorization checks, IDOR, path traversal, CORS misconfiguration          |
-| A02 | Cryptographic Failures    | Weak algorithms, hardcoded keys, missing encryption, cleartext transmission        |
-| A03 | Injection                 | SQL, NoSQL, OS command, LDAP, XPath injection via unsanitized input                |
-| A04 | Insecure Design           | Missing threat model, business logic flaws, insufficient rate limiting             |
-| A05 | Security Misconfiguration | Default credentials, unnecessary features enabled, verbose errors, missing headers |
-| A06 | Vulnerable Components     | Outdated libraries, unpatched dependencies, known CVEs                             |
-| A07 | Auth Failures             | Weak passwords, missing brute-force protection, insecure session management        |
-| A08 | Data Integrity Failures   | Insecure deserialization, unsigned updates, untrusted CI/CD pipelines              |
-| A09 | Logging Failures          | Missing audit logs, sensitive data in logs, no alerting                            |
-| A10 | SSRF                      | User-controlled URLs in server-side requests, metadata endpoint access             |
+| #   | Category                  | What to Look For                                                                                          |
+| --- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| A01 | Broken Access Control     | Missing authorization checks, IDOR, path traversal, CORS misconfiguration                                 |
+| A02 | Cryptographic Failures    | Weak algorithms, hardcoded keys, missing encryption, cleartext transmission, hand-built tokens or formats |
+| A03 | Injection                 | SQL, NoSQL, OS command, LDAP, XPath injection via unsanitized input                                       |
+| A04 | Insecure Design           | Missing threat model, business logic flaws, insufficient rate limiting                                    |
+| A05 | Security Misconfiguration | Default credentials, unnecessary features enabled, verbose errors, missing headers                        |
+| A06 | Vulnerable Components     | Outdated libraries, unpatched dependencies, known CVEs                                                    |
+| A07 | Auth Failures             | Weak passwords, missing brute-force protection, insecure session management                               |
+| A08 | Data Integrity Failures   | Insecure deserialization, unsigned updates, untrusted CI/CD pipelines                                     |
+| A09 | Logging Failures          | Missing audit logs, sensitive data in logs, no alerting                                                   |
+| A10 | SSRF                      | User-controlled URLs in server-side requests, metadata endpoint access                                    |
 
 ## OWASP API Top 10
 

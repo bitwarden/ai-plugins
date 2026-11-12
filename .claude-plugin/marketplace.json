@@ -24,13 +24,13 @@
     {
       "name": "bitwarden-code-review",
       "source": "./plugins/bitwarden-code-review",
-      "version": "3.1.0",
+      "version": "3.2.0",
       "description": "Comprehensive code review system with organization-wide standards."
     },
     {
       "name": "bitwarden-init",
       "source": "./plugins/bitwarden-init",
-      "version": "1.2.2",
+      "version": "1.3.0",
       "description": "Initialize Claude Code configuration with Bitwarden's standardized template format"
     },
     {
@@ -54,7 +54,7 @@
     {
       "name": "bitwarden-security-engineer",
       "source": "./plugins/bitwarden-security-engineer",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "description": "Application security engineering assistant for vulnerability triage, threat modeling, and secure code analysis."
     },
     {

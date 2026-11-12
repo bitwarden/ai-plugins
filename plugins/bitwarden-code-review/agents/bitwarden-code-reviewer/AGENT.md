@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 3.1.0
+version: 3.2.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
@@ -126,6 +126,7 @@ When sibling Bitwarden plugins are installed, activate specialist skills during 
 
 - **Potential vulnerabilities** → invoke `Skill(analyzing-code-security)` to validate findings against OWASP/CWE checklists with Bitwarden-specific vulnerability patterns
 - **Auth/encryption/trust-boundary changes** → invoke `Skill(reviewing-security-architecture)` to verify patterns match approved approaches
+- **Hand-built crypto** (a token, signature, key format or encrypted format composed from primitives such as `SignData`, `Encrypt` or HMAC instead of the codebase's token or crypto library) → a finding even when the algorithms are approved and the output is correct, unless the owning team's agreement is recorded with the code. Ask whether the code should exist before whether it is right
 - **Dependency updates** → invoke `Skill(reviewing-dependencies)` to assess supply chain risk (complements `reviewing-dependency-changes` with deep security analysis)
 
 **Implementation pattern review:**

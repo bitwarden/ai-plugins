@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-11-12
+
+### Added
+
+- `bitwarden-code-reviewer`: hand-built crypto (a token, signature, key format or encrypted format composed from primitives instead of the codebase's library) is a finding unless the owning team's agreement is recorded with the code, and the reviewer asks whether such code should exist before whether it is correct
+
 ## [3.1.0] - 2026-11-06
 
 ### Added

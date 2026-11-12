@@ -77,6 +77,12 @@ public async Task<Cipher> GetCipher(Guid cipherId) {
 - Use envelope encryption: data encrypted with a data encryption key (DEK), DEK encrypted with a key encryption key (KEK) in a key management system
 - Bitwarden's end-to-end encryption ensures vault data is encrypted before leaving the client
 
+### Cryptographic Implementation
+
+- Make and check tokens, signatures, key formats and encrypted formats (JWT, JWS, JWE, JWK, COSE, EncString) with the vetted library the codebase already uses: `Microsoft.IdentityModel` on the server, the Bitwarden SDK in clients. Never compose one from cryptographic primitives (`ECDsa.SignData`, `RSA.Encrypt`, `AesGcm`, HMAC), even with approved algorithms and correct output (OWASP ASVS 4.0.3 V6.2.2).
+- Ask whether hand-built crypto should exist before asking whether it is correct. A design that writes its own token or format is a finding unless the owning team (team-auth for authentication and tokens) has agreed to it, and the agreement is recorded where the code is, for example in a justified `RS0030` suppression under `Microsoft.CodeAnalysis.BannedApiAnalyzers`.
+- Avoiding a dependency is not a reason to hand-build crypto. Prefer the library the codebase already depends on.
+
 ### Encryption in Transit
 
 - TLS 1.2 minimum, TLS 1.3 preferred

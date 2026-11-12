@@ -40,16 +40,16 @@ This represents one engineer's opinion. Modules are opt-in; the user picks which
 
 4. **Module selection.** Use `AskUserQuestion` with `multiSelect: true`. Options (each with the listed one-line description):
 
-   | Module file                      | One-line summary                                         |
-   | -------------------------------- | -------------------------------------------------------- |
-   | `overview.md`                    | Bitwarden's mission and what this workspace file is for  |
-   | `zero-knowledge-invariant.md`    | The foundational client-side encryption invariant        |
-   | `cryptography-choices.md`        | AES-CBC + HMAC-SHA-256, RSA-OAEP, EK-1                   |
-   | `security-principles.md`         | P01–P06 verbatim                                         |
-   | `core-vocabulary.md`             | Vault Data, Protected Data, Secure/Trusted Channel, etc. |
-   | `agent-planning-requirements.md` | Plans and subagents must use the vocabulary              |
-   | `operating-defaults.md`          | Worktrees + plan mode for non-trivial work               |
-   | `sources-of-truth.md`            | Reference links for future refinement                    |
+   | Module file                      | One-line summary                                             |
+   | -------------------------------- | ------------------------------------------------------------ |
+   | `overview.md`                    | Bitwarden's mission and what this workspace file is for      |
+   | `zero-knowledge-invariant.md`    | The foundational client-side encryption invariant            |
+   | `cryptography-choices.md`        | AES-CBC + HMAC-SHA-256, RSA-OAEP, no hand-built crypto, EK-1 |
+   | `security-principles.md`         | P01–P06 verbatim                                             |
+   | `core-vocabulary.md`             | Vault Data, Protected Data, Secure/Trusted Channel, etc.     |
+   | `agent-planning-requirements.md` | Plans and subagents must use the vocabulary                  |
+   | `operating-defaults.md`          | Worktrees + plan mode for non-trivial work                   |
+   | `sources-of-truth.md`            | Reference links for future refinement                        |
 
 5. **Render preview.** For each selected module:
    - Read `${CLAUDE_PLUGIN_ROOT}/templates/workspace/<slug>.md`.
