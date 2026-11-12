@@ -2,5 +2,5 @@
 
 - **Symmetric:** AES-CBC with 256-bit keys, authenticated with HMAC-SHA-256 — scheme `AES256-CBC-HMAC-SHA256` [4]
 - **Asymmetric:** RSA with OAEP padding [4]
-- **No hand-built crypto:** make and check tokens, signatures and encrypted formats with the vetted library the codebase already uses (`Microsoft.IdentityModel` on the server, the SDK in clients), never composed from primitives, even when the result would be correct. The library that implements a format (the scheme above, in the SDK) and HMAC used as a keyed digest or for key derivation are not hand-built crypto. Anything else needs the owning team's agreement before any code.
+- **No hand-built crypto:** make and check tokens, signatures and encrypted formats with the vetted library the codebase already uses (`Microsoft.IdentityModel` on the server, the SDK in clients), never composed from primitives, even when the result would be correct. The library that implements a format (the scheme above, in the SDK) and HMAC used as a keyed digest or for key derivation are not hand-built crypto. Hand-building one anyway needs the owning team's agreement before any code.
 - **EK-1 requirement:** _"The UserKey **MUST** have 256 bits of security."_ [5]
