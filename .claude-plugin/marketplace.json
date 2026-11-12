@@ -148,8 +148,8 @@
       "description": "Testmo API access for Bitwarden — create test runs from reviewable filter specs, one or many per pass, with a dry-run, milestone linkage, and duplicate checks."
     },
     {
-      "name": "searching-bitwarden-repos",
-      "source": "./plugins/searching-bitwarden-repos",
+      "name": "bitwarden-repo-search",
+      "source": "./plugins/bitwarden-repo-search",
       "version": "0.1.0",
       "description": "Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live"
     }

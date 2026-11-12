@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of searching-bitwarden-repos plugin
+- Initial release of bitwarden-repo-search plugin
 - `searching-bitwarden-repos` skill for cross-repo code and feature discovery
 - Known feature-to-repo mappings for passkeys and passwordless.dev
 - Support for `gh search code`, `gh search repos`, and `gh api` commands
