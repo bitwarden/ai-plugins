@@ -120,7 +120,7 @@ When dependency manifest files appear in the diff, invoke `Skill(reviewing-depen
 
 ### Hand-Built Crypto
 
-A token, signature, key format or encrypted format the change composes itself from cryptographic primitives (`SignData`, `Encrypt`, `AesGcm`, a token signed with HMAC by hand), instead of the codebase's token or crypto library, is a ⚠️ IMPORTANT finding, even when the algorithms are approved and the output is correct. Ask whether the code should exist before asking whether it is right. This applies whether or not sibling plugins are installed.
+A token, signature, key format or encrypted format the change composes itself from cryptographic primitives (`ECDsa.SignData`, `RSA.Encrypt`, `AesGcm`, a token signed with HMAC by hand), instead of the codebase's token or crypto library, is a ⚠️ IMPORTANT finding, even when the algorithms are approved and the output is correct. Ask whether the code should exist before asking whether it is right. This applies whether or not sibling plugins are installed.
 
 It is a design finding, not a behavior bug, so the trace-incorrect-behavior tests in `classifying-review-findings` (Step 3) and `avoiding-false-positives` (Step 4) don't apply to it. Validate it instead by confirming that the changed code builds the token or format itself and that the codebase has a library that would.
 
