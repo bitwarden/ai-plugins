@@ -24,6 +24,4 @@ or ticket the work tracks, or none) and each acceptance criterion with its evide
    Abacus's) and the pre-commit checks (the gate and the reviewer have run), and staging or committing belongs to
    `abacus-finalize`.
 
-Pull request titles are not covered here. Abacus's `land.pr` slot uses
-`bitwarden-delivery-tools:applying-pr-conventions`, which drops the bracket the same way when there is no ticket, so a
-bead's commit subject and pull request title agree.
+Pull request titles are not covered here. Abacus's `land.pr` slot uses `bitwarden-abacus-tools:composing-abacus-pull-requests`, which follows `bitwarden-delivery-tools:applying-pr-conventions`. That skill drops the bracket the same way when there is no ticket, so a bead's commit subject and pull request title agree.
