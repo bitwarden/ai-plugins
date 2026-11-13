@@ -77,6 +77,12 @@ public async Task<Cipher> GetCipher(Guid cipherId) {
 - Use envelope encryption: data encrypted with a data encryption key (DEK), DEK encrypted with a key encryption key (KEK) in a key management system
 - Bitwarden's end-to-end encryption ensures vault data is encrypted before leaving the client
 
+### Cryptographic Implementation
+
+- Make and check tokens, signatures, key formats and encrypted formats (JWT, JWS, JWE, JWK, COSE, EncString) with the vetted library the codebase already uses: `Microsoft.IdentityModel` for tokens and JOSE formats and Fido2NetLib for WebAuthn COSE keys on the server, and the Bitwarden SDK for EncStrings and in clients. Never compose one from cryptographic primitives (`ECDsa.SignData`, `RSA.Encrypt`, `AesGcm`, HMAC), even with approved algorithms and correct output (OWASP ASVS 4.0.3 V6.2.2). HMAC used as a keyed digest or for key derivation is not a token or a format. The client SDK's `bitwarden-crypto` crate is the one place that implements Bitwarden's own formats, such as EncString, from primitives, so its own code is not hand-built crypto.
+- Ask whether hand-built crypto should exist before asking whether it is correct. A design that writes its own token or format is a finding unless the owning team (team-auth for authentication and tokens) has agreed to it, and the agreement is recorded where the code is: a comment saying what the code does, why no library serves it, and which team agreed where (an accepted ADR, a decision or a pull request).
+- Avoiding a dependency is not a reason to hand-build crypto. Prefer the library the codebase already depends on.
+
 ### Encryption in Transit
 
 - TLS 1.2 minimum, TLS 1.3 preferred

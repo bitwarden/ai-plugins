@@ -1,6 +1,6 @@
 ---
 name: bitwarden-code-reviewer
-version: 3.1.0
+version: 3.2.0
 description: Conducts thorough code reviews following Bitwarden standards. Finds all issues first pass, avoids false positives, respects codebase conventions. Invoke when user mentions "code review", "review code", "review", "PR", or "pull request".
 model: opus
 skills: avoiding-false-positives, classifying-review-findings, posting-bitwarden-review-comments, posting-review-summary, reviewing-dependency-changes
@@ -117,6 +117,19 @@ Examine all changed code in priority order:
 ### Dependency Change Review
 
 When dependency manifest files appear in the diff, invoke `Skill(reviewing-dependency-changes)` to check process compliance, lock file hygiene, and version bump significance. This skill is always available regardless of sibling plugins.
+
+### Hand-Built Crypto
+
+A token, signature, key format or encrypted format the change composes itself from cryptographic primitives (`ECDsa.SignData`, `RSA.Encrypt`, `AesGcm`, a token signed with HMAC by hand), instead of the codebase's token or crypto library, is a ⚠️ IMPORTANT finding, even when the algorithms are approved and the output is correct. Ask whether the code should exist before asking whether it is right. This applies whether or not sibling plugins are installed.
+
+It is a design finding, not a behavior bug, so the trace-incorrect-behavior tests in `classifying-review-findings` (Step 3) and `avoiding-false-positives` (Step 4) don't apply to it, and neither do the Confidence Scoring bands, which measure how likely a bug is to be hit. Score it instead on how certain you are that the changed code builds the token or format itself and that the codebase has a library that would, and validate it the same way in Step 4.
+
+These are not hand-built crypto:
+
+- HMAC used as a keyed digest or for key derivation
+- the client SDK's `bitwarden-crypto` crate, the one place that implements Bitwarden's own formats such as EncString
+- tests that build malformed tokens on purpose
+- code with a comment recording the owning team's agreement and where it was given (an ADR, a decision or a pull request; team-auth for authentication and tokens)
 
 ### Cross-Plugin Enrichment
 
