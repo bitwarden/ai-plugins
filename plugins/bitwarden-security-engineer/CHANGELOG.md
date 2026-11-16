@@ -5,6 +5,16 @@ All notable changes to the `bitwarden-security-engineer` plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-11-12
+
+### Added
+
+- `reviewing-security-architecture`: a "Cryptographic Implementation" section. Tokens, signatures, key formats and encrypted formats are made with the codebase's vetted library (`Microsoft.IdentityModel` on the server, the SDK in clients), never composed from primitives. Hand-built crypto is a finding unless the owning team's agreement is recorded with the code; the client SDK's `bitwarden-crypto` crate, which implements Bitwarden's own formats such as EncString, is the one exception, even with approved algorithms and correct output (OWASP ASVS 4.0.3 V6.2.2). `references/crypto-algorithms.md` gains a hand-built JWS anti-pattern with its `JsonWebTokenHandler` equivalent
+
+### Changed
+
+- `analyzing-code-security`: "Cryptographic Failures" and the OWASP A02 checklist row now include hand-built tokens and formats. The algorithm checks alone passed a hand-built ES256 client assertion, because every algorithm in it was approved
+
 ## [2.1.0] - 2026-09-08
 
 ### Changed

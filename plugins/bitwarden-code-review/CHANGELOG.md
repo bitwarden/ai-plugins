@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-11-12
+
+### Added
+
+- `bitwarden-code-reviewer`: a "Hand-Built Crypto" step in Step 2, applied whether or not sibling plugins are installed. A token, signature, key format or encrypted format composed from primitives instead of the codebase's library is a ⚠️ IMPORTANT design finding unless a comment on the code records the owning team's agreement. The reviewer asks whether such code should exist before whether it is correct, and validates the finding by confirming the code builds the format itself, not by the trace-incorrect-behavior tests or the likelihood-based confidence bands. The client SDK's `bitwarden-crypto` crate, the one place that implements Bitwarden's own formats, is exempt
+
 ## [3.1.0] - 2026-11-06
 
 ### Added

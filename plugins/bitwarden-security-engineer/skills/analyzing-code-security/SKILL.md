@@ -25,7 +25,7 @@ The most frequently encountered categories across Bitwarden's stack:
 - **SSRF** (CWE-918) — User-controlled URLs in server-side requests. Validate against host allowlists.
 - **Insecure Deserialization** (CWE-502) — Type-handling enabled on untrusted input. Avoid `TypeNameHandling.All` in JSON.NET.
 - **Path Traversal** (CWE-22) — User-supplied paths reaching file system operations. Canonicalize and validate against a base directory.
-- **Cryptographic Failures** — Weak algorithms, hardcoded keys, predictable IVs. See the `reviewing-security-architecture` skill for approved algorithms.
+- **Cryptographic Failures** (CWE-327, CWE-1240) — Weak algorithms, hardcoded keys, predictable IVs, and hand-built crypto: a token, signature or encrypted format composed from primitives where a vetted library exists (OWASP ASVS 4.0.3 V6.2.2). Hand-built crypto is a finding even when every algorithm is approved and the output is correct, unless a comment on the code records the owning team's agreement and where it was given. HMAC used as a keyed digest or for key derivation, and the client SDK's `bitwarden-crypto` crate, which implements Bitwarden's own formats such as EncString, are not hand-built crypto. See the `reviewing-security-architecture` skill for approved algorithms and libraries.
 
 For complete framework checklists (all OWASP and CWE categories), consult **`references/framework-checklists.md`**.
 

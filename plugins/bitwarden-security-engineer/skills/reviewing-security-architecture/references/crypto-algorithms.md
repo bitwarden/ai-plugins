@@ -14,6 +14,32 @@
 
 ## Common Crypto Anti-Patterns
 
+### Hand-Built Tokens and Formats
+
+```csharp
+// WRONG — a JWS composed by hand: header and claims serialized, then signed with the primitive
+var signingInput = $"{Base64Url(header)}.{Base64Url(claims)}";
+var signature = ecdsa.SignData(Encoding.ASCII.GetBytes(signingInput), HashAlgorithmName.SHA256);
+var jwt = $"{signingInput}.{Base64Url(signature)}";
+
+// CORRECT — the token library builds and signs it
+var token = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+{
+    Issuer = clientId,
+    Audience = audience,
+    Expires = now.AddMinutes(1),
+    TokenType = "client-authentication+jwt",
+    Claims = new Dictionary<string, object>
+    {
+        ["sub"] = clientId,
+        ["jti"] = Guid.NewGuid().ToString(),
+    },
+    SigningCredentials = new SigningCredentials(new ECDsaSecurityKey(ecdsa), SecurityAlgorithms.EcdsaSha256),
+});
+```
+
+The hand-built version can be correct and still be a finding: every format detail it gets right by hand is one a library already tests, and every one it gets wrong is a vulnerability no one else will catch.
+
 ### ECB Mode
 
 ```csharp
@@ -21,7 +47,8 @@
 var aes = Aes.Create();
 aes.Mode = CipherMode.ECB;
 
-// CORRECT — GCM mode (authenticated encryption)
+// CORRECT (mode choice only) — GCM mode (authenticated encryption)
+// For a stored or transmitted format, use the codebase's library (EncString, Data Protection) rather than AesGcm directly
 var aesGcm = new AesGcm(key);
 ```
 
