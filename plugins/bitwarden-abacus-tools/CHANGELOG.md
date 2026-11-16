@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-abacus-tools` plugin will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-12
+
+### Added
+
+- `composing-abacus-pull-requests` skill, now mapped as `land.pr`. It composes the pull request through `bitwarden-delivery-tools:applying-pr-conventions` and settles that skill's AI review label question as `ai-review` for a pull request created as a draft, which an unattended Abacus stage can't ask a person, so each draft PR Abacus opens in a Bitwarden repository is labeled for AI review. Abacus's own body requirements still win over the PR template. It is hidden from the `/` menu, since only the Abacus stage calls it.
+
 ## [1.1.0] - 2026-11-03
 
 ### Added
