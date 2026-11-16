@@ -1,13 +1,15 @@
 {
   "profile": "bitwarden",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "abacus": ">=0.15",
   "plugins": {
     "workers": [
       "bitwarden-delivery-tools",
       "bitwarden-code-review",
       "bitwarden-security-engineer",
-      "bitwarden-software-engineer"
+      "bitwarden-software-engineer",
+      "claude-config-validator",
+      "plugin-dev"
     ],
     "planner": ["bitwarden-atlassian-tools", "bitwarden-product-analyst"],
     "concierge": [],
@@ -17,7 +19,13 @@
     "plan.source": "bitwarden-atlassian-tools:researching-jira-issues",
     "plan.analyze": "",
     "implement.guide": "",
-    "review": [],
+    "review": {
+      "standard": { "agent": "bitwarden-code-review:bitwarden-code-reviewer" },
+      "substantial": {
+        "workflow": "bitwarden-abacus-tools:substantial-review"
+      },
+      "assess": "bitwarden-code-review:addressing-code-review-comments"
+    },
     "land.commit": "bitwarden-abacus-tools:commit-message",
     "land.pr": "bitwarden-abacus-tools:composing-abacus-pull-requests",
     "retro.analyze": ""

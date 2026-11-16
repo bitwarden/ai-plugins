@@ -5,6 +5,13 @@ All notable changes to the `bitwarden-abacus-tools` plugin will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-11-16
+
+### Added
+
+- `review` mapped to Bitwarden's code review: the `bitwarden-code-review:bitwarden-code-reviewer` agent for low and medium risk changes, the `substantial-review` workflow for high, critical and unassessed ones, and `bitwarden-code-review:addressing-code-review-comments` to judge the findings. Abacus lands a change only once that review covers it, so lane work meets the same review bar as a Bitwarden engineer's. Requires Abacus 0.20 or later; earlier versions don't run the review, and their `abacus doctor` reports the slot as unreadable.
+- `claude-config-validator` and `plugin-dev` listed for workers, since `substantial-review` adds its configuration and skill reviewers only when they are installed, and `abacus doctor` now names either one a machine is missing.
+
 ## [1.2.0] - 2026-11-12
 
 ### Added
