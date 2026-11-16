@@ -1,7 +1,7 @@
 {
   "profile": "bitwarden",
   "version": "1.3.0",
-  "abacus": ">=0.15",
+  "abacus": ">=0.20",
   "plugins": {
     "workers": [
       "bitwarden-delivery-tools",
