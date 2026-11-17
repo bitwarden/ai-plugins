@@ -3,8 +3,9 @@
 /**
  * Atlassian MCP Server
  * MCP server for Jira and Confluence integration with Claude Code.
- * Confluence is read-only; Jira read is always on, and Jira write is opt-in
- * per install via ATLASSIAN_JIRA_WRITE_TOKEN.
+ * Jira read is always on; Jira write is opt-in via ATLASSIAN_JIRA_WRITE_TOKEN.
+ * Confluence read is always on; Confluence write is opt-in via
+ * ATLASSIAN_CONFLUENCE_WRITE_TOKEN.
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -57,6 +58,14 @@ import linkIssues from "./tools/link-issues.js";
 import addIssueComment from "./tools/add-issue-comment.js";
 import transitionIssue from "./tools/transition-issue.js";
 
+// Confluence write tools
+//
+// Same pattern as Jira writes: registered unconditionally so dry-run previews
+// are available on read-only installs. Live execution is gated inside each
+// handler on ATLASSIAN_CONFLUENCE_WRITE_TOKEN.
+import createConfluencePage from "./tools/create-confluence-page.js";
+import updateConfluencePage from "./tools/update-confluence-page.js";
+
 const tools: ToolDefinition[] = [
   getIssue,
   getIssueComments,
@@ -78,6 +87,8 @@ const tools: ToolDefinition[] = [
   linkIssues,
   addIssueComment,
   transitionIssue,
+  createConfluencePage,
+  updateConfluencePage,
 ];
 
 async function main() {
