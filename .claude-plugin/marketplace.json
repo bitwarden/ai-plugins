@@ -138,7 +138,7 @@
     {
       "name": "bitwarden-abacus-tools",
       "source": "./plugins/bitwarden-abacus-tools",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step: Jira issues when it plans, commit message and pull request conventions when it lands."
     },
     {
