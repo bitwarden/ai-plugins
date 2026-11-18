@@ -18,7 +18,7 @@ Search across all repositories in the **bitwarden** GitHub organization to find 
 By default, search the entire `bitwarden` org. If the user names specific repos (e.g., "in clients and server"), validate each repo name matches `^[A-Za-z0-9._-]+$` (no slashes — it's a single repo name, not a path) and use `--repo` flags instead of `--owner`:
 
 ```bash
-gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term>'
+gh search code --repo bitwarden/clients --repo bitwarden/server --limit 50 --json repository,path,url --jq '.[] | "\(.repository.nameWithOwner) \(.path) \(.url)"' -- '<search term>'
 ```
 
 ## Steps
@@ -83,7 +83,7 @@ Organize findings clearly:
 
 Format as a table when there are multiple repos. Include the repo description and primary language from `gh repo view` output in step 3.
 
-**Ranking:** Rank repos by the number of distinct files matched in the result set. Note that results are capped at `--limit 50` and GitHub returns at most five matches per file, so counts are approximate — but they still differentiate repos with many hits from those with few. No hardcoded repo lists, no extra API calls.
+**Ranking:** Rank repos by the number of distinct files matched in the result set. Note that results are capped at `--limit 50` and GitHub returns at most five matches per file, so counts are approximate — but they still differentiate repos with many hits from those with few. Ranking uses no hardcoded lists and no extra API calls.
 
 **Deduplication:** When matching on file paths across repos, strip vendoring prefixes like `upstream/<repo>/` before comparing. For example, `bitwarden/msapoc` stores `upstream/clients/libs/common/...` — treat that as the same file as `bitwarden/clients libs/common/...`. Show the file once with the primary repo listed first, and note which other repos contain it.
 
