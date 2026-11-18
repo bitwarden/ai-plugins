@@ -12,4 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release of bitwarden-github-tools plugin
 - `searching-bitwarden-repos` skill for cross-repo code and feature discovery
 - Known feature-to-repo mappings for passkeys and passwordless.dev
-- Support for `gh search code`, `gh search repos`, and `gh api` commands
+- Support for `gh search code`, `gh search repos`, `gh repo view`, and `gh api` commands
