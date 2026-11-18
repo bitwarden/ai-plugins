@@ -4,7 +4,7 @@
     "skill_path": "plugins/bitwarden-doc-parity/skills/verifying-doc-parity",
     "executor_model": "claude-opus-5-5",
     "analyzer_model": "claude-opus-5-5",
-    "timestamp": "2026-11-18T20:22:38Z",
+    "timestamp": "2026-11-18T21:54:06Z",
     "evals_run": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     "runs_per_configuration": 3,
     "corpus_ref": {
@@ -148,11 +148,11 @@
       "run_number": 1,
       "result": {
         "pass_rate": 1.0,
-        "passed": 4,
+        "passed": 7,
         "failed": 0,
-        "total": 4,
-        "time_seconds": 89.642,
-        "tokens": 62875,
+        "total": 7,
+        "time_seconds": 105.525,
+        "tokens": 56295,
         "tool_calls": 0,
         "errors": 0
       },
@@ -160,22 +160,37 @@
         {
           "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
           "passed": true,
-          "evidence": "Transcript steps 3-5: greps for '-- organization', '\"organization\"', '--users', '--collections', 'org-preset', 'SeederUtility', 'Seeder Utility', 'OrganizationArgs'; step 10 contributing-docs searches for 'SeederUtility', 'seeder organization', 'dotnet run -- organization', 'util/Seeder'."
+          "evidence": "Search terms come from the verb (`-- organization`, `` `organization` ``), changed flag (`--users`), changed path/title vocabulary (`SeederUtility`): transcript step 5 git grep and step 10 WebSearch 'SeederUtility dotnet run organization seeder'."
         },
         {
           "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
           "passed": true,
-          "evidence": "Step 10: `gh search code` in bitwarden/contributing-docs found seeder.md, ADR 0040, component-documentation.md. Step 11: read both candidate pages via `gh api .../contents` before judging."
+          "evidence": "Transcript steps 10-12: WebSearch on contributing.bitwarden.com, then WebFetch of /getting-started/server/guide/ and /getting-started/server/seeder before judging."
         },
         {
           "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
           "passed": true,
-          "evidence": "Response: 'Out-of-repo callouts (contributing-docs). Each one needs a work item before merge and a stale marker on the page' with seeder.md (both places naming `organization`) and ADR 0040. Ground truth: upstream bitwarden/contributing-docs docs/getting-started/server/seeder.md line 45 lists the `organization` command and line 86 says 'use `organization` or `individual` only when no preset fits' (verified via gh api). The local clone (HEAD d431d88, 2026-09-29) predates this page and has no seeder.md."
+          "evidence": "Out-of-repo callout for contributing.bitwarden.com/getting-started/server/seeder quoting the `organization` verb, stating: 'create a work item before merge and apply a stale marker to this page'."
         },
         {
           "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
           "passed": true,
-          "evidence": "Step 4 lists ancestor documented scopes (SeederUtility README, root README, .claude/CLAUDE.md); step 7 read util/Seeder/CLAUDE.md lines 175-195 (maintenance rule and SeederUtility cross-references); step 9 attests root README and .claude/CLAUDE.md."
+          "evidence": "Transcript step 7 (lines 175-200) reads util/Seeder/CLAUDE.md (maintenance rules at lines 182-183 to scan Seeds/ and SeederUtility/ markdown, link to SeederUtility/README.md) and walks the in-repo Seeder docs (scenarios, presets, dev/seed.ps1, seeds.json). <details> attests util/Seeder/CLAUDE.md links to the SeederUtility README and names no changed flag."
+        },
+        {
+          "text": "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+          "passed": true,
+          "evidence": "final.patch is byte-identical (md5 bac7f490...) to the other runs and contains only the fixture diff (OrganizationArgs.cs, OrganizationCommand.cs, util/SeederUtility/README.md); transcript says 'Edits: none'/no edits; response reports needed changes as findings."
+        },
+        {
+          "text": "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+          "passed": true,
+          "evidence": "Calls out bug-reproduction.md (old verb in quick start/prose, 'No vault data' row missing --collections), scenarios/README.md line 18 (`organization` -> `org-preset`), and bump-rust-sdk SKILL.md line 73 (old verb and missing --collections), each with the required replacement. These match ground truth (bug-reproduction.md lines 8, 11, 26; scenarios README line 18; SKILL.md line 73). Also flags OrganizationCommand help text and README 'no vault data' label."
+        },
+        {
+          "text": "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed",
+          "passed": true,
+          "evidence": "No-change scopes (root README, .claude/CLAUDE.md, util/Seeder/CLAUDE.md, util/Seeder/README.md, OrganizationArgs.cs, dev/seed.ps1, Setup Guide) are only inside <details><summary>Attested scopes</summary>. Main body has one sentence confirming the PR's README edits."
         }
       ],
       "notes": []
@@ -184,112 +199,142 @@
       "eval_id": 10,
       "configuration": "with_skill",
       "run_number": 2,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 122.321,
+        "tokens": 61150,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
+          "passed": true,
+          "evidence": "Search terms come from the verb (`-- organization`, `` `organization` ``), changed flag (`--users`), changed path/title vocabulary (`SeederUtility`): transcript step 5 grep and step 11 lists search terms SeederUtility, seeder, `organization` command, and the flags."
+        },
+        {
+          "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
+          "passed": true,
+          "evidence": "Transcript step 11: WebSearch on contributing.bitwarden.com, WebFetch of /database/ (404), /guide/, and /seeder, plus a second WebSearch."
+        },
+        {
+          "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
+          "passed": true,
+          "evidence": "Out-of-repo callout for contributing.bitwarden.com/getting-started/server/seeder quoting the `organization` verb, stating: 'create a work item to update this page before merge and add a stale marker to the page'."
+        },
+        {
+          "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
+          "passed": true,
+          "evidence": "Transcript step 8 (lines 175-200) reads util/Seeder/CLAUDE.md (maintenance rules at lines 182-183 to scan Seeds/ and SeederUtility/ markdown, link to SeederUtility/README.md) and walks the in-repo Seeder docs (scenarios, presets, dev/seed.ps1, seeds.json). <details> attests util/Seeder/CLAUDE.md."
+        },
+        {
+          "text": "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+          "passed": true,
+          "evidence": "final.patch is byte-identical (md5 bac7f490...) to the other runs and contains only the fixture diff (OrganizationArgs.cs, OrganizationCommand.cs, util/SeederUtility/README.md); transcript says 'Edits: none'/no edits; response reports needed changes as findings."
+        },
+        {
+          "text": "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+          "passed": true,
+          "evidence": "Calls out bug-reproduction.md (old verb in quick start/prose, 'No vault data' row missing --collections), scenarios/README.md line 18 (`organization` -> `org-preset`), and bump-rust-sdk SKILL.md line 73 (old verb and missing --collections), each with the required replacement. These match ground truth (bug-reproduction.md lines 8, 11, 26; scenarios README line 18; SKILL.md line 73). Also flags help text and OrganizationArgs XML summary."
+        },
+        {
+          "text": "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed",
+          "passed": true,
+          "evidence": "No-change scopes are only inside <details><summary>Attested scopes</summary>. Main body has one sentence confirming the README edits are accurate."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 10,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 109.717,
+        "tokens": 63895,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
+          "passed": true,
+          "evidence": "Search terms come from the verb (`-- organization`, `` `organization` ``), changed flag (`--users`), changed path/title vocabulary (`SeederUtility`): transcript steps 5-6 grep and steps 11, 14 WebSearch for the seeder utility / command."
+        },
+        {
+          "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
+          "passed": true,
+          "evidence": "Transcript steps 11-14: WebSearch on contributing.bitwarden.com, WebFetch of Setup Guide and /getting-started/server/seeder/, second WebSearch for other pages."
+        },
+        {
+          "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
+          "passed": true,
+          "evidence": "Out-of-repo callout for contributing.bitwarden.com/getting-started/server/seeder quoting the `organization` verb, stating: 'create a work item before merge and apply a stale marker to the page'."
+        },
+        {
+          "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
+          "passed": true,
+          "evidence": "Transcript step 8 (top + Scenarios section) reads util/Seeder/CLAUDE.md (maintenance rules at lines 182-183 to scan Seeds/ and SeederUtility/ markdown, link to SeederUtility/README.md) and walks the in-repo Seeder docs (scenarios, presets, dev/seed.ps1, seeds.json). <details> attests util/Seeder/CLAUDE.md links to the CLI README."
+        },
+        {
+          "text": "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+          "passed": true,
+          "evidence": "final.patch is byte-identical (md5 bac7f490...) to the other runs and contains only the fixture diff (OrganizationArgs.cs, OrganizationCommand.cs, util/SeederUtility/README.md); transcript says 'Edits: none'/no edits; response reports needed changes as findings."
+        },
+        {
+          "text": "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+          "passed": true,
+          "evidence": "Calls out bug-reproduction.md (old verb in quick start/prose, 'No vault data' row missing --collections), scenarios/README.md line 18 (`organization` -> `org-preset`), and bump-rust-sdk SKILL.md line 73 (old verb and missing --collections), each with the required replacement. These match ground truth (bug-reproduction.md lines 8, 11, 26; scenarios README line 18; SKILL.md line 73). Also flags OrganizationCommand help text."
+        },
+        {
+          "text": "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed",
+          "passed": true,
+          "evidence": "No-change scopes are only inside <details><summary>Attested scopes</summary>. Main body has one sentence: 'The PR's edits to util/SeederUtility/README.md match the new verb and the required --collections flag.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
       "result": {
         "pass_rate": 0.75,
         "passed": 3,
         "failed": 1,
         "total": 4,
-        "time_seconds": 79.294,
-        "tokens": 55396,
+        "time_seconds": 26.318,
+        "tokens": 34347,
         "tool_calls": 0,
         "errors": 0
       },
       "expectations": [
         {
-          "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
-          "passed": true,
-          "evidence": "Steps 5-6: greps for '-- organization', '\"organization\"', '--users', '`organization`', 'organization command', SeederUtility; step 11 contributing-docs searches for 'SeederUtility', 'dotnet run -- organization', 'Seeder', 'org-preset', '--collections'."
-        },
-        {
-          "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
-          "passed": true,
-          "evidence": "Step 11 `gh search code` in bitwarden/contributing-docs; step 12 fetched seeder.md, ADR 0040, manual-setup.md via `gh api .../contents` before judging."
-        },
-        {
-          "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
-          "passed": true,
-          "evidence": "Response: 'Out-of-repo callouts (contributing-docs). Each needs a work item before merge and a stale marker on the page' for seeder.md, citing the command list and step 2. Ground truth: upstream bitwarden/contributing-docs docs/getting-started/server/seeder.md line 45 lists the `organization` command and line 86 says 'use `organization` or `individual` only when no preset fits' (verified via gh api). The local clone (HEAD d431d88, 2026-09-29) predates this page and has no seeder.md. ADR 0040 attested as a dated decision record, a defensible judgment."
-        },
-        {
-          "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
+          "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
           "passed": false,
-          "evidence": "Step 2 walked ancestor markers and step 9 attested root README and .claude/CLAUDE.md, but util/Seeder/CLAUDE.md is never read or named; its cross-references to util/SeederUtility are not verified."
-        }
-      ],
-      "notes": []
-    },
-    {
-      "eval_id": 10,
-      "configuration": "with_skill",
-      "run_number": 3,
-      "result": {
-        "pass_rate": 1.0,
-        "passed": 4,
-        "failed": 0,
-        "total": 4,
-        "time_seconds": 76.515,
-        "tokens": 56911,
-        "tool_calls": 0,
-        "errors": 0
-      },
-      "expectations": [
-        {
-          "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
-          "passed": true,
-          "evidence": "Step 4 greps for 'run -- organization', '`organization`', '--users', '--collections', '-u N'; step 9 searches for 'SeederUtility' and 'seeder'; step 8 WebSearch for the seeder CLI on contributing.bitwarden.com."
-        },
-        {
-          "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
-          "passed": true,
-          "evidence": "Steps 8-9: WebSearch on contributing.bitwarden.com and `gh api search/code` in bitwarden/contributing-docs; step 10 fetched each candidate (seeder.md, manual-setup, guide, ADR 0040/0041, component-documentation) and grepped them before judging."
-        },
-        {
-          "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
-          "passed": true,
-          "evidence": "Response: seeder.md 'invalidated ... Both must say `org-preset`. Under the documentation standard's external-docs flow, create a work item before merge and put a stale marker on the page.' Ground truth: upstream bitwarden/contributing-docs docs/getting-started/server/seeder.md line 45 lists the `organization` command and line 86 says 'use `organization` or `individual` only when no preset fits' (verified via gh api). The local clone (HEAD d431d88, 2026-09-29) predates this page and has no seeder.md."
-        },
-        {
-          "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
-          "passed": true,
-          "evidence": "Step 3 listed ancestor scopes (SeederUtility README, root README, .claude/CLAUDE.md); step 5 read util/Seeder/CLAUDE.md lines 175-195 with its SeederUtility scan rule; step 7 attests root README and .claude/CLAUDE.md."
-        }
-      ],
-      "notes": []
-    },
-    {
-      "eval_id": 2,
-      "configuration": "with_skill",
-      "run_number": 1,
-      "result": {
-        "pass_rate": 1.0,
-        "passed": 4,
-        "failed": 0,
-        "total": 4,
-        "time_seconds": 26.229,
-        "tokens": 35317,
-        "tool_calls": 0,
-        "errors": 0
-      },
-      "expectations": [
-        {
-          "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
-          "passed": true,
-          "evidence": "transcript step 5: 'Read util/Seeder/README.md Services section (lines 155-170) and util/Seeder/CLAUDE.md lines 60-80' before the step 6 judgments."
+          "evidence": "transcript step 6 reads util/Seeder/README.md lines 155-170, but CLAUDE.md appears only as grep hits ('line 69 thread-safety note, line 48 dependencies') in step 5. No read of CLAUDE.md is recorded."
         },
         {
           "text": "Makes zero documentation edits for the behavior-preserving refactor",
           "passed": true,
-          "evidence": "final.patch (identical md5 across all six runs) contains only the user's ManglerService.cs diff; no .md or other file touched."
+          "evidence": "final.patch contains only the user's pre-existing diff to util/Seeder/Services/ManglerService.cs (md5 identical across all six runs); no .md or other doc file changed."
         },
         {
           "text": "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
           "passed": true,
-          "evidence": "response.md is exactly one line: 'Documentation parity: verified current, no changes required.'"
+          "evidence": "response.md is exactly 'Documentation parity: verified current, no changes required.'"
         },
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "final.patch contains only the user's ManglerService.cs change; no placeholder/cosmetic doc edit. Transcript explicitly says no token edit."
+          "evidence": "final.patch identical to the user's baseline change; no placeholder/whitespace/doc edit added."
         }
       ],
       "notes": []
@@ -303,8 +348,8 @@
         "passed": 4,
         "failed": 0,
         "total": 4,
-        "time_seconds": 23.419,
-        "tokens": 36045,
+        "time_seconds": 26.277,
+        "tokens": 35345,
         "tool_calls": 0,
         "errors": 0
       },
@@ -312,22 +357,22 @@
         {
           "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
           "passed": true,
-          "evidence": "transcript steps 6-7 read util/Seeder/README.md Services section (~150-175) and util/Seeder/CLAUDE.md lines 60-80 before step 10 judgment."
+          "evidence": "transcript step 6: 'Read util/Seeder/README.md lines 155-170 ... and util/Seeder/CLAUDE.md lines 60-80'. Both read before the step 7 judgments."
         },
         {
           "text": "Makes zero documentation edits for the behavior-preserving refactor",
           "passed": true,
-          "evidence": "final.patch (identical md5 across all six runs) contains only the user's ManglerService.cs diff; no .md or other file touched."
+          "evidence": "final.patch contains only the user's pre-existing diff to util/Seeder/Services/ManglerService.cs (md5 identical across all six runs); no .md or other doc file changed."
         },
         {
           "text": "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
           "passed": true,
-          "evidence": "response.md is exactly one line: 'Documentation parity: verified current, no changes required.'"
+          "evidence": "response.md is exactly 'Documentation parity: verified current, no changes required.'"
         },
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "final.patch contains only the user's ManglerService.cs change; no placeholder/cosmetic doc edit. Transcript explicitly says no token edit."
+          "evidence": "final.patch identical to the user's baseline change; no placeholder/whitespace/doc edit added."
         }
       ],
       "notes": []
@@ -341,8 +386,8 @@
         "passed": 4,
         "failed": 0,
         "total": 4,
-        "time_seconds": 23.242,
-        "tokens": 35461,
+        "time_seconds": 25.793,
+        "tokens": 34886,
         "tool_calls": 0,
         "errors": 0
       },
@@ -350,22 +395,22 @@
         {
           "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
           "passed": true,
-          "evidence": "transcript step 6: 'Read util/Seeder/README.md lines 118-170 ... and util/Seeder/CLAUDE.md lines 60-80' before step 8 judgment."
+          "evidence": "transcript step 6: 'Read util/Seeder/README.md Services section (lines 155-175)'; step 7: 'Read util/Seeder/CLAUDE.md lines 60-80'."
         },
         {
           "text": "Makes zero documentation edits for the behavior-preserving refactor",
           "passed": true,
-          "evidence": "final.patch (identical md5 across all six runs) contains only the user's ManglerService.cs diff; no .md or other file touched."
+          "evidence": "final.patch contains only the user's pre-existing diff to util/Seeder/Services/ManglerService.cs (md5 identical across all six runs); no .md or other doc file changed."
         },
         {
           "text": "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
           "passed": true,
-          "evidence": "response.md is exactly one line: 'Documentation parity: verified current, no changes required.'"
+          "evidence": "response.md is exactly 'Documentation parity: verified current, no changes required.'"
         },
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "final.patch contains only the user's ManglerService.cs change; no placeholder/cosmetic doc edit. Transcript explicitly says no token edit."
+          "evidence": "final.patch identical to the user's baseline change; no placeholder/whitespace/doc edit added."
         }
       ],
       "notes": []
@@ -379,8 +424,8 @@
         "passed": 4,
         "failed": 0,
         "total": 4,
-        "time_seconds": 28.762,
-        "tokens": 43502,
+        "time_seconds": 26.262,
+        "tokens": 34779,
         "tool_calls": 0,
         "errors": 0
       },
@@ -388,22 +433,22 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "response.md: 'I didn't add the trailing newline... a cosmetic edit made only to quiet the hook is a token edit that this check doesn't accept.' final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no edit to util/Seeder/README.md."
+          "evidence": "response.md: \"I didn't add the newline. A cosmetic edit made only to satisfy the check is not a documentation update\". final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no doc edits."
         },
         {
           "text": "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "response.md: 'This attestation is the result the hook asks for, and you can ship the change as it is.'"
+          "evidence": "response.md: \"A cosmetic edit made only to satisfy the check is not a documentation update... I ran the parity check on your change instead.\""
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
           "passed": true,
-          "evidence": "Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and repo root (README.md; .claude/CLAUDE.md also holds root-level guidance). util/Seeder/Recipes and util/ have no docs. transcript.md lists Recipes, util/Seeder, util, root; cats util/Seeder/README.md and CLAUDE.md in full; reads the class XML doc; greps root README.md and .claude/CLAUDE.md; Attest recorded per scope; grep for out-of-chain restatements."
+          "evidence": "Transcript step 2 lists the ancestor chain: util/Seeder/Recipes (none), util/Seeder (README.md, CLAUDE.md), util (none), root (README.md). Step 4 greps the util/Seeder docs, and step 6 greps the root README and the repo for restated literals, finding the OrganizationUserScene XML doc. The Judgments section gives Attest with a reason for each scope. Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and the repo root (README.md); util/Seeder/Recipes and util have none."
         },
         {
           "text": "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes",
           "passed": true,
-          "evidence": "response.md opens with the single verification line, then a short refusal explanation; 'no documentation describes that detail' names no scopes."
+          "evidence": "response.md gives the refusal explanation, a one-sentence diff summary, and the single line \"Documentation parity: verified current, no changes required.\" It says \"no documentation describes it at that level of detail\" without naming any scope."
         }
       ],
       "notes": []
@@ -417,8 +462,8 @@
         "passed": 4,
         "failed": 0,
         "total": 4,
-        "time_seconds": 41.072,
-        "tokens": 38639,
+        "time_seconds": 31.154,
+        "tokens": 35488,
         "tool_calls": 0,
         "errors": 0
       },
@@ -426,27 +471,25 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "response.md: 'I didn't add the newline... Any other edit made only to get past the hook would claim a doc update that didn't happen.' final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no edit to util/Seeder/README.md."
+          "evidence": "response.md: \"I didn't add the trailing newline.\" final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no doc edits."
         },
         {
           "text": "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "response.md: the hook 'asks for confirmation that the docs were checked. This message is that confirmation'."
+          "evidence": "response.md: \"A whitespace edit to make the hook pass would be a token doc change, and the diff doesn't need one... If the hook fires again, point it at this result.\" This passes, but more weakly than the other runs, because the response does not say outright that verification replaces the token edit."
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
           "passed": true,
-          "evidence": "Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and repo root (README.md; .claude/CLAUDE.md also holds root-level guidance). util/Seeder/Recipes and util/ have no docs. transcript.md enumerates documented scopes (util/Seeder README.md+CLAUDE.md, util/ none, root README.md+.claude/CLAUDE.md), reads README Recipes section and XML doc, greps the rest, records Attest per scope with reasons, and searches repo for changed literals."
+          "evidence": "Transcript step 3 enumerates the ancestor chain with documented scopes util/Seeder/README.md, util/Seeder/CLAUDE.md, and ./README.md. Step 6 greps all three. The Judgments section gives Attest with a reason for each scope and for the class XML doc. Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and the repo root (README.md); util/Seeder/Recipes and util have none."
         },
         {
           "text": "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes",
           "passed": true,
-          "evidence": "response.md names no attested scopes ('No documentation describes that logic'), ends with 'Documentation parity: verified current, no changes required.' Extra lines explain the refusal and hook, which the skill permits."
+          "evidence": "response.md opens with the single-line verdict. The remaining text explains the refusal and mentions README.md only for the trailing-newline fact. It enumerates no attested scopes."
         }
       ],
-      "notes": [
-        "Pre-existing CLAUDE.md rule 1 mismatch noted in transcript only."
-      ]
+      "notes": []
     },
     {
       "eval_id": 3,
@@ -457,8 +500,8 @@
         "passed": 4,
         "failed": 0,
         "total": 4,
-        "time_seconds": 29.498,
-        "tokens": 37093,
+        "time_seconds": 29.922,
+        "tokens": 35565,
         "tool_calls": 0,
         "errors": 0
       },
@@ -466,27 +509,25 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "response.md: 'I did not add the trailing newline.' final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no edit to util/Seeder/README.md."
+          "evidence": "response.md: \"I didn't add the trailing newline.\" final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no doc edits."
         },
         {
           "text": "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "response.md: a whitespace edit 'would only satisfy the hook without making the docs more accurate'; leads with the verification line and says 'If the hook fires again, dismiss it with this result.'"
+          "evidence": "response.md: \"A cosmetic edit made only to quiet the hook would tell the next reader that the docs were reviewed for this change, so I checked them properly... This reply is that verdict, so you can ship.\""
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
           "passed": true,
-          "evidence": "Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and repo root (README.md; .claude/CLAUDE.md also holds root-level guidance). util/Seeder/Recipes and util/ have no docs. transcript.md lists docs in each ancestor (Recipes, util/Seeder, util, root), reads README Recipes section, greps CLAUDE.md, greps root README.md, and records per-scope Attest judgments with reasons (util/Seeder/README.md, util/Seeder/CLAUDE.md, root README.md, class XML doc). Did not check .claude/CLAUDE.md, which is in a subdirectory rather than root itself, so not counted against it."
+          "evidence": "Transcript step 3 lists the ancestor chain and identifies util/Seeder and the root as documented scopes. Step 5 greps util/Seeder README.md and CLAUDE.md, step 7 greps the root README.md, and step 6 checks the class XML doc. It records Attest per scope. Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and the repo root (README.md); util/Seeder/Recipes and util have none."
         },
         {
           "text": "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes",
           "passed": true,
-          "evidence": "response.md opens with 'Documentation parity: verified current, no changes required.' followed only by the refusal explanation; README.md is named only as the refusal target, not as an attested scope. No scope enumeration."
+          "evidence": "response.md opens with \"Documentation parity: verified current, no changes required.\" The rest explains the refusal and the hook. It mentions util/Seeder/README.md only for the newline fact and names no attested scope."
         }
       ],
-      "notes": [
-        "Pre-existing CLAUDE.md Recipe Contract mismatch noted in transcript only; not surfaced to user."
-      ]
+      "notes": []
     },
     {
       "eval_id": 4,
@@ -1333,12 +1374,12 @@
       "configuration": "without_skill",
       "run_number": 1,
       "result": {
-        "pass_rate": 0.5,
-        "passed": 2,
+        "pass_rate": 0.71,
+        "passed": 5,
         "failed": 2,
-        "total": 4,
-        "time_seconds": 86.033,
-        "tokens": 53082,
+        "total": 7,
+        "time_seconds": 90.949,
+        "tokens": 54569,
         "tool_calls": 0,
         "errors": 0
       },
@@ -1346,22 +1387,37 @@
         {
           "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
           "passed": true,
-          "evidence": "Transcript steps 3-4, 6, 8: in-repo greps for SeederUtility, '-- organization', '--users', '\"organization\"', 'OrganizationArgs', 'user-count', 'org-preset'. Terms derive from verbs, paths and title, though used only in-repo."
+          "evidence": "Search terms come from the verb (`-- organization`, `` `organization` ``), changed flag (`--users`), changed path/title vocabulary (`SeederUtility`): transcript steps 3-6 grep for SeederUtility, `dotnet run -- organization`, `--users`, `organization -n` in repo and in contributing-docs/dev-docs."
         },
         {
           "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
-          "passed": false,
-          "evidence": "No search of contributing-docs at all. Response only says contributing.bitwarden.com and other sources should be searched before merge: 'I cannot reach them from this checkout'."
+          "passed": true,
+          "evidence": "Transcript step 6 greps the local contributing-docs, dev-docs, dev-docs-internal clones for SeederUtility / `dotnet run -- organization`. Clone search counts per operator rule; no candidates found."
         },
         {
           "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
           "passed": false,
-          "evidence": "No external page was identified, although upstream seeder.md is invalidated. Ground truth: upstream bitwarden/contributing-docs docs/getting-started/server/seeder.md line 45 lists the `organization` command and line 86 says 'use `organization` or `individual` only when no preset fits' (verified via gh api). The local clone (HEAD d431d88, 2026-09-29) predates this page and has no seeder.md. Response gives a generic 'Search them before merge' with no work item or stale-marker flow."
+          "evidence": "No external page called out. The run searched only local clones (contributing-docs etc.) and concluded no external docs reference SeederUtility, missing the live contributing.bitwarden.com/getting-started/server/seeder page that names the `organization` verb. No work item / stale marker flow stated. Response: 'Out-of-repo docs (local contributing-docs ...): no references ... no follow-up is needed elsewhere.'"
         },
         {
           "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
           "passed": true,
-          "evidence": "Step 7 read util/Seeder/CLAUDE.md lines 178-195 (rule to scan Seeds/ and SeederUtility/ md files, SeederUtility/README.md cross-references); response lists Seeder CLAUDE.md, Seeder README, Seeds README, presets.md, verification.md, scenario files as checked."
+          "evidence": "Transcript step 7 (lines 175-195) reads util/Seeder/CLAUDE.md (maintenance rules at lines 182-183 to scan Seeds/ and SeederUtility/ markdown, link to SeederUtility/README.md) and walks the in-repo Seeder docs (scenarios, presets, dev/seed.ps1, seeds.json). Response lists util/Seeder/CLAUDE.md under checked scopes."
+        },
+        {
+          "text": "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+          "passed": true,
+          "evidence": "final.patch is byte-identical (md5 bac7f490...) to the other runs and contains only the fixture diff (OrganizationArgs.cs, OrganizationCommand.cs, util/SeederUtility/README.md); transcript says 'Edits: none'/no edits; response reports needed changes as findings."
+        },
+        {
+          "text": "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+          "passed": true,
+          "evidence": "Calls out bug-reproduction.md (old verb in quick start/prose, 'No vault data' row missing --collections), scenarios/README.md line 18 (`organization` -> `org-preset`), and bump-rust-sdk SKILL.md line 73 (old verb and missing --collections), each with the required replacement. These match ground truth (bug-reproduction.md lines 8, 11, 26; scenarios README line 18; SKILL.md line 73). Also flags README wording, help text, and a broken unit test."
+        },
+        {
+          "text": "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed",
+          "passed": false,
+          "evidence": "Main body contains '### Checked, no change needed' naming dev/seeds.json, dev/seed.ps1, util/Seeder/CLAUDE.md, util/Seeder/README.md, presets.md, verification.md, and out-of-repo clones. No <details> block."
         }
       ],
       "notes": []
@@ -1371,12 +1427,12 @@
       "configuration": "without_skill",
       "run_number": 2,
       "result": {
-        "pass_rate": 0.75,
-        "passed": 3,
-        "failed": 1,
-        "total": 4,
-        "time_seconds": 96.553,
-        "tokens": 64414,
+        "pass_rate": 0.71,
+        "passed": 5,
+        "failed": 2,
+        "total": 7,
+        "time_seconds": 103.857,
+        "tokens": 54423,
         "tool_calls": 0,
         "errors": 0
       },
@@ -1384,22 +1440,37 @@
         {
           "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
           "passed": true,
-          "evidence": "Steps 3-4, 7, 10: greps for SeederUtility, '-- organization', '--users', '\"organization\"', '`organization`', '--collections', and 'organization command usage' in out-of-repo clones."
+          "evidence": "Search terms come from the verb (`-- organization`, `` `organization` ``), changed flag (`--users`), changed path/title vocabulary (`SeederUtility`): transcript steps 3 and 8 grep for `-- organization`, `--users`, SeederUtility, `-- organization -n` in repo and sibling clones."
         },
         {
           "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
           "passed": true,
-          "evidence": "Step 7 grepped the local contributing-docs clone (plus dev-docs, qa-tools) for SeederUtility and organization command usage; the only candidate hit (component-documentation.md) was inspected and judged unaffected. The operator note counts the local clone as the corpus."
+          "evidence": "Transcript step 8 greps the local contributing-docs clone (and other siblings) for SeederUtility / `-- organization -n`. Clone search counts per operator rule; no candidate pages found."
         },
         {
           "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
           "passed": false,
-          "evidence": "Response: 'bitwarden/contributing-docs (local clone) has no SeederUtility command or flag references.' The local clone is stale; upstream seeder.md is invalidated and was not called out, and no work-item/stale-marker flow is stated. Ground truth: upstream bitwarden/contributing-docs docs/getting-started/server/seeder.md line 45 lists the `organization` command and line 86 says 'use `organization` or `individual` only when no preset fits' (verified via gh api). The local clone (HEAD d431d88, 2026-09-29) predates this page and has no seeder.md."
+          "evidence": "No external page called out. The run searched only local clones (contributing-docs etc.) and concluded no external docs reference SeederUtility, missing the live contributing.bitwarden.com/getting-started/server/seeder page that names the `organization` verb. No work item / stale marker flow stated. Response: 'I found no external consumers.'"
         },
         {
           "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
           "passed": true,
-          "evidence": "Steps 3 and 6 read util/Seeder/CLAUDE.md lines 175-195 (maintenance rules and SeederUtility cross-references); response lists Seeder/CLAUDE.md, Seeder README and each scenario doc as checked."
+          "evidence": "Transcript step 9 (grep; cites lines 182-183) reads util/Seeder/CLAUDE.md (maintenance rules at lines 182-183 to scan Seeds/ and SeederUtility/ markdown, link to SeederUtility/README.md) and walks the in-repo Seeder docs (scenarios, presets, dev/seed.ps1, seeds.json). Response lists util/Seeder/CLAUDE.md under checked scopes."
+        },
+        {
+          "text": "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+          "passed": true,
+          "evidence": "final.patch is byte-identical (md5 bac7f490...) to the other runs and contains only the fixture diff (OrganizationArgs.cs, OrganizationCommand.cs, util/SeederUtility/README.md); transcript says 'Edits: none'/no edits; response reports needed changes as findings."
+        },
+        {
+          "text": "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+          "passed": true,
+          "evidence": "Calls out bug-reproduction.md (old verb in quick start/prose, 'No vault data' row missing --collections), scenarios/README.md line 18 (`organization` -> `org-preset`), and bump-rust-sdk SKILL.md line 73 (old verb and missing --collections), each with the required replacement. These match ground truth (bug-reproduction.md lines 8, 11, 26; scenarios README line 18; SKILL.md line 73). Also flags README wording and the pre-existing `seed --preset` on line 74."
+        },
+        {
+          "text": "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed",
+          "passed": false,
+          "evidence": "Main body contains '### Checked, no change needed' naming dev/seeds.json, dev/seed.ps1, util/Seeder/CLAUDE.md, util/Seeder/README.md, presets.md, SeederApi, and out-of-repo clones. No <details> block."
         }
       ],
       "notes": []
@@ -1409,12 +1480,12 @@
       "configuration": "without_skill",
       "run_number": 3,
       "result": {
-        "pass_rate": 0.25,
-        "passed": 1,
-        "failed": 3,
-        "total": 4,
-        "time_seconds": 71.034,
-        "tokens": 51530,
+        "pass_rate": 0.71,
+        "passed": 5,
+        "failed": 2,
+        "total": 7,
+        "time_seconds": 75.577,
+        "tokens": 46670,
         "tool_calls": 0,
         "errors": 0
       },
@@ -1422,22 +1493,37 @@
         {
           "text": "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
           "passed": true,
-          "evidence": "Transcript steps 3, 5, 8: git grep for 'dotnet run -- organization', 'organization', 'SeederUtility|OrganizationCommand|OrganizationArgs'. Terms derived from the verb and paths, used in-repo only."
+          "evidence": "Search terms come from the verb (`-- organization`, `` `organization` ``), changed flag (`--users`), changed path/title vocabulary (`SeederUtility`): transcript steps 2, 5, 8 grep for SeederUtility, `-- organization`, `--users` in the repo and in contributing-docs."
         },
         {
           "text": "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
-          "passed": false,
-          "evidence": "Transcript has no out-of-repo search; response has no mention of contributing docs."
+          "passed": true,
+          "evidence": "Transcript step 8: grep for SeederUtility / `dotnet run -- organization` in the local contributing-docs clone (plus dev-docs, docs, qa-tools). Per operator rule, searching the clone counts; no candidate pages surfaced to read."
         },
         {
           "text": "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
           "passed": false,
-          "evidence": "The invalidated seeder.md page is not called out and the external-docs flow is not stated. Ground truth: upstream bitwarden/contributing-docs docs/getting-started/server/seeder.md line 45 lists the `organization` command and line 86 says 'use `organization` or `individual` only when no preset fits' (verified via gh api). The local clone (HEAD d431d88, 2026-09-29) predates this page and has no seeder.md."
+          "evidence": "No external page called out. The run searched only local clones (contributing-docs etc.) and concluded no external docs reference SeederUtility, missing the live contributing.bitwarden.com/getting-started/server/seeder page that names the `organization` verb. No work item / stale marker flow stated. Response: 'Out-of-repo docs: ... no SeederUtility or dotnet run -- organization references ... no follow-up is needed there.'"
         },
         {
           "text": "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
+          "passed": true,
+          "evidence": "Transcript step 4 (lines 175-195) reads util/Seeder/CLAUDE.md (maintenance rules at lines 182-183 to scan Seeds/ and SeederUtility/ markdown, link to SeederUtility/README.md) and walks the in-repo Seeder docs (scenarios, presets, dev/seed.ps1, seeds.json). Response cites util/Seeder/CLAUDE.md line 183 and classifies line 201 as the preset JSON block."
+        },
+        {
+          "text": "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+          "passed": true,
+          "evidence": "final.patch is byte-identical (md5 bac7f490...) to the other runs and contains only the fixture diff (OrganizationArgs.cs, OrganizationCommand.cs, util/SeederUtility/README.md); transcript says 'Edits: none'/no edits; response reports needed changes as findings."
+        },
+        {
+          "text": "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+          "passed": true,
+          "evidence": "Calls out bug-reproduction.md (old verb in quick start/prose, 'No vault data' row missing --collections), scenarios/README.md line 18 (`organization` -> `org-preset`), and bump-rust-sdk SKILL.md line 73 (old verb and missing --collections), each with the required replacement. These match ground truth (bug-reproduction.md lines 8, 11, 26; scenarios README line 18; SKILL.md line 73). Also flags README 'no vault data' wording and code help text."
+        },
+        {
+          "text": "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed",
           "passed": false,
-          "evidence": "Transcript never reads util/Seeder/CLAUDE.md or judges its cross-references to SeederUtility; step 8 grep reports 'no further doc references' without examining them. Response lists Seeder/CLAUDE.md as checked only on a grep for the verb. Ancestor scopes (root README, .claude/CLAUDE.md) are not walked."
+          "evidence": "Main body has a '### Checked and fine' section naming dev/seed.ps1, dev/seeds.json, .claude/hooks/seeder-docs-check.sh, preset JSON keys, and out-of-repo clones. No <details> block exists."
         }
       ],
       "notes": []
@@ -1447,75 +1533,73 @@
       "configuration": "without_skill",
       "run_number": 1,
       "result": {
-        "pass_rate": 0.75,
-        "passed": 3,
-        "failed": 1,
+        "pass_rate": 0.5,
+        "passed": 2,
+        "failed": 2,
         "total": 4,
-        "time_seconds": 42.481,
-        "tokens": 38497,
+        "time_seconds": 34.604,
+        "tokens": 37363,
         "tool_calls": 0,
         "errors": 0
       },
       "expectations": [
         {
           "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
-          "passed": true,
-          "evidence": "transcript step 6 reads util/Seeder/README.md lines 150-175; step 7 reads util/Seeder/CLAUDE.md lines 60-72; judgment at step 10."
+          "passed": false,
+          "evidence": "transcript step 5 reads util/Seeder/README.md lines 155-170; CLAUDE.md is only covered by a grep for 'mangl' with line numbers (step 4). No read of CLAUDE.md is recorded."
         },
         {
           "text": "Makes zero documentation edits for the behavior-preserving refactor",
           "passed": true,
-          "evidence": "final.patch (identical md5 across all six runs) contains only the user's ManglerService.cs diff; no .md or other file touched."
+          "evidence": "final.patch contains only the user's pre-existing diff to util/Seeder/Services/ManglerService.cs (md5 identical across all six runs); no .md or other doc file changed."
         },
         {
           "text": "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
           "passed": false,
-          "evidence": "response.md is a multi-paragraph report with 'Docs I verified against the change' enumerating six docs plus 'The change' and 'About the hook' sections; not the single-line form."
+          "evidence": "response.md is a multi-paragraph report that lists each checked doc and explains the hook. Not the single-line shape."
         },
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "final.patch contains only the user's ManglerService.cs change; no placeholder/cosmetic doc edit. Transcript states a filler/placeholder .md edit would be wrong and none was made."
+          "evidence": "final.patch identical to the user's baseline change; no placeholder/whitespace/doc edit added."
         }
       ],
-      "notes": [
-        "Could not see the doc-parity plugin hook implementation from the repo; asked user for format if needed"
-      ]
+      "notes": []
     },
     {
       "eval_id": 2,
       "configuration": "without_skill",
       "run_number": 2,
       "result": {
-        "pass_rate": 0.5,
-        "passed": 2,
-        "failed": 2,
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
         "total": 4,
-        "time_seconds": 30.701,
-        "tokens": 34028,
+        "time_seconds": 42.276,
+        "tokens": 37140,
         "tool_calls": 0,
         "errors": 0
       },
       "expectations": [
         {
           "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
-          "passed": false,
-          "evidence": "transcript step 6 reads util/Seeder/README.md lines 155-175, but util/Seeder/CLAUDE.md is only covered by step 4's grep for 'mangl' across Seeder docs; there is no read of the file content. A grep match on one keyword is not reading the file, so the expectation is not met."
+          "passed": true,
+          "evidence": "transcript step 4: 'Read util/Seeder/README.md lines 155-175 ... util/Seeder/CLAUDE.md lines 60-75'."
         },
         {
           "text": "Makes zero documentation edits for the behavior-preserving refactor",
           "passed": true,
-          "evidence": "final.patch (identical md5 across all six runs) contains only the user's ManglerService.cs diff; no .md or other file touched."
+          "evidence": "final.patch contains only the user's pre-existing diff to util/Seeder/Services/ManglerService.cs (md5 identical across all six runs); no .md or other doc file changed."
         },
         {
           "text": "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
           "passed": false,
-          "evidence": "response.md is a multi-paragraph report with a 'Docs I checked' list enumerating five attested docs (Seeder README, CLAUDE.md, SeederApi, SeederUtility, Seeds README) plus diff and hook explanations; not the single-line form."
+          "evidence": "response.md is a multi-paragraph report that enumerates each attested scope (README Services/Scenes, CLAUDE.md, SeederApi README, fixtures.md) plus hook explanation and a pre-existing issue. Not the single-line shape."
         },
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "final.patch contains only the user's ManglerService.cs change; no placeholder/cosmetic doc edit. Transcript states a filler/placeholder .md edit would be wrong and none was made."
+          "evidence": "final.patch identical to the user's baseline change; no placeholder/whitespace/doc edit added."
         }
       ],
       "notes": []
@@ -1525,35 +1609,35 @@
       "configuration": "without_skill",
       "run_number": 3,
       "result": {
-        "pass_rate": 0.75,
-        "passed": 3,
-        "failed": 1,
+        "pass_rate": 0.5,
+        "passed": 2,
+        "failed": 2,
         "total": 4,
-        "time_seconds": 35.802,
-        "tokens": 37260,
+        "time_seconds": 32.471,
+        "tokens": 36408,
         "tool_calls": 0,
         "errors": 0
       },
       "expectations": [
         {
           "text": "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
-          "passed": true,
-          "evidence": "transcript step 6: 'Ran sed on util/Seeder/README.md lines 155-175 (the Services section) and util/Seeder/CLAUDE.md lines 60-80 (the Parallelism section)' before step 7 judgment."
+          "passed": false,
+          "evidence": "transcript step 5 reads util/Seeder/README.md lines 155-170, but util/Seeder/CLAUDE.md is only covered by a grep for 'mangl' (step 4). No read of CLAUDE.md is recorded."
         },
         {
           "text": "Makes zero documentation edits for the behavior-preserving refactor",
           "passed": true,
-          "evidence": "final.patch (identical md5 across all six runs) contains only the user's ManglerService.cs diff; no .md or other file touched."
+          "evidence": "final.patch contains only the user's pre-existing diff to util/Seeder/Services/ManglerService.cs (md5 identical across all six runs); no .md or other doc file changed."
         },
         {
           "text": "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
           "passed": false,
-          "evidence": "response.md is a multi-paragraph report with a 'Docs I checked' list enumerating Seeder README, CLAUDE.md, fixtures.md, SeederApi/SeederUtility READMEs, plus diff and hook sections; not the single-line form."
+          "evidence": "response.md is a multi-section report enumerating verified docs ('What I verified', 'About the hook'). Not the single-line shape."
         },
         {
           "text": "Does not make a token or cosmetic edit to satisfy the hook",
           "passed": true,
-          "evidence": "final.patch contains only the user's ManglerService.cs change; no placeholder/cosmetic doc edit. Transcript explicitly says no token edit."
+          "evidence": "final.patch identical to the user's baseline change; no placeholder/whitespace/doc edit added."
         }
       ],
       "notes": []
@@ -1567,8 +1651,8 @@
         "passed": 2,
         "failed": 2,
         "total": 4,
-        "time_seconds": 28.758,
-        "tokens": 30095,
+        "time_seconds": 28.53,
+        "tokens": 30078,
         "tool_calls": 0,
         "errors": 0
       },
@@ -1576,22 +1660,22 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "response.md: 'I didn't add the newline.' final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no edit to util/Seeder/README.md."
+          "evidence": "response.md: \"I did not add the newline.\" final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no doc edits."
         },
         {
           "text": "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "response.md: an edit that only exists to get past the hook 'hides the hook's result'; 'The real answer is \"checked, no doc impact\"... tell it that'."
+          "evidence": "response.md: a whitespace edit \"would also hide the hook's real question: do the docs still match the code? I checked that question for your change.\""
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
           "passed": false,
-          "evidence": "Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and repo root (README.md; .claude/CLAUDE.md also holds root-level guidance). util/Seeder/Recipes and util/ have no docs. transcript.md reads util/Seeder/README.md (sed 80-105, grep) and greps util/Seeder/CLAUDE.md, but never lists or checks the repo root (README.md or .claude/CLAUDE.md). Root scope not walked."
+          "evidence": "Transcript searches only under util/: find *.md under util/Seeder* and grep --include=*.md util/. It reads the util/Seeder README Recipes section and CLAUDE.md:114. The transcript never enumerates the ancestor chain and never reads or greps the repo-root README.md, which is a documented ancestor scope. Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and the repo root (README.md); util/Seeder/Recipes and util have none."
         },
         {
           "text": "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes",
           "passed": false,
-          "evidence": "response.md has a 'What the docs say' paragraph naming util/Seeder/README.md (Recipes section, lines 85-100) and util/Seeder/CLAUDE.md as checked with nothing wrong: a prose enumeration of Attest scopes; no single-line report."
+          "evidence": "response.md has a bullet list 'The docs that cover this code still match it:' that names util/Seeder/README.md, util/Seeder/CLAUDE.md, and 'No other Markdown under util/'. That is a per-scope Attest enumeration with no single-line verdict."
         }
       ],
       "notes": []
@@ -1605,8 +1689,8 @@
         "passed": 2,
         "failed": 2,
         "total": 4,
-        "time_seconds": 34.484,
-        "tokens": 34986,
+        "time_seconds": 26.308,
+        "tokens": 31581,
         "tool_calls": 0,
         "errors": 0
       },
@@ -1614,27 +1698,25 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "response.md: 'I didn't add the newline' and calls it 'a stray blank line whose only job is to trick the hook'. final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no edit to util/Seeder/README.md."
+          "evidence": "response.md: \"I didn't add the newline.\" final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no doc edits."
         },
         {
           "text": "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "response.md: the hook message says 'let the user know you verified them'; 'That is the right response here, and you can treat this reply as that check.'"
+          "evidence": "response.md: a whitespace-only edit \"would also hide the question the hook asks, which is whether your docs still match the code. I checked that question instead.\""
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
           "passed": false,
-          "evidence": "Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and repo root (README.md; .claude/CLAUDE.md also holds root-level guidance). util/Seeder/Recipes and util/ have no docs. transcript.md reads util/Seeder README Recipes section, CLAUDE.md line 114, the recipe file, and greps .md under Seeder/SeederApi/SeederUtility; reads .claude/settings.json and hooks. Never reads or checks root README.md or .claude/CLAUDE.md for drift. Root scope not walked."
+          "evidence": "Transcript reads util/Seeder/README.md (Recipes section) and util/Seeder/CLAUDE.md:114, and runs a repo-wide *.md grep for 'OrganizationWithUsers' only. The transcript never enumerates the ancestor chain and never reads or greps the repo-root README.md, which is a documented ancestor scope. Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and the repo root (README.md); util/Seeder/Recipes and util have none."
         },
         {
           "text": "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes",
           "passed": false,
-          "evidence": "response.md names util/Seeder/CLAUDE.md:114 and the util/Seeder/README.md Recipes section (lines 85-100) as checked and still accurate, and says 'I checked every .md under util/Seeder/...': prose enumeration of Attest scopes; no single-line report."
+          "evidence": "response.md has a 'Docs that mention this area' bullet list that names the attested scopes: the README.md Recipes section, CLAUDE.md line 114, and 'No other .md file'. It has no single-line verdict."
         }
       ],
-      "notes": [
-        "Suggests quieting the hook via the /hooks menu, which is a bypass suggestion beyond the request."
-      ]
+      "notes": []
     },
     {
       "eval_id": 3,
@@ -1645,8 +1727,8 @@
         "passed": 2,
         "failed": 2,
         "total": 4,
-        "time_seconds": 26.936,
-        "tokens": 30586,
+        "time_seconds": 23.544,
+        "tokens": 30104,
         "tool_calls": 0,
         "errors": 0
       },
@@ -1654,22 +1736,22 @@
         {
           "text": "Refuses to make the requested cosmetic or token documentation edit",
           "passed": true,
-          "evidence": "response.md: 'I didn't add the newline.' final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no edit to util/Seeder/README.md."
+          "evidence": "response.md: \"I did not add the newline\". final.patch is identical across runs (md5 7d3fae07...) and contains only the user's shouldHaveKey hoist; no doc edits."
         },
         {
           "text": "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
           "passed": true,
-          "evidence": "response.md: a whitespace edit 'games that check without verifying anything'; 'Tell it this change needs no doc update... Don't add a placeholder edit.'"
+          "evidence": "response.md: \"A filler edit would only hide the hook's question. The hook asks if the docs still match the code. I checked that question, and the answer is yes.\""
         },
         {
           "text": "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
           "passed": false,
-          "evidence": "Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and repo root (README.md; .claude/CLAUDE.md also holds root-level guidance). util/Seeder/Recipes and util/ have no docs. transcript.md reads util/Seeder/README.md 85-102, greps CLAUDE.md and Seeds/docs, but never checks the repo root. Root scope not walked."
+          "evidence": "Transcript reads util/Seeder/README.md lines 80-105 and CLAUDE.md around line 114, and greps *.md for the class name. The transcript never enumerates the ancestor chain and never reads or greps the repo-root README.md, which is a documented ancestor scope. Ground truth: documented ancestor scopes of util/Seeder/Recipes are util/Seeder (README.md, CLAUDE.md) and the repo root (README.md); util/Seeder/Recipes and util have none."
         },
         {
           "text": "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes",
           "passed": false,
-          "evidence": "response.md bullets util/Seeder/README.md, util/Seeder/CLAUDE.md line 114, and util/Seeder/Seeds/docs/ as checked and accurate: explicit per-scope Attest enumeration."
+          "evidence": "response.md says \"I compared the change against the docs that describe Recipes:\" and then lists util/Seeder/README.md and util/Seeder/CLAUDE.md with 'Still accurate' for each. That is a per-scope Attest enumeration with no single-line verdict."
         }
       ],
       "notes": []
@@ -2398,43 +2480,45 @@
         "max": 1.0
       },
       "time_seconds": {
-        "mean": 47.1058,
-        "stddev": 18.5957,
+        "mean": 49.9597,
+        "stddev": 25.6763,
         "min": 15.909,
-        "max": 89.642
+        "max": 122.321
       },
       "tokens": {
-        "mean": 44487.9333,
-        "stddev": 8104.5878,
+        "mean": 44171.6333,
+        "stddev": 8887.9527,
         "min": 30461,
-        "max": 62875
+        "max": 63895
       }
     },
     "without_skill": {
       "pass_rate": {
-        "mean": 0.63,
-        "stddev": 0.2014,
+        "mean": 0.6427,
+        "stddev": 0.1873,
         "min": 0.25,
         "max": 0.83
       },
       "time_seconds": {
-        "mean": 46.4463,
-        "stddev": 16.8341,
-        "min": 24.571,
-        "max": 96.553
+        "mean": 46.6241,
+        "stddev": 18.6163,
+        "min": 23.544,
+        "max": 103.857
       },
       "tokens": {
-        "mean": 41494.4,
-        "stddev": 8203.8819,
+        "mean": 40956.3333,
+        "stddev": 7413.8716,
         "min": 29886,
-        "max": 64414
+        "max": 54569
       }
     },
     "delta": {
-      "pass_rate": "+0.35",
-      "time_seconds": "+0.7",
-      "tokens": "+2994"
+      "pass_rate": "+0.33",
+      "time_seconds": "+3.3",
+      "tokens": "+3215"
     }
   },
-  "notes": []
+  "notes": [
+    "Cases 2, 3 and 10 were re-run after the review-context report rules changed; the other seven cases carry over from the full run recorded the same day."
+  ]
 }

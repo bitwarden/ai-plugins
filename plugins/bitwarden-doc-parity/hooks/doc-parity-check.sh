@@ -83,7 +83,7 @@ is_noise() {
     package-lock.json | */package-lock.json) return 0 ;;
     pnpm-lock.yaml | */pnpm-lock.yaml) return 0 ;;
     yarn.lock | */yarn.lock) return 0 ;;
-    *packages.lock.json) return 0 ;;
+    packages.lock.json | */packages.lock.json) return 0 ;;
     Cargo.lock | */Cargo.lock) return 0 ;;
   esac
   return 1

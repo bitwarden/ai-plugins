@@ -121,12 +121,15 @@
       "id": 10,
       "name": "review-context-out-of-repo-discovery",
       "prompt": "You are running as the documentation pass of a pull request review on bitwarden/server. The PR is titled \"Rename SeederUtility CLI verb 'organization' to 'org-preset' and change its required flags\". The diff renames the SeederUtility command and its options and updates util/SeederUtility/README.md accordingly. Perform the doc-parity review.",
-      "expected_output": "Verifies the in-repo scopes (util/SeederUtility, util/Seeder cross-references such as CLAUDE.md pointers, repo root) and then performs out-of-repo discovery: derives search terms from the PR diff and title (command name, old and new verbs, seeder tooling vocabulary), searches the contributing-docs corpus for pages that describe the SeederUtility CLI, reads candidates, and for any invalidated page calls it out stating the external-docs flow — a work item MUST be created before merge and a stale marker MUST be applied to the invalidated page.",
+      "expected_output": "Verifies the in-repo scopes (util/SeederUtility, util/Seeder cross-references such as CLAUDE.md pointers, repo root) and then performs out-of-repo discovery: derives search terms from the PR diff and title (command name, old and new verbs, seeder tooling vocabulary), searches the contributing-docs corpus for pages that describe the SeederUtility CLI, reads candidates, and for any invalidated page calls it out stating the external-docs flow — a work item MUST be created before merge and a stale marker MUST be applied to the invalidated page. Makes no edits: in-repo docs that need changes are reported as callouts naming the doc and what it must say, and the scopes that needed no change appear only inside a collapsed <details> block.",
       "expectations": [
         "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
         "Searches the contributing-docs corpus (contributing.bitwarden.com / bitwarden/contributing-docs) with those terms and reads candidate pages before judging",
         "For any external page the rename invalidates, calls it out and states the required external-docs flow: a work item created before merge and a stale marker applied to the page",
-        "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility"
+        "Also verifies the in-repo documented scopes, including cross-references from util/Seeder/CLAUDE.md to util/SeederUtility",
+        "Makes no file edits; as a review, it reports needed in-repo changes instead of applying them",
+        "Reports each in-repo doc the change invalidates as a callout naming the doc and what it must say",
+        "Names the scopes that needed no change only inside a collapsed `<details>` block, not in the main body of the review summary. One sentence in the main body confirming the PR's own documentation edits are accurate is allowed"
       ]
     }
   ]

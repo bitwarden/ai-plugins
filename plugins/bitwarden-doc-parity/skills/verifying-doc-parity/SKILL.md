@@ -26,7 +26,7 @@ Collect the full set of changed files and read the diff, not just the file list,
 
 Before walking the tree, consider whether the change qualifies as a tripwire false positive: a formatting-only diff, generated output, or a doc-comment-only edit that the Stop hook classified as code. When it does, **dismiss** the check with a one-line reason naming the false-positive class and end the skill.
 
-### Step 2: Enumerate every documented ancestor scope
+### Step 2: Enumerate every documented scope and surface
 
 For each changed file, walk its directory chain from the file's own directory up to and including the repo root. A directory is a documented scope when it contains a `README.md`, a `CLAUDE.md`, a `docs/` directory, or diagram sources (`.mmd`, `.mermaid`). Below component scope, the documentation surface is source-embedded: Rust `//!` module docs, C# XML doc comments, JSDoc/TSDoc on public symbols. When the changed area of a source file carries such doc comments, treat that file as its own documented surface. Collect the union of documented scopes and surfaces across all changed files.
 
@@ -45,7 +45,7 @@ Never token-edit. Do not make a cosmetic or token documentation edit to satisfy 
 
 ### Step 4: Report concisely
 
-The Step 3 walk covers every documented scope and surface. The user-facing report's shape is determined by the outcomes, never by how many scopes you checked. Per-scope reasoning belongs in internal thinking, not in the user-facing output. Finish every Step 3 judgment before choosing a report shape; the one-line report is the result of an all-Attest walk, not a reason to Attest. In a review, out-of-repo callouts are always reported in addition to the shape below.
+The Step 3 walk covers every documented scope and surface. The user-facing report's shape is determined by the outcomes, never by how many scopes you checked. Per-scope reasoning belongs in internal thinking, not in the user-facing output. Finish every Step 3 judgment before choosing a report shape; the one-line report is the result of an all-Attest walk, not a reason to Attest. In a review, out-of-repo callouts are always reported in addition to the shape below, and the attested scopes are listed inside a collapsed `<details>` block so the posted summary stays auditable after the fact; the "do not name attested scopes" rule in the shapes below is session guidance and does not apply inside that block.
 
 **All Attest, no Updates — the common case.** The entire report is one line:
 
@@ -55,7 +55,7 @@ Documentation parity: verified current, no changes required.
 
 Do not name the attested scopes anywhere in the response, in a list or in prose. A sentence such as "I checked util/Seeder/README.md and CLAUDE.md, and neither describes this logic" is the same enumeration as a bulleted list, so leave it out. When the skill declined a user request, such as a token edit, the response can explain the refusal, but the explanation does not list scopes. The walk's rigor is in Step 3, not in the report.
 
-**Any Updates.** List each Update with a one-line reason. Do not name the scopes that attested, in a list or in prose; the user can ask if they want to know what else was checked. When the user already edited documentation as part of the change, one sentence confirming those edits are accurate is fine.
+**Any Updates.** List each Update with a one-line reason. In a review, where no edit is applied, each Update is reported as a callout naming the in-repo doc and what it must say. Do not name the scopes that attested, in a list or in prose; the user can ask if they want to know what else was checked. When the user already edited documentation as part of the change, one sentence confirming those edits are accurate is fine.
 
 ```text
 Documentation parity:
