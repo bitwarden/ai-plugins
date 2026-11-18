@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.1] - 2026-11-17
+
+### Fixed
+
+- The `bitwarden-atlassian` MCP server starts on Windows. It used to launch through `bash`, which on Windows with WSL installed runs the WSL launcher instead of Git Bash, so the server exited at launch. It now launches through `node` and a `launch.mjs` script that runs the same install, build, and start steps on macOS, Linux, and Windows. The build no longer runs `chmod`, which Windows lacks.
+
 ## [2.9.0] - 2026-10-30
 
 ### Added

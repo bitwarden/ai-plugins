@@ -8,7 +8,7 @@
     "bitwarden-atlassian-mcp": "./build/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "tsc",
     "watch": "tsc --watch",
     "dev": "tsc && node build/index.js",
     "inspector": "pnpm dlx @modelcontextprotocol/inspector@0.22.0 build/index.js",

@@ -8,7 +8,7 @@
     "bitwarden-test-automation-mcp": "./build/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "tsc",
     "watch": "tsc --watch",
     "dev": "tsc && node build/index.js",
     "test": "vitest run",

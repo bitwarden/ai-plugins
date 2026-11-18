@@ -2,10 +2,9 @@
   "mcpServers": {
     "bitwarden-atlassian": {
       "type": "stdio",
-      "command": "bash",
+      "command": "node",
       "args": [
-        "-c",
-        "cd \"${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server\" && CPV=$(node -p 'require(\"./package.json\").devDependencies.corepack.trim()') && npm exec --yes corepack@\"$CPV\" -- pnpm install --frozen-lockfile --prod --silent >/dev/null && npm exec --yes corepack@\"$CPV\" -- pnpm run build >/dev/null && exec node build/index.js"
+        "${CLAUDE_PLUGIN_ROOT}/mcp/bitwarden-atlassian-mcp-server/launch.mjs"
       ],
       "env": {
         "ATLASSIAN_CLOUD_ID": "${ATLASSIAN_CLOUD_ID}",
