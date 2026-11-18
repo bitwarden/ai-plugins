@@ -8,7 +8,7 @@
 # a CLAUDE.md, a docs/ directory, or diagram sources (.mmd, .mermaid), the
 # same definition SKILL.md uses. Root-scope docs do not arm the tripwire, since the
 # root is an ancestor of every file; their verification belongs to the
-# semantic layer.
+# semantic layer. Package-manager lock files are not counted as changed code.
 #
 # Behavior: blocks exactly once per session with a message directing the
 # agent to the verifying-doc-parity skill, then allows through.

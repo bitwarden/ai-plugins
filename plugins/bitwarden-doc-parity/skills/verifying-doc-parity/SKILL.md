@@ -45,7 +45,7 @@ Never token-edit. Do not make a cosmetic or token documentation edit to satisfy 
 
 ### Step 4: Report concisely
 
-The Step 3 walk covers every documented scope and surface. The user-facing report's shape is determined by the outcomes, never by how many scopes you checked. Per-scope reasoning belongs in internal thinking, not in the user-facing output. Finish every Step 3 judgment before choosing a report shape; the one-line report is the result of an all-Attest walk, not a reason to Attest.
+The Step 3 walk covers every documented scope and surface. The user-facing report's shape is determined by the outcomes, never by how many scopes you checked. Per-scope reasoning belongs in internal thinking, not in the user-facing output. Finish every Step 3 judgment before choosing a report shape; the one-line report is the result of an all-Attest walk, not a reason to Attest. In a review, out-of-repo callouts are always reported in addition to the shape below.
 
 **All Attest, no Updates — the common case.** The entire report is one line:
 
