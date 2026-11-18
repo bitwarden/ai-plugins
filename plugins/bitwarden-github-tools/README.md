@@ -21,9 +21,15 @@ Ask Claude Code to search the Bitwarden organization:
 - "Find where WebAuthn login is implemented"
 - "What repos use bitwarden-fido?"
 
-The skill uses `gh search code`, `gh search repos`, and `gh api` to scan the organization and presents results grouped by repository with file paths and direct GitHub URLs.
+The skill uses `gh search code`, `gh search repos`, `gh repo view`, and `gh api` to scan the organization and presents results grouped by repository with file paths and direct GitHub URLs.
 
-## Prerequisites
+## Installation
+
+```bash
+/plugin install bitwarden-github-tools@bitwarden-marketplace
+```
+
+### Prerequisites
 
 - **GitHub CLI (`gh`)** installed and authenticated
 - Access to the `bitwarden` GitHub organization
