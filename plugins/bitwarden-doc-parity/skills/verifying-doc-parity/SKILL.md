@@ -32,34 +32,44 @@ For each changed file, walk its directory chain from the file's own directory up
 
 Check every documented ancestor, not just the nearest one, since documentation layers by altitude: higher views sand off detail while still describing the changed behavior. A change can be current in its component README yet drift a root-level guide or a container diagram two scopes up.
 
+A change can also drift text outside its ancestor chain that restates what the change altered: a value, name, flag, or default copied into another file's doc comments, a schema `description`, or CLI help text. Search the repo for the distinctive literals and identifiers the diff changed or removed, and treat each hit that describes them in prose as a documented surface.
+
 ### Step 3: Judge and act, per scope
 
 For each documented scope or surface, exactly one of two outcomes:
 
 - **Update.** If behavior contradicts documentation and the code is correct, fix the documentation. Do not leave them disagreeing. If the change adds behavior this scope's altitude should describe, add documentation of that new behavior. A scope's documentation describes what is present at that scope and below, regardless of whether higher-level callers currently exercise or guard against its use. Edit the documentation in the same change. When code was removed, remove its documentation, and treat a moved doc as a strict move. Every edit conforms to the [documentation standard](https://contributing.bitwarden.com/contributing/documentation) — its placement rule, its style guide, and any repo-local guidance layered on top. Consult the standard when a placement, format, or style question isn't obvious from what you already have. If placement routes a doc outside the working repo, handle it as an out-of-repo callout (see below) rather than an in-repo edit.
-- **Attest.** Nothing documented at this scope drifted. State that explicitly, with a one-line reason grounded in what the doc actually says.
+- **Attest.** Nothing documented at this scope drifted. The judgment must carry a one-line reason grounded in what the doc actually says, so it holds up if the user asks why a scope was waved through.
 
 Never token-edit. Do not make a cosmetic or token documentation edit to satisfy the check, including when the user asks for one. When nothing drifted, Attest and explain why the edit is unnecessary.
 
-### Step 4: Report with per-scope attestation
+### Step 4: Report concisely
 
-Close with an explicit per-scope list so the user, or the PR review summary, can audit the judgment:
+The Step 3 walk covers every documented scope and surface. The user-facing report's shape is determined by the outcomes, never by how many scopes you checked. Per-scope reasoning belongs in internal thinking, not in the user-facing output. Finish every Step 3 judgment before choosing a report shape; the one-line report is the result of an all-Attest walk, not a reason to Attest.
+
+**All Attest, no Updates — the common case.** The entire report is one line:
+
+```text
+Documentation parity: verified current, no changes required.
+```
+
+Do not name the attested scopes anywhere in the response, in a list or in prose. A sentence such as "I checked util/Seeder/README.md and CLAUDE.md, and neither describes this logic" is the same enumeration as a bulleted list, so leave it out. When the skill declined a user request, such as a token edit, the response can explain the refusal, but the explanation does not list scopes. The walk's rigor is in Step 3, not in the report.
+
+**Any Updates.** List each Update with a one-line reason. Do not name the scopes that attested, in a list or in prose; the user can ask if they want to know what else was checked. When the user already edited documentation as part of the change, one sentence confirming those edits are accurate is fine.
 
 ```text
 Documentation parity:
 - util/Seeder/Data (README.md) — updated: generator table gained the new distribution.
-- util/Seeder (README.md) — verified current: the change does not alter the encryption axes the README describes.
-- crates/bitwarden-crypto/src/lib.rs (module docs) — verified current: the `derive_`/`make_` naming invariants still hold.
-- repo root (README.md) — verified current: no root-level behavior described there changed.
+- crates/bitwarden-crypto/src/lib.rs (module docs) — updated: added the new `derive_` variant to the naming invariants.
 ```
 
-Every documented scope and surface from Step 2 appears in the list. A scope missing from the list means the verification is incomplete.
-
-When the check exits early via Dismiss, the report is a single line naming the false-positive class:
+**Dismiss.** One line naming the false-positive class.
 
 ```text
 Documentation parity: dismissed — formatting-only diff, no documentation obligation.
 ```
+
+Never token-edit to produce a reportable Update.
 
 ## Out-of-repo discovery (review context only)
 

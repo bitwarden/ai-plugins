@@ -18,7 +18,7 @@ Behavior cases run against the Seeder subsystem of [bitwarden/server](https://gi
 
 These evals are executed against a pinned server ref, `d6c84a7562cc6b464de910dbf829690885500137`. To increase stability in testing, evaluate against that reference point.
 
-Each case is constructed so a run that skips a documented scope, stays silent instead of attesting, token-edits its way past the gate, or mishandles a specific outcome type (Update, Attest, Dismiss) fails a named expectation. Behavior cases assume the run happens inside a bitwarden/server checkout so the ground-truth docs are readable.
+Each case is constructed so a run that skips a documented scope during the walk, token-edits its way past the gate, or emits a report shape that mishandles the outcome type (Update list, one-line Attest summary, or one-line Dismiss) fails a named expectation. Behavior cases assume the run happens inside a bitwarden/server checkout so the ground-truth docs are readable.
 
 Case 10 exercises the review context (out-of-repo discovery against the contributing-docs corpus); all other cases are session cases. Cases involve live edits to a scratch checkout, so run them against a disposable clone or a git worktree, never a working tree you care about.
 

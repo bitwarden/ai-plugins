@@ -5,29 +5,30 @@
     "repo": "bitwarden/server",
     "commit": "d6c84a7562cc6b464de910dbf829690885500137"
   },
-  "purpose": "Behavior test cases for verifying-doc-parity, anchored in bitwarden/server's Seeder subsystem (util/Seeder, util/SeederApi, util/SeederUtility) whose code-to-docs mapping is known ground truth: util/Seeder/README.md (subsystem-level: cipher encryption states, encryption-scheme axes with attachmentVersion enumeration, pipeline architecture), util/Seeder/CLAUDE.md (test commands, encryption-scheme taxonomy, deterministic data generation), util/Seeder/Data/README.md (design principles including a deterministic-generation claim, Generators section, Current Capabilities catalog by cipher type), util/Seeder/Seeds/README.md (preset catalog table with folder columns), util/Seeder/Seeds/docs/presets.md (per-preset catalog with rows keyed by preset name), and the repo root README. Each case is constructed so a run that skips a documented scope, stays silent instead of attesting, token-edits its way past the gate, or mishandles a specific outcome type (Update, Attest, Dismiss) fails a named expectation. Cases involve live edits to a scratch checkout; run against a disposable clone. Prompts do not name the skill; they are phrased as a developer would in the terminal, to keep the subject blind. See ./README.md for the run flow.",
+  "purpose": "Behavior test cases for verifying-doc-parity, anchored in bitwarden/server's Seeder subsystem (util/Seeder, util/SeederApi, util/SeederUtility) whose code-to-docs mapping is known ground truth: util/Seeder/README.md (subsystem-level: cipher encryption states, encryption-scheme axes with attachmentVersion enumeration, pipeline architecture), util/Seeder/CLAUDE.md (test commands, encryption-scheme taxonomy, deterministic data generation), util/Seeder/Data/README.md (design principles including a deterministic-generation claim, Generators section, Current Capabilities catalog by cipher type), util/Seeder/Seeds/README.md (preset catalog table with folder columns), util/Seeder/Seeds/docs/presets.md (per-preset catalog with rows keyed by preset name), util/Seeder/Seeds/schemas/cipher.schema.json (fixture contract read by authors and editors, not loaded by code), and the repo root README. Each case is constructed so a run that skips a documented scope during the walk, token-edits its way past the gate, or emits a report shape that mishandles the outcome type (Update list, one-line Attest summary, or one-line Dismiss) fails a named expectation. Cases involve live edits to a scratch checkout; run against a disposable clone. Prompts do not name the skill; they are phrased as a developer would in the terminal, to keep the subject blind. See ./README.md for the run flow.",
   "evals": [
     {
       "id": 1,
       "name": "enumerates-every-documented-ancestor",
-      "prompt": "In bitwarden/server I added a new generator class util/Seeder/Data/Generators/PassphraseGenerator.cs that produces diceware-style passphrases, wired into GeneratorContext. The doc-parity hook blocked my session. Verify the documentation is current with this change.",
-      "expected_output": "Reads the diff, enumerates every documented ancestor scope (util/Seeder/Data, util/Seeder, repo root) plus the source-embedded XML doc surfaces on the touched classes, then updates util/Seeder/Data/README.md's Current Capabilities / Generators section since that scope catalogs generators, and attests for higher scopes with grounded reasons. Ends with a per-scope report.",
+      "prompt": "In bitwarden/server I added a new username category, `PlusAddressedEmail` (first.last+site@domain), to the Seeder's cipher username generator and gave it 5% of the realistic distribution. The doc-parity hook blocked my session. Verify the documentation is current with this change.",
+      "expected_output": "Reads the diff, enumerates every documented ancestor scope (util/Seeder/Data, util/Seeder, repo root) plus the source-embedded XML doc surfaces on the touched types, then updates util/Seeder/Data/README.md's Login Ciphers capability line, which counts 8 username patterns, to count 9 and name the new category. Searches outside the ancestor chain and updates util/Seeder/Options/OrganizationVaultOptions.cs, whose UsernameDistribution XML doc still describes the realistic mix as 45% corporate. Higher scopes attest internally. The user-facing report lists only the Update lines.",
       "expectations": [
         "Enumerates util/Seeder/Data, util/Seeder, and the repo root as documented scopes of the change, not only the nearest README",
-        "Reads util/Seeder/Data/README.md before judging, and updates its generator documentation to include the new generator",
-        "For each scope with no drift, gives an explicit attestation with a reason grounded in the doc's actual content, rather than staying silent about the scope",
-        "Ends with a per-scope report in which every enumerated documented scope appears exactly once as either updated or verified current"
+        "Reads util/Seeder/Data/README.md and updates its Login Ciphers capability line from 8 to 9 username patterns, naming the new category",
+        "For each scope with no drift, internally judges it as not-drifted with a reason grounded in the doc's actual content, rather than skipping the scope from the walk",
+        "User-facing report lists each Update line, including util/Seeder/Data/README.md, with a one-line reason; does not enumerate the Attest scopes",
+        "Updates the \"45% corporate\" reference in util/Seeder/Options/OrganizationVaultOptions.cs, a restatement of the changed distribution outside the ancestor chain"
       ]
     },
     {
       "id": 2,
       "name": "attestation-only-happy-path",
       "prompt": "I refactored util/Seeder/Services/ManglerService.cs in bitwarden/server — extracted two private helpers out of the Mangle method and renamed a couple of internal locals for readability. No public surface change, no behavior change. The doc-parity hook fired. Can you clear it?",
-      "expected_output": "Reads the docs at every documented ancestor scope of the change (util/Seeder, repo root, plus CLAUDE.md at util/Seeder), confirms none of them describe internals that changed, and attests per scope. Makes zero documentation edits and explains that the attestation is the legitimate path when nothing drifted.",
+      "expected_output": "Reads the docs at every documented ancestor scope of the change (util/Seeder, repo root, plus CLAUDE.md at util/Seeder), confirms none of them describe internals that changed, and attests internally per scope. Makes zero documentation edits. The user-facing report is a single line stating documentation parity is verified current and no changes are required.",
       "expectations": [
         "Reads util/Seeder/README.md and util/Seeder/CLAUDE.md before concluding",
         "Makes zero documentation edits for the behavior-preserving refactor",
-        "Ends with an explicit per-scope report where each scope is marked verified current with a one-line reason grounded in what the doc actually says",
+        "Ends with a single-line report stating documentation parity is verified current (no changes required), rather than enumerating each attested scope",
         "Does not make a token or cosmetic edit to satisfy the hook"
       ]
     },
@@ -35,60 +36,61 @@
       "id": 3,
       "name": "refuses-checkbox-theater",
       "prompt": "The doc-parity Stop hook has fired three times in a row after my changes under util/Seeder/Recipes/. Can you just add a trailing newline to util/Seeder/README.md so the hook passes and we can ship this?",
-      "expected_output": "Refuses the cosmetic edit, explains that attestation is the legitimate path when nothing drifted, then performs a real per-scope verification against the Recipes/ changes and closes with an update-or-attest report.",
+      "expected_output": "Refuses the cosmetic edit, explains that attestation is the legitimate path when nothing drifted, then performs a real per-scope verification against the Recipes/ changes and closes with a report matching the Step 4 rule (single-line Attest when nothing drifted, Update lines when drift was found).",
       "expectations": [
         "Refuses to make the requested cosmetic or token documentation edit",
         "Explains why the refusal — that a real per-scope verification is the correct path through the hook",
         "Performs the actual verification: reads the docs at every documented ancestor scope of util/Seeder/Recipes and either updates or attests per scope",
-        "Ends with a per-scope report grounded in what the docs say"
+        "Final report follows the Step 4 rule — a single line when nothing drifted, or an Update list when drift was found; does not emit a per-scope enumeration of Attest scopes"
       ]
     },
     {
       "id": 4,
       "name": "fixes-docs-that-contradict-behavior",
       "prompt": "Doing a small tweak to util/Seeder/Data/Distributions/UserStatusDistributions.cs (adjusted a percentage split). While I was in there I noticed util/Seeder/Data/README.md's Design Principles claim generation is deterministic — 'same org ID → same test data → reproducible debugging' — but the distribution the file next to my change uses `DateTime.Now` at call time, so runs already differ. My change doesn't touch that. Docs check please.",
-      "expected_output": "Does not defer the contradiction just because the current diff didn't introduce it. Either edits util/Seeder/Data/README.md's determinism claim to describe reality, or surfaces the contradiction as an immediate decision (fix docs vs fix code) with a recommendation. Also completes the per-scope verification for the actual small change.",
+      "expected_output": "Does not defer the contradiction just because the current diff didn't introduce it. Either edits util/Seeder/Data/README.md's determinism claim to describe reality, or surfaces the contradiction as an immediate decision (fix docs vs fix code) with a recommendation. Also completes the Step 3 walk for the actual small change.",
       "expectations": [
         "Names what the doc says (the deterministic claim) and what the code does (wall-clock non-determinism) as a concrete disagreement",
         "Either edits util/Seeder/Data/README.md's determinism claim, or surfaces the contradiction with a specific recommendation — does not silently defer",
         "Still completes per-scope verification for the actual UserStatusDistributions change",
-        "Ends with a per-scope report"
+        "Final report follows the Step 4 rule — Update line(s) when docs were edited, one-line Attest when no edit was needed"
       ]
     },
     {
       "id": 5,
       "name": "deletion-is-doc-maintenance",
       "prompt": "In bitwarden/server I deleted the features.policy-enterprise preset — removed util/Seeder/Seeds/fixtures/presets/features/policy-enterprise.json and any fixture-only files it referenced. Doc-parity check please.",
-      "expected_output": "Treats deletion as documentation maintenance: removes the policy-enterprise row from the preset catalog in util/Seeder/Seeds/docs/presets.md, checks the util/Seeder/Seeds/README.md preset table and the scenarios/ pages for references, and removes them. Verifies higher scopes and reports per scope.",
+      "expected_output": "Treats deletion as documentation maintenance: removes the policy-enterprise row from the preset catalog in util/Seeder/Seeds/docs/presets.md, checks the util/Seeder/Seeds/README.md preset table and the scenarios/ pages for references, and removes them. Verifies higher scopes as part of the Step 3 walk; the user-facing report lists only the Update lines.",
       "expectations": [
         "Removes the policy-enterprise entry from util/Seeder/Seeds/docs/presets.md's preset catalog",
         "Checks util/Seeder/Seeds/README.md and util/Seeder/Seeds/docs/scenarios/ for inbound references to the deleted preset and updates any that reference it",
-        "Verifies the higher scopes (util/Seeder, repo root) and reports per scope",
+        "Verifies the higher scopes (util/Seeder, repo root) during the Step 3 walk and omits their Attests from the user-facing report",
         "Does not leave catalog rows or links pointing at the removed preset"
       ]
     },
     {
       "id": 6,
-      "name": "drift-two-scopes-up",
-      "prompt": "I extended the Seeder attachment pipeline in bitwarden/server to support a new attachment scheme `v3` where the attachment key is wrapped by an org key. Changes land in util/Seeder/Pipeline/ and util/Seeder/Factories/. I already updated the XML doc comments on the touched classes. Check the docs.",
-      "expected_output": "Recognizes that class-level XML doc updates do not discharge the higher scopes. Reads util/Seeder/README.md, identifies the `attachmentVersion` axis table enumerating `v0 | v1 | v2` and the cipher/attachment strategy invariant, updates both for `v3`. Also checks the Seeds/ docs for `attachmentVersion` fixture-key references. Includes the changed source files' XML doc surfaces in the enumeration.",
+      "name": "xml-docs-do-not-discharge-readme",
+      "prompt": "In bitwarden/server I made `attachmentVersion` optional on Seeder fixture attachments. When it's omitted, the seeder now picks v2 for cipher-key ciphers and v1 otherwise. Changes are in util/Seeder/Models/ and util/Seeder/Steps/, and I already updated the XML doc comments on the touched types. Check the docs.",
+      "expected_output": "Recognizes that the updated XML doc comments do not discharge the higher scopes. Reads util/Seeder/README.md, sees that its Encryption Schemes table marks `userKey (default)` for `cipherEncryption` but gives no default for `attachmentVersion`, and adds the inferred default there. util/Seeder/CLAUDE.md lists each axis's values without a default for either, so attesting it is correct and editing it is optional. Searches outside the ancestor chain and updates util/Seeder/Seeds/schemas/cipher.schema.json, whose attachment `required` list and `attachmentVersion` description still treat the key as mandatory. Attests the Seeds scenario docs, which enumerate v0/v1/v2 and stay accurate. The user-facing report lists only the Update lines.",
       "expectations": [
-        "Reads util/Seeder/README.md and identifies that its `attachmentVersion` axis table enumerates `v0 | v1 | v2` and the cipher/attachment invariant needs revisiting for `v3`",
-        "Updates util/Seeder/README.md's attachmentVersion enumeration and invariant rather than only attesting",
-        "Enumerates the changed source files (Pipeline/, Factories/) as below-component source-embedded surfaces in Step 2, distinct from the tree-level README scopes",
-        "Also checks util/Seeder/Seeds/ documentation for references to the attachmentVersion key",
-        "Does not treat the already-updated XML doc comments as sufficient for the higher-scope READMEs"
+        "Reads util/Seeder/README.md and identifies that its Encryption Schemes table gives no default for `attachmentVersion`",
+        "Updates the util/Seeder/README.md Encryption Schemes section (the table or text directly beside it) to state the inferred default: v2 on a cipher-key host, v1 otherwise. Editing util/Seeder/CLAUDE.md is allowed but not required, since it gives no default for either axis",
+        "Judges the XML doc comments in the changed source files (Models/, Steps/) as documented surfaces in their own right, separate from the tree-level README scopes; any wording counts",
+        "Checks util/Seeder/Seeds/ documentation and util/Seeder/Seeds/schemas/cipher.schema.json for `attachmentVersion` references, and updates the schema's attachment `required` list and `attachmentVersion` description",
+        "Does not treat the already-updated XML doc comments as sufficient for the higher-scope READMEs",
+        "User-facing report lists each Update line with a one-line reason; does not enumerate the Attest scopes, in a list or in prose. One sentence confirming the user's own XML doc edits are accurate is allowed"
       ]
     },
     {
       "id": 7,
       "name": "instruction-files-count-as-documentation",
       "prompt": "In bitwarden/server I moved the Seeder integration tests from test/SeederApi.IntegrationTest/ to test/Seeder.IntegrationTest/ and updated the csproj references. Verify documentation parity.",
-      "expected_output": "Includes instruction files in the verification: util/Seeder/CLAUDE.md documents test commands with the old path (`dotnet test test/SeederApi.IntegrationTest/`) and is updated to the new path. Other Seeder docs are read, and any that state the old test-project path are updated; unaffected scopes get explicit attestations.",
+      "expected_output": "Includes instruction files in the verification: util/Seeder/CLAUDE.md documents test commands with the old path (`dotnet test test/SeederApi.IntegrationTest/`) and is updated to the new path. Other Seeder docs are read, and any that state the old test-project path are updated; unaffected scopes attest internally and are omitted from the user-facing report.",
       "expectations": [
         "Treats util/Seeder/CLAUDE.md as documentation in scope and updates its `dotnet test` command(s) to the new path",
         "Checks the other Seeder READMEs for references to the old test project path and updates any found",
-        "Reports per scope, marking each scope as either updated or verified current"
+        "Final report lists the Update line(s) with a one-line reason; omits scopes that attested"
       ]
     },
     {
@@ -118,7 +120,7 @@
     {
       "id": 10,
       "name": "review-context-out-of-repo-discovery",
-      "prompt": "You are running as the documentation pass of a pull request review on bitwarden/server. The PR is titled \"Rename SeederUtility CLI verb 'generate' to 'preset' and change its required flags\". The diff renames the SeederUtility command and its options and updates util/SeederUtility/README.md accordingly. Perform the doc-parity review.",
+      "prompt": "You are running as the documentation pass of a pull request review on bitwarden/server. The PR is titled \"Rename SeederUtility CLI verb 'organization' to 'org-preset' and change its required flags\". The diff renames the SeederUtility command and its options and updates util/SeederUtility/README.md accordingly. Perform the doc-parity review.",
       "expected_output": "Verifies the in-repo scopes (util/SeederUtility, util/Seeder cross-references such as CLAUDE.md pointers, repo root) and then performs out-of-repo discovery: derives search terms from the PR diff and title (command name, old and new verbs, seeder tooling vocabulary), searches the contributing-docs corpus for pages that describe the SeederUtility CLI, reads candidates, and for any invalidated page calls it out stating the external-docs flow — a work item MUST be created before merge and a stale marker MUST be applied to the invalidated page.",
       "expectations": [
         "Derives search terms from the renamed command verbs, changed paths, and the PR title vocabulary",
