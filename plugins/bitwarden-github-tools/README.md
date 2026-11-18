@@ -1,10 +1,10 @@
-# bitwarden-repo-search
+# bitwarden-github-tools
 
-Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live — directly from Claude Code.
+GitHub tools for Bitwarden — cross-repo code and feature discovery across the bitwarden organization, directly from Claude Code.
 
 ## Overview
 
-Bitwarden's codebase spans many repositories (`clients`, `server`, `sdk-internal`, `passkey-rs`, mobile apps, and more). This plugin eliminates the need to manually browse GitHub by providing a single skill that searches across the entire organization and returns structured, grouped results.
+Bitwarden's codebase spans many repositories (`clients`, `server`, `sdk-internal`, `passkey-rs`, mobile apps, and more). This plugin provides GitHub-focused skills, starting with cross-repo search that finds where code and features live across the entire organization.
 
 ## Skills
 
