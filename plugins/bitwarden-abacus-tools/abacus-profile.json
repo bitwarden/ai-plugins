@@ -1,7 +1,7 @@
 {
   "profile": "bitwarden",
   "version": "1.3.0",
-  "abacus": ">=0.20",
+  "abacus": ">=0.21",
   "plugins": {
     "workers": [
       "bitwarden-delivery-tools",
@@ -20,7 +20,7 @@
     "plan.analyze": "",
     "implement.guide": "",
     "review": {
-      "standard": { "agent": "bitwarden-code-review:bitwarden-code-reviewer" },
+      "standard": { "skill": "bitwarden-abacus-tools:standard-review" },
       "substantial": {
         "workflow": "bitwarden-abacus-tools:substantial-review"
       },
