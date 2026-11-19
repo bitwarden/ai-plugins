@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `assessing-test-coverage` step G checks Automation Type with `Bitwarden.TestmoValidator find-cases`, run in a local `bitwarden/test` clone on its checked-out branch. It needs the clone (`BITWARDEN_TEST_REPO`, or `test` beside the current repo) and the .NET SDK, and no Testmo key. The 50-ID limit is gone. A `[Description]` that lists several IDs now matches each of them, as the Testmo validator already does, and `[TestCase(..., Description = "...")]` IDs are now found.
 
+### Security
+
+- `assessing-test-coverage` pre-approves writes only to its `coverage-reports` data folder, written literally because `${CLAUDE_PLUGIN_DATA}` is not expanded for `--plugin-dir` loads. A write anywhere else now asks first, so text from a PR, Jira, or Testmo cannot change the `find-cases` project before `dotnet run` builds it.
+
 ### Removed
 
 - The `bitwarden-test-automation` MCP server and its CI workflow. The `find-cases` command in `bitwarden/test` replaces it.
