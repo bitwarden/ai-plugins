@@ -1,6 +1,7 @@
 ---
 name: searching-bitwarden-repos
 context: fork
+background: false
 agent: general-purpose
 description: "Search across all repositories in the Bitwarden GitHub organization to find where specific code, features, or topics live. Use for 'where is passkey code', 'which repo has X', 'find where feature Y is implemented', or any cross-repo code discovery question."
 argument-hint: "[search-query]"
@@ -40,8 +41,8 @@ gh search code --repo bitwarden/<repo-name> --limit 10 --json repository,path,te
 If results are too broad, refine with language or path filters:
 
 ```bash
-gh search code --owner bitwarden --limit 30 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term> language:rust'
-gh search code --owner bitwarden --limit 30 --json repository,path --jq '.[] | "\(.repository.nameWithOwner) \(.path)"' -- '<search term> path:src'
+gh search code --owner bitwarden --limit 30 --json repository,path,url --jq '.[] | "\(.repository.nameWithOwner) \(.path) \(.url)"' -- '<search term> language:rust'
+gh search code --owner bitwarden --limit 30 --json repository,path,url --jq '.[] | "\(.repository.nameWithOwner) \(.path) \(.url)"' -- '<search term> path:src'
 ```
 
 ### 2. Identify relevant repositories
