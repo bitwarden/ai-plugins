@@ -20,9 +20,9 @@ The hook blocks once per session and its message directs the agent to run the ve
 
 ### Layer 3: semantic verification skill
 
-`verifying-doc-parity` is the intelligence the hook invokes, also invocable on demand: read the diff, then read the documentation at every documented ancestor of the change, since references may occur at any level.
+`verifying-doc-parity` is the intelligence the hook invokes, also invocable on demand: read the diff, then read the documentation at every documented ancestor of the change, since references may occur at any level, plus any other file that restates a value or name the change altered.
 
-The outcome, per documented scope, is either an update or an explicit attestation that nothing documented there drifted.
+The outcome, per documented scope, is either an update or an attestation that nothing documented there drifted. The report lists only the updates; when every scope attests, it is a single line.
 
 ### Layer 4: CI face
 
