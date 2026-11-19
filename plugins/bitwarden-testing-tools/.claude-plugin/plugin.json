@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-testing-tools",
-  "version": "1.5.1",
-  "description": "Testing tools for Bitwarden: test coverage and Testmo case review, test layer recommendations, manual test cases, requirement readiness, test plans, and QA manual regression runs, plus the bundled bitwarden-test-automation MCP server.",
+  "version": "1.6.0",
+  "description": "Testing tools for Bitwarden: test coverage and Testmo case review, test layer recommendations, manual test cases, requirement readiness, test plans, and QA manual regression runs.",
   "author": {
     "name": "Bitwarden",
     "url": "https://github.com/bitwarden"
