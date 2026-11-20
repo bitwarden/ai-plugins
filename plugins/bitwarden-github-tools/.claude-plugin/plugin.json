@@ -1,0 +1,19 @@
+{
+  "name": "bitwarden-github-tools",
+  "version": "0.1.0",
+  "description": "GitHub tools for Bitwarden: cross-repo code and feature discovery across the bitwarden organization",
+  "author": {
+    "name": "Bitwarden",
+    "url": "https://github.com/bitwarden"
+  },
+  "homepage": "https://github.com/bitwarden/ai-plugins/tree/main/plugins/bitwarden-github-tools",
+  "repository": "https://github.com/bitwarden/ai-plugins",
+  "keywords": [
+    "search",
+    "github",
+    "repository",
+    "code-search",
+    "organization",
+    "discovery"
+  ]
+}
