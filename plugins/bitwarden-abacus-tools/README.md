@@ -9,13 +9,13 @@ follows the same conventions as work a Bitwarden engineer does by hand.
 
 ## What it does today
 
-| Abacus slot   | Bitwarden skill                                                                                                                                                                  | Effect                                                                                                                 |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `plan.source` | `bitwarden-atlassian-tools:researching-jira-issues`                                                                                                                              | "Plan PM-1234" works: the planner reads the issue, its links and Confluence pages into beads                           |
-| `assess-risk` | `bitwarden-code-review:assessing-change-risk`                                                                                                                                    | Each draft and each finished change is rated by Bitwarden's risk factors, which set how much human review its PR needs |
-| `review`      | `bitwarden-abacus-tools:standard-review` (standard), `bitwarden-abacus-tools:substantial-review` (substantial), `bitwarden-code-review:addressing-code-review-comments` (assess) | Each bead's change passes Bitwarden's code review, at the depth its risk calls for, before Abacus lands it             |
-| `land.commit` | `bitwarden-abacus-tools:commit-message` (over `bitwarden-delivery-tools:committing-changes`)                                                                                     | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket                             |
-| `land.pr`     | `bitwarden-abacus-tools:composing-abacus-pull-requests` (over `bitwarden-delivery-tools:applying-pr-conventions`)                                                                | Each bead's draft PR gets Bitwarden's conventional title, PR template body, `t:` type label and `ai-review` label      |
+| Abacus slot   | Bitwarden skill                                                                                                                                                                  | Effect                                                                                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan.source` | `bitwarden-atlassian-tools:researching-jira-issues`                                                                                                                              | "Plan PM-1234" works: the planner reads the issue, its links and Confluence pages into beads                                                            |
+| `assess-risk` | `bitwarden-code-review:assessing-change-risk`                                                                                                                                    | Each finished change is rated by Bitwarden's risk skill, which sets how much human review its PR needs; each draft gets a predicted rating at plan time |
+| `review`      | `bitwarden-abacus-tools:standard-review` (standard), `bitwarden-abacus-tools:substantial-review` (substantial), `bitwarden-code-review:addressing-code-review-comments` (assess) | Each bead's change passes Bitwarden's code review, at the depth its risk calls for, before Abacus lands it                                              |
+| `land.commit` | `bitwarden-abacus-tools:commit-message` (over `bitwarden-delivery-tools:committing-changes`)                                                                                     | Each bead's commit follows Bitwarden's format: `[PM-1234]`, or no bracket without a ticket                                                              |
+| `land.pr`     | `bitwarden-abacus-tools:composing-abacus-pull-requests` (over `bitwarden-delivery-tools:applying-pr-conventions`)                                                                | Each bead's draft PR gets Bitwarden's conventional title, PR template body, `t:` type label and `ai-review` label                                       |
 
 **Planning from Jira.** The planner reads the issue through the Atlassian tools, drafts beads with the issue key as
 their source, and turns the issue's acceptance criteria into checkable ones. It only reads: Abacus refuses Jira
@@ -69,12 +69,13 @@ The security reviewer runs as `bitwarden-security-engineer:bitwarden-security-en
 ## Coordinating roles
 
 The concierge and orchestrator launch with none of the Bitwarden plugins; the planner keeps
-`bitwarden-atlassian-tools` and `bitwarden-product-analyst`. Workers keep every plugin you have installed.
+`bitwarden-atlassian-tools`, `bitwarden-product-analyst` and `bitwarden-code-review`, which it uses to rate each draft's risk. Workers keep every plugin you have installed.
 
 ## Requirements
 
 - Abacus 0.15 or later to plan from Jira (`plan.source` arrived in 0.15); `land.commit` and `land.pr` work from 0.13.
 - Abacus 0.21 or later for the code review (a `review` entry that names a skill arrived in 0.21). Earlier versions run only Abacus's own reviewer, and their `abacus doctor` reports the `review` slot as unreadable.
+- `bitwarden-code-review` 3.1.0 or later, for `assessing-change-risk`. This plugin depends on it, so Claude Code installs or updates it along with this one.
 - The plugins it names, installed from this marketplace (`plugin-dev` from `claude-plugins-official`). If they aren't installed on a machine, Abacus can't use them; `abacus doctor` reports what's missing.
 
 ## Installation
