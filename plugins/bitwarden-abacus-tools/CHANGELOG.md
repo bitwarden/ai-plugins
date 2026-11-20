@@ -5,6 +5,12 @@ All notable changes to the `bitwarden-abacus-tools` plugin will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-11-20
+
+### Added
+
+- `assess-risk` mapped to `bitwarden-code-review:assessing-change-risk`, the same risk assessment Bitwarden engineers run on their own pull requests, so Abacus rates lane changes and sets their human review requirement by Bitwarden's factors rather than its generic built-in checklist. The planner runs the slot on each draft, so `bitwarden-code-review` is listed for the planner too, and `abacus doctor` names it when a machine is missing it.
+
 ## [1.3.0] - 2026-11-16
 
 ### Added
