@@ -286,15 +286,17 @@ Claude Code stores sessions using this pattern:
 ~/.claude/projects/{project-identifier}/{session-id}.jsonl
 ```
 
-Where `{project-identifier}` is calculated by replacing all `/` with `-` in the absolute working directory path:
+`locate-logs.sh` calculates `{project-identifier}` from the absolute working directory path. Unix paths replace `/` with `-`. Windows drive paths normalize the drive letter to uppercase and replace the drive colon and either path separator with `-`. On Git Bash, `/c/...` is converted to `C:/...` first; Unix `/c/...` paths retain their existing meaning.
 
 ```bash
-# Example: /Users/user/project → -Users-user-project
-PROJECT_ID=$(echo "${PWD}" | sed 's/\//\-/g')
-LOGS_DIR="${HOME}/.claude/projects/${PROJECT_ID}"
+# /Users/user/project → -Users-user-project
+# C:\Users\user\project → C--Users-user-project
+LOGS_DIR=$(scripts/locate-logs.sh)
 ```
 
 All scripts use `locate-logs.sh` internally for consistent path calculation.
+
+Run its Windows and Unix path regression tests with `bash scripts/tests/locate-logs.test.sh` from this skill's directory.
 
 ## Anti-Patterns to Avoid
 
