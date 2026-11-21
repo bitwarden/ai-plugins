@@ -1,4 +1,7 @@
 overrides:
-  hono: 4.13.13
+  hono: 4.13.16
   ip-address: 10.7.4
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  # Renovate security update: hono@4.13.16
+  - hono@4.13.16
