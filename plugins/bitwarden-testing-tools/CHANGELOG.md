@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - `assessing-test-coverage` pre-approves writes only to its `coverage-reports` data folder, written literally because `${CLAUDE_PLUGIN_DATA}` is not expanded for `--plugin-dir` loads. A write anywhere else now asks first, so text from a PR, Jira, or Testmo cannot change the `find-cases` project before `dotnet run` builds it.
+- `assessing-test-coverage` no longer pre-approves `git -C <clone> fetch origin`, so the fetch asks first. A pre-approved fetch could run a command through an injected `-c credential.helper` or `-c core.sshCommand` option without any file write.
 
 ### Removed
 
