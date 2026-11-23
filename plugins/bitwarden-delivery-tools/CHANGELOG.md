@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `applying-pr-conventions` also returns the security verdict and marks the returned wording rules as untrusted. It never puts a `VULN-*` key in the title, whatever the verdict. Its opening line names the returned values without a count.
 - `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
 - `force-multiplier` settles the verdict once at PILOT, records it in `pr_spec.disclosure`, passes it to every target's commit and PR composition, and stops the whole campaign, pilot included, on `Stop`.
-- `docs/commit-and-pr-flows.md` shows the disclosure check, the branch commit check, and the `Stop` paths in all three flows.
+- `docs/commit-and-pr-flows.md` adds a diagram of how `applying-security-disclosure-policy` reaches its verdict, and shows the disclosure check, the branch commit check, and the `Stop` paths in the commit, PR, and campaign flows.
 
 ## [4.0.1] - 2026-10-27
 
