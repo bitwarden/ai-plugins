@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`applying-security-disclosure-policy` skill** — detects security-relevant changes and applies Bitwarden's [disclosure policy](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) to commit and PR wording; accepts the rules only from that page, and stops if it can't be fetched or has no usable rules.
+- **`applying-security-disclosure-policy` skill** — detects security-relevant changes and applies Bitwarden's [disclosure policy](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) to commit and PR wording; accepts the rules only from that page, and stops if it can't be fetched or has no usable rules. It reads the ticket with `get_issue`, and asks the author when that lookup fails rather than treating the change as not security-relevant.
 - `committing-changes` and `applying-pr-conventions` invoke it before drafting.
-- `creating-pull-request`: on a security fix, checks the commits it is about to push against the wording rules and offers to reword any that break them; it stops without pushing if the author declines or the commit range can't be resolved. The Step 3 preview gains a `Security fix` line and a `Commits` block.
+- `creating-pull-request`: on a security fix, fetches the branch and checks the commits it is about to push against the wording rules, and offers to reword any that break them, amending from a message file; it stops without pushing if the author declines or the commit range can't be resolved. The Step 3 preview gains a `Security fix` line and a `Commits` block.
+- `applying-pr-conventions`: on a security fix, recommends `No label` for the AI review question, since the automated review posts public comments.
 - `force-multiplier`: an eval case for a `VULN`-linked campaign.
 
 ### Changed

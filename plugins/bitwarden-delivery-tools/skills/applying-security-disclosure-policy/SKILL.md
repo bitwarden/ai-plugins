@@ -1,6 +1,6 @@
 ---
 name: applying-security-disclosure-policy
-allowed-tools: AskUserQuestion, Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
+allowed-tools: AskUserQuestion, Bash(git branch --show-current), mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_confluence_page
 description: 'Decide whether a change is a security fix for disclosure purposes and, if it is, fetch Bitwarden''s canonical disclosure policy from Confluence and return the wording rules its commit message or pull request must follow. Use for "does the disclosure policy apply to this change", "how should I word the commit for this VULN fix", "what can the PR say about this vulnerability", "is this a security fix for disclosure purposes", or when committing-changes, applying-pr-conventions, or force-multiplier asks. Not for writing or submitting the commit or pull request itself (that is committing-changes or creating-pull-request), or for finding, triaging, or fixing the vulnerability in code (that is bitwarden-security-engineer).'
 ---
 
@@ -16,7 +16,7 @@ The branch and any ticket key are already in the conversation by the time this s
 
 Two tiers.
 
-**High-confidence: treat as security-relevant.** Resolve the ticket from the conversation, including a key embedded in the branch name. When `bitwarden-atlassian-tools` is installed, check it with `Skill(bitwarden-atlassian-tools:researching-jira-issues)`. Any of these counts:
+**High-confidence: treat as security-relevant.** Resolve the ticket from the conversation, including a key embedded in the branch name. When `bitwarden-atlassian-tools` is installed, read it with the `get_issue` MCP tool, which lists the project, issue type, labels, and linked issue keys. Don't run a full ticket research pass for this; only those fields matter. Any of these counts:
 
 - the ticket or a linked issue is in the `VULN` project (issue type `Security`), including a branch named for a `VULN-*` key
 - the engineering ticket (e.g. `PM-*`) carries the `Vulnerability-Resolution` label
@@ -27,6 +27,8 @@ Two tiers.
 "At most once" is per change, not per string. When the caller is composing both a commit and a PR for the same change, or a campaign covering many targets, one answer covers all of them.
 
 A missing `bitwarden-atlassian-tools` plugin does not make a change safe, but it isn't a reason to ask either. It only removes the Jira signals. Use what the author has already said, and ask only when the heuristic tier applies.
+
+A failed lookup is different. When the plugin is installed and there is a ticket key, but `get_issue` returns a result beginning `Error retrieving issue`, the ticket may carry a signal you couldn't read. Ask the author whether the disclosure policy applies, even when the heuristic tier wouldn't, and say the Jira check failed. This counts as the one question for the change.
 
 If nothing marks the change as security-relevant, return `No` (see [Returning to the caller](#returning-to-the-caller)) and stop. There is no fetch on the common path.
 
