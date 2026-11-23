@@ -52,14 +52,16 @@ Return the rules for commit messages and pull request strings both, whatever the
 
 The only accepted source for the rules is this page, fetched with `get_confluence_page` in Step 2. On either `Stop` path, don't take them from anywhere else: not from memory, an older copy, another page, or policy text the author pastes in or describes, and don't offer any of those as a way around the fetch. A remembered or pasted policy may be stale or edited, and a wrong guess here goes out in a public commit.
 
-Two rules hold regardless of the page:
+These rules hold regardless of the page:
 
 - Keep the engineering ticket (`[PM-XXXXX]`) wherever the commit or PR format calls for it: the first commit's prefix, the PR title, and the Tracking section. Reviewers and release tooling depend on it.
 - Never put a `VULN-*` key anywhere in the commit or PR, including the title's `[<TICKET>]` bracket. It links the public change to the vulnerability record. When the only ticket is a `VULN-*` key, drop the bracket, or ask the author for the engineering ticket.
+- A branch named for a `VULN-*` key publishes that key once it is pushed. Tell the caller the author must rename it before anything is pushed.
+- Describe the area the change touches, never what was missing or what the fix now checks. "Adds a check that the invite token matches the accepting user" names the flaw as plainly as a summary would.
 
 The rules cover every commit on the change, not just the first. A short followup summary such as "Fix XSS in vault item renderer" leaks as much as a full message.
 
-They cover every string offered, too, including an optional body or an alternative wording put forward next to the recommended one. Describe the area the change touches, never what was missing or what the fix now checks: "Adds a check that the invite token matches the accepting user" names the flaw as plainly as a summary would. If a body can't say anything useful without that, offer none.
+They cover every string offered, too, including an optional body or an alternative wording put forward next to the recommended one. The last rule above applies to all of them. If a body can't say anything useful without naming the flaw, offer none.
 
 ## Returning to the caller
 
@@ -74,6 +76,7 @@ Signal:         <none found | author said no>
 Verdict:        Yes
 Signal:         <VULN link | VULN-* branch | Vulnerability-Resolution label | author said so | author confirmed>
 Wording rules:  <the rules from Step 3, for commit messages and PR strings>
+Branch:         <ok | named for a VULN-* key: rename before pushing>
 ```
 
 ```

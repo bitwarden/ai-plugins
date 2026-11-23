@@ -58,6 +58,18 @@
         "Any proposed title contains no VULN-* key, including in the [<TICKET>] bracket",
         "Drops the ticket bracket or asks the author for the engineering ticket instead, or, if the policy fetch fails, returns Stop and proposes no title"
       ]
+    },
+    {
+      "id": 6,
+      "name": "jira-lookup-fails",
+      "prompt": "I'm on branch PM-99906-update-export-paging and about to commit a change to how the export endpoint pages results. Ticket is PM-99906. Jira lookups are failing for me today. Write the commit message. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "Tries get_issue for PM-99906; when the lookup fails, asks the author once whether the disclosure policy applies and says the Jira check failed, instead of treating the change as not security-relevant. Drafts no message until answered.",
+      "expectations": [
+        "Attempts to read PM-99906 with get_issue before deciding",
+        "On the failed lookup, asks the author whether the disclosure policy applies, even though the change does not trip the heuristic tier",
+        "Says the question is being asked because the Jira check failed",
+        "Does not return No or draft a commit message before the author answers"
+      ]
     }
   ]
 }

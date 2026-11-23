@@ -108,7 +108,7 @@ graph TD
     conventions[applying-pr-conventions:<br/>title with its type from labeling-changes,<br/>body, ai-review label]
     secureConventions[applying-pr-conventions under the wording rules:<br/>no VULN-* key anywhere,<br/>No label recommended for AI review]
     policyStop[Stop: policy unavailable or unusable,<br/>nothing composed or pushed]
-    commitCheck{Fetch the branch, then: does any commit<br/>not yet pushed break the wording rules?}
+    commitCheck{Fetch, then: does any commit<br/>not yet pushed break the wording rules?}
     whichCommit{Is it HEAD?}
     amend[Reword with git commit --amend -F]
     handBack[Hand back to the author,<br/>stop before the preview]
@@ -143,7 +143,7 @@ graph TD
     offer -->|yes| amend
     offer -->|no| handBack
     whichCommit -->|no, older commit| handBack
-    commitCheck -->|commit range can't be resolved| handBack
+    commitCheck -->|listing the commits fails| handBack
     amend --> preview
     preview --> confirm
     confirm -->|Submit as shown| push

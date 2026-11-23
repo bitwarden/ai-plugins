@@ -22,6 +22,8 @@ Branch on the `Verdict:` line:
 
 The verdict holds for every commit on the change, followup commits included.
 
+A caller that can't show the message to the author, such as an unattended landing stage, gets no message on `Stop`, and on `Yes` none without a recorded approval. Return the verdict, with the draft on `Yes`, so the caller halts rather than commits.
+
 ---
 
 ## Commit Message Format

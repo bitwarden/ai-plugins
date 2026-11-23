@@ -2,7 +2,7 @@
 
 Behavior test cases for the `applying-security-disclosure-policy` skill, in the `skill-creator` schema.
 
-`evals.json` holds five cases, one per branch of the skill's decision: a VULN-linked fix (high-confidence `Yes`), a session-handling fix with no Jira signal (the heuristic tier asks once), a dependency bump (`No`, with no fetch), a confirmed fix with the Atlassian plugin missing (`Stop`), and a branch named for a `VULN-*` key (the key stays out of the title). Each case's `expectations` are the pass criteria.
+`evals.json` holds six cases, one per branch of the skill's decision: a VULN-linked fix (high-confidence `Yes`), a session-handling fix with no Jira signal (the heuristic tier asks once), a dependency bump (`No`, with no fetch), a confirmed fix with the Atlassian plugin missing (`Stop`), a branch named for a `VULN-*` key (the key stays out of the title), and a ticket whose Jira lookup fails (the skill asks rather than returning `No`). Case 6 is not yet in `behavior-baseline.json`. Each case's `expectations` are the pass criteria.
 
 Cases are **advice-only**: the graded artifact is the stated plan or draft, and nothing is committed or submitted. Every ticket key uses the `-999NN` range so no case describes a real vulnerability record.
 

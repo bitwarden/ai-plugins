@@ -1,7 +1,7 @@
 ---
 name: applying-pr-conventions
 allowed-tools: "Read, Glob, Skill(labeling-changes), Skill(applying-security-disclosure-policy), Bash(gh api repos/bitwarden/template/contents/.github/PULL_REQUEST_TEMPLATE.md -H Accept:application/vnd.github.raw)"
-description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, which template the body came from, and the security verdict. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
+description: 'Compose the conventions a Bitwarden pull request needs — the conventional commit type prefix and title, the PR template body, and the ai-review label. Use for "what should the PR title be", "draft the PR body", "fill in the PR template", "which ai-review label", or when another delivery skill asks for these. Returns the title, body, resolved t: label, label choice, which template the body came from, and the security verdict, or, on a security fix whose disclosure policy can''t be fetched, a stop with its reason and remedy instead of a title and body. Not for opening the pull request itself (that is creating-pull-request), or for the type keyword and t: mapping alone outside a PR being composed (that is labeling-changes).'
 ---
 
 # Applying PR Conventions
@@ -17,7 +17,7 @@ Before composing the title, invoke `Skill(applying-security-disclosure-policy)` 
 Branch on the `Verdict:` line:
 
 - **`Verdict: Stop`** — the policy couldn't be fetched, or came back without usable rules. Don't compose the title or body, and don't ask the label question. Return the stop, its reason, and its remedy to the caller without running Steps 1 to 3.
-- **`Verdict: Yes`** — its wording rules govern the whole title, including the `[<TICKET>]` bracket (never a `VULN-*` key), the body, and the Tracking reference, so apply them in Steps 1 and 2. If the caller settled a value that conflicts with them, flag the conflict to the user rather than silently rewriting it. Get the user's explicit approval of the title and body before returning them. Skip it only when a submission preview later in the workflow asks for that approval, as in `creating-pull-request`, or when the caller says the author already approved this change's wording pattern, as `force-multiplier` does after its pilot. An offer to adjust the wording is not approval.
+- **`Verdict: Yes`** — its wording rules govern the whole title, including the `[<TICKET>]` bracket (never a `VULN-*` key), the body, and the Tracking reference, so apply them in Steps 1 and 2. If the caller settled a value that conflicts with them, flag the conflict to the user rather than silently rewriting it. Get the user's explicit approval of the title and body before returning them. Skip it only when the caller says its own submission preview will collect that approval, as `creating-pull-request` does, or that the author already approved this change's wording pattern, as `force-multiplier` does after its pilot. An offer to adjust the wording is not approval.
 - **`Verdict: No`** — compose as usual.
 
 ## Step 1 — Title
