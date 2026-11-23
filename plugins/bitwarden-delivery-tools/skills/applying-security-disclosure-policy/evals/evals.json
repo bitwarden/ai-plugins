@@ -29,11 +29,12 @@
       "id": 3,
       "name": "dependency-bump-no-fetch",
       "prompt": "Bumping @angular/core from 19.1.2 to 19.1.4 in clients, ticket PM-99903. Write me a commit message. Non-interactive: state any question as plain text and stop.",
-      "expected_output": "Returns not security-relevant without asking the author and without fetching the Confluence policy; the commit message is written normally.",
+      "expected_output": "The ticket can't be read, so the skill fails closed: it asks the author once whether the disclosure policy applies, says it couldn't read the ticket, and writes no commit message until answered. It does not fetch the Confluence policy page.",
       "expectations": [
-        "Does not ask the author whether the disclosure policy applies",
+        "Asks the author once whether the disclosure policy applies",
+        "Says the question is being asked because the ticket couldn't be read",
         "Does not fetch or attempt to fetch the Confluence policy page",
-        "Proposes a normal commit message with the [PM-99903] prefix"
+        "Does not propose a commit message before the author answers"
       ]
     },
     {

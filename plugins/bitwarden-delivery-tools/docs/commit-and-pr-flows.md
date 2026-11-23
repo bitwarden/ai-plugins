@@ -13,7 +13,7 @@ graph TD
     start[Verdict requested for one change]
     ticket{Ticket key in the branch<br/>or conversation?}
     lookup[get_issue]
-    lookupOk{Lookup succeeded?}
+    lookupOk{Ticket read?<br/>plugin missing counts as no}
     high{VULN link, VULN-* branch,<br/>Vulnerability-Resolution label,<br/>or the author said so?}
     heuristic{A fix touching auth, sessions,<br/>crypto, input validation,<br/>access control, or secrets?}
     lookupFailed{VULN-* branch, or<br/>the author said so?}
@@ -27,8 +27,8 @@ graph TD
     stop[Verdict: Stop<br/>reason and remedy]
 
     start --> ticket
-    ticket -->|yes, plugin installed| lookup
-    ticket -->|no, or plugin missing| high
+    ticket -->|yes| lookup
+    ticket -->|no| high
     lookup --> lookupOk
     lookupOk -->|yes| high
     lookupOk -->|no| lookupFailed

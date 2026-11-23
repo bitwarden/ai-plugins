@@ -26,9 +26,9 @@ Two tiers.
 
 "At most once" is per change, not per string. When the caller is composing both a commit and a PR for the same change, or a campaign covering many targets, one answer covers all of them.
 
-A missing `bitwarden-atlassian-tools` plugin does not make a change safe, but it isn't a reason to ask either. It only removes the Jira signals. Use what the author has already said, and ask only when the heuristic tier applies.
+When there is a ticket key but you can't read the ticket, it may carry a signal you can't see, so fail closed. That covers a missing `bitwarden-atlassian-tools` plugin, a `get_issue` tool that isn't available, and a lookup that fails in any way (a result beginning `Error`, a tool error, or no issue details). A `VULN-*` branch or the author's word still counts as high-confidence on its own. Without either, ask the author whether the disclosure policy applies, even when the heuristic tier wouldn't, such as for a dependency bump, and say you couldn't read the ticket. This counts as the one question for the change.
 
-A failed lookup is different. When the plugin is installed and there is a ticket key, but `get_issue` fails in any way (a result beginning `Error`, a tool error, or no issue details), the ticket may carry a signal you couldn't read. A `VULN-*` branch or the author's word still counts as high-confidence on its own. Without either, ask the author whether the disclosure policy applies, even when the heuristic tier wouldn't, and say the Jira check failed. This counts as the one question for the change.
+With no ticket key at all, there is nothing to look up. Use what the author has already said, and ask only when the heuristic tier applies.
 
 If nothing marks the change as security-relevant, return `No` (see [Returning to the caller](#returning-to-the-caller)) and stop. There is no fetch on the common path.
 
