@@ -108,6 +108,8 @@ graph TD
     conventions[applying-pr-conventions:<br/>title with its type from labeling-changes,<br/>body, ai-review label]
     secureConventions[applying-pr-conventions under the wording rules:<br/>no VULN-* key anywhere,<br/>No label recommended for AI review]
     policyStop[Stop: policy unavailable or unusable,<br/>nothing composed or pushed]
+    branchCheck{Branch named for<br/>a VULN-* key?}
+    rename[Ask the author to rename the branch,<br/>stop before the preview]
     commitCheck{Fetch, then: does any commit<br/>not yet pushed break the wording rules?}
     whichCommit{Is it HEAD?}
     amend[Reword with git commit --amend -F]
@@ -136,7 +138,9 @@ graph TD
     disclosure -->|Yes| secureConventions
     disclosure -->|Stop| policyStop
     conventions --> preview
-    secureConventions --> commitCheck
+    secureConventions --> branchCheck
+    branchCheck -->|yes| rename
+    branchCheck -->|no| commitCheck
     commitCheck -->|no| preview
     commitCheck -->|yes| whichCommit
     whichCommit -->|yes| offer
