@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - `assessing-test-coverage` pre-approves writes only to its `coverage-reports` data folder, written literally because `${CLAUDE_PLUGIN_DATA}` is not expanded for `--plugin-dir` loads. A write anywhere else now asks first, so text from a PR, Jira, or Testmo cannot change the `find-cases` project before `dotnet run` builds it.
+- `assessing-test-coverage` pre-approves `dotnet run` only for the `test-origin-head` worktree in its data folder. Running `find-cases` from any other `Bitwarden.TestmoValidator` directory now asks first, so text from a PR, Jira, or Testmo cannot point the run at a different project that already exists on disk.
 - `assessing-test-coverage` no longer pre-approves `git -C <clone> fetch origin`, `worktree add`, or `checkout`, so step G's git commands ask first. A pre-approved command could run another command through an injected `-c credential.helper`, `-c core.sshCommand`, or `-c core.fsmonitor` option without any file write.
 
 ### Removed
