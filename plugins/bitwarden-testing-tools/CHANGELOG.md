@@ -8,13 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `assessing-test-coverage` step G checks Automation Type with `Bitwarden.TestmoValidator find-cases`, run against origin's default branch of a local `bitwarden/test` clone. It fetches origin and reads `origin/HEAD` through a detached worktree in the plugin's data folder, so the result never depends on what the clone has checked out. It needs the clone (`test` beside the current repo) and the .NET SDK, and no Testmo key. The 50-ID limit is gone. A `[Description]` that lists several IDs now matches each of them, as the Testmo validator already does, and `[TestCase(..., Description = "...")]` IDs are now found.
+- `assessing-test-coverage` step G checks Automation Type with `Bitwarden.TestmoValidator find-cases`, run by a bundled `find-cases.sh` against origin's default branch of a local `bitwarden/test` clone. It fetches origin and reads `origin/HEAD` through a detached worktree in the plugin's data folder, so the result never depends on what the clone has checked out. It needs the clone (`test` beside the current repo) and the .NET SDK, and no Testmo key. The 50-ID limit is gone. A `[Description]` that lists several IDs now matches each of them, as the Testmo validator already does, and `[TestCase(..., Description = "...")]` IDs are now found.
 
 ### Security
 
 - `assessing-test-coverage` pre-approves writes only to its `coverage-reports` data folder, written literally because `${CLAUDE_PLUGIN_DATA}` is not expanded for `--plugin-dir` loads. A write anywhere else now asks first, so text from a PR, Jira, or Testmo cannot change the `find-cases` project before `dotnet run` builds it.
-- `assessing-test-coverage` pre-approves `dotnet run` only for the `test-origin-head` worktree in its data folder. Running `find-cases` from any other `Bitwarden.TestmoValidator` directory now asks first, so text from a PR, Jira, or Testmo cannot point the run at a different project that already exists on disk.
-- `assessing-test-coverage` no longer pre-approves `git -C <clone> fetch origin`, `worktree add`, or `checkout`, so step G's git commands ask first. A pre-approved command could run another command through an injected `-c credential.helper`, `-c core.sshCommand`, or `-c core.fsmonitor` option without any file write.
+- `assessing-test-coverage` pre-approves only its bundled `find-cases.sh` for step G, not `dotnet run` or `git`. The script fixes the project to the `test-origin-head` worktree of a verified `bitwarden/test` clone, checks it out at origin's default branch, and accepts only numeric case IDs. Text from a PR, Jira, or Testmo cannot point the run at a different project or pass options such as `--property:RunCommand` or `-c core.sshCommand` to `dotnet run` or `git`, which wildcard `Bash` rules could not prevent.
 
 ### Removed
 
