@@ -2,7 +2,7 @@
 name: assessing-test-coverage
 description: Use when determining what test coverage ALREADY exists for a specific change (a PR, Jira key, Tech Breakdown doc, Testmo CSV, changed paths, or named component), or which existing Testmo cases and tests it makes obsolete, wrong, or duplicated, including other teams' cases. Use it before writing new tests or Testmo cases. Triggers on "what's already tested", "does this PR have tests", "what coverage exists for", "is this component covered", "which behaviors have no test today", "which Testmo cases does this story make obsolete", or "which tests should be retired or updated for PM-123". A backward-looking review: it recommends update or retire, lists possible duplicates, notes other teams' affected cases, and never writes to Testmo or code. Do NOT use it to decide which new tests to add ("should I add integration tests here", "are unit tests enough"), to design a test strategy or plan, to run or fix existing tests, or to explain testing concepts like the test pyramid or which layers a repo uses.
 argument-hint: "[PR URL | Jira key | Tech Breakdown doc | Testmo CSV] [designing-test-plans plan path]"
-allowed-tools: "Read, Edit(~/.claude/plugins/data/bitwarden-testing-tools*/coverage-reports/*), Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh api repos/bitwarden/*), Bash(gh search code:*), Bash(git rev-parse:*), Bash(git remote get-url:*), Bash(git -C * rev-parse:*), Bash(git -C * remote get-url:*), Bash(printenv BITWARDEN_TEST_REPO), Bash(dotnet run --project */Bitwarden.TestmoValidator -- find-cases --repo *), Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__testmo__get_states, mcp__testmo__get_statuses, mcp__testmo__get_repository_folders, mcp__testmo__get_repository_folder, mcp__testmo__get_repository_cases, mcp__testmo__get_repository_case, mcp__testmo__get_case_result_history, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue"
+allowed-tools: "Read, Edit(~/.claude/plugins/data/bitwarden-testing-tools*/coverage-reports/*), Grep, Glob, Bash(date:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh api repos/bitwarden/*), Bash(gh search code:*), Bash(git rev-parse:*), Bash(git remote get-url:*), Bash(git -C * rev-parse:*), Bash(git -C * remote get-url:*), Bash(dotnet run --project */Bitwarden.TestmoValidator -- find-cases --repo *), Skill(bitwarden-atlassian-tools:researching-jira-issues), mcp__testmo__get_states, mcp__testmo__get_statuses, mcp__testmo__get_repository_folders, mcp__testmo__get_repository_folder, mcp__testmo__get_repository_cases, mcp__testmo__get_repository_case, mcp__testmo__get_case_result_history, mcp__plugin_bitwarden-atlassian-tools_bitwarden-atlassian__get_issue"
 disallowed-tools: "Bash(curl *), Bash(wget *), WebFetch, Read(//**/.env), Read(//**/.env.*)"
 context: fork
 agent: general-purpose
@@ -38,7 +38,7 @@ Before the first read from Jira or Testmo, load the tools by exact name with Too
 3. For each behavior, find the tests covering it: tests in the linked PR diffs first, then a lookup scoped to the change surface. Include E2E.
 4. Record each behavior: layer (unit / integration / E2E), representative test permalink(s), count, source. Behaviors with no test found are gaps.
 5. Run the Testmo procedure below for every story. If Testmo cannot be read, record why in the Testmo section and continue with the code side. If the input resolves to no story and no plan, skip the Testmo procedure and record "no AC source, Testmo cases not reviewed" under NOT CHECKED.
-6. Write the report to `${CLAUDE_PLUGIN_DATA}/coverage-reports/<slug>-<timestamp>-coverage.md` (`<slug>` from the ticket/PR/feature; `<timestamp>` from `date +%Y-%m-%d-%H%M%S`) using the template below. If `${CLAUDE_PLUGIN_DATA}` reaches you unexpanded, write to `~/.claude/plugins/data/bitwarden-testing-tools/coverage-reports/` instead. Never write anywhere else.
+6. Write the report to `${CLAUDE_PLUGIN_DATA}/coverage-reports/<slug>-<timestamp>-coverage.md` (`<slug>` from the ticket/PR/feature; `<timestamp>` from `date +%Y-%m-%d-%H%M%S`) using the template below.
 
 ## Testmo procedure
 
@@ -132,18 +132,9 @@ The "Coverage now" part only tells the team where the behavior is tested. It is 
 
 F. **Read the history of each retire or update candidate.** Call `get_case_result_history` with project ID 1 and the case ID for the last run date and result. Results come back as status IDs. Call `get_statuses` with project ID 1 once per run to turn them into names, such as Passed or Failed. Keep the number of candidates small. Each call is one request.
 
-G. **Check Automation Type against code.** Run this for every full-review case, including ones the story does not change, because a mismatch is a finding either way. Run `find-cases` in a local `bitwarden/test` clone, as it is checked out:
+G. **Check Automation Type against code.** Run this for every full-review case, including ones the story does not change, because a mismatch is a finding either way. The `bitwarden/test` clone is `<clone>`: `test` beside the current repo's root, on its default branch. Run `dotnet run --project <clone>/Bitwarden.TestmoValidator -- find-cases --repo <clone> <IDs>`, with every full-review case ID from step C's merged results, separated by spaces. Set the Bash timeout to 10 minutes: the first run restores and builds the project. The result starts at the `Source: <path>, HEAD <sha>.` line. Build warnings above it are not part of the result.
 
-1. Find the clone: `printenv BITWARDEN_TEST_REPO` if set, else the current repo if its `origin` is `bitwarden/test`, else `test` beside the current repo's root. Use only the first candidate that applies. Its `git -C <candidate> rev-parse --show-toplevel` output is `<clone>`, and `git -C <clone> remote get-url origin` must point at `bitwarden/test`.
-2. `dotnet run --project <clone>/Bitwarden.TestmoValidator -- find-cases --repo <clone> <IDs>`, with every full-review case ID from step C's merged results, separated by spaces. Set the Bash timeout to 10 minutes: the first run restores and builds the project. The result starts at the `Source: <path>, HEAD <sha>.` line. Build warnings above it are not part of the result.
-
-Put the `Source:` line in the report. If `git -C <clone> rev-parse --abbrev-ref HEAD` is not `main`, add a NOT CHECKED line saying the code check read that branch, not `main`. If step 1 or 2 fails (no clone, wrong origin, no `dotnet`, a build error, or no `find-cases` command on the checked-out branch), list the cases as not checked for code with `Code not checked: <reason>`. Do not ask the user to clone, and do not fall back to `gh` for case IDs. For each ID the command returns found or not found, and for each match the file, line, attribute, platform, and whether the test is ignored or has a KnownBug.
-
-How matches are read:
-
-- Every number in a `[Description("...")]`, `[TestCase(..., Description = "...")]`, `[Covers(...)]`, `.SetDescription("...")`, or `.SetProperty("Covers", "...")` value is a case ID, so `[Description("1153508, 1153509")]` matches both IDs. `.SetDescription` matches are reported as `Description`, and `.SetProperty("Covers", ...)` matches as `Covers`.
-- Test files under the `ProdSmoke` folder are not read. They reuse functional IDs on purpose. `DataSetup` files are not read either.
-- A test is ignored when `[Ignore]` sits on its method or its class. KnownBug is read from the method. Neither is read for `.SetDescription` or `.SetProperty` entries.
+In the report, cite the code check's source as `https://github.com/bitwarden/test/tree/<sha>`, using the `<sha>` from the `Source:` line. If the command fails (no clone, no `dotnet`, or a build error), list the cases as not checked for code with `Code not checked: <reason>`. Do not ask the user to clone, and do not fall back to `gh` for case IDs. For each ID the command returns found or not found, and for each match the file, line, attribute, platform, and whether the test is ignored or has a KnownBug.
 
 Then compare each case's Automation Type from the search results with what the code shows:
 
@@ -153,7 +144,7 @@ Then compare each case's Automation Type from the search results with what the c
 - Every match ignored, but the type is `Automated`, is a mismatch.
 - The type is `Automated`, but the command finds no match, is a mismatch.
 
-Report mismatches only, for the team to decide. Do not call them bugs. Check every full-review case ID from step C's merged results, fetched or not. If the code check could not run, list the cases as not checked for code, with the reason. Never state that a case has no test in code unless the command returned that result.
+Report mismatches only, for the team to decide. Do not call them bugs. Never state that a case has no test in code unless the command returned that result.
 
 H. **Plan overlap (only when the user gave a plan).** For each plan item that an existing case or test already covers, answer two separate questions:
 

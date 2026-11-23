@@ -62,9 +62,9 @@ The single quotes matter. Claude Code saves `${TESTMO_API_KEY}`, not the key, in
 
 ## Code Check
 
-`assessing-test-coverage` checks which Testmo case IDs are automated by running `Bitwarden.TestmoValidator find-cases` in a local `bitwarden/test` clone, on whatever branch the clone has checked out. The report names the commit it read and flags a branch other than `main`. It needs:
+`assessing-test-coverage` checks which Testmo case IDs are automated by running `Bitwarden.TestmoValidator find-cases` in a local `bitwarden/test` clone on its default branch. The report links to the commit it read on GitHub. It needs:
 
-- A `bitwarden/test` clone whose `origin` is `bitwarden/test`, with a checked-out branch that has `find-cases`: at `BITWARDEN_TEST_REPO`, the repo you run Claude Code from, or `test` beside it.
+- A `bitwarden/test` clone named `test`, beside your other repos.
 - The .NET SDK.
 
 No Testmo key is needed. Without the clone or the SDK, the skill reports the code check as not checked.
