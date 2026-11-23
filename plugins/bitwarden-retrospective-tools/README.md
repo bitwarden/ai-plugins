@@ -1,6 +1,6 @@
 # Bitwarden Retrospective Tools Plugin
 
-Tools for looking back on your own engineering work.
+Tools for looking back on your own engineering work: a daily or weekly work recap, in RAG standup format, built from your Claude Code session logs, your GitHub activity, and your Jira and Confluence activity.
 
 ## Overview
 
@@ -10,9 +10,10 @@ Skills can be invoked individually. See the table below for what ships today.
 
 ## Skills
 
-| Skill         | What It Does                                                                                                                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `daily-recap` | Builds an interactive HTML recap of one workday from your Claude Code sessions and GitHub events, with a standup card, themed work streams, and a filterable GitHub timeline. See [its README](skills/daily-recap/README.md). |
+| Skill          | What It Does                                                                                                                                                                                                                  |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `daily-recap`  | Builds an interactive HTML recap of one workday from your Claude Code sessions and GitHub events, with a standup card, themed work streams, and a filterable GitHub timeline. See [its README](skills/daily-recap/README.md). |
+| `weekly-recap` | A thin skill that reuses daily-recap's scripts, template, and references to build the same recap over a Monday-to-Friday workweek instead of a single day. See [its README](skills/weekly-recap/README.md).                   |
 
 ## Installation
 
@@ -27,6 +28,7 @@ Skills activate based on natural-language triggers:
 ```
 What did I work on yesterday?
 Put together a recap I can use for standup
+Give me a weekly recap
 ```
 
 ## Requirements

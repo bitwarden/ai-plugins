@@ -44,7 +44,7 @@ timeout — `--timeout` bounds anything that stalls.
   a non-trigger and warns on stderr, so a slow run is not silently read as a real failure.
 - `--model` (default `claude-opus-4-8`) — pass the same model the baseline was recorded on so
   verdicts are comparable. Each `baseline.json` records its model in a top-level `model` field;
-  match it. Both current baselines were recorded on `claude-opus-4-8`, the model most users run.
+  match it. All four current baselines were recorded on `claude-opus-4-8`, the model most users run.
 
 ## Running
 
@@ -68,8 +68,9 @@ python3 ../../../evals/run_real_eval.py \
 
 A 20-query set at `--runs-per-query 7` is 140 `claude -p` invocations; with 3 workers it takes
 several minutes. `--num-workers` is the memory knob (see _Arguments_). The two coverage skills
-share trigger space, so after any description change to one, re-run the other's eval too to
-confirm neither cannibalizes the other's triggers.
+share trigger space, and so do `assessing-requirement-readiness` and `designing-test-plans`. After
+a description change to either skill in a pair, re-run both evals in that pair to confirm neither
+cannibalizes the other's triggers.
 
 ## Regression check
 
@@ -94,13 +95,15 @@ description change.
 
 ## Known below-threshold queries
 
-None. On `claude-opus-4-8` both baselines pass every query: `recommending-test-layers` at 10/10
-should-trigger and 10/10 should-not-trigger, `assessing-test-coverage` likewise 10/10 and 10/10.
-The mechanism still allows a baseline to _record_ a should-trigger query below threshold and diff
-clean; when the model was `claude-sonnet-5`, `assessing-test-coverage`'s branch-audit phrasing
-(`audit the current test coverage on the feat/cipher-key-rotation branch — I just want to see what
-exists, not recommendations`) sat at 2/7, but on Opus it triggers 7/7. If one drops below
-threshold on a future run, list it here rather than editing the eval set.
+- `assessing-requirement-readiness`: `is CL-1221 actually testable or is it hand-wavy`, 2/7 should-trigger on `claude-opus-4-8`. Too short and vague to route.
+- `assessing-requirement-readiness`: `the autofill story we're refining next has a figma link and two lines of description. will that hold up or should I send it back to the PO now?`, 2/7 should-trigger on `claude-opus-4-8`. Names no Jira ticket, and the skill starts from a Jira story.
+- `assessing-test-coverage`: `is the new CipherService.RestoreAsync path covered by any existing tests? I'm not asking you to add any — just tell me what's already there`, 1/7 should-trigger on `claude-opus-4-8`. Before this change it also scored 0/7 on the same model.
+- `assessing-test-coverage`: `which behaviors of the passkey enrollment flow we just merged already have tests? permalinks if you can`, 1/7 should-trigger on `claude-opus-4-8`. A 14-run recheck scored 5/14 before this change and 6/14 after.
+- `assessing-test-coverage`: `audit the current test coverage on the feat/cipher-key-rotation branch — I just want to see what exists, not recommendations`, 3/7 should-trigger on `claude-opus-4-8`. Before this change it scored 4/7 on the same model, on the threshold.
+- `assessing-test-coverage`: `got the test plan for PM-39988 from designing-test-plans at ./designing-test-plans/PM-39988-plan.md. before anyone writes new cases, which of these do we already have that we should update instead?`, 2/7 should-trigger on `claude-opus-4-8`. Claude reads the plan file the query names instead of picking a skill.
+- `assessing-test-coverage`: `PM-41861 and PM-42581 have the same title -- did we end up with two sets of Testmo cases for the same thing?`, 0/7 should-trigger on `claude-opus-4-8`. Also 0/7 on `claude-opus-5-5`; two Jira keys and a yes/no question read as something to answer directly.
+
+On `claude-opus-4-8` the `recommending-test-layers` baseline passes every query, 10/10 should-trigger and 10/10 should-not-trigger. The `assessing-test-coverage` baseline was re-recorded on 2026-10-29 with 28 queries. On that date the version before this change also scored below threshold on the RestoreAsync, passkey, and cipher-key-rotation queries on the same model, so those results come from the setup, not the skill change. The mechanism still allows a baseline to _record_ a should-trigger query below threshold and diff clean. If one drops below threshold on a future run, list it here rather than editing the eval set.
 
 ## Add evals for a new skill
 

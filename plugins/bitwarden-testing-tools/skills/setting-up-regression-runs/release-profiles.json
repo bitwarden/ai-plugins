@@ -1,0 +1,30 @@
+{
+  "_comment": "Which regression run specs belong to each release type. Each profile lists every spec it runs in full — there is no inheritance, so the list is exactly what gets passed to the run-creation script. 'full' is NOT a superset of 'partial': Directory Connector (BWDC) runs on partial releases only, and CLI, Desktop, and Extension on full releases only. Spec names are file names in specs/ without the .json extension.",
+  "profiles": {
+    "partial": [
+      "web-password-manager-regression",
+      "web-admin-console-regression",
+      "web-admin-portal-sm-providers-regression",
+      "old-client-new-server-regression",
+      "mobile-ios-regression",
+      "mobile-android-regression",
+      "directory-connector-regression"
+    ],
+    "full": [
+      "web-password-manager-regression",
+      "web-admin-console-regression",
+      "web-admin-portal-sm-providers-regression",
+      "old-client-new-server-regression",
+      "mobile-ios-regression",
+      "mobile-android-regression",
+      "cli-regression",
+      "desktop-macos-regression",
+      "desktop-windows-regression",
+      "desktop-linux-regression",
+      "extension-macos-chrome-regression",
+      "extension-windows-edge-regression",
+      "extension-macos-safari-regression",
+      "extension-linux-firefox-regression"
+    ]
+  }
+}

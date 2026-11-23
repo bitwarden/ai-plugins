@@ -8,7 +8,7 @@
     "bitwarden-atlassian-mcp": "./build/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "tsc",
     "watch": "tsc --watch",
     "dev": "tsc && node build/index.js",
     "inspector": "pnpm dlx @modelcontextprotocol/inspector@0.22.0 build/index.js",
@@ -28,6 +28,8 @@
     "@modelcontextprotocol/sdk": "1.32.0",
     "@types/node": "24.13.3",
     "axios": "1.20.0",
+    "marked": "16.4.2",
+    "marklassian": "1.2.1",
     "typescript": "7.0.2",
     "zod": "4.6.6"
   },

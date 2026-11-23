@@ -110,7 +110,7 @@ jobs:
           set -eu
 
           # Read the command from the shipped artifact so this test cannot drift from it.
-          CMD=$(jq -er '.mcpServers["bitwarden-atlassian"].args[1]' .mcp.json)
+          CMD=$(jq -er '.mcpServers["bitwarden-atlassian"] | [.command] + .args | map("\"" + . + "\"") | join(" ")' .mcp.json)
           printf '%s\n' "Launch command under test:" "$CMD"
 
           # Fail loudly if the runner image puts Corepack back on PATH, rather

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "sprint planning is tomorrow and PM-41861 is on the list. before I commit the team to it, is there enough in the story to start, or are we going to be chasing the PO for answers mid-sprint?",
+    "should_trigger": true
+  },
+  {
+    "query": "the PM-42838 AC just says \"match the spec in figma\". is that enough for QA to know what a pass looks like, or does it go back to refinement?",
+    "should_trigger": true
+  },
+  {
+    "query": "go through the child stories of the emergency-access revamp epic and tell me which ones would bounce at refinement and why",
+    "should_trigger": true
+  },
+  {
+    "query": "CL-1221 moved to Ready for Dev this morning but I don't think anyone looked at it closely. anything missing that would block testing?",
+    "should_trigger": true
+  },
+  {
+    "query": "before i write a line of code for PM-32009 i want to know if the acceptance criteria hold up or if they'll change on me halfway through",
+    "should_trigger": true
+  },
+  {
+    "query": "PO says the passkey enrollment story is refined. sanity check that?",
+    "should_trigger": true
+  },
+  {
+    "query": "which stories under the org-vault export epic are still too vague to hand to an engineer?",
+    "should_trigger": true
+  },
+  {
+    "query": "does PM-41861 have everything QA needs, or are there holes, like missing error behavior or which clients it applies to?",
+    "should_trigger": true
+  },
+  {
+    "query": "is CL-1221 actually testable or is it hand-wavy",
+    "should_trigger": true
+  },
+  {
+    "query": "the autofill story we're refining next has a figma link and two lines of description. will that hold up or should I send it back to the PO now?",
+    "should_trigger": true
+  },
+  {
+    "query": "what's PM-123 about, and what's blocking it?",
+    "should_trigger": false
+  },
+  {
+    "query": "give me context on PM-456 and the Confluence pages it links to",
+    "should_trigger": false
+  },
+  {
+    "query": "write a requirements doc for passkey enrollment from the Confluence initiative page",
+    "should_trigger": false
+  },
+  {
+    "query": "write a spec from this ticket, PM-234",
+    "should_trigger": false
+  },
+  {
+    "query": "gather requirements for PM-345 and document them in a requirements doc",
+    "should_trigger": false
+  },
+  {
+    "query": "break down PM-567 into implementable tasks with a work plan",
+    "should_trigger": false
+  },
+  {
+    "query": "which layer should each of PM-678's new tests live at, unit or E2E?",
+    "should_trigger": false
+  },
+  {
+    "query": "should PM-890 get integration tests, or are unit tests enough?",
+    "should_trigger": false
+  },
+  {
+    "query": "what tests already cover the acceptance criteria on PM-112?",
+    "should_trigger": false
+  },
+  {
+    "query": "write Gherkin test cases for the acceptance criteria on PM-223 so I can import them into Testmo",
+    "should_trigger": false
+  }
+]

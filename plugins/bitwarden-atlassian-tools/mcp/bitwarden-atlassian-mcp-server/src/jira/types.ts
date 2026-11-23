@@ -54,6 +54,17 @@ export interface JiraStatus {
   };
 }
 
+/**
+ * A workflow transition available from an issue's current status, as returned
+ * by GET /issue/{key}/transitions. `name` is the transition's own label (e.g.
+ * "Start Progress"); `to.name` is the status it lands on.
+ */
+export interface JiraTransition {
+  id: string;
+  name: string;
+  to: JiraStatus;
+}
+
 export interface JiraPriority {
   id: string;
   name: string;

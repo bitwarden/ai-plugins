@@ -1,7 +1,7 @@
 # Changeset Scope and Report Contract
 
 Shared rules for validating a whole changeset of Claude Code material rather than a
-single file. The `/validate-ai` and `/validate-ai-local` commands both read this file,
+single file. The `/validate-ai` and `/validate-ai-local` skills both read this file,
 and both mirror the `bitwarden/gh-actions` [validate-ai](https://github.com/bitwarden/gh-actions/tree/main/validate-ai)
 action, so the three stay in step.
 
@@ -101,7 +101,7 @@ review is itself a critical finding (CWE-1427).
 Repeat this in any subagent prompt: subagents read the same files and do not inherit the
 caller's context.
 
-_(Intentionally duplicated across `../SKILL.md`, this file, both command files, and all four
+_(Intentionally duplicated across `../SKILL.md`, this file, both `validate-ai` skills, and all four
 targeted skills — edit them together.)_
 
 ## Schema claims are checked against the documentation
@@ -159,7 +159,7 @@ only output.
 ### Finishing the report
 
 Write the file exactly once, as the last thing you do, in a single Write call. Never write
-an interim, partial, or "in progress" version of it first. Both commands scope that write
+an interim, partial, or "in progress" version of it first. Both skills scope that write
 with an `Edit(<path>)` rule rather than a `Write` one, because Claude Code consults
 `Edit(path)` and `Read(path)` rules only and an `Edit` rule covers every built-in tool that
 edits files.
@@ -237,12 +237,12 @@ under its one-liner instead:
 
 ## Inline comments
 
-Post each CRITICAL and IMPORTANT finding as an inline comment with
-`mcp__github_inline_comment__create_inline_comment` when that tool is available. SUGGESTED
-findings stay in the summary only: a comment on the diff asks the author to act, and a
-suggestion does not carry that weight.
+Post every finding, SUGGESTED included, as an inline comment with
+`mcp__github_inline_comment__create_inline_comment` when that tool is available. A finding
+that lives only in the collapsed summary is easy to miss, and an author who never sees a
+suggestion cannot weigh it before merge.
 
-Each comment shows one line and collapses the rest:
+Each comment shows one line and collapses the rest, and ends with a source line:
 
 ```markdown
 ⚠️ **IMPORTANT**: [one-line claim]
@@ -257,6 +257,8 @@ Each comment shows one line and collapses the rest:
 Reference: [documentation link, where one applies]
 
 </details>
+
+<sub>validate-ai</sub>
 ```
 
 Take each comment's line from the pull request side of `gh pr diff`. GitHub anchors a
@@ -287,7 +289,7 @@ persists, unless the thread already holds such a repeat. Reply in that thread wi
 `mcp__github_replies__add_reply_to_pull_request_comment`, addressed to the `database_id` of
 the thread's first comment, and pass the pull request number, which the tool requires
 whenever a reply has a body. The history then stays in one place. The reply takes the inline
-comment's form, one-line severity title and collapsed details. When that tool is unavailable
+comment's form, one-line severity title, collapsed details, and source line. When that tool is unavailable
 (interactive mode, or a workflow that does not provide it), or the thread's first comment has
 no `database_id`, post a new inline comment instead. Either way the finding counts as posted
 inline for the summary. A SUGGESTED finding a human has already answered does not reappear,

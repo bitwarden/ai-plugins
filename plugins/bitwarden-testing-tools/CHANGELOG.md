@@ -4,6 +4,41 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-11-17
+
+### Fixed
+
+- The `bitwarden-test-automation` MCP server starts on Windows. It used to launch through `bash`, which on Windows with WSL installed runs the WSL launcher instead of Git Bash, so the server exited at launch. It now launches through `node` and a `launch.mjs` script that runs the same install, build, and start steps on macOS, Linux, and Windows. The build no longer runs `chmod`, which Windows lacks.
+
+## [1.5.0] - 2026-10-30
+
+### Added
+
+- `bitwarden-test-automation` MCP server, bundled at `mcp/bitwarden-test-automation-mcp-server/`. Its one tool, `find_automated_cases`, takes Testmo case IDs and reports which are automated in `bitwarden/test`, with the file, line, platform, and whether the test is ignored or has a KnownBug. It reads the repo through the user's `gh` login, needs no Testmo key, and refuses to start when `NODE_TLS_REJECT_UNAUTHORIZED` is `0`.
+- `assessing-test-coverage`: for a story, reviews the existing Testmo cases in the story's client folders and New Release, and recommends retire or update for each case the story changes, with the AC or plan item behind each recommendation. Retiring means setting the case to Retired and leaving it in place with a note. Checks each case's Automation Type against the `[Description]` IDs in code, using the Testmo validator's rules. Lists possible duplicates, cases owned by other teams, and plan overlap when a plan is given. Adds a Testmo section after the existing Coverage and Gaps sections. Reads Testmo through Testmo's official MCP server in read-only mode.
+- `assessing-test-coverage` excludes Retired cases by reading the case states first and sending every other state in each case search.
+- `assessing-test-coverage` blocks `curl`, `wget`, WebFetch, and `.env` file reads while it runs, and reads Testmo only through the `testmo` MCP server.
+- `assessing-test-coverage` uses the newest saved `designing-test-plans` plan for the story when no plan path is given, and names the file in its report.
+- `designing-test-plans` runs `assessing-test-coverage` with the saved plan when the request also asks about existing tests or Testmo cases.
+
+### Changed
+
+- `assessing-test-coverage` runs as a forked skill and no longer stops to ask the user mid-run. When the team or client is unclear, or a repo can't be read, it records that in its report and in the text it returns.
+
+## [1.4.0] - 2026-10-28
+
+### Added
+
+- `setting-up-regression-runs` skill: sets up the QA manual regression runs for a release. It holds the `partial` and `full` release profiles and the regression run specs, and hands the chosen profile's specs to `bitwarden-testmo-tools`' `creating-test-runs` skill, which creates the runs. Moved from `bitwarden-testmo-tools` so that plugin keeps only general Testmo tooling, per the component placement guidelines for vendor integrations.
+
+## [1.3.0] - 2026-10-21
+
+### Added
+
+- `assessing-requirement-readiness` skill: judges whether a Jira story is ready to build and test, and returns READY or NOT READY with the gaps to fix. Given an epic, it judges each child story.
+- `designing-test-plans` skill: builds a test plan from a READY story, or from an epic's READY child stories, mapping each test to its acceptance criterion with its layer, test kind, and method (automated or manual).
+- Trigger evals and baselines for both skills.
+
 ## [1.2.0] - 2026-09-14
 
 ### Added

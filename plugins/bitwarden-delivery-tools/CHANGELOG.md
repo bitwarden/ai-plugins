@@ -5,7 +5,7 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.1.0] - 2026-10-26
+## [4.1.0] - 2026-11-23
 
 ### Added
 
@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
 - `force-multiplier` settles the verdict once at PILOT, records it in `pr_spec.disclosure`, passes it to every target's commit and PR composition, and stops the whole campaign, pilot included, on `Stop`.
 - `docs/commit-and-pr-flows.md` shows the disclosure check, the branch commit check, and the `Stop` paths in all three flows.
+
+## [4.0.1] - 2026-10-27
+
+### Changed
+
+- `creating-pull-request` cleanup note: both review paths now write outside the repo by default
 
 ## [4.0.0] - 2026-10-17
 

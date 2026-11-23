@@ -6,7 +6,7 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/emit_session.py\"",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       }
@@ -17,7 +17,7 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/emit_identity.py\"",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       }
@@ -28,7 +28,7 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/emit_identity.py\"",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       }
@@ -40,7 +40,7 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/emit_identity.py\"",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       },
@@ -50,7 +50,7 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/emit_git.py\"",
-            "timeout": 5
+            "timeout": 15
           }
         ]
       },
@@ -60,7 +60,7 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/emit_mcp.py\"",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       }
