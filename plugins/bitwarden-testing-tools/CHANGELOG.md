@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `assessing-test-coverage` step G checks Automation Type with `Bitwarden.TestmoValidator find-cases`, run in a local `bitwarden/test` clone on its default branch. It needs the clone (`test` beside the current repo) and the .NET SDK, and no Testmo key. The 50-ID limit is gone. A `[Description]` that lists several IDs now matches each of them, as the Testmo validator already does, and `[TestCase(..., Description = "...")]` IDs are now found.
+- `assessing-test-coverage` step G checks Automation Type with `Bitwarden.TestmoValidator find-cases`, run against origin's default branch of a local `bitwarden/test` clone. It fetches origin and reads `origin/HEAD` through a detached worktree in the plugin's data folder, so the result never depends on what the clone has checked out. It needs the clone (`test` beside the current repo) and the .NET SDK, and no Testmo key. The 50-ID limit is gone. A `[Description]` that lists several IDs now matches each of them, as the Testmo validator already does, and `[TestCase(..., Description = "...")]` IDs are now found.
 
 ### Security
 

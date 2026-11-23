@@ -62,7 +62,7 @@ The single quotes matter. Claude Code saves `${TESTMO_API_KEY}`, not the key, in
 
 ## Code Check
 
-`assessing-test-coverage` checks which Testmo case IDs are automated by running `Bitwarden.TestmoValidator find-cases` in a local `bitwarden/test` clone on its default branch. The report links to the commit it read on GitHub. It needs:
+`assessing-test-coverage` checks which Testmo case IDs are automated by running `Bitwarden.TestmoValidator find-cases` against origin's default branch of a local `bitwarden/test` clone. It fetches origin and reads `origin/HEAD` through a detached worktree in the plugin's data folder, so your checkout is never changed. The report links to the commit it read on GitHub. It needs:
 
 - A `bitwarden/test` clone named `test`, beside your other repos.
 - The .NET SDK.
