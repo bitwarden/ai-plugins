@@ -4,7 +4,7 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.0] - 2026-11-19
+## [2.0.0] - 2026-11-19
 
 ### Changed
 
@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- The `bitwarden-test-automation` MCP server and its CI workflow. The `find-cases` command in `bitwarden/test` replaces it.
+- The `bitwarden-test-automation` MCP server and its CI workflow. The `find-cases` command in `bitwarden/test` replaces it. This is a breaking change: the `find_automated_cases` tool is gone, and step G now needs a local clone and the .NET SDK.
 
 ## [1.5.1] - 2026-11-17
 

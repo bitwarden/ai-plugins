@@ -108,7 +108,7 @@
     {
       "name": "bitwarden-testing-tools",
       "source": "./plugins/bitwarden-testing-tools",
-      "version": "1.6.0",
+      "version": "2.0.0",
       "description": "Testing tools for Bitwarden: test coverage and Testmo case review, test layer recommendations, manual test cases, requirement readiness, test plans, and QA manual regression runs."
     },
     {
