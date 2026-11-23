@@ -84,7 +84,7 @@ pr_spec:
   disclosure:
     verdict: "<No | Yes>"
     wording_rules: "<on Yes: the rules the verdict returned>"
-    approved_at_pilot: <true on Yes, once the author approves the pilot's wording>
+    approved_at_pilot: <true on Yes, once the author approves the pilot's wording, or the first target's under --no-pilot>
 safety_policy:
   max_targets_per_run: 10
   destructive: false

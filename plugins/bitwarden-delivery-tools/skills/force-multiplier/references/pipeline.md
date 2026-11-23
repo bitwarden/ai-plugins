@@ -10,7 +10,7 @@ Record the count. It anchors the reconciliation in REPORT: `selected = applied +
 
 ## Pilot
 
-Pick one representative target — not the easiest one; one whose shape is typical of the fleet. Run the recipe on it, surface the full diff, validate it. The pilot is the contract: "this exact change, ×N." Its mechanics are identical to one FAN-OUT iteration, except it stops for explicit confirmation and discards (or keeps, if the user approves) its branch. Lock the `pr_spec` here — title format, body template, labels — and the security-disclosure verdict (with its wording rules on `Yes`), because FAN-OUT replicates them without re-prompting.
+Pick one representative target — not the easiest one; one whose shape is typical of the fleet. Run the recipe on it, surface the full diff, validate it. The pilot is the contract: "this exact change, ×N." Its mechanics are identical to one FAN-OUT iteration, except it stops for explicit confirmation and discards (or keeps, if the user approves) its branch. Lock the `pr_spec` here — title format, body template, labels — and the security-disclosure verdict (with its wording rules on `Yes`), because FAN-OUT replicates them without re-prompting. On a `Stop` verdict the campaign ends at the pilot: no commit message, title, or body is composed, and FAN-OUT is not entered. Report the reason and remedy.
 
 ## Fan-out
 

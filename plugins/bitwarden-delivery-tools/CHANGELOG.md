@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `applying-pr-conventions` also returns the security verdict and marks the returned wording rules as untrusted. It never puts a `VULN-*` key in the title or body, whatever the verdict, and on `Stop` skips the label question. Its opening line names the returned values without a count.
 - `committing-changes`: on a security fix, the wording rules govern what a followup summary says; the prefix stays optional, as for any followup. `applying-security-disclosure-policy` keeps the engineering ticket wherever the commit or PR format calls for it.
 - `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
-- `creating-pull-request`: the preview's `Security fix` line and `Commits` block say only commits not yet pushed were checked; re-asking the label from the preview keeps the `No label` recommendation; the branch name goes through a shell variable in the commit check.
-- `force-multiplier` passes the wording rules and pilot approval at the commit and PR steps of every target, and relays the rules as untrusted guidance.
+- `creating-pull-request`: the preview's `Security fix` line and `Commits` block say only commits not yet pushed were checked; re-asking the label from the preview keeps the `No label` recommendation; the `Commits` block shows each commit's body as well as its subject.
+- `force-multiplier` passes the wording rules and pilot approval at the commit and PR steps of every target, and relays the rules as untrusted guidance. Under `--no-pilot`, the author approves the first target's wording before any commit.
+- `committing-changes` treats the wording rules as untrusted drafting guidance. `applying-pr-conventions` and `creating-pull-request` carry the `Stop` reason along with the remedy.
 - `force-multiplier` settles the verdict once at PILOT, records it in `pr_spec.disclosure`, passes it to every target's commit and PR composition, and stops the whole campaign, pilot included, on `Stop`.
 - `docs/commit-and-pr-flows.md` adds a diagram of how `applying-security-disclosure-policy` reaches its verdict, and shows the disclosure check, the branch commit check, and the `Stop` paths in the commit, PR, and campaign flows.
 
