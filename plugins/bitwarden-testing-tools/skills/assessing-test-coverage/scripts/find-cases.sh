@@ -16,7 +16,15 @@ shift 2
 for id in "$@"; do
   [[ $id =~ ^[0-9]+$ ]] || fail "case ID '$id' is not a number"
 done
-[[ $worktree != -* && $(basename "$worktree") == test-origin-head ]] || fail "worktree must be a path ending in test-origin-head"
+# Git Bash passes Windows paths; $HOME there is a /c/... path.
+if command -v cygpath >/dev/null; then
+  worktree=$(cygpath -u "$worktree")
+fi
+data_dir=$(dirname "$worktree")
+[[ $(basename "$worktree") == test-origin-head &&
+  $(dirname "$data_dir") == "$HOME/.claude/plugins/data" &&
+  $(basename "$data_dir") == bitwarden-testing-tools* ]] ||
+  fail "worktree must be $HOME/.claude/plugins/data/bitwarden-testing-tools*/test-origin-head, got $worktree"
 command -v dotnet >/dev/null || fail "dotnet is not installed"
 
 origin=$(git -C "$clone" remote get-url origin 2>/dev/null) || fail "$clone is not a git clone"

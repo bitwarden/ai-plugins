@@ -66,6 +66,7 @@ The single quotes matter. Claude Code saves `${TESTMO_API_KEY}`, not the key, in
 
 - A `bitwarden/test` clone named `test`, beside your other repos.
 - The .NET SDK.
+- On Windows, a bash shell (Git Bash). The script's pre-approval matches only `/`-separated paths, so the run asks for approval there.
 
 No Testmo key is needed. Without the clone or the SDK, the skill reports the code check as not checked.
 

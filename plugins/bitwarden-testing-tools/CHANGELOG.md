@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - `assessing-test-coverage` pre-approves writes only to its `coverage-reports` data folder, written literally because `${CLAUDE_PLUGIN_DATA}` is not expanded for `--plugin-dir` loads. A write anywhere else now asks first, so text from a PR, Jira, or Testmo cannot change the `find-cases` project before `dotnet run` builds it.
-- `assessing-test-coverage` pre-approves only its bundled `find-cases.sh` for step G, not `dotnet run` or `git`. The script fixes the project to the `test-origin-head` worktree of a verified `bitwarden/test` clone, checks it out at origin's default branch, and accepts only numeric case IDs. Text from a PR, Jira, or Testmo cannot point the run at a different project or pass options such as `--property:RunCommand` or `-c core.sshCommand` to `dotnet run` or `git`, which wildcard `Bash` rules could not prevent.
+- `assessing-test-coverage` pre-approves only its bundled `find-cases.sh` for step G, not `dotnet run` or `git`. The script fixes the project to the `test-origin-head` worktree of a verified `bitwarden/test` clone, refuses a worktree path outside `~/.claude/plugins/data/bitwarden-testing-tools*/`, checks it out at origin's default branch, and accepts only numeric case IDs. Text from a PR, Jira, or Testmo cannot point the run at a different project or pass options such as `--property:RunCommand` or `-c core.sshCommand` to `dotnet run` or `git`, which wildcard `Bash` rules could not prevent.
 
 ### Removed
 
