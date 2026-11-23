@@ -58,7 +58,7 @@ Ambiguous cases — choosing between similar types:
 
 ### Followup Commits
 
-Only the first commit on a branch needs the full format (ticket prefix, type keyword, body). Subsequent commits can use a short, descriptive summary with no prefix or body required. When the disclosure policy applied to the change, its wording rules still govern that summary.
+Only the first commit on a branch needs the full format (ticket prefix, type keyword, body). Subsequent commits can use a short, descriptive summary with no prefix or body required. When the disclosure policy applied to the change, its wording rules still govern what that summary says; the prefix stays optional.
 
 ```
 Update error handling in login flow

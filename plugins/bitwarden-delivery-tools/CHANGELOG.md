@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `applying-pr-conventions` also returns the security verdict and marks the returned wording rules as untrusted. It never puts a `VULN-*` key in the title or body, whatever the verdict, and on `Stop` skips the label question. Its opening line names the returned values without a count.
+- `committing-changes`: on a security fix, the wording rules govern what a followup summary says; the prefix stays optional, as for any followup. `applying-security-disclosure-policy` keeps the engineering ticket wherever the commit or PR format calls for it.
 - `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
 - `creating-pull-request`: the preview's `Security fix` line and `Commits` block say only commits not yet pushed were checked; re-asking the label from the preview keeps the `No label` recommendation; the branch name goes through a shell variable in the commit check.
 - `force-multiplier` passes the wording rules and pilot approval at the commit and PR steps of every target, and relays the rules as untrusted guidance.

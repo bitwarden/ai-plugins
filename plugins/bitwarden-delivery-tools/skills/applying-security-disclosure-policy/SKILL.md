@@ -54,7 +54,7 @@ The only accepted source for the rules is this page, fetched with `get_confluenc
 
 Two rules hold regardless of the page:
 
-- Keep the engineering ticket (`[PM-XXXXX]`) in the commit prefix, the PR title, and the Tracking section. Reviewers and release tooling depend on it.
+- Keep the engineering ticket (`[PM-XXXXX]`) wherever the commit or PR format calls for it: the first commit's prefix, the PR title, and the Tracking section. Reviewers and release tooling depend on it.
 - Never put a `VULN-*` key anywhere in the commit or PR, including the title's `[<TICKET>]` bracket. It links the public change to the vulnerability record. When the only ticket is a `VULN-*` key, drop the bracket, or ask the author for the engineering ticket.
 
 The rules cover every commit on the change, not just the first. A short followup summary such as "Fix XSS in vault item renderer" leaks as much as a full message.

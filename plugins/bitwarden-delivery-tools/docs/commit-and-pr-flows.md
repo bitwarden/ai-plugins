@@ -52,7 +52,7 @@ graph TD
 
 ## Committing a change
 
-The branch check runs before anything is staged, so work never lands on the default branch by accident. The disclosure check runs before any message is written, because a commit message can't be reworded once it's pushed. It is skipped when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot. Only the first commit on a branch needs the full message format; followups can be a short summary.
+The branch check runs before anything is staged, so work never lands on the default branch by accident. The disclosure check runs before any message is written, because a commit message can't be reworded once it's pushed. It is skipped when the caller passes a verdict it already settled, as `force-multiplier` does after its pilot. Only the first commit on a branch needs the full message format; followups can be a short summary, and on a security fix the wording rules still apply to it.
 
 ```mermaid
 graph TD
@@ -67,7 +67,7 @@ graph TD
     first{First commit on the branch?}
     typeKeyword[labeling-changes:<br/>type keyword and t: label]
     full[Ticket prefix, type keyword,<br/>imperative summary, why body]
-    short[Short descriptive summary]
+    short[Short descriptive summary,<br/>worded per the rules on a security fix]
     done[Commit]
 
     start --> onDefault
