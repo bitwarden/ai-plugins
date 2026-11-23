@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.2] - 2026-11-23
+
+### Fixed
+
+- `get_confluence_page` and `get_confluence_page_comments` now keep the body of Confluence code macros. The storage formatter removed leftover tags with a regex that also swallowed `<![CDATA[ … ]]>`, so a code macro came back as just its language parameter. Code bodies are now extracted before that pass and returned as fenced blocks, with the macro's `language` parameter as the fence language. The closing fence also ends on its own line, so text after the macro no longer runs into it.
+
 ## [2.9.1] - 2026-11-17
 
 ### Fixed

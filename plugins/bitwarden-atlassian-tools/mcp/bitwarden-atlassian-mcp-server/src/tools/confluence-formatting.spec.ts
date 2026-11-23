@@ -187,6 +187,45 @@ describe("get_confluence_page formatting", () => {
     // Should not have 3+ consecutive newlines
     expect(result).not.toMatch(/\n{4,}/);
   });
+
+  it("should keep the code from a Confluence code macro", async () => {
+    const storage =
+      "<p>Before</p>" +
+      '<ac:structured-macro ac:name="code">' +
+      '<ac:parameter ac:name="language">typescript</ac:parameter>' +
+      "<ac:plain-text-body><![CDATA[const x = 1;]]></ac:plain-text-body>" +
+      "</ac:structured-macro>" +
+      "<p>After</p>";
+    mockGetPage.mockResolvedValueOnce({
+      title: "Page",
+      id: "1",
+      status: "current",
+      body: { storage: { value: storage } },
+    });
+
+    const result = await getConfluencePageTool.handler({ pageId: "1" });
+    expect(result).toContain("```typescript\nconst x = 1;\n```\nAfter");
+    expect(result).toContain("Before");
+  });
+
+  it("should keep each code macro body", async () => {
+    const storage =
+      '<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">xml</ac:parameter>' +
+      '<ac:plain-text-body><![CDATA[<item name="a & b">]]></ac:plain-text-body></ac:structured-macro>' +
+      '<ac:structured-macro ac:name="code">' +
+      "<ac:plain-text-body><![CDATA[plain()]]></ac:plain-text-body>" +
+      "</ac:structured-macro>";
+    mockGetPage.mockResolvedValueOnce({
+      title: "Page",
+      id: "1",
+      status: "current",
+      body: { storage: { value: storage } },
+    });
+
+    const result = await getConfluencePageTool.handler({ pageId: "1" });
+    expect(result).toContain('```xml\n<item name="a & b">\n```');
+    expect(result).toContain("```\nplain()\n```");
+  });
 });
 
 // ── get_confluence_page_comments ────────────────────────────────────
@@ -214,6 +253,29 @@ describe("get_confluence_page_comments formatting", () => {
     });
     expect(result).toContain("## Footer Comments (1)");
     expect(result).toContain("Footer comment");
+  });
+
+  it("should keep the code from a code macro in a comment", async () => {
+    const storage =
+      '<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">typescript</ac:parameter>' +
+      "<ac:plain-text-body><![CDATA[const x = 1;]]></ac:plain-text-body>" +
+      "</ac:structured-macro>";
+    mockGetPageComments.mockResolvedValueOnce({
+      results: [
+        {
+          id: "c1",
+          version: { by: { displayName: "Alice" } },
+          body: { storage: { value: storage } },
+        },
+      ],
+    });
+    mockGetPageInlineComments.mockResolvedValueOnce({ results: [] });
+    mockGetCommentReplies.mockResolvedValueOnce({ results: [] });
+
+    const result = await getConfluencePageCommentsTool.handler({
+      pageId: "100",
+    });
+    expect(result).toContain("```typescript\nconst x = 1;\n```");
   });
 
   it("should show inline comments section with count", async () => {
