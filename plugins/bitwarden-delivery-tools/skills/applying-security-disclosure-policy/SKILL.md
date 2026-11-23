@@ -28,7 +28,7 @@ Two tiers.
 
 A missing `bitwarden-atlassian-tools` plugin does not make a change safe, but it isn't a reason to ask either. It only removes the Jira signals. Use what the author has already said, and ask only when the heuristic tier applies.
 
-A failed lookup is different. When the plugin is installed and there is a ticket key, but `get_issue` returns a result beginning `Error retrieving issue`, the ticket may carry a signal you couldn't read. Ask the author whether the disclosure policy applies, even when the heuristic tier wouldn't, and say the Jira check failed. This counts as the one question for the change.
+A failed lookup is different. When the plugin is installed and there is a ticket key, but `get_issue` fails in any way (a result beginning `Error`, a tool error, or no issue details), the ticket may carry a signal you couldn't read. A `VULN-*` branch or the author's word still counts as high-confidence on its own. Without either, ask the author whether the disclosure policy applies, even when the heuristic tier wouldn't, and say the Jira check failed. This counts as the one question for the change.
 
 If nothing marks the change as security-relevant, return `No` (see [Returning to the caller](#returning-to-the-caller)) and stop. There is no fetch on the common path.
 
@@ -72,7 +72,7 @@ Signal:         <none found | author said no>
 
 ```
 Verdict:        Yes
-Signal:         <VULN link | Vulnerability-Resolution label | author said so | author confirmed>
+Signal:         <VULN link | VULN-* branch | Vulnerability-Resolution label | author said so | author confirmed>
 Wording rules:  <the rules from Step 3, for commit messages and PR strings>
 ```
 

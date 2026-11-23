@@ -16,6 +16,7 @@ graph TD
     lookupOk{Lookup succeeded?}
     high{VULN link, VULN-* branch,<br/>Vulnerability-Resolution label,<br/>or the author said so?}
     heuristic{A fix touching auth, sessions,<br/>crypto, input validation,<br/>access control, or secrets?}
+    lookupFailed{VULN-* branch, or<br/>the author said so?}
     ask[Ask the author once:<br/>does the policy apply?]
     answer{Author says yes?}
     no[Verdict: No<br/>no fetch]
@@ -30,7 +31,9 @@ graph TD
     ticket -->|no, or plugin missing| high
     lookup --> lookupOk
     lookupOk -->|yes| high
-    lookupOk -->|no| ask
+    lookupOk -->|no| lookupFailed
+    lookupFailed -->|yes| fetch
+    lookupFailed -->|no| ask
     high -->|yes| fetch
     high -->|no| heuristic
     heuristic -->|yes| ask
@@ -109,6 +112,7 @@ graph TD
     whichCommit{Is it HEAD?}
     amend[Reword with git commit --amend -F]
     handBack[Hand back to the author,<br/>stop before the preview]
+    offer{Author accepts<br/>the reword?}
     preview[Submission preview<br/>on a security fix, shows the verdict<br/>and the commits to be pushed]
     confirm{Submit as previewed?}
     edit[Apply the edit]
@@ -135,8 +139,9 @@ graph TD
     secureConventions --> commitCheck
     commitCheck -->|no| preview
     commitCheck -->|yes| whichCommit
-    whichCommit -->|yes| amend
-    whichCommit -->|yes, author declines| handBack
+    whichCommit -->|yes| offer
+    offer -->|yes| amend
+    offer -->|no| handBack
     whichCommit -->|no, older commit| handBack
     commitCheck -->|commit range can't be resolved| handBack
     amend --> preview
