@@ -30,6 +30,8 @@ if [[ -e $worktree ]]; then
   [[ $worktree_git_dir == "$clone_git_dir" ]] || fail "$worktree is not a worktree of $clone"
   git -C "$worktree" checkout --quiet --detach origin/HEAD || fail "could not check out origin/HEAD in $worktree"
 else
+  # Clears a record git keeps after the worktree folder is deleted.
+  git -C "$clone" worktree remove --force "$worktree" 2>/dev/null || true
   git -C "$clone" worktree add --quiet --detach "$worktree" origin/HEAD || fail "could not create $worktree"
 fi
 
