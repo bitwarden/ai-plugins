@@ -114,7 +114,7 @@
     {
       "name": "bitwarden-doc-parity",
       "source": "./plugins/bitwarden-doc-parity",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "description": "Enforces the documentation standard's base obligations — docs and diagrams update in the same change as the code they describe. Session instructions, a Stop-hook tripwire, a semantic verification skill, and a CI review face."
     },
     {
@@ -138,8 +138,8 @@
     {
       "name": "bitwarden-abacus-tools",
       "source": "./plugins/bitwarden-abacus-tools",
-      "version": "1.2.0",
-      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step: Jira issues when it plans, commit message and pull request conventions when it lands."
+      "version": "1.3.0",
+      "description": "Abacus profile for Bitwarden: which Bitwarden skills Abacus uses at each step: Jira issues when it plans, code review, commit message and pull request conventions when it lands."
     },
     {
       "name": "bitwarden-testmo-tools",
