@@ -81,14 +81,14 @@ Branch:         <ok | named for a VULN-* key: rename before pushing>
 
 ```
 Verdict:        Stop
-Signal:         <as above>
+Signal:         <VULN link | VULN-* branch | Vulnerability-Resolution label | author said so | author confirmed>
 Reason:         <MCP tool unavailable | Error retrieving Confluence page | page has no body | page has no wording rules>
 Remedy:         <matching the reason, below>
 ```
 
 Match the remedy to the reason:
 
-- **MCP tool unavailable** — install `bitwarden-atlassian-tools` (`/plugin install bitwarden-atlassian-tools@bitwarden-marketplace`), then retry.
+- **MCP tool unavailable** — install `bitwarden-atlassian-tools` (`/plugin install bitwarden-atlassian-tools@bitwarden-marketplace`); if it is already installed, enable its MCP server and confirm it is authenticated against Atlassian. Then retry.
 - **Error retrieving Confluence page** — check Atlassian access to the APPSEC space, then retry.
 - **Page has no body, or no wording rules** — ask AppSec to restore the policy page. Retrying returns the same result.
 

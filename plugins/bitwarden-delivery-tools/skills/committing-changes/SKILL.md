@@ -38,6 +38,7 @@ A caller that can't show the message to the author, such as an unattended landin
 
 1. **Ticket prefix**: Always include `[PM-XXXXX]` matching the Jira ticket
 2. **Type keyword**: Invoke `Skill(labeling-changes)` to pick the conventional commit type.
+3. **Never a `VULN-*` key**: whatever the security verdict, don't use a `VULN-*` key as the ticket prefix. It links a public commit to the vulnerability record. Use the engineering ticket, or drop the bracket.
 
 ### Examples
 

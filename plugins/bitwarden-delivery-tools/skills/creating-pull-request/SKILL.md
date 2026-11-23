@@ -107,7 +107,7 @@ Then use the `AskUserQuestion` tool to confirm, passing the complete preview blo
 - **Question**: "Submit this PR as previewed?"
 - **Options**:
   - `Submit as shown` — proceed to Step 4 with the previewed values
-  - `Edit title or body` — apply the requested edit, then redisplay the preview and re-ask
+  - `Edit title or body` — apply the requested edit, then redisplay the preview and re-ask. On a `Yes` verdict, check the edited title or body against the wording rules Step 2 carried back first, and flag the conflict rather than applying the edit if it breaks them. Don't re-enter `Skill(applying-pr-conventions)` to do it; the rules are already in hand
   - `Change ai-review label` — ask the label question again here (`ai-review`, `ai-review-vnext`, `No label`), and on a `Yes` verdict list `No label` first with the reason `applying-pr-conventions` returned. Then redisplay the preview and re-ask. Do not re-enter `Skill(applying-pr-conventions)`; it would recompose the title and body and discard any edit just applied
   - `Cancel` — stop without pushing or creating the PR
 
