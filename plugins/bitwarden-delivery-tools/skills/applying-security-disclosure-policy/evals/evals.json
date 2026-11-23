@@ -18,7 +18,7 @@
       "id": 2,
       "name": "session-fix-asks-once",
       "prompt": "quick one: fixing a bug in the web vault where the refresh token wasn't being cleared from session storage on logout, ticket PM-99902 (no labels on it, not linked to anything). help me write the PR title and body. Non-interactive: state any question as plain text and stop.",
-      "expected_output": "Finds no high-confidence signal, but the change is a fix touching session handling and secret storage, so it asks the author once whether the disclosure policy applies and does not draft a title or body until answered.",
+      "expected_output": "The ticket can't be read, so the skill fails closed: it asks the author once whether the disclosure policy applies and does not draft a title or body until answered.",
       "expectations": [
         "Asks the author whether the disclosure policy applies",
         "Asks exactly one disclosure question, not several",
@@ -40,7 +40,7 @@
     {
       "id": 4,
       "name": "policy-unavailable-stops",
-      "prompt": "The author confirmed PM-99904 is a security fix (XSS in the Send preview). The bitwarden-atlassian-tools plugin is not installed in this environment, so get_confluence_page is unavailable. Draft the PR title and body. Non-interactive: state any question as plain text and stop.",
+      "prompt": "The author confirmed PM-99904 is a security fix (XSS in the Send preview). Draft the PR title and body. Non-interactive: state any question as plain text and stop.",
       "expected_output": "Returns Stop: does not draft a title or body, from memory or from policy text the author could paste in, and gives the install remedy.",
       "expectations": [
         "Does not produce a PR title or body",
@@ -70,6 +70,18 @@
         "On the failed lookup, asks the author whether the disclosure policy applies, even though the change does not trip the heuristic tier",
         "Says the question is being asked because the Jira check failed",
         "Does not return No or draft a commit message before the author answers"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "heuristic-no-ticket",
+      "prompt": "fixing a bug in the web vault where the refresh token wasn't being cleared from session storage on logout. there's no ticket for this one. help me write the commit message. Non-interactive: state any question as plain text and stop.",
+      "expected_output": "With no ticket key and no VULN-* branch, there is nothing to look up. The change is a fix touching session handling and secret storage, so the heuristic tier asks the author once whether the disclosure policy applies, and no commit message is drafted until answered.",
+      "expectations": [
+        "Does not attempt a Jira lookup (there is no ticket key)",
+        "Asks the author whether the disclosure policy applies, because the change touches session or secret handling",
+        "Asks exactly one disclosure question, not several",
+        "Does not propose a commit message before the question is answered"
       ]
     }
   ]

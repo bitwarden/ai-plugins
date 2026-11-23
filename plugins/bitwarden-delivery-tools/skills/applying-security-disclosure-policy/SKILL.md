@@ -82,6 +82,7 @@ Branch:         <ok | named for a VULN-* key: rename before pushing>
 ```
 Verdict:        Stop
 Signal:         <VULN link | VULN-* branch | Vulnerability-Resolution label | author said so | author confirmed>
+Branch:         <ok | named for a VULN-* key: rename before pushing>
 Reason:         <MCP tool unavailable | Error retrieving Confluence page | page has no body | page has no wording rules>
 Remedy:         <matching the reason, below>
 ```

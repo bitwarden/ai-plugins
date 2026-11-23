@@ -14,7 +14,7 @@
     },
     "policy-unavailable-stops": {
       "skill": "9/9",
-      "no-skill": "4/9"
+      "no-skill": "2/9"
     },
     "vulnerability-key-only-in-branch": {
       "skill": "12/12",
@@ -23,6 +23,10 @@
     "jira-lookup-fails": {
       "skill": "12/12",
       "no-skill": "6/12"
+    },
+    "heuristic-no-ticket": {
+      "skill": "12/12",
+      "no-skill": "5/12"
     }
   }
 }

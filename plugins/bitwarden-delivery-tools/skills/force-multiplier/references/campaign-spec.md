@@ -42,7 +42,7 @@ The per-target gate that must pass before a commit is made. Defined by what the 
 
 The shape of the change as it is delivered. Confirmed once on the pilot, then replicated:
 
-- `branch` — a deterministic branch name template (same input → same branch, so re-runs are no-ops).
+- `branch` — a deterministic branch name template (same input → same branch, so re-runs are no-ops). On a security fix it is checked against the disclosure verdict at pilot and never names a `VULN-*` key or the flaw.
 - `title` — follows `Skill(applying-pr-conventions)` format (`[TICKET] <type>: <summary>`), so CI applies the right `t:` label. `[TICKET]` is a placeholder — substitute a real tracking-issue key, never the literal word.
 - `body` — fills whichever template `Skill(applying-pr-conventions)` resolves for the target repo, which is its own `.github/PULL_REQUEST_TEMPLATE.md` when it has one.
 - `labels` — the `ai-review` choice and any others, confirmed at pilot.

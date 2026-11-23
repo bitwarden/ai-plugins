@@ -49,7 +49,7 @@ Invoke `Skill(applying-pr-conventions)` for this one pull request. It owns the t
 
 Pass it what Step 1 produced, since it does not go looking for review results itself: the review path taken, any skip the user volunteered, every deferred CRITICAL or IMPORTANT finding, and any scope or path limitation on the review, such as a fallback taken because one path was unavailable. Those go into the body's AI-assisted review section. Tell it, too, that Step 3's preview collects the author's approval of the title and body.
 
-Carry back the title, the body, the resolved `t:` label its prefix will produce, the `ai-review` label choice, which template the body was built from, and the security verdict: `No`, or `Yes` with its signal and wording rules. Step 3's preview shows all of them — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
+Carry back the title, the body, the resolved `t:` label its prefix will produce, the `ai-review` label choice, which template the body was built from, and the security verdict: `No`, or `Yes` with its signal, its wording rules, and the `No label` recommendation with the reason it gave. Step 3's preview shows all of them — it prints the `type → t:<label>` mapping, and that mapping has no other source in this workflow — and Step 4 submits the title, body, and label.
 
 The template source belongs in the preview because only one of its values is the target repo's own. A body built from the embedded copy can carry a section header that has drifted from what reviewers scan for, and this preview is the only place a person sees the body before it is submitted.
 
@@ -87,10 +87,10 @@ Type prefix:    <type>  →  will apply  t:<label>
 AI review:      <ai-review / ai-review-vnext / No label>
 Code review:    <Standard | Substantial | Skipped (user request)>  →  <N deferred findings recorded>
 Template:       <target repo | bitwarden/template (canonical) | embedded copy (fallback) | not consulted (body supplied)>
-Security fix:   <No | Yes (<signal>)  →  wording rules applied to title, body, and the commits about to be pushed>
+Security fix:   <No, or: Yes (<signal>)  →  wording rules applied to title, body, and the commits about to be pushed>
 
 Commits (not yet on origin; commits already pushed are out of scope):
-<one line per commit about to be pushed: hash, subject, and any rule it breaks; "none" if the remote is up to date>
+<one line per commit about to be pushed: hash and subject; "none" if the remote is up to date>
 <under each, its body, or "(no body)">
 
 Body:
