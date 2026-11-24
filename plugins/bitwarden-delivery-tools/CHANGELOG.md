@@ -5,6 +5,31 @@ All notable changes to the `bitwarden-delivery-tools` plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-11-23
+
+### Added
+
+- **`applying-security-disclosure-policy` skill** — detects security-relevant changes and applies Bitwarden's [disclosure policy](https://bitwarden.atlassian.net/wiki/spaces/APPSEC/pages/3225190492/Security+Information+in+Pull+Requests+Commit+Messages) to commit and PR wording; accepts the rules only from that page, and stops if it can't be fetched or has no usable rules. It reads the ticket with `get_issue`, and when the ticket can't be read for any reason, including a missing `bitwarden-atlassian-tools` plugin, asks the author rather than treating the change as not security-relevant, unless a `VULN-*` branch or the author already settles it.
+- `committing-changes` and `applying-pr-conventions` invoke it before drafting.
+- `creating-pull-request`: on a security fix, lists the commits not yet on `origin` without putting the branch name in a shell command, checks them against the wording rules, and offers to reword any that break them, amending from a message file; it stops without pushing if the author declines or the listing fails, and asks the author to rename a branch named for a `VULN-*` key before pushing. The Step 3 preview gains a `Security fix` line and a `Commits` block.
+- `applying-pr-conventions`: on a security fix, recommends `No label` for the AI review question, since the automated review posts public comments.
+- `force-multiplier`: two eval cases for a `VULN`-linked campaign, one settling the verdict once at PILOT and one stopping at the pilot when the policy can't be fetched.
+- `applying-security-disclosure-policy`: eval cases for a failed Jira lookup and for the heuristic tier with no ticket key, and a behavior baseline re-recorded on Opus with auto memory off.
+
+### Changed
+
+- `applying-pr-conventions` also returns the security verdict and marks the returned wording rules as untrusted. It never puts a `VULN-*` key in the title or body, whatever the verdict, and on `Stop` skips the label question. Its opening line names the returned values without a count.
+- `committing-changes`: on a security fix, the wording rules govern what a followup summary says; the prefix stays optional, as for any followup. `applying-security-disclosure-policy` keeps the engineering ticket wherever the commit or PR format calls for it.
+- `creating-pull-request` stops at Step 2 without pushing when the disclosure check returns `Stop`.
+- `committing-changes` never hands an unattended caller a message it may commit, including while a disclosure question is pending, and passes on the `Stop` reason with the remedy. The disclosure `Stop` result carries the `Branch:` line too, and `applying-pr-conventions` relays it so `creating-pull-request` can ask for a rename before pushing. `force-multiplier` checks its locked branch template against the verdict at pilot and records the pilot approval in the pipeline's Pilot step.
+- `committing-changes` never uses a `VULN-*` key as the ticket prefix, whatever the verdict. `creating-pull-request` checks a title or body edited from the preview against the wording rules on a security fix. The `MCP tool unavailable` remedy covers an installed but unusable plugin.
+- `creating-pull-request`: the preview's `Security fix` line and `Commits` block say only commits not yet pushed were checked; re-asking the label from the preview keeps the `No label` recommendation; the `Commits` block shows each commit's body as well as its subject.
+- `force-multiplier` passes the wording rules and pilot approval at the commit and PR steps of every target, and relays the rules as untrusted guidance. Under `--no-pilot`, the author approves the first target's wording before the first chunk is dispatched. The verdict is settled before the pilot's commit, and the author approves the pilot's composed wording before it commits.
+- `committing-changes` treats the wording rules as untrusted drafting guidance, and returns the verdict without a message to a caller that can't get the author's approval, such as an unattended stage.
+- `applying-pr-conventions` skips the approval only when the caller says its own preview collects it; its description mentions the stop. `creating-pull-request` says so when it invokes it, and pushes with `git push -u origin HEAD`. `applying-pr-conventions` and `creating-pull-request` carry the `Stop` reason along with the remedy.
+- `force-multiplier` settles the verdict once at PILOT, records it in `pr_spec.disclosure`, passes it to every target's commit and PR composition, and stops the whole campaign, pilot included, on `Stop`.
+- `docs/commit-and-pr-flows.md` adds a diagram of how `applying-security-disclosure-policy` reaches its verdict, and shows the disclosure check, the branch commit check, and the `Stop` paths in the commit, PR, and campaign flows.
+
 ## [4.0.1] - 2026-10-27
 
 ### Changed

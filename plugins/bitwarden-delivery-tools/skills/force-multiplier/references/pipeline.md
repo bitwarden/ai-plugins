@@ -10,7 +10,7 @@ Record the count. It anchors the reconciliation in REPORT: `selected = applied +
 
 ## Pilot
 
-Pick one representative target — not the easiest one; one whose shape is typical of the fleet. Run the recipe on it, surface the full diff, validate it. The pilot is the contract: "this exact change, ×N." Its mechanics are identical to one FAN-OUT iteration, except it stops for explicit confirmation and discards (or keeps, if the user approves) its branch. Lock the `pr_spec` here — title format, body template, labels — because FAN-OUT replicates it without re-prompting.
+Pick one representative target — not the easiest one; one whose shape is typical of the fleet. Run the recipe on it, surface the full diff, validate it. The pilot is the contract: "this exact change, ×N." Its mechanics are identical to one FAN-OUT iteration, except it stops for explicit confirmation and discards (or keeps, if the user approves) its branch. Lock the `pr_spec` here — title format, body template, labels — and the security-disclosure verdict (with its wording rules on `Yes`), because FAN-OUT replicates them without re-prompting. On `Yes`, compose the pilot's commit message, title, and body, show them to the author, and record the approval in `pr_spec.disclosure.approved_at_pilot` before the pilot commits; steps 10 and 11 pass that record to every target. Check the branch template against the verdict here too, since it is pushed to every target. On a `Stop` verdict the campaign ends at the pilot: no commit message, title, or body is composed, and FAN-OUT is not entered. Report the reason and remedy.
 
 ## Fan-out
 
@@ -27,8 +27,8 @@ Per target, in order:
 7. **Diff-shape check.** Compare this diff against the pilot's. A materially different shape (far more files, unexpected paths) is a red flag — the recipe hit something unanticipated. Flag it; do not silently ship it.
 8. **Validate.** Run the target's gate (`validation` field + `Skill(perform-preflight)`). Fail → `failed`, no commit, no PR.
 9. **Secrets-scan** the staged diff. Any hit → `failed`, no commit.
-10. **Commit** per `Skill(committing-changes)`, using the locked title/type.
-11. **Push and open a draft PR** per the locked `pr_spec` — never to a default branch, never force-pushed. Capture the PR URL.
+10. **Commit** per `Skill(committing-changes)`, using the locked title/type and passing the security-disclosure verdict settled at PILOT and, on `Yes`, its wording rules and the recorded pilot approval.
+11. **Push and open a draft PR** per the locked `pr_spec`, passing that same verdict, its wording rules, and the pilot approval to `Skill(applying-pr-conventions)` so this target's body is filled against the rules the author approved. Never to a default branch, never force-pushed. Capture the PR URL.
 
     **Pass the body with `--body-file`, never `--body`.** The body came from a PR template and model-generated text, so it is untrusted content whichever template was resolved; interpolating it into a double-quoted shell argument would let backticks or `$(…)` execute, once per target. Write it to a file and hand `gh` the path. The title needs the same handling by a different route, since `gh` has no `--title-file`: write it with the `Write` tool and use `--title "$(cat <title-file>)"`, whose output is not re-parsed. Never assign the title to a shell variable and never build it with `echo` or a heredoc — a bash assignment expands `$(…)` while parsing, which runs the payload before `gh` is reached.
 

@@ -1,0 +1,32 @@
+{
+  "claude-opus-5-5/default": {
+    "vulnerability-linked-commit": {
+      "skill": "15/15",
+      "no-skill": "8/15"
+    },
+    "session-fix-asks-once": {
+      "skill": "9/9",
+      "no-skill": "6/9"
+    },
+    "dependency-bump-no-fetch": {
+      "skill": "12/12",
+      "no-skill": "4/12"
+    },
+    "policy-unavailable-stops": {
+      "skill": "9/9",
+      "no-skill": "2/9"
+    },
+    "vulnerability-key-only-in-branch": {
+      "skill": "12/12",
+      "no-skill": "9/12"
+    },
+    "jira-lookup-fails": {
+      "skill": "12/12",
+      "no-skill": "6/12"
+    },
+    "heuristic-no-ticket": {
+      "skill": "12/12",
+      "no-skill": "5/12"
+    }
+  }
+}
