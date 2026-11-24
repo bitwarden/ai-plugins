@@ -4,6 +4,21 @@ All notable changes to the Bitwarden Testing Tools Plugin will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-11-19
+
+### Changed
+
+- `assessing-test-coverage` step G checks Automation Type with `Bitwarden.TestmoValidator find-cases`, run by a bundled `find-cases.sh` against origin's default branch of a local `bitwarden/test` clone. It fetches origin and reads `origin/HEAD` through a detached worktree in the plugin's data folder, so the result never depends on what the clone has checked out. It needs the clone (`test` beside the current repo) and the .NET SDK, and no Testmo key. The 50-ID limit is gone. A `[Description]` that lists several IDs now matches each of them, as the Testmo validator already does, and `[TestCase(..., Description = "...")]` IDs are now found.
+
+### Security
+
+- `assessing-test-coverage` pre-approves writes only to its `coverage-reports` data folder, written literally because `${CLAUDE_PLUGIN_DATA}` is not expanded for `--plugin-dir` loads. A write anywhere else now asks first, so text from a PR, Jira, or Testmo cannot change the `find-cases` project before `dotnet run` builds it.
+- `assessing-test-coverage` pre-approves only its bundled `find-cases.sh` for step G, not `dotnet run` or `git`. The script fixes the project to the `test-origin-head` worktree of a verified `bitwarden/test` clone, refuses a worktree path outside `~/.claude/plugins/data/bitwarden-testing-tools*/`, checks it out at origin's default branch, and accepts only numeric case IDs. Text from a PR, Jira, or Testmo cannot point the run at a different project or pass options such as `--property:RunCommand` or `-c core.sshCommand` to `dotnet run` or `git`, which wildcard `Bash` rules could not prevent.
+
+### Removed
+
+- The `bitwarden-test-automation` MCP server and its CI workflow. The `find-cases` command in `bitwarden/test` replaces it. This is a breaking change: the `find_automated_cases` tool is gone, and step G now needs a local clone and the .NET SDK.
+
 ## [1.5.1] - 2026-11-17
 
 ### Fixed
