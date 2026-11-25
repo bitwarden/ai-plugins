@@ -180,8 +180,8 @@ importers:
         specifier: 1.20.0
         version: 1.20.0(debug@4.4.3)
       marked:
-        specifier: 16.4.2
-        version: 16.4.2
+        specifier: 18.2.1
+        version: 18.2.1
       marklassian:
         specifier: 1.2.1
         version: 1.2.1
@@ -832,6 +832,11 @@ packages:
 
   marked@16.4.2:
     resolution: {integrity: sha512-TI3V8YYWvkVf3KJe1dRkpnjs68JUPyEa5vjKrp1XEEJUAOaQc+Qj+L1qWbPd0SJuAdQkFU0h73sXXqwDYxsiDA==}
+    engines: {node: '>= 20'}
+    hasBin: true
+
+  marked@18.2.1:
+    resolution: {integrity: sha512-ii4bxCTCqqwpT86XZWgJNs+ZnAIZksmLGYMViWA7PDIXYIeNo1x6cDdX3JOip9NM/cI6p8z57FxliACboTruMA==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -1662,6 +1667,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.6.0
 
   marked@16.4.2: {}
+
+  marked@18.2.1: {}
 
   marklassian@1.2.1:
     dependencies:
