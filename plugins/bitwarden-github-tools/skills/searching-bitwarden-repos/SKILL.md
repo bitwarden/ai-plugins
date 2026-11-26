@@ -34,7 +34,7 @@ Use the org-wide search only to find which repos have hits, then search each rep
    gh search code --owner bitwarden --limit 100 --json repository,path --jq 'map(select(.path | startswith("upstream/") | not)) | group_by(.repository.nameWithOwner) | map("\(length) \(.[0].repository.nameWithOwner)") | .[]' -- '<search term>'
    ```
 
-2. Build the list of repos to search: every repo from the search above, plus the repos `feature-repo-map.md` lists for the topic. Put the mapped repos first, then the rest by count.
+2. Build the list of repos to search: every repo from the search above, plus the repos `${CLAUDE_SKILL_DIR}/references/feature-repo-map.md` lists for the topic. Put the mapped repos first, then the rest by count.
 3. Search each repo on its own, up to 8 of them. Validate that `<repo-name>` matches `^[A-Za-z0-9._-]+$` before interpolation. Add `fork:true` to the query for forks like `passkey-rs` (check with `gh repo view bitwarden/<repo-name> --json isFork`). Each call returns the repo's hit count (up to 100) and its top 10 files:
 
    ```bash
